@@ -54,27 +54,28 @@ El proyecto de documentación está organizado de la siguiente manera para facil
 └── tables/               # Tablas complejas (opcional)
 ```
 
-🚀 Instrucciones de Compilación
-Este proyecto está configurado para compilarse utilizando Visual Studio Code con la extensión LaTeX Workshop.
+## 🚀 Instrucciones de Compilación
 
-Requisitos Previos
-Tener instalado una distribución de TeX (TeX Live en Linux/WSL o MiKTeX en Windows).
+Este proyecto está configurado para compilarse utilizando **Visual Studio Code** con la extensión **LaTeX Workshop**.
 
-Tener instalado biber para la gestión de bibliografía.
+### Requisitos Previos
+* Tener instalada una distribución de TeX (**TeX Live** en Linux/WSL o **MiKTeX** en Windows).
+* Tener instalado **biber** para la gestión de bibliografía.
 
-Pasos
-Abrir el archivo main.tex en VS Code.
+### Pasos
+1.  Abrir el archivo `main.tex` en VS Code.
+2.  Abrir el panel de comandos de LaTeX (barra lateral izquierda).
+3.  Ejecutar la receta: **Build LaTeX project**.
+4.  El archivo PDF se generará automáticamente en la raíz como `main.pdf`.
 
-Abrir el panel de comandos de LaTeX (barra lateral izquierda).
+> **Nota:** El archivo `.gitignore` está configurado para ignorar archivos auxiliares de compilación (`.aux`, `.log`, `.out`, etc.), manteniendo el repositorio limpio.
 
-Ejecutar la receta: Build LaTeX project.
+---
 
-El archivo PDF se generará automáticamente en la raíz como main.pdf.
+## 🔒 Confidencialidad
 
-Nota: El archivo .gitignore está configurado para ignorar archivos auxiliares de compilación (.aux, .log, .out, etc.), manteniendo el repositorio limpio.
+**PROYECTO ACADÉMICO EN DESARROLLO.**
 
-🔒 Confidencialidad
-PROYECTO ACADÉMICO EN DESARROLLO.
-La información contenida en este repositorio, incluyendo datos experimentales y diseño del sistema, es parte de una investigación en curso en el Instituto Politécnico Nacional.
+La información contenida en este repositorio, incluyendo datos experimentales y diseño del sistema, es parte de una investigación en curso en el **Instituto Politécnico Nacional**.
 
-Última actualización: Febrero 2026
+*Última actualización: Febrero 2026*
