@@ -1,0 +1,45 @@
+\documentclass[12pt,letterpaper]{report}
+
+\input{preamble}
+
+\begin{document}
+
+% --- Portada y preliminares (numeración romana) ---
+\pagenumbering{roman}
+\input{front/portada}
+\input{front/resumen}
+\input{front/abstract}
+\input{front/agradecimientos}
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+% Opcional
+% \input{front/glosario}
+% \input{front/abreviaturas}
+
+% --- Cuerpo (numeración arábiga) ---
+\clearpage
+\pagenumbering{arabic}
+
+\include{chapters/01_introduccion}
+\include{chapters/02_estado_arte}
+\include{chapters/03_marco_teorico}
+\include{chapters/04_analisis}
+\include{chapters/05_diseno}
+\include{chapters/06_desarrollo}
+\include{chapters/07_pruebas_resultados}
+\include{chapters/08_conclusiones}
+
+% --- Cierre ---
+\include{back/trabajo_futuro}
+
+\appendix
+\include{back/apendice_A}
+\include{back/apendice_B}
+
+% --- Bibliografía ---
+\printbibliography
+
+\end{document}

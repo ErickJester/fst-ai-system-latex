@@ -1,0 +1,38 @@
+% Idioma y codificación
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+
+% Márgenes
+\usepackage[left=3cm,right=2.5cm,top=3cm,bottom=3cm]{geometry}
+
+% Gráficos y tablas
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+
+% Matemáticas
+\usepackage{amsmath,amssymb}
+
+% Links y referencias
+\usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
+
+% Encabezados/pies
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Trabajo Terminal}
+\fancyhead[R]{\leftmark}
+\fancyfoot[C]{\thepage}
+
+% Interlineado (ajusta si tu escuela exige 1.5)
+\usepackage{setspace}
+\onehalfspacing
+
+% Bibliografía (recomendado)
+\usepackage[backend=biber,style=ieee]{biblatex}
+\addbibresource{bib/referencias.bib}
