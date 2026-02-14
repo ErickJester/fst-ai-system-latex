@@ -1,8 +1,3 @@
-Aquí tienes el archivo `README.md` completo y formateado profesionalmente con la información de tu protocolo.
-
-Copia y pega todo el siguiente bloque de código en tu archivo `README.md`:
-
-```markdown
 # Prototipo de un sistema web de análisis conductual asistido por IA en un modelo de conducta depresiva en rata mediante nado forzado
 
 [cite_start]**Trabajo Terminal No. 2026-B066** [cite: 2]
@@ -57,36 +52,3 @@ El proyecto de documentación está organizado de la siguiente manera para facil
 ├── bib/                  # Archivo de referencias bibliográficas (.bib)
 ├── figures/              # Imágenes, diagramas y gráficos del documento
 └── tables/               # Tablas complejas (opcional)
-
-```
-
-## 🚀 Instrucciones de Compilación
-
-Este proyecto está configurado para compilarse utilizando **Visual Studio Code** con la extensión **LaTeX Workshop**.
-
-### Requisitos Previos
-
-1. Tener instalado una distribución de TeX (TeX Live en Linux/WSL o MiKTeX en Windows).
-2. Tener instalado `biber` para la gestión de bibliografía.
-
-### Pasos
-
-1. Abrir el archivo `main.tex` en VS Code.
-2. Abrir el panel de comandos de LaTeX (barra lateral izquierda).
-3. Ejecutar la receta: **Build LaTeX project**.
-4. El archivo PDF se generará automáticamente en la raíz como `main.pdf`.
-
-> **Nota:** El archivo `.gitignore` está configurado para ignorar archivos auxiliares de compilación (`.aux`, `.log`, `.out`, etc.), manteniendo el repositorio limpio.
-
----
-
-## 🔒 Confidencialidad
-
-**PROYECTO ACADÉMICO EN DESARROLLO**.
-La información contenida en este repositorio, incluyendo datos experimentales y diseño del sistema, es parte de una investigación en curso en el Instituto Politécnico Nacional.
-
-*Última actualización: Febrero 2026*
-
-```
-
-```
