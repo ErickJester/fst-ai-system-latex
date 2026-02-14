@@ -42,7 +42,7 @@ La depresión es un problema de salud pública estudiado experimentalmente media
 
 El proyecto de documentación está organizado de la siguiente manera para facilitar la compilación modular en LaTeX:
 
-```text
+
 /
 ├── main.tex              # Archivo maestro que estructura todo el documento
 ├── preamble.tex          # Configuración de paquetes, márgenes y bibliografía
