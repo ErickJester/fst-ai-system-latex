@@ -1,0 +1,219 @@
+\chapter{Estado del arte}
+
+El análisis automatizado del comportamiento animal en modelos preclínicos ha experimentado una
+transformación significativa en la última década, impulsada por los avances en visión por computadora
+y aprendizaje profundo. Este capítulo revisa los trabajos y herramientas más relevantes en tres ejes
+que convergen en la propuesta del presente proyecto: (1) las herramientas de análisis conductual
+existentes para el FST y pruebas afines; (2) los enfoques de detección y seguimiento de animales
+mediante aprendizaje profundo; y (3) los métodos de clasificación conductual basados en redes
+neuronales. Al final del capítulo se presenta una tabla comparativa que sitúa el proyecto respecto a
+los trabajos revisados.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Herramientas comerciales de análisis conductual por video}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{EthoVision XT}
+
+EthoVision XT, desarrollado por Noldus Information Technology, es la plataforma comercial de
+referencia para el seguimiento automatizado de animales en video \cite{noldus_ethovision}. Emplea
+algoritmos de sustracción de fondo y umbralización para detectar al animal en cada cuadro y registrar
+su posición, velocidad y tiempo de inmovilidad. La plataforma permite definir zonas de interés
+personalizadas (arenas, brazos de laberintos, cilindros) y exportar métricas en formatos estándar para
+análisis estadístico.
+
+En el contexto del FST, EthoVision puede detectar inmovilidad mediante la variación de píxeles entre
+cuadros consecutivos. Sin embargo, presenta limitaciones relevantes para el caso de uso del presente
+proyecto: requiere condiciones de iluminación y contraste estrictamente controladas, ya que los
+reflejos del agua y las variaciones de iluminación degradan significativamente la detección; no
+distingue de forma nativa las tres conductas del FST, limitándose a una clasificación binaria
+móvil/inmóvil \cite{della_valle2025}; y su modelo de licenciamiento comercial resulta inaccesible
+para muchos laboratorios de investigación básica.
+
+\subsection{ANY-maze}
+
+ANY-maze (Stoelting Co.) es otro software comercial ampliamente utilizado para el análisis
+conductual de roedores. Al igual que EthoVision, se basa en el seguimiento de la posición del animal
+mediante procesamiento de video y permite definir zonas y parámetros de análisis. Su interfaz es más
+accesible, pero presenta las mismas limitaciones fundamentales: dependencia de condiciones visuales
+controladas y clasificación binaria de la actividad sin diferenciación entre las subconductas del FST.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Herramientas de código abierto para análisis del FST}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{ezTrack}
+
+ezTrack es un flujo de análisis de video de código abierto desarrollado por Pennington et al.\
+\cite{pennington2019_eztrack}, orientado a la investigación del comportamiento animal. Implementado
+en Python con una interfaz basada en Jupyter Notebooks, permite el seguimiento de la posición del
+animal y la cuantificación de la inmovilidad mediante análisis de diferencias entre cuadros. Su
+fortaleza reside en la accesibilidad: no requiere experiencia avanzada en programación, puede
+ejecutarse en hardware modesto y registra todos los parámetros de procesamiento en un archivo
+reproducible.
+
+No obstante, ezTrack asume condiciones de grabación razonablemente controladas y realiza
+exclusivamente una clasificación binaria de la actividad. No fue diseñado para el FST con vista
+superior ni para el análisis simultáneo de múltiples animales, y no ofrece una plataforma web para
+la gestión centralizada de experimentos.
+
+\subsection{DBscorer}
+
+DBscorer (Depression Behavior Scorer), desarrollado por Nandi et al.\ \cite{nandi2021} en el
+Indian Institute of Science, es hasta la fecha la herramienta de código abierto más específicamente
+orientada al FST y al test de suspensión de cola (TST). Implementada en MATLAB con una interfaz
+gráfica intuitiva, cuantifica el tiempo de inmovilidad comparando el área del animal binarizado entre
+cuadros consecutivos con un umbral ajustable por el usuario.
+
+DBscorer representa un avance respecto a los métodos completamente manuales al ofrecer análisis
+objetivo y reproducible de la inmovilidad. Sin embargo, sus limitaciones son directamente relevantes
+para este proyecto: está basado en umbralización del cambio de área, lo que lo hace sensible a
+variaciones de iluminación y reflejos; solo distingue entre movilidad e inmovilidad, sin clasificar las
+conductas de nado activo y escalamiento por separado; está diseñado para el análisis de un solo
+animal a la vez desde perspectiva lateral, no para vistas superiores con múltiples cilindros
+simultáneos; y no incluye ningún componente web para almacenamiento centralizado o comparación
+entre sesiones.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Enfoques de aprendizaje profundo para el FST}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{Red dual sin umbral (DSAAN)}
+
+Meng et al.\ \cite{meng2024} propusieron un método de análisis sin umbral para el FST y TST
+denominado DSAAN (Dual-Stream Activity Analysis Network). La arquitectura extrae información
+morfológica (apariencia del animal) y de movimiento (mapas de diferencias entre cuadros) en dos
+ramas paralelas, fusionando ambas representaciones para clasificar el estado del animal cuadro a
+cuadro. El método alcanza una precisión del 88.70\,\% para el FST con tan solo 94 imágenes
+anotadas, superando a DBscorer y EthoVision XT en correlación con la anotación manual.
+
+Este trabajo es el más cercano en espíritu al enfoque del presente proyecto; sin embargo, fue
+validado en condiciones de laboratorio controladas sin abordar la robustez ante iluminación
+variable, reflejos de agua o bajo contraste, y no incorpora restricciones del dominio físico ni
+componente de plataforma web.
+
+\subsection{Red convolucional 3D-RCNN (Della Valle et al., 2025)}
+
+Della Valle et al.\ \cite{della_valle2025} propusieron un modelo basado en una red neuronal
+convolucional residual tridimensional (3D-RCNN) que procesa directamente los píxeles del video en
+segmentos temporales, capturando la dinámica espacio-temporal del comportamiento del roedor. El
+modelo fue entrenado para distinguir las tres conductas del FST (nado, inmovilidad y escalamiento),
+abordando así la limitación de herramientas previas que solo realizaban clasificación binaria. Los
+autores reportan que el modelo supera a los sistemas existentes en la diferenciación de las
+subconductas activas, y destacan que los sistemas previos ---incluso los comerciales--- son
+\textit{``typically only able to distinguish between immobility and active behaviours''}.
+
+Este trabajo constituye el estado del arte más reciente en clasificación multiclase del FST. Sin
+embargo, al igual que trabajos anteriores, opera bajo condiciones de grabación controladas y no
+aborda explícitamente el reto de los reflejos, el bajo contraste y la variación del nivel del agua que
+caracterizan las grabaciones reales de laboratorio.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Estimación de pose y seguimiento multianimales}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{DeepLabCut}
+
+DeepLabCut es la herramienta de referencia para la estimación de pose de animales sin marcadores
+mediante aprendizaje profundo \cite{mathis2018deeplabcut}. Utiliza redes convolucionales profundas
+para detectar puntos clave definidos por el usuario en el cuerpo del animal, permitiendo el seguimiento
+preciso de extremidades y otros puntos anatómicos. Su extensión multianimales (maDLC) fue
+presentada por Lauer et al.\ \cite{lauer2022madeeplabcut}, añadiendo capacidades de identificación
+individual y seguimiento entre cuadros para escenarios con múltiples individuos simultáneos.
+
+Sturman et al.\ \cite{sturman2020} demostraron que clasificadores supervisados entrenados sobre la
+representación esquelética generada por DeepLabCut eliminan la variación intra e inter-evaluadores
+en pruebas como el FST y el laberinto en cruz elevado. Sin embargo, DeepLabCut requiere la
+anotación manual de puntos clave en un número significativo de cuadros de entrenamiento, y su
+rendimiento puede degradarse cuando los puntos clave quedan parcialmente sumergidos o cuando los
+reflejos del agua generan artefactos visuales ---situación frecuente en el FST con vista superior.
+
+\subsection{YOLO-Behaviour}
+
+Chan et al.\ \cite{chan2025yolobehaviour} presentaron YOLO-Behaviour, un marco flexible para la
+cuantificación automática de conductas animales a partir de video. El sistema combina un detector
+YOLOv8 para localizar al animal en cada cuadro con un clasificador de conducta que opera sobre la
+región recortada del animal. Los autores reportan resultados sólidos en múltiples especies con
+conjuntos de entrenamiento relativamente pequeños, y destacan la ventaja de separar la detección
+del animal de la clasificación de su conducta como dos etapas independientes.
+
+Este enfoque de dos etapas es conceptualmente relevante para el presente proyecto: la detección
+primero localiza cada animal dentro de su cilindro correspondiente, y la clasificación opera sobre
+una región de imagen normalizada y recortada, reduciendo el efecto de las variaciones de fondo
+e iluminación.
+
+\subsection{YOLOv8 para detección en investigación conductual}
+
+Stadler et al.\ \cite{stadler2024yolov8behavior} evaluaron sistemáticamente el uso de YOLOv8 para
+la detección de objetos en estudios de comportamiento, encontrando que el modelo logra detección
+casi perfecta con conjuntos de entrenamiento de tan solo 100 a 350 imágenes en condiciones de
+fondo consistentes. Los autores señalan, no obstante, que el modelo no generaliza bien al mismo
+objeto en fondos distintos, subrayando la importancia de incluir variabilidad de fondo en el conjunto
+de entrenamiento. Este resultado es directamente aplicable al contexto del proyecto, donde las
+condiciones de iluminación y el nivel del agua varían entre experimentos.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Brecha identificada: condiciones no ideales}
+% ─────────────────────────────────────────────────────────────────────────────
+
+Una limitación transversal a todos los trabajos revisados es su dependencia de condiciones de
+grabación controladas. Los sistemas basados en umbralización (DBscorer, ezTrack) degradan su
+rendimiento ante variaciones de iluminación, reflejos del agua o bajo contraste entre el animal y
+el fondo \cite{nandi2021, meng2024}. Los enfoques de aprendizaje profundo (DeepLabCut, DSAAN,
+3D-RCNN) son más robustos en principio, pero su robustez depende de que el conjunto de
+entrenamiento incluya suficiente variabilidad visual de las condiciones reales.
+
+Ninguno de los trabajos revisados aborda de forma explícita el diseño de un sistema concebido
+desde su inicio para operar bajo condiciones no ideales de grabación, ni incorpora mecanismos de
+corrección dinámica de artefactos propios del FST, como la variación del nivel y la línea de agua
+a lo largo del experimento, la refracción generada por la superficie del agua o la similitud visual
+entre el pelaje claro del animal y el fondo del cilindro. Esta brecha entre las condiciones ideales
+asumidas por los sistemas existentes y las condiciones reales de los laboratorios de investigación
+básica constituye la principal motivación técnica del presente proyecto.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Tabla comparativa}
+% ─────────────────────────────────────────────────────────────────────────────
+
+La Tabla~\ref{tab:comparativa_ea} sintetiza los trabajos y herramientas revisados en función de
+los criterios más relevantes para el presente proyecto.
+
+\begin{table}[htbp]
+\centering
+\caption{Comparativa de herramientas y trabajos relacionados con el análisis automatizado del FST.}
+\label{tab:comparativa_ea}
+\renewcommand{\arraystretch}{1.3}
+\small
+\begin{tabular}{p{3.8cm} c c c c c c}
+\toprule
+\textbf{Sistema / Trabajo} &
+\rotatebox{60}{\textbf{Específico FST}} &
+\rotatebox{60}{\textbf{3 conductas}} &
+\rotatebox{60}{\textbf{Cond. no ideales}} &
+\rotatebox{60}{\textbf{Deep Learning}} &
+\rotatebox{60}{\textbf{Plataforma web}} &
+\rotatebox{60}{\textbf{Código abierto}} \\
+\midrule
+EthoVision XT \cite{noldus_ethovision}     & Parcial & No  & No  & No  & No  & No  \\
+ANY-maze                                    & Parcial & No  & No  & No  & No  & No  \\
+ezTrack \cite{pennington2019_eztrack}       & Parcial & No  & No  & No  & No  & Sí  \\
+DBscorer \cite{nandi2021}                   & Sí      & No  & No  & No  & No  & Sí  \\
+DSAAN \cite{meng2024}                       & Sí      & No  & No  & Sí  & No  & No  \\
+3D-RCNN \cite{della_valle2025}              & Sí      & Sí  & No  & Sí  & No  & No  \\
+DeepLabCut \cite{lauer2022madeeplabcut}     & Parcial & Parcial & Parcial & Sí & No & Sí \\
+YOLO-Behaviour \cite{chan2025yolobehaviour} & No      & ---  & Parcial & Sí & No & Sí \\
+\midrule
+\textbf{Propuesta}           & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Como se observa en la Tabla~\ref{tab:comparativa_ea}, ninguna de las herramientas o trabajos
+revisados cubre simultáneamente los seis criterios que definen el alcance del presente proyecto.
+Las herramientas comerciales carecen de clasificación multiclase, robustez ante condiciones no
+ideales y acceso abierto. Las herramientas de código abierto existentes (DBscorer, ezTrack) no
+emplean aprendizaje profundo ni ofrecen plataforma web. Los trabajos más recientes de aprendizaje
+profundo (DSAAN, 3D-RCNN) abordan la clasificación multiclase pero no contemplan condiciones
+no ideales ni integración web. La propuesta del presente proyecto busca ser la primera solución
+que integra estos seis aspectos en un sistema específico para el FST con vista superior y
+procesamiento simultáneo de múltiples animales.
