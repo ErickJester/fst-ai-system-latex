@@ -1,38 +1,70 @@
-% Idioma y codificación
+% ===============================
+%          PREÁMBULO
+% ===============================
+
+% ---------- Idioma y codificación ----------
 \usepackage[spanish,es-tabla]{babel}
 \usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage{lmodern}
+\usepackage[utf8]{inputenc} % Si usas pdflatex
+\usepackage{lmodern}        % Fuente estable (evita warnings de font shape)
 
-% Márgenes
-\usepackage[left=3cm,right=2.5cm,top=3cm,bottom=3cm]{geometry}
+% ---------- Márgenes ----------
+\usepackage[
+  left=3cm,
+  right=2.5cm,
+  top=3cm,
+  bottom=3cm
+]{geometry}
 
-% Gráficos y tablas
+% ---------- Interlineado ----------
+\usepackage{setspace}
+\onehalfspacing   % Cambia a \doublespacing si lo exige la escuela
+
+% ---------- Gráficos y tablas ----------
 \usepackage{graphicx}
-\graphicspath{{figures/}}
+\graphicspath{{figures/}{logos/}}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
+\usepackage{caption}
+\usepackage{subcaption}
 
-% Matemáticas
-\usepackage{amsmath,amssymb}
+% ---------- Matemáticas ----------
+\usepackage{amsmath}
+\usepackage{amssymb}
 
-% Links y referencias
-\usepackage[hidelinks]{hyperref}
-\usepackage{cleveref}
-
-% Encabezados/pies
+% ---------- Encabezados ----------
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{Trabajo Terminal}
 \fancyhead[R]{\leftmark}
 \fancyfoot[C]{\thepage}
+\setlength{\headheight}{16pt} % Elimina warning de fancyhdr
 
-% Interlineado (ajusta si tu escuela exige 1.5)
-\usepackage{setspace}
-\onehalfspacing
+% ---------- Espaciado de capítulos ----------
+\usepackage{titlesec}
+\titlespacing*{\chapter}{-5pt}{0pt}{0pt}
+% Si lo quieres aún más arriba: cambia 0pt por -5pt
 
-% Bibliografía (recomendado)
-\usepackage[backend=biber,style=ieee]{biblatex}
+% ---------- Hipervínculos ----------
+\usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
+
+% ---------- Citas y bibliografía ----------
+\usepackage{csquotes} % Necesario con babel + biblatex
+
+\usepackage[
+  backend=biber,
+  style=ieee,
+  sorting=none
+]{biblatex}
+
 \addbibresource{bib/referencias.bib}
+
+% ---------- Mejor tipografía ----------
+\usepackage{microtype}
+
+% ===============================
+%      FIN DEL PREÁMBULO
+% ===============================

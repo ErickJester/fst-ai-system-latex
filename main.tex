@@ -4,9 +4,15 @@
 
 \begin{document}
 
-% --- Portada y preliminares (numeración romana) ---
-\pagenumbering{roman}
+% --- Portada (sin numeración visible) ---
+\pagenumbering{gobble}
 \input{front/portada}
+
+% --- Preliminares (numeración romana) ---
+\clearpage
+\pagenumbering{roman}
+\setcounter{page}{1}
+
 \input{front/resumen}
 %\input{front/abstract}
 %\input{front/agradecimientos}
@@ -22,6 +28,7 @@
 % --- Cuerpo (numeración arábiga) ---
 \clearpage
 \pagenumbering{arabic}
+\setcounter{page}{1}
 
 \include{chapters/01_introduccion}
 \include{chapters/02_estado_arte}
