@@ -1,2 +1,91 @@
 \chapter{Introducción}
-Hola mundo, esta es mi tesis en LaTeX usando VS Code.
+
+\section{Antecedentes}
+La depresión es un trastorno del estado de ánimo que afecta a cientos de millones de personas en el mundo, según la Organización Mundial de la Salud \cite{who_depression_2025}. Su elevada prevalencia, su impacto sobre la calidad de vida y la carga económica que representa para los sistemas de salud la convierten en un problema de salud pública de primer orden, que exige el continuo desarrollo y validación de nuevos tratamientos farmacológicos.
+
+En el ámbito de la investigación preclínica, la evaluación del potencial antidepresivo de nuevas moléculas recurre habitualmente a modelos animales estandarizados. Entre ellos, la prueba de nado forzado (Forced Swim Test, FST), desarrollada originalmente por Porsolt et al. en 1977 \cite{porsolt1977}, es uno de los paradigmas conductuales más utilizados para este fin en roedores. El procedimiento consiste en colocar al animal en un recipiente cilíndrico con agua del que no puede escapar y registrar su actividad motora durante un periodo determinado. La administración previa de fármacos antidepresivos reduce el tiempo de inmovilidad y promueve conductas activas, lo que se utiliza como criterio de eficacia del modelo \cite{slattery2012,armario2021}.
+
+El análisis de los videos resultantes ha sido, desde la creación del paradigma, una tarea manual: el investigador observa las grabaciones y cronometra cada conducta de forma individual para cada animal. Este proceso, aunque funcional, implica un consumo de tiempo considerable —especialmente en experimentos con múltiples grupos y sesiones— y está sujeto a variabilidad entre evaluadores, lo que puede comprometer la reproducibilidad de los resultados \cite{armario2021}.
+
+Los avances recientes en visión por computadora y aprendizaje automático han abierto la posibilidad de automatizar el análisis conductual en modelos animales. Herramientas como EthoVision XT \cite{noldus_ethovision} y ezTrack \cite{pennington2019_eztrack} demuestran la viabilidad técnica de detectar y cuantificar automáticamente el movimiento y la posición de animales en video. Sin embargo, estas soluciones presentan limitaciones relevantes para el contexto del FST: algunas son de licenciamiento comercial costoso, otras están diseñadas para cuantificación general de movimiento y no para la clasificación conductual específica del FST, y ninguna de ellas ofrece una plataforma web que centralice el almacenamiento, la comparación entre sesiones y la generación de reportes para el flujo de trabajo del laboratorio colaborador.
+
+En este contexto, el Laboratorio de Neurociencia Conductual de la Escuela Superior de Medicina y Homeopatía del IPN (ENMyH-IPN), encabezado por el Dr. Israel Salas Ramírez, ha manifestado la necesidad concreta de contar con una herramienta de análisis automatizado que sea específica para el FST, accesible desde la web y capaz de integrarse a su flujo de trabajo experimental. El presente Trabajo Terminal responde directamente a esa necesidad.
+
+\section{Planteamiento del problema}
+El grupo de investigación colaborador realiza periódicamente experimentos de nado forzado en grupos de ratas para evaluar moléculas con potencial antidepresivo. Cada experimento genera videos con cuatro animales simultáneos, grabados desde la parte superior con dispositivos móviles, en dos sesiones por animal (20 minutos el primer día y 5 minutos el segundo día, 24 horas después de la administración del tratamiento).
+
+Actualmente, el análisis de dichos videos se realiza completamente a mano: un investigador reproduce cada video y va anotando manualmente el inicio y fin de cada conducta (nado activo, inmovilidad e intentos de escape) para cada rata, con ayuda de un cronómetro. Este proceso tiene las siguientes implicaciones problemáticas:
+\begin{itemize}
+  \item \textbf{Consumo elevado de tiempo:} el análisis manual de un experimento puede requerir varias horas de trabajo. Por ejemplo, si se evalúan seis ratas y cada toma registra cuatro cilindros, la grabación se realiza en dos tandas (p.\ ej., 4 + 2).
+  \item \textbf{Variabilidad entre evaluadores:} el criterio para determinar el inicio y fin de cada conducta puede diferir entre investigadores, comprometiendo la reproducibilidad de los resultados.
+  \item \textbf{Falta de estandarización:} no existe un sistema centralizado que almacene los resultados de forma estructurada, facilite la comparación entre sesiones o permita generar reportes estandarizados para publicación o reuniones de laboratorio.
+  \item \textbf{Imposibilidad práctica del análisis temporal detallado:} el desglose minuto a minuto de las conductas, que aportaría información valiosa sobre la dinámica del efecto farmacológico, rara vez se realiza de forma manual por el tiempo que implicaría.
+\end{itemize}
+
+Estos factores limitan la capacidad del laboratorio para procesar mayores volúmenes de experimentos, reducen la objetividad del análisis y representan un obstáculo para la estandarización y escalabilidad de sus estudios preclínicos.
+
+\section{Propuesta de solución}
+Se propone el diseño, desarrollo y validación de un prototipo de sistema web asistido por inteligencia artificial que automatice el análisis de la prueba de nado forzado a partir de los videos generados por el laboratorio colaborador.
+
+El sistema estará compuesto por dos componentes principales que operan de forma integrada:
+\begin{itemize}
+  \item \textbf{Módulo de análisis conductual por visión por computadora:} flujo de procesamiento de video (pipeline) que recibe las grabaciones del FST, aplica técnicas de preparación del video (preprocesamiento), como normalización de iluminación y extracción de regiones de interés, y clasifica cuadro a cuadro (frame a frame) cada conducta de cada rata mediante un modelo de aprendizaje supervisado. La salida del módulo incluye el tiempo total de cada conducta por individuo y, opcionalmente, un desglose temporal por intervalos de un minuto.
+  \item \textbf{Plataforma web:} interfaz accesible desde navegador que permite al investigador cargar los videos de cada sesión experimental, consultar el estado del análisis, visualizar los resultados por individuo y por sesión, comparar el día 1 con el día 2, y generar reportes exportables. La plataforma centraliza el almacenamiento de sesiones, grupos y resultados en una base de datos relacional.
+\end{itemize}
+
+La validación del sistema se realizará mediante la comparación de sus resultados con las anotaciones manuales del experto (gold standard), utilizando métricas de concordancia y error definidas previamente. La arquitectura modular del sistema permitirá, en iteraciones futuras, adaptar el módulo de análisis a otros paradigmas conductuales mediante la redefinición de las categorías de conducta.
+
+\section{Objetivo general}
+Diseñar, implementar y validar un prototipo de sistema web asistido por inteligencia artificial que permita detectar y cuantificar de forma automatizada los patrones conductuales asociados a la prueba de nado forzado en ratas —nado activo, inmovilidad e intentos de escape— y generar métricas comparables con la evaluación manual realizada por el experto del laboratorio colaborador.
+
+\subsection{Objetivos específicos}
+\begin{enumerate}
+  \item Analizar trabajos previos sobre prueba de nado forzado y análisis conductual automatizado para seleccionar los enfoques de visión por computadora y clasificación supervisada más adecuados al problema, y fundamentar su integración en el sistema web.
+  \item Describir y formalizar el paradigma experimental del FST, las conductas de interés y la estructura de los videos proporcionados por el laboratorio, en coordinación directa con el experto del dominio.
+  \item Diseñar la arquitectura del sistema web, definiendo los módulos de carga y gestión de videos, pipeline de análisis conductual, almacenamiento en base de datos y visualización de resultados.
+  \item Desarrollar e integrar el módulo de análisis conductual basado en visión por computadora y aprendizaje supervisado para clasificar segmentos de video en nado activo, inmovilidad e intentos de escape.
+  \item Validar el desempeño del sistema mediante la comparación de sus resultados con las anotaciones expertas del gold standard, utilizando métricas de concordancia y error previamente definidas.
+  \item Cuantificar la reducción de tiempo de análisis que aporta el sistema respecto al proceso manual, y documentar las condiciones bajo las cuales la arquitectura podría adaptarse a otros paradigmas conductuales.
+\end{enumerate}
+
+\section{Justificación}
+El uso de observaciones manuales en estudios de nado forzado limita la objetividad del análisis, introduce variabilidad entre observadores y representa un cuello de botella operativo para el laboratorio. El sistema propuesto automatiza específicamente el análisis de las grabaciones generadas por el grupo colaborador, permitiendo procesar de forma sistemática cuatro animales simultáneos por video, obtener tiempos estandarizados de cada conducta y almacenar los resultados para su comparación entre sesiones y grupos experimentales.
+
+Al centralizar la información en una base de datos accesible desde la web, el sistema facilita la gestión histórica de experimentos, la comparación entre tratamientos y la generación de reportes reproducibles para publicaciones o reuniones de laboratorio. Con ello se reducen los sesgos humanos, se homogeneiza el criterio de evaluación y se incrementa la capacidad de procesamiento del laboratorio sin necesidad de adquirir licencias de software comercial.
+
+Desde la perspectiva de ingeniería de software, el proyecto representa una oportunidad de aplicar en un contexto real técnicas de visión por computadora, aprendizaje supervisado y desarrollo web full-stack, alineadas con las competencias del perfil de egreso de la carrera de Ingeniería en Sistemas Computacionales de la ESCOM.
+
+Los beneficiarios directos son el grupo de investigación en neurociencia conductual de la ENMyH-IPN. A más largo plazo, la arquitectura modular del sistema sienta las bases para su adaptación a otros paradigmas conductuales preclínicos, ampliando su impacto potencial en la investigación biomédica.
+
+\section{Alcance del proyecto}
+El presente Trabajo Terminal se delimita a los siguientes alcances:
+
+\subsection*{Incluido en el alcance}
+\begin{itemize}
+  \item Análisis automatizado de videos del FST proporcionados por el laboratorio colaborador de la ENMyH-IPN, en formato de grabación superior con cuatro cilindros simultáneos.
+  \item Clasificación de las tres conductas definidas por el experto: nado activo, inmovilidad e intentos de escape (escalamiento). Si el sistema no distingue con precisión aceptable nado e intentos de escape, ambas conductas se reportarán como movilidad, priorizando la exactitud en la cuantificación de la inmovilidad.
+  \item Generación de métricas por individuo y por sesión: tiempo total de cada conducta en los 5 minutos de grabación del día 2, y desglose por intervalos de un minuto como funcionalidad opcional.
+  \item Comparación entre sesiones día 1 y día 2 para la misma rata o grupo experimental.
+  \item Plataforma web con módulos de carga de videos, gestión de sesiones, visualización de resultados y generación de reportes exportables.
+  \item Validación del sistema mediante comparación con el gold standard del experto, utilizando métricas de concordancia (métrica de acuerdo entre evaluadores, como el Kappa de Cohen) y error absoluto medio.
+  \item Documentación técnica completa conforme a los lineamientos de la CATT-ESCOM.
+\end{itemize}
+
+\subsection*{Fuera del alcance}
+\begin{itemize}
+  \item Análisis en tiempo real: el sistema operará sobre videos pregrabados, no sobre flujos de video en vivo.
+  \item Síntesis, diseño o administración de compuestos farmacológicos; el sistema se limita al análisis de videos ya generados.
+  \item Participación directa en los experimentos con animales; los procedimientos son diseñados y ejecutados por el laboratorio colaborador conforme a sus protocolos institucionales y éticos.
+  \item Implementación en producción ni despliegue institucional definitivo; el producto final es un prototipo funcional validado.
+  \item Análisis de modelos conductuales distintos al FST en esta versión del sistema, aunque la arquitectura se diseñará para permitir esta extensión en trabajos futuros.
+\end{itemize}
+
+\section{Metodología}
+El desarrollo del sistema sigue la metodología Scrum, adaptada al contexto de un proyecto de dos integrantes con entregas académicas en dos etapas (TT1 y TT2). Scrum facilita una gestión ágil, iterativa y verificable del avance, con ciclos cortos (sprints de 2 a 4 semanas) que concluyen con un entregable validado y retroalimentación del director.
+
+Esta elección responde a las características propias del proyecto: integra módulos de adquisición de video, análisis con IA y aprendizaje supervisado, almacenamiento relacional y una interfaz web de consulta; cada uno de estos módulos tiene dependencias técnicas que hacen conveniente un enfoque iterativo donde los avances de un sprint alimentan la planificación del siguiente. La retroalimentación continua del experto del dominio (Dr. Salas Ramírez) sobre los resultados del módulo de análisis es, asimismo, un elemento central que justifica el modelo iterativo frente a enfoques lineales.
+
+El plan de sprints se organiza como sigue:
+% TODO: insertar la Tabla 1 
+
+Las herramientas tecnológicas seleccionadas para el desarrollo incluyen: Python con Flask para el servidor (backend) y el flujo de análisis; OpenCV y TensorFlow/scikit-learn para el módulo de visión por computadora y clasificación conductual; PostgreSQL como sistema de gestión de base de datos relacional; React.js para la interfaz web; BORIS como herramienta de anotación para la construcción del gold standard; y Git con Docker para control de versiones y empaquetado reproducible.
