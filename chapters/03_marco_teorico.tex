@@ -1,408 +1,196 @@
 \chapter{Marco teórico}
 
-Este capítulo presenta los fundamentos teóricos que sustentan el diseño e implementación del
-sistema propuesto. Se organiza en cinco bloques temáticos: el modelo biológico del FST; los
-fundamentos de visión por computadora aplicados al análisis de video; el aprendizaje profundo y
-las redes neuronales convolucionales; las técnicas de seguimiento de objetos en video; y los
-conceptos de arquitectura de software relevantes para el sistema web.
+Este capítulo describe los conceptos teóricos en los que se apoya el sistema.
+Se organiza en tres bloques: el modelo biológico del FST y las conductas que interesa
+clasificar; los fundamentos de redes neuronales y aprendizaje profundo para la
+clasificación de conductas; y los elementos de arquitectura del sistema web. Las
+técnicas específicas de procesamiento de video utilizadas en el módulo de seguimiento
+(sustracción de fondo, umbralización, contornos, línea de agua) se describen en el
+capítulo~6, dentro del desarrollo del módulo correspondiente.
 
-% ─────────────────────────────────────────────────────────────────────────────
 \section{El modelo de nado forzado como paradigma preclínico}
-% ─────────────────────────────────────────────────────────────────────────────
 
 \subsection{Depresión y modelos animales}
 
-La depresión mayor es un trastorno del estado de ánimo con alta prevalencia global. La
-Organización Mundial de la Salud estima que afecta a más de 280 millones de personas en el mundo
-y constituye una de las principales causas de discapacidad \cite{who_depression2023}. Dado que
-la comprensión de sus mecanismos neurobiológicos requiere experimentación en sistemas vivos, los
-modelos animales desempeñan un papel central en la investigación preclínica de fármacos
-antidepresivos.
+La depresión mayor es uno de los trastornos más frecuentes a nivel mundial. La OMS
+estima que afecta a más de 280 millones de personas y es una de las principales causas
+de discapacidad \cite{who_depression_2025}. Para estudiar nuevos tratamientos antes de
+probarlos en humanos, los investigadores usan modelos animales que reproducen algunos
+aspectos del trastorno.
 
-Un modelo animal válido debe cumplir tres tipos de validez: \textit{validez de constructo}
-(refleja los mecanismos neurobiológicos del trastorno humano), \textit{validez de cara} (produce
-síntomas análogos a los observados clínicamente) y \textit{validez predictiva} (responde de
-manera predecible a los tratamientos farmacológicos establecidos) \cite{slattery_cryan2012}.
+Para que un modelo animal sea considerado válido, debe cumplir con tres criterios
+\cite{slattery2012}: tener \textit{validez de constructo} (los mecanismos biológicos
+involucrados deben ser parecidos a los del trastorno humano), \textit{validez de cara}
+(los síntomas observables deben ser similares a los clínicos) y \textit{validez
+predictiva} (el modelo debe responder a los fármacos que funcionan en pacientes).
 
 \subsection{La prueba de nado forzado (FST)}
 
-La prueba de nado forzado fue introducida por Porsolt et al.\ en 1977 como método para evaluar el
-efecto de fármacos antidepresivos en roedores \cite{porsolt1977}. El procedimiento consiste en
-colocar al animal en un cilindro con agua del que no puede escapar y registrar su comportamiento
-motor durante un tiempo determinado. El fundamento del modelo es que, ante la imposibilidad de
-escape, los animales reducen progresivamente su actividad motora y adoptan una postura de
-flotación pasiva, interpretada como \textit{desesperanza conductual} (\textit{behavioral despair}),
-análoga a la apatía y la pérdida de motivación observadas en la depresión \cite{yankelevitch2015}.
+La prueba de nado forzado fue propuesta por Porsolt et al.\ en 1977 \cite{porsolt1977}.
+Consiste en poner a la rata en un cilindro lleno de agua del que no puede salir, y
+registrar cómo se comporta. Al principio el animal intenta escapar, pero después de
+un rato empieza a quedarse flotando. Esa conducta pasiva se interpreta como
+\textit{desesperanza conductual} (en inglés \textit{behavioral despair}), que se
+asocia con la pérdida de motivación propia de la depresión \cite{armario2021}.
 
-El FST tiene alta validez predictiva: los antidepresivos de todas las clases farmacológicas
-clásicas (inhibidores de la recaptación de monoaminas, antidepresivos tricíclicos, inhibidores de
-la MAO) reducen consistentemente el tiempo de inmovilidad \cite{cryan2005}. Desde 2000 hasta
-2024, más de 8{,}000 artículos científicos han reportado el uso del FST, con más de 5{,}500
-publicados en la última década \cite{della_valle2025}.
+La prueba funciona bien para evaluar antidepresivos porque la mayoría de los fármacos
+que son efectivos en humanos también reducen el tiempo de inmovilidad en ratas
+\cite{cryan2005}. Es uno de los experimentos más citados en neurociencia conductual:
+desde el 2000 hay más de 8{,}000 artículos que lo reportan \cite{della_valle2025}.
 
-\subsection{Conductas observadas y su interpretación}
+\subsection{Conductas que se observan y cómo se interpretan}
 
-En el FST se identifican tres conductas mutuamente excluyentes \cite{yankelevitch2015,cryan2005}:
+En el FST se pueden distinguir tres tipos de conducta \cite{armario2021,cryan2005}.
+Son mutuamente excluyentes, o sea que en cada momento la rata solo está haciendo una:
 
 \begin{itemize}
-    \item \textbf{Inmovilidad} (\textit{immobility / floating}): el animal flota realizando
-          únicamente los movimientos mínimos necesarios para mantener la nariz sobre la superficie
-          del agua. Se interpreta como estrategia de afrontamiento pasivo y constituye el indicador
-          principal del nivel de desesperanza conductual.
+    \item \textbf{Inmovilidad}: el animal flota haciendo solo lo necesario para no
+          hundirse. Es el indicador principal de desesperanza conductual.
 
-    \item \textbf{Nado activo} (\textit{swimming}): movimientos de extremidades en patrón de
-          paladas, que producen desplazamiento horizontal. Se asocia al sistema serotoninérgico y
-          es potenciado por inhibidores selectivos de la recaptación de serotonina (ISRS).
+    \item \textbf{Nado activo}: movimientos de paladas que lo desplazan horizontalmente.
+          Está relacionado con el sistema serotoninérgico; los antidepresivos tipo
+          ISRS (como la fluoxetina) aumentan esta conducta.
 
-    \item \textbf{Escalamiento} (\textit{climbing / struggling}): movimientos rápidos de las
-          cuatro extremidades en los que las patas delanteras rompen la superficie del agua,
-          dirigidos hacia las paredes del cilindro. Se asocia al sistema noradrenérgico y es
-          potenciado por fármacos como la desipramina.
+    \item \textbf{Escalamiento}: movimientos rápidos hacia las paredes del cilindro,
+          con las patas delanteras tocando o rompiendo la superficie del agua. Se asocia
+          al sistema noradrenérgico; la desipramina, por ejemplo, la incrementa.
 \end{itemize}
 
-La distinción entre estas tres conductas es farmacológicamente relevante: los antidepresivos
-que actúan principalmente sobre la serotonina aumentan el nado activo sin modificar el
-escalamiento, mientras que los que actúan sobre la noradrenalina aumentan el escalamiento.
-Esta diferenciación no puede obtenerse con herramientas que solo realizan clasificación binaria
-móvil/inmóvil.
+Distinguir estas tres conductas es importante porque permite saber sobre qué sistema
+neurotransmisor está actuando el fármaco evaluado. Un sistema que solo detecta si la
+rata se mueve o no pierde esa información.
 
-\subsection{Protocolo experimental del laboratorio colaborador}
+\subsection{Protocolo del laboratorio colaborador}
 
-En el protocolo utilizado por el laboratorio de la ENMyH, las ratas se colocan individualmente
-en cilindros cilíndricos transparentes con agua a profundidad suficiente para impedir el apoyo
-en el fondo. Se realizan dos sesiones por animal: una sesión basal (día 1, 20 minutos) y una
-sesión de prueba (día 2, 5 minutos), esta última tras la administración del tratamiento
-farmacológico asignado. Las grabaciones se realizan con cámara de dispositivo móvil en vista
-superior, capturando simultáneamente cuatro cilindros en un mismo encuadre. Las condiciones de
-iluminación, contraste y refracción del agua varían entre sesiones y experimentos, y pueden
-reducir el contraste especialmente en animales de pelaje claro.
+En el laboratorio de la ENMyH, las ratas se meten individualmente en cilindros
+transparentes con agua. Hay dos sesiones: 20 minutos el día 1 (línea base) y
+5 minutos el día 2 (después del tratamiento), con 24 horas de diferencia. Los videos
+se graban desde arriba con cámara de celular, capturando los cuatro cilindros al mismo
+tiempo. La iluminación y el nivel del agua varían entre experimentos, y con ratas de
+pelaje claro el contraste contra el cilindro puede ser bastante bajo. Estas condiciones
+representan el caso de uso principal del sistema y determinarán en qué medida los
+algoritmos funcionan correctamente; los requisitos mínimos de calidad del video se
+definirán durante las pruebas de validación.
 
-% ─────────────────────────────────────────────────────────────────────────────
-\section{Fundamentos de visión por computadora para análisis de video}
-% ─────────────────────────────────────────────────────────────────────────────
+\section{Redes neuronales y aprendizaje profundo}
 
-\subsection{Representación digital de imágenes y video}
+\subsection{Idea general de una red neuronal}
 
-Una imagen digital en escala de grises se representa como una matriz $I \in \mathbb{R}^{H \times W}$,
-donde cada elemento $I(y,x)$ almacena la intensidad del píxel en la posición $(x, y)$, con valores
-típicamente en el rango $[0, 255]$ para imágenes de 8 bits. Una imagen a color en el espacio BGR
-(convención de OpenCV) tiene tres canales: $I \in \mathbb{R}^{H \times W \times 3}$. Un video
-es una secuencia temporal de imágenes $\{F_t\}_{t=1}^{T}$ capturadas a una tasa de cuadros
-(\textit{frames per second}, FPS) constante.
+Una red neuronal es un modelo que aprende a partir de ejemplos. Está formada por
+capas de ``neuronas'' (en realidad son solo funciones matemáticas simples) que se
+conectan entre sí. Cada neurona recibe varios valores, los pondera con unos pesos,
+los suma y aplica una función de activación. La función más usada hoy en día es
+ReLU, que devuelve el valor si es positivo y cero si es negativo.
 
-El espacio de color HSV (\textit{Hue, Saturation, Value}) es útil en análisis de video porque
-separa la información de color (\textit{hue}) de la información de luminosidad (\textit{value}),
-lo que permite algoritmos más robustos ante cambios de iluminación que los que operan directamente
-en el espacio BGR.
+Los pesos no se definen a mano: se aprenden durante el entrenamiento. El proceso es
+iterativo: se le da al modelo un ejemplo con su respuesta correcta, se ve cuánto se
+equivocó, y se ajustan un poquito los pesos para que la próxima vez lo haga mejor.
+Eso se hace con el algoritmo de retropropagación y un optimizador como Adam
+\cite{kingma2014}, que es una versión mejorada del descenso por gradiente clásico.
 
-\subsection{Sustracción de fondo}
+\subsection{Redes convolucionales (CNN)}
 
-La sustracción de fondo (\textit{background subtraction}) es una técnica fundamental para detectar
-objetos en movimiento en video capturado con cámara estática \cite{piccardi2004background}. El
-principio consiste en mantener un modelo del fondo de la escena $B$ y, para cada cuadro $F_t$,
-calcular la máscara de primer plano como:
+Las CNN son redes neuronales diseñadas específicamente para trabajar con imágenes
+\cite{lecun1998}. La idea principal es que en vez de conectar cada píxel con cada
+neurona (lo que sería inmanejable), se usan filtros pequeños que se deslizan por
+toda la imagen. El mismo filtro se aplica en cada posición, lo cual reduce mucho la
+cantidad de parámetros y hace que la red pueda detectar un patrón sin importar dónde
+esté en la imagen.
 
-\begin{equation}
-    M_t(y,x) = \begin{cases} 1 & \text{si } |F_t(y,x) - B(y,x)| > \theta \\ 0 & \text{en otro caso} \end{cases}
-    \label{eq:bgsubtract}
-\end{equation}
+Las capas del principio aprenden a detectar cosas simples como bordes o cambios de color.
+Las capas más profundas van combinando esas características básicas para detectar formas
+más complejas, y al final hay capas completamente conectadas que hacen la clasificación.
 
-donde $\theta$ es un umbral de sensibilidad. El modelo de fondo más simple es la mediana temporal
-de un conjunto de cuadros muestreados sin el objeto de interés; esto es precisamente la estrategia
-empleada en el módulo \texttt{build\_background\_model()} del sistema, que calcula la mediana
-píxel a píxel sobre 60 cuadros muestreados al inicio del video.
+\subsection{Transfer learning}
 
-Modelos más sofisticados incluyen la mezcla de gaussianas (Gaussian Mixture Model, GMM), que
-modela cada píxel como una mezcla de distribuciones gaussianas y actualiza los parámetros en
-tiempo real para adaptarse a cambios lentos del fondo \cite{zivkovic2004improved}. La ventaja
-de la mediana estática sobre GMM para el FST es su determinismo: al calcular el fondo antes del
-experimento, se garantiza que cualquier presencia del animal en el cuadro sea detectada como
-primer plano, incluso si el animal permanece inmóvil durante intervalos prolongados.
+Entrenar una red desde cero requiere muchos datos etiquetados, generalmente cientos de
+miles de imágenes. Para este proyecto eso no es viable porque el laboratorio tiene un
+número limitado de videos.
 
-\subsection{Umbralización y morfología matemática}
+La solución es el \textit{transfer learning} \cite{pan2010}: se usa una red que ya fue
+entrenada en otro dataset grande (en este caso ImageNet, con más de un millón de
+imágenes) y se adapta para la tarea nueva. En la práctica se reemplaza la última
+capa del modelo (que antes clasificaba 1{,}000 objetos diferentes) por una capa nueva con
+solo 3 salidas (una por conducta), y se re-entrena solo esa parte final con los videos
+del laboratorio. Las capas anteriores ya saben detectar bordes, texturas y formas
+generales, y eso sí se puede aprovechar.
 
-La umbralización (\textit{thresholding}) convierte una imagen en escala de grises en una imagen
-binaria. El método de Otsu \cite{otsu1979threshold} determina automáticamente el umbral óptimo
-$\theta^*$ que minimiza la varianza intraclase entre los píxeles del objeto y del fondo:
+\subsection{ResNet}
 
-\begin{equation}
-    \theta^* = \arg\min_{\theta} \left[ \omega_0(\theta)\sigma_0^2(\theta) + \omega_1(\theta)\sigma_1^2(\theta) \right]
-    \label{eq:otsu}
-\end{equation}
+ResNet \cite{he2016} es una arquitectura CNN muy usada como punto de partida para transfer
+learning. La novedad que introdujo fue agregar conexiones directas que se ``saltan'' una o
+más capas (por eso se llaman \textit{skip connections} o conexiones residuales). Eso
+facilita mucho el entrenamiento cuando la red es muy profunda, porque el error puede
+fluir más fácilmente hacia atrás sin desvanecerse.
 
-donde $\omega_i$ son las probabilidades de cada clase y $\sigma_i^2$ sus varianzas. La
-umbralización de Otsu es especialmente útil cuando la distribución de intensidades tiene dos
-modas claras, condición que se satisface razonablemente cuando el animal presenta contraste
-respecto al agua.
+Para este proyecto se considera usar ResNet-18 o ResNet-50 como base del clasificador,
+dependiendo de los resultados de las pruebas iniciales.
 
-Las operaciones morfológicas actúan sobre imágenes binarias mediante un elemento estructurante
-$B$ (típicamente circular): la \textit{erosión} elimina píxeles en los bordes de los objetos,
-y la \textit{dilatación} los añade. Su combinación produce la \textit{apertura} (erosión seguida
-de dilatación, elimina ruido pequeño) y el \textit{cierre} (dilatación seguida de erosión, cierra
-huecos). Estas operaciones son esenciales en el postprocesado de la máscara de segmentación para
-obtener regiones compactas que correspondan al contorno del animal.
+\subsection{Clasificación de las tres conductas}
 
-\subsection{Detección de contornos y análisis de componentes conexas}
+% [PENDIENTE: definir la arquitectura final del clasificador en Sprint 4]
 
-Un contorno es la curva que delimita una región binaria en una imagen. La función
-\texttt{findContours} de OpenCV implementa el algoritmo de Suzuki y Abe \cite{suzuki1985topological}
-para extraer contornos de una imagen binarizada. A partir del contorno se pueden calcular
-propiedades geométricas del objeto detectado: área, rectángulo envolvente (\textit{bounding box}),
-centroide, relación de aspecto y \textit{solidez} (razón entre el área del contorno y el área del
-rectángulo envolvente). Estas propiedades son utilizadas en el módulo \texttt{\_best\_blob\_from\_mask()}
-para seleccionar el candidato de detección más consistente con la forma de una rata en el FST.
+El clasificador recibe como entrada el recorte de la imagen alrededor de la rata (el
+bounding box), normalizado a un tamaño fijo. La capa de salida produce tres valores
+de probabilidad (uno por conducta) y se predice la que tenga mayor valor. Para entrenar
+el modelo se necesitan cuadros de video etiquetados por el Dr.\ Salas Ramírez,
+indicando qué conducta realiza cada rata. Esas etiquetas se obtienen con la herramienta
+BORIS y sirven también como gold standard para la validación.
 
-La \textit{Intersección sobre la Unión} (IoU, \textit{Intersection over Union}) es una métrica
-estándar para evaluar el solapamiento entre dos regiones delimitadas por rectángulos:
-
-\begin{equation}
-    \text{IoU}(A, B) = \frac{|A \cap B|}{|A \cup B|}
-    \label{eq:iou}
-\end{equation}
-
-Un valor de IoU cercano a 1 indica que ambas cajas coinciden casi perfectamente. En el módulo de
-seguimiento, IoU se usa como criterio de consistencia entre la detección por segmentación y la
-predicción del tracker de correlación.
-
-\subsection{Estimación y corrección de la línea de agua}
-
-Un reto específico del FST con vista superior es que la superficie del agua introduce reflejos
-y variaciones de textura que degradan la segmentación. La línea de agua (\textit{waterline}) es
-la frontera horizontal que separa el cuerpo del animal (total o parcialmente sumergido) del
-reflejo/espejo de agua.
-
-El sistema propuesto estima la línea de agua mediante el análisis del perfil de intensidad
-vertical de cada ROI. Se calcula la media de intensidad por fila, se suaviza con un filtro de
-media deslizante, y se busca la posición vertical donde el gradiente negativo es más pronunciado,
-indicando el cambio de textura entre el animal/agua y el fondo del cilindro. La posición
-estimada se estabiliza con un suavizador EMA (\textit{Exponential Moving Average}):
-
-\begin{equation}
-    \hat{y}_t = \alpha \cdot \tilde{y}_t + (1 - \alpha) \cdot \hat{y}_{t-1}
-    \label{eq:ema}
-\end{equation}
-
-donde $\tilde{y}_t$ es la mediana de las últimas $W$ estimaciones, $\hat{y}_{t-1}$ es el valor
-suavizado previo, y $\alpha \in (0,1)$ es el factor de suavizado. Este mecanismo, implementado
-en la clase \texttt{WaterlineSmoother}, limita los saltos bruscos y proporciona una estimación
-estable frame a frame, constituyendo uno de los aportes técnicos originales del proyecto.
-
-% ─────────────────────────────────────────────────────────────────────────────
-\section{Aprendizaje profundo para clasificación de conductas}
-% ─────────────────────────────────────────────────────────────────────────────
-
-\subsection{Redes neuronales artificiales}
-
-Una red neuronal artificial (RNA) es un modelo computacional compuesto por capas de unidades
-de procesamiento (neuronas), donde cada neurona $j$ en la capa $l$ computa:
-
-\begin{equation}
-    a_j^{(l)} = f\left( \sum_i w_{ij}^{(l)} a_i^{(l-1)} + b_j^{(l)} \right)
-    \label{eq:neuron}
-\end{equation}
-
-siendo $w_{ij}^{(l)}$ los pesos sinápticos, $b_j^{(l)}$ el sesgo, y $f(\cdot)$ la función de
-activación. La función ReLU (\textit{Rectified Linear Unit}) $f(z) = \max(0, z)$ es la más
-utilizada en redes profundas por su simplicidad computacional y porque mitiga el problema del
-gradiente que desvanece (\textit{vanishing gradient}).
-
-Los parámetros de la red se aprenden mediante el algoritmo de retropropagación
-(\textit{backpropagation}), que calcula el gradiente de una función de pérdida $\mathcal{L}$
-respecto a cada peso usando la regla de la cadena, y los actualiza mediante descenso por
-gradiente estocástico (SGD) o variantes adaptativas como Adam \cite{kingma2014adam}.
-
-\subsection{Redes neuronales convolucionales (CNN)}
-
-Las redes neuronales convolucionales (CNN, \textit{Convolutional Neural Networks}) son
-arquitecturas diseñadas específicamente para procesar datos con estructura espacial, como imágenes
-\cite{lecun1998gradient}. Su ventaja fundamental respecto a las redes totalmente conectadas es
-la \textit{compartición de pesos}: el mismo filtro (kernel) $K$ se aplica en todas las posiciones
-de la imagen, reduciendo drásticamente el número de parámetros y haciendo la representación
-invariante a traslaciones.
-
-Una capa convolucional aplica $N_f$ filtros de tamaño $k \times k$ a la entrada $X$:
-
-\begin{equation}
-    Z^{(n)}(y,x) = \sum_{c} \sum_{i=0}^{k-1} \sum_{j=0}^{k-1} X^{(c)}(y+i, x+j) \cdot K^{(n,c)}(i,j) + b^{(n)}
-    \label{eq:conv}
-\end{equation}
-
-produciendo un \textit{mapa de características} (\textit{feature map}) que codifica la respuesta
-del filtro en cada posición espacial. Los filtros de las primeras capas detectan características
-de bajo nivel (bordes, texturas), mientras que las capas profundas combinan estas para detectar
-patrones semánticos complejos.
-
-La capa de \textit{pooling} (típicamente max-pooling) reduce la resolución espacial del mapa de
-características tomando el máximo en ventanas no solapadas, lo que introduce invarianza local a
-pequeñas deformaciones y reduce la carga computacional.
-
-\subsection{Aprendizaje por transferencia}
-
-El aprendizaje por transferencia (\textit{transfer learning}) consiste en inicializar una red con
-pesos pre-entrenados en una tarea o dominio diferente (generalmente ImageNet, con más de 1.2
-millones de imágenes de 1{,}000 clases), y luego ajustar (\textit{fine-tuning}) los parámetros
-para la tarea objetivo \cite{pan2010survey}. Esta estrategia es especialmente valiosa cuando
-el conjunto de datos de la tarea objetivo es pequeño, ya que los filtros pre-entrenados ya han
-aprendido representaciones generales de bordes, texturas y formas que son transferibles.
-
-En el contexto del FST, el conjunto de datos de entrenamiento disponible es limitado (videos del
-laboratorio colaborador). El aprendizaje por transferencia desde arquitecturas como ResNet o
-EfficientNet permite alcanzar buena capacidad de generalización con pocas muestras anotadas.
-
-\subsection{ResNet y conexiones residuales}
-
-ResNet (\textit{Deep Residual Network}), propuesta por He et al.\ \cite{he2016resnet}, introdujo
-las conexiones residuales (\textit{skip connections}) para resolver el problema de la degradación
-en redes muy profundas. En lugar de aprender la transformación $\mathcal{H}(x)$ directamente,
-cada bloque residual aprende la función residual $\mathcal{F}(x) = \mathcal{H}(x) - x$, de modo
-que la salida del bloque es:
-
-\begin{equation}
-    y = \mathcal{F}(x, \{W_i\}) + x
-    \label{eq:residual}
-\end{equation}
-
-Esta formulación facilita el flujo del gradiente durante el entrenamiento, permitiendo entrenar
-redes de más de 100 capas sin degradación. ResNet-50 y ResNet-18 son las variantes más empleadas
-como backbones de extracción de características en tareas de clasificación de comportamiento
-animal.
-
-\subsection{Clasificación multiclase y función softmax}
-
-En un problema de clasificación con $C$ clases (en el FST: nado, inmovilidad y escalamiento,
-$C=3$), la capa de salida produce $C$ activaciones $z_1, \ldots, z_C$ llamadas \textit{logits}.
-La función \textit{softmax} los convierte en una distribución de probabilidad:
-
-\begin{equation}
-    p_k = \frac{e^{z_k}}{\sum_{j=1}^{C} e^{z_j}}, \quad k = 1, \ldots, C
-    \label{eq:softmax}
-\end{equation}
-
-La clase predicha es $\hat{y} = \arg\max_k p_k$. La función de pérdida utilizada durante el
-entrenamiento es la entropía cruzada categórica:
-
-\begin{equation}
-    \mathcal{L} = -\sum_{k=1}^{C} y_k \log p_k
-    \label{eq:crossentropy}
-\end{equation}
-
-donde $y_k \in \{0,1\}$ es la etiqueta verdadera (\textit{one-hot encoding}).
-
-% ─────────────────────────────────────────────────────────────────────────────
 \section{Seguimiento de objetos en video}
-% ─────────────────────────────────────────────────────────────────────────────
 
-\subsection{Seguimiento por correlación (CSRT, KCF)}
+% [PENDIENTE: desarrollar esta sección con más detalle una vez definida la
+%  implementación final del tracker --- ver cap. 6]
 
-Los \textit{trackers} de correlación representan el objeto a seguir como un parche de imagen
-y buscan, en el cuadro siguiente, la posición que maximiza la correlación con un filtro aprendido.
-El CSRT (\textit{Channel and Spatial Reliability Tracker}) \cite{lukezic2017csrt} extiende los
-filtros de correlación discriminativa con máscaras de confiabilidad espacial, lo que le confiere
-mayor precisión en objetos de forma irregular o ante oclusiones parciales, a costa de mayor costo
-computacional. KCF (\textit{Kernelized Correlation Filter}) \cite{henriques2015kcf} opera en el
-dominio de la frecuencia para lograr mayor velocidad, pero es menos robusto ante cambios bruscos
-de apariencia.
+\subsection{Trackers de correlación: CSRT y KCF}
 
-En el sistema propuesto, CSRT es el tracker preferido; si no está disponible en la versión de
-OpenCV instalada, el sistema cae a KCF o MOSSE. Esta estrategia de \textit{fallback} garantiza
-compatibilidad entre diferentes entornos de despliegue.
+Los trackers de correlación aprenden a reconocer cómo se ve el objeto que siguen y
+en cada cuadro buscan la región de la imagen que más se le parece. CSRT \cite{lukezic2017}
+es más preciso pero tarda más en procesar cada cuadro. KCF \cite{henriques2015} es
+más rápido pero menos robusto ante cambios bruscos de apariencia. En el sistema se
+usa CSRT como primera opción, con KCF como respaldo si CSRT no está disponible en la
+versión de OpenCV instalada.
 
 \subsection{Estrategia de seguimiento en cascada}
 
-Para garantizar que ningún cuadro quede sin detección, el sistema implementa una estrategia de
-seguimiento en cascada con tres niveles:
+% [PENDIENTE: describir con detalle los tres niveles del fallback y agregar diagrama
+%  de flujo --- fig. 3.X]
 
-\begin{enumerate}
-    \item \textbf{Segmentación primaria}: detección por sustracción de fondo + umbralización en
-          el cuadro actual. Si el resultado es consistente con la detección anterior (IoU $\geq 0.08$
-          o distancia al centroide $\leq 1.6 \times \max(w, h)$), se acepta como detección
-          principal y se reinicializa el tracker.
+Para que ningún cuadro quede sin detección, el módulo implementa tres niveles de
+respaldo. Primero intenta detectar a la rata por segmentación (sustracción de fondo).
+Si eso falla o el resultado no es consistente con el cuadro anterior, usa la predicción
+del tracker CSRT. Y si ese también falla, congela la última posición conocida,
+asignándole una confianza que va disminuyendo con el tiempo hasta un mínimo.
 
-    \item \textbf{Tracker de correlación}: si la segmentación falla o el candidato es inconsistente,
-          se usa la predicción del tracker de correlación (CSRT/KCF), asignándole una confianza
-          más baja ($\leq 0.55$).
+\subsection{Métricas de evaluación}
 
-    \item \textbf{Congelamiento con degradación}: si ambos mecanismos fallan, se congela la
-          última detección conocida con confianza que decrece linealmente con el tiempo, hasta
-          un mínimo de $0.05$.
-\end{enumerate}
+% [PENDIENTE: agregar ecuaciones de precisión, recall y F1]
 
-Esta arquitectura asegura cobertura completa del video y permite al módulo clasificador operar
-sobre una región de imagen bien definida en todo momento.
+Para validar el sistema se compararán sus predicciones contra las anotaciones manuales
+del experto. La métrica principal es la kappa de Cohen ($\kappa$), que mide la
+concordancia entre dos evaluadores descontando lo que ocurriría por pura casualidad.
+Se busca alcanzar $\kappa > 0.80$, que corresponde a concordancia casi perfecta según
+la escala de Landis y Koch. También se calcula el error absoluto medio en segundos
+para tener una idea del error acumulado por animal.
 
-\subsection{Métricas de evaluación de detección y seguimiento}
-
-Las métricas estándar para evaluar sistemas de detección y seguimiento son:
-
-\textbf{Precisión} y \textbf{Recall}:
-\begin{equation}
-    P = \frac{VP}{VP + FP}, \qquad R = \frac{VP}{VP + FN}
-    \label{eq:prec_recall}
-\end{equation}
-
-donde $VP$ son verdaderos positivos, $FP$ falsos positivos y $FN$ falsos negativos.
-
-\textbf{Puntuación F1}:
-\begin{equation}
-    F_1 = 2 \cdot \frac{P \cdot R}{P + R}
-    \label{eq:f1}
-\end{equation}
-
-\textbf{Concordancia de Cohen ($\kappa$)}: para comparar la clasificación conductual del sistema
-contra la anotación manual de un experto, eliminando la concordancia debida al azar:
-\begin{equation}
-    \kappa = \frac{P_o - P_e}{1 - P_e}
-    \label{eq:kappa}
-\end{equation}
-
-donde $P_o$ es la concordancia observada y $P_e$ la esperada por azar. Un valor de $\kappa > 0.80$
-se considera concordancia casi perfecta y es el umbral de aceptación definido para el sistema.
-
-% ─────────────────────────────────────────────────────────────────────────────
 \section{Arquitectura del sistema web}
-% ─────────────────────────────────────────────────────────────────────────────
+
+% [PENDIENTE: desarrollar esta sección. Temas: API REST con Flask, procesamiento
+%  asíncrono con Redis, Docker, PostgreSQL + SQLAlchemy]
 
 \subsection{Arquitectura cliente-servidor y API REST}
 
-El sistema sigue una arquitectura cliente-servidor en dos capas. El \textit{frontend} (cliente),
-implementado en React con Vite, se ejecuta en el navegador del usuario y se comunica con el
-\textit{backend} (servidor) mediante una API REST (\textit{Representational State Transfer}).
-En una API REST, los recursos se identifican por URLs y las operaciones sobre ellos se expresan
-mediante verbos HTTP estándar: \texttt{GET} para consulta, \texttt{POST} para creación,
-\texttt{PUT} para actualización completa, \texttt{PATCH} para actualización parcial y
-\texttt{DELETE} para eliminación \cite{fielding2000rest}.
-
-El backend está implementado en FastAPI (Python), un framework moderno que genera documentación
-OpenAPI automáticamente y soporta operaciones asíncronas nativas mediante \texttt{async/await}.
+% [PENDIENTE: desarrollar]
 
 \subsection{Procesamiento asíncrono con colas de tareas}
 
-El análisis de un video de FST es una operación de larga duración (de minutos a horas según la
-longitud del video). Realizarla de forma síncrona bloquearía la conexión HTTP y resultaría en
-una experiencia de usuario deficiente. La solución es el procesamiento asíncrono mediante colas
-de tareas (\textit{task queues}).
-
-El patrón implementado es el de productor-consumidor: el endpoint de la API recibe el video,
-encola una tarea (\textit{job}) en una cola persistente (Redis), devuelve inmediatamente al
-cliente un identificador de tarea, y un proceso \textit{worker} separado consume la cola,
-ejecuta el análisis y almacena el resultado en la base de datos. El cliente puede consultar el
-estado de la tarea mediante polling o mediante WebSockets.
+% [PENDIENTE: desarrollar. Incluir diagrama del flujo:
+%  subida del video -> encolado -> worker -> resultado -> consulta del cliente]
 
 \subsection{Contenedorización con Docker}
 
-Docker es una plataforma de contenedorización que empaqueta una aplicación junto con todas sus
-dependencias en una imagen reproducible \cite{merkel2014docker}. Un \textit{Dockerfile} define
-las instrucciones para construir la imagen; \texttt{docker-compose} orquesta múltiples contenedores
-(en este proyecto: backend, frontend, base de datos PostgreSQL y worker) como un servicio
-compuesto. Las ventajas para el proyecto son la reproducibilidad del entorno de desarrollo y la
-simplicidad del despliegue en el servidor institucional.
+% [PENDIENTE: desarrollar]
 
 \subsection{Persistencia de datos con PostgreSQL}
 
-PostgreSQL es un sistema de gestión de bases de datos relacional de código abierto, ampliamente
-utilizado en aplicaciones web de nivel de producción por su robustez, soporte a tipos de datos
-complejos (JSON, arrays) y cumplimiento del estándar SQL. En el sistema, la base de datos almacena
-los metadatos de sesiones de experimento, los resultados de análisis por individuo y cuadro, y
-los registros de usuarios. La interacción entre el backend Python y PostgreSQL se realiza mediante
-SQLAlchemy como ORM (\textit{Object-Relational Mapper}), que traduce las operaciones sobre objetos
-Python a consultas SQL.
+% [PENDIENTE: referenciar al modelo de datos del capítulo 4]
