@@ -3,10 +3,9 @@
 % ===============================
 
 % ---------- Idioma y codificación ----------
-\usepackage[spanish,es-tabla]{babel}
+\usepackage[spanish]{babel}
 \usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc} % Si usas pdflatex
-\usepackage{lmodern}        % Fuente estable (evita warnings de font shape)
+\usepackage[utf8]{inputenc}
 
 % ---------- Márgenes ----------
 \usepackage[
@@ -18,7 +17,7 @@
 
 % ---------- Interlineado ----------
 \usepackage{setspace}
-\onehalfspacing   % Cambia a \doublespacing si lo exige la escuela
+\onehalfspacing
 
 % ---------- Gráficos y tablas ----------
 \usepackage{graphicx}
@@ -40,30 +39,20 @@
 \fancyhead[L]{Trabajo Terminal}
 \fancyhead[R]{\leftmark}
 \fancyfoot[C]{\thepage}
-\setlength{\headheight}{16pt} % Elimina warning de fancyhdr
+\setlength{\headheight}{16pt}
 
 % ---------- Espaciado de capítulos ----------
 \usepackage{titlesec}
 \titlespacing*{\chapter}{-5pt}{0pt}{0pt}
-% Si lo quieres aún más arriba: cambia 0pt por -5pt
 
 % ---------- Hipervínculos ----------
 \usepackage[hidelinks]{hyperref}
 \usepackage{cleveref}
 
-% ---------- Citas y bibliografía ----------
-\usepackage{csquotes} % Necesario con babel + biblatex
-
-\usepackage[
-  backend=biber,
-  style=ieee,
-  sorting=none
-]{biblatex}
-
+% ---------- Citas y bibliografía (biblatex + biber) ----------
+\usepackage{csquotes}
+\usepackage[backend=biber,style=ieee,sorting=none]{biblatex}
 \addbibresource{bib/referencias.bib}
-
-% ---------- Mejor tipografía ----------
-\usepackage{microtype}
 
 % ===============================
 %      FIN DEL PREÁMBULO
