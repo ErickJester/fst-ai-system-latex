@@ -25,15 +25,14 @@ tienen limitaciones importantes: algunas son demasiado costosas, otras solo dete
 animal se mueve o no sin distinguir el tipo de conducta, y en general están pensadas para
 condiciones de grabación más controladas que las que se tienen en el laboratorio.
 
-El Laboratorio de Neurociencia Conductual de la ENMyH-IPN, dirigido por el Dr. Israel Salas
-Ramírez, trabaja con este paradigma de forma regular y cuenta con un acervo de videos
+El Laboratorio de Neurociencia Conductual de la ENMyH-IPN, dirigido por el Dr. ... , trabaja con este paradigma de forma regular y cuenta con un acervo de videos
 que actualmente se analizan de manera manual. A partir de esa necesidad concreta surge
 este Trabajo Terminal.
 
 \section{Planteamiento del problema}
 El laboratorio colaborador realiza experimentos de nado forzado periódicamente, evaluando
 grupos de ratas para medir el efecto de distintas moléculas. Cada experimento genera videos
-donde se graban cuatro animales simultáneamente desde arriba, con teléfono o tableta, en
+donde se graban cuatro animales simultáneamente, con teléfono o cámara web, en
 dos sesiones: 20 minutos el primer día y 5 minutos el segundo día.
 
 Hoy en día, el análisis de esos videos se hace completamente a mano: un investigador
@@ -74,7 +73,7 @@ El sistema tiene dos partes principales:
 \end{itemize}
 
 El sistema asume que los videos de entrada tienen un formato y calidad mínimos para que
-el procesamiento funcione correctamente: vista superior con los cuatro cilindros visibles,
+el procesamiento funcione correctamente: vista lateral con los cuatro cilindros visibles,
 contraste suficiente entre el animal y el fondo, y estabilidad de la cámara. Los videos
 de muestra disponibles hasta ahora presentan algunas variaciones en iluminación y contraste
 que podrían afectar el desempeño; se evaluará durante el desarrollo qué tan robustos son
@@ -98,7 +97,7 @@ resultados sean comparables con la evaluación manual del experto del laboratori
         más adecuados al problema.
   \item Describir con detalle el protocolo experimental del FST que usa el laboratorio,
         incluyendo las conductas de interés y las características de los videos, en
-        coordinación con el Dr. Salas Ramírez.
+        coordinación con el Dr. \dots.
   \item Diseñar la arquitectura del sistema, definiendo los módulos de carga de videos,
         pipeline de análisis, base de datos y visualización de resultados.
   \item Implementar el módulo de análisis conductual con visión por computadora y un
@@ -120,16 +119,16 @@ diseñadas para el flujo de trabajo específico del laboratorio, mientras que la
 abierto disponibles no clasifican las tres conductas del FST ni cuentan con una plataforma
 web. El sistema propuesto cubre esas dos necesidades al mismo tiempo.
 
-Desde el punto de vista académico, el proyecto nos permite aplicar conocimientos de visión
-por computadora, aprendizaje automático y desarrollo web en un problema real con impacto
-en investigación biomédica, que es justamente el tipo de trabajo que define el perfil de
-egreso de la ESCOM.
+%Desde el punto de vista académico, el proyecto nos permite aplicar conocimientos de visión
+%por computadora, aprendizaje automático y desarrollo web en un problema real con impacto
+%en investigación biomédica, que es justamente el tipo de trabajo que define el perfil de
+%egreso de la ESCOM.
 
 \section{Alcance del proyecto}
 
 \subsection*{Incluido en el alcance}
 \begin{itemize}
-  \item Análisis de videos del FST del laboratorio de la ENMyH-IPN, grabados desde arriba
+  \item Análisis de videos del FST del laboratorio de la ENMyH-IPN, grabados desde el lateral
         con cuatro cilindros simultáneos, bajo condiciones de grabación suficientes para
         que el procesamiento sea viable.
   \item Clasificación de tres conductas: nado activo, inmovilidad e intentos de escape.
@@ -141,7 +140,7 @@ egreso de la ESCOM.
   \item Plataforma web con carga de videos, consulta de resultados y generación de reportes.
   \item Validación contra el gold standard del experto con métricas de concordancia
         (Kappa de Cohen) y error absoluto medio.
-  \item Documentación técnica conforme a los lineamientos de la CATT-ESCOM.
+  %\item Documentación técnica conforme a los lineamientos de la CATT-ESCOM.
 \end{itemize}
 
 \subsection*{Fuera del alcance}

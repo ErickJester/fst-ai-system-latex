@@ -19,10 +19,10 @@ probarlos en humanos, los investigadores usan modelos animales que reproducen al
 aspectos del trastorno.
 
 Para que un modelo animal sea considerado válido, debe cumplir con tres criterios
-\cite{slattery2012}: tener \textit{validez de constructo} (los mecanismos biológicos
-involucrados deben ser parecidos a los del trastorno humano), \textit{validez de cara}
-(los síntomas observables deben ser similares a los clínicos) y \textit{validez
-predictiva} (el modelo debe responder a los fármacos que funcionan en pacientes).
+\cite{slattery2012}: tener validez de constructo (los mecanismos biológicos
+involucrados deben ser parecidos a los del trastorno humano), validez de cara
+(los síntomas observables deben ser similares a los clínicos) y validez
+predictiva (el modelo debe responder a los fármacos que funcionan en pacientes).
 
 \subsection{La prueba de nado forzado (FST)}
 
@@ -65,7 +65,7 @@ rata se mueve o no pierde esa información.
 En el laboratorio de la ENMyH, las ratas se meten individualmente en cilindros
 transparentes con agua. Hay dos sesiones: 20 minutos el día 1 (línea base) y
 5 minutos el día 2 (después del tratamiento), con 24 horas de diferencia. Los videos
-se graban desde arriba con cámara de celular, capturando los cuatro cilindros al mismo
+se graban desde un costado con cámara de celular, capturando los cuatro cilindros al mismo
 tiempo. La iluminación y el nivel del agua varían entre experimentos, y con ratas de
 pelaje claro el contraste contra el cilindro puede ser bastante bajo. Estas condiciones
 representan el caso de uso principal del sistema y determinarán en qué medida los
@@ -133,7 +133,7 @@ dependiendo de los resultados de las pruebas iniciales.
 El clasificador recibe como entrada el recorte de la imagen alrededor de la rata (el
 bounding box), normalizado a un tamaño fijo. La capa de salida produce tres valores
 de probabilidad (uno por conducta) y se predice la que tenga mayor valor. Para entrenar
-el modelo se necesitan cuadros de video etiquetados por el Dr.\ Salas Ramírez,
+el modelo se necesitan cuadros de video etiquetados por el Dr. \dots,
 indicando qué conducta realiza cada rata. Esas etiquetas se obtienen con la herramienta
 BORIS y sirven también como gold standard para la validación.
 
