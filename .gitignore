@@ -13,9 +13,6 @@
 *.synctex.gz
 *.toc
 
-# Opcional: Ignorar el PDF generado (se recomienda generarlo, no guardarlo)
-*.pdf
-
 # Archivos de sistema
 .DS_Store
 Thumbs.db
