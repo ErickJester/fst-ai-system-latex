@@ -4,138 +4,134 @@ Este capítulo describe los conceptos teóricos en los que se apoya el sistema.
 Se organiza en tres bloques: el modelo biológico del FST y las conductas que interesa
 clasificar; los fundamentos de redes neuronales y aprendizaje profundo para la
 clasificación de conductas; y los elementos de arquitectura del sistema web. Las
-técnicas específicas de procesamiento de video utilizadas en el módulo de seguimiento
-(sustracción de fondo, umbralización, contornos, línea de agua) se describen en el
-capítulo~6, dentro del desarrollo del módulo correspondiente.
+técnicas de procesamiento de video del módulo de seguimiento (sustracción de fondo,
+umbralización, contornos, línea de agua) se describen en el capítulo~6, dentro del
+desarrollo del módulo correspondiente.
 
 \section{El modelo de nado forzado como paradigma preclínico}
 
 \subsection{Depresión y modelos animales}
 
-La depresión mayor es uno de los trastornos más frecuentes a nivel mundial. La OMS
-estima que afecta a más de 280 millones de personas y es una de las principales causas
-de discapacidad \cite{who_depression_2025}. Para estudiar nuevos tratamientos antes de
-probarlos en humanos, los investigadores usan modelos animales que reproducen algunos
-aspectos del trastorno.
+La depresión mayor afecta a más de 280 millones de personas y es una de las principales
+causas de discapacidad a nivel mundial \cite{who_depression_2025}. Para probar nuevos
+tratamientos antes de llegar a humanos, los investigadores usan modelos animales que
+reproducen algunos aspectos del trastorno.
 
-Para que un modelo animal sea considerado válido, debe cumplir con tres criterios
-\cite{slattery2012}: tener validez de constructo (los mecanismos biológicos
-involucrados deben ser parecidos a los del trastorno humano), validez de cara
-(los síntomas observables deben ser similares a los clínicos) y validez
-predictiva (el modelo debe responder a los fármacos que funcionan en pacientes).
+Para que un modelo animal sea válido debe cumplir tres criterios \cite{slattery2012}:
+\textit{validez de constructo} (los mecanismos biológicos involucrados deben parecerse
+a los del trastorno humano), \textit{validez de cara} (los síntomas observables deben
+ser similares a los clínicos) y \textit{validez predictiva} (el modelo debe responder
+a los fármacos que funcionan en pacientes).
 
 \subsection{La prueba de nado forzado (FST)}
 
-La prueba de nado forzado fue propuesta por Porsolt et al.\ en 1977 \cite{porsolt1977}.
-Consiste en poner a la rata en un cilindro lleno de agua del que no puede salir, y
-registrar cómo se comporta. Al principio el animal intenta escapar, pero después de
-un rato empieza a quedarse flotando. Esa conducta pasiva se interpreta como
-\textit{desesperanza conductual} (en inglés \textit{behavioral despair}), que se
-asocia con la pérdida de motivación propia de la depresión \cite{armario2021}.
+La prueba de nado forzado la propuso Porsolt et al.\ en 1977 \cite{porsolt1977}.
+Consiste en poner a la rata en un cilindro con agua del que no puede salir y registrar
+cómo se comporta. Al principio el animal intenta escapar, pero después de un rato empieza
+a quedarse flotando. Esa conducta pasiva se interpreta como \textit{desesperanza
+conductual} (\textit{behavioral despair}), que se asocia con la pérdida de motivación
+propia de la depresión \cite{armario2021}.
 
 La prueba funciona bien para evaluar antidepresivos porque la mayoría de los fármacos
 que son efectivos en humanos también reducen el tiempo de inmovilidad en ratas
-\cite{cryan2005}. Es uno de los experimentos más citados en neurociencia conductual:
-desde el 2000 hay más de 8{,}000 artículos que lo reportan \cite{della_valle2025}.
+\cite{cryan2005}. Desde el año 2000 hay más de 8{,}000 artículos que lo reportan
+\cite{della_valle2025}.
 
 \subsection{Conductas que se observan y cómo se interpretan}
 
-En el FST se pueden distinguir tres tipos de conducta \cite{armario2021,cryan2005}.
-Son mutuamente excluyentes, o sea que en cada momento la rata solo está haciendo una:
+En el FST se distinguen tres conductas \cite{armario2021,cryan2005}. Son mutuamente
+excluyentes: en cada momento la rata solo puede estar haciendo una.
 
 \begin{itemize}
     \item \textbf{Inmovilidad}: el animal flota haciendo solo lo necesario para no
           hundirse. Es el indicador principal de desesperanza conductual.
 
-    \item \textbf{Nado activo}: movimientos de paladas que lo desplazan horizontalmente.
-          Está relacionado con el sistema serotoninérgico; los antidepresivos tipo
-          ISRS (como la fluoxetina) aumentan esta conducta.
+    \item \textbf{Nado activo}: movimientos de paladas que desplazan al animal
+          horizontalmente. Está relacionado con el sistema serotoninérgico; los
+          antidepresivos tipo ISRS (como la fluoxetina) aumentan esta conducta.
 
     \item \textbf{Escalamiento}: movimientos rápidos hacia las paredes del cilindro,
           con las patas delanteras tocando o rompiendo la superficie del agua. Se asocia
-          al sistema noradrenérgico; la desipramina, por ejemplo, la incrementa.
+          al sistema noradrenérgico; la desipramina, por ejemplo, lo incrementa.
 \end{itemize}
 
-Distinguir estas tres conductas es importante porque permite saber sobre qué sistema
-neurotransmisor está actuando el fármaco evaluado. Un sistema que solo detecta si la
-rata se mueve o no pierde esa información.
+Distinguir las tres conductas importa porque permite saber sobre qué sistema
+neurotransmisor actúa el fármaco evaluado. Un sistema que solo detecta si la rata se
+mueve o no pierde esa información.
 
 \subsection{Protocolo del laboratorio colaborador}
 
-En el laboratorio de la ENMyH, las ratas se meten individualmente en cilindros
-transparentes con agua. Hay dos sesiones: 20 minutos el día 1 (línea base) y
-5 minutos el día 2 (después del tratamiento), con 24 horas de diferencia. Los videos
-se graban desde un costado con cámara de celular, capturando los cuatro cilindros al mismo
-tiempo. La iluminación y el nivel del agua varían entre experimentos, y con ratas de
-pelaje claro el contraste contra el cilindro puede ser bastante bajo. Estas condiciones
-representan el caso de uso principal del sistema y determinarán en qué medida los
-algoritmos funcionan correctamente; los requisitos mínimos de calidad del video se
-definirán durante las pruebas de validación.
+En el laboratorio de la ENMyH las ratas se colocan individualmente en cilindros
+transparentes con agua. Hay dos sesiones: 20 minutos el día 1 (línea base) y 5 minutos
+el día 2 (después del tratamiento), con 24 horas de diferencia. Los videos se graban
+desde arriba con cámara de celular, capturando los cuatro cilindros al mismo tiempo.
+La iluminación y el nivel del agua varían entre experimentos, y con ratas de pelaje
+claro el contraste contra el cilindro puede ser bajo. Estas condiciones son el caso de
+uso principal del sistema y determinarán en qué medida funcionan los algoritmos; los
+requisitos mínimos de calidad del video se definirán durante las pruebas de validación.
 
 \section{Redes neuronales y aprendizaje profundo}
 
 \subsection{Idea general de una red neuronal}
 
-Una red neuronal es un modelo que aprende a partir de ejemplos. Está formada por
-capas de ``neuronas'' (en realidad son solo funciones matemáticas simples) que se
-conectan entre sí. Cada neurona recibe varios valores, los pondera con unos pesos,
-los suma y aplica una función de activación. La función más usada hoy en día es
-ReLU, que devuelve el valor si es positivo y cero si es negativo.
+Una red neuronal aprende a partir de ejemplos. Está formada por capas de ``neuronas''
+---funciones matemáticas simples--- que se conectan entre sí. Cada neurona recibe
+valores, los pondera con unos pesos, los suma y aplica una función de activación. La
+más usada hoy en día es ReLU, que devuelve el valor si es positivo y cero si no.
 
 Los pesos no se definen a mano: se aprenden durante el entrenamiento. El proceso es
-iterativo: se le da al modelo un ejemplo con su respuesta correcta, se ve cuánto se
-equivocó, y se ajustan un poquito los pesos para que la próxima vez lo haga mejor.
-Eso se hace con el algoritmo de retropropagación y un optimizador como Adam
-\cite{kingma2014}, que es una versión mejorada del descenso por gradiente clásico.
+iterativo: se da al modelo un ejemplo con su respuesta correcta, se mide cuánto se
+equivocó, y se ajustan los pesos un poco para que la próxima vez lo haga mejor. Eso
+se hace con retropropagación y un optimizador como Adam \cite{kingma2014}, que es una
+versión mejorada del descenso por gradiente clásico.
 
 \subsection{Redes convolucionales (CNN)}
 
-Las CNN son redes neuronales diseñadas específicamente para trabajar con imágenes
-\cite{lecun1998}. La idea principal es que en vez de conectar cada píxel con cada
-neurona (lo que sería inmanejable), se usan filtros pequeños que se deslizan por
-toda la imagen. El mismo filtro se aplica en cada posición, lo cual reduce mucho la
-cantidad de parámetros y hace que la red pueda detectar un patrón sin importar dónde
-esté en la imagen.
+Las CNN son redes diseñadas para trabajar con imágenes \cite{lecun1998}. En vez de
+conectar cada píxel con cada neurona (lo que sería inmanejable), usan filtros pequeños
+que se deslizan por toda la imagen. El mismo filtro se aplica en cada posición, lo que
+reduce la cantidad de parámetros y permite detectar un patrón sin importar dónde esté.
 
-Las capas del principio aprenden a detectar cosas simples como bordes o cambios de color.
-Las capas más profundas van combinando esas características básicas para detectar formas
-más complejas, y al final hay capas completamente conectadas que hacen la clasificación.
+Las capas iniciales aprenden bordes y cambios de color. Las más profundas combinan esas
+características para detectar formas más complejas. Al final, capas completamente
+conectadas hacen la clasificación.
 
 \subsection{Transfer learning}
 
-Entrenar una red desde cero requiere muchos datos etiquetados, generalmente cientos de
+Entrenar una red desde cero requiere muchos datos etiquetados, normalmente cientos de
 miles de imágenes. Para este proyecto eso no es viable porque el laboratorio tiene un
 número limitado de videos.
 
-La solución es el \textit{transfer learning} \cite{pan2010}: se usa una red que ya fue
-entrenada en otro dataset grande (en este caso ImageNet, con más de un millón de
-imágenes) y se adapta para la tarea nueva. En la práctica se reemplaza la última
-capa del modelo (que antes clasificaba 1{,}000 objetos diferentes) por una capa nueva con
-solo 3 salidas (una por conducta), y se re-entrena solo esa parte final con los videos
-del laboratorio. Las capas anteriores ya saben detectar bordes, texturas y formas
-generales, y eso sí se puede aprovechar.
+La alternativa es el \textit{transfer learning} \cite{pan2010}: se usa una red ya
+entrenada en otro dataset grande (ImageNet, con más de un millón de imágenes) y se
+adapta para la tarea nueva. En la práctica se reemplaza la última capa del modelo (que
+antes clasificaba 1{,}000 objetos) por una capa nueva con solo 3 salidas (una por
+conducta), y se re-entrena solo esa parte final con los videos del laboratorio. Las
+capas anteriores ya saben detectar bordes, texturas y formas generales, y eso se puede
+aprovechar directamente.
 
 \subsection{ResNet}
 
-ResNet \cite{he2016} es una arquitectura CNN muy usada como punto de partida para transfer
-learning. La novedad que introdujo fue agregar conexiones directas que se ``saltan'' una o
-más capas (por eso se llaman \textit{skip connections} o conexiones residuales). Eso
-facilita mucho el entrenamiento cuando la red es muy profunda, porque el error puede
-fluir más fácilmente hacia atrás sin desvanecerse.
+ResNet \cite{he2016} es una arquitectura CNN muy usada como punto de partida para
+transfer learning. La novedad que introdujo fueron conexiones directas que ``saltan''
+una o más capas (\textit{skip connections} o conexiones residuales). Eso facilita el
+entrenamiento cuando la red es muy profunda, porque el error puede fluir hacia atrás
+sin desvanecerse.
 
 Para este proyecto se considera usar ResNet-18 o ResNet-50 como base del clasificador,
-dependiendo de los resultados de las pruebas iniciales.
+según los resultados de las pruebas iniciales.
 
 \subsection{Clasificación de las tres conductas}
 
 % [PENDIENTE: definir la arquitectura final del clasificador en Sprint 4]
 
-El clasificador recibe como entrada el recorte de la imagen alrededor de la rata (el
-bounding box), normalizado a un tamaño fijo. La capa de salida produce tres valores
-de probabilidad (uno por conducta) y se predice la que tenga mayor valor. Para entrenar
-el modelo se necesitan cuadros de video etiquetados por el Dr. \dots,
-indicando qué conducta realiza cada rata. Esas etiquetas se obtienen con la herramienta
-BORIS y sirven también como gold standard para la validación.
+El clasificador recibe el recorte de imagen alrededor de la rata (el bounding box),
+normalizado a un tamaño fijo. La capa de salida produce tres valores de probabilidad
+(uno por conducta) y se predice la de mayor valor. Para entrenar el modelo se necesitan
+cuadros de video etiquetados. Esas etiquetas las generan los autores del proyecto usando
+BORIS, tomando como referencia los registros conductuales (tiempos por conducta, por
+animal y por sesión) proporcionados por el laboratorio. Esos mismos registros
+constituyen el gold standard para la validación del sistema.
 
 \section{Seguimiento de objetos en video}
 
@@ -144,34 +140,32 @@ BORIS y sirven también como gold standard para la validación.
 
 \subsection{Trackers de correlación: CSRT y KCF}
 
-Los trackers de correlación aprenden a reconocer cómo se ve el objeto que siguen y
-en cada cuadro buscan la región de la imagen que más se le parece. CSRT \cite{lukezic2017}
-es más preciso pero tarda más en procesar cada cuadro. KCF \cite{henriques2015} es
-más rápido pero menos robusto ante cambios bruscos de apariencia. En el sistema se
-usa CSRT como primera opción, con KCF como respaldo si CSRT no está disponible en la
-versión de OpenCV instalada.
+Los trackers de correlación aprenden a reconocer cómo se ve el objeto que siguen y en
+cada cuadro buscan la región que más se le parece. CSRT \cite{lukezic2017} es más
+preciso pero más lento. KCF \cite{henriques2015} es más rápido pero menos robusto ante
+cambios bruscos de apariencia. El sistema usa CSRT como primera opción y KCF como
+respaldo si CSRT no está disponible en la versión de OpenCV instalada.
 
 \subsection{Estrategia de seguimiento en cascada}
 
 % [PENDIENTE: describir con detalle los tres niveles del fallback y agregar diagrama
 %  de flujo --- fig. 3.X]
 
-Para que ningún cuadro quede sin detección, el módulo implementa tres niveles de
-respaldo. Primero intenta detectar a la rata por segmentación (sustracción de fondo).
+El módulo implementa tres niveles de respaldo para que ningún cuadro quede sin
+detección. Primero intenta detectar a la rata por segmentación (sustracción de fondo).
 Si eso falla o el resultado no es consistente con el cuadro anterior, usa la predicción
-del tracker CSRT. Y si ese también falla, congela la última posición conocida,
-asignándole una confianza que va disminuyendo con el tiempo hasta un mínimo.
+del tracker CSRT. Si ese también falla, congela la última posición conocida con una
+confianza que baja con el tiempo hasta un mínimo.
 
 \subsection{Métricas de evaluación}
 
 % [PENDIENTE: agregar ecuaciones de precisión, recall y F1]
 
-Para validar el sistema se compararán sus predicciones contra las anotaciones manuales
-del experto. La métrica principal es la kappa de Cohen ($\kappa$), que mide la
+La métrica principal de validación es la kappa de Cohen ($\kappa$), que mide la
 concordancia entre dos evaluadores descontando lo que ocurriría por pura casualidad.
 Se busca alcanzar $\kappa > 0.80$, que corresponde a concordancia casi perfecta según
-la escala de Landis y Koch. También se calcula el error absoluto medio en segundos
-para tener una idea del error acumulado por animal.
+Landis y Koch. También se calcula el error absoluto medio en segundos para tener una
+idea del error acumulado por animal.
 
 \section{Arquitectura del sistema web}
 
