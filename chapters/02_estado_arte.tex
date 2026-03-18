@@ -1,123 +1,119 @@
 \chapter{Estado del arte}
 
-Antes de definir cómo va a funcionar el sistema, revisamos qué herramientas y trabajos
-existen para el análisis automatizado de la prueba de nado forzado. La búsqueda se centró
-en tres áreas: herramientas de software para análisis conductual, métodos de seguimiento
-de animales con visión por computadora, y enfoques de clasificación de conducta basados
-en aprendizaje profundo.
+Antes de decidir cómo va a funcionar el sistema, revisamos qué herramientas y trabajos
+existen para el análisis automatizado del FST. La búsqueda se centró en tres áreas:
+software para análisis conductual, métodos de seguimiento de animales con visión por
+computadora, y enfoques de clasificación de conducta con aprendizaje profundo.
 
 \section{Herramientas comerciales de análisis conductual por video}
 
 \subsection{EthoVision XT}
-EthoVision XT (Noldus Information Technology) es probablemente el software más usado en
-laboratorios de neurociencia conductual para el seguimiento automático de animales en video
-\cite{noldus_ethovision}. Funciona detectando al animal en cada cuadro mediante sustracción
-de fondo y umbralización, y registra su posición, velocidad y tiempo de inmovilidad.
+EthoVision XT (Noldus Information Technology) es el software más usado en laboratorios
+de neurociencia conductual para seguimiento automático de animales en video
+\cite{noldus_ethovision}. Detecta al animal en cada cuadro por sustracción de fondo y
+umbralización, y registra posición, velocidad y tiempo de inmovilidad.
 
-Para el FST, EthoVision puede detectar si el animal se mueve o no, pero no diferencia entre
-los tres tipos de conducta (nado, inmovilidad, escalamiento) que son relevantes para el
-análisis farmacológico \cite{della_valle2025}. Además, requiere condiciones de iluminación
-bastante controladas para funcionar bien, y su licencia comercial tiene un costo elevado
-que no es accesible para todos los laboratorios.
+Para el FST, EthoVision puede detectar si el animal se mueve o no, pero no distingue
+entre los tres tipos de conducta (nado, inmovilidad, escalamiento) que importan para el
+análisis farmacológico \cite{della_valle2025}. Además, necesita condiciones de
+iluminación bastante controladas para funcionar bien, y su licencia comercial tiene un
+costo que no todos los laboratorios pueden cubrir.
 
 \subsection{ANY-maze}
-ANY-maze (Stoelting Co.) es otro software comercial con uso similar al de EthoVision. Tiene
-una interfaz más sencilla y accesible, pero comparte las mismas limitaciones básicas: necesita
-condiciones visuales controladas y no clasifica las subconductas del FST por separado.
+ANY-maze (Stoelting Co.) tiene un uso similar al de EthoVision y una interfaz más
+accesible, pero comparte las mismas limitaciones de fondo: requiere condiciones visuales
+controladas y no clasifica las subconductas del FST por separado.
 
 \section{Herramientas de código abierto para análisis del FST}
 
 \subsection{ezTrack}
-ezTrack \cite{pennington2019_eztrack} es una herramienta de código abierto desarrollada
-en Python, pensada para investigadores sin mucha experiencia en programación. Se ejecuta
-sobre Jupyter Notebooks y cuantifica el movimiento del animal comparando diferencias entre
-cuadros consecutivos.
+ezTrack \cite{pennington2019_eztrack} es una herramienta de código abierto en Python,
+pensada para investigadores sin experiencia en programación. Corre sobre Jupyter
+Notebooks y cuantifica el movimiento comparando cuadros consecutivos.
 
-Es útil para experimentos simples, pero solo hace clasificación binaria (se mueve/no se
-mueve) y asume condiciones de grabación razonablemente controladas. No está pensada para
-vista superior con varios cilindros al mismo tiempo.
+Sirve para experimentos simples, pero solo hace clasificación binaria (se mueve/no se
+mueve) y asume condiciones de grabación razonablemente controladas. No fue diseñada
+para vista superior con varios cilindros al mismo tiempo.
 
 \subsection{DBscorer}
-DBscorer \cite{nandi2021_dbscorer} es la herramienta de código abierto más específica para
-el FST y para el test de suspensión de cola (TST). Fue desarrollada en MATLAB por el Indian
-Institute of Science y tiene una interfaz gráfica bastante intuitiva. Cuantifica la
+DBscorer \cite{nandi2021_dbscorer} es la herramienta de código abierto más específica
+para el FST y el test de suspensión de cola (TST). La desarrolló el Indian Institute of
+Science en MATLAB y tiene una interfaz gráfica bastante intuitiva. Cuantifica la
 inmovilidad comparando el tamaño de la región del animal entre cuadros consecutivos.
 
-Representa un avance importante frente al análisis completamente manual, pero tiene
-limitaciones relevantes para este proyecto: es sensible a cambios de iluminación y
-reflejos del agua, solo distingue móvil/inmóvil sin separar nado de escalamiento, está
-diseñada para un solo animal a la vez desde perspectiva lateral, y no tiene interfaz web.
+Es un paso adelante frente al análisis manual, pero tiene limitaciones concretas para
+este proyecto: es sensible a cambios de iluminación y reflejos del agua, solo distingue
+móvil/inmóvil sin separar nado de escalamiento, está diseñada para un solo animal a la
+vez en perspectiva lateral, y no tiene interfaz web.
 
 \section{Enfoques de aprendizaje profundo para el FST}
 
 \subsection{Red dual sin umbral (DSAAN)}
-Meng et al.\ \cite{meng2024_dsaan} propusieron un método llamado DSAAN que usa dos ramas
-paralelas para procesar información de apariencia y de movimiento del animal por separado,
-y luego las combina para clasificar el estado cuadro a cuadro. Lo interesante es que
-alcanza 88.7\,\% de precisión con apenas 94 imágenes etiquetadas, lo cual es un resultado
-bastante bueno para el tamaño de dataset que tendríamos disponible.
+Meng et al.\ \cite{meng2024_dsaan} propusieron DSAAN, un método con dos ramas paralelas
+que procesan apariencia y movimiento del animal por separado y luego los combinan para
+clasificar el estado cuadro a cuadro. Con apenas 94 imágenes etiquetadas alcanzó un
+88.7\,\% de precisión, lo cual es relevante dado el tamaño de dataset que tendríamos
+disponible.
 
-El método fue validado en condiciones controladas de laboratorio; los autores no abordan
-el comportamiento del sistema ante variaciones de iluminación o reflejos del agua.
+El método se validó en condiciones controladas; los autores no reportan qué pasa con
+variaciones de iluminación o reflejos del agua.
 
 \subsection{Red convolucional 3D-RCNN (Della Valle et al., 2025)}
-Este es el trabajo más reciente que encontramos sobre clasificación automática en el FST.
-Della Valle et al.\ \cite{della_valle2025} entrenaron un modelo basado en redes residuales
-3D que procesa segmentos de video para capturar el movimiento en el tiempo. Es de los
-pocos sistemas que distingue las tres conductas (nado, inmovilidad y escalamiento); los
-propios autores señalan que la mayoría de sistemas anteriores solo pueden diferenciar entre
-inmovilidad y conductas activas en general.
+El trabajo más reciente que encontramos sobre clasificación automática en el FST.
+Della Valle et al.\ \cite{della_valle2025} entrenaron un modelo basado en redes
+residuales 3D que procesa segmentos de video para capturar el movimiento en el tiempo.
+Es uno de los pocos sistemas que distingue las tres conductas; los propios autores
+señalan que la mayoría de sistemas anteriores solo diferencian entre inmovilidad y
+conductas activas en general.
 
-%Al igual que los demás trabajos revisados, fue validado en condiciones controladas.
+También fue validado en condiciones controladas.
 
 \section{Estimación de pose y seguimiento multianimales}
 
 \subsection{DeepLabCut}
 DeepLabCut \cite{mathis2018_dlc} es la herramienta estándar para seguimiento de pose
-en animales sin necesidad de marcadores físicos. Usa redes convolucionales para detectar
-puntos clave del cuerpo (nariz, patas, cola) definidos por el usuario. Su versión
-multianimales, maDLC \cite{lauer2022_madlc}, permite trabajar con varios individuos al
-mismo tiempo.
+en animales sin marcadores físicos. Usa redes convolucionales para detectar puntos clave
+del cuerpo (nariz, patas, cola) definidos por el usuario. Su versión multianimales,
+maDLC \cite{lauer2022_madlc}, permite trabajar con varios individuos al mismo tiempo.
 
-Sturman et al.\ \cite{sturman2020_dlc} demostraron que un clasificador entrenado sobre
-la representación esquelética de DeepLabCut puede eliminar la variabilidad entre evaluadores
-en el FST. Sin embargo, requiere anotar manualmente puntos clave en decenas de cuadros
-para entrenarlo, lo cual implica un esfuerzo de etiquetado considerable.
+Sturman et al.\ \cite{sturman2020_dlc} mostraron que un clasificador entrenado sobre
+la representación esquelética de DeepLabCut puede eliminar la variabilidad entre
+evaluadores en el FST. El precio es el esfuerzo de etiquetado: hay que anotar
+manualmente puntos clave en decenas de cuadros antes de poder entrenar el modelo.
 
 \subsection{YOLO-Behaviour}
-Chan et al.\ \cite{chan2025_yolo} presentaron un sistema que combina YOLOv8 para detectar
-al animal y un clasificador de conducta que actúa sobre la región recortada. La ventaja de
-separar la detección de la clasificación es que el clasificador trabaja sobre una imagen
-más limpia, sin distracciones del fondo. Ese enfoque de dos etapas es el que se retoma
-en este proyecto.
+Chan et al.\ \cite{chan2025_yolo} presentaron un sistema que combina YOLOv8 para
+detectar al animal con un clasificador de conducta que actúa sobre la región recortada.
+Separar detección de clasificación tiene una ventaja práctica: el clasificador trabaja
+sobre una imagen más limpia, sin distracciones del fondo. Ese enfoque de dos etapas es
+el que se retoma en este proyecto.
 
 \subsection{YOLOv8 para detección en investigación conductual}
-Stadler et al.\ \cite{stadler2024_yolov8} evaluaron YOLOv8 para detección de animales en
-estudios de comportamiento y encontraron que con entre 100 y 350 imágenes etiquetadas se
-puede lograr una detección casi perfecta en fondos consistentes. También encontraron que
-el modelo no generaliza bien cuando el fondo cambia mucho entre condiciones, lo cual es
-un punto a considerar en el entrenamiento del sistema.
+Stadler et al.\ \cite{stadler2024_yolov8} evaluaron YOLOv8 para detección de animales
+en estudios de comportamiento. Con entre 100 y 350 imágenes etiquetadas lograron
+detección casi perfecta en fondos consistentes. También encontraron que el modelo no
+generaliza bien cuando el fondo cambia mucho entre condiciones, lo cual es un punto a
+tener en cuenta al entrenar el sistema.
 
 \section{Limitaciones comunes y contexto del proyecto}
-Un patrón que se repite en todos los trabajos revisados es que fueron desarrollados y
-validados bajo condiciones de grabación bastante controladas: iluminación uniforme, fondo
-contrastante, sin reflejos problemáticos. Las herramientas basadas en umbralización
-(DBscorer, ezTrack) son especialmente sensibles a esas condiciones. Los métodos de
-aprendizaje profundo son más robustos en principio, pero su rendimiento depende en gran
-medida de que el conjunto de entrenamiento represente las condiciones reales de uso.
+Todos los trabajos revisados se desarrollaron y validaron bajo condiciones bastante
+controladas: iluminación uniforme, fondo contrastante, sin reflejos problemáticos. Las
+herramientas basadas en umbralización (DBscorer, ezTrack) son especialmente sensibles
+a eso. Los métodos de aprendizaje profundo son más robustos en principio, pero su
+rendimiento depende de que el conjunto de entrenamiento represente las condiciones
+reales de uso.
 
-En ese sentido, los videos disponibles del laboratorio colaborador presentan algunas
-características que pueden suponer un reto: grabación con cámara de celular, variaciones
-de iluminación entre sesiones, y ratas de pelaje claro con bajo contraste frente al
-cilindro. El sistema propuesto no garantiza robustez ante todas esas condiciones desde
-el inicio; parte del trabajo de desarrollo será evaluar qué tan bien funciona con los
-videos disponibles y definir los requisitos mínimos de calidad de entrada. La hipótesis
-de trabajo es que los videos del laboratorio son suficientemente buenos para que el
-sistema funcione, pero eso se confirmará o ajustará durante las pruebas.
+Los videos del laboratorio colaborador tienen características que complican las cosas:
+grabación con cámara de celular, variaciones de iluminación entre sesiones, y ratas
+de pelaje claro con poco contraste frente al cilindro. El sistema propuesto no garantiza
+robustez ante todas esas condiciones desde el inicio; parte del trabajo de desarrollo
+será evaluar qué tan bien funciona con los videos disponibles y definir los requisitos
+mínimos de calidad de entrada. La hipótesis es que los videos son suficientemente buenos
+para que el sistema funcione, pero eso se confirma o se ajusta durante las pruebas.
 
 \section{Tabla comparativa}
-La Tabla~\ref{tab:comparativa_herramientas} resume los trabajos revisados en relación con
-los criterios más importantes para el proyecto.
+La Tabla~\ref{tab:comparativa_herramientas} resume los trabajos revisados frente a los
+criterios más relevantes para el proyecto.
 
 \begin{table}[ht]
 \centering
@@ -142,9 +138,9 @@ YOLO-Behaviour     & No    & ---   & Sí  & No  & Sí  \\
 \end{tabular}
 \end{table}
 
-Ningún sistema existente cubre los cinco criterios al mismo tiempo. Los comerciales no son
-abiertos y no clasifican las tres conductas. Los de código abierto no usan aprendizaje
-profundo ni tienen interfaz web. Los de aprendizaje profundo más recientes sí clasifican
-las tres conductas pero no tienen plataforma web. El sistema propuesto busca cubrir los
-cinco, con la salvedad de que el desempeño real dependerá de la calidad de los videos
-con los que se trabaje.
+Ningún sistema existente cubre los cinco criterios al mismo tiempo. Los comerciales no
+son abiertos y no clasifican las tres conductas. Los de código abierto no usan
+aprendizaje profundo ni tienen interfaz web. Los de aprendizaje profundo más recientes
+sí clasifican las tres conductas pero no tienen plataforma web. El sistema propuesto
+busca cubrir los cinco, con la salvedad de que el desempeño real dependerá de la
+calidad de los videos con los que se trabaje.

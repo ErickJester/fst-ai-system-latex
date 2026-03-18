@@ -7,27 +7,27 @@
 \chapter{Análisis}
 
 En este capítulo se definen los requerimientos del sistema, las reglas que deben
-respetarse durante su operación, los riesgos que podrían afectar el desarrollo y
-la factibilidad del proyecto desde cuatro ángulos: tecnológico, operativo, económico
-y legal. Todo lo que se describe aquí sirve como punto de partida para el diseño e
-implementación que se presentan en el Capítulo~5.
+respetarse durante su operación, los riesgos que podrían afectar el desarrollo y la
+factibilidad del proyecto desde cuatro ángulos: tecnológico, operativo, económico y
+legal. Todo lo que se describe aquí es el punto de partida para el diseño e
+implementación del Capítulo~5.
 
 % -----------------------------------------------------------
 \section{Requerimientos}
 % -----------------------------------------------------------
 
 Para levantar los requerimientos se realizaron reuniones con el Dr.\ Israel Salas
-Ramírez, responsable del laboratorio de neurociencia conductual de la ENMyH-IPN, y
-se analizó paso a paso cómo trabaja actualmente el laboratorio con los videos del FST.
-De esas sesiones salieron dos tipos de requerimientos: los funcionales, que dicen qué
-debe hacer el sistema, y los no funcionales, que dicen bajo qué condiciones debe
-hacerlo \cite{pressman2014,sommerville2016}.
+Ramírez, responsable del laboratorio de neurociencia conductual de la ENMyH-IPN, y se
+analizó paso a paso cómo trabaja el laboratorio con los videos del FST. De esas sesiones
+salieron dos tipos de requerimientos: los funcionales, que dicen qué debe hacer el
+sistema, y los no funcionales, que dicen bajo qué condiciones debe hacerlo
+\cite{pressman2014,sommerville2016}.
 
 % -----------------------------------------------------------
 \subsection{Requerimientos Funcionales (RF)}
 % -----------------------------------------------------------
 
-Los requerimientos funcionales están organizados por módulo y tienen tres niveles de
+Los requerimientos funcionales están organizados por módulo con tres niveles de
 prioridad: \textbf{Alta} (sin esto el prototipo no sirve), \textbf{Media} (importante
 pero puede quedar para una iteración posterior) y \textbf{Baja} (sería bueno tenerlo
 pero no es urgente).
@@ -197,8 +197,8 @@ RF-28 & Administración
 % -----------------------------------------------------------
 
 Los requerimientos no funcionales dicen cómo debe comportarse el sistema más allá de
-las funciones que realiza: qué tan rápido debe responder, qué tan seguro tiene que ser,
-desde dónde se puede usar y cuánto esfuerzo cuesta mantenerlo.
+las funciones que realiza: velocidad de respuesta, seguridad, compatibilidad y
+mantenibilidad.
 
 \begin{longtable}{|>{\bfseries}p{1.1cm}|p{1.9cm}|p{5.9cm}|p{4.2cm}|}
 \caption{Requerimientos No Funcionales (RNF).
@@ -253,8 +253,8 @@ RNF-07 & Compatibilidad
        & Pruebas en los tres navegadores en sus versiones actuales. \\
 \hline
 RNF-08 & Almacenamiento
-       & Los videos se guardan 30~días después de que el análisis termina bien y luego
-         se borran automáticamente. Los resultados y reportes se conservan para siempre.
+       & Los videos se borran 30~días después de que el análisis termina bien. Los
+         resultados y reportes se conservan indefinidamente.
        & Tarea programada (\textit{cron job}) de limpieza que corre cada día. \\
 \hline
 RNF-09 & Portabilidad
@@ -288,11 +288,11 @@ RNF-12 & Concurrencia
 \subsection{Reglas de negocio}
 % -----------------------------------------------------------
 
-Las reglas de negocio son los límites que el sistema siempre tiene que respetar,
-independientemente de cómo se implemente. Algunas vienen del protocolo experimental
-del FST, otras del sentido común de la ingeniería de software y otras del contexto
-institucional del laboratorio \cite{pressman2014}. Están redactadas de forma que
-cualquiera pueda verificar si el sistema las cumple o no.
+Las reglas de negocio son los límites que el sistema siempre debe respetar,
+independientemente de cómo esté implementado. Algunas vienen del protocolo experimental
+del FST, otras de buenas prácticas de ingeniería de software y otras del contexto del
+laboratorio \cite{pressman2014}. Están escritas de forma que cualquiera pueda verificar
+si el sistema las cumple.
 
 \begin{longtable}{|>{\bfseries}p{1.1cm}|p{8.3cm}|p{3.9cm}|}
 \caption{Reglas de negocio.
@@ -309,7 +309,7 @@ cualquiera pueda verificar si el sistema las cumple o no.
 \endfoot
 
 RN-01 & Un video pertenece a exactamente un experimento. No se puede reutilizar un video
-        que ya se subió para asociarlo a un experimento distinto.
+        ya subido para asociarlo a un experimento distinto.
       & Garantiza que los resultados siempre sean trazables a su origen. \\
 \hline
 RN-02 & Un experimento tiene como máximo dos videos: uno del Día~1 (20~minutos) y uno
@@ -324,13 +324,13 @@ RN-04 & El análisis lo inicia el sistema solo, cuando termina la carga. El inve
         no puede iniciarlo, pausarlo ni reiniciarlo a mano.
       & Evita que la cola de procesamiento quede en estados inconsistentes. \\
 \hline
-RN-05 & Los videos se borran automáticamente 30~días después de que el análisis
-        termina. La acción es irreversible y el usuario recibe un aviso en la interfaz
-        antes de que ocurra.
+RN-05 & Los videos se borran automáticamente 30~días después de que el análisis termina.
+        La acción es irreversible y el usuario recibe un aviso en la interfaz antes de
+        que ocurra.
       & Controla el uso del almacenamiento y protege los datos del laboratorio. \\
 \hline
-RN-06 & Los resultados y reportes (PDF y CSV) se conservan aunque el video original
-        ya haya sido borrado.
+RN-06 & Los resultados y reportes (PDF y CSV) se conservan aunque el video original ya
+        haya sido borrado.
       & Los datos de investigación tienen valor a largo plazo. \\
 \hline
 RN-07 & En cada cuadro del video, a cada animal se le asigna exactamente una conducta:
@@ -342,13 +342,13 @@ RN-08 & Cada investigador solo puede ver sus propios experimentos y resultados. 
         Administrador puede ver todo.
       & Control de acceso básico para proteger la confidencialidad de los datos. \\
 \hline
-RN-09 & Borrar un experimento es permanente: se van el video, los resultados y los
+RN-09 & Borrar un experimento es permanente: se eliminan el video, los resultados y los
         reportes. El sistema pide confirmación explícita antes de ejecutarlo.
       & Previene borrados accidentales de datos de investigación. \\
 \hline
-RN-10 & Antes de procesar cualquier video, el sistema verifica que el archivo tenga un
+RN-10 & Antes de procesar cualquier video, el sistema verifica que el archivo tenga
         formato válido. Si no lo tiene, lo rechaza sin gastar recursos de cómputo.
-      & No tiene sentido poner en cola un archivo que el pipeline no puede procesar. \\
+      & No tiene sentido encolar un archivo que el pipeline no puede procesar. \\
 \hline
 
 \end{longtable}
@@ -358,10 +358,9 @@ RN-10 & Antes de procesar cualquier video, el sistema verifica que el archivo te
 % -----------------------------------------------------------
 
 La elección del \textit{stack} tecnológico no fue arbitraria. Para cada componente del
-sistema se evaluaron las opciones disponibles considerando qué tan maduras son, si
-funcionan bien con el resto de las herramientas, qué tan fácil es encontrar documentación
-y soporte, y si el equipo ya tenía experiencia con ellas. Las herramientas se agrupan
-en cuatro áreas.
+sistema se evaluaron las opciones disponibles según su madurez, compatibilidad con el
+resto de las herramientas, disponibilidad de documentación y experiencia previa del
+equipo. Las herramientas se agrupan en cuatro áreas.
 
 \subsection{Análisis de técnicas de detección de objetos y seguimiento}
 
@@ -396,8 +395,7 @@ Sustracción de fondo por mediana \cite{piccardi2004}
     & El fondo se estima como la mediana píxel a píxel de los primeros $N$ cuadros.
       Funciona bien aunque la rata esté inmóvil al inicio del video.
     & Más simple y predecible que el modelo de mezcla gaussiana \cite{zivkovic2004}
-      para el caso de cámara fija que tenemos. Ya está implementado en
-      \texttt{tracker.py}. \\
+      para el caso de cámara fija. Ya está implementado en \texttt{tracker.py}. \\
 \hline
 Tracker CSRT \cite{lukezic2017}
     & Tracker de correlación que mantiene el seguimiento entre cuadros. Es más
@@ -434,7 +432,7 @@ ResNet-18 \cite{he2016}
 ResNet-50 \cite{he2016}
     & Versión más profunda (50~capas). Tiene más capacidad que ResNet-18 pero
       también cuesta más en tiempo de entrenamiento e inferencia.
-    & Se usará como alternativa si ResNet-18 no alcanza $\kappa > 0.80$. \\
+    & Se usará si ResNet-18 no alcanza $\kappa > 0.80$. \\
 \hline
 TensorFlow 2.x / Keras \cite{abadi2016}
     & Framework de aprendizaje profundo con una API de alto nivel que simplifica
@@ -469,32 +467,34 @@ Flask (Python) \cite{grinberg2018}
     & Microframework ligero para construir APIs REST. Tiene extensiones para
       autenticación (Flask-JWT-Extended), ORM (SQLAlchemy) y tareas asíncronas.
     & Es suficiente para el tamaño del prototipo y permite integrar el pipeline
-      de IA sin necesitar un framework más pesado. \\
+      de IA sin un framework más pesado. \\
 \hline
 React.js + Vite
-    & Framework frontend basado en componentes. Vite reduce mucho los tiempos
-      de compilación durante el desarrollo.
+    & Framework frontend basado en componentes. Vite reduce los tiempos de
+      compilación durante el desarrollo.
     & Es la opción más adecuada para construir la barra de progreso en tiempo real
       y el resto de la interfaz reactiva que necesita el sistema. \\
 \hline
 PostgreSQL
     & Base de datos relacional con soporte para transacciones ACID y tipos de
       datos avanzados. Es de código abierto.
-    & Cubre bien los patrones de acceso del sistema y se integra sin problema
+    & Cubre los patrones de acceso del sistema y se integra sin problema
       con SQLAlchemy. \\
 \hline
 Docker + Docker Compose \cite{merkel2014}
     & Permite empaquetar todos los servicios del sistema (backend, frontend,
-      base de datos, worker) en contenedores independientes y levantarlos juntos
-      con un solo comando.
+      base de datos, worker) en contenedores y levantarlos juntos con un solo
+      comando.
     & El laboratorio no tiene que instalar nada más allá de Docker para correr
       el sistema. \\
 \hline
 BORIS \cite{friard2016}
     & Software de código abierto para anotar conductas en video cuadro a cuadro.
       Exporta en varios formatos compatibles con análisis estadístico.
-    & Es la herramienta con la que el Dr.\ Salas Ramírez va a generar el
-      \textit{gold standard} para validar el sistema. \\
+    & Es la herramienta con la que los autores del proyecto anotarán los cuadros
+      de video tomando como referencia los registros conductuales proporcionados
+      por el laboratorio, generando así el conjunto de entrenamiento y el
+      \textit{gold standard} para la validación. \\
 \hline
 
 \end{longtable}
@@ -503,10 +503,9 @@ BORIS \cite{friard2016}
 \section{Análisis de riesgos}
 % -----------------------------------------------------------
 
-Todo proyecto tiene cosas que pueden salir mal. Identificarlos desde el principio no
-significa que vayan a ocurrir, pero sí permite tener un plan antes de que sea urgente.
-Cada riesgo tiene una probabilidad estimada, un nivel de impacto si ocurre, y una
-acción concreta para reducir el daño.
+Identificar los riesgos desde el principio no significa que vayan a ocurrir, pero
+permite tener un plan antes de que sea urgente. Cada riesgo tiene una probabilidad
+estimada, un nivel de impacto y una acción concreta para reducir el daño.
 
 \begin{longtable}{|>{\bfseries}p{0.9cm}|p{3.5cm}|p{1.4cm}|p{1.3cm}|p{1.2cm}|p{4.4cm}|}
 \caption{Matriz de riesgos del proyecto.
@@ -533,16 +532,16 @@ R-02
     & El dataset disponible (63~imágenes) no alcanza para entrenar un clasificador de
       conducta que llegue a $\kappa > 0.80$.
     & Alta & Alto & Alto
-    & Ampliar el dataset anotando más \textit{frames} del laboratorio con BORIS.
+    & Ampliar el dataset anotando más \textit{frames} con BORIS.
       Usar \textit{data augmentation}. Si el escalamiento sigue siendo difícil de
       distinguir, reportarlo junto con el nado activo como ``conducta activa''. \\
 \hline
 R-03
-    & El Dr.\ Salas Ramírez no tiene tiempo disponible para las sesiones de validación
-      y anotación del \textit{gold standard}.
+    & El laboratorio no puede proporcionar los registros conductuales en el tiempo
+      necesario para el entrenamiento y validación del clasificador.
     & Media & Alto & Medio
-    & Acordar un calendario de reuniones desde el inicio del TT2 y preparar los
-      materiales con anticipación para aprovechar cada sesión. \\
+    & Acordar un calendario de entrega de registros desde el inicio del TT2 y
+      preparar los materiales con anticipación para aprovechar cada sesión. \\
 \hline
 R-04
     & Procesar un video de 5~minutos tarda más de lo que el laboratorio puede esperar
@@ -586,28 +585,28 @@ R-08
 \section{Análisis de factibilidad}
 % -----------------------------------------------------------
 
-El análisis de factibilidad responde a una pregunta sencilla: ¿es posible hacer este
-sistema? Se revisa desde cuatro ángulos para asegurarse de que no haya ningún obstáculo
-que haga inviable el proyecto.
+El análisis de factibilidad responde a una pregunta concreta: ¿es posible hacer este
+sistema? Se revisa desde cuatro ángulos para asegurarse de que no hay ningún obstáculo
+que lo haga inviable.
 
 % -----------------------------------------------------------
 \subsection{Factibilidad tecnológica}
 % -----------------------------------------------------------
 
-El proyecto es tecnológicamente viable. Todas las herramientas del \textit{stack}
-son de código abierto, están bien documentadas y el equipo ya tiene experiencia con la
-mayoría de ellas desde cursos de la carrera en la ESCOM.
+El proyecto es tecnológicamente viable. Todas las herramientas del \textit{stack} son
+de código abierto, están bien documentadas y el equipo tiene experiencia con la mayoría
+desde cursos de la carrera en la ESCOM.
 
 Lo más importante es que el modelo de detección de rata ya funciona: se entrenó YOLOv8
-con el dataset disponible, los pesos están en \texttt{weights/rat.pt} y las métricas
-de entrenamiento quedaron guardadas en \texttt{runs/detect/train/}. Eso confirma que
-al menos la parte de detección es viable con los videos que tiene el laboratorio.
-Para el clasificador de conducta todavía hay que anotar más \textit{frames} con BORIS,
-pero la arquitectura (ResNet-18 con \textit{transfer learning}) es perfectamente
-aplicable al problema con el tamaño de dataset que se puede generar.
+con el dataset disponible, los pesos están en \texttt{weights/rat.pt} y las métricas de
+entrenamiento quedaron en \texttt{runs/detect/train/}. Eso confirma que al menos la
+detección es viable con los videos del laboratorio. Para el clasificador de conducta
+hay que anotar más \textit{frames} con BORIS, pero la arquitectura (ResNet-18 con
+\textit{transfer learning}) es aplicable al problema con el tamaño de dataset que se
+puede generar.
 
-Si el laboratorio no tiene GPU disponible para el entrenamiento, Google Colab lo resuelve
-gratis con hasta 12~horas de GPU por sesión.
+Si el laboratorio no tiene GPU disponible para el entrenamiento, Google Colab resuelve
+eso de forma gratuita con hasta 12~horas de GPU por sesión.
 
 \begin{longtable}{|p{5.0cm}|p{8.3cm}|}
 \caption{Estado de factibilidad por componente tecnológico.
@@ -653,27 +652,26 @@ Entrenamiento con GPU
 \subsection{Factibilidad operativa}
 % -----------------------------------------------------------
 
-El sistema no le cambia el protocolo al laboratorio. El investigador sigue grabando
-los videos igual que siempre; lo único diferente es que en vez de analizarlos a mano,
-los sube a la plataforma y espera el resultado.
+El sistema no cambia el protocolo del laboratorio. El investigador sigue grabando los
+videos igual que siempre; lo único diferente es que en vez de analizarlos a mano, los
+sube a la plataforma y espera el resultado.
 
-Como es una aplicación web, no hay nada que instalar en el equipo del usuario. Eso
-reduce mucho la barrera de adopción, especialmente en un laboratorio donde no todos
-tienen conocimientos técnicos. La prueba de usabilidad del Sprint~6 va a confirmar
-si esto funciona como esperamos con al menos un usuario real del laboratorio.
+Al ser una aplicación web, no hay nada que instalar en el equipo del usuario. Eso baja
+la barrera de adopción, especialmente en un laboratorio donde no todos tienen
+conocimientos técnicos. La prueba de usabilidad del Sprint~6 confirmará si esto
+funciona con al menos un usuario real del laboratorio.
 
-Los reportes que genera el sistema salen en PDF y CSV, que son los formatos que ya
-usa el laboratorio para sus análisis estadísticos en hojas de cálculo, R o MATLAB,
-así que encajan en el flujo de trabajo existente sin ningún cambio.
+Los reportes salen en PDF y CSV, que son los formatos que ya usa el laboratorio para
+sus análisis estadísticos en hojas de cálculo, R o MATLAB, así que encajan en el flujo
+de trabajo sin cambios adicionales.
 
 % -----------------------------------------------------------
 \subsection{Factibilidad económica}
 % -----------------------------------------------------------
 
 No hay costo de licencias porque todas las herramientas son de código abierto. El
-desarrollo lo hace el equipo del TT sin costo adicional, y para la infraestructura
-de despliegue se usa el equipo del laboratorio o las computadoras del equipo de
-desarrollo.
+desarrollo lo hace el equipo del TT sin costo adicional, y para la infraestructura de
+despliegue se usa el equipo del laboratorio o las computadoras del equipo de desarrollo.
 
 \begin{longtable}{|p{5.8cm}|p{7.5cm}|}
 \caption{Análisis de costos del proyecto.
@@ -707,8 +705,8 @@ Almacenamiento de videos (estimado)
 
 \end{longtable}
 
-El proyecto es económicamente viable. No necesita financiamiento externo y no hay
-ningún costo que dependa de aprobaciones institucionales para empezar.
+El proyecto no necesita financiamiento externo y no hay costos que dependan de
+aprobaciones institucionales para empezar.
 
 % -----------------------------------------------------------
 \subsection{Factibilidad legal}
@@ -731,12 +729,12 @@ el uso académico sin restricciones:
 \end{itemize}
 
 Los videos que usa el sistema son propiedad del grupo de investigación de la ENMyH-IPN
-y su uso en este proyecto está respaldado por la colaboración formal entre los directores
-del TT y el laboratorio. No se publican ni se comparten fuera del proyecto.
+y su uso está respaldado por la colaboración formal entre los directores del TT y el
+laboratorio. No se publican ni se comparten fuera del proyecto.
 
 El equipo de desarrollo no interviene en ningún experimento con animales. Eso lo hace
-exclusivamente el laboratorio, que ya tiene los permisos institucionales y éticos
-necesarios. El sistema solo analiza las grabaciones que resultan de esos experimentos.
+el laboratorio, que ya tiene los permisos institucionales y éticos necesarios. El
+sistema solo analiza las grabaciones que resultan de esos experimentos.
 
 % -----------------------------------------------------------
 \section{Análisis de sostenibilidad}
@@ -748,33 +746,31 @@ con él a largo plazo.
 \subsection{Sostenibilidad ambiental}
 
 Reducir el análisis manual significa que los investigadores no tienen que ir al
-laboratorio solo para sentarse a cronometrar videos. Como el sistema es web y se puede
-usar desde cualquier lugar, el desplazamiento para esas tareas desaparece.
+laboratorio solo para sentarse a cronometrar videos. Al ser web, el sistema puede
+usarse desde cualquier lugar, lo que elimina ese desplazamiento para esas tareas.
 
 El costo energético de procesar video en una computadora es marginal comparado con las
-horas de trabajo que reemplaza. Y la política de borrar los videos a los 30~días evita
+horas de trabajo que reemplaza. La política de borrar los videos a los 30~días evita
 que el disco crezca sin control.
 
 \subsection{Sostenibilidad social e institucional}
 
-El sistema está hecho para el laboratorio de la ENMyH, pero está diseñado de forma
-modular para que pueda adaptarse a otros paradigmas conductuales (laberinto en cruz
-elevada, campo abierto, etc.) solo reconfigurando el módulo de clasificación. Eso abre
-la puerta a que otros grupos del IPN puedan usarlo sin tener que desarrollarlo desde
-cero.
+El sistema está hecho para el laboratorio de la ENMyH, pero su diseño modular permite
+adaptarlo a otros paradigmas conductuales (laberinto en cruz elevada, campo abierto,
+etc.) reconfigurando solo el módulo de clasificación. Eso abre la puerta a que otros
+grupos del IPN puedan usarlo sin tener que desarrollarlo desde cero.
 
-Al estandarizar el análisis y quitarle variabilidad humana al proceso, el sistema también
+Al estandarizar el análisis y reducir la variabilidad humana, el sistema también
 contribuye a que los resultados del laboratorio sean más reproducibles, lo que tiene
-un impacto directo en la calidad de la investigación \cite{armario2021}.
+impacto directo en la calidad de la investigación \cite{armario2021}.
 
 \subsection{Mantenibilidad del sistema}
 
-El sistema se entrega como prototipo funcional. Para mantenerlo después, hace falta
-alguien que sepa lo básico de Python y Docker; no se requiere ser experto. La
-documentación técnica de este documento y el \texttt{README} del repositorio están
-pensados para que cualquier persona que retome el proyecto pueda entender cómo funciona
-sin necesitar al equipo original.
+El sistema se entrega como prototipo funcional. Para mantenerlo hace falta alguien que
+sepa lo básico de Python y Docker, sin necesidad de ser experto. La documentación
+técnica de este documento y el \texttt{README} del repositorio están pensados para que
+cualquiera que retome el proyecto pueda entenderlo sin depender del equipo original.
 
-Las herramientas principales (YOLOv8, Flask, React, PostgreSQL) siguen en desarrollo
-activo y tienen comunidades grandes, así que no hay riesgo de que queden obsoletas en
-el horizonte de tiempo que se considera para este prototipo.
+Las herramientas principales (YOLOv8, Flask, React, PostgreSQL) tienen desarrollo
+activo y comunidades grandes, así que no hay riesgo de que queden obsoletas en el
+horizonte de tiempo de este prototipo.

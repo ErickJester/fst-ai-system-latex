@@ -9,52 +9,52 @@
 
 Para el módulo de seguimiento, un video se trata como una secuencia de matrices de
 números. Cada cuadro (\textit{frame}) es una imagen BGR de tres canales (azul, verde,
-rojo), que es la convención que usa OpenCV. Un video de 5 minutos a 30 FPS equivale
-a procesar 9{,}000 cuadros de forma secuencial.
+rojo), que es la convención de OpenCV. Un video de 5 minutos a 30 FPS equivale a
+procesar 9{,}000 cuadros de forma secuencial.
 
 \subsection{Modelo de fondo y sustracción}
 
 El primer paso del pipeline es construir un modelo del fondo: una imagen de referencia
 del cilindro sin la rata. Se calcula como la mediana píxel a píxel de los primeros
 60 cuadros del video. Usar la mediana en vez del promedio evita que una rata inmóvil
-al inicio ``contamine'' el modelo. Una vez que se tiene el fondo, en cada cuadro se
-calcula la diferencia absoluta contra esa referencia; los píxeles que cambiaron
-significativamente corresponden al primer plano (la rata).
+al inicio ``contamine'' el modelo. Después, en cada cuadro se calcula la diferencia
+absoluta contra esa referencia; los píxeles que cambiaron significativamente son el
+primer plano (la rata).
 
 Este enfoque es más simple que métodos adaptativos como el modelo de mezcla gaussiana
-(GMM) \cite{zivkovic2004}, pero suficiente para el caso de uso: la cámara es fija y
-el fondo no cambia durante el experimento.
+(GMM) \cite{zivkovic2004}, pero es suficiente para este caso de uso: la cámara es fija
+y el fondo no cambia durante el experimento.
 
 \subsection{Umbralización y limpieza morfológica}
 
-La imagen de diferencias se convierte a binario mediante el método de Otsu
-\cite{otsu1979}, que calcula automáticamente el umbral óptimo a partir del histograma
-de intensidades. Después se aplica una apertura morfológica (erosión seguida de
-dilatación) para eliminar ruido pequeño y rellenar huecos en la región detectada.
+La imagen de diferencias se convierte a binario con el método de Otsu \cite{otsu1979},
+que calcula automáticamente el umbral óptimo a partir del histograma de intensidades.
+Después se aplica una apertura morfológica (erosión seguida de dilatación) para
+eliminar ruido pequeño y rellenar huecos en la región detectada.
 
 \subsection{Detección de contornos y selección de candidatos}
 
-Sobre la imagen binaria limpia se extraen los contornos con \texttt{findContours}
-de OpenCV \cite{suzuki1985}. De cada contorno se obtiene el área, el rectángulo
-envolvente (\textit{bounding box}) y el centroide. Con esas propiedades se filtra
-cuál de los candidatos detectados corresponde a la rata y cuál es ruido, usando
-restricciones de área mínima y máxima calibradas para el tamaño esperado del animal
-dentro de cada cilindro.
+Sobre la imagen binaria limpia se extraen los contornos con \texttt{findContours} de
+OpenCV \cite{suzuki1985}. De cada contorno se obtiene el área, el rectángulo envolvente
+(\textit{bounding box}) y el centroide. Con esas propiedades se filtra cuál de los
+candidatos detectados corresponde a la rata y cuál es ruido, usando restricciones de
+área mínima y máxima calibradas para el tamaño esperado del animal dentro de cada
+cilindro.
 
 Para verificar consistencia entre cuadros consecutivos se usa la métrica IoU
 (\textit{Intersection over Union}): la relación entre el área de intersección y el
 área de unión de dos rectángulos. Un IoU cercano a 1 indica que la detección actual
-coincide con la del cuadro anterior; si es demasiado bajo se activa el respaldo del
+coincide con la del cuadro anterior; si baja demasiado se activa el respaldo del
 tracker de correlación.
 
 \subsection{Estimación de la línea de agua}
 
 La superficie del agua puede generar reflejos que hacen que el animal aparezca
-duplicado desde la vista superior. Para mitigar ese efecto, el sistema estima en
-cada cuadro la posición vertical de la línea del agua: se analiza el perfil de
-intensidad promedio por filas dentro de cada ROI y se identifica la fila con el
-cambio más brusco. Como esa estimación oscila por ruido entre cuadros, se estabiliza
-con un promedio móvil exponencial (EMA):
+duplicado desde la vista lateral. Para mitigar ese efecto, el sistema estima en cada
+cuadro la posición vertical de la línea del agua: analiza el perfil de intensidad
+promedio por filas dentro de cada ROI e identifica la fila con el cambio más brusco.
+Como esa estimación oscila por ruido entre cuadros, se estabiliza con un promedio
+móvil exponencial (EMA):
 
 \begin{equation}
     \hat{y}_t = \alpha \cdot \tilde{y}_t + (1 - \alpha) \cdot \hat{y}_{t-1}
