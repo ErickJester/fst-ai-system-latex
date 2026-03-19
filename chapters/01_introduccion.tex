@@ -1,63 +1,104 @@
 \chapter{Introducción}
 
 \section{Antecedentes}
-La depresión afecta a más de 280 millones de personas en el mundo y es una de las
-principales causas de discapacidad según la OMS \cite{who_depression_2025}. Eso la
-pone en el centro de la investigación farmacológica: si no se pueden probar nuevos
-medicamentos de forma confiable, el desarrollo de tratamientos se frena.
 
-Antes de pasar a ensayos en humanos, los fármacos se prueban en modelos animales. Uno
-de los más usados en roedores es la prueba de nado forzado (Forced Swim Test, FST),
-propuesta por Porsolt et al.\ en 1977 \cite{porsolt1977}. En términos simples: se mete
-a la rata en un cilindro con agua del que no puede salir y se registra cuánto tiempo
-pasa quieta versus cuánto tiempo intenta escapar. Los antidepresivos reducen el tiempo
-que el animal pasa inmóvil \cite{slattery2012,armario2021}.
+El análisis del comportamiento animal con herramientas computacionales ha crecido
+notablemente en la última década. Lo que antes requería que un investigador se sentara
+horas frente a un video con cronómetro en mano, hoy puede delegarse a sistemas que
+procesan miles de cuadros por segundo. Esa transición no es trivial: implica que los
+resultados son más reproducibles, el tiempo de análisis se reduce y el sesgo del
+evaluador deja de ser una variable que contamina los datos
+\cite{armario2021,della_valle2025}.
 
-El problema es que analizar esos videos sigue siendo manual: alguien tiene que ver la
-grabación y cronometrar cada conducta para cada animal. Eso toma horas y los resultados
-dependen del criterio de quien lo hace, así que dos evaluadores distintos pueden llegar
-a números diferentes \cite{armario2021}.
+En el ámbito de la farmacología experimental, los roedores ---especialmente ratas y
+ratones--- son el modelo biológico más usado para el estudio de trastornos del estado de
+ánimo y el desarrollo de nuevos fármacos. Su fisiología y neuroanatomía tienen una
+correspondencia suficientemente alta con la humana, en particular en la organización del
+sistema nervioso central y las respuestas neuroendocrinas al estrés \cite{armario2021}.
+A eso se suman razones prácticas: son de manejo sencillo, tienen ciclos reproductivos
+cortos y el costo de mantenimiento es bajo comparado con otros modelos animales.
 
-Existen herramientas como EthoVision XT \cite{noldus_ethovision} o ezTrack
-\cite{pennington2019_eztrack} que automatizan parte del proceso, pero tienen
-limitaciones concretas: algunas son demasiado caras, otras solo detectan si el animal
-se mueve sin distinguir qué tipo de movimiento hace, y la mayoría requiere condiciones
-de grabación más controladas que las del laboratorio real.
+La depresión mayor afecta a más de 280 millones de personas en el mundo y es una de
+las principales causas de discapacidad según la OMS \cite{who_depression_2025}. Para
+probar nuevos antidepresivos antes de llegar a ensayos clínicos en humanos, los
+investigadores usan modelos conductuales que reproducen algunos aspectos del trastorno.
+El más citado en neurociencia preclínica es la prueba de nado forzado (Forced Swim
+Test, FST), propuesta originalmente por Porsolt et al.\ en 1977 \cite{porsolt1977}.
+Desde el año 2000 hay más de 8{,}000 artículos que lo reportan como método de
+evaluación \cite{della_valle2025}, lo que da una idea de su peso en la literatura.
+
+En términos simples, el FST consiste en colocar a la rata en un cilindro con agua del
+que no puede salir y registrar cómo responde. Al principio intenta escapar; con el
+tiempo empieza a flotar con movimientos mínimos. Esa conducta pasiva ---llamada
+\textit{desesperanza conductual} o \textit{behavioral despair}--- se asocia con la
+pérdida de motivación propia de la depresión \cite{armario2021}. Los fármacos
+antidepresivos reducen el tiempo de inmovilidad, y eso es precisamente lo que se mide
+\cite{slattery2012,cryan2005}.
+
+El uso de animales de laboratorio en México está regulado por la Norma Oficial Mexicana
+NOM-062-ZOO-1999 \cite{nom062}, que establece las especificaciones éticas, sanitarias
+y de bienestar animal aplicables a su cuidado y uso experimental. El laboratorio
+colaborador opera bajo esas disposiciones; el sistema desarrollado en este proyecto solo
+analiza los videos que resultan de los experimentos, sin intervenir en ningún
+procedimiento con los animales.
+
+En los últimos años han surgido herramientas para automatizar el análisis de estos
+experimentos. EthoVision XT \cite{noldus_ethovision} y ANY-maze son las comerciales
+más usadas; ezTrack \cite{pennington2019_eztrack} y DBscorer \cite{nandi2021_dbscorer}
+son las alternativas abiertas más específicas para el FST. Todas tienen limitaciones
+concretas: las comerciales son caras y no distinguen las tres conductas relevantes del
+FST; las abiertas tampoco clasifican nado, inmovilidad y escalamiento por separado, y
+ninguna tiene interfaz web. Los trabajos más recientes con aprendizaje profundo
+\cite{della_valle2025,meng2024_dsaan} sí alcanzan esa clasificación de tres clases,
+pero no están disponibles como sistemas desplegables para laboratorios sin
+infraestructura de cómputo especializada.
 
 El Laboratorio de Neurociencia Conductual de la ENMyH-IPN, dirigido por el Dr. Israel
-Salas Ramírez, usa el FST regularmente y tiene un acervo de videos que hoy se analizan
-a mano. De esa necesidad concreta nace este Trabajo Terminal.
+Salas Ramírez, realiza experimentos de FST de forma regular y tiene un acervo de videos
+que hoy se analizan a mano. De esa necesidad concreta nace este Trabajo Terminal.
 
 \section{Planteamiento del problema}
-El laboratorio colaborador corre experimentos de nado forzado de forma periódica:
-grupos de ratas se evalúan para medir el efecto de distintas moléculas. Cada
-experimento genera videos donde se graban cuatro animales al mismo tiempo desde arriba,
-con teléfono o tableta, en dos sesiones: 20 minutos el primer día y 5 minutos el
-segundo.
 
-Hoy ese análisis se hace completamente a mano: un investigador reproduce el video y va
-anotando con un cronómetro cuándo la rata nada, cuándo está inmóvil y cuándo intenta
-escalar. El problema tiene varias caras:
+El laboratorio colaborador corre experimentos de nado forzado periódicamente para
+evaluar el efecto de distintas moléculas en grupos de ratas. Cada experimento genera
+videos donde se graban cuatro animales al mismo tiempo desde una vista cenital, con
+teléfono o tableta, en dos sesiones: 20 minutos el primer día y 5 minutos el segundo
+día.
+
+El análisis de esos videos se hace completamente a mano: un investigador reproduce la
+grabación y va anotando con un cronómetro cuándo cada rata nada, cuándo está inmóvil y
+cuándo intenta escalar. Los problemas de ese proceso son los siguientes:
 
 \begin{itemize}
-  \item \textbf{Tiempo:} analizar un experimento completo a mano puede llevar varias
-        horas, según el número de animales y sesiones.
-  \item \textbf{Subjetividad:} dos personas pueden usar criterios distintos para decidir
-        cuándo empieza o termina una conducta, lo que afecta la reproducibilidad.
+  \item \textbf{Tiempo:} analizar un experimento completo puede llevar varias horas,
+        según el número de animales y sesiones.
+  \item \textbf{Variabilidad entre evaluadores:} dos personas pueden usar criterios
+        distintos para decidir cuándo empieza o termina una conducta, lo que afecta la
+        reproducibilidad de los resultados \cite{armario2021}. La norma
+        ISO/IEC~25010:2023 \cite{iso25010} define la consistencia de resultados entre
+        evaluadores como un atributo de calidad funcional (\textit{correctness}); un
+        sistema automatizado puede satisfacer ese atributo donde el análisis manual no
+        puede garantizarlo.
   \item \textbf{Sin registro centralizado:} los resultados se guardan en archivos
         separados (hojas de cálculo, notas), sin forma fácil de comparar sesiones o
         grupos entre sí.
-  \item \textbf{Análisis temporal limitado:} un desglose minuto a minuto sería útil
-        para ver la dinámica del efecto farmacológico, pero hacerlo a mano es
-        prácticamente inviable.
+  \item \textbf{Análisis temporal limitado:} un desglose minuto a minuto de las
+        conductas sería valioso para ver la dinámica del efecto farmacológico a lo largo
+        de la sesión, pero hacerlo manualmente es prácticamente inviable.
 \end{itemize}
 
 Todo esto limita cuántos experimentos puede procesar el laboratorio y dificulta
-estandarizar sus resultados.
+estandarizar sus resultados entre sesiones o con otros grupos.
 
 \section{Propuesta de solución}
+
 La propuesta es desarrollar un prototipo de sistema web que use inteligencia artificial
-para analizar automáticamente los videos del FST que genera el laboratorio.
+para analizar automáticamente los videos del FST generados por el laboratorio. El
+desarrollo del sistema sigue el ciclo de vida de software descrito en la norma
+ISO/IEC/IEEE~12207:2017 \cite{iso12207}, que estructura el proceso en fases de
+definición de requerimientos, diseño, implementación, verificación y mantenimiento.
+La adaptación concreta de ese ciclo al proyecto se describe en la sección de
+metodología.
 
 El sistema tiene dos partes:
 
@@ -68,62 +109,79 @@ El sistema tiene dos partes:
         es el tiempo total de cada conducta por animal y, de forma opcional, el desglose
         por minuto.
   \item \textbf{Plataforma web:} interfaz desde el navegador donde el investigador puede
-        subir los videos, ver el estado del análisis, consultar los resultados por animal
-        y por sesión, y descargar reportes. Los datos se almacenan en una base de datos
-        para facilitar la comparación entre experimentos.
+        subir los videos, consultar el estado del análisis, revisar los resultados por
+        animal y por sesión, y descargar reportes. Los datos se almacenan en una base de
+        datos para facilitar la comparación entre experimentos.
 \end{itemize}
 
-El sistema asume que los videos tienen un formato y calidad mínimos: vista superior con
-los cuatro cilindros visibles, contraste suficiente entre el animal y el fondo, y
-cámara estable. Los videos disponibles hasta ahora tienen variaciones de iluminación y
-contraste que pueden afectar el desempeño; durante el desarrollo se evaluará qué tan
-robustos son los algoritmos ante esas condiciones y se documentarán los requisitos
-mínimos de calidad.
+El sistema asume que los videos tienen un formato y calidad mínimos para que el
+procesamiento sea viable: vista cenital con los cuatro cilindros visibles, contraste
+suficiente entre el animal y el fondo, y cámara estable. Los videos disponibles hasta
+ahora tienen variaciones de iluminación y contraste que pueden afectar el desempeño;
+durante el desarrollo se evaluará la robustez de los algoritmos ante esas condiciones y
+se documentarán los requisitos mínimos de calidad conforme a los criterios de
+\textit{performance efficiency} de la ISO/IEC~25010:2023 \cite{iso25010}.
 
-Para validar el sistema, sus resultados se compararán con los registros conductuales
-manuales proporcionados por el laboratorio (gold standard), usando métricas de
-concordancia que se definirán en la etapa de análisis.
+Para validar el sistema, sus predicciones se compararán con los registros conductuales
+manuales del laboratorio (gold standard) usando el coeficiente kappa de Cohen y el
+error absoluto medio por animal.
 
 \section{Objetivo general}
+
 Diseñar, desarrollar y validar un prototipo de sistema web asistido por inteligencia
 artificial que automatice la detección y cuantificación de las conductas de la prueba
 de nado forzado en ratas ---nado activo, inmovilidad e intentos de escape--- con
-resultados comparables a la evaluación manual del laboratorio.
+resultados comparables a la evaluación manual del laboratorio, cumpliendo los atributos
+de calidad funcional definidos en la norma ISO/IEC~25010:2023 \cite{iso25010}.
 
 \subsection{Objetivos específicos}
 \begin{enumerate}
   \item Revisar trabajos y herramientas existentes para el análisis automatizado del
-        FST, e identificar los enfoques de visión por computadora y clasificación
+        FST e identificar los enfoques de visión por computadora y clasificación
         supervisada más adecuados al problema.
   \item Describir el protocolo experimental del FST que usa el laboratorio, incluyendo
         las conductas de interés y las características de los videos, a partir de
         entrevistas técnicas con el equipo del laboratorio y de los registros
         conductuales que éste proporcionará.
-  \item Diseñar la arquitectura del sistema, definiendo los módulos de carga de videos,
-        pipeline de análisis, base de datos y visualización de resultados.
+  \item Diseñar la arquitectura del sistema conforme al proceso de diseño de software
+        de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}, definiendo los módulos de carga
+        de videos, pipeline de análisis, base de datos y visualización de resultados.
   \item Implementar el módulo de análisis conductual con visión por computadora y un
         clasificador supervisado para las tres conductas del FST.
   \item Validar el desempeño del sistema comparando sus predicciones contra los
-        registros conductuales manuales proporcionados por el laboratorio (gold
-        standard), con métricas de concordancia previamente definidas.
-  \item Medir la reducción de tiempo que aporta el sistema frente al análisis manual, y
-        documentar bajo qué condiciones podría adaptarse a otros experimentos
-        conductuales.
+        registros conductuales del laboratorio (gold standard), usando el coeficiente
+        kappa de Cohen ($\kappa$) y el error absoluto medio como métricas principales.
+  \item Medir la reducción de tiempo de análisis frente al proceso manual y documentar
+        bajo qué condiciones el sistema podría adaptarse a otros paradigmas conductuales.
 \end{enumerate}
 
 \section{Justificación}
-El análisis manual del FST tiene limitaciones claras: toma mucho tiempo, depende del
-criterio del evaluador y no hay forma centralizada de guardar y comparar los resultados.
-Un sistema automatizado resolvería esos tres problemas para el laboratorio colaborador.
 
-Las herramientas comerciales (como EthoVision) son caras y no están pensadas para el
-flujo de trabajo del laboratorio. Las de código abierto disponibles no clasifican las
-tres conductas del FST ni tienen plataforma web. Este sistema cubre las dos cosas al
-mismo tiempo.
+El análisis manual del FST tiene tres problemas concretos: toma mucho tiempo, depende
+del criterio del evaluador y no hay forma centralizada de guardar y comparar resultados.
+Un sistema automatizado resuelve los tres para el laboratorio colaborador.
 
-Desde el punto de vista académico, el proyecto permite aplicar visión por computadora,
+Las herramientas comerciales disponibles (EthoVision XT, ANY-maze) no están diseñadas
+para el flujo de trabajo del laboratorio y tienen costos de licencia que no son
+accesibles en el contexto académico del IPN. Las de código abierto (ezTrack, DBscorer)
+no clasifican las tres conductas del FST ni tienen plataforma web. Los trabajos de
+investigación con aprendizaje profundo que sí clasifican las tres conductas
+\cite{della_valle2025,meng2024_dsaan} no están disponibles como sistemas desplegables.
+Este prototipo cubre todo eso al mismo tiempo.
+
+Desde el punto de vista de la calidad del software, el sistema se diseña para cumplir
+con los atributos de la norma ISO/IEC~25010:2023 \cite{iso25010} que son relevantes
+para este contexto: \textit{functional correctness} (los resultados deben ser
+consistentes con las anotaciones del experto), \textit{time behaviour} (el análisis no
+debe tardar más de lo que el laboratorio puede asumir en su flujo de trabajo) y
+\textit{usability} (un investigador sin conocimientos de programación debe poder
+operar el sistema sin ayuda técnica). Esos atributos no son aspiracionales; son los
+criterios que se usarán para decidir si el prototipo cumple o no en la validación.
+
+Desde el punto de vista académico, el proyecto aplica visión por computadora,
 aprendizaje automático y desarrollo web en un problema real con impacto en investigación
-biomédica. Eso encaja directamente con el perfil de egreso de la ESCOM.
+biomédica. Eso encaja con el perfil de egreso de la ESCOM y con la línea de
+colaboración entre la ESCOM y la ENMyH-IPN.
 
 \section{Alcance del proyecto}
 
@@ -134,42 +192,98 @@ biomédica. Eso encaja directamente con el perfil de egreso de la ESCOM.
         suficientes para que el procesamiento sea viable.
   \item Clasificación de tres conductas: nado activo, inmovilidad e intentos de escape.
         Si el sistema no logra distinguir con precisión suficiente nado y escalamiento,
-        ambos se reportarán juntos como movilidad.
-  \item Métricas por animal y por sesión: tiempo total de cada conducta en los 5 minutos
-        del día 2, y desglose por minuto como funcionalidad opcional.
-  \item Comparación entre sesiones día 1 y día 2 para el mismo animal o grupo.
+        ambos se reportarán juntos como conducta activa.
+  \item Métricas por animal y por sesión: tiempo total de cada conducta en los
+        5~minutos del día~2 y desglose por minuto como funcionalidad opcional.
+  \item Comparación entre sesiones día~1 y día~2 para el mismo animal o grupo.
   \item Plataforma web con carga de videos, consulta de resultados y generación de
-        reportes.
-  \item Validación contra el gold standard del laboratorio con métricas de concordancia
-        (Kappa de Cohen) y error absoluto medio.
-  \item Documentación técnica conforme a los lineamientos de la CATT-ESCOM.
+        reportes en PDF y CSV.
+  \item Validación contra el gold standard del laboratorio con $\kappa$ de Cohen y
+        error absoluto medio.
+  \item Documentación técnica conforme a los lineamientos de la CATT-ESCOM y al ciclo
+        de vida de software de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}.
 \end{itemize}
 
 \subsection*{Fuera del alcance}
 \begin{itemize}
   \item Análisis en tiempo real sobre video en vivo.
-  \item Corrección automática de videos con mala iluminación, reflejos excesivos u otros
-        problemas de calidad.
+  \item Corrección automática de videos con mala iluminación, reflejos excesivos u
+        otros problemas de calidad de grabación.
   \item Cualquier intervención en los experimentos con animales; eso lo hace el
-        laboratorio.
+        laboratorio bajo la NOM-062-ZOO-1999 \cite{nom062}.
   \item Despliegue institucional definitivo; el producto entregado es un prototipo
         funcional.
-  \item Análisis de paradigmas conductuales distintos al FST en esta versión del sistema.
+  \item Análisis de paradigmas conductuales distintos al FST en esta versión del
+        sistema.
 \end{itemize}
 
 \section{Metodología}
-El proyecto usa una metodología ágil basada en Scrum, adaptada a un equipo de dos
-personas con entregas en dos etapas académicas (TT1 y TT2). La razón de elegir este
-enfoque es que el proyecto tiene partes muy distintas entre sí ---el módulo de video,
-el clasificador, la web, la base de datos--- y no tiene sentido diseñar todo desde el
-inicio si no sabemos cómo va a quedar el módulo de seguimiento hasta probarlo.
 
-Los sprints duran entre 2 y 4 semanas. Al final de cada uno hay un entregable concreto
-que se puede revisar con el director.
+El proyecto se desarrolla bajo una metodología ágil basada en Scrum, adaptada a un
+equipo de dos personas con entregas en dos etapas académicas (TT1 y TT2). La razón de
+elegir este enfoque es que el proyecto tiene componentes muy distintos entre sí ---el
+módulo de video, el clasificador, la plataforma web, la base de datos--- y diseñar
+todo desde el inicio, antes de probar el módulo de seguimiento, sería un riesgo
+innecesario. Scrum permite confirmar o ajustar decisiones de diseño al cierre de cada
+sprint, con base en evidencia de lo que funcionó.
 
-% TODO: insertar tabla de sprints
+Cada iteración termina con un entregable concreto revisable con los directores en
+sesiones quincenales. Las actividades se organizan según los procesos de implementación
+y verificación de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}: criterios de aceptación
+definidos antes de codificar, revisión del producto al cierre de cada bloque, y
+registro de ajustes para el siguiente ciclo.
 
-Las herramientas son: Python con Flask para el backend y el pipeline; OpenCV y
-TensorFlow/scikit-learn para procesamiento de video y clasificación; PostgreSQL para
-la base de datos; React.js para el frontend; BORIS para anotar el gold standard; y
-Git con Docker para control de versiones y despliegue.
+La Tabla~\ref{tab:plan_trabajo} muestra la distribución de actividades por etapa
+académica y por integrante del equipo. Ángel Ali es responsable del sistema web y la
+infraestructura (backend, base de datos, frontend); Vanesa es responsable del pipeline
+de inteligencia artificial (preprocesamiento de video, clasificador de conducta,
+validación).
+
+\begin{table}[ht]
+\centering
+\caption{Plan de trabajo por etapa académica.}
+\label{tab:plan_trabajo}
+\small
+\begin{tabular}{|p{1.0cm}|p{3.8cm}|p{4.0cm}|p{4.0cm}|}
+\hline
+\textbf{Etapa} & \textbf{Bloque} & \textbf{Ángel Ali (sistema web)} & \textbf{Vanesa (pipeline IA)} \\
+\hline
+\multirow{4}{*}{\textbf{TT1} \newline Feb--Jun}
+  & Documentación caps.~1--2
+  & Introducción, planteamiento, estado del arte y comparativa tecnológica.
+  & Antecedentes FST, técnicas de visión por computadora y modelos ML/DL aplicables. \\
+\cline{2-4}
+  & Análisis (cap.~3)
+  & RF/RNF, casos de uso, matriz de trazabilidad y criterios de aceptación por módulo.
+  & Especificación de conductas, métricas, protocolo de anotación y plan de validación. \\
+\cline{2-4}
+  & Diseño (cap.~4)
+  & Arquitectura del sistema, modelo E-R, API REST, diagramas UML y wireframes.
+  & Pipeline de preprocesamiento, separación por sujeto, descriptores y arquitectura del clasificador. \\
+\cline{2-4}
+  & Entregable TT1
+  & \multicolumn{2}{p{8.0cm}|}{Protocolo registrado en CATT-ESCOM; documentación de caps.~1--4 aprobada por directores.} \\
+\hline
+\multirow{4}{*}{\textbf{TT2} \newline Jul--Ene}
+  & Implementación base
+  & Backend Flask + PostgreSQL, esquema de BD, API REST de sesiones y autenticación.
+  & Baseline de sustracción de fondo, curación de videos y anotación del gold standard con BORIS. \\
+\cline{2-4}
+  & Implementación principal
+  & Vistas React.js (carga, dashboard, reportes) e integración frontend-backend.
+  & Clasificador entrenado (nado/inmovilidad/escape), ajuste de hiperparámetros y métricas por individuo. \\
+\cline{2-4}
+  & Integración, pruebas y robustez
+  & Integración del módulo de IA al backend (worker/cola), pruebas unitarias y de sistema.
+  & Pruebas con distintas condiciones de grabación, manejo de oclusiones y reporte de métricas finales. \\
+\cline{2-4}
+  & Entregable TT2
+  & \multicolumn{2}{p{8.0cm}|}{Sistema desplegado con Docker Compose; manuales técnico y de usuario; material de defensa.} \\
+\hline
+\end{tabular}
+\end{table}
+
+Las herramientas principales son: Python con Flask para el backend y el pipeline;
+OpenCV y TensorFlow/scikit-learn para procesamiento de video y clasificación;
+PostgreSQL para la base de datos; React.js para el frontend; BORIS para anotar el
+gold standard; y Git con Docker para control de versiones y despliegue.
