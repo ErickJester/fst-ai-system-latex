@@ -1,190 +1,399 @@
 \chapter{Marco teórico}
 
-Este capítulo describe los conceptos teóricos en los que se apoya el sistema.
-Se organiza en tres bloques: el modelo biológico del FST y las conductas que interesa
-clasificar; los fundamentos de redes neuronales y aprendizaje profundo para la
-clasificación de conductas; y los elementos de arquitectura del sistema web. Las
-técnicas de procesamiento de video del módulo de seguimiento (sustracción de fondo,
-umbralización, contornos, línea de agua) se describen en el capítulo~6, dentro del
-desarrollo del módulo correspondiente.
+Este capítulo describe los conceptos teóricos en los que se apoya el sistema. Se organiza
+en cuatro bloques: el modelo biológico del FST y las conductas que interesa clasificar; el
+procesamiento de video para detectar y seguir a los animales; los fundamentos de redes
+neuronales y aprendizaje profundo para la clasificación de conductas; y los elementos de
+arquitectura del sistema web. Al final se presentan las métricas de evaluación que se
+usarán para validar el sistema conforme a los atributos de calidad de la norma
+ISO/IEC~25010:2023 \cite{iso25010}.
 
+% ============================================================
 \section{El modelo de nado forzado como paradigma preclínico}
+% ============================================================
 
 \subsection{Depresión y modelos animales}
 
 La depresión mayor afecta a más de 280 millones de personas y es una de las principales
 causas de discapacidad a nivel mundial \cite{who_depression_2025}. Para probar nuevos
-tratamientos antes de llegar a humanos, los investigadores usan modelos animales que
-reproducen algunos aspectos del trastorno.
+tratamientos antes de llegar a ensayos clínicos en humanos, los investigadores usan
+modelos animales que reproducen algunos aspectos del trastorno.
 
 Para que un modelo animal sea válido debe cumplir tres criterios \cite{slattery2012}:
 \textit{validez de constructo} (los mecanismos biológicos involucrados deben parecerse
 a los del trastorno humano), \textit{validez de cara} (los síntomas observables deben
-ser similares a los clínicos) y \textit{validez predictiva} (el modelo debe responder
-a los fármacos que funcionan en pacientes).
+ser similares a los clínicos) y \textit{validez predictiva} (el modelo debe responder a
+los fármacos que funcionan en pacientes). El FST cumple principalmente la validez
+predictiva: prácticamente todos los antidepresivos clínicamente aprobados reducen la
+inmovilidad en este test \cite{cryan2005}.
 
 \subsection{La prueba de nado forzado (FST)}
 
-La prueba de nado forzado la propuso Porsolt et al.\ en 1977 \cite{porsolt1977}.
+La prueba de nado forzado fue propuesta por Porsolt et al.\ en 1977 \cite{porsolt1977}.
 Consiste en poner a la rata en un cilindro con agua del que no puede salir y registrar
-cómo se comporta. Al principio el animal intenta escapar, pero después de un rato empieza
-a quedarse flotando. Esa conducta pasiva se interpreta como \textit{desesperanza
-conductual} (\textit{behavioral despair}), que se asocia con la pérdida de motivación
-propia de la depresión \cite{armario2021}.
-
-La prueba funciona bien para evaluar antidepresivos porque la mayoría de los fármacos
-que son efectivos en humanos también reducen el tiempo de inmovilidad en ratas
-\cite{cryan2005}. Desde el año 2000 hay más de 8{,}000 artículos que lo reportan
-\cite{della_valle2025}.
+cómo responde. Al principio intenta escapar; después de un rato empieza a flotar con
+movimientos mínimos. Esa conducta pasiva ---\textit{behavioral despair} o desesperanza
+conductual--- se asocia con la pérdida de motivación propia de la depresión
+\cite{armario2021}.
 
 \subsection{Conductas que se observan y cómo se interpretan}
 
-En el FST se distinguen tres conductas \cite{armario2021,cryan2005}. Son mutuamente
-excluyentes: en cada momento la rata solo puede estar haciendo una.
+En el FST se distinguen tres conductas mutuamente excluyentes \cite{armario2021,cryan2005}:
 
 \begin{itemize}
     \item \textbf{Inmovilidad}: el animal flota haciendo solo lo necesario para no
-          hundirse. Es el indicador principal de desesperanza conductual.
+          hundirse. Es el indicador principal de desesperanza conductual y el parámetro
+          que más se reporta en la literatura.
 
     \item \textbf{Nado activo}: movimientos de paladas que desplazan al animal
-          horizontalmente. Está relacionado con el sistema serotoninérgico; los
-          antidepresivos tipo ISRS (como la fluoxetina) aumentan esta conducta.
+          horizontalmente. Se asocia al sistema serotoninérgico; los antidepresivos tipo
+          ISRS (como la fluoxetina) aumentan esta conducta específicamente.
 
     \item \textbf{Escalamiento}: movimientos rápidos hacia las paredes del cilindro,
           con las patas delanteras tocando o rompiendo la superficie del agua. Se asocia
-          al sistema noradrenérgico; la desipramina, por ejemplo, lo incrementa.
+          al sistema noradrenérgico; la desipramina lo incrementa. Desde la vista
+          cenital, el escalamiento produce movimiento concentrado en el borde del
+          cilindro, lo que lo distingue visualmente del nado.
 \end{itemize}
 
-Distinguir las tres conductas importa porque permite saber sobre qué sistema
-neurotransmisor actúa el fármaco evaluado. Un sistema que solo detecta si la rata se
-mueve o no pierde esa información.
+Distinguir las tres conductas importa porque cada una refleja la activación de un sistema
+neurotransmisor distinto, lo que permite inferir el mecanismo de acción del fármaco
+evaluado. Un sistema que solo detecta si la rata se mueve o no pierde esa información
+\cite{della_valle2025}.
 
 \subsection{Protocolo del laboratorio colaborador}
 
 En el laboratorio de la ENMyH las ratas se colocan individualmente en cilindros
 transparentes con agua. Hay dos sesiones: 20 minutos el día 1 (línea base) y 5 minutos
 el día 2 (después del tratamiento), con 24 horas de diferencia. Los videos se graban
-desde arriba con cámara de celular, capturando los cuatro cilindros al mismo tiempo.
-La iluminación y el nivel del agua varían entre experimentos, y con ratas de pelaje
-claro el contraste contra el cilindro puede ser bajo. Estas condiciones son el caso de
-uso principal del sistema y determinarán en qué medida funcionan los algoritmos; los
-requisitos mínimos de calidad del video se definirán durante las pruebas de validación.
+desde una vista cenital con cámara de celular, capturando los cuatro cilindros al mismo
+tiempo. La iluminación y el nivel del agua varían entre experimentos, y con ratas de
+pelaje claro el contraste contra el cilindro puede ser bajo. El sistema debe funcionar
+bajo esas condiciones; los requisitos mínimos de calidad de video se definirán durante
+las pruebas de validación.
 
-\section{Redes neuronales y aprendizaje profundo}
+% ============================================================
+\section{Procesamiento de video para detección y seguimiento}
+% ============================================================
 
-\subsection{Idea general de una red neuronal}
+\subsection{Representación digital de imágenes y video}
 
-Una red neuronal aprende a partir de ejemplos. Está formada por capas de ``neuronas''
----funciones matemáticas simples--- que se conectan entre sí. Cada neurona recibe
-valores, los pondera con unos pesos, los suma y aplica una función de activación. La
-más usada hoy en día es ReLU, que devuelve el valor si es positivo y cero si no.
+Un video se trata como una secuencia de matrices de números. Cada cuadro
+(\textit{frame}) es una imagen BGR de tres canales (azul, verde, rojo), que es la
+convención de OpenCV \cite{bradski2000}. Un video de 5 minutos a 30 FPS equivale a
+9{,}000 cuadros. Cada píxel tiene un valor entero entre 0 y 255 por canal; la
+representación completa de un cuadro de resolución $W \times H$ ocupa $W \times H
+\times 3$ bytes.
 
-Los pesos no se definen a mano: se aprenden durante el entrenamiento. El proceso es
-iterativo: se da al modelo un ejemplo con su respuesta correcta, se mide cuánto se
-equivocó, y se ajustan los pesos un poco para que la próxima vez lo haga mejor. Eso
-se hace con retropropagación y un optimizador como Adam \cite{kingma2014}, que es una
-versión mejorada del descenso por gradiente clásico.
+\subsection{Modelo de fondo y sustracción}
 
-\subsection{Redes convolucionales (CNN)}
+El primer paso del pipeline es construir un modelo del fondo: una imagen de referencia
+del cilindro sin la rata. Se calcula como la mediana píxel a píxel de los primeros
+$N$ cuadros del video:
 
-Las CNN son redes diseñadas para trabajar con imágenes \cite{lecun1998}. En vez de
-conectar cada píxel con cada neurona (lo que sería inmanejable), usan filtros pequeños
-que se deslizan por toda la imagen. El mismo filtro se aplica en cada posición, lo que
-reduce la cantidad de parámetros y permite detectar un patrón sin importar dónde esté.
+\begin{equation}
+    B(x,y) = \text{mediana}\bigl\{ I_1(x,y),\, I_2(x,y),\, \ldots,\, I_N(x,y) \bigr\}
+    \label{eq:fondo}
+\end{equation}
 
-Las capas iniciales aprenden bordes y cambios de color. Las más profundas combinan esas
-características para detectar formas más complejas. Al final, capas completamente
-conectadas hacen la clasificación.
+Usar la mediana en vez del promedio evita que una rata inmóvil al inicio contamine el
+modelo. Una vez que se tiene el fondo, en cada cuadro se calcula la diferencia absoluta:
+los píxeles con diferencia mayor a un umbral son el primer plano (la rata). Este enfoque
+es más predecible que el modelo de mezcla gaussiana (GMM) \cite{zivkovic2004} para el
+caso de cámara fija \cite{piccardi2004}.
 
-\subsection{Transfer learning}
+\subsection{Umbralización de Otsu}
 
-Entrenar una red desde cero requiere muchos datos etiquetados, normalmente cientos de
-miles de imágenes. Para este proyecto eso no es viable porque el laboratorio tiene un
-número limitado de videos.
+La imagen de diferencias se convierte a binario con el método de Otsu \cite{otsu1979}.
+Este método calcula automáticamente el umbral óptimo $T^*$ que minimiza la varianza
+intra-clase entre píxeles de fondo y primer plano:
 
-La alternativa es el \textit{transfer learning} \cite{pan2010}: se usa una red ya
-entrenada en otro dataset grande (ImageNet, con más de un millón de imágenes) y se
-adapta para la tarea nueva. En la práctica se reemplaza la última capa del modelo (que
-antes clasificaba 1{,}000 objetos) por una capa nueva con solo 3 salidas (una por
-conducta), y se re-entrena solo esa parte final con los videos del laboratorio. Las
-capas anteriores ya saben detectar bordes, texturas y formas generales, y eso se puede
-aprovechar directamente.
+\begin{equation}
+    T^* = \arg\min_{T} \bigl[ \omega_0(T)\,\sigma_0^2(T) + \omega_1(T)\,\sigma_1^2(T) \bigr]
+    \label{eq:otsu}
+\end{equation}
 
-\subsection{ResNet}
+donde $\omega_0$ y $\omega_1$ son las proporciones de píxeles en cada clase y $\sigma_0^2$,
+$\sigma_1^2$ sus varianzas. La ventaja de Otsu es que adapta el umbral a cada cuadro
+sin parámetros fijos, lo que es útil cuando la iluminación varía entre sesiones.
 
-ResNet \cite{he2016} es una arquitectura CNN muy usada como punto de partida para
-transfer learning. La novedad que introdujo fueron conexiones directas que ``saltan''
-una o más capas (\textit{skip connections} o conexiones residuales). Eso facilita el
-entrenamiento cuando la red es muy profunda, porque el error puede fluir hacia atrás
-sin desvanecerse.
+Después de la umbralización se aplica una apertura morfológica (erosión seguida de
+dilatación) para eliminar ruido pequeño y rellenar huecos en la región detectada.
 
-Para este proyecto se considera usar ResNet-18 o ResNet-50 como base del clasificador,
-según los resultados de las pruebas iniciales.
+\subsection{Detección de contornos e IoU}
 
-\subsection{Clasificación de las tres conductas}
+Sobre la imagen binaria se extraen los contornos con el algoritmo de Suzuki y Abe
+\cite{suzuki1985}. De cada contorno se obtiene el área, el rectángulo envolvente
+(\textit{bounding box}) y el centroide. Para verificar consistencia entre cuadros
+consecutivos se usa la métrica IoU (\textit{Intersection over Union}):
 
-% [PENDIENTE: definir la arquitectura final del clasificador en Sprint 4]
+\begin{equation}
+    \text{IoU}(A, B) = \frac{|A \cap B|}{|A \cup B|}
+    \label{eq:iou}
+\end{equation}
 
-El clasificador recibe el recorte de imagen alrededor de la rata (el bounding box),
-normalizado a un tamaño fijo. La capa de salida produce tres valores de probabilidad
-(uno por conducta) y se predice la de mayor valor. Para entrenar el modelo se necesitan
-cuadros de video etiquetados. Esas etiquetas las generan los autores del proyecto usando
-BORIS, tomando como referencia los registros conductuales (tiempos por conducta, por
-animal y por sesión) proporcionados por el laboratorio. Esos mismos registros
-constituyen el gold standard para la validación del sistema.
+Un IoU cercano a 1 indica que la detección actual coincide con la del cuadro anterior;
+si cae por debajo de un umbral se activa el respaldo del tracker de correlación.
 
-\section{Seguimiento de objetos en video}
+\subsection{Estimación de la línea de agua}
 
-% [PENDIENTE: desarrollar esta sección con más detalle una vez definida la
-%  implementación final del tracker --- ver cap. 6]
+La superficie del agua puede generar reflejos que hacen que el animal aparezca duplicado
+desde la vista superior. Para mitigar ese efecto, el sistema estima la posición vertical
+de la línea del agua analizando el perfil de intensidad por filas dentro de cada ROI e
+identificando la fila con el cambio más brusco. Como esa estimación oscila por ruido
+entre cuadros, se estabiliza con un promedio móvil exponencial (EMA):
+
+\begin{equation}
+    \hat{y}_t = \alpha \cdot \tilde{y}_t + (1 - \alpha) \cdot \hat{y}_{t-1}
+    \label{eq:ema}
+\end{equation}
+
+donde $\tilde{y}_t$ es la estimación del cuadro actual, $\hat{y}_{t-1}$ el valor
+suavizado anterior y $\alpha \in (0,1)$ controla la velocidad de respuesta. Un $\alpha$
+alto responde rápido a cambios reales pero amplifica el ruido; un $\alpha$ bajo es más
+estable pero tarda en adaptarse.
 
 \subsection{Trackers de correlación: CSRT y KCF}
 
-Los trackers de correlación aprenden a reconocer cómo se ve el objeto que siguen y en
-cada cuadro buscan la región que más se le parece. CSRT \cite{lukezic2017} es más
-preciso pero más lento. KCF \cite{henriques2015} es más rápido pero menos robusto ante
-cambios bruscos de apariencia. El sistema usa CSRT como primera opción y KCF como
-respaldo si CSRT no está disponible en la versión de OpenCV instalada.
+Cuando el detector falla en un cuadro (por oclusión parcial o reflejo), el sistema usa
+un tracker de correlación como respaldo. Estos trackers aprenden a reconocer la
+apariencia del objeto y en cada cuadro buscan la región más parecida.
 
-\subsection{Estrategia de seguimiento en cascada}
+CSRT (\textit{Discriminative Correlation Filter with Channel and Spatial Reliability})
+\cite{lukezic2017} mantiene un mapa de confiabilidad espacial que pondera las regiones
+más discriminativas del objeto. Es más preciso que KCF pero más lento.
 
-% [PENDIENTE: describir con detalle los tres niveles del fallback y agregar diagrama
-%  de flujo --- fig. 3.X]
+KCF (\textit{Kernelized Correlation Filters}) \cite{henriques2015} usa el truco del
+kernel para trabajar eficientemente en el espacio de características circular. Es más
+rápido que CSRT pero menos robusto ante cambios bruscos de apariencia.
 
-El módulo implementa tres niveles de respaldo para que ningún cuadro quede sin
-detección. Primero intenta detectar a la rata por segmentación (sustracción de fondo).
-Si eso falla o el resultado no es consistente con el cuadro anterior, usa la predicción
-del tracker CSRT. Si ese también falla, congela la última posición conocida con una
-confianza que baja con el tiempo hasta un mínimo.
+Se propone usar CSRT como primera opción y KCF como respaldo si CSRT no está
+disponible en la versión de OpenCV instalada. Si ambos fallan, la última posición
+conocida se congela con una confianza decreciente hasta que el detector vuelva a
+encontrar al animal.
 
-\subsection{Métricas de evaluación}
+% ============================================================
+\section{Redes neuronales y aprendizaje profundo}
+% ============================================================
 
-% [PENDIENTE: agregar ecuaciones de precisión, recall y F1]
+\subsection{Redes neuronales: idea general}
 
-La métrica principal de validación es la kappa de Cohen ($\kappa$), que mide la
-concordancia entre dos evaluadores descontando lo que ocurriría por pura casualidad.
-Se busca alcanzar $\kappa > 0.80$, que corresponde a concordancia casi perfecta según
-Landis y Koch. También se calcula el error absoluto medio en segundos para tener una
-idea del error acumulado por animal.
+Una red neuronal aprende a partir de ejemplos. Está formada por capas de neuronas
+---funciones matemáticas simples--- que se conectan entre sí. Cada neurona recibe un
+vector de entradas $\mathbf{x}$, aplica una transformación afín y una función de
+activación $f$:
 
+\begin{equation}
+    a = f\!\left(\mathbf{w}^\top \mathbf{x} + b\right)
+    \label{eq:neurona}
+\end{equation}
+
+donde $\mathbf{w}$ son los pesos y $b$ el sesgo (\textit{bias}). La función de
+activación más usada hoy en día es ReLU (\textit{Rectified Linear Unit}):
+
+\begin{equation}
+    \text{ReLU}(z) = \max(0,\, z)
+    \label{eq:relu}
+\end{equation}
+
+Los pesos se aprenden durante el entrenamiento con el algoritmo de retropropagación
+(\textit{backpropagation}) y el optimizador Adam \cite{kingma2014}, que ajusta la tasa
+de aprendizaje de cada parámetro individualmente usando estimaciones de primer y segundo
+momento del gradiente.
+
+\subsection{Redes convolucionales (CNN)}
+
+Las CNN son redes diseñadas para trabajar con imágenes \cite{lecun1998}. En lugar de
+conectar cada píxel con cada neurona, usan filtros pequeños $\mathbf{K}$ de tamaño
+$k \times k$ que se deslizan por la imagen mediante la operación de convolución discreta:
+
+\begin{equation}
+    (I * \mathbf{K})(x,y) = \sum_{i=0}^{k-1}\sum_{j=0}^{k-1} I(x+i,\, y+j)\cdot \mathbf{K}(i,j)
+    \label{eq:conv}
+\end{equation}
+
+El mismo filtro se aplica en cada posición, lo que reduce los parámetros y hace que la
+red detecte un patrón sin importar dónde esté en la imagen
+(\textit{equivarianza traslacional}). Después de cada convolución, una operación de
+\textit{max-pooling} reduce la resolución a la mitad conservando el valor máximo en
+ventanas de $2 \times 2$ píxeles, lo que hace la representación resistente a pequeños
+desplazamientos.
+
+Las capas iniciales aprenden bordes y cambios de color; las más profundas combinan esas
+características para detectar formas complejas. Al final, capas completamente conectadas
+producen las probabilidades de clase.
+
+\subsection{Transfer learning}
+
+Entrenar una CNN desde cero requiere cientos de miles de imágenes etiquetadas. Para este
+proyecto eso no es viable dado el tamaño del dataset disponible.
+
+La solución es el \textit{transfer learning} \cite{pan2010}: se toma una red preentrenada
+en ImageNet (más de un millón de imágenes de 1{,}000 clases) y se adapta para la tarea
+nueva. En la práctica se reemplaza la última capa del modelo por una nueva con 3 salidas
+(una por conducta) y se re-entrena solo esa parte con los cuadros etiquetados del
+laboratorio. Las capas anteriores ya detectan bordes, texturas y formas generales, y ese
+conocimiento se transfiere directamente. Goodfellow et al.\ señalan que este enfoque
+reduce significativamente los requerimientos de datos y tiempo de entrenamiento cuando
+el dominio de origen (ImageNet) y el de destino (recortes de rata en FST) comparten
+características visuales básicas \cite{kingma2014}.
+
+\subsection{ResNet y conexiones residuales}
+
+ResNet (\textit{Deep Residual Network}) \cite{he2016} resolvió un problema práctico: las
+redes de más de 20 capas entrenadas con retropropagación tendían a empeorar porque el
+gradiente se desvanecía al retroceder por muchas capas consecutivas
+(\textit{vanishing gradient problem}).
+
+La solución fue agregar conexiones directas que ``saltan'' una o más capas
+(\textit{skip connections}). En lugar de que cada bloque aprenda una transformación
+$\mathcal{H}(\mathbf{x})$ desde cero, aprende solo la diferencia residual
+$\mathcal{F}(\mathbf{x}) = \mathcal{H}(\mathbf{x}) - \mathbf{x}$:
+
+\begin{equation}
+    \mathbf{y} = \mathcal{F}(\mathbf{x},\, \{W_i\}) + \mathbf{x}
+    \label{eq:resnet}
+\end{equation}
+
+Esto permite al gradiente fluir directamente hacia atrás sin atenuarse, lo que hace
+posible entrenar redes de 50, 101 o 152 capas. Para este proyecto se considera ResNet-18
+como primera opción por su balance entre precisión y velocidad de inferencia, y
+ResNet-50 como alternativa si no se alcanza $\kappa > 0.80$.
+
+\subsection{Clasificación de las tres conductas}
+
+El clasificador recibe el recorte de imagen alrededor de la rata (el bounding box),
+normalizado a $224 \times 224$ píxeles. La capa de salida produce tres valores de
+activación que la función \textit{softmax} convierte en probabilidades:
+
+\begin{equation}
+    p_c = \frac{e^{z_c}}{\sum_{j=1}^{3} e^{z_j}}, \quad c \in \{\text{nado, inmovilidad, escalamiento}\}
+    \label{eq:softmax}
+\end{equation}
+
+Se predice la conducta con mayor probabilidad. Durante el entrenamiento, la función de
+pérdida es la entropía cruzada categórica, que penaliza fuertemente predicciones
+incorrectas con alta confianza:
+
+\begin{equation}
+    \mathcal{L} = -\sum_{c=1}^{3} y_c \log p_c
+    \label{eq:crossentropy}
+\end{equation}
+
+donde $y_c = 1$ si la etiqueta correcta es la clase $c$ y 0 en caso contrario. Las
+etiquetas las generan los autores del proyecto usando BORIS, tomando como referencia los
+registros conductuales proporcionados por el laboratorio. Esos mismos registros
+constituyen el gold standard para la validación del sistema.
+
+% ============================================================
 \section{Arquitectura del sistema web}
-
-% [PENDIENTE: desarrollar esta sección. Temas: API REST con Flask, procesamiento
-%  asíncrono con Redis, Docker, PostgreSQL + SQLAlchemy]
+% ============================================================
 
 \subsection{Arquitectura cliente-servidor y API REST}
 
-% [PENDIENTE: desarrollar]
+El sistema sigue una arquitectura cliente-servidor de tres capas: el frontend (React.js)
+corre en el navegador del investigador, el backend (Flask) expone una API REST que
+gestiona la lógica de negocio, y la base de datos (PostgreSQL) persiste los datos.
+
+Una API REST (\textit{Representational State Transfer}) define un conjunto de endpoints
+con semántica HTTP estándar: \texttt{GET} para consultar, \texttt{POST} para crear,
+\texttt{PUT}/\texttt{PATCH} para actualizar y \texttt{DELETE} para eliminar. Cada
+recurso tiene una URL fija y las respuestas se intercambian en formato JSON. Esta
+separación entre frontend y backend permite que ambos evolucionen de forma independiente
+\cite{grinberg2018}.
 
 \subsection{Procesamiento asíncrono con colas de tareas}
 
-% [PENDIENTE: desarrollar. Incluir diagrama del flujo:
-%  subida del video -> encolado -> worker -> resultado -> consulta del cliente]
+Analizar un video de 5 minutos puede tomar varios minutos. Hacerlo dentro del ciclo
+petición-respuesta HTTP bloquearía al servidor e impediría atender a otros usuarios.
+La solución es el procesamiento asíncrono: cuando el investigador sube un video, el
+backend encola la tarea y devuelve inmediatamente una respuesta con el identificador
+del análisis. Un proceso worker independiente toma la tarea de la cola, ejecuta el
+pipeline de IA y escribe los resultados en la base de datos. El frontend consulta
+periódicamente el estado del análisis y actualiza la barra de progreso.
 
 \subsection{Contenedorización con Docker}
 
-% [PENDIENTE: desarrollar]
+Docker permite empaquetar una aplicación con todas sus dependencias en una imagen
+reproducible \cite{merkel2014}. Docker Compose orquesta múltiples contenedores
+(backend, frontend, base de datos, worker) con un solo comando. La norma
+ISO/IEC/IEEE~12207:2017 \cite{iso12207} define la portabilidad como un atributo del
+proceso de despliegue; el uso de Docker satisface ese atributo al garantizar que el
+sistema se comporta igual en cualquier equipo que tenga Docker instalado.
 
 \subsection{Persistencia de datos con PostgreSQL}
 
-% [PENDIENTE: referenciar al modelo de datos del capítulo 4]
+PostgreSQL es un sistema de gestión de bases de datos relacionales de código abierto
+con soporte para transacciones ACID (\textit{Atomicity, Consistency, Isolation,
+Durability}), que garantizan que las operaciones de escritura son seguras incluso ante
+fallos del sistema. El esquema de datos incluye tablas para usuarios, experimentos,
+sesiones de video y resultados por animal y conducta. Las consultas se abstraen con
+SQLAlchemy como ORM (\textit{Object-Relational Mapper}), lo que permite cambiar el
+motor de base de datos sin modificar el código de la aplicación.
+
+% ============================================================
+\section{Métricas de evaluación}
+% ============================================================
+
+La evaluación del sistema se basa en métricas que cubren los atributos de calidad
+definidos en la norma ISO/IEC~25010:2023 \cite{iso25010}: \textit{functional
+correctness} (precisión de las predicciones), \textit{time behaviour} (tiempo de
+procesamiento) y \textit{usability} (facilidad de uso para el investigador).
+
+\subsection{Kappa de Cohen}
+
+El coeficiente kappa de Cohen ($\kappa$) mide la concordancia entre dos evaluadores
+---en este caso el sistema y el gold standard del laboratorio--- descontando la
+concordancia que ocurriría por azar:
+
+\begin{equation}
+    \kappa = \frac{p_o - p_e}{1 - p_e}
+    \label{eq:kappa}
+\end{equation}
+
+donde $p_o$ es la proporción de acuerdos observados y $p_e$ es la proporción de acuerdos
+esperados por azar. Un $\kappa = 1$ indica concordancia perfecta; $\kappa = 0$ indica
+que el acuerdo no supera el azar. Según la escala de Landis y Koch, $\kappa > 0.80$
+corresponde a concordancia casi perfecta (\textit{almost perfect agreement}), que es el
+umbral objetivo para este proyecto.
+
+\subsection{Precisión, recall y F1 por clase}
+
+Para cada conducta $c$ se calculan:
+
+\begin{equation}
+    \text{Precisión}_c = \frac{TP_c}{TP_c + FP_c}, \quad
+    \text{Recall}_c = \frac{TP_c}{TP_c + FN_c}
+    \label{eq:precision_recall}
+\end{equation}
+
+\begin{equation}
+    F1_c = 2 \cdot \frac{\text{Precisión}_c \cdot \text{Recall}_c}{\text{Precisión}_c + \text{Recall}_c}
+    \label{eq:f1}
+\end{equation}
+
+donde $TP_c$, $FP_c$ y $FN_c$ son los verdaderos positivos, falsos positivos y falsos
+negativos de la clase $c$ respectivamente. El F1 es útil cuando las clases están
+desbalanceadas, que es esperable en el FST donde la inmovilidad suele dominar en los
+primeros experimentos.
+
+\subsection{Error absoluto medio (MAE)}
+
+El error absoluto medio mide cuántos segundos se aleja el sistema del tiempo total
+reportado por el laboratorio para cada conducta:
+
+\begin{equation}
+    \text{MAE} = \frac{1}{n} \sum_{i=1}^{n} \bigl| \hat{t}_i - t_i \bigr|
+    \label{eq:mae}
+\end{equation}
+
+donde $\hat{t}_i$ es el tiempo predicho por el sistema para el animal $i$ y $t_i$ es el
+tiempo registrado manualmente. El MAE se reporta en segundos por animal para que el
+laboratorio pueda interpretar el error en términos de su flujo de trabajo real.
+
+\subsection{Tiempo de análisis}
+
+El tiempo de procesamiento de un video de 5 minutos se mide en minutos de cómputo y
+se reporta como relación minuto de video / minuto de procesamiento. El umbral
+aceptable se define con el laboratorio durante la fase de pruebas y validación, conforme
+al atributo de \textit{time behaviour} de la ISO/IEC~25010:2023 \cite{iso25010}.
