@@ -168,9 +168,9 @@ fondos consistentes, lo cual es relevante dado el tamaño de dataset disponible 
 proyecto. El modelo no generaliza bien cuando el fondo cambia mucho entre condiciones,
 lo que hay que considerar durante el entrenamiento.
 
-%YOLOv8 ya se usó en este proyecto para entrenar el detector de rata: los pesos están en
-%\texttt{weights/rat.pt} y las métricas de entrenamiento en \texttt{runs/detect/train/},
-%lo que confirma la viabilidad técnica de esta etapa.
+La separación entre detección y clasificación que propone este enfoque ---YOLOv8 para
+localizar al animal, clasificador independiente para etiquetar la conducta--- es la
+arquitectura que adopta este proyecto, por las razones descritas en el cap.~4.
 
 \subsection{DeepLabCut}
 
@@ -276,8 +276,8 @@ sus objetivos. Para este proyecto, los atributos relevantes son:
         concordancia casi perfecta según la escala de Landis y Koch.
   \item \textbf{Time behaviour:} el tiempo de análisis de un video de 5~minutos debe
         ser aceptable para el flujo de trabajo del laboratorio. Se mide en minutos de
-        procesamiento por minuto de video y se define el umbral concreto durante el
-        Sprint~6 con el laboratorio.
+        procesamiento por minuto de video y se define el umbral concreto con el
+        laboratorio durante la fase de pruebas y validación.
   \item \textbf{Usability:} un investigador sin conocimientos de programación debe
         poder operar el sistema sin ayuda técnica. Se evalúa con una prueba de
         usabilidad con al menos un usuario real del laboratorio.
