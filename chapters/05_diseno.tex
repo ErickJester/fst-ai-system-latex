@@ -12,10 +12,13 @@ a través de la API REST, y cómo se ve la interfaz desde la perspectiva del inv
 También incluye el diseño del pipeline de análisis conductual: el flujo de procesamiento
 de video, la estrategia de separación por sujeto y la arquitectura del clasificador.
 
-El diseño sigue los procesos de diseño de software definidos en la norma
-ISO/IEC/IEEE~12207:2017 \cite{iso12207}, que establece que las decisiones de
-arquitectura deben ser trazables a los requerimientos del sistema y documentadas antes
-de iniciar la implementación.
+La decisión de diseño más importante fue separar el worker del backend en un proceso
+independiente. La opción más simple habría sido ejecutar el pipeline dentro del mismo
+servidor Flask, pero eso significa bloquear todas las peticiones HTTP mientras un video
+de 20 minutos se procesa. El worker resuelve ese problema a costa de mayor complejidad
+en el despliegue: hace falta una cola de tareas, un proceso adicional y comunicación
+entre procesos. Esa complejidad extra está justificada porque el laboratorio puede
+tener varios análisis en cola al mismo tiempo.
 
 % -----------------------------------------------------------
 \section{Arquitectura general del sistema}
@@ -448,6 +451,11 @@ ambos opcionales) y confirmación. Solo acepta archivos \texttt{.mp4}; el rechaz
 formato ocurre en el cliente antes de iniciar la subida. Una vez completada la carga
 válida, el análisis inicia automáticamente (RF-12).
 
+La división en tres pasos se eligió sobre un formulario único porque la carga de video
+puede tardar varios minutos según el tamaño del archivo: separar los metadatos de la
+carga permite que el investigador corrija un nombre o fecha sin necesidad de volver a
+subir el video si cometió un error en los campos de texto.
+
 \begin{figure}[ht]
 \centering
 % [PENDIENTE: insertar captura o wireframe de mockup_nuevo_experimento.html]
@@ -462,6 +470,12 @@ detección de cilindros, seguimiento y clasificación), una barra de progreso en
 porcentaje y el log de ejecución expandible. Si ocurre un error, muestra el código,
 la descripción y el botón de descarga del reporte de diagnóstico (RF-16). El análisis
 continúa aunque el investigador cierre la pestaña (RF-15).
+
+No hay botón de cancelar visible durante el análisis. La decisión fue deliberada: el
+laboratorio no tiene casos de uso donde cancele un análisis a mitad de camino, y
+agregar la funcionalidad implicaría manejar el estado de cancelación en el worker y
+limpiar los archivos parciales. Si en el futuro surge esa necesidad, el endpoint
+\texttt{DELETE /experiments/\{id\}/videos} puede extenderse para eso.
 
 \begin{figure}[ht]
 \centering

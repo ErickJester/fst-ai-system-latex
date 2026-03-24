@@ -129,10 +129,10 @@ atributos de calidad de la norma ISO/IEC~25010:2023 \cite{iso25010}.
   \item Revisar trabajos y herramientas existentes para el análisis automatizado del
         FST e identificar los enfoques de visión por computadora y clasificación
         supervisada más adecuados al problema.
-  \item Describir el protocolo experimental del FST que usa el laboratorio, incluyendo
-        las conductas de interés y las características de los videos, a partir de
-        entrevistas técnicas con el equipo del laboratorio y de los registros
-        conductuales que éste proporcionará.
+  \item Documentar el protocolo experimental del laboratorio: qué conductas se anotan,
+        cómo se graba, y qué características tienen los videos disponibles. Esto
+        requiere entrevistas con el equipo del Dr.\ Sandino y revisión de los
+        registros conductuales que éste proporcionará.
   \item Diseñar la arquitectura del sistema conforme al proceso de diseño de software
         de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}, definiendo los módulos de carga
         de videos, pipeline de análisis, base de datos y visualización de resultados.
@@ -141,8 +141,9 @@ atributos de calidad de la norma ISO/IEC~25010:2023 \cite{iso25010}.
   \item Validar el desempeño del sistema comparando sus predicciones contra los
         registros conductuales del laboratorio (gold standard), usando el coeficiente
         kappa de Cohen ($\kappa$) y el error absoluto medio como métricas principales.
-  \item Medir la reducción de tiempo de análisis frente al proceso manual y documentar
-        bajo qué condiciones el sistema podría adaptarse a otros paradigmas conductuales.
+  \item Cuantificar la reducción de tiempo de análisis respecto al proceso manual, y
+        dejar documentado qué tendría que cambiar en el pipeline si el laboratorio
+        quisiera aplicarlo a otro paradigma conductual.
 \end{enumerate}
 
 \section{Justificación}
@@ -166,9 +167,6 @@ trabajo) y \textit{usability} (un investigador sin conocimientos de programació
 operar el sistema sin ayuda técnica). Esos tres atributos son los criterios de
 aceptación de la validación final.
 
-El proyecto forma parte de la colaboración entre la ESCOM y la ENMyH-IPN, y aplica
-visión por computadora, aprendizaje automático y desarrollo web en un problema real con
-impacto en investigación biomédica.
 
 \section{Alcance del proyecto}
 
