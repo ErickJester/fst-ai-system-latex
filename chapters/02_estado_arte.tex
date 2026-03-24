@@ -8,6 +8,24 @@ aprendizaje profundo aplicadas al seguimiento de animales, y enfoques de clasifi
 de conducta con modelos supervisados.
 
 % -----------------------------------------------------------
+\section{Limitaciones comunes y contexto del proyecto}
+% -----------------------------------------------------------
+
+Todos los trabajos revisados se validaron bajo condiciones controladas: iluminación
+uniforme, fondo contrastante, sin reflejos problemáticos. Las herramientas basadas en
+umbralización (DBscorer, ezTrack) son especialmente sensibles a eso. Los métodos de
+aprendizaje profundo son más robustos en principio, pero dependen de que el conjunto
+de entrenamiento represente las condiciones reales de uso.
+
+Los videos del laboratorio colaborador tienen características que complican las cosas:
+grabación con cámara de celular, variaciones de iluminación entre sesiones, y ratas de
+pelaje claro con poco contraste frente al cilindro. El sistema no garantiza robustez
+ante todas esas condiciones desde el inicio; evaluar qué tan bien funciona con los videos
+disponibles es parte del trabajo de desarrollo. La hipótesis es que los videos son
+suficientemente buenos para que el sistema funcione, pero eso se confirma o se ajusta
+durante las pruebas.
+
+% -----------------------------------------------------------
 \section{Trabajos similares}
 % -----------------------------------------------------------
 
@@ -271,24 +289,6 @@ sus objetivos. Para este proyecto, los atributos relevantes son:
 
 Además, el error absoluto medio (MAE) en segundos por animal y conducta completa los
 criterios de evaluación cuantitativos del clasificador.
-
-% -----------------------------------------------------------
-\section{Limitaciones comunes y contexto del proyecto}
-% -----------------------------------------------------------
-
-Todos los trabajos revisados se validaron bajo condiciones controladas: iluminación
-uniforme, fondo contrastante, sin reflejos problemáticos. Las herramientas basadas en
-umbralización (DBscorer, ezTrack) son especialmente sensibles a eso. Los métodos de
-aprendizaje profundo son más robustos en principio, pero dependen de que el conjunto
-de entrenamiento represente las condiciones reales de uso.
-
-Los videos del laboratorio colaborador tienen características que complican las cosas:
-grabación con cámara de celular, variaciones de iluminación entre sesiones, y ratas de
-pelaje claro con poco contraste frente al cilindro. El sistema no garantiza robustez
-ante todas esas condiciones desde el inicio; evaluar qué tan bien funciona con los videos
-disponibles es parte del trabajo de desarrollo. La hipótesis es que los videos son
-suficientemente buenos para que el sistema funcione, pero eso se confirma o se ajusta
-durante las pruebas.
 
 % -----------------------------------------------------------
 \section{Tabla comparativa}

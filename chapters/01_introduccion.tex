@@ -265,7 +265,12 @@ video, clasificador de conducta, validación).
 \end{tabular}
 \end{table}
 
-Las herramientas son: Python con Flask para el backend y el pipeline; OpenCV y
-TensorFlow/scikit-learn para procesamiento de video y clasificación; PostgreSQL para
-la base de datos; React.js para el frontend; BORIS para anotar el gold standard; y
-Git con Docker para control de versiones y despliegue.
+El stack técnico cubre los dos frentes del proyecto: Python con Flask, OpenCV,
+TensorFlow/scikit-learn y PostgreSQL para el pipeline y el backend; React.js para
+el frontend; BORIS para anotar el gold standard; Git con Docker para control de
+versiones y despliegue.
+
+En la práctica, Ángel y Vanesa trabajan en ramas separadas del repositorio y se
+sincronizan en los sprint reviews semanales. La integración entre los dos módulos
+---el endpoint que recibe el video y el pipeline que lo procesa--- se prueba de forma
+conjunta al cierre de cada sprint, no se deja acumular para el final.
