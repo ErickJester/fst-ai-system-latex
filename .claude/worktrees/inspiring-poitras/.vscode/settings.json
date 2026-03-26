@@ -1,0 +1,62 @@
+{
+    "code-runner.runInTerminal": true,
+    "code-runner.saveAllFilesBeforeRun": true,
+    "explorer.confirmDelete": false,
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "redhat.telemetry.enabled": true,
+    "security.workspace.trust.untrustedFiles": "open",
+    "workbench.secondarySideBar.defaultVisibility": "hidden",
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    "git.enableSmartCommit": true,
+    "files.exclude": {
+        "**/*.aux": true,
+        "**/*.log": true,
+        "**/*.out": true,
+        "**/*.toc": true,
+        "**/*.synctex.gz": true,
+        "**/*.fls": true,
+        "**/*.fdb_latexmk": true,
+        "**/*.bbl": true,
+        "**/*.blg": true,
+        "**/*.bcf": true,
+        "**/*.run.xml": true,
+        "**/*.lof": true,
+        "**/*.lot": true
+    },
+    "explorer.confirmDragAndDrop": false,
+    "claudeCode.preferredLocation": "panel",
+    "latex-workshop.latex.autoBuild.run": "onSave",
+    "latex-workshop.latex.rootFile.useSubFile": false,
+    "latex-workshop.latex.outDir": "build",
+    "latex-workshop.latex.tools": [
+        {
+            "name": "pdflatex",
+            "command": "pdflatex",
+            "args": [
+                "-interaction=nonstopmode",
+                "-synctex=1",
+                "-file-line-error",
+                "-output-directory=build",
+                "%DOC%"
+            ]
+        },
+        {
+            "name": "biber",
+            "command": "biber",
+            "args": [
+                "--input-directory=build",
+                "--output-directory=build",
+                "%DOCFILE%"
+            ]
+        }
+    ],
+    "latex-workshop.latex.recipes": [
+        {
+            "name": "pdflatex→biber→pdflatex×2",
+            "tools": ["pdflatex", "biber", "pdflatex", "pdflatex"]
+        }
+    ],
+    "latex-workshop.view.pdf.viewer": "tab",
+    "latex-workshop.synctex.afterBuild.enabled": true
+}

@@ -1,0 +1,513 @@
+% ============================================================
+%  Capítulo 5 — Diseño
+%  TT 2026-B066 | ESCOM-IPN
+%  Frausto Robles Ángel Ali · Rodríguez Verdín Sandoval Vanesa
+% ============================================================
+
+\chapter{Diseño}
+
+Este capítulo describe las decisiones de diseño del sistema: cómo están organizados
+sus módulos, cómo se estructura la base de datos, cómo se comunican los componentes
+a través de la API REST, y cómo se ve la interfaz desde la perspectiva del investigador.
+También incluye el diseño del pipeline de análisis conductual: el flujo de procesamiento
+de video, la estrategia de separación por sujeto y la arquitectura del clasificador.
+
+La decisión de diseño más importante fue separar el worker del backend en un proceso
+independiente. La opción más simple habría sido ejecutar el pipeline dentro del mismo
+servidor Flask, pero eso significa bloquear todas las peticiones HTTP mientras un video
+de 20 minutos se procesa. El worker resuelve ese problema a costa de mayor complejidad
+en el despliegue: hace falta una cola de tareas, un proceso adicional y comunicación
+entre procesos. Esa complejidad extra está justificada porque el laboratorio puede
+tener varios análisis en cola al mismo tiempo.
+
+% -----------------------------------------------------------
+\section{Arquitectura general del sistema}
+% -----------------------------------------------------------
+
+El sistema tiene una arquitectura cliente-servidor de tres capas separadas en
+contenedores Docker independientes: frontend, backend y base de datos. Un cuarto
+contenedor ---el worker--- ejecuta el pipeline de análisis de forma asíncrona, sin
+bloquear al servidor web mientras procesa los videos.
+
+\begin{figure}[ht]
+\centering
+% [PENDIENTE: insertar diagrama de componentes Docker con las cuatro capas y sus
+%  conexiones: frontend → backend (HTTP/REST), backend → worker (cola de tareas),
+%  backend ↔ base de datos (SQLAlchemy/PostgreSQL), worker ↔ almacenamiento de videos]
+\caption{Arquitectura general del sistema [autoría propia].}
+\label{fig:arquitectura}
+\end{figure}
+
+La Figura~\ref{fig:arquitectura} muestra la arquitectura. Las responsabilidades de
+cada componente son:
+
+\begin{itemize}
+  \item \textbf{Frontend (React.js + Vite):} corre en el navegador del investigador.
+        Se comunica con el backend exclusivamente mediante la API REST usando JSON.
+        No tiene acceso directo a la base de datos ni al sistema de archivos del
+        servidor.
+
+  \item \textbf{Backend (Flask):} expone la API REST, gestiona la autenticación con
+        JWT, valida los archivos subidos, encola las tareas de análisis y devuelve
+        los resultados al frontend. Usa SQLAlchemy como ORM para interactuar con
+        PostgreSQL.
+
+  \item \textbf{Worker (Python):} proceso independiente que consume tareas de la
+        cola, ejecuta el pipeline completo de análisis (preprocesamiento, detección,
+        seguimiento y clasificación) y escribe los resultados en la base de datos.
+        Al correr en un proceso separado, el servidor web sigue respondiendo a
+        otras peticiones mientras el video se procesa.
+
+  \item \textbf{Base de datos (PostgreSQL):} almacena usuarios, experimentos,
+        sesiones de video, resultados por animal y conducta, y reportes generados.
+        Los archivos de video se guardan en el sistema de archivos del servidor, no
+        en la base de datos.
+\end{itemize}
+
+La separación en contenedores cumple con el atributo de portabilidad de la
+ISO/IEC/IEEE~12207:2017 \cite{iso12207}: el sistema puede desplegarse en cualquier
+equipo con Docker instalado sin dependencias adicionales. La separación entre worker
+y backend también satisface el RF-12 (análisis automático en segundo plano) y permite
+escalar el número de workers de forma independiente si el volumen de análisis aumenta.
+
+% -----------------------------------------------------------
+\section{Diseño del pipeline de análisis conductual}
+% -----------------------------------------------------------
+
+El pipeline recibe un video del FST y produce como salida los tiempos totales de cada
+conducta por animal y, de forma opcional, el desglose por minuto. Tiene cuatro etapas
+secuenciales: preprocesamiento, detección de cilindros, seguimiento de animales y
+clasificación de conducta.
+
+\begin{figure}[ht]
+\centering
+% [PENDIENTE: insertar diagrama de flujo del pipeline:
+%   video de entrada → preprocesamiento (decodificación, corrección CLAHE)
+%   → detección de cilindros (YOLOv8, confianza ≥ 0.70)
+%   → seguimiento frame a frame (sustracción de fondo + CSRT/KCF)
+%   → clasificación de conducta (ResNet-18)
+%   → resultados (tiempos por animal y conducta)]
+\caption{Diagrama de flujo del pipeline de análisis conductual [autoría propia].}
+\label{fig:pipeline}
+\end{figure}
+
+\subsection{Preprocesamiento}
+
+El preprocesamiento decodifica el video y verifica que sea procesable. Si el contraste
+promedio de los cuadros cae por debajo del umbral mínimo, se aplica corrección CLAHE
+(\textit{Contrast Limited Adaptive Histogram Equalization}) \cite{bradski2000} antes
+de continuar. Si después de CLAHE el contraste sigue siendo insuficiente, el pipeline
+se detiene y genera un reporte de diagnóstico (ver RN-11).
+
+\subsection{Detección de cilindros}
+
+El sistema localiza los cuatro cilindros en el encuadre usando detección de contornos
+sobre los primeros cuadros del video, después de construir el modelo de fondo por
+mediana. Cada cilindro detectado se convierte en una región de interés (ROI) que
+delimita el área de análisis de cada animal. La detección requiere una confianza mínima
+de 0.70; si no se alcanza para los cuatro cilindros, el pipeline se detiene.
+
+\subsection{Seguimiento de animales}
+
+Dentro de cada ROI, el seguimiento opera en tres niveles de respaldo:
+
+\begin{enumerate}
+  \item \textbf{Segmentación por sustracción de fondo}: en cada cuadro se calcula
+        la diferencia absoluta con el modelo de fondo y se umbraliza con Otsu
+        \cite{otsu1979}. Si el contorno resultante es consistente con el cuadro
+        anterior (IoU $\geq$ umbral), se acepta como detección válida.
+  \item \textbf{Tracker CSRT}: si la segmentación falla o produce un resultado
+        inconsistente, el tracker CSRT \cite{lukezic2017} mantiene la estimación
+        de posición usando la apariencia del animal en cuadros anteriores.
+  \item \textbf{Congelación de posición}: si CSRT también falla, la última posición
+        conocida se conserva con una confianza decreciente hasta que el detector
+        vuelva a encontrar al animal.
+\end{enumerate}
+
+La estimación de la línea de agua se estabiliza con un promedio móvil exponencial
+(EMA, ecuación~\ref{eq:ema} del cap.~3) para reducir el efecto de los reflejos en la
+detección de la rata.
+
+\subsection{Clasificación de conducta}
+
+El clasificador recibe el recorte de imagen alrededor de la rata (el bounding box),
+normalizado a $224 \times 224$ píxeles. Produce tres valores de probabilidad ---uno
+por conducta--- y asigna la conducta con mayor valor. La arquitectura base es
+ResNet-18 preentrenada en ImageNet con transfer learning \cite{he2016,pan2010}:
+se reemplaza la capa de clasificación original por una nueva con 3 salidas (nado
+activo, inmovilidad, escalamiento) y se re-entrena esa capa con los cuadros
+etiquetados del laboratorio.
+
+La arquitectura del clasificador se detalla en la Figura~\ref{fig:clasificador}.
+
+\begin{figure}[ht]
+\centering
+% [PENDIENTE: insertar diagrama de la arquitectura del clasificador:
+%   bounding box (224×224) → ResNet-18 (capas congeladas) → capa FC nueva (3 salidas)
+%   → softmax → conducta predicha]
+\caption{Arquitectura del clasificador de conducta basado en ResNet-18 con transfer
+learning [autoría propia].}
+\label{fig:clasificador}
+\end{figure}
+
+\subsection{Estrategia de separación por sujeto}
+
+Los cuatro cilindros se graban en una sola toma cenital. La separación por sujeto
+se hace asignando cada ROI detectada en la etapa de detección de cilindros a un
+identificador de animal (Animal~1 a Animal~4). La asignación usa la posición
+espacial de cada ROI en el encuadre: se ordena primero por fila (arriba/abajo) y
+luego por columna (izquierda/derecha), lo que produce una numeración consistente
+entre sesiones mientras el encuadre no cambie.
+
+Si el número de cilindros detectados es menor a cuatro, el sistema reporta cuántos
+animales pudo procesar y cuáles no, en lugar de abortar el análisis completo.
+
+% -----------------------------------------------------------
+\section{Diseño de la base de datos}
+% -----------------------------------------------------------
+
+El modelo de datos sigue el paradigma relacional. La Figura~\ref{fig:er} muestra el
+diagrama entidad-relación físico con las tablas, columnas y claves del sistema.
+
+\begin{figure}[ht]
+\centering
+% [PENDIENTE: insertar diagrama E-R físico con tablas: usuarios, experimentos,
+%  videos, animales, resultados_conducta, reportes, notificaciones; con claves
+%  primarias, foráneas y cardinalidades]
+\caption{Modelo entidad-relación físico del sistema [autoría propia].}
+\label{fig:er}
+\end{figure}
+
+Las tablas principales y sus responsabilidades son:
+
+\begin{itemize}
+  \item \textbf{usuarios}: almacena credenciales (correo, hash de contraseña con
+        bcrypt), rol (investigador/administrador) y estado (activo/inactivo).
+
+  \item \textbf{experimentos}: agrupa los videos y resultados de un experimento.
+        Campos: nombre, fecha, tratamiento, notas, número esperado de animales y
+        referencia al usuario propietario.
+
+  \item \textbf{videos}: un experimento puede tener hasta dos videos (Día~1 y
+        Día~2). Campos: ruta del archivo, sesión (día~1/día~2), estado del análisis
+        (en cola, procesando, completado, error), fecha de carga y fecha límite de
+        eliminación (30 días desde la finalización del análisis).
+
+  \item \textbf{animales}: cada video procesado genera un registro por animal
+        detectado, con su identificador y posición en el encuadre.
+
+  \item \textbf{resultados\_conducta}: almacena el tiempo en segundos de cada
+        conducta por animal, sesión y, opcionalmente, por minuto dentro de la
+        sesión. Es la tabla central para la generación de reportes.
+
+  \item \textbf{reportes}: registros de los archivos PDF y CSV generados, con su
+        ruta de almacenamiento y fecha de generación. Los reportes se conservan
+        aunque el video original haya sido eliminado (ver RN-06).
+
+  \item \textbf{notificaciones}: avisos al investigador sobre eventos del sistema
+        (análisis completado, error en análisis, video próximo a eliminarse).
+\end{itemize}
+
+El diccionario de datos completo con tipos, restricciones y descripciones de cada
+columna se incluye en los anexos.
+
+% -----------------------------------------------------------
+\section{Diseño de la API REST}
+% -----------------------------------------------------------
+
+La API REST sigue las convenciones HTTP estándar \cite{grinberg2018}. Todos los
+endpoints requieren autenticación con JWT salvo los de inicio de sesión y recuperación
+de contraseña. Las respuestas usan JSON con una estructura consistente: campo
+\texttt{data} para el resultado, \texttt{error} para mensajes de error y
+\texttt{status} para el código HTTP.
+
+La Tabla~\ref{tab:api} describe los endpoints principales agrupados por recurso.
+
+\begin{longtable}{|p{1.5cm}|p{4.0cm}|p{4.0cm}|p{3.5cm}|}
+\caption{Endpoints principales de la API REST.
+\label{tab:api}}\\
+\hline
+\textbf{Método} & \textbf{Ruta} & \textbf{Descripción} & \textbf{Acceso} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Método} & \textbf{Ruta} & \textbf{Descripción} & \textbf{Acceso} \\
+\hline
+\endhead
+\hline
+\endfoot
+
+POST & \texttt{/auth/login} & Inicia sesión; devuelve token JWT. & Público \\
+\hline
+POST & \texttt{/auth/logout} & Invalida el token activo. & Autenticado \\
+\hline
+POST & \texttt{/auth/recover} & Envía enlace de recuperación por correo. & Público \\
+\hline
+
+GET  & \texttt{/experiments} & Lista los experimentos del usuario activo. & Investigador \\
+\hline
+POST & \texttt{/experiments} & Crea un nuevo experimento con sus metadatos. & Investigador \\
+\hline
+GET  & \texttt{/experiments/\{id\}} & Devuelve detalle y estado de un experimento. & Investigador \\
+\hline
+DELETE & \texttt{/experiments/\{id\}} & Elimina permanentemente un experimento. & Investigador \\
+\hline
+
+POST & \texttt{/experiments/\{id\}/videos} & Sube un video (Día~1 o Día~2) y encola el análisis. & Investigador \\
+\hline
+GET  & \texttt{/experiments/\{id\}/status} & Devuelve el progreso del análisis en porcentaje. & Investigador \\
+\hline
+
+GET  & \texttt{/experiments/\{id\}/results} & Devuelve los resultados por animal y sesión. & Investigador \\
+\hline
+GET  & \texttt{/experiments/\{id\}/results/byminute} & Devuelve el desglose por minuto. & Investigador \\
+\hline
+GET  & \texttt{/experiments/\{id\}/comparison} & Devuelve la comparación Día~1 vs.\ Día~2. & Investigador \\
+\hline
+
+GET  & \texttt{/experiments/\{id\}/report/pdf} & Descarga el reporte en PDF. & Investigador \\
+\hline
+GET  & \texttt{/experiments/\{id\}/report/csv} & Descarga los datos en CSV. & Investigador \\
+\hline
+
+GET  & \texttt{/admin/users} & Lista todos los usuarios (filtrable por rol y estado). & Admin \\
+\hline
+POST & \texttt{/admin/users} & Crea una cuenta de usuario. & Admin \\
+\hline
+PATCH & \texttt{/admin/users/\{id\}} & Modifica o desactiva una cuenta. & Admin \\
+\hline
+GET  & \texttt{/admin/system} & Devuelve métricas del sistema: disco y cola. & Admin \\
+\hline
+
+\end{longtable}
+
+% -----------------------------------------------------------
+\section{Diseño de casos de uso}
+% -----------------------------------------------------------
+
+El sistema tiene dos actores principales: \textbf{Investigador} y
+\textbf{Administrador}. El Investigador gestiona sus experimentos y consulta
+resultados; el Administrador gestiona usuarios y monitorea el estado del sistema.
+El Administrador hereda todas las capacidades del Investigador sobre los experimentos
+de cualquier usuario (ver RN-08).
+
+\begin{figure}[ht]
+\centering
+% [PENDIENTE: insertar diagrama de casos de uso UML con los dos actores y los
+%  casos de uso principales: CU-01 Iniciar sesión, CU-02 Crear experimento,
+%  CU-03 Subir video, CU-04 Consultar progreso, CU-05 Ver resultados,
+%  CU-06 Descargar reporte, CU-07 Gestionar usuarios (Admin),
+%  CU-08 Monitorear sistema (Admin)]
+\caption{Diagrama de casos de uso del sistema [autoría propia].}
+\label{fig:casos_uso}
+\end{figure}
+
+Los casos de uso principales son:
+
+\begin{itemize}
+  \item \textbf{CU-01 Iniciar sesión:} el investigador ingresa correo y contraseña.
+        El sistema valida las credenciales y devuelve un token JWT. Las credenciales
+        incorrectas muestran un error genérico (ver RN-01).
+
+  \item \textbf{CU-02 Crear experimento:} el investigador registra los metadatos del
+        experimento (nombre, fecha, tratamiento, número de animales) y sube uno o
+        dos videos. El análisis inicia automáticamente al completarse la carga válida.
+
+  \item \textbf{CU-03 Consultar progreso:} el investigador puede ver el estado del
+        análisis en tiempo real. Si ocurre un error, puede descargar el reporte de
+        diagnóstico.
+
+  \item \textbf{CU-04 Ver resultados:} una vez completado el análisis, el
+        investigador puede consultar los tiempos por animal y conducta, el desglose
+        por minuto y, si ambos videos fueron procesados, la comparación Día~1
+        vs.\ Día~2.
+
+  \item \textbf{CU-05 Descargar reporte:} el investigador descarga los resultados
+        en PDF o CSV desde la pantalla de resultados o desde el dashboard.
+
+  \item \textbf{CU-06 Gestionar usuarios (Admin):} el administrador crea, modifica
+        y desactiva cuentas. Las contraseñas temporales se marcan para cambio
+        obligatorio al primer ingreso.
+
+  \item \textbf{CU-07 Monitorear sistema (Admin):} el administrador consulta el
+        uso de disco, el tamaño de la cola y las métricas operativas del sistema.
+\end{itemize}
+
+% -----------------------------------------------------------
+\section{Diagramas de secuencia}
+% -----------------------------------------------------------
+
+Los diagramas de secuencia describen el flujo de mensajes entre el frontend, el
+backend y el worker para los flujos más importantes del sistema.
+
+\begin{figure}[ht]
+\centering
+% [PENDIENTE: insertar diagrama de secuencia de inicio de sesión:
+%  frontend → POST /auth/login → backend (valida credenciales, genera JWT)
+%  → frontend (almacena token)]
+\caption{Secuencia: inicio de sesión [autoría propia].}
+\label{fig:seq_login}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+% [PENDIENTE: insertar diagrama de secuencia de carga y análisis de video:
+%  frontend → POST /experiments → backend (crea experimento)
+%  → frontend → POST /experiments/{id}/videos → backend (valida formato,
+%  guarda archivo, encola tarea) → worker (procesa pipeline, escribe resultados)
+%  → frontend polling GET /experiments/{id}/status → frontend (muestra progreso)
+%  → frontend GET /experiments/{id}/results]
+\caption{Secuencia: carga de video y análisis automático [autoría propia].}
+\label{fig:seq_analisis}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+% [PENDIENTE: insertar diagrama de secuencia de error en análisis:
+%  worker detecta error → escribe estado 'error' + código en BD
+%  → backend devuelve estado al frontend → frontend muestra código de error
+%  y botón de descarga de diagnóstico PDF]
+\caption{Secuencia: manejo de error en el análisis [autoría propia].}
+\label{fig:seq_error}
+\end{figure}
+
+% -----------------------------------------------------------
+\section{Diagrama de clases}
+% -----------------------------------------------------------
+
+\begin{figure}[ht]
+\centering
+% [PENDIENTE: insertar diagrama de clases UML con las entidades principales:
+%  User, Experiment, Video, Animal, BehaviorResult, Report, Notification;
+%  con sus atributos, métodos y relaciones de composición/asociación]
+\caption{Diagrama de clases del sistema [autoría propia].}
+\label{fig:clases}
+\end{figure}
+
+Las clases principales del dominio son:
+
+\begin{itemize}
+  \item \textbf{User}: representa a un usuario del sistema con su rol y estado.
+        Tiene métodos para verificar contraseña, generar token y cambiar estado.
+
+  \item \textbf{Experiment}: agrupa los videos y resultados de un experimento.
+        Conoce su estado general (en proceso, completado, error) derivado del
+        estado de sus videos.
+
+  \item \textbf{Video}: representa un archivo de video subido. Gestiona su ciclo
+        de vida: validación, encolado, procesamiento y eliminación automática a
+        30~días.
+
+  \item \textbf{Animal}: un animal detectado en un video. Tiene su identificador,
+        posición en el encuadre y sus resultados de conducta asociados.
+
+  \item \textbf{BehaviorResult}: tiempo en segundos de cada conducta para un
+        animal en una sesión. Puede tener desglose por minuto.
+
+  \item \textbf{Report}: archivo PDF o CSV generado para un experimento. Persiste
+        aunque el video original haya sido eliminado.
+\end{itemize}
+
+% -----------------------------------------------------------
+\section{Diseño de la interfaz web}
+% -----------------------------------------------------------
+
+La interfaz tiene seis pantallas principales, diseñadas para que un investigador sin
+experiencia en programación pueda completar el flujo completo ---crear experimento,
+esperar el análisis, consultar y descargar resultados--- sin necesitar asistencia
+técnica (ver RNF-06).
+
+\subsection{Pantalla de inicio de sesión}
+
+Formulario con campos de correo institucional y contraseña. Las credenciales
+incorrectas muestran un mensaje de error genérico sin revelar cuál campo falló
+(ver RN-01). Incluye enlace de recuperación de contraseña (RF-03).
+
+\begin{figure}[ht]
+\centering
+% [PENDIENTE: insertar captura o wireframe de mockup_login.html]
+\caption{Pantalla de inicio de sesión [autoría propia].}
+\label{fig:ui_login}
+\end{figure}
+
+\subsection{Dashboard del investigador}
+
+Lista de experimentos del investigador activo con nombre, fecha, tratamiento, sesión,
+estado y accesos directos a resultados y descarga. Muestra avisos cuando un video está
+a menos de 7~días de ser eliminado automáticamente (RF-23). Incluye filtros por estado
+y paginación.
+
+\begin{figure}[ht]
+\centering
+% [PENDIENTE: insertar captura o wireframe de mockup_dashboard_investigador.html]
+\caption{Dashboard del investigador [autoría propia].}
+\label{fig:ui_dashboard}
+\end{figure}
+
+\subsection{Creación de experimento}
+
+Formulario en tres pasos: metadatos del experimento, carga de videos (Día~1 y Día~2,
+ambos opcionales) y confirmación. Solo acepta archivos \texttt{.mp4}; el rechazo de
+formato ocurre en el cliente antes de iniciar la subida. Una vez completada la carga
+válida, el análisis inicia automáticamente (RF-12).
+
+La división en tres pasos se eligió sobre un formulario único porque la carga de video
+puede tardar varios minutos según el tamaño del archivo: separar los metadatos de la
+carga permite que el investigador corrija un nombre o fecha sin necesidad de volver a
+subir el video si cometió un error en los campos de texto.
+
+\begin{figure}[ht]
+\centering
+% [PENDIENTE: insertar captura o wireframe de mockup_nuevo_experimento.html]
+\caption{Pantalla de creación de experimento [autoría propia].}
+\label{fig:ui_nuevo}
+\end{figure}
+
+\subsection{Progreso del análisis}
+
+Muestra el estado actual del pipeline con las cuatro etapas (preprocesamiento,
+detección de cilindros, seguimiento y clasificación), una barra de progreso en
+porcentaje y el log de ejecución expandible. Si ocurre un error, muestra el código,
+la descripción y el botón de descarga del reporte de diagnóstico (RF-16). El análisis
+continúa aunque el investigador cierre la pestaña (RF-15).
+
+No hay botón de cancelar visible durante el análisis. La decisión fue deliberada: el
+laboratorio no tiene casos de uso donde cancele un análisis a mitad de camino, y
+agregar la funcionalidad implicaría manejar el estado de cancelación en el worker y
+limpiar los archivos parciales. Si en el futuro surge esa necesidad, el endpoint
+\texttt{DELETE /experiments/\{id\}/videos} puede extenderse para eso.
+
+\begin{figure}[ht]
+\centering
+% [PENDIENTE: insertar captura o wireframe de mockup_progreso_analisis.html]
+\caption{Pantalla de progreso del análisis [autoría propia].}
+\label{fig:ui_progreso}
+\end{figure}
+
+\subsection{Resultados del experimento}
+
+Cuatro pestañas: resumen por sesión con totales en segundos y porcentaje por conducta,
+tabla detallada por animal (RF-18), desglose por minuto (RF-19) y comparación
+Día~1 vs.\ Día~2 (RF-20, disponible solo si ambos videos fueron procesados). Incluye
+botones de descarga en PDF y CSV.
+
+\begin{figure}[ht]
+\centering
+% [PENDIENTE: insertar captura o wireframe de mockup_resultados.html]
+\caption{Pantalla de resultados del experimento [autoría propia].}
+\label{fig:ui_resultados}
+\end{figure}
+
+\subsection{Panel de administración}
+
+Vista exclusiva del rol Administrador. Muestra métricas del sistema (uso de disco,
+cola de procesamiento, análisis activos), lista de usuarios con filtros por rol y
+estado, y la lista de experimentos de todos los investigadores. Incluye modales para
+crear y editar cuentas (RF-05, RF-27, RF-28).
+
+\begin{figure}[ht]
+\centering
+% [PENDIENTE: insertar captura o wireframe de mockup_admin.html]
+\caption{Panel de administración [autoría propia].}
+\label{fig:ui_admin}
+\end{figure}

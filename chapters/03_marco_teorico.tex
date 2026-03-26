@@ -72,7 +72,7 @@ evaluado. Un sistema que solo detecta si la rata se mueve o no pierde esa inform
 En el laboratorio de la ENMyH las ratas se colocan individualmente en cilindros
 transparentes con agua. Hay dos sesiones: 20 minutos el día 1 (línea base) y 5 minutos
 el día 2 (después del tratamiento), con 24 horas de diferencia. Los videos se graban
-desde una vista cenital con cámara de celular, capturando los cuatro cilindros al mismo
+desde una vista lateral con cámara de celular, capturando los cuatro cilindros al mismo
 tiempo. La iluminación y el nivel del agua varían entre experimentos, y con ratas de
 pelaje claro el contraste contra el cilindro puede ser bajo. El sistema debe funcionar
 bajo esas condiciones; los requisitos mínimos de calidad de video se definirán durante
@@ -144,7 +144,7 @@ si cae por debajo de un umbral se activa el respaldo del tracker de correlación
 \subsection{Estimación de la línea de agua}
 
 La superficie del agua puede generar reflejos que hacen que el animal aparezca duplicado
-desde la vista superior. Para mitigar ese efecto, el sistema estima la posición vertical
+desde la vista lateral. Para mitigar ese efecto, el sistema estima la posición vertical
 de la línea del agua analizando el perfil de intensidad por filas dentro de cada ROI e
 identificando la fila con el cambio más brusco. Como esa estimación oscila por ruido
 entre cuadros, se estabiliza con un promedio móvil exponencial (EMA):
