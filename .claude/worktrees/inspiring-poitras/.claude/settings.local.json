@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -n \"vale la pena\\\\|prácticamente\\\\|simplemente\\\\|fácilmente\\\\|digamos\\\\|es decir\\\\|a saber\\\\|vaya que\\\\|pues bien\\\\|bueno\\\\|claro que\\\\|obviamente\\\\|bastante\" /c/Users/ID634/Desktop/proyectos/latexFST/fst-ai-system-latex/chapters/*.tex)",
+      "Bash(grep -nE \"nosotros|nuestro|nuestra|nuestros|nuestras\" /c/Users/ID634/Desktop/proyectos/latexFST/fst-ai-system-latex/chapters/*.tex)",
+      "Bash(grep -nE \"vale la pena|simplemente|fácilmente|obviamente|bastante|claramente|directamente|pues|bueno\\\\b\" /c/Users/ID634/Desktop/proyectos/latexFST/fst-ai-system-latex/chapters/*.tex)",
+      "Bash(grep -nE \"prácticamente|suficientemente|parcial|sencillo|ciclos|fácilmente\" /c/Users/ID634/Desktop/proyectos/latexFST/fst-ai-system-latex/chapters/*.tex)"
+    ]
+  }
+}
