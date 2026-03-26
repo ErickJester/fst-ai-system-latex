@@ -15,4 +15,5 @@
 
 # Archivos de sistema
 .DS_Store
-Thumbs.db.claude/
+Thumbs.db
+.claude/
