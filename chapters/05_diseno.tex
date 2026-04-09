@@ -31,49 +31,7 @@ bloquear al servidor web mientras procesa los videos.
 
 \begin{figure}[ht]
 \centering
-\begin{mermaid}
-flowchart TB
-    subgraph Cliente["🖥️ Frontend - React + Vite"]
-        UI["Interfaz de Usuario<br/>SPA React"]
-    end
-
-    subgraph Servidor["⚙️ Backend - Flask"]
-        API["API REST<br/>Flask + Gunicorn"]
-        AUTH["Autenticación<br/>JWT"]
-        ENDPOINTS["Endpoints<br/>/experiments<br/>/videos<br/>/admin"]
-    end
-
-    subgraph Procesamiento["🔬 Worker - Python"]
-        WORKER["Cola de Tareas<br/>Polling jobs"]
-        PIPELINE["Pipeline de Análisis<br/>OpenCV + PyTorch"]
-        YOLO["Detección YOLO"]
-        CNN["Clasificador ResNet-18"]
-    end
-
-    subgraph Datos["🗄️ Persistencia"]
-        DB[("PostgreSQL<br/>Base de Datos")]
-        FS[("Sistema de Archivos<br/>/data/videos<br/>/data/reports")]
-    end
-
-    UI -- "HTTP REST<br/>JSON" --> API
-    API --> AUTH
-    API --> ENDPOINTS
-    ENDPOINTS -- "SELECT / INSERT<br/>SQLAlchemy" --> DB
-    ENDPOINTS -- "Guardar video<br/>Leer reporte" --> FS
-
-    WORKER -- "SELECT jobs<br/>WHERE status=QUEUED<br/>FOR UPDATE SKIP LOCKED" --> DB
-    WORKER --> PIPELINE
-    PIPELINE --> YOLO
-    PIPELINE --> CNN
-    PIPELINE -- "Leer video MP4" --> FS
-    PIPELINE -- "Guardar video tracked<br/>+ tracking JSON" --> FS
-    WORKER -- "UPDATE jobs, INSERT<br/>animals, behavior_results" --> DB
-
-    style Cliente fill:#1a1a2e,stroke:#e94560,color:#eee
-    style Servidor fill:#16213e,stroke:#0f3460,color:#eee
-    style Procesamiento fill:#0f3460,stroke:#533483,color:#eee
-    style Datos fill:#1a1a2e,stroke:#e94560,color:#eee
-\end{mermaid}
+\includegraphics[width=\textwidth]{figures/mermaid/arquitectura}
 \caption{Arquitectura general del sistema [autoría propia].}
 \label{fig:arquitectura}
 \end{figure}
@@ -121,67 +79,7 @@ clasificación de conducta y generación de resultados.
 
 \begin{figure}[ht]
 \centering
-\begin{mermaid}
-flowchart LR
-    V["📹 Video MP4<br/>subido por usuario"] --> PRE
-
-    subgraph PRE["1. Preprocesamiento"]
-        PRE1["Lectura de frames<br/>OpenCV VideoCapture"]
-        PRE2["Ecualización adaptativa<br/>CLAHE"]
-        PRE3["Estabilización<br/>ECC + ORB"]
-        PRE1 --> PRE2 --> PRE3
-    end
-
-    PRE --> DET
-
-    subgraph DET["2. Detección de ROIs"]
-        DET1["Detectar layout<br/>1x4 / 2x2 / 1x3"]
-        DET2["Calcular ROIs<br/>por cilindro"]
-        DET3["Detección de<br/>línea de agua<br/>EMA filter"]
-        DET1 --> DET2 --> DET3
-    end
-
-    DET --> TRK
-
-    subgraph TRK["3. Seguimiento"]
-        TRK1["YOLOv8 + ByteTrack<br/>modelo rat.pt"]
-        TRK2["Asignación a ROIs<br/>por IoU máximo"]
-        TRK3["Physical Gate<br/>validación física"]
-        TRK4["ROI State<br/>freeze / recovery"]
-        TRK1 --> TRK2 --> TRK3 --> TRK4
-    end
-
-    TRK --> CLS
-
-    subgraph CLS["4. Clasificación"]
-        CLS1["ResNet-18<br/>swim / immobile / escape"]
-        CLS2{"¿Confianza<br/>≥ 0.65?"}
-        CLS3["ResNet-50<br/>fallback"]
-        CLS4["Heurística<br/>motion + aspect ratio"]
-        CLS5["Voto mayoritario<br/>ventana 1 segundo"]
-        CLS1 --> CLS2
-        CLS2 -- "Sí" --> CLS5
-        CLS2 -- "No" --> CLS3 --> CLS5
-        CLS4 -.-> CLS5
-    end
-
-    CLS --> RES
-
-    subgraph RES["5. Resultados"]
-        RES1["Tiempos totales<br/>swim_s, immobile_s, escape_s"]
-        RES2["Desglose por minuto<br/>per_minute_json"]
-        RES3["Video anotado<br/>_tracked.mp4"]
-        RES4["Datos de tracking<br/>_tracking.json"]
-        RES1 --- RES2
-        RES3 --- RES4
-    end
-
-    style PRE fill:#1b263b,stroke:#415a77,color:#e0e1dd
-    style DET fill:#1b263b,stroke:#415a77,color:#e0e1dd
-    style TRK fill:#1b263b,stroke:#415a77,color:#e0e1dd
-    style CLS fill:#1b263b,stroke:#415a77,color:#e0e1dd
-    style RES fill:#0d1b2a,stroke:#778da9,color:#e0e1dd
-\end{mermaid}
+\includegraphics[width=\textwidth]{figures/mermaid/pipeline}
 \caption{Diagrama de flujo del pipeline de análisis conductual [autoría propia].}
 \label{fig:pipeline}
 \end{figure}
@@ -254,100 +152,7 @@ diagrama entidad-relación físico con las tablas, columnas y claves del sistema
 
 \begin{figure}[ht]
 \centering
-\begin{mermaid}
-erDiagram
-    USERS {
-        int id PK
-        varchar email UK
-        varchar password_hash
-        varchar name
-        enum role "INVESTIGADOR | ADMIN"
-        boolean is_active
-        boolean must_change_password
-        datetime created_at
-        datetime last_login
-    }
-
-    EXPERIMENTS {
-        int id PK
-        int user_id FK
-        datetime created_at
-        varchar name
-        datetime experiment_date
-        varchar treatment
-        varchar species
-        int num_animals
-        text notes
-    }
-
-    VIDEOS {
-        int id PK
-        int experiment_id FK
-        datetime created_at
-        enum day "DAY1 | DAY2"
-        varchar filename
-        varchar path
-        text roi_json
-        datetime deletion_date
-    }
-
-    JOBS {
-        int id PK
-        int video_id FK
-        datetime created_at
-        datetime started_at
-        datetime finished_at
-        enum status "QUEUED | RUNNING | DONE | FAILED"
-        enum stage "PREPROCESSING | ROI_DETECTION | TRACKING | CLASSIFICATION | DONE"
-        int progress_pct
-        text error
-    }
-
-    ANIMALS {
-        int id PK
-        int job_id FK
-        int rat_idx
-        int roi_x
-        int roi_y
-        int roi_w
-        int roi_h
-    }
-
-    BEHAVIOR_RESULTS {
-        int id PK
-        int animal_id FK
-        float swim_s
-        float immobile_s
-        float escape_s
-        json per_minute_json
-    }
-
-    REPORTS {
-        int id PK
-        int experiment_id FK
-        datetime created_at
-        enum format "PDF | CSV"
-        varchar path
-    }
-
-    NOTIFICATIONS {
-        int id PK
-        int user_id FK
-        datetime created_at
-        enum type "ANALYSIS_DONE | ANALYSIS_FAILED | VIDEO_EXPIRING | VIDEO_DELETED"
-        text message
-        boolean is_read
-        int experiment_id FK
-    }
-
-    USERS ||--o{ EXPERIMENTS : "crea"
-    USERS ||--o{ NOTIFICATIONS : "recibe"
-    EXPERIMENTS ||--o{ VIDEOS : "contiene"
-    EXPERIMENTS ||--o{ REPORTS : "genera"
-    VIDEOS ||--o{ JOBS : "encola"
-    JOBS ||--o{ ANIMALS : "detecta"
-    ANIMALS ||--o{ BEHAVIOR_RESULTS : "produce"
-\end{mermaid}
+\includegraphics[width=\textwidth]{figures/mermaid/er}
 \caption{Modelo entidad-relación físico del sistema [autoría propia].}
 \label{fig:er}
 \end{figure}
@@ -467,49 +272,7 @@ de cualquier usuario (ver RN-08).
 
 \begin{figure}[ht]
 \centering
-\begin{mermaid}
-flowchart LR
-    INV(("👨‍🔬<br/>Investigador"))
-    ADM(("👤<br/>Administrador"))
-
-    subgraph Sistema["Sistema FST"]
-        UC1["Iniciar sesión"]
-        UC2["Crear experimento"]
-        UC3["Subir video"]
-        UC4["Ver progreso<br/>del análisis"]
-        UC5["Ver resultados"]
-        UC6["Comparar Día 1<br/>vs Día 2"]
-        UC7["Descargar reporte<br/>PDF / CSV"]
-        UC8["Ver notificaciones"]
-        UC9["Gestionar usuarios"]
-        UC10["Monitorear sistema<br/>disco y cola"]
-        UC11["Crear usuario"]
-        UC12["Activar / Desactivar<br/>usuario"]
-    end
-
-    INV --- UC1
-    INV --- UC2
-    INV --- UC3
-    INV --- UC4
-    INV --- UC5
-    INV --- UC6
-    INV --- UC7
-    INV --- UC8
-
-    ADM --- UC1
-    ADM --- UC9
-    ADM --- UC10
-    ADM --- UC11
-    ADM --- UC12
-
-    UC3 -. "incluye" .-> UC4
-    UC5 -. "extiende" .-> UC6
-    UC5 -. "extiende" .-> UC7
-    UC9 -. "incluye" .-> UC11
-    UC9 -. "incluye" .-> UC12
-
-    style Sistema fill:#16213e,stroke:#0f3460,color:#eee
-\end{mermaid}
+\includegraphics[width=\textwidth]{figures/mermaid/casos_uso}
 \caption{Diagrama de casos de uso del sistema [autoría propia].}
 \label{fig:casos_uso}
 \end{figure}
@@ -554,202 +317,42 @@ backend y el worker para los flujos más importantes del sistema.
 
 \begin{figure}[ht]
 \centering
-\begin{mermaid}
-sequenceDiagram
-    autonumber
-    participant U as 👨‍🔬 Usuario
-    participant F as 🖥️ Frontend
-    participant A as ⚙️ API Flask
-    participant DB as 🗄️ PostgreSQL
-
-    U->>F: Ingresa email y contraseña
-    F->>A: POST /auth/login {email, password}
-    A->>DB: SELECT * FROM users WHERE email = ?
-    DB-->>A: Registro del usuario
-    A->>A: Verificar contraseña (hash)
-    A->>DB: UPDATE users SET last_login = NOW()
-    A-->>F: 200 {token, user}
-    F->>F: Almacenar JWT en localStorage
-    F-->>U: Redirigir al dashboard
-\end{mermaid}
+\includegraphics[width=\textwidth]{figures/mermaid/seq_login}
 \caption{Secuencia: inicio de sesión [autoría propia].}
 \label{fig:seq_login}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\begin{mermaid}
-sequenceDiagram
-    autonumber
-    participant U as 👨‍🔬 Usuario
-    participant F as 🖥️ Frontend
-    participant A as ⚙️ API Flask
-    participant DB as 🗄️ PostgreSQL
-    participant FS as 📁 FileSystem
-    participant W as 🔬 Worker
-    participant P as 🧠 Pipeline
-
-    U->>F: Selecciona archivo .mp4 y día (DAY1/DAY2)
-    F->>A: POST /experiments/{id}/videos (multipart)
-    A->>DB: SELECT * FROM videos WHERE experiment_id AND day
-    DB-->>A: Sin duplicados
-    A->>DB: INSERT INTO videos (experiment_id, day, filename)
-    DB-->>A: video.id
-    A->>FS: Guardar archivo en /data/videos/experiment_{id}/
-    A->>DB: INSERT INTO jobs (video_id, status=QUEUED, stage=PREPROCESSING)
-    A-->>F: 200 {video_id, job_id}
-    F-->>U: Video subido, análisis en cola
-
-    loop Cada 2 segundos
-        W->>DB: SELECT id FROM jobs WHERE status='QUEUED' FOR UPDATE SKIP LOCKED
-        DB-->>W: job_id
-    end
-
-    W->>DB: UPDATE jobs SET status=RUNNING, started_at=NOW()
-    W->>FS: Leer video MP4
-    W->>P: run_analysis(video_path)
-    P->>P: Preprocesamiento (CLAHE + estabilización)
-    P->>P: Detección de ROIs (layout cilindros)
-    P->>P: Seguimiento YOLO + ByteTrack
-    P->>P: Clasificación ResNet-18/50
-    P-->>W: List[RatSummary]
-    W->>FS: Guardar video_tracked.mp4 + tracking.json
-    W->>DB: INSERT INTO animals + behavior_results
-    W->>DB: UPDATE jobs SET status=DONE, progress_pct=100
-    W->>DB: UPDATE videos SET deletion_date = NOW() + 30 días
-    W->>DB: INSERT INTO notifications (type=ANALYSIS_DONE)
-\end{mermaid}
+\includegraphics[width=\textwidth]{figures/mermaid/seq_analisis}
 \caption{Secuencia: carga de video y análisis automático [autoría propia].}
 \label{fig:seq_analisis}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\begin{mermaid}
-sequenceDiagram
-    autonumber
-    participant W as 🔬 Worker
-    participant P as 🧠 Pipeline
-    participant DB as 🗄️ PostgreSQL
-    participant U as 👨‍🔬 Usuario
-    participant F as 🖥️ Frontend
-    participant A as ⚙️ API Flask
-
-    W->>DB: UPDATE jobs SET status=RUNNING
-    W->>P: run_analysis(video_path)
-    P->>P: Error durante procesamiento
-    P--xW: Exception("Modelo YOLO no encontrado")
-
-    W->>DB: UPDATE jobs SET status=FAILED,<br/>error="Modelo YOLO no encontrado",<br/>finished_at=NOW()
-    W->>DB: INSERT INTO notifications<br/>(type=ANALYSIS_FAILED,<br/>message="Error en análisis...")
-
-    Note over W: Worker continúa polling<br/>sin detenerse
-
-    U->>F: Revisa estado del experimento
-    F->>A: GET /experiments/{id}/status
-    A->>DB: SELECT * FROM jobs WHERE video_id = ?
-    DB-->>A: {status: FAILED, error: "Modelo YOLO no encontrado"}
-    A-->>F: Job con estado FAILED y mensaje de error
-    F-->>U: Mostrar error al usuario con detalle
-\end{mermaid}
+\includegraphics[width=\textwidth]{figures/mermaid/seq_error}
 \caption{Secuencia: manejo de error en el análisis [autoría propia].}
 \label{fig:seq_error}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\begin{mermaid}
-sequenceDiagram
-    autonumber
-    participant U as 👨‍🔬 Usuario
-    participant F as 🖥️ Frontend
-    participant A as ⚙️ API Flask
-    participant DB as 🗄️ PostgreSQL
-
-    U->>F: Abre pantalla de experimento
-    loop Polling cada 3-5 segundos
-        F->>A: GET /experiments/{id}/status
-        A->>DB: SELECT jobs.* FROM jobs<br/>JOIN videos ON videos.id = jobs.video_id<br/>WHERE videos.experiment_id = ?
-        DB-->>A: Lista de jobs con status, stage, progress_pct
-        A-->>F: {jobs: [{status, stage, progress_pct, error}]}
-        F-->>U: Actualizar barra de progreso
-    end
-
-    Note over F,U: Cuando status = DONE,<br/>habilitar botón "Ver resultados"
-\end{mermaid}
+\includegraphics[width=\textwidth]{figures/mermaid/seq_progreso}
 \caption{Secuencia: consulta de progreso del análisis [autoría propia].}
 \label{fig:seq_progreso}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\begin{mermaid}
-sequenceDiagram
-    autonumber
-    participant U as 👨‍🔬 Usuario
-    participant F as 🖥️ Frontend
-    participant A as ⚙️ API Flask
-    participant DB as 🗄️ PostgreSQL
-    participant FS as 📁 FileSystem
-
-    U->>F: Clic en "Descargar PDF"
-    F->>A: GET /experiments/{id}/reports/pdf
-    A->>DB: SELECT * FROM experiments WHERE id = ?
-    A->>DB: SELECT animals, behavior_results<br/>FROM jobs WHERE status=DONE
-    DB-->>A: Resultados completos del experimento
-    A->>A: Generar PDF con tablas y gráficas<br/>(swim_s, immobile_s, escape_s por rata)
-    A->>FS: Guardar en /data/reports/experiment_{id}/report_{id}.pdf
-    A->>DB: INSERT INTO reports (experiment_id, format=PDF, path)
-    A-->>F: 200 Archivo PDF (Content-Disposition: attachment)
-    F-->>U: Descarga del archivo PDF
-
-    U->>F: Clic en "Descargar CSV"
-    F->>A: GET /experiments/{id}/reports/csv
-    A->>DB: SELECT resultados por animal y por minuto
-    DB-->>A: Datos tabulares
-    A->>A: Generar CSV con desglose
-    A->>FS: Guardar en /data/reports/experiment_{id}/report_{id}.csv
-    A->>DB: INSERT INTO reports (experiment_id, format=CSV, path)
-    A-->>F: 200 Archivo CSV
-    F-->>U: Descarga del archivo CSV
-\end{mermaid}
+\includegraphics[width=\textwidth]{figures/mermaid/seq_reportes}
 \caption{Secuencia: descarga de reportes [autoría propia].}
 \label{fig:seq_reportes}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\begin{mermaid}
-sequenceDiagram
-    autonumber
-    participant U as 👨‍🔬 Usuario
-    participant F as 🖥️ Frontend
-    participant A as ⚙️ API Flask
-    participant DB as 🗄️ PostgreSQL
-
-    U->>F: Navega a resultados del experimento
-    F->>A: GET /experiments/{id}/results
-    A->>DB: SELECT jobs WHERE status=DONE<br/>JOIN videos ON experiment_id
-    A->>DB: SELECT animals JOIN behavior_results<br/>WHERE job_id = ?
-    DB-->>A: Tiempos totales por animal y día
-    A-->>F: {results: {DAY1: [{rat_idx, swim_s, immobile_s, escape_s}]}}
-    F-->>U: Tabla de tiempos totales por rata
-
-    U->>F: Clic en "Desglose por minuto"
-    F->>A: GET /experiments/{id}/results/by-minute
-    A->>DB: SELECT per_minute_json FROM behavior_results
-    DB-->>A: Datos por minuto por animal
-    A-->>F: {per_minute: {DAY1: [{rat_idx, per_minute: [...]}]}}
-    F-->>U: Gráfica temporal minuto a minuto
-
-    U->>F: Clic en "Comparar Día 1 vs Día 2"
-    F->>A: GET /experiments/{id}/comparison
-    A->>DB: Consultar resultados de ambos días
-    DB-->>A: Datos DAY1 + DAY2
-    A->>A: Calcular porcentajes<br/>swim_pct, immobile_pct, escape_pct
-    A-->>F: {comparison: {DAY1: [...], DAY2: [...]}}
-    F-->>U: Tabla comparativa con porcentajes
-\end{mermaid}
+\includegraphics[width=\textwidth]{figures/mermaid/seq_resultados}
 \caption{Secuencia: consulta de resultados [autoría propia].}
 \label{fig:seq_resultados}
 \end{figure}
@@ -760,149 +363,7 @@ sequenceDiagram
 
 \begin{figure}[ht]
 \centering
-\begin{mermaid}
-classDiagram
-    class User {
-        +int id
-        +String email
-        +String password_hash
-        +String name
-        +Role role
-        +bool is_active
-        +bool must_change_password
-        +datetime created_at
-        +datetime last_login
-    }
-
-    class Experiment {
-        +int id
-        +int user_id
-        +String name
-        +datetime created_at
-        +datetime experiment_date
-        +String treatment
-        +String species
-        +int num_animals
-        +String notes
-    }
-
-    class Video {
-        +int id
-        +int experiment_id
-        +Day day
-        +String filename
-        +String path
-        +String roi_json
-        +datetime deletion_date
-        +datetime created_at
-    }
-
-    class Job {
-        +int id
-        +int video_id
-        +JobStatus status
-        +PipelineStage stage
-        +int progress_pct
-        +String error
-        +datetime created_at
-        +datetime started_at
-        +datetime finished_at
-    }
-
-    class Animal {
-        +int id
-        +int job_id
-        +int rat_idx
-        +int roi_x
-        +int roi_y
-        +int roi_w
-        +int roi_h
-    }
-
-    class BehaviorResult {
-        +int id
-        +int animal_id
-        +float swim_s
-        +float immobile_s
-        +float escape_s
-        +JSON per_minute_json
-    }
-
-    class Report {
-        +int id
-        +int experiment_id
-        +ReportFormat format
-        +String path
-        +datetime created_at
-    }
-
-    class Notification {
-        +int id
-        +int user_id
-        +NotificationType type
-        +String message
-        +bool is_read
-        +int experiment_id
-        +datetime created_at
-    }
-
-    class Role {
-        <<enumeration>>
-        INVESTIGADOR
-        ADMIN
-    }
-
-    class Day {
-        <<enumeration>>
-        DAY1
-        DAY2
-    }
-
-    class JobStatus {
-        <<enumeration>>
-        QUEUED
-        RUNNING
-        DONE
-        FAILED
-    }
-
-    class PipelineStage {
-        <<enumeration>>
-        PREPROCESSING
-        ROI_DETECTION
-        TRACKING
-        CLASSIFICATION
-        DONE
-    }
-
-    class ReportFormat {
-        <<enumeration>>
-        PDF
-        CSV
-    }
-
-    class NotificationType {
-        <<enumeration>>
-        ANALYSIS_DONE
-        ANALYSIS_FAILED
-        VIDEO_EXPIRING
-        VIDEO_DELETED
-    }
-
-    User "1" --> "*" Experiment : crea
-    User "1" --> "*" Notification : recibe
-    Experiment "1" --> "*" Video : contiene
-    Experiment "1" --> "*" Report : genera
-    Video "1" --> "*" Job : encola
-    Job "1" --> "*" Animal : detecta
-    Animal "1" --> "*" BehaviorResult : produce
-    User --> Role
-    Video --> Day
-    Job --> JobStatus
-    Job --> PipelineStage
-    Report --> ReportFormat
-    Notification --> NotificationType
-\end{mermaid}
+\includegraphics[width=\textwidth]{figures/mermaid/clases}
 \caption{Diagrama de clases del sistema [autoría propia].}
 \label{fig:clases}
 \end{figure}
