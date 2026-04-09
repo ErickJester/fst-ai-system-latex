@@ -1,0 +1,369 @@
+% ============================================================
+%  Glosario
+%  TT 2026-B066 | ESCOM-IPN
+% ============================================================
+
+\chapter*{Glosario}
+\addcontentsline{toc}{chapter}{Glosario}
+\markboth{Glosario}{Glosario}
+
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{0pt}
+
+\begin{longtable}{@{} p{4.3cm} p{11.3cm} @{}}
+
+  \toprule
+  \textbf{Término} & \textbf{Definición} \\
+  \midrule
+  \endfirsthead
+
+  \multicolumn{2}{@{}l}{\small\itshape (continúa de la página anterior)} \\[4pt]
+  \toprule
+  \textbf{Término} & \textbf{Definición} \\
+  \midrule
+  \endhead
+
+  \midrule
+  \multicolumn{2}{r@{}}{\small\itshape (continúa en la página siguiente)} \\
+  \endfoot
+
+  \bottomrule
+  \endlastfoot
+
+  % ── A ──────────────────────────────────────────────────────────────
+  \textbf{Antidepresivo}
+  & Fármaco que reduce los síntomas depresivos modulando la disponibilidad de
+    neurotransmisores monoaminérgicos (serotonina, noradrenalina o dopamina) en la
+    hendidura sináptica. En el contexto del FST, su efecto se mide como reducción
+    del tiempo de inmovilidad. \\[5pt]
+
+  \textbf{API REST}
+  & Interfaz de programación de aplicaciones que sigue las restricciones
+    arquitectónicas REST (\textit{Representational State Transfer}). En el
+    sistema B066, la API Flask expone los recursos del backend (experimentos,
+    videos, resultados) mediante verbos HTTP estándar (GET, POST, PATCH, DELETE)
+    e intercambia datos en formato JSON. \\[5pt]
+
+  \textbf{Aprendizaje supervisado}
+  & Paradigma de aprendizaje automático en el que el modelo se entrena con
+    pares entrada-etiqueta proporcionados por un experto. En el proyecto, el
+    clasificador de conductas se entrena con fotogramas etiquetados manualmente
+    por el colaborador clínico. \\[5pt]
+
+  % ── B ──────────────────────────────────────────────────────────────
+  \textbf{Behavioral despair}
+  & (Desesperanza conductual.) Estado conductual inducido por exposición a un
+    estresor inescapable —como el agua en el FST— que se manifiesta como
+    inmovilidad progresiva. Postulado por Porsolt (1977) como modelo
+    traslacional de depresión. \\[5pt]
+
+  \textbf{Bounding box}
+  & (Caja delimitadora.) Rectángulo mínimo que encierra a un objeto detectado
+    en una imagen. El clasificador ResNet recibe el recorte de imagen definido
+    por el bounding box de la rata, normalizado a $224\times224$ píxeles. \\[5pt]
+
+  \textbf{ByteTrack}
+  & Algoritmo de seguimiento multi-objeto que asocia detecciones entre fotogramas
+    usando IoU y un filtro de Kalman. Se utiliza junto con YOLOv8 para mantener
+    la identidad de cada rata a lo largo del video. \\[5pt]
+
+  % ── C ──────────────────────────────────────────────────────────────
+  \textbf{CLAHE}
+  & (\textit{Contrast Limited Adaptive Histogram Equalization}.) Técnica de
+    mejora de contraste local que divide la imagen en teselas y aplica
+    ecualización de histograma con un límite de amplificación. Se aplica como
+    preprocesamiento cuando el contraste global del video es insuficiente. \\[5pt]
+
+  \textbf{CNN}
+  & (\textit{Convolutional Neural Network} / Red Neuronal Convolucional.)
+    Arquitectura de red profunda que aplica filtros convolucionales para extraer
+    características espaciales jerárquicas de las imágenes. El clasificador de
+    conductas del sistema es una CNN (ResNet-18) reentrenada con datos del FST. \\[5pt]
+
+  \textbf{Cola de tareas}
+  & Estructura de datos FIFO que desacopla la recepción de solicitudes de análisis
+    del procesamiento efectivo. El worker consulta la cola periódicamente y toma
+    un trabajo a la vez, lo que permite procesar múltiples videos de forma
+    secuencial sin bloquear el servidor web. \\[5pt]
+
+  \textbf{Conducta de escalamiento}
+  & (\textit{Climbing / escape attempts}.) Comportamiento en el FST caracterizado
+    por movimientos verticales enérgicos de las patas anteriores contra las
+    paredes del cilindro. Se asocia con la activación del sistema noradrenérgico. \\[5pt]
+
+  \textbf{Conducta de nado activo}
+  & (\textit{Swimming}.) Movimientos horizontales del cuerpo y las extremidades
+    que desplazan al animal por el cilindro. Se asocia con la actividad del
+    sistema serotoninérgico y se incrementa con antidepresivos ISRS. \\[5pt]
+
+  \textbf{Contorno}
+  & Curva que delimita los bordes de un objeto en una imagen binarizada. En el
+    pipeline, los contornos obtenidos tras la umbralización de Otsu sirven para
+    detectar la silueta de la rata y calcular su bounding box. \\[5pt]
+
+  \textbf{Corticosterona}
+  & Principal glucocorticoide en roedores, secretado por las glándulas suprarrenales
+    en respuesta al estrés. Sus niveles plasmáticos se elevan significativamente
+    durante el FST y constituyen un biomarcador del eje hipotálamo-hipófisis-adrenal. \\[5pt]
+
+  \textbf{CSRT}
+  & (\textit{Channel and Spatial Reliability Tracker}.) Algoritmo de seguimiento
+    por filtro de correlación discriminativo que pondera las regiones de la imagen
+    con mayor fiabilidad espacial. Se utiliza como respaldo cuando la segmentación
+    por sustracción de fondo falla en un fotograma. \\[5pt]
+
+  % ── D ──────────────────────────────────────────────────────────────
+  \textbf{Data augmentation}
+  & (Aumento de datos.) Técnica que incrementa artificialmente el tamaño del
+    conjunto de entrenamiento aplicando transformaciones geométricas (rotación,
+    volteo, zoom) y fotométricas (brillo, contraste) a las imágenes originales,
+    reduciendo el riesgo de sobreajuste. \\[5pt]
+
+  \textbf{Detección de objetos}
+  & Tarea de visión por computadora que consiste en localizar y clasificar
+    simultáneamente múltiples instancias de objetos en una imagen. En el proyecto
+    se emplea YOLOv8 para detectar las ratas dentro de sus respectivas ROIs. \\[5pt]
+
+  \textbf{Docker}
+  & Plataforma de contenedorización que empaqueta una aplicación junto con todas
+    sus dependencias en unidades aisladas y reproducibles. El sistema B066 se
+    despliega como cuatro contenedores orquestados: frontend, backend, worker y
+    base de datos. \\[5pt]
+
+  \textbf{Dopaminérgico}
+  & Relativo al sistema de neurotransmisión mediado por dopamina. Fármacos que
+    potencian la actividad dopaminérgica pueden modificar el patrón de conductas
+    en el FST, aunque su efecto es menos selectivo que el de los ISRS sobre el
+    tiempo de nado activo. \\[5pt]
+
+  % ── E ──────────────────────────────────────────────────────────────
+  \textbf{EMA}
+  & (\textit{Exponential Moving Average} / Promedio móvil exponencial.)
+    Filtro de suavizado que asigna mayor peso a las observaciones recientes.
+    En el pipeline se utiliza para estabilizar la estimación de la línea de
+    agua y reducir el efecto de reflejos transitorios en la detección. \\[5pt]
+
+  \textbf{Entropía cruzada}
+  & (\textit{Cross-entropy loss}.) Función de pérdida estándar para clasificación
+    multiclase que mide la discrepancia entre la distribución de probabilidad
+    predicha por el modelo y la distribución real (etiquetas one-hot). Se
+    minimiza durante el entrenamiento del clasificador de conductas. \\[5pt]
+
+  % ── F ──────────────────────────────────────────────────────────────
+  \textbf{F1-score}
+  & Media armónica entre precisión y recall: $F_1 = 2 \cdot \frac{P \cdot R}{P + R}$.
+    Métrica balanceada que penaliza tanto los falsos positivos como los falsos
+    negativos; se reporta por clase (inmovilidad, nado activo, escalamiento)
+    para evaluar el clasificador. \\[5pt]
+
+  \textbf{Frame}
+  & (Cuadro de video.) Imagen estática individual dentro de una secuencia de
+    video. El análisis del FST opera cuadro a cuadro (\textit{frame-by-frame}):
+    cada fotograma es clasificado independientemente y los tiempos de conducta
+    se acumulan en segundos sumando los cuadros clasificados en cada categoría. \\[5pt]
+
+  \textbf{FST}
+  & (\textit{Forced Swim Test} / Prueba de Nado Forzado.) Paradigma experimental
+    propuesto por Porsolt et al.\ (1977) en el que una rata se coloca en un
+    cilindro con agua de la que no puede escapar. La duración de la inmovilidad
+    en la segunda sesión (día 2) es el indicador primario de desesperanza
+    conductual y sensibilidad a antidepresivos. \\[5pt]
+
+  % ── G ──────────────────────────────────────────────────────────────
+  \textbf{Gold standard}
+  & (Estándar de referencia.) Conjunto de etiquetas considerado como la verdad
+    absoluta para la evaluación del sistema. En el proyecto, lo constituyen las
+    anotaciones manuales cuadro a cuadro realizadas por el experto del laboratorio
+    colaborador, contra las cuales se comparan las predicciones del modelo. \\[5pt]
+
+  % ── H ──────────────────────────────────────────────────────────────
+  \textbf{Hiperparámetro}
+  & Parámetro cuyo valor se fija antes del entrenamiento y no se aprende de los
+    datos (e.g., tasa de aprendizaje, tamaño del lote, número de épocas,
+    umbral de confianza del clasificador). Se ajusta mediante búsqueda en
+    cuadrícula o validación cruzada. \\[5pt]
+
+  % ── I ──────────────────────────────────────────────────────────────
+  \textbf{ImageNet}
+  & Base de datos de más de 14 millones de imágenes anotadas en más de 21{,}000
+    categorías. Los pesos del modelo ResNet-18 preentrenados en ImageNet se usan
+    como punto de partida para el transfer learning, aprovechando características
+    visuales generales antes de la especialización en fotogramas del FST. \\[5pt]
+
+  \textbf{Inmovilidad}
+  & (\textit{Immobility}.) Conducta en el FST caracterizada por la ausencia de
+    movimientos propulsivos; el animal flota con movimientos mínimos para
+    mantener la cabeza sobre el agua. Es la medida primaria de la desesperanza
+    conductual y el indicador de referencia para cuantificar el efecto
+    antidepresivo. \\[5pt]
+
+  \textbf{IoU}
+  & (\textit{Intersection over Union}.) Métrica de solapamiento entre dos
+    rectángulos (generalmente una detección y su verdad de referencia):
+    $\text{IoU} = \frac{|A \cap B|}{|A \cup B|}$. En el sistema se usa para
+    validar la consistencia entre detecciones consecutivas durante el seguimiento
+    de las ratas. \\[5pt]
+
+  \textbf{ISRS}
+  & (Inhibidor Selectivo de la Recaptación de Serotonina.) Clase farmacológica
+    que bloquea el transportador SERT, incrementando la disponibilidad sináptica
+    de serotonina. En el FST aumentan específicamente el tiempo de nado activo
+    sin afectar de forma significativa el escalamiento. Fluoxetina y sertralina
+    son ejemplos representativos. \\[5pt]
+
+  % ── J ──────────────────────────────────────────────────────────────
+  \textbf{JWT}
+  & (\textit{JSON Web Token}.) Estándar abierto (RFC 7519) para la transmisión
+    segura de información entre partes como un objeto JSON firmado digitalmente.
+    El backend emite un JWT al iniciar sesión; el frontend lo adjunta en el
+    encabezado \texttt{Authorization} de cada petición subsecuente para
+    autenticar al usuario. \\[5pt]
+
+  % ── K ──────────────────────────────────────────────────────────────
+  \textbf{Kappa de Cohen}
+  & Coeficiente estadístico ($\kappa$) que mide el grado de concordancia entre
+    dos evaluadores descontando el acuerdo esperado por azar. Valores $\kappa > 0.80$
+    se consideran acuerdo casi perfecto. Se reporta para cuantificar la concordancia
+    entre el sistema automático y el experto en la clasificación cuadro a cuadro. \\[5pt]
+
+  \textbf{KCF}
+  & (\textit{Kernelized Correlation Filter}.) Algoritmo de seguimiento basado en
+    correlación en el dominio de Fourier con kernel RBF, evaluado como alternativa
+    al CSRT durante el diseño del módulo de rastreo. El CSRT fue seleccionado
+    por su mayor precisión en presencia de oclusión parcial. \\[5pt]
+
+  % ── M ──────────────────────────────────────────────────────────────
+  \textbf{MAE}
+  & (\textit{Mean Absolute Error} / Error Absoluto Medio.) Métrica de error de
+    regresión definida como $\text{MAE} = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|$.
+    En la evaluación del sistema se calcula entre los tiempos de conducta
+    estimados automáticamente y los tiempos del gold standard, expresado
+    en segundos. \\[5pt]
+
+  \textbf{Modelo de fondo}
+  & (\textit{Background model}.) Representación estadística de la escena sin el
+    objeto de interés, construida en el pipeline mediante la mediana de los primeros
+    cuadros del video. Permite detectar la rata por diferencia absoluta entre
+    cada fotograma y el fondo. \\[5pt]
+
+  % ── N ──────────────────────────────────────────────────────────────
+  \textbf{Noradrenérgico}
+  & Relativo al sistema de neurotransmisión mediado por noradrenalina (norepinefrina).
+    Los antidepresivos noradrenérgicos (e.g., desipramina) aumentan
+    preferentemente el tiempo de escalamiento en el FST, a diferencia de los
+    serotoninérgicos que aumentan el nado activo. \\[5pt]
+
+  % ── O ──────────────────────────────────────────────────────────────
+  \textbf{ORM}
+  & (\textit{Object-Relational Mapping}.) Técnica que abstrae las operaciones de
+    base de datos relacional mediante objetos del lenguaje de programación. El
+    backend utiliza SQLAlchemy como ORM para interactuar con PostgreSQL sin
+    escribir SQL directamente en la lógica de negocio. \\[5pt]
+
+  \textbf{Otsu, umbralización de}
+  & Método automático de binarización de imágenes que calcula el umbral óptimo
+    minimizando la varianza intraclase entre los píxeles de fondo y primer plano.
+    En el pipeline se aplica al mapa de diferencias para segmentar la silueta de
+    la rata del fondo. \\[5pt]
+
+  \textbf{Overfitting}
+  & (Sobreajuste.) Fenómeno en el que un modelo aprende el ruido del conjunto de
+    entrenamiento en lugar de los patrones generalizables, resultando en alta
+    precisión en entrenamiento pero baja en datos nuevos. Se mitiga con data
+    augmentation, dropout y validación cruzada. \\[5pt]
+
+  % ── P ──────────────────────────────────────────────────────────────
+  \textbf{Pipeline de análisis}
+  & Secuencia de etapas de procesamiento encadenadas en las que la salida de
+    cada etapa es la entrada de la siguiente. En el sistema, el pipeline comprende:
+    preprocesamiento, detección de ROIs, seguimiento con YOLO, y clasificación
+    con ResNet, ejecutado por el worker de forma asíncrona. \\[5pt]
+
+  \textbf{PostgreSQL}
+  & Sistema de gestión de bases de datos relacional de código abierto con soporte
+    para tipos de datos avanzados y transacciones ACID. Es la base de datos
+    primaria del sistema B066, que almacena usuarios, experimentos, videos,
+    resultados de conducta y notificaciones. \\[5pt]
+
+  \textbf{Precisión}
+  & (\textit{Precision}.) Fracción de las predicciones positivas que son
+    verdaderos positivos: $P = \frac{VP}{VP + FP}$. Una precisión alta indica
+    pocos falsos positivos en la clasificación de cada conducta. \\[5pt]
+
+  \textbf{Prueba de nado forzado}
+  & Véase \textbf{FST}. Protocolo de dos sesiones (día 1: 15 min de nado de
+    habituación; día 2: 5 min de prueba) durante las cuales se registran en
+    video los tiempos de inmovilidad, nado activo y escalamiento de cada animal. \\[5pt]
+
+  % ── R ──────────────────────────────────────────────────────────────
+  \textbf{Recall}
+  & (Sensibilidad / \textit{Sensitivity}.) Fracción de los casos positivos reales
+    que son correctamente identificados: $R = \frac{VP}{VP + FN}$. Un recall alto
+    indica que el sistema detecta la mayoría de los fotogramas de cada conducta
+    presentes en el video. \\[5pt]
+
+  \textbf{ResNet}
+  & (\textit{Residual Network}.) Familia de redes neuronales convolucionales con
+    conexiones residuales (atajos) que permiten entrenar arquitecturas muy
+    profundas sin degradación del gradiente. Se usa ResNet-18 como clasificador
+    de conductas por su balance entre capacidad expresiva y tiempo de inferencia. \\[5pt]
+
+  \textbf{ROI}
+  & (\textit{Region of Interest} / Región de interés.) Subregión rectangular del
+    fotograma que delimita el área de análisis de un animal específico. En el
+    sistema, cada cilindro del FST corresponde a una ROI detectada automáticamente
+    al inicio del pipeline. \\[5pt]
+
+  % ── S ──────────────────────────────────────────────────────────────
+  \textbf{Segmentación}
+  & Proceso que asigna una etiqueta (clase) a cada píxel de una imagen. En el
+    contexto del pipeline, la segmentación por sustracción de fondo separa los
+    píxeles correspondientes a la rata de los píxeles del fondo estático para
+    obtener su contorno y bounding box. \\[5pt]
+
+  \textbf{Serotoninérgico}
+  & Relativo al sistema de neurotransmisión mediado por serotonina (5-HT). Los
+    antidepresivos serotoninérgicos (ISRS) incrementan específicamente el tiempo
+    de nado activo en el FST sin modificar significativamente el escalamiento ni
+    la actividad locomotora general. \\[5pt]
+
+  \textbf{Softmax}
+  & Función de activación que transforma un vector de puntuaciones en una
+    distribución de probabilidad: $\sigma(z)_i = e^{z_i}/\sum_j e^{z_j}$.
+    La capa final del clasificador ResNet aplica softmax para obtener la
+    probabilidad de cada conducta (inmovilidad, nado activo, escalamiento). \\[5pt]
+
+  \textbf{Sustracción de fondo}
+  & (\textit{Background subtraction}.) Técnica de segmentación que identifica
+    los píxeles que cambian respecto al modelo de fondo estático. Es el método
+    primario del pipeline para detectar la presencia y posición de la rata
+    en cada cuadro del video. \\[5pt]
+
+  % ── T ──────────────────────────────────────────────────────────────
+  \textbf{Tracker}
+  & (Rastreador.) Algoritmo que mantiene la identidad de un objeto entre
+    fotogramas consecutivos de un video sin necesidad de re-detectarlo en cada
+    cuadro. En el sistema se utiliza CSRT como respaldo cuando la segmentación
+    por sustracción de fondo falla. \\[5pt]
+
+  \textbf{Transfer learning}
+  & (Aprendizaje por transferencia.) Técnica que reutiliza los pesos de un
+    modelo entrenado en una tarea o conjunto de datos extenso (ImageNet) como
+    punto de partida para una tarea relacionada con datos más limitados. Permite
+    entrenar el clasificador de conductas con menos fotogramas etiquetados. \\[5pt]
+
+  % ── W ──────────────────────────────────────────────────────────────
+  \textbf{Worker}
+  & Proceso independiente del servidor web que consume trabajos de la cola de
+    tareas y ejecuta el pipeline de análisis completo. Al correr en un contenedor
+    Docker separado, permite que el backend siga respondiendo peticiones HTTP
+    mientras se procesa un video de larga duración. \\[5pt]
+
+  % ── Y ──────────────────────────────────────────────────────────────
+  \textbf{YOLO}
+  & (\textit{You Only Look Once}.) Familia de detectores de objetos en tiempo
+    real basados en una sola pasada por la red para predecir bounding boxes y
+    clases simultáneamente. En el sistema se emplea YOLOv8 para detectar y
+    localizar las ratas dentro de las ROIs de cada cilindro. \\[5pt]
+
+\end{longtable}

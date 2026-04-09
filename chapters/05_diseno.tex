@@ -313,27 +313,86 @@ Los casos de uso principales son:
 % -----------------------------------------------------------
 
 Los diagramas de secuencia describen el flujo de mensajes entre el frontend, el
-backend y el worker para los flujos más importantes del sistema.
+backend y el worker para los flujos principales del sistema, organizados por área
+funcional: autenticación y sesión, gestión de usuarios y perfil, notificaciones,
+y análisis de experimentos.
+
+% ---- Autenticación y sesión ----
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{figures/mermaid/seq_registro}
+\caption{Secuencia: registro de usuario por administrador [autoría propia].}
+\label{fig:seq_registro}
+\end{figure}
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/seq_login}
-\caption{Secuencia: inicio de sesión [autoría propia].}
+\caption{Secuencia: inicio de sesión del investigador [autoría propia].}
 \label{fig:seq_login}
 \end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{figures/mermaid/seq_login_admin}
+\caption{Secuencia: inicio de sesión del administrador [autoría propia].}
+\label{fig:seq_login_admin}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{figures/mermaid/seq_logout}
+\caption{Secuencia: cierre de sesión [autoría propia].}
+\label{fig:seq_logout}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{figures/mermaid/seq_cambio_pass_inv}
+\caption{Secuencia: cambio de contraseña del investigador [autoría propia].}
+\label{fig:seq_cambio_pass_inv}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{figures/mermaid/seq_cambio_pass_admin}
+\caption{Secuencia: restablecimiento de contraseña por administrador [autoría propia].}
+\label{fig:seq_cambio_pass_admin}
+\end{figure}
+
+% ---- Gestión de usuarios y perfil ----
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{figures/mermaid/seq_gestion_usuarios}
+\caption{Secuencia: gestión de usuarios por administrador (crear y desactivar) [autoría propia].}
+\label{fig:seq_gestion_usuarios}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{figures/mermaid/seq_perfil}
+\caption{Secuencia: configuración de perfil del investigador [autoría propia].}
+\label{fig:seq_perfil}
+\end{figure}
+
+% ---- Notificaciones ----
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{figures/mermaid/seq_notificaciones}
+\caption{Secuencia: generación y consulta de notificaciones [autoría propia].}
+\label{fig:seq_notificaciones}
+\end{figure}
+
+% ---- Análisis de experimentos ----
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/seq_analisis}
 \caption{Secuencia: carga de video y análisis automático [autoría propia].}
 \label{fig:seq_analisis}
-\end{figure}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=\textwidth]{figures/mermaid/seq_error}
-\caption{Secuencia: manejo de error en el análisis [autoría propia].}
-\label{fig:seq_error}
 \end{figure}
 
 \begin{figure}[ht]
@@ -345,9 +404,9 @@ backend y el worker para los flujos más importantes del sistema.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=\textwidth]{figures/mermaid/seq_reportes}
-\caption{Secuencia: descarga de reportes [autoría propia].}
-\label{fig:seq_reportes}
+\includegraphics[width=\textwidth]{figures/mermaid/seq_error}
+\caption{Secuencia: manejo de error en el análisis [autoría propia].}
+\label{fig:seq_error}
 \end{figure}
 
 \begin{figure}[ht]
@@ -357,42 +416,23 @@ backend y el worker para los flujos más importantes del sistema.
 \label{fig:seq_resultados}
 \end{figure}
 
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{figures/mermaid/seq_reportes}
+\caption{Secuencia: descarga de reportes [autoría propia].}
+\label{fig:seq_reportes}
+\end{figure}
+
 % -----------------------------------------------------------
 \section{Diagrama de clases}
 % -----------------------------------------------------------
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=\textwidth]{figures/mermaid/clases}
+\includegraphics[width=\textwidth, height=0.95\textheight, keepaspectratio]{figures/mermaid/clases}
 \caption{Diagrama de clases del sistema [autoría propia].}
 \label{fig:clases}
 \end{figure}
-
-\subsection{Flujos pendientes de documentación}
-
-\textbf{[PENDIENTE --- flujos pendientes de diseño e implementación]:}
-
-Los siguientes diagramas de secuencia están pendientes de documentación. Se incluirán
-en la siguiente iteración del diseño:
-
-\begin{itemize}
-  \item \textbf{Registro de usuario}: flujo para que nuevos investigadores se
-        autoregistren con confirmación por correo electrónico (requiere decisión:
-        ¿solo administrador crea cuentas, o permite self-signup con aprobación?).
-  \item \textbf{Inicio de sesión del administrador}: variante con permisos elevados
-        y acceso al panel de administración.
-  \item \textbf{Cambio de contraseña (investigador)}: flujo desde pantalla de perfil.
-  \item \textbf{Cambio de contraseña (administrador)}: flujo desde panel de
-        administración.
-  \item \textbf{Cerrar sesión}: invalidación de token JWT y limpieza de localStorage.
-  \item \textbf{Manejo de usuarios (Admin)}: crear, editar y desactivar cuentas desde
-        el panel de administración.
-  \item \textbf{Configuración de perfil}: actualizar nombre, correo y preferencias
-        desde la pantalla de perfil del investigador.
-  \item \textbf{Notificaciones}: flujo explícito de envío de notificaciones
-        (analysis\_done, analysis\_failed, video\_expiring, video\_deleted) y consulta
-        desde la interfaz.
-\end{itemize}
 
 % -----------------------------------------------------------
 \section{Diseño de la interfaz web}
@@ -409,9 +449,21 @@ Formulario con campos de correo institucional y contraseña. Las credenciales
 incorrectas muestran un mensaje de error genérico sin revelar cuál campo falló
 (ver RN-01). Incluye enlace de recuperación de contraseña (RF-03).
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
-% [PENDIENTE: insertar captura o wireframe de mockup_login.html]
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_login_normal}
+    \caption{Estado normal.}
+    \label{fig:ui_login_normal}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_login_error}
+    \caption{Credenciales incorrectas (RN-01).}
+    \label{fig:ui_login_error}
+  \end{subfigure}
 \caption{Pantalla de inicio de sesión [autoría propia].}
 \label{fig:ui_login}
 \end{figure}
@@ -423,9 +475,29 @@ estado y accesos directos a resultados y descarga. Muestra avisos cuando un vide
 a menos de 7~días de ser eliminado automáticamente (RF-23). Incluye filtros por estado
 y paginación.
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
-% [PENDIENTE: insertar captura o wireframe de mockup_dashboard_investigador.html]
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_dashboard_normal}
+    \caption{Vista con experimentos activos.}
+    \label{fig:ui_dashboard_normal}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_dashboard_vacio}
+    \caption{Sin experimentos (estado vacío).}
+    \label{fig:ui_dashboard_vacio}
+  \end{subfigure}
+
+  \vspace{8pt}
+  \begin{subfigure}[t]{0.70\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_dashboard_alerta}
+    \caption{Aviso de vencimiento próximo de video (RF-23).}
+    \label{fig:ui_dashboard_alerta}
+  \end{subfigure}
 \caption{Dashboard del investigador [autoría propia].}
 \label{fig:ui_dashboard}
 \end{figure}
@@ -442,9 +514,51 @@ puede tardar varios minutos según el tamaño del archivo: separar los metadatos
 carga permite que el investigador corrija un nombre o fecha sin necesidad de volver a
 subir el video si cometió un error en los campos de texto.
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
-% [PENDIENTE: insertar captura o wireframe de mockup_nuevo_experimento.html]
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_nuevo_vacio}
+    \caption{Formulario vacío (paso 1).}
+    \label{fig:ui_nuevo_vacio}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_nuevo_lleno}
+    \caption{Metadatos completados (paso 1).}
+    \label{fig:ui_nuevo_lleno}
+  \end{subfigure}
+
+  \vspace{8pt}
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_nuevo_subiendo}
+    \caption{Subida de video en progreso (RF-09).}
+    \label{fig:ui_nuevo_subiendo}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_nuevo_error}
+    \caption{Error de formato de archivo (RF-10).}
+    \label{fig:ui_nuevo_error}
+  \end{subfigure}
+
+  \vspace{8pt}
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_nuevo_validacion}
+    \caption{Errores de validación en campos.}
+    \label{fig:ui_nuevo_validacion}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_nuevo_exito}
+    \caption{Carga exitosa, análisis en cola (RF-12).}
+    \label{fig:ui_nuevo_exito}
+  \end{subfigure}
 \caption{Pantalla de creación de experimento [autoría propia].}
 \label{fig:ui_nuevo}
 \end{figure}
@@ -463,9 +577,36 @@ agregar la funcionalidad implicaría manejar el estado de cancelación en el wor
 limpiar los archivos parciales. Si en el futuro surge esa necesidad, el endpoint
 \texttt{DELETE /experiments/\{id\}/videos} puede extenderse para eso.
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
-% [PENDIENTE: insertar captura o wireframe de mockup_progreso_analisis.html]
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_progreso_analizando}
+    \caption{Análisis en curso (RF-15).}
+    \label{fig:ui_progreso_analizando}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_progreso_completado}
+    \caption{Análisis completado.}
+    \label{fig:ui_progreso_completado}
+  \end{subfigure}
+
+  \vspace{8pt}
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_progreso_err_calidad}
+    \caption{Error por calidad de video insuficiente (RF-16).}
+    \label{fig:ui_progreso_err_calidad}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_progreso_err_deteccion}
+    \caption{Error por fallo en detección de cilindros (RF-16).}
+    \label{fig:ui_progreso_err_deteccion}
+  \end{subfigure}
 \caption{Pantalla de progreso del análisis [autoría propia].}
 \label{fig:ui_progreso}
 \end{figure}
@@ -477,9 +618,29 @@ tabla detallada por animal (RF-18), desglose por minuto (RF-19) y comparación
 Día~1 vs.\ Día~2 (RF-20, disponible solo si ambos videos fueron procesados). Incluye
 botones de descarga en PDF y CSV.
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
-% [PENDIENTE: insertar captura o wireframe de mockup_resultados.html]
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_resultados_dia2}
+    \caption{Resumen de un solo día (Día~2).}
+    \label{fig:ui_resultados_dia2}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_resultados_comparacion}
+    \caption{Comparación Día~1 vs.\ Día~2 (RF-20).}
+    \label{fig:ui_resultados_comparacion}
+  \end{subfigure}
+
+  \vspace{8pt}
+  \begin{subfigure}[t]{0.70\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_resultados_minutos}
+    \caption{Desglose por minuto expandido (RF-19).}
+    \label{fig:ui_resultados_minutos}
+  \end{subfigure}
 \caption{Pantalla de resultados del experimento [autoría propia].}
 \label{fig:ui_resultados}
 \end{figure}
@@ -491,9 +652,44 @@ cola de procesamiento, análisis activos), lista de usuarios con filtros por rol
 estado, y la lista de experimentos de todos los investigadores. Incluye modales para
 crear y editar cuentas (RF-05, RF-27, RF-28).
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
-% [PENDIENTE: insertar captura o wireframe de mockup_admin.html]
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_admin_normal}
+    \caption{Vista de métricas del sistema.}
+    \label{fig:ui_admin_normal}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_admin_disco}
+    \caption{Alerta de uso de disco elevado (RF-28).}
+    \label{fig:ui_admin_disco}
+  \end{subfigure}
+
+  \vspace{8pt}
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_admin_cola}
+    \caption{Cola de análisis activa (RF-28).}
+    \label{fig:ui_admin_cola}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_admin_modal_nuevo}
+    \caption{Modal de creación de usuario (RF-05).}
+    \label{fig:ui_admin_modal_nuevo}
+  \end{subfigure}
+
+  \vspace{8pt}
+  \begin{subfigure}[t]{0.70\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/ui_admin_modal_editar}
+    \caption{Modal de edición de usuario (RF-05).}
+    \label{fig:ui_admin_modal_editar}
+  \end{subfigure}
 \caption{Panel de administración [autoría propia].}
 \label{fig:ui_admin}
 \end{figure}
