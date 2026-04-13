@@ -442,6 +442,18 @@ RN-12 & La comparación Día~1 vs.\ Día~2 solo se genera si ambos videos del mi
         experimento fueron procesados exitosamente.
       & No tiene sentido comparar con datos incompletos. Ver RF-20. \\
 \hline
+RN-13 & Si durante la fase de validación el clasificador no alcanza
+        $\kappa > 0.80$ distinguiendo las tres conductas por separado,
+        el nado activo y el escalamiento se reportan juntos como
+        \textit{conducta activa}. El reporte generado indica
+        explícitamente qué nivel de clasificación se aplicó, de modo
+        que el investigador sepa interpretar los resultados en
+        consecuencia.
+      & Contemplado en el alcance (cap.~1) y en el riesgo R-08.
+        Complementa RN-11 para el caso en que el pipeline completa
+        la detección pero el clasificador no alcanza la precisión
+        objetivo. Ver RF-17, RF-18. \\
+\hline
 
 \end{longtable}
 
