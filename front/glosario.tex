@@ -62,11 +62,6 @@
     en una imagen. El clasificador ResNet recibe el recorte de imagen definido
     por el bounding box de la rata, normalizado a $224\times224$ píxeles. \\[5pt]
 
-  \textbf{ByteTrack}
-  & Algoritmo de seguimiento multi-objeto que asocia detecciones entre fotogramas
-    usando IoU y un filtro de Kalman. Se utiliza junto con YOLOv8 para mantener
-    la identidad de cada rata a lo largo del video. \\[5pt]
-
   % ── C ──────────────────────────────────────────────────────────────
   \textbf{CLAHE}
   & (\textit{Contrast Limited Adaptive Histogram Equalization}.) Técnica de
@@ -101,11 +96,6 @@
     pipeline, los contornos obtenidos tras la umbralización de Otsu sirven para
     detectar la silueta de la rata y calcular su bounding box. \\[5pt]
 
-  \textbf{Corticosterona}
-  & Principal glucocorticoide en roedores, secretado por las glándulas suprarrenales
-    en respuesta al estrés. Sus niveles plasmáticos se elevan significativamente
-    durante el FST y constituyen un biomarcador del eje hipotálamo-hipófisis-adrenal. \\[5pt]
-
   \textbf{CSRT}
   & (\textit{Channel and Spatial Reliability Tracker}.) Algoritmo de seguimiento
     por filtro de correlación discriminativo que pondera las regiones de la imagen
@@ -129,12 +119,6 @@
     sus dependencias en unidades aisladas y reproducibles. El sistema B066 se
     despliega como cuatro contenedores orquestados: frontend, backend, worker y
     base de datos. \\[5pt]
-
-  \textbf{Dopaminérgico}
-  & Relativo al sistema de neurotransmisión mediado por dopamina. Fármacos que
-    potencian la actividad dopaminérgica pueden modificar el patrón de conductas
-    en el FST, aunque su efecto es menos selectivo que el de los ISRS sobre el
-    tiempo de nado activo. \\[5pt]
 
   % ── E ──────────────────────────────────────────────────────────────
   \textbf{EMA}
@@ -265,12 +249,6 @@
     minimizando la varianza intraclase entre los píxeles de fondo y primer plano.
     En el pipeline se aplica al mapa de diferencias para segmentar la silueta de
     la rata del fondo. \\[5pt]
-
-  \textbf{Overfitting}
-  & (Sobreajuste.) Fenómeno en el que un modelo aprende el ruido del conjunto de
-    entrenamiento en lugar de los patrones generalizables, resultando en alta
-    precisión en entrenamiento pero baja en datos nuevos. Se mitiga con data
-    augmentation, dropout y validación cruzada. \\[5pt]
 
   % ── P ──────────────────────────────────────────────────────────────
   \textbf{Pipeline de análisis}
