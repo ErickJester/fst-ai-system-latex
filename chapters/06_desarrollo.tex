@@ -66,7 +66,35 @@ suavizado anterior, y $\alpha$ controla la velocidad de respuesta. Esta lógica 
 encapsulada en la clase \texttt{WaterlineSmoother}. Su efectividad depende de las
 condiciones del video y se evaluará durante las pruebas de validación.
 
-% [PENDIENTE: describir las clases principales: WaterlineSmoother, RatTracker]
+\subsection{Arquitectura de clases del módulo de seguimiento}
+
+El módulo \texttt{tracker.py} organiza la lógica de seguimiento en dos clases
+principales y una función de procesamiento de alto nivel.
+
+\textbf{WaterlineSmoother} encapsula la estimación de la línea de agua descrita en la
+sección anterior. Mantiene internamente el valor suavizado $\hat{y}_{t-1}$ y expone un
+único método que recibe la estimación cruda del cuadro actual y devuelve el valor
+filtrado por EMA (ecuación~\ref{eq:ema}).
+
+\textbf{YoloTracker} encapsula la integración con Ultralytics YOLOv8 en modo
+\textit{track}. Al instanciarse carga el modelo (\texttt{weights/rat.pt}) y configura
+ByteTrack \cite{zhang2022_bytetrack} como algoritmo de seguimiento a través del
+archivo \texttt{bytetrack.yaml} que Ultralytics incluye en su distribución. Su método
+principal, \texttt{track()}, invoca \texttt{model.track()} con el parámetro
+\texttt{persist=True} para mantener la continuidad de identidades entre cuadros
+consecutivos. Si Ultralytics no está disponible en el entorno ---por ausencia de GPU o
+del paquete--- la clase reporta \texttt{available=False} y el pipeline cae
+automáticamente al detector clásico (sustracción de fondo con Otsu).
+
+La función \texttt{process\_video()} integra ambas clases con la lógica de gating
+físico (restricciones de tamaño, posición respecto a la línea de agua y velocidad
+máxima entre cuadros), la política de congelación de posición (\textit{freeze}) con
+decaimiento de confianza, y el mecanismo de re-adquisición con umbral de confianza
+reducido para ROIs en recuperación. En la práctica, el pipeline sigue la jerarquía:
+ByteTrack (vía \texttt{YoloTracker})
+$\rightarrow$ detector clásico
+$\rightarrow$ posición congelada.
+
 % [PENDIENTE: fragmentos de c\'{o}digo relevantes y su explicaci\'{o}n]
 
 \section{Implementaci\'{o}n del clasificador de conducta}

@@ -179,6 +179,55 @@ y vuelve al agua.
 El sistema usa CSRT como primera opción y KCF como respaldo si CSRT no está disponible.
 Si ambos fallan, la última posición conocida se congela con una confianza decreciente.
 
+\subsection{ByteTrack y el filtro de Kalman}
+
+ByteTrack \cite{zhang2022_bytetrack} es el tracker principal del sistema. A diferencia
+de los trackers de correlación, que operan sobre el parche de apariencia del objeto,
+ByteTrack mantiene trayectorias explícitas propagadas en el tiempo mediante un filtro
+de Kalman lineal.
+
+El filtro de Kalman modela el estado de cada trayectoria como un vector de ocho
+variables:
+
+\begin{equation}
+    \mathbf{x}_t = (c_x,\; c_y,\; a,\; h,\;
+                    \dot{c}_x,\; \dot{c}_y,\; \dot{a},\; \dot{h})^{\!\top}
+    \label{eq:kalman_state}
+\end{equation}
+
+donde $(c_x, c_y)$ es el centroide del bounding box, $a$ su relación de aspecto, $h$
+su altura, y las variables con punto son las velocidades correspondientes. La predicción
+sigue un modelo de movimiento constante:
+
+\begin{equation}
+    \hat{\mathbf{x}}_{t|t-1} = \mathbf{F}\,\mathbf{x}_{t-1}
+    \label{eq:kalman_pred}
+\end{equation}
+
+donde $\mathbf{F}$ es la matriz de transición de estado. Cuando el detector produce una
+detección válida, el filtro actualiza el estado con la corrección estándar de Kalman; si
+no hay detección, el estado se propaga solo con la predicción, lo que permite mantener
+la trayectoria durante oclusiones breves.
+
+La asociación entre detecciones y trayectorias activas se resuelve con el algoritmo
+húngaro minimizando la distancia IoU (ecuación~\ref{eq:iou}). ByteTrack ejecuta esta
+asociación en dos pasadas: la primera con detecciones de confianza alta
+($s \geq \tau_{\text{high}}$) y la segunda con las de confianza baja
+($\tau_{\text{low}} \leq s < \tau_{\text{high}}$), con el fin de recuperar
+trayectorias que perdieron su detección principal por oclusión o cambio brusco de
+apariencia. Este segundo paso ---que da nombre al algoritmo--- es lo que lo distingue
+de SORT \cite{bewley2016_sort}, su predecesor directo.
+
+DeepSORT \cite{wojke2017_deepsort} extiende SORT añadiendo un descriptor de apariencia
+por red neuronal para reidentificar objetos entre cuadros distantes. En el contexto del
+FST, con exactamente una rata por cilindro y sin necesidad de reidentificación
+entre animales, esa complejidad adicional es innecesaria; ByteTrack logra continuidad
+con solo IoU y Kalman.
+
+La estimación de la línea de agua se estabiliza con un promedio móvil exponencial para
+reducir el efecto de los reflejos en la detección de la rata
+(véase ecuación~\ref{eq:ema}).
+
 % ============================================================
 \section{Redes neuronales y aprendizaje profundo}
 % ============================================================
