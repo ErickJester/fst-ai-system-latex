@@ -205,9 +205,36 @@ saber qué es el objeto, solo cómo se veía en el cuadro anterior. CSRT
 Filters}) \cite{henriques2015} es más rápido pero menos robusto ante cambios bruscos de
 apariencia.
 
-En el sistema propuesto, los trackers operan como respaldo cuando el detector falla: si
-YOLO no detecta a la rata en un cuadro, el tracker CSRT mantiene la estimación de
-posición hasta que el detector vuelve a encontrarla.
+En el sistema propuesto, los trackers de correlación operan como respaldo clásico cuando
+ByteTrack no está disponible: si YOLO no detecta a la rata en un cuadro y el modo track
+está desactivado, el tracker CSRT mantiene la estimación de posición hasta que el
+detector vuelve a encontrarla.
+
+\subsection{ByteTrack: asociación por detección completa}
+
+ByteTrack \cite{zhang2022_bytetrack} es un algoritmo de seguimiento multi-objeto
+(\textit{multi-object tracking}, MOT) propuesto por Zhang et al.\ en ECCV 2022. Su
+contribución principal es asociar \emph{todas} las cajas producidas por el detector
+---incluyendo las de baja confianza--- en lugar de descartarlas.
+
+El algoritmo opera en dos pasos por cuadro. En el primero asocia las detecciones de
+alta confianza con las trayectorias activas mediante la métrica IoU y el filtro de
+Kalman para predecir la posición esperada de cada trayectoria. En el segundo paso
+intenta recuperar trayectorias sin coincidencia usando las detecciones de baja
+confianza, que de otro modo serían descartadas. Esta segunda pasada es la que da nombre
+al algoritmo: aprovechar hasta el último \textit{byte} de información disponible.
+
+Frente a SORT \cite{bewley2016_sort} ---que descarta las detecciones de baja
+confianza--- ByteTrack mantiene mejor continuidad en situaciones de oclusión parcial.
+Frente a DeepSORT \cite{wojke2017_deepsort} ---que añade un descriptor de apariencia
+por red neuronal para reidentificación--- ByteTrack logra resultados comparables sin
+requerir un modelo de \textit{embedding} adicional, lo que reduce la latencia.
+
+En el FST, con exactamente una rata por cilindro, la ausencia de ambigüedad de
+identidad hace que la reidentificación de DeepSORT sea innecesaria. ByteTrack cubre
+el caso de uso con menor complejidad: solo IoU y Kalman. La integración se realiza a
+través del modo \texttt{.track()} de Ultralytics YOLOv8 con la configuración
+\texttt{bytetrack.yaml} que el paquete incluye.
 
 % -----------------------------------------------------------
 \section{Modelos de clasificación supervisada aplicables al FST}
@@ -304,20 +331,20 @@ proyecto.
 \caption{Comparativa de herramientas y trabajos relacionados con el análisis del FST.}
 \label{tab:comparativa_herramientas}
 \small
-\begin{tabular}{lcccccp{3.0cm}}
+\begin{tabular}{lccccccp{2.5cm}}
 \hline
-\textbf{Sistema} & \textbf{Espec. FST} & \textbf{3 cond.} & \textbf{DL} & \textbf{Web} & \textbf{Abierto} & \textbf{Métricas reportadas} \\
+\textbf{Sistema} & \textbf{Espec. FST} & \textbf{3 cond.} & \textbf{DL} & \textbf{Web} & \textbf{Abierto} & \textbf{Tracker MOT} & \textbf{Métricas reportadas} \\
 \hline
-EthoVision XT  & Parc. & No    & No  & No  & No  & Posición, velocidad \\
-ANY-maze       & Parc. & No    & No  & No  & No  & Posición, velocidad \\
-ezTrack        & Parc. & No    & No  & No  & Sí  & \% movimiento \\
-DBscorer       & Sí    & No    & No  & No  & Sí  & Tiempo inmóvil \\
-DSAAN          & Sí    & No    & Sí  & No  & No  & Precisión 88.7\,\% \\
-3D-RCNN        & Sí    & Sí    & Sí  & No  & No  & F1 por clase \\
-DeepLabCut+clf & Parc. & Parc. & Sí  & No  & Sí  & $\kappa$ vs.\ experto \\
-YOLO-Behaviour & No    & ---   & Sí  & No  & Sí  & Precisión, recall \\
+EthoVision XT  & Parc. & No    & No  & No  & No  & No          & Posición, velocidad \\
+ANY-maze       & Parc. & No    & No  & No  & No  & No          & Posición, velocidad \\
+ezTrack        & Parc. & No    & No  & No  & Sí  & No          & \% movimiento \\
+DBscorer       & Sí    & No    & No  & No  & Sí  & No          & Tiempo inmóvil \\
+DSAAN          & Sí    & No    & Sí  & No  & No  & No          & Precisión 88.7\,\% \\
+3D-RCNN        & Sí    & Sí    & Sí  & No  & No  & No          & F1 por clase \\
+DeepLabCut+clf & Parc. & Parc. & Sí  & No  & Sí  & No          & $\kappa$ vs.\ experto \\
+YOLO-Behaviour & No    & ---   & Sí  & No  & Sí  & No          & Precisión, recall \\
 \hline
-\textbf{Propuesta} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & $\kappa > 0.80$, MAE, tiempo \\
+\textbf{Propuesta} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{ByteTrack} & $\kappa > 0.80$, MAE, tiempo \\
 \hline
 \end{tabular}
 \end{table}

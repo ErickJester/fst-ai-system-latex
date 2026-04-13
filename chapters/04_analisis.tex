@@ -470,15 +470,15 @@ agrupan en cuatro áreas.
 
 \subsection{Detección de objetos y seguimiento}
 
-\begin{longtable}{|p{2.3cm}|p{5.4cm}|p{5.4cm}|}
+\begin{longtable}{|p{2.3cm}|p{4.8cm}|p{4.8cm}|p{1.3cm}|}
 \caption{Técnicas de detección de objetos y seguimiento.
 \label{tab:herr_cv}}\\
 \hline
-\textbf{Herramienta} & \textbf{Características principales} & \textbf{Por qué se eligió} \\
+\textbf{Herramienta} & \textbf{Características principales} & \textbf{Por qué se eligió} & \textbf{GPU req.} \\
 \hline
 \endfirsthead
 \hline
-\textbf{Herramienta} & \textbf{Características principales} & \textbf{Por qué se eligió} \\
+\textbf{Herramienta} & \textbf{Características principales} & \textbf{Por qué se eligió} & \textbf{GPU req.} \\
 \hline
 \endhead
 \hline
@@ -487,31 +487,48 @@ agrupan en cuatro áreas.
 OpenCV 4.x \cite{bradski2000}
     & Biblioteca estándar para procesamiento de imágenes y video en Python. Incluye
       sustracción de fondo, umbralización de Otsu, morfología, contornos y los
-      trackers CSRT y KCF.
+      trackers de correlación CSRT y KCF (respaldo clásico frente a ByteTrack).
     & Es la herramienta de referencia para este tipo de trabajo y es compatible con
-      YOLOv8 y TensorFlow sin configuración extra. \\
+      YOLOv8 y TensorFlow sin configuración extra.
+    & No \\
 \hline
 Ultralytics YOLOv8 \cite{jocher2023}
     & Detector de objetos estado del arte. Con 100--350 imágenes etiquetadas logra
       detección casi perfecta en fondos consistentes \cite{stadler2024_yolov8}.
     & El detector de rata ya fue entrenado (\texttt{weights/rat.pt}) y su viabilidad
-      técnica está confirmada con los videos del laboratorio. \\
+      técnica está confirmada con los videos del laboratorio.
+    & Sí \\
 \hline
 Sustracción de fondo por mediana \cite{piccardi2004}
     & El fondo se estima como la mediana píxel a píxel de los primeros $N$ cuadros,
       evitando que una rata inmóvil al inicio contamine el modelo.
     & Más simple y predecible que el GMM \cite{zivkovic2004} para el caso de cámara
       fija. No requiere parámetros de color ni modelos adaptativos, lo que reduce
-      la sensibilidad a variaciones de iluminación entre sesiones. \\
+      la sensibilidad a variaciones de iluminación entre sesiones.
+    & No \\
 \hline
-Tracker CSRT \cite{lukezic2017}
-    & Tracker de correlación con mapa de confiabilidad espacial. Más preciso que
-      KCF aunque más lento.
-    & Primera opción de respaldo cuando YOLO no detecta a la rata en un cuadro.
-      KCF \cite{henriques2015} como respaldo secundario. \\
+ByteTrack \cite{zhang2022_bytetrack}
+    & Algoritmo MOT basado en filtro de Kalman y asociación por IoU. Asocia
+      detecciones de alta y baja confianza en dos pasadas para mantener trayectorias
+      durante oclusiones. No requiere descriptor de reidentificación por apariencia.
+    & Tracker principal del pipeline. Con una rata por ROI no se necesita
+      reidentificación, por lo que la simplicidad de ByteTrack es una ventaja sobre
+      DeepSORT. Se integra a través del modo \texttt{.track()} de Ultralytics con
+      \texttt{bytetrack.yaml}.
+    & Sí\textsuperscript{*} \\
+\hline
+Trackers de correlación CSRT \cite{lukezic2017} / KCF \cite{henriques2015}
+    & Trackers de correlación basados en filtros discriminativos. CSRT mantiene un
+      mapa de confiabilidad espacial (mayor precisión); KCF opera en el espacio de
+      características circular (mayor velocidad).
+    & Respaldo clásico para cuadros donde ByteTrack no está disponible (sin GPU o
+      sin modelo cargado). CSRT es la primera opción; KCF el segundo nivel.
+    & No \\
 \hline
 
 \end{longtable}
+{\footnotesize\textsuperscript{*}GPU recomendada para inferencia en tiempo real;
+el modo CPU es funcional pero más lento.}
 
 \subsection{Aprendizaje profundo para clasificación de conductas}
 

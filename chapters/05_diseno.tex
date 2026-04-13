@@ -102,19 +102,28 @@ de 0.70; si no se alcanza para los cuatro cilindros, el pipeline se detiene.
 
 \subsection{Seguimiento de animales}
 
-Dentro de cada ROI, el seguimiento opera en tres niveles de respaldo:
+Dentro de cada ROI, el seguimiento opera en cuatro niveles de respaldo:
 
 \begin{enumerate}
-  \item \textbf{Segmentación por sustracción de fondo}: en cada cuadro se calcula
-        la diferencia absoluta con el modelo de fondo y se umbraliza con Otsu
-        \cite{otsu1979}. Si el contorno resultante es consistente con el cuadro
-        anterior (IoU $\geq$ umbral), se acepta como detección válida.
-  \item \textbf{Tracker CSRT}: si la segmentación falla o produce un resultado
-        inconsistente, el tracker CSRT \cite{lukezic2017} mantiene la estimación
-        de posición usando la apariencia del animal en cuadros anteriores.
-  \item \textbf{Congelación de posición}: si CSRT también falla, la última posición
-        conocida se conserva con una confianza decreciente hasta que el detector
-        vuelva a encontrar al animal.
+  \item \textbf{ByteTrack} \cite{zhang2022_bytetrack}: tracker principal. YOLOv8 corre
+        en modo \texttt{.track()} con \texttt{bytetrack.yaml}, lo que activa la
+        asociación por IoU con filtro de Kalman. Las detecciones de alta y baja
+        confianza se asocian en dos pasadas para mantener la trayectoria durante
+        oclusiones breves. Requiere que el modelo \texttt{weights/rat.pt} y
+        Ultralytics estén disponibles.
+  \item \textbf{Segmentación por sustracción de fondo}: si ByteTrack no está
+        disponible (ausencia de GPU, modelo no cargado o fallo del entorno), en
+        cada cuadro se calcula la diferencia absoluta con el modelo de fondo y se
+        umbraliza con Otsu \cite{otsu1979}. Si el contorno resultante es consistente
+        con el cuadro anterior (IoU $\geq$ umbral), se acepta como detección válida.
+  \item \textbf{Tracker CSRT / KCF}: si la segmentación falla o produce un resultado
+        inconsistente, el tracker CSRT \cite{lukezic2017} mantiene la estimación de
+        posición usando la apariencia del animal en cuadros anteriores. KCF
+        \cite{henriques2015} actúa como segundo nivel de respaldo si CSRT no está
+        disponible.
+  \item \textbf{Congelación de posición}: si todos los niveles anteriores fallan,
+        la última posición conocida se conserva con una confianza decreciente hasta
+        que el detector vuelva a encontrar al animal.
 \end{enumerate}
 
 La estimación de la línea de agua se estabiliza con un promedio móvil exponencial
