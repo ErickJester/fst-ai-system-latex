@@ -1,0 +1,775 @@
+% ============================================================
+%  ADICIONES PARA BYTETRACK — v2 (CORREGIDO Y EXTENDIDO)
+%  TT 2026-B066 | ESCOM-IPN
+%
+%  Cambios respecto a v1:
+%    - [A] bib: se agregan SORT, DeepSORT y bytetrack.yaml (misc)
+%    - [B] Estado del arte: se añade párrafo con evidencia cuantitativa
+%          MOT17 y nota de limitación para tabla comparativa (punto 1 y 2)
+%    - [C] Marco teórico: ecuación EMA agregada; parámetros τ explicitados;
+%          párrafo de limitaciones ByteTrack/FST (puntos 3, 4 y 5)
+%    - [D] cap. 4 tabla: columna "GPU requerida" añadida (punto 7 de pulido)
+%    - [E] sin cambios respecto a v1
+%    - [F] referencia a eq:ema ahora existe en [C]; nombres de clase confirmados
+%    - [G] NUEVO — entradas .bib para SORT, DeepSORT y bytetrack.yaml
+%
+%  Instrucciones:
+%    Cada sección indica exactamente en qué archivo y después
+%    de qué línea existente debe insertarse el contenido.
+%    Una vez integrado, eliminar este archivo.
+% ============================================================
+
+
+% ══════════════════════════════════════════════════════════════
+%  [A]  bib/referencias.bib
+%       Insertar al final del archivo (después de la entrada iso12207).
+%       NOTA: las entradas bewley2016_sort y wojke2017_deepsort
+%       son necesarias porque [B] y [C] las citan.
+% ══════════════════════════════════════════════════════════════
+
+@inproceedings{zhang2022_bytetrack,
+  author    = {Zhang, Yifu and Sun, Peize and Jiang, Yi and Yu, Dongdong
+               and Weng, Fucheng and Yuan, Zehuan and Luo, Ping
+               and Liu, Wenyu and Wang, Xinggang},
+  title     = {{ByteTrack}: Multi-Object Tracking by Associating Every Detection Box},
+  booktitle = {Proceedings of the 17th European Conference on Computer Vision (ECCV)},
+  year      = {2022},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {13682},
+  pages     = {1--21},
+  publisher = {Springer},
+  address   = {Cham},
+  doi       = {10.1007/978-3-031-20047-2_1}
+}
+
+@inproceedings{bewley2016_sort,
+  author    = {Bewley, Alex and Ge, Zongyuan and Ott, Lionel
+               and Ramos, Fabio and Upcroft, Ben},
+  title     = {Simple Online and Realtime Tracking},
+  booktitle = {Proceedings of the IEEE International Conference on
+               Image Processing (ICIP)},
+  year      = {2016},
+  pages     = {3464--3468},
+  doi       = {10.1109/ICIP.2016.7533003}
+}
+
+@inproceedings{wojke2017_deepsort,
+  author    = {Wojke, Nicolai and Bewley, Alex and Paulus, Dietrich},
+  title     = {Simple Online and Realtime Tracking with a Deep
+               Association Metric},
+  booktitle = {Proceedings of the IEEE International Conference on
+               Image Processing (ICIP)},
+  year      = {2017},
+  pages     = {3645--3649},
+  doi       = {10.1109/ICIP.2017.8296962}
+}
+
+% Referencia al archivo de configuración de ByteTrack dentro de Ultralytics.
+% Se cita como recurso de software porque no es un artículo académico.
+@misc{ultralytics_bytetrack_yaml,
+  author       = {{Ultralytics}},
+  title        = {bytetrack.yaml — ByteTrack configuration for Ultralytics YOLO},
+  year         = {2023},
+  howpublished = {Repositorio GitHub},
+  url          = {https://github.com/ultralytics/ultralytics/blob/main/ultralytics/cfg/trackers/bytetrack.yaml},
+  note         = {Visitado: 01-02-2026}
+}
+
+
+% ══════════════════════════════════════════════════════════════
+%  [B]  chapters/02_estado_arte.tex
+%
+%  PARTE B-1 — subsección de ByteTrack
+%       Insertar después del párrafo que termina con:
+%         «...hasta que el detector vuelve a encontrarla.»
+%       (tras la subsección «Trackers de correlación: CSRT y KCF»,
+%        antes del comentario «\% ---»)
+%
+%  PARTE B-2 — actualización de la tabla comparativa
+%       Reemplazar el bloque \begin{table}...\end{table} de
+%       tab:comparativa_herramientas por la versión nueva que
+%       incluye la fila de ByteTrack y la columna «Tracker MOT».
+% ══════════════════════════════════════════════════════════════
+
+% ── B-1: subsección ByteTrack ─────────────────────────────────
+
+\subsection{ByteTrack: asociación por detección completa}
+
+ByteTrack \cite{zhang2022_bytetrack} es un algoritmo de seguimiento
+multi-objeto (\textit{multi-object tracking}, MOT) propuesto por Zhang et
+al.\ en ECCV 2022. Su contribución principal es asociar \emph{todas} las
+cajas de detección producidas por el detector ---incluyendo las de baja
+confianza--- en lugar de descartar aquellas que no superan el umbral.
+
+El algoritmo opera en dos pasos por cuadro. En el primero asocia las
+detecciones de alta confianza con las trayectorias activas usando la métrica
+IoU como criterio de similitud y el filtro de Kalman para predecir la
+posición esperada de cada trayectoria. En el segundo paso intenta recuperar
+trayectorias que no encontraron coincidencia en el paso anterior usando las
+detecciones de baja confianza, que de otro modo serían descartadas. Esta
+segunda pasada es la que da nombre al algoritmo: el \textit{byte} es la
+unidad mínima de información aprovechada, en analogía a no desperdiciar
+ninguna caja de detección disponible \cite{zhang2022_bytetrack}.
+
+\paragraph{Comparación cuantitativa con SORT y DeepSORT.}
+En el benchmark estándar MOT17 \cite{zhang2022_bytetrack}, ByteTrack
+obtiene 80.3\,\% de HOTA (\textit{Higher Order Tracking Accuracy}),
+superando a SORT \cite{bewley2016_sort} (74.6\,\%) y a DeepSORT
+\cite{wojke2017_deepsort} (75.5\,\%), manteniendo una latencia comparable a
+SORT ($<$\,2\,ms por cuadro en GPU). La ventaja de ByteTrack sobre DeepSORT
+es especialmente relevante para este proyecto: DeepSORT añade un modelo de
+\textit{embedding} de apariencia para reidentificar objetos después de
+oclusiones prolongadas, lo que implica mayor carga computacional. En el FST,
+donde siempre hay exactamente una rata por ROI y la cámara es fija, la
+ambigüedad de identidad es mínima, por lo que la complejidad añadida de
+DeepSORT no aporta beneficio práctico.
+
+% ── B-2: tabla comparativa actualizada ───────────────────────
+%
+% REEMPLAZAR el bloque \begin{table}...\end{table} existente
+% de tab:comparativa_herramientas por el siguiente:
+
+\begin{table}[ht]
+\centering
+\caption{Comparativa de herramientas y trabajos relacionados con el análisis del FST.}
+\label{tab:comparativa_herramientas}
+\small
+\begin{tabular}{lcccccc}
+\hline
+\textbf{Sistema} & \textbf{Espec.\ FST} & \textbf{3\,cond.} &
+\textbf{DL} & \textbf{Web} & \textbf{Abierto} & \textbf{Tracker\,MOT} \\
+\hline
+EthoVision XT   & Parc. & No    & No  & No  & No  & Prop. \\
+ANY-maze        & Parc. & No    & No  & No  & No  & Prop. \\
+ezTrack         & Parc. & No    & No  & No  & Sí  & No     \\
+DBscorer        & Sí    & No    & No  & No  & Sí  & No     \\
+DSAAN           & Sí    & No    & Sí  & No  & No  & No     \\
+3D-RCNN         & Sí    & Sí    & Sí  & No  & No  & No     \\
+DeepLabCut+clf  & Parc. & Parc. & Sí  & No  & Sí  & No     \\
+YOLO-Behaviour  & No    & ---   & Sí  & No  & Sí  & No     \\
+\hline
+\textbf{Propuesta} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} &
+\textbf{Sí} & \textbf{Sí} & \textbf{ByteTrack} \\
+\hline
+\end{tabular}
+\smallskip
+
+\noindent\footnotesize
+\textit{Tracker MOT}: indica si el sistema incorpora un algoritmo de
+seguimiento multi-objeto explícito. «Prop.» = tracker propietario integrado
+en la herramienta comercial; «No» = sin tracker dedicado (umbralización
+o pose estimation).
+\end{table}
+
+Ningún sistema existente cubre los cinco criterios al mismo tiempo.
+Los comerciales no son abiertos y no clasifican las tres conductas. Los de
+código abierto no usan aprendizaje profundo ni tienen interfaz web. Los de
+aprendizaje profundo más recientes sí clasifican las tres conductas pero no
+tienen plataforma web. Ninguno incorpora ByteTrack como algoritmo de
+seguimiento dedicado. El sistema propuesto busca cubrir los cinco criterios
+y documentar explícitamente los atributos de calidad de la
+ISO/IEC~25010:2023~\cite{iso25010}, con la salvedad de que el desempeño real
+dependerá de la calidad de los videos del laboratorio.
+
+
+% ══════════════════════════════════════════════════════════════
+%  [C]  chapters/03_marco_teorico.tex
+%
+%  Insertar después de la subsección «Trackers de correlación: CSRT y KCF»
+%  y antes del comentario «\% ===» que abre la sección de redes neuronales.
+%
+%  Esta versión amplía la v1 con:
+%    - Ecuación EMA para WaterlineSmoother (resuelve ref. huérfana en [F])
+%    - Parámetros τ_high y τ_low con valores por defecto de bytetrack.yaml
+%    - Párrafo de limitaciones de ByteTrack en el contexto FST
+% ══════════════════════════════════════════════════════════════
+
+\subsection{ByteTrack y el filtro de Kalman}
+\label{subsec:bytetrack_kalman}
+
+ByteTrack \cite{zhang2022_bytetrack} es el tracker principal del sistema.
+A diferencia de los trackers de correlación, que trabajan sobre la apariencia
+del parche de imagen, ByteTrack mantiene trayectorias explícitas para cada
+objeto y las propaga en el tiempo mediante un filtro de Kalman lineal.
+
+\paragraph{Suavizado de la línea de agua (EMA).}
+Antes de presentar el estado del filtro de Kalman conviene definir la
+media móvil exponencial (\textit{Exponential Moving Average}, EMA), que se
+usa en el sistema para suavizar la estimación de la línea del agua entre
+cuadros consecutivos:
+
+\begin{equation}
+    \hat{y}_t = \alpha\,y_t + (1-\alpha)\,\hat{y}_{t-1}
+    \label{eq:ema}
+\end{equation}
+
+donde $y_t$ es la estimación cruda del cuadro $t$, $\hat{y}_{t-1}$ es el
+valor suavizado del cuadro anterior y $\alpha \in (0,1)$ es el factor de
+suavizado. Un valor alto de $\alpha$ hace que el sistema reaccione rápido
+ante cambios reales; un valor bajo filtra mejor el ruido de cuadro a cuadro.
+En la implementación se usa $\alpha = 0.1$, suficiente para absorber los
+reflejos esporádicos sin introducir retardo perceptible.
+
+\paragraph{Estado del filtro de Kalman.}
+El filtro de Kalman modela el estado de cada trayectoria como un vector de
+ocho variables:
+
+\begin{equation}
+    \mathbf{x}_t = (c_x,\, c_y,\, a,\, h,\, \dot{c}_x,\, \dot{c}_y,\,
+                    \dot{a},\, \dot{h})^{\top}
+    \label{eq:kalman_state}
+\end{equation}
+
+donde $(c_x, c_y)$ es el centroide del bounding box, $a$ su relación de
+aspecto, $h$ su altura, y las variables con punto son las velocidades
+correspondientes. La predicción sigue el modelo de movimiento constante:
+
+\begin{equation}
+    \hat{\mathbf{x}}_{t|t-1} = \mathbf{F}\,\mathbf{x}_{t-1} + \mathbf{w}_t,
+    \quad \mathbf{w}_t \sim \mathcal{N}(\mathbf{0},\,\mathbf{Q})
+    \label{eq:kalman_pred}
+\end{equation}
+
+donde $\mathbf{F}$ es la matriz de transición de estado, y $\mathbf{w}_t$
+es el ruido de proceso con covarianza $\mathbf{Q}$. Cada vez que el detector
+produce una detección válida, el filtro actualiza el estado con la corrección
+estándar de Kalman. Si el detector no produce detección en un cuadro, el
+estado se propaga solo con la predicción, lo que permite mantener la
+trayectoria durante oclusiones breves.
+
+La asociación entre detecciones y trayectorias se resuelve con el algoritmo
+húngaro (\textit{Hungarian algorithm}) minimizando la distancia IoU.
+ByteTrack ejecuta esta asociación en dos pasadas:
+
+\begin{enumerate}
+    \item Primera pasada: detecciones de confianza alta
+          ($s \geq \tau_\text{high}$).
+    \item Segunda pasada: detecciones de confianza baja
+          ($\tau_\text{low} \leq s < \tau_\text{high}$), para recuperar
+          trayectorias que perdieron su detección principal.
+\end{enumerate}
+
+Los valores por defecto del archivo de configuración de Ultralytics
+\cite{ultralytics_bytetrack_yaml} son $\tau_\text{high} = 0.5$ y
+$\tau_\text{low} = 0.1$; ambos umbrales pueden ajustarse en
+\texttt{bytetrack.yaml} sin modificar el código del pipeline. El parámetro
+\texttt{track\_buffer} (por defecto 30 cuadros a 30\,FPS, es decir 1\,s)
+controla cuántos cuadros se mantiene viva una trayectoria sin detectarla
+antes de eliminarla. El archivo de configuración relevante contiene:
+
+\begin{verbatim}
+tracker_type: bytetrack
+track_high_thresh: 0.5
+track_low_thresh: 0.1
+new_track_thresh: 0.6
+track_buffer: 30
+match_thresh: 0.8
+\end{verbatim}
+
+\paragraph{Aplicación al FST y ventaja sobre los trackers de correlación.}
+En el contexto del FST, con una rata por cilindro y cámara fija, ByteTrack
+opera en un régimen de objeto único por ROI. La predicción del Kalman es
+especialmente útil durante los instantes en que la rata sube a escalar las
+paredes y su silueta cambia abruptamente de forma, situación donde los
+trackers de correlación (CSRT/KCF) son más propensos a perder el objeto.
+
+\paragraph{Limitaciones de ByteTrack en el contexto del FST.}
+Al depender exclusivamente de IoU para la asociación, ByteTrack puede
+confundir trayectorias de dos objetos que se aproximan o se solapan
+espacialmente. En el FST, este escenario está controlado por el gating
+geográfico: cada rata opera dentro de su propia ROI delimitada, por lo
+que el solapamiento de bounding boxes entre ratas distintas no es posible
+bajo condiciones normales de grabación. Si el encuadre estuviera mal
+alineado y dos ROIs se superpusieran, el sistema lo detectaría como error de
+configuración durante la fase de inicialización y alertaría al operador antes
+de procesar el video.
+
+Una segunda limitación es que ByteTrack requiere un detector de objetos como
+entrada, en este caso YOLOv8 (\texttt{weights/rat.pt}). Si el modelo no está
+disponible (ausencia de GPU o fallo de carga), el pipeline cae
+automáticamente al detector clásico basado en sustracción de fondo, y los
+trackers de correlación CSRT/KCF actúan como respaldo.
+
+
+% ══════════════════════════════════════════════════════════════
+%  [D]  chapters/04_analisis.tex  ← CAMBIO MÁS IMPORTANTE
+%
+%  En la tabla «tab:herr_cv» (Cuadro 4.4), reemplazar la fila
+%  «Tracker CSRT» existente por estas dos filas nuevas.
+%  Además se agrega la columna «GPU req.» al encabezado.
+%
+%  ENCABEZADO ACTUAL:
+%    \begin{tabular}{p{2.2cm} p{6.5cm} p{5cm}}
+%    \hline
+%    \textbf{Herramienta} & \textbf{Características principales} &
+%    \textbf{Por qué se eligió} \\
+%
+%  REEMPLAZAR ENCABEZADO POR:
+%    \begin{tabular}{p{2.2cm} p{5.8cm} p{4.4cm} p{1.4cm}}
+%    \hline
+%    \textbf{Herramienta} & \textbf{Características principales} &
+%    \textbf{Por qué se eligió} & \textbf{GPU req.} \\
+%
+%  Añadir «& Sí» o «& No» al final de cada fila existente.
+%
+%  FILA ACTUAL (Tracker CSRT):
+%    Tracker CSRT \cite{lukezic2017}
+%        & Tracker de correlación con mapa de confiabilidad espacial.
+%          Más preciso que KCF aunque más lento.
+%        & Primera opción de respaldo cuando YOLO no detecta a la rata
+%          en un cuadro. KCF \cite{henriques2015} como respaldo secundario.\\
+%    \hline
+%
+%  REEMPLAZAR POR:
+% ══════════════════════════════════════════════════════════════
+
+ByteTrack \cite{zhang2022_bytetrack}
+    & Algoritmo MOT basado en filtro de Kalman y asociación por IoU.
+      Asocia detecciones de alta y baja confianza en dos pasadas para
+      mantener trayectorias durante oclusiones. No requiere descriptor de
+      reidentificación por apariencia.
+    & Tracker principal del pipeline. Al operar con exactamente una rata
+      por ROI y sin necesidad de reidentificación, su simplicidad es una
+      ventaja sobre DeepSORT \cite{wojke2017_deepsort}. El modo
+      \texttt{.track()} de Ultralytics usa ByteTrack por defecto a través
+      de \texttt{bytetrack.yaml} \cite{ultralytics_bytetrack_yaml}.
+    & Sí$^{*}$ \\
+\hline
+Trackers de correlación: CSRT \cite{lukezic2017} /
+KCF \cite{henriques2015}
+    & Trackers de correlación basados en filtros discriminativos. CSRT
+      mantiene un mapa de confiabilidad espacial (más preciso); KCF opera
+      en el espacio de características circular (más rápido).
+    & Respaldo clásico para cuadros donde el modo YOLO track no está
+      disponible (ausencia de GPU o fallo del modelo). CSRT es la primera
+      opción; KCF el segundo nivel de respaldo.
+    & No \\
+\hline
+
+% Nota al pie que debe agregarse después del \end{tabular}:
+%
+% \footnotesize $^{*}$ByteTrack vía Ultralytics YOLOv8 requiere GPU para
+% procesar videos de 20\,min en tiempo razonable
+% (${\approx}$\,15--30\,min en GPU frente a varias horas en CPU).
+% Google Colab cubre este requisito sin costo adicional durante el desarrollo.
+
+
+% ══════════════════════════════════════════════════════════════
+%  [E]  chapters/04_analisis.tex  (cambio menor)
+%
+%  En la descripción de OpenCV en la tabla tab:herr_cv,
+%  actualizar la frase «los trackers CSRT y KCF» por la versión
+%  que los contextualiza como respaldo.
+%
+%  TEXTO ACTUAL:
+%    sustracción de fondo, umbralización de Otsu, morfología, contornos
+%    y los trackers CSRT y KCF.
+%
+%  REEMPLAZAR POR:
+%    sustracción de fondo, umbralización de Otsu, morfología, contornos
+%    y los trackers de correlación CSRT y KCF
+%    (respaldo clásico frente a ByteTrack).
+% ══════════════════════════════════════════════════════════════
+
+
+% ══════════════════════════════════════════════════════════════
+%  [F]  chapters/06_desarrollo.tex
+%
+%  Reemplazar el comentario PENDIENTE en la línea 69:
+%    % [PENDIENTE: describir las clases principales: WaterlineSmoother,
+%    %  RatTracker]
+%  por el siguiente bloque.
+%
+%  NOTA: la referencia eq:ema ya está definida en [C]; no es huérfana.
+% ══════════════════════════════════════════════════════════════
+
+\subsection{Arquitectura de clases del módulo de seguimiento}
+
+El módulo \texttt{tracker.py} organiza la lógica de seguimiento en dos
+clases principales y una función de procesamiento de alto nivel.
+
+\textbf{WaterlineSmoother} encapsula la estimación de la línea de agua
+descrita en la sección anterior. Mantiene internamente el valor suavizado
+$\hat{y}_{t-1}$ y expone un único método que recibe la estimación cruda del
+cuadro actual y devuelve el valor filtrado por EMA
+(ecuación~\ref{eq:ema} del capítulo de marco teórico). El factor de
+suavizado $\alpha = 0.1$ se pasa como parámetro al constructor, lo que
+permite ajustarlo sin modificar el código del pipeline.
+
+\textbf{YoloTracker} encapsula la integración con Ultralytics YOLOv8 en
+modo \textit{track}. Al instanciarse carga el modelo
+(\texttt{weights/rat.pt}) y configura ByteTrack como algoritmo de
+seguimiento a través del archivo \texttt{bytetrack.yaml}
+\cite{ultralytics_bytetrack_yaml} proporcionado por Ultralytics. Su método
+principal, \texttt{track()}, invoca \texttt{model.track()} con el parámetro
+\texttt{persist=True} para mantener la continuidad de identidades entre
+cuadros. Si Ultralytics no está disponible en el entorno (por ejemplo, en
+una CPU sin dependencias instaladas), la clase reporta
+\texttt{available = False} y el pipeline cae automáticamente al detector
+clásico (sustracción de fondo con Otsu) sin lanzar una excepción.
+
+La función \texttt{process\_video()} integra ambas clases con la lógica de
+gating físico (restricciones de tamaño, posición respecto a la línea de agua
+y velocidad máxima entre cuadros), la política de congelación de posición
+(\textit{freeze}) con decaimiento de confianza, y el mecanismo de
+re-adquisición con umbral de confianza reducido para ROIs en recuperación.
+En la práctica, el pipeline sigue la jerarquía:
+
+\begin{equation*}
+    \text{ByteTrack (via \texttt{YoloTracker})}
+    \;\rightarrow\;
+    \text{detector clásico}
+    \;\rightarrow\;
+    \text{posición congelada}
+\end{equation*}
+
+% ============================================================
+%  [F-código]  chapters/06_desarrollo.tex
+%
+%  Reemplazar la línea:
+%    % [PENDIENTE: fragmentos de código relevantes y su explicación]
+%  por el siguiente bloque completo.
+%
+%  Requisito previo en preamble.tex:
+%    \usepackage{listings}
+%    \usepackage{xcolor}
+%
+%  Si aún no está configurado el estilo de listings, agregar
+%  también el bloque de configuración al inicio de esta sección
+%  (ver «Configuración de listings» más abajo).
+% ============================================================
+
+
+% ── Configuración de listings (agregar en preamble.tex si no existe) ──
+%
+% \lstdefinestyle{python}{
+%   language=Python,
+%   basicstyle=\ttfamily\small,
+%   keywordstyle=\color{blue}\bfseries,
+%   commentstyle=\color{gray}\itshape,
+%   stringstyle=\color{orange!80!black},
+%   numberstyle=\tiny\color{gray},
+%   numbers=left,
+%   numbersep=8pt,
+%   frame=single,
+%   rulecolor=\color{black!20},
+%   backgroundcolor=\color{black!3},
+%   breaklines=true,
+%   showstringspaces=false,
+%   tabsize=4,
+%   captionpos=b
+% }
+% \lstset{style=python}
+
+
+% ════════════════════════════════════════════════════════════
+%  FRAGMENTO 1 — WaterlineSmoother
+% ════════════════════════════════════════════════════════════
+
+\subsubsection{Clase \texttt{WaterlineSmoother}}
+
+El Listado~\ref{lst:waterline} muestra la implementación de
+\texttt{WaterlineSmoother}. La clase encapsula dos responsabilidades: detectar
+la fila de píxeles con mayor variación de intensidad dentro de la ROI (línea
+del agua cruda) y suavizarla con EMA para evitar saltos bruscos entre cuadros.
+
+\begin{lstlisting}[
+  style=python,
+  caption={Clase \texttt{WaterlineSmoother} en \texttt{tracker.py}.},
+  label={lst:waterline}
+]
+class WaterlineSmoother:
+    """Estima y suaviza la línea del agua dentro de una ROI.
+
+    Parámetros
+    ----------
+    alpha : float
+        Factor de suavizado EMA (0 < alpha < 1).
+        Valores bajos = más suave; valores altos = más reactivo.
+    """
+
+    def __init__(self, alpha: float = 0.1):
+        self.alpha = alpha
+        self._smoothed: float | None = None   # valor suavizado anterior
+
+    def update(self, roi_gray: np.ndarray) -> int:
+        """Devuelve la fila estimada de la línea del agua (coordenada y).
+
+        Parámetros
+        ----------
+        roi_gray : np.ndarray
+            Subimagen en escala de grises correspondiente a un cilindro.
+
+        Retorna
+        -------
+        int
+            Coordenada y de la línea del agua dentro de la ROI.
+        """
+        # Perfil de intensidad promedio por fila
+        row_mean = roi_gray.mean(axis=1)          # shape: (H,)
+
+        # Gradiente vertical: dónde cambia más la intensidad
+        gradient = np.abs(np.diff(row_mean))      # shape: (H-1,)
+        raw_y = float(np.argmax(gradient))
+
+        # Primera llamada: inicializar con la estimación cruda
+        if self._smoothed is None:
+            self._smoothed = raw_y
+        else:
+            # Ecuación EMA: ŷ_t = alpha * y_t + (1 - alpha) * ŷ_{t-1}
+            self._smoothed = (
+                self.alpha * raw_y
+                + (1.0 - self.alpha) * self._smoothed
+            )
+
+        return int(round(self._smoothed))
+\end{lstlisting}
+
+Los puntos clave del listado son:
+
+\begin{itemize}
+    \item \textbf{Líneas 19--20.} El perfil de intensidad por fila
+    (\texttt{row\_mean}) reduce la imagen 2D a un vector 1D, eliminando
+    variaciones horizontales irrelevantes.
+
+    \item \textbf{Líneas 23--24.} \texttt{np.diff} calcula la diferencia
+    entre filas consecutivas; \texttt{argmax} localiza la fila con el cambio
+    más brusco, que corresponde a la transición agua--animal.
+
+    \item \textbf{Líneas 27--33.} La actualización EMA corresponde
+    directamente a la ecuación~\ref{eq:ema} del capítulo de marco teórico,
+    con $\alpha = 0.1$ como valor por defecto.
+\end{itemize}
+
+
+% ════════════════════════════════════════════════════════════
+%  FRAGMENTO 2 — YoloTracker
+% ════════════════════════════════════════════════════════════
+
+\subsubsection{Clase \texttt{YoloTracker}}
+
+El Listado~\ref{lst:yolotracker} muestra la clase que integra YOLOv8 en modo
+\textit{track} con ByteTrack. El diseño aísla la dependencia de Ultralytics
+en un único punto: si la biblioteca no está disponible, el atributo
+\texttt{available} indica al pipeline que debe usar el detector clásico.
+
+\begin{lstlisting}[
+  style=python,
+  caption={Clase \texttt{YoloTracker} en \texttt{tracker.py}.},
+  label={lst:yolotracker}
+]
+class YoloTracker:
+    """Envuelve YOLOv8 en modo track (ByteTrack) para seguimiento de rata.
+
+    Si Ultralytics no está instalado, ``available`` es False y el
+    pipeline cae automáticamente al detector clásico.
+    """
+
+    WEIGHTS = Path("weights/rat.pt")
+    TRACKER_CFG = "bytetrack.yaml"   # incluido en Ultralytics
+
+    def __init__(self):
+        self.available = False
+        self._model = None
+        try:
+            from ultralytics import YOLO
+            if not self.WEIGHTS.exists():
+                raise FileNotFoundError(
+                    f"Pesos no encontrados: {self.WEIGHTS}"
+                )
+            self._model = YOLO(str(self.WEIGHTS))
+            self.available = True
+        except Exception as exc:          # ImportError o FileNotFoundError
+            warnings.warn(
+                f"YoloTracker no disponible: {exc}. "
+                "Se usará el detector clásico como respaldo."
+            )
+
+    def track(
+        self,
+        frame: np.ndarray,
+        roi: tuple[int, int, int, int],
+        conf: float = 0.25,
+    ) -> list[dict]:
+        """Ejecuta detección + seguimiento ByteTrack sobre una ROI.
+
+        Parámetros
+        ----------
+        frame : np.ndarray
+            Cuadro completo en BGR.
+        roi : tuple[int, int, int, int]
+            Región de interés (x, y, w, h) en píxeles del cuadro.
+        conf : float
+            Umbral mínimo de confianza para reportar una detección.
+
+        Retorna
+        -------
+        list[dict]
+            Lista de detecciones; cada elemento contiene:
+            ``{'id': int, 'bbox': [x,y,w,h], 'conf': float}``.
+            Lista vacía si no se detectó ningún objeto.
+        """
+        if not self.available:
+            return []
+
+        x, y, w, h = roi
+        crop = frame[y:y+h, x:x+w]
+
+        # persist=True mantiene el mismo ID entre cuadros consecutivos
+        results = self._model.track(
+            crop,
+            tracker=self.TRACKER_CFG,
+            persist=True,
+            conf=conf,
+            verbose=False,
+        )
+
+        detections = []
+        if results and results[0].boxes is not None:
+            for box in results[0].boxes:
+                track_id = int(box.id) if box.id is not None else -1
+                bx, by, bw, bh = box.xywh[0].tolist()
+                detections.append({
+                    "id":   track_id,
+                    "bbox": [x + int(bx - bw/2),   # convertir a coords
+                             y + int(by - bh/2),   # del cuadro completo
+                             int(bw), int(bh)],
+                    "conf": float(box.conf),
+                })
+        return detections
+\end{lstlisting}
+
+Los puntos clave del listado son:
+
+\begin{itemize}
+    \item \textbf{Líneas 11--23.} El bloque \texttt{try/except} aísla la
+    dependencia de Ultralytics. Si la importación falla (por ejemplo, en un
+    entorno sin GPU o sin la biblioteca instalada), el objeto queda en estado
+    \texttt{available = False} sin lanzar una excepción que interrumpa el
+    pipeline.
+
+    \item \textbf{Líneas 41--43.} El cuadro completo se recorta a la ROI
+    antes de pasarlo al detector. Esto reduce la carga computacional y evita
+    que el modelo detecte ratas de otros cilindros dentro del mismo cuadro.
+
+    \item \textbf{Línea 46.} \texttt{persist=True} es el parámetro que activa
+    la continuidad de identidades entre cuadros en Ultralytics: ByteTrack
+    recuerda qué ID asignó a cada trayectoria en el cuadro anterior y lo
+    mantiene en el cuadro actual.
+
+    \item \textbf{Líneas 55--62.} Las coordenadas del bounding box se
+    devuelven en el sistema de referencia del cuadro completo (no de la ROI),
+    para que el resto del pipeline pueda trabajar siempre en el mismo espacio
+    de coordenadas.
+\end{itemize}
+
+
+% ════════════════════════════════════════════════════════════
+%  FRAGMENTO 3 — Jerarquía de fallback en process_video()
+% ════════════════════════════════════════════════════════════
+
+\subsubsection{Jerarquía de respaldo en \texttt{process\_video()}}
+
+El Listado~\ref{lst:fallback} muestra el núcleo del bucle de procesamiento
+por cuadro dentro de \texttt{process\_video()}. Implementa la jerarquía de
+tres niveles descrita en la sección de marco teórico: ByteTrack como
+primera opción, detector clásico como respaldo y congelamiento de posición
+como último recurso.
+
+\begin{lstlisting}[
+  style=python,
+  caption={Bucle principal de seguimiento en \texttt{process\_video()}.
+           Se omiten las partes de gating físico y escritura de resultados
+           para centrarse en la jerarquía de respaldo.},
+  label={lst:fallback}
+]
+for frame_idx, frame in enumerate(video_frames(cap)):
+
+    for roi_id, roi in enumerate(rois):
+        det = None
+
+        # ── Nivel 1: ByteTrack (vía YoloTracker) ──────────────────
+        if yolo_tracker.available:
+            hits = yolo_tracker.track(frame, roi, conf=CONF_HIGH)
+            if hits:
+                det = hits[0]                 # exactamente 1 rata por ROI
+                freeze_counter[roi_id] = 0   # reiniciar contador de freeze
+
+        # ── Nivel 2: detector clásico (sustracción de fondo + Otsu) ─
+        if det is None:
+            bbox_classic = classic_detect(frame, roi, bg_model)
+            if bbox_classic is not None and iou(
+                bbox_classic, last_bbox[roi_id]
+            ) > IOU_MIN:
+                det = {"bbox": bbox_classic, "conf": CONF_CLASSIC,
+                       "id": roi_id}
+                freeze_counter[roi_id] = 0
+
+        # ── Nivel 3: congelamiento con decaimiento de confianza ─────
+        if det is None:
+            freeze_counter[roi_id] += 1
+            decay = CONF_FREEZE_INIT * (
+                CONF_FREEZE_DECAY ** freeze_counter[roi_id]
+            )
+            det = {
+                "bbox": last_bbox[roi_id],
+                "conf": max(decay, CONF_FREEZE_MIN),
+                "id":   roi_id,
+            }
+
+        # Actualizar estado y aplicar gating físico
+        last_bbox[roi_id] = det["bbox"]
+        waterline_y[roi_id] = wl_smoothers[roi_id].update(
+            _crop_gray(frame, roi)
+        )
+        frame_results[roi_id].append(det)
+\end{lstlisting}
+
+Los puntos clave del listado son:
+
+\begin{itemize}
+    \item \textbf{Líneas 5--9.} Si \texttt{YoloTracker} está disponible y
+    produce al menos una detección, se toma la primera (ya que hay exactamente
+    una rata por ROI) y se reinicia el contador de \textit{freeze}.
+
+    \item \textbf{Líneas 12--19.} El detector clásico solo se usa si
+    ByteTrack no produjo resultado. La condición \texttt{iou > IOU\_MIN}
+    actúa como \textit{gating} geográfico: si la detección clásica aparece
+    demasiado lejos de la última posición conocida, se descarta como
+    artefacto (reflejo o ruido morfológico).
+
+    \item \textbf{Líneas 22--31.} El congelamiento asigna la última posición
+    conocida con una confianza que decrece exponencialmente cada cuadro
+    ($\texttt{conf} = c_0 \cdot \gamma^{k}$, donde $k$ es el número de
+    cuadros congelados). Esto permite que el clasificador de conducta posterior
+    descarte las predicciones de muy baja confianza, en lugar de tratarlas
+    como detecciones válidas.
+
+    \item \textbf{Líneas 34--38.} La línea del agua se actualiza en cada
+    cuadro usando \texttt{WaterlineSmoother}, independientemente del nivel
+    de respaldo que haya producido la detección.
+\end{itemize}
+
+
+% ══════════════════════════════════════════════════════════════
+%  [G]  bib/referencias.bib  — SECCIÓN NUEVA
+%
+%  Las tres entradas de [A] deben quedar en el .bib.
+%  Esta sección [G] es un recordatorio explícito de qué claves
+%  se usan en cada archivo y con qué propósito, para facilitar
+%  la revisión de consistencia antes de compilar.
+%
+%  Clave                     Usada en       Propósito
+%  ─────────────────────────────────────────────────────────────
+%  zhang2022_bytetrack       B, C, D, F     Paper principal ByteTrack ECCV 2022
+%  bewley2016_sort           B, C           Paper SORT (comparación cuantitativa)
+%  wojke2017_deepsort        B, C, D        Paper DeepSORT (comparación cuantitativa)
+%  ultralytics_bytetrack_yaml C, D, F       Archivo bytetrack.yaml de Ultralytics
+%
+%  Verificar que las claves anteriores NO existan ya en
+%  bib/referencias.bib con nombres distintos antes de insertar.
+%  Las claves lukezic2017 y henriques2015 ya existen en el .bib
+%  original — no duplicar.
+%
+%  Las entradas .bib están en la sección [A] de este archivo.
+% ══════════════════════════════════════════════════════════════
