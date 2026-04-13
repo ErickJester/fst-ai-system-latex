@@ -89,7 +89,293 @@ ByteTrack (vía \texttt{YoloTracker})
 $\rightarrow$ detector clásico
 $\rightarrow$ posición congelada.
 
-% [PENDIENTE: fragmentos de c\'{o}digo relevantes y su explicaci\'{o}n]
+% ════════════════════════════════════════════════════════════
+%  FRAGMENTO 1 — WaterlineSmoother
+% ════════════════════════════════════════════════════════════
+
+\subsubsection{Clase \texttt{WaterlineSmoother}}
+
+El Listado~\ref{lst:waterline} muestra la implementación de
+\texttt{WaterlineSmoother}. La clase encapsula dos responsabilidades: detectar
+la fila de píxeles con mayor variación de intensidad dentro de la ROI (línea
+del agua cruda) y suavizarla con EMA para evitar saltos bruscos entre cuadros.
+
+\begin{lstlisting}[
+  style=python,
+  caption={Clase \texttt{WaterlineSmoother} en \texttt{tracker.py}.},
+  label={lst:waterline}
+]
+class WaterlineSmoother:
+    """Estima y suaviza la línea del agua dentro de una ROI.
+
+    Parámetros
+    ----------
+    alpha : float
+        Factor de suavizado EMA (0 < alpha < 1).
+        Valores bajos = más suave; valores altos = más reactivo.
+    """
+
+    def __init__(self, alpha: float = 0.1):
+        self.alpha = alpha
+        self._smoothed: float | None = None   # valor suavizado anterior
+
+    def update(self, roi_gray: np.ndarray) -> int:
+        """Devuelve la fila estimada de la línea del agua (coordenada y).
+
+        Parámetros
+        ----------
+        roi_gray : np.ndarray
+            Subimagen en escala de grises correspondiente a un cilindro.
+
+        Retorna
+        -------
+        int
+            Coordenada y de la línea del agua dentro de la ROI.
+        """
+        # Perfil de intensidad promedio por fila
+        row_mean = roi_gray.mean(axis=1)          # shape: (H,)
+
+        # Gradiente vertical: dónde cambia más la intensidad
+        gradient = np.abs(np.diff(row_mean))      # shape: (H-1,)
+        raw_y = float(np.argmax(gradient))
+
+        # Primera llamada: inicializar con la estimación cruda
+        if self._smoothed is None:
+            self._smoothed = raw_y
+        else:
+            # Ecuación EMA: ŷ_t = alpha * y_t + (1 - alpha) * ŷ_{t-1}
+            self._smoothed = (
+                self.alpha * raw_y
+                + (1.0 - self.alpha) * self._smoothed
+            )
+
+        return int(round(self._smoothed))
+\end{lstlisting}
+
+Los puntos clave del listado son:
+
+\begin{itemize}
+    \item \textbf{Líneas 19--20.} El perfil de intensidad por fila
+    (\texttt{row\_mean}) reduce la imagen 2D a un vector 1D, eliminando
+    variaciones horizontales irrelevantes.
+
+    \item \textbf{Líneas 23--24.} \texttt{np.diff} calcula la diferencia
+    entre filas consecutivas; \texttt{argmax} localiza la fila con el cambio
+    más brusco, que corresponde a la transición agua--animal.
+
+    \item \textbf{Líneas 27--33.} La actualización EMA corresponde
+    directamente a la ecuación~\ref{eq:ema} del capítulo de marco teórico,
+    con $\alpha = 0.1$ como valor por defecto.
+\end{itemize}
+
+
+% ════════════════════════════════════════════════════════════
+%  FRAGMENTO 2 — YoloTracker
+% ════════════════════════════════════════════════════════════
+
+\subsubsection{Clase \texttt{YoloTracker}}
+
+El Listado~\ref{lst:yolotracker} muestra la clase que integra YOLOv8 en modo
+\textit{track} con ByteTrack. El diseño aísla la dependencia de Ultralytics
+en un único punto: si la biblioteca no está disponible, el atributo
+\texttt{available} indica al pipeline que debe usar el detector clásico.
+
+\begin{lstlisting}[
+  style=python,
+  caption={Clase \texttt{YoloTracker} en \texttt{tracker.py}.},
+  label={lst:yolotracker}
+]
+class YoloTracker:
+    """Envuelve YOLOv8 en modo track (ByteTrack) para seguimiento de rata.
+
+    Si Ultralytics no está instalado, ``available`` es False y el
+    pipeline cae automáticamente al detector clásico.
+    """
+
+    WEIGHTS = Path("weights/rat.pt")
+    TRACKER_CFG = "bytetrack.yaml"   # incluido en Ultralytics
+
+    def __init__(self):
+        self.available = False
+        self._model = None
+        try:
+            from ultralytics import YOLO
+            if not self.WEIGHTS.exists():
+                raise FileNotFoundError(
+                    f"Pesos no encontrados: {self.WEIGHTS}"
+                )
+            self._model = YOLO(str(self.WEIGHTS))
+            self.available = True
+        except Exception as exc:          # ImportError o FileNotFoundError
+            warnings.warn(
+                f"YoloTracker no disponible: {exc}. "
+                "Se usará el detector clásico como respaldo."
+            )
+
+    def track(
+        self,
+        frame: np.ndarray,
+        roi: tuple[int, int, int, int],
+        conf: float = 0.25,
+    ) -> list[dict]:
+        """Ejecuta detección + seguimiento ByteTrack sobre una ROI.
+
+        Parámetros
+        ----------
+        frame : np.ndarray
+            Cuadro completo en BGR.
+        roi : tuple[int, int, int, int]
+            Región de interés (x, y, w, h) en píxeles del cuadro.
+        conf : float
+            Umbral mínimo de confianza para reportar una detección.
+
+        Retorna
+        -------
+        list[dict]
+            Lista de detecciones; cada elemento contiene:
+            ``{'id': int, 'bbox': [x,y,w,h], 'conf': float}``.
+            Lista vacía si no se detectó ningún objeto.
+        """
+        if not self.available:
+            return []
+
+        x, y, w, h = roi
+        crop = frame[y:y+h, x:x+w]
+
+        # persist=True mantiene el mismo ID entre cuadros consecutivos
+        results = self._model.track(
+            crop,
+            tracker=self.TRACKER_CFG,
+            persist=True,
+            conf=conf,
+            verbose=False,
+        )
+
+        detections = []
+        if results and results[0].boxes is not None:
+            for box in results[0].boxes:
+                track_id = int(box.id) if box.id is not None else -1
+                bx, by, bw, bh = box.xywh[0].tolist()
+                detections.append({
+                    "id":   track_id,
+                    "bbox": [x + int(bx - bw/2),   # convertir a coords
+                             y + int(by - bh/2),   # del cuadro completo
+                             int(bw), int(bh)],
+                    "conf": float(box.conf),
+                })
+        return detections
+\end{lstlisting}
+
+Los puntos clave del listado son:
+
+\begin{itemize}
+    \item \textbf{Líneas 11--23.} El bloque \texttt{try/except} aísla la
+    dependencia de Ultralytics. Si la importación falla (por ejemplo, en un
+    entorno sin GPU o sin la biblioteca instalada), el objeto queda en estado
+    \texttt{available = False} sin lanzar una excepción que interrumpa el
+    pipeline.
+
+    \item \textbf{Líneas 41--43.} El cuadro completo se recorta a la ROI
+    antes de pasarlo al detector. Esto reduce la carga computacional y evita
+    que el modelo detecte ratas de otros cilindros dentro del mismo cuadro.
+
+    \item \textbf{Línea 46.} \texttt{persist=True} es el parámetro que activa
+    la continuidad de identidades entre cuadros en Ultralytics: ByteTrack
+    recuerda qué ID asignó a cada trayectoria en el cuadro anterior y lo
+    mantiene en el cuadro actual.
+
+    \item \textbf{Líneas 55--62.} Las coordenadas del bounding box se
+    devuelven en el sistema de referencia del cuadro completo (no de la ROI),
+    para que el resto del pipeline pueda trabajar siempre en el mismo espacio
+    de coordenadas.
+\end{itemize}
+
+
+% ════════════════════════════════════════════════════════════
+%  FRAGMENTO 3 — Jerarquía de fallback en process_video()
+% ════════════════════════════════════════════════════════════
+
+\subsubsection{Jerarquía de respaldo en \texttt{process\_video()}}
+
+El Listado~\ref{lst:fallback} muestra el núcleo del bucle de procesamiento
+por cuadro dentro de \texttt{process\_video()}. Implementa la jerarquía de
+tres niveles descrita en la sección de marco teórico: ByteTrack como
+primera opción, detector clásico como respaldo y congelamiento de posición
+como último recurso.
+
+\begin{lstlisting}[
+  style=python,
+  caption={Bucle principal de seguimiento en \texttt{process\_video()}.
+           Se omiten las partes de gating físico y escritura de resultados
+           para centrarse en la jerarquía de respaldo.},
+  label={lst:fallback}
+]
+for frame_idx, frame in enumerate(video_frames(cap)):
+
+    for roi_id, roi in enumerate(rois):
+        det = None
+
+        # -- Nivel 1: ByteTrack (vía YoloTracker) --
+        if yolo_tracker.available:
+            hits = yolo_tracker.track(frame, roi, conf=CONF_HIGH)
+            if hits:
+                det = hits[0]                 # exactamente 1 rata por ROI
+                freeze_counter[roi_id] = 0   # reiniciar contador de freeze
+
+        # -- Nivel 2: detector clásico (sustracción de fondo + Otsu) --
+        if det is None:
+            bbox_classic = classic_detect(frame, roi, bg_model)
+            if bbox_classic is not None and iou(
+                bbox_classic, last_bbox[roi_id]
+            ) > IOU_MIN:
+                det = {"bbox": bbox_classic, "conf": CONF_CLASSIC,
+                       "id": roi_id}
+                freeze_counter[roi_id] = 0
+
+        # -- Nivel 3: congelamiento con decaimiento de confianza --
+        if det is None:
+            freeze_counter[roi_id] += 1
+            decay = CONF_FREEZE_INIT * (
+                CONF_FREEZE_DECAY ** freeze_counter[roi_id]
+            )
+            det = {
+                "bbox": last_bbox[roi_id],
+                "conf": max(decay, CONF_FREEZE_MIN),
+                "id":   roi_id,
+            }
+
+        # Actualizar estado y aplicar gating físico
+        last_bbox[roi_id] = det["bbox"]
+        waterline_y[roi_id] = wl_smoothers[roi_id].update(
+            _crop_gray(frame, roi)
+        )
+        frame_results[roi_id].append(det)
+\end{lstlisting}
+
+Los puntos clave del listado son:
+
+\begin{itemize}
+    \item \textbf{Líneas 5--9.} Si \texttt{YoloTracker} está disponible y
+    produce al menos una detección, se toma la primera (ya que hay exactamente
+    una rata por ROI) y se reinicia el contador de \textit{freeze}.
+
+    \item \textbf{Líneas 12--19.} El detector clásico solo se usa si
+    ByteTrack no produjo resultado. La condición \texttt{iou > IOU\_MIN}
+    actúa como \textit{gating} geográfico: si la detección clásica aparece
+    demasiado lejos de la última posición conocida, se descarta como
+    artefacto (reflejo o ruido morfológico).
+
+    \item \textbf{Líneas 22--31.} El congelamiento asigna la última posición
+    conocida con una confianza que decrece exponencialmente cada cuadro
+    ($\texttt{conf} = c_0 \cdot \gamma^{k}$, donde $k$ es el número de
+    cuadros congelados). Esto permite que el clasificador de conducta posterior
+    descarte las predicciones de muy baja confianza, en lugar de tratarlas
+    como detecciones válidas.
+
+    \item \textbf{Líneas 34--38.} La línea del agua se actualiza en cada
+    cuadro usando \texttt{WaterlineSmoother}, independientemente del nivel
+    de respaldo que haya producido la detección.
+\end{itemize}
 
 \section{Implementaci\'{o}n del clasificador de conducta}
 % [PENDIENTE: pendiente Sprint 4 --- arquitectura del clasificador,
