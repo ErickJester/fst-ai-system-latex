@@ -428,9 +428,13 @@ RN-10 & El sistema rechaza cualquier archivo que no sea \texttt{.mp4} antes de
 RN-11 & La detección de cilindros requiere una confianza mínima de 0.70. Si no se
         alcanza ese umbral, el pipeline se detiene y genera un reporte de
         diagnóstico descargable automáticamente. El umbral de 0.70 es un valor
-        conservador estándar en detección con YOLOv8 para fondos consistentes
-        \cite{stadler2024_yolov8}; se ajustará con base en las pruebas con los
-        videos reales del laboratorio durante la fase de validación.
+        provisional definido a partir de las pruebas preliminares de detección
+        realizadas con los videos del laboratorio (véase la
+        sección~\ref{sec:fact_tecnologica}); no se deriva directamente de
+        \cite{stadler2024_yolov8}, cuyo contexto de validación corresponde a
+        detección de objetos en general y no a la detección específica de
+        cilindros en el FST. Este valor se ajustará con base en los videos reales
+        durante la fase de validación y robustez (TT2).
       & Evita que el sistema produzca resultados incorrectos sin advertir al
         usuario. Ver RF-14, RF-16. \\
 \hline
@@ -666,6 +670,7 @@ R-08 & El escalamiento y el nado activo se ven tan parecidos desde la vista late
 % -----------------------------------------------------------
 
 \subsection{Factibilidad tecnológica}
+\label{sec:fact_tecnologica}
 
 La factibilidad tecnológica consiste en evaluar si el proyecto puede desarrollarse con
 la infraestructura técnica, el conocimiento especializado y los recursos disponibles.
