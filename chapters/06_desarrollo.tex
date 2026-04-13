@@ -54,17 +54,11 @@ duplicado desde la vista lateral. Para mitigar ese efecto, el sistema estima en 
 cuadro la posición vertical de la línea del agua: analiza el perfil de intensidad
 promedio por filas dentro de cada ROI e identifica la fila con el cambio más brusco.
 Como esa estimación oscila por ruido entre cuadros, se estabiliza con un promedio
-móvil exponencial (EMA):
-
-\begin{equation}
-    \hat{y}_t = \alpha \cdot \tilde{y}_t + (1 - \alpha) \cdot \hat{y}_{t-1}
-    \label{eq:ema}
-\end{equation}
-
-donde $\tilde{y}_t$ es la estimación del cuadro actual, $\hat{y}_{t-1}$ es el valor
-suavizado anterior, y $\alpha$ controla la velocidad de respuesta. Esta lógica está
-encapsulada en la clase \texttt{WaterlineSmoother}. Su efectividad depende de las
-condiciones del video y se evaluará durante las pruebas de validación.
+móvil exponencial (EMA, véase ecuación~\ref{eq:ema} del capítulo de marco teórico),
+donde $\tilde{y}_t$ es la estimación del cuadro actual, $\hat{y}_{t-1}$ el valor
+suavizado anterior y $\alpha \in (0,1)$ controla la velocidad de respuesta. Esta
+lógica está encapsulada en la clase \texttt{WaterlineSmoother}. Su efectividad depende
+de las condiciones del video y se evaluará durante las pruebas de validación.
 
 \subsection{Arquitectura de clases del módulo de seguimiento}
 
