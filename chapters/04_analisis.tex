@@ -32,7 +32,7 @@ niveles de prioridad: \textbf{Alta} (sin esto el prototipo no funciona),
 \textbf{Baja} (deseable pero no urgente). Cada requerimiento se derivó directamente
 de los prototipos de interfaz diseñados \cite{pressman2014,sommerville2016}.
 
-\begin{longtable}{|>{\bfseries}p{1.1cm}|p{2.0cm}|p{6.7cm}|p{1.3cm}|p{1.7cm}|}
+\begin{longtable}{|>{\bfseries}p{1.1cm}|>{\raggedright}p{2.0cm}|>{\raggedright\arraybackslash}p{6.7cm}|p{1.3cm}|p{1.7cm}|}
 \caption{Requerimientos Funcionales (RF).
 \label{tab:rf}}\\
 \hline
@@ -245,7 +245,7 @@ operaciones interactivas cortas (navegación, filtros, consultas) el umbral est�
 de 1 a 3 segundos; para operaciones de procesamiento intensivo (análisis de video) el
 tiempo aceptable se determina con el usuario durante las pruebas \cite{iso25010}.
 
-\begin{longtable}{|>{\bfseries}p{1.1cm}|p{1.8cm}|p{5.9cm}|p{4.3cm}|}
+\begin{longtable}{|>{\bfseries}p{1.1cm}|>{\raggedright}p{1.8cm}|>{\raggedright}p{5.9cm}|>{\raggedright\arraybackslash}p{4.3cm}|}
 \caption{Requerimientos No Funcionales (RNF).
 \label{tab:rnf}}\\
 \hline
@@ -366,7 +366,7 @@ experimental del FST, otras del diseño de la interfaz y otras del contexto
 institucional del laboratorio \cite{pressman2014}. Los requerimientos que dependen
 de estas reglas las referencian explícitamente.
 
-\begin{longtable}{|>{\bfseries}p{1.1cm}|p{8.1cm}|p{3.9cm}|}
+\begin{longtable}{|>{\bfseries}p{1.1cm}|>{\raggedright}p{8.1cm}|>{\raggedright\arraybackslash}p{3.9cm}|}
 \caption{Reglas de negocio.
 \label{tab:rn}}\\
 \hline
@@ -428,6 +428,13 @@ RN-10 & El sistema rechaza cualquier archivo que no sea \texttt{.mp4} antes de
 RN-11 & La detección de cilindros requiere una confianza mínima de 0.70. Si no se
         alcanza ese umbral, el pipeline se detiene y genera un reporte de
         diagnóstico descargable automáticamente. El umbral de 0.70 es un valor
+        provisional definido a partir de las pruebas preliminares de detección
+        realizadas con los videos del laboratorio (véase la
+        sección~\ref{sec:fact_tecnologica}); no se deriva directamente de
+        \cite{stadler2024_yolov8}, cuyo contexto de validación corresponde a
+        detección de objetos en general y no a la detección específica de
+        cilindros en el FST. Este valor se ajustará con base en los videos reales
+        durante la fase de validación y robustez (TT2).
         conservador estándar en detección con YOLOv8 para fondos consistentes
         \cite{stadler2024_yolov8}; se ajustará con base en las pruebas con los
         videos reales del laboratorio durante la fase de validación.
@@ -437,6 +444,18 @@ RN-11 & La detección de cilindros requiere una confianza mínima de 0.70. Si no
 RN-12 & La comparación Día~1 vs.\ Día~2 solo se genera si ambos videos del mismo
         experimento fueron procesados exitosamente.
       & No tiene sentido comparar con datos incompletos. Ver RF-20. \\
+\hline
+RN-13 & Si durante la fase de validación el clasificador no alcanza
+        $\kappa > 0.80$ distinguiendo las tres conductas por separado,
+        el nado activo y el escalamiento se reportan juntos como
+        \textit{conducta activa}. El reporte generado indica
+        explícitamente qué nivel de clasificación se aplicó, de modo
+        que el investigador sepa interpretar los resultados en
+        consecuencia.
+      & Contemplado en el alcance (cap.~1) y en el riesgo R-08.
+        Complementa RN-11 para el caso en que el pipeline completa
+        la detección pero el clasificador no alcanza la precisión
+        objetivo. Ver RF-17, RF-18. \\
 \hline
 
 \end{longtable}
@@ -666,6 +685,7 @@ R-08 & El escalamiento y el nado activo se ven tan parecidos desde la vista late
 % -----------------------------------------------------------
 
 \subsection{Factibilidad tecnológica}
+\label{sec:fact_tecnologica}
 
 La factibilidad tecnológica consiste en evaluar si el proyecto puede desarrollarse con
 la infraestructura técnica, el conocimiento especializado y los recursos disponibles.
