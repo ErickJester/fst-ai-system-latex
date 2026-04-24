@@ -172,8 +172,7 @@ aceptación de la validación final.
 
 \subsection*{Incluido en el alcance}
 \begin{itemize}
-  \item Análisis de videos del FST del laboratorio de la ENMyH-IPN, grabados desde
-        arriba con cuatro cilindros simultáneos, bajo condiciones de grabación
+  \item Análisis de videos del FST del laboratorio de la ENMyH-IPN, grabados desde el lateral con cuatro cilindros simultáneos, bajo condiciones de grabación
         suficientes para que el procesamiento sea viable.
   \item Clasificación de tres conductas: nado activo, inmovilidad e intentos de escape.
         Si el sistema no logra distinguir con precisión suficiente nado y escalamiento,
@@ -185,8 +184,8 @@ aceptación de la validación final.
         reportes en PDF y CSV.
   \item Validación contra el gold standard del laboratorio con $\kappa$ de Cohen y
         error absoluto medio.
-  \item Documentación técnica conforme a los lineamientos de la CATT-ESCOM y al ciclo
-        de vida de software de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}.
+  %\item Documentación técnica conforme a los lineamientos de la CATT-ESCOM y al ciclo
+   %     de vida de software de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}.
 \end{itemize}
 
 \subsection*{Fuera del alcance}
@@ -201,25 +200,25 @@ aceptación de la validación final.
   \item Análisis de paradigmas conductuales distintos al FST en esta versión.
 \end{itemize}
 
-\section{Metodología}
+%\section{Metodología}
 
-El proyecto usa una metodología ágil basada en Scrum, adaptada a un equipo de dos
-personas con entregas en dos etapas académicas (TT1 y TT2). El motivo de elegir este
-enfoque es directo: el proyecto tiene partes muy distintas ---el módulo de video, el
-clasificador, la plataforma web, la base de datos--- y no tiene sentido diseñar todo
-desde el inicio sin saber cómo va a quedar el módulo de seguimiento hasta probarlo.
-Scrum permite ajustar decisiones al cierre de cada bloque, con base en lo que funcionó.
+%El proyecto usa una metodología ágil basada en Scrum, adaptada a un equipo de dos
+%personas con entregas en dos etapas académicas (TT1 y TT2). El motivo de elegir este
+%enfoque es directo: el proyecto tiene partes muy distintas ---el módulo de video, el
+%clasificador, la plataforma web, la base de datos--- y no tiene sentido diseñar todo
+%desde el inicio sin saber cómo va a quedar el módulo de seguimiento hasta probarlo.
+%Scrum permite ajustar decisiones al cierre de cada bloque, con base en lo que funcionó.
 
-Cada iteración termina con un entregable revisable con los directores en sesiones
-quincenales. Las actividades se organizan según los procesos de implementación y
-verificación de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}: criterios de aceptación
-definidos antes de codificar, revisión del producto al cierre de cada bloque, y
-registro de ajustes para el siguiente ciclo.
+%Cada iteración termina con un entregable revisable con los directores en sesiones
+%quincenales. Las actividades se organizan según los procesos de implementación y
+%verificación de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}: criterios de aceptación
+%definidos antes de codificar, revisión del producto al cierre de cada bloque, y
+%registro de ajustes para el siguiente ciclo.
 
-La Tabla~\ref{tab:plan_trabajo} muestra la distribución de actividades por etapa y por
-integrante. Ángel Ali es responsable del sistema web e infraestructura (backend, base
-de datos, frontend); Vanesa es responsable del pipeline de IA (preprocesamiento de
-video, clasificador de conducta, validación).
+%La Tabla~\ref{tab:plan_trabajo} muestra la distribución de actividades por etapa y por
+%integrante. Ángel Ali es responsable del sistema web e infraestructura (backend, base
+%de datos, frontend); Vanesa es responsable del pipeline de IA (preprocesamiento de
+%video, clasificador de conducta, validación).
 
 \begin{table}[ht]
 \centering

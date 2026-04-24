@@ -45,9 +45,7 @@
             "name": "biber",
             "command": "biber",
             "args": [
-                "--input-directory=build",
-                "--output-directory=build",
-                "%DOCFILE%"
+                "build/%DOCFILE%"
             ]
         }
     ],

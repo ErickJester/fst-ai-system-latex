@@ -157,8 +157,9 @@ entre cuadros, se estabiliza con un promedio móvil exponencial (EMA):
 donde $\tilde{y}_t$ es la estimación del cuadro actual, $\hat{y}_{t-1}$ el valor
 suavizado anterior y $\alpha \in (0,1)$ controla la velocidad de respuesta. Un $\alpha$
 alto responde rápido a cambios reales pero amplifica el ruido; un $\alpha$ bajo es más
-estable pero tarda en adaptarse. Esta lógica está encapsulada en la clase
-\texttt{WaterlineSmoother} del módulo \texttt{tracker.py}.
+estable pero tarda en adaptarse. 
+%Esta lógica está encapsulada en la clase
+%\texttt{WaterlineSmoother} del módulo \texttt{tracker.py}.
 
 \subsection{Trackers de correlación: CSRT y KCF}
 
