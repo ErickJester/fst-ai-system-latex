@@ -1,0 +1,103 @@
+@startuml "Ciclo-De-Vida-Experimento-FST"
+title Máquina de Estados Global — Ciclo de Vida del Experimento FST\nPlataforma Web FST · TT 2026-B066
+
+' ========= ESTILO ==========================================================
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam ArrowColor #3A3A3A
+skinparam ArrowFontColor #222222
+skinparam ArrowFontSize 11
+
+skinparam state {
+  FontSize 12
+  FontStyle bold
+  AttributeFontSize 10
+
+  BackgroundColor #DAE8FC
+  BorderColor     #6C8EBF
+  FontColor       #1A1A1A
+
+  BackgroundColor<<error>>      #F8CECC
+  BorderColor<<error>>          #B85450
+  FontColor<<error>>            #1A1A1A
+
+  BackgroundColor<<archivo>>    #E1D5E7
+  BorderColor<<archivo>>        #9673A6
+  FontColor<<archivo>>          #1A1A1A
+
+  BackgroundColor<<procesamiento>> #E8F5E9
+  BorderColor<<procesamiento>>     #82B366
+
+  BackgroundColor<<completado>>    #F0F4FF
+  BorderColor<<completado>>        #6C8EBF
+}
+
+' ========= ESTADO INICIAL ==================================================
+[*] --> Incompleto : Investigador crea\nnuevo experimento
+
+' ========= COMPOSITE: INCOMPLETO ===========================================
+state Incompleto {
+  [*] --> SinSujetos
+  SinSujetos       --> EsperandoVideos      : sujetos registrados\n(etiquetas / índices)
+  EsperandoVideos  --> ListoParaEjecucion   : videos validados\ny subidos
+}
+
+' ========= TRANSICIÓN A MOTOR ==============================================
+ListoParaEjecucion --> Encolado : Investigador presiona\n"Iniciar Análisis"
+
+' ========= COMPOSITE: MOTOR DE ANÁLISIS ====================================
+state "Motor de Análisis  (Worker Asíncrono)" as Procesamiento <<procesamiento>> {
+  state Encolado
+  state "Preprocesamiento"              as Preproc
+  state "Detección de ROIs"             as ROIs
+  state "Rastreo  (YOLOv8 + ByteTrack)" as Tracking
+  state "Clasificación de Conducta"     as Clasificacion
+
+  Encolado      --> Preproc       : worker toma el trabajo
+  Preproc       --> ROIs          : CLAHE aplicado
+  ROIs          --> Tracking      : cilindros detectados\n(confianza ≥ 0.70)
+  Tracking      --> Clasificacion : tracks y coordenadas\nlistas
+}
+
+' ========= FALLO Y REINTENTO ===============================================
+state "FalloAnálisis\n(video corrupto, error modelo,\nfalta de RAM)" as FalloAnalisis <<error>>
+
+Procesamiento --> FalloAnalisis : error durante\nel pipeline
+FalloAnalisis --> Encolado      : Investigador solicita\nreintento
+
+' ========= COMPOSITE: COMPLETADO ===========================================
+Procesamiento --> Completado : pipeline finaliza\ncon éxito  (100 %)
+
+state Completado <<completado>> {
+  [*] --> ResultadosDisponibles
+  ResultadosDisponibles --> ReporteGenerado : Investigador solicita\nexportación  (CSV / PDF)
+}
+
+' ========= ARCHIVADO =======================================================
+state "Archivado\n(archivos .mp4 eliminados\ntras N días)" as Archivado <<archivo>>
+
+Completado --> Archivado : cronjob de limpieza\n(N días)
+
+' ========= FINAL ===========================================================
+Archivado     --> [*] : Investigador elimina\nexperimento
+FalloAnalisis --> [*] : Investigador elimina\nexperimento
+Incompleto    --> [*] : Investigador cancela /\nelimina experimento
+
+' ========= NOTAS ===========================================================
+note right of Procesamiento
+  El **Worker** es asíncrono:
+  consulta `jobs.status = QUEUED`
+  con //FOR UPDATE SKIP LOCKED//
+  y actualiza `progress_pct`
+  en cada etapa.
+end note
+
+note bottom of Archivado
+  Los **reportes** (PDF / CSV) y
+  `behavior_results` se conservan
+  indefinidamente.  Solo el video
+  original se elimina.
+end note
+
+@enduml
