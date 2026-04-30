@@ -1,11 +1,38 @@
 \chapter*{Resumen}
 \addcontentsline{toc}{chapter}{Resumen}
 
-El presente proyecto propone el diseño, desarrollo y validación de un prototipo de sistema web asistido por inteligencia artificial orientado al análisis automatizado de la prueba de nado forzado (Forced Swim Test, FST) en ratas. El FST es un paradigma experimental estándar para la evaluación preclínica del potencial antidepresivo de moléculas en neurociencia conductual; sin embargo, su análisis actualmente depende de la observación manual cuadro a cuadro (frame a frame) de los videos, lo que implica un consumo elevado de tiempo y una variabilidad importante entre evaluadores.
+Anotar manualmente un experimento de nado forzado lleva entre una y dos horas por
+video. Un investigador reproduce la grabación, observa la conducta de cada rata y
+registra a mano cuánto tiempo pasa nadando, inmóvil o intentando escalar las paredes
+del cilindro. Si el protocolo requiere que dos evaluadores lo hagan de forma
+independiente para verificar consistencia, ese tiempo se duplica. Con entre 32 y 40
+videos por semestre, la anotación consume cientos de horas-persona y produce resultados
+que varían según quién anota y cómo interpreta cada transición entre conductas.
 
-El sistema propuesto integra un módulo de visión por computadora y aprendizaje supervisado capaz de clasificar cuadro a cuadro (frame a frame) las conductas de interés (nado activo, inmovilidad e intentos de escape) directamente sobre los videos proporcionados por el laboratorio colaborador, y una plataforma web que permite al investigador cargar los videos, ejecutar el análisis automático y obtener reportes cuantitativos por individuo y por sesión. Los resultados del sistema se compararán con anotaciones expertas para estimar su nivel de concordancia y la reducción de tiempo en el análisis.
+Este Trabajo Terminal propone un prototipo de sistema web con inteligencia artificial
+que automatice ese proceso para el Laboratorio de Bioquímica Estructural, Sección de
+Posgrado, de la Escuela Nacional de Medicina y Homeopatía (ENMyH-IPN). El uso concreto
+es directo: el investigador sube el video al sistema desde el navegador, el sistema lo
+analiza y en minutos genera un reporte con los tiempos de nado activo, inmovilidad e
+intentos de escape por espécimen y sesión.
 
-El proyecto se desarrolla en colaboración con el Laboratorio de Bioquímica Estructural, Sección de Posgrado, de la Escuela Nacional de Medicina y Homeopatía (ENMyH-IPN), que aporta el acervo de videos experimentales y el estándar de referencia del experto (gold standard) para la validación del sistema.
+El sistema no diagnostica depresión ni produce información de uso clínico. Es una
+herramienta de apoyo a la investigación preclínica en farmacología experimental; su
+propósito es reemplazar la anotación manual de videos del Forced Swim Test (FST), la
+prueba conductual más usada para evaluar el efecto de antidepresivos en ratas antes de
+pasar a ensayos en humanos.
+
+El sistema integra un módulo de visión por computadora y aprendizaje supervisado que
+clasifica las conductas de interés directamente sobre los videos del laboratorio, y una
+plataforma web que permite cargar videos, ejecutar el análisis y obtener reportes
+cuantitativos por espécimen y por sesión. La validación compara los resultados del
+sistema contra los registros manuales del laboratorio (gold standard) usando el
+coeficiente kappa de Cohen para medir concordancia y el error absoluto medio para
+cuantificar la diferencia en segundos por conducta. El desarrollo sigue el ciclo de
+vida de software de la norma ISO/IEC/IEEE~12207:2017 y los atributos de calidad de la
+ISO/IEC~25010:2023.
 
 
-\noindent\textbf{Palabras clave:} visión por computadora, aprendizaje automático, prueba de nado forzado, farmacología conductual, sistema web, análisis conductual animal.
+\noindent\textbf{Palabras clave:} visión por computadora, aprendizaje automático,
+prueba de nado forzado, análisis conductual preclínico, sistema web, farmacología
+experimental.
