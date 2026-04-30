@@ -6,6 +6,25 @@
 - Los commits deben parecer escritos enteramente por el desarrollador.
 - No mencionar herramientas de IA en ningún mensaje de commit, PR description ni comentario de código.
 
+## Regla: nunca usar "inteligencia artificial" sin especificar la técnica
+- El término "inteligencia artificial" es demasiado amplio e impreciso para describir el sistema.
+- Cuando se haga referencia a los componentes de análisis del sistema, usar siempre las técnicas concretas: **visión por computadora** (detección y seguimiento de especímenes) y **aprendizaje supervisado** (clasificador de conductas).
+- "Sistema web con visión por computadora y aprendizaje supervisado" ✅
+- "Sistema web con inteligencia artificial" ❌
+- Esta regla aplica al documento escrito, a la presentación y a cualquier otro material del TT.
+
+## Regla: términos en inglés con peso significativo
+- Todo término o frase en inglés con peso conceptual significativo (atributos ISO, nombres de paradigmas, términos técnicos propios) debe seguir este formato:
+  - **Primera aparición:** `\textit{término en inglés}` seguido inmediatamente de `(traducción al español)`.
+  - **Apariciones posteriores:** solo `\textit{término en inglés}`, sin paréntesis.
+- No aplica a siglas de uso común en español técnico (GPU, API, REST, JSON, CSV, PDF, etc.).
+- Ejemplos correctos ya aplicados: `\textit{performance efficiency}` (eficiencia de desempeño), `\textit{functional correctness}` (corrección funcional), `\textit{time behaviour}` (desempeño temporal), `\textit{usability}` (usabilidad).
+
+## PENDIENTE IMPORTANTE — revisar menciones de métricas de validación
+- **NO hacer aún.** Requiere revisión cuidadosa de todo el documento.
+- En el Alcance (Incluido) se eliminó el bullet "Validación contra el gold standard del laboratorio con κ de Cohen y error absoluto medio."
+- **Pendiente:** revisar y eliminar (o reubicar) todas las demás menciones de κ de Cohen, MAE (Mean Absolute Error / error absoluto medio) y \textit{gold standard} en el documento escrito, incluyendo: Propuesta de solución, Objetivo general (OE-5), Metodología, resumen.tex y cap. 4 (RNF-02, sec:umbrales). Hacer con cuidado para no romper la coherencia del documento.
+
 ---
 
 # Retroalimentación — Primera Simulación de Defensa TT-I

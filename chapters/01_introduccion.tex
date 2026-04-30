@@ -108,8 +108,8 @@ El sistema es una herramienta de apoyo a la investigación preclínica en farmac
 No diagnostica depresión ni produce información de uso clínico; su propósito es
 reemplazar la anotación manual de videos experimentales.
 
-La propuesta es un prototipo de sistema web con inteligencia artificial que analice
-automáticamente los videos del FST del laboratorio. El desarrollo sigue el ciclo de
+La propuesta es un prototipo de sistema web con visión por computadora y aprendizaje
+supervisado que analice automáticamente los videos del FST del laboratorio. El desarrollo sigue el ciclo de
 vida de software de la norma ISO/IEC/IEEE~12207:2017 \cite{iso12207}, que organiza el
 proceso en fases de definición de requerimientos, diseño, implementación y verificación.
 La adaptación concreta de ese ciclo al proyecto se describe en la sección de
@@ -134,7 +134,7 @@ visibles, contraste suficiente entre la rata y el fondo, y cámara estable. Los 
 disponibles hasta ahora tienen variaciones de iluminación y contraste que pueden afectar
 el desempeño; durante el desarrollo se evaluará la robustez de los algoritmos y se
 documentarán los requisitos mínimos de calidad conforme al atributo \textit{performance
-efficiency} de la ISO/IEC~25010:2023 \cite{iso25010}.
+efficiency} (eficiencia de desempeño) de la ISO/IEC~25010:2023 \cite{iso25010}.
 
 La validación compara las predicciones del sistema con los registros conductuales
 manuales del laboratorio (gold standard), usando el coeficiente kappa de Cohen y el
@@ -142,9 +142,10 @@ error absoluto medio por rata.
 
 \section{Objetivo general}
 
-Diseñar, desarrollar y validar un prototipo de sistema web asistido por inteligencia
-artificial que automatice la detección y cuantificación de las conductas de la prueba
-de nado forzado en ratas ---nado activo, inmovilidad e intentos de escape--- con
+Diseñar, desarrollar y validar un prototipo de sistema web con visión por computadora
+y aprendizaje supervisado que automatice la detección y cuantificación de las conductas
+de la prueba de nado forzado en ratas ---nado activo, inmovilidad e intentos de
+escape--- con
 resultados comparables a la evaluación manual del laboratorio y cumpliendo los
 atributos de calidad de la norma ISO/IEC~25010:2023 \cite{iso25010}.
 
@@ -172,12 +173,12 @@ atributos de calidad de la norma ISO/IEC~25010:2023 \cite{iso25010}.
 
 \section{Justificación}
 
-El costo de tiempo es real y medible. Con el método manual, anotar un video de 5
-minutos lleva entre una hora y media y dos horas. Si dos evaluadores anotan de forma
-independiente para verificar consistencia, ese tiempo se duplica. En un semestre con
-entre 32 y 40 videos, el laboratorio puede gastar más de 200 horas-persona en anotación
-sola. Un sistema que procese esos videos en minutos libera ese tiempo para diseñar
-experimentos y analizar resultados.
+En un semestre con entre 32 y 40 videos que anotar, el laboratorio puede acumular más
+de 200 horas-persona dedicadas exclusivamente a reproducir grabaciones con cronómetro.
+Con el método manual, anotar el video de 5~minutos de un espécimen lleva entre una
+hora y media a dos horas; si dos evaluadores lo hacen de forma independiente para
+verificar consistencia, ese tiempo se duplica. Son horas que los investigadores no
+están usando para diseñar experimentos, analizar resultados ni escribir publicaciones.
 
 El impacto en reproducibilidad importa igual para la ciencia. Cuando dos evaluadores
 obtienen tiempos distintos para la misma rata ---algo habitual en las transiciones entre
@@ -197,47 +198,113 @@ infraestructura especializada. Este prototipo atiende esas tres brechas: clasifi
 conductas, sin costo de licencia, con interfaz web accesible desde el navegador.
 
 En cuanto a calidad del software, el sistema se diseña para cumplir atributos concretos
-de la ISO/IEC~25010:2023 \cite{iso25010}: \textit{functional correctness} (resultados
-consistentes con las anotaciones del laboratorio), \textit{time behaviour} (el análisis
-termina en un tiempo asumible en el flujo de trabajo) y \textit{usability} (un
-investigador sin conocimientos de programación opera el sistema sin ayuda técnica).
-Esos tres atributos son los criterios de aceptación de la validación final.
+de la ISO/IEC~25010:2023 \cite{iso25010}: \textit{functional correctness} (corrección
+funcional), que mide la consistencia de los resultados con las anotaciones del
+laboratorio; \textit{time behaviour} (desempeño temporal), que establece que el análisis
+debe terminar en un tiempo asumible en el flujo de trabajo; y \textit{usability}
+(usabilidad), que garantiza que un investigador sin conocimientos de programación puede
+operar el sistema sin ayuda técnica. Esos tres atributos son los criterios de aceptación
+de la validación final.
 
 
 \section{Alcance del proyecto}
 
 \subsection*{Incluido en el alcance}
 \begin{itemize}
-  \item Análisis de videos del FST del laboratorio de la ENMyH-IPN, grabados desde el lateral con cuatro cilindros simultáneos, bajo condiciones de grabación
-        suficientes para que el procesamiento sea viable.
-  \item Clasificación de tres conductas: nado activo, inmovilidad e intentos de escape.
-        Si el sistema no logra distinguir con precisión suficiente nado y escalamiento,
-        ambos se reportarán juntos como conducta activa.
-  \item Métricas por rata y por sesión: tiempo total de cada conducta en los
-        5~minutos del día~2 y desglose por minuto como funcionalidad opcional.
-  \item Comparación entre sesiones día~1 y día~2 para la misma rata o grupo.
-  \item Plataforma web con carga de videos, consulta de resultados y generación de
-        reportes en PDF y CSV.
-  \item Validación contra el gold standard del laboratorio con $\kappa$ de Cohen y
-        error absoluto medio.
-  %\item Documentación técnica conforme a los lineamientos de la CATT-ESCOM y al ciclo
-   %     de vida de software de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}.
+  \item \textbf{Videos a analizar:} grabaciones del FST del laboratorio ENMyH-IPN en
+        formato MP4, tomadas con vista lateral, con los cuatro cilindros visibles
+        simultáneamente en el encuadre y cámara estacionaria. El video principal que
+        el sistema procesa es el del día~2 (5~min) para cada espécimen de todos los
+        grupos experimentales. Los primeros 5~min del día~1 del grupo control pueden
+        cargarse opcionalmente como referencia basal.
+
+  \item \textbf{Detección y seguimiento de especímenes:} identificación automática de
+        hasta cuatro ratas dentro de la grabación, distinguiéndolas por su posición
+        en el encuadre. Los cilindros son fijos y no cambian de posición entre sesiones,
+        lo que permite asignar cada región a un espécimen de forma estable a lo largo
+        del video.
+
+  \item \textbf{Clasificación de conductas:} el sistema clasifica de forma continua
+        las tres conductas del FST: nado activo, inmovilidad e intentos de escape
+        (escalamiento). El buceo se clasifica como nado activo. Para contabilizarse,
+        un episodio debe tener una duración mínima de tres segundos consecutivos. Si
+        el clasificador no logra distinguir con precisión suficiente nado activo de
+        escalamiento, ambas conductas se reportan juntas como conducta activa.
+
+  \item \textbf{Métricas por espécimen y por grupo:} tiempo total de cada conducta en
+        los 5~min del día~2, desglose por minuto como funcionalidad opcional, y
+        estadísticos de grupo (media, desviación estándar y varianza por conducta)
+        para caracterizar el perfil conductual del conjunto de especímenes de cada
+        grupo experimental.
+
+  \item \textbf{Reportes y exportaciones:} reporte de diagnóstico en PDF con
+        indicadores de calidad del análisis (nivel de confianza del clasificador por
+        espécimen y sesión); exportación de datos en CSV y en XLSX con columnas
+        Tiempo (min:seg), Nado activo, Escalamiento e Inmovilidad, desglosadas por
+        espécimen y por minuto.
+
+  \item \textbf{Plataforma web:} interfaz accesible desde el navegador con registro
+        de usuario con aprobación del administrador, carga de videos, cola de
+        procesamiento secuencial para hasta cuatro análisis en un mismo período,
+        consulta de resultados por espécimen y sesión, y descarga de reportes. Los
+        datos se almacenan en base de datos para permitir comparar sesiones y
+        experimentos posteriores.
+
+  \item \textbf{Comparación entre sesiones:} los resultados del día~1 (5~min del
+        grupo control) y del día~2 quedan disponibles en la misma vista para el
+        mismo espécimen, de modo que el investigador puede contrastar el perfil
+        conductual antes y después del período de estrés sin necesidad de exportar
+        y combinar archivos manualmente.
 \end{itemize}
 
 \subsection*{Fuera del alcance}
 \begin{itemize}
-  \item Diagnóstico clínico de ningún tipo. El sistema mide conductas dentro de un
-        protocolo experimental preclínico; no produce información de uso clínico ni
-        permite inferir diagnósticos de depresión u otros trastornos, ni en ratas ni
-        en humanos.
-  \item Análisis en tiempo real sobre video en vivo.
-  \item Corrección automática de videos con mala iluminación, reflejos excesivos u
-        otros problemas de calidad de grabación.
-  \item Cualquier intervención en los experimentos con ratas; eso lo hace el
-        laboratorio bajo la NOM-062-ZOO-1999 \cite{nom062}.
-  \item Despliegue institucional definitivo; el producto entregado es un prototipo
-        funcional.
-  \item Análisis de paradigmas conductuales distintos al FST en esta versión.
+  \item \textbf{Diagnóstico clínico:} el sistema mide conductas dentro de un protocolo
+        experimental preclínico. No produce información de uso clínico ni permite
+        inferir diagnósticos de depresión u otros trastornos, ni en ratas ni en
+        humanos.
+
+  \item \textbf{Video completo del día~1:} el experimento del día~1 dura 20~minutos;
+        el sistema no procesa ese video completo. Solo acepta, de forma opcional, los
+        primeros 5~minutos del grupo control como referencia basal. El análisis de los
+        20~min completos queda fuera del alcance de este prototipo.
+
+  \item \textbf{Corrección automática de calidad de video:} si el análisis detecta
+        condiciones desfavorables (reflejos, pelaje claro, contraste insuficiente), el
+        sistema genera un reporte de diagnóstico con el nivel de confianza obtenido,
+        pero no corrige ni preprocesa el video de forma automática. El umbral mínimo
+        de confianza para que el análisis se considere válido es de 0.70.
+
+  \item \textbf{Comparación automática entre grupos experimentales:} el sistema genera
+        métricas por espécimen y estadísticos dentro de cada grupo, pero no compara
+        automáticamente el perfil conductual entre el grupo control, el de referencia y
+        el de tratamiento. Esa comparación queda a criterio del investigador usando
+        los datos exportados.
+
+  \item \textbf{Reentrenamiento del clasificador:} el sistema no actualiza el modelo
+        de clasificación a partir de nuevas anotaciones del usuario. Cualquier
+        modificación del clasificador requiere intervención técnica externa al sistema.
+
+  \item \textbf{Análisis en tiempo real:} el sistema procesa videos ya grabados. No
+        admite transmisiones de video en vivo ni análisis mientras el experimento está
+        en curso.
+
+  \item \textbf{Aplicación móvil:} la plataforma es exclusivamente web, diseñada para
+        navegador de escritorio. No existe versión para dispositivos móviles ni tabletas.
+
+  \item \textbf{Intervención en los experimentos:} el proyecto no incluye ningún
+        procedimiento con ratas. Los experimentos los realiza el laboratorio bajo la
+        NOM-062-ZOO-1999 \cite{nom062}; este sistema únicamente analiza los videos
+        resultantes.
+
+  \item \textbf{Despliegue institucional definitivo:} el producto entregado es un
+        prototipo funcional validado. El despliegue permanente en la infraestructura
+        del servidor institucional de la ESCOM está fuera del alcance de este Trabajo
+        Terminal, aunque el prototipo está diseñado para ejecutarse en ese entorno.
+
+  \item \textbf{Otros paradigmas conductuales:} el sistema está diseñado y entrenado
+        específicamente para el FST con ratas. No se garantiza su funcionamiento con
+        otras pruebas conductuales ni con otras especies.
 \end{itemize}
 
 \section{Metodología}
