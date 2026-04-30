@@ -2,87 +2,111 @@
 
 \section{Antecedentes}
 
-El análisis del comportamiento animal con herramientas computacionales cambió de forma sustancial
-en la última década. Lo que antes requería que alguien se sentara horas frente a un
-video con cronómetro en mano ahora puede delegarse a sistemas que procesan miles de
-cuadros por minuto, con resultados más consistentes y menos dependientes del criterio
-del observador \cite{armario2021,della_valle2025}.
+En el Laboratorio de Bioquímica Estructural de la Escuela Nacional de Medicina y
+Homeopatía, analizar un experimento de nado forzado funciona así: el investigador abre
+el video en la computadora, pone en marcha un cronómetro y observa. Cada vez que la
+rata cambia de conducta ---empieza a nadar, se queda inmóvil, intenta escalar las
+paredes del cilindro--- registra la hora a mano. Al terminar los cinco minutos, tiene
+una tabla con los tiempos de cada conducta para una sola rata. Luego repite el proceso
+con la siguiente. Si el protocolo requiere que dos evaluadores hagan la anotación de
+forma independiente para verificar consistencia, el mismo video se revisa dos veces más.
 
-En farmacología experimental, los roedores ---especialmente ratas y ratones--- son el
-modelo biológico más usado para estudiar trastornos del estado de ánimo y probar nuevos
-fármacos. Su fisiología y neuroanatomía tienen correspondencia suficiente con la humana,
-en particular en la organización del sistema nervioso central y las respuestas
-neuroendocrinas al estrés \cite{armario2021}. A eso se suman razones prácticas: manejo
-sencillo, ciclos reproductivos cortos y bajo costo de mantenimiento.
+Ese proceso existe porque el nado forzado es el modelo conductual más usado en
+neurociencia preclínica para evaluar el efecto de antidepresivos en ratas. La depresión
+mayor afecta a más de 280 millones de personas y es una de las principales causas de
+discapacidad según la OMS \cite{who_depression_2025}. Para probar nuevas moléculas
+antes de pasar a ensayos clínicos en humanos, los investigadores necesitan modelos
+animales que reproduzcan aspectos observables del trastorno. El más citado es la prueba
+de nado forzado (Forced Swim Test, FST), propuesta por Porsolt et al.\ en 1977
+\cite{porsolt1977}; desde el año 2000 hay más de 8{,}000 artículos que lo reportan
+\cite{della_valle2025}.
 
-La depresión mayor afecta a más de 280 millones de personas y es una de las principales
-causas de discapacidad según la OMS \cite{who_depression_2025}. Para probar nuevos
-antidepresivos antes de pasar a ensayos clínicos en humanos, los investigadores usan
-modelos conductuales que reproducen algunos aspectos del trastorno. El más citado en
-neurociencia preclínica es la prueba de nado forzado (Forced Swim Test, FST), propuesta
-por Porsolt et al.\ en 1977 \cite{porsolt1977}. Desde el año 2000 hay más de
-8{,}000 artículos que lo reportan \cite{della_valle2025}.
+El experimento consiste en colocar a la rata en un cilindro con agua del que no puede
+salir y registrar cómo responde. Al principio intenta escapar activamente; después de
+un rato empieza a flotar con movimientos mínimos. Esa conducta pasiva ---llamada
+\textit{desesperanza conductual} o \textit{behavioral despair}--- se asocia con la
+pérdida de motivación propia de la depresión \cite{armario2021}. Los antidepresivos
+reducen el tiempo de inmovilidad, y eso es lo que se mide \cite{slattery2012,cryan2005}.
 
-El FST consiste en poner a la rata en un cilindro con agua del que no puede salir y
-registrar cómo responde. Al principio intenta escapar; después de un rato empieza a
-flotar con movimientos mínimos. Esa conducta pasiva ---llamada \textit{desesperanza
-conductual} o \textit{behavioral despair}--- se asocia con la pérdida de motivación
-propia de la depresión \cite{armario2021}. Los antidepresivos reducen el tiempo de
-inmovilidad, y eso es lo que se mide \cite{slattery2012,cryan2005}.
+Las ratas son el modelo biológico estándar para este tipo de estudio. Su fisiología y
+neuroanatomía tienen correspondencia suficiente con la humana, en particular en la
+organización del sistema nervioso central y las respuestas neuroendocrinas al estrés
+\cite{armario2021}. A eso se suman razones prácticas: manejo sencillo, ciclos
+reproductivos cortos y bajo costo de mantenimiento.
 
-El uso de animales de laboratorio en México está regulado por la Norma Oficial Mexicana
+El uso de ratas de laboratorio en México está regulado por la Norma Oficial Mexicana
 NOM-062-ZOO-1999 \cite{nom062}, que establece las especificaciones éticas, sanitarias
 y de bienestar animal para su cuidado y uso experimental. El laboratorio colaborador
 opera bajo esas disposiciones; este proyecto solo analiza los videos que resultan de
-los experimentos, sin intervenir en ningún procedimiento con las ratas.
+los experimentos, sin intervenir en ningún procedimiento con los especímenes.
 
 Existen herramientas para automatizar parte del análisis. EthoVision XT
 \cite{noldus_ethovision} y ANY-maze son las comerciales más usadas; ezTrack
 \cite{pennington2019_eztrack} y DBscorer \cite{nandi2021_dbscorer} son las alternativas
-abiertas más específicas para el FST. Todas tienen el mismo problema de fondo: no
-distinguen las tres conductas relevantes del FST (nado, inmovilidad y escalamiento) por
-separado, y ninguna tiene interfaz web. Los trabajos más recientes con aprendizaje
-profundo \cite{della_valle2025,meng2024_dsaan} sí alcanzan esa clasificación de tres
-clases, pero no están disponibles como sistemas que un laboratorio sin infraestructura
-especializada pueda desplegar.
+abiertas más específicas para el FST. Todas tienen el mismo problema: no distinguen las
+tres conductas relevantes del FST (nado, inmovilidad y escalamiento) por separado, y
+ninguna tiene interfaz web. Los trabajos más recientes con aprendizaje profundo
+\cite{della_valle2025,meng2024_dsaan} sí alcanzan esa clasificación de tres clases,
+pero no se distribuyen como sistemas que un laboratorio sin infraestructura especializada
+pueda desplegar.
 
-El Laboratorio de Bioquímica Estructural, Sección de Posgrado, de la Escuela Nacional de Medicina y Homeopatía (ENMyH-IPN), a cargo del Dr.\ César
-Augusto Sandino Reyes López, investigador del posgrado de esa institución, corre
-experimentos de FST regularmente y tiene un acervo de videos que
-hoy se analizan a mano. Esa es la necesidad que origina este Trabajo Terminal.
+El Laboratorio de Bioquímica Estructural, Sección de Posgrado, de la Escuela Nacional
+de Medicina y Homeopatía (ENMyH-IPN), a cargo del Dr.\ César Augusto Sandino Reyes
+López, investigador del posgrado de esa institución, corre experimentos de FST
+regularmente y tiene un acervo de videos que hoy se analizan a mano. Esa es la
+necesidad que origina este Trabajo Terminal.
 
 \section{Planteamiento del problema}
 
 El laboratorio realiza experimentos de nado forzado de forma periódica para evaluar el
-efecto de distintas moléculas en grupos de ratas. Cada experimento genera videos donde
-se graban cuatro ratas al mismo tiempo desde una vista lateral, con teléfono o
-tableta, en dos sesiones: 20 minutos el primer día y 5 minutos el segundo.
+efecto de distintas moléculas en grupos de ratas. Cada experimento graba cuatro ratas
+al mismo tiempo desde una vista lateral, en dos sesiones: 20 minutos el primer día y
+5 minutos el segundo.
 
-El análisis se hace completamente a mano: un investigador reproduce la grabación y va
-anotando con un cronómetro cuándo cada rata nada, cuándo está inmóvil y cuándo intenta
-escalar. Los problemas son:
+El análisis de esos videos se hace completamente a mano. Anotar el video de 5 minutos
+de un espécimen ---cronómetro en mano, observando la grabación cuadro a cuadro---
+lleva entre una hora y media y dos horas. Si el protocolo incluye que dos evaluadores
+anotan de forma independiente para verificar consistencia, ese tiempo se multiplica.
+Por semestre, el laboratorio puede acumular entre 32 y 40 videos de ese tipo; en el
+peor caso, eso representa más de 200 horas-persona dedicadas solo a anotación manual.
+
+Los problemas que genera ese proceso son los siguientes:
 
 \begin{itemize}
-  \item \textbf{Tiempo:} analizar un experimento completo puede llevar varias horas,
-        según el número de ratas y sesiones.
-  \item \textbf{Variabilidad entre evaluadores:} dos personas pueden usar criterios
-        distintos para decidir cuándo empieza o termina una conducta, lo que afecta la
-        reproducibilidad \cite{armario2021}. La norma ISO/IEC~25010:2023 \cite{iso25010}
-        define la consistencia de resultados entre evaluaciones como un atributo de
-        calidad funcional (\textit{correctness}) que un sistema automatizado puede
-        garantizar donde el proceso manual no puede.
-  \item \textbf{Sin registro centralizado:} los resultados se guardan en archivos
-        separados ---hojas de cálculo, notas--- sin forma fácil de comparar sesiones o
-        grupos entre sí.
+  \item \textbf{Costo de tiempo:} el volumen de anotación manual limita cuántos
+        experimentos puede procesar el laboratorio en un período.
+  \item \textbf{Variabilidad entre evaluadores:} las transiciones entre conductas
+        ---el momento exacto en que la rata pasa de nadar a quedarse inmóvil, por
+        ejemplo--- no siempre son nítidas. Dos evaluadores pueden registrar tiempos
+        distintos para la misma rata en el mismo video. Cuando eso ocurre, el
+        investigador debe decidir qué número incluir en el reporte; esa decisión no
+        tiene criterio formal y afecta la reproducibilidad de los resultados
+        \cite{armario2021}. La norma ISO/IEC~25010:2023 \cite{iso25010} define la
+        consistencia entre evaluaciones como un atributo de calidad funcional
+        (\textit{correctness}) que un sistema automatizado puede garantizar donde el
+        proceso manual no puede.
+  \item \textbf{Sin registro centralizado:} los resultados quedan dispersos en hojas
+        de cálculo y notas sueltas, sin forma directa de comparar sesiones o grupos
+        entre sí.
   \item \textbf{Análisis temporal limitado:} un desglose minuto a minuto sería útil
-        para ver la dinámica del efecto farmacológico, pero hacerlo a mano es
-        prácticamente inviable.
+        para ver la dinámica del efecto farmacológico a lo largo de la sesión, pero
+        producirlo a mano es inviable en la práctica.
 \end{itemize}
 
-Eso limita cuántos experimentos puede procesar el laboratorio y complica estandarizar
-los resultados entre sesiones o con otros grupos.
+Eso limita la capacidad de producción del laboratorio y hace difícil estandarizar los
+resultados para compararlos con los de otros grupos de investigación.
 
 \section{Propuesta de solución}
+
+En términos concretos: el investigador sube el video al sistema desde el navegador, el
+sistema lo analiza y en minutos genera un reporte con los tiempos de nado activo,
+inmovilidad e intentos de escape por espécimen y sesión. Lo que hoy lleva horas de
+anotación manual, el sistema lo produce de forma automática y con los mismos criterios
+cada vez.
+
+El sistema es una herramienta de apoyo a la investigación preclínica en farmacología.
+No diagnostica depresión ni produce información de uso clínico; su propósito es
+reemplazar la anotación manual de videos experimentales.
 
 La propuesta es un prototipo de sistema web con inteligencia artificial que analice
 automáticamente los videos del FST del laboratorio. El desarrollo sigue el ciclo de
@@ -148,24 +172,36 @@ atributos de calidad de la norma ISO/IEC~25010:2023 \cite{iso25010}.
 
 \section{Justificación}
 
-El análisis manual del FST tiene tres problemas: toma mucho tiempo, depende del
-criterio del evaluador y no hay forma centralizada de guardar y comparar los resultados.
-Un sistema automatizado resuelve los tres.
+El costo de tiempo es real y medible. Con el método manual, anotar un video de 5
+minutos lleva entre una hora y media y dos horas. Si dos evaluadores anotan de forma
+independiente para verificar consistencia, ese tiempo se duplica. En un semestre con
+entre 32 y 40 videos, el laboratorio puede gastar más de 200 horas-persona en anotación
+sola. Un sistema que procese esos videos en minutos libera ese tiempo para diseñar
+experimentos y analizar resultados.
 
-Las herramientas comerciales (EthoVision XT, ANY-maze) no están diseñadas para el flujo
-de trabajo del laboratorio y tienen costos de licencia fuera del alcance académico del
-IPN. Las abiertas (ezTrack, DBscorer) no clasifican las tres conductas del FST ni tienen
-plataforma web. Los trabajos con aprendizaje profundo que sí distinguen las tres
-conductas \cite{della_valle2025,meng2024_dsaan} no se distribuyen como sistemas
-desplegables. Este prototipo atiende esas tres brechas.
+El impacto en reproducibilidad importa igual para la ciencia. Cuando dos evaluadores
+obtienen tiempos distintos para la misma rata ---algo habitual en las transiciones entre
+conductas--- el investigador debe decidir qué número reportar. Esa decisión no tiene
+criterio formal: depende del evaluador, y distintos laboratorios pueden resolverla de
+forma diferente. El resultado es que el mismo experimento puede producir datos distintos
+en manos distintas, lo que complica comparar publicaciones entre grupos de investigación.
+Un sistema automatizado produce siempre el mismo resultado para el mismo video. Si hay
+error, es el mismo error en todos los casos: documentable y corregible, no aleatorio.
 
-En cuanto a calidad del software, el sistema se diseña para cumplir con atributos
-concretos de la ISO/IEC~25010:2023 \cite{iso25010}: \textit{functional correctness}
-(resultados consistentes con las anotaciones del laboratorio), \textit{time behaviour}
-(el análisis termina en un tiempo que el laboratorio puede asumir en su flujo de
-trabajo) y \textit{usability} (un investigador sin conocimientos de programación puede
-operar el sistema sin ayuda técnica). Esos tres atributos son los criterios de
-aceptación de la validación final.
+Las herramientas existentes no cubren las necesidades del laboratorio. EthoVision XT y
+ANY-maze tienen costos de licencia fuera del alcance académico del IPN. ezTrack y
+DBscorer no clasifican las tres conductas del FST por separado. Los trabajos con
+aprendizaje profundo que sí distinguen las tres conductas
+\cite{della_valle2025,meng2024_dsaan} no se distribuyen como sistemas desplegables sin
+infraestructura especializada. Este prototipo atiende esas tres brechas: clasifica tres
+conductas, sin costo de licencia, con interfaz web accesible desde el navegador.
+
+En cuanto a calidad del software, el sistema se diseña para cumplir atributos concretos
+de la ISO/IEC~25010:2023 \cite{iso25010}: \textit{functional correctness} (resultados
+consistentes con las anotaciones del laboratorio), \textit{time behaviour} (el análisis
+termina en un tiempo asumible en el flujo de trabajo) y \textit{usability} (un
+investigador sin conocimientos de programación opera el sistema sin ayuda técnica).
+Esos tres atributos son los criterios de aceptación de la validación final.
 
 
 \section{Alcance del proyecto}
@@ -190,6 +226,10 @@ aceptación de la validación final.
 
 \subsection*{Fuera del alcance}
 \begin{itemize}
+  \item Diagnóstico clínico de ningún tipo. El sistema mide conductas dentro de un
+        protocolo experimental preclínico; no produce información de uso clínico ni
+        permite inferir diagnósticos de depresión u otros trastornos, ni en ratas ni
+        en humanos.
   \item Análisis en tiempo real sobre video en vivo.
   \item Corrección automática de videos con mala iluminación, reflejos excesivos u
         otros problemas de calidad de grabación.

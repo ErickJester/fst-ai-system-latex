@@ -217,3 +217,187 @@ TT-I es Conceptualización. El lenguaje de la defensa debe ser accesible para cu
 | 20 | Agregar tabla de grupos experimentales (control / referencia / tratamiento) | 🟡 Media | Vanesa |
 | 21 | Detallar flujo Scrum real por integrante (no teoría) | 🟡 Media | Ángel + Vanesa |
 | 22 | Lenguaje accesible en toda la defensa y el documento escrito | 🟡 Media | Ángel + Vanesa |
+
+---
+
+# Estado del proyecto — documento LaTeX (fst-ai-system-latex)
+
+> Última actualización: 2026-04-30. Refleja todas las sesiones de trabajo con asistencia de IA.
+
+## Cambios ya aplicados al repositorio (commit 514930d)
+
+### chapters/01_introduccion.tex
+- **Tablas Gantt de cronograma** (sección Metodología): reemplazadas dos `sidewaystable` con ~35-40 filas por tablas compactas de 12 actividades por integrante. Columnas: actividad + 12 meses. `\small`, `\arraystretch=1.4`, `\tabcolsep=4pt`.
+- **Fila "Revisiones"**: texto cambiado a "Revisiones mensuales con directores e investigador del laboratorio" (meses Feb–Jun, ambas tablas).
+
+### chapters/04_analisis.tex
+**Requisitos funcionales (RF):**
+- RF-07: resuelto [PENDIENTE] — autoregistro + aprobación admin + notificaciones email
+- RF-08: "El sistema debe aceptar únicamente archivos en formato .mp4"
+- RF-09: Día 1 = "sesión de estrés"; solo se analizan primeros 5 min del grupo control
+- RF-11: "entre 1 y 4 según el diseño experimental"
+- RF-13, RF-16, RF-29: corregidos a lenguaje imperativo ("debe ejecutar", "debe mostrar", "debe poder ver")
+- RF-17: añadido "El buceo se clasifica como nado activo"
+- RF-21: exportación CSV + XLSX con columnas Tiempo(min:seg)/Nado/Escalamiento/Inmovilidad; PDF para reporte diagnóstico
+- RF-30 (nuevo, tras RF-17): duración mínima de episodio ≥ 3 segundos consecutivos
+- RF-31 (nuevo, tras RF-29): estadísticos de grupo — media, desviación estándar y varianza por conducta
+
+**Requisitos no funcionales (RNF):**
+- RNF-02: concordancia ≥ 85 % con anotación experta (no tiempo de procesamiento)
+- RNF-03: disponibilidad 24/7, ≥ 95 % mensual
+- RNF-04: todos los investigadores con cuenta activa pueden ver todos los experimentos (ref RN-08)
+- RNF-10: "servidor institucional provisto por la ESCOM"
+- RNF-13: máximo 4 usuarios en el mismo periodo, cola secuencial (ref RN-04)
+
+**Reglas de negocio (RN):**
+- RN-08: todos los investigadores pueden ver todos los experimentos; Admin puede además modificar/desactivar cuentas
+- RN-11: limpiados párrafos duplicados y contradictorios sobre umbral de confianza 0.70
+
+**Nueva subsección:** `\subsection{Justificación de umbrales y valores numéricos}` con `\label{sec:umbrales}`:
+- 0.70 confianza: pruebas preliminares del laboratorio (sec:fact_tecnologica)
+- ≥ 85 % concordancia: declarado por Dr. Sandino en entrevista
+- 3 s duración de episodio: estándar manual del laboratorio
+- 30 días retención: confirmado en entrevista
+- 4 usuarios capacidad: declarado en entrevista
+- 80/90 % umbrales de disco: gestión de capacidad estándar (pressman2014)
+
+**Anchos de columna corregidos (tablas longtable):**
+```
+RF table:    |p{1.1cm}|p{2.8cm}|p{5.7cm}|p{1.3cm}|p{2.2cm}|
+RNF table:   |p{1.2cm}|p{2.9cm}|p{5.2cm}|p{3.8cm}|
+Herr CV:     |p{2.7cm}|p{4.4cm}|p{4.8cm}|p{1.3cm}|
+Herr ML+Web: |p{2.7cm}|p{5.2cm}|p{5.2cm}|
+Risk table:  |p{0.9cm}|p{3.4cm}|p{1.3cm}|p{1.7cm}|p{1.1cm}|p{4.1cm}|
+```
+
+### bib/referencias.bib
+- Entrada `noldus_ethovision`: `@misc` → `@online`, eliminado `year = {n.d.}` (causaba WARN de biber por valor no entero); conservado `urldate = {2026-02-01}`.
+
+### .vscode/settings.json
+- Añadidos: `"latex-workshop.chktex.enabled": false` y `"latex-workshop.linting.chktex.enabled": false`
+
+---
+
+## Errores de compilación resueltos
+
+| Error | Causa | Solución |
+|-------|-------|----------|
+| "Incompatible glue units" (líneas 298, 302, 310, 412) | `\,\%` dentro de `$...$` con babel-spanish redefine `\%` | `$\geq 85$\,\%` — porcentaje fuera del entorno math |
+| biber WARN "year field 'n.d.' is not an integer" | `year = {n.d.}` en entrada `@misc` | Cambiar a `@online` y eliminar campo `year` |
+| Subrayados rojos en VSCode (no errores reales) | chktex linter activo en LaTeX Workshop | `"latex-workshop.chktex.enabled": false` |
+| Desbordamiento de columnas en longtables | Anchos declarados menores al contenido real | Ajuste de `p{Xcm}` en todas las tablas afectadas |
+
+---
+
+## Pendiente — PRIORIDAD 1 (claridad del proyecto)
+
+Estas tareas fueron confirmadas como alta prioridad por el usuario pero están **en pausa** — trabajo en documento escrito, NO en presentación.
+
+### 1. Cap. 1 — Antecedentes
+Reescribir con narrativa concreta antes/después: investigador con cronómetro frente a sistema automatizado. No iniciar con genérico "las herramientas computacionales han transformado...".
+
+### 2. Cap. 1 — Planteamiento del problema
+Agregar números concretos:
+- ~2 h por video × 3 analistas = ~6 horas-persona por video
+- 32-40 videos por semestre = hasta ~240 horas-persona manuales por semestre
+
+### 3. Cap. 1 — Propuesta de solución
+Agregar descripción simple "cargar video → obtener reporte" ANTES de la descripción técnica del pipeline.
+
+### 4. Cap. 1 — Justificación
+Cuantificar impacto en reproducibilidad; explicar por qué la consistencia importa para la calidad de publicación.
+
+### 5. Cap. 1 — Alcance
+Añadir declaración explícita: el sistema **NO diagnostica depresión** y **no es una herramienta clínica**. Es un instrumento de apoyo al investigador en farmacología preclínica.
+
+### 6. front/resumen.tex
+Reescribir completo para lector no especialista:
+- Eliminar "frame a frame" redundante
+- Agregar impacto concreto (tiempo, reproducibilidad)
+- Aclarar que es investigación preclínica, no herramienta clínica
+
+### 7. Tabla de grupos experimentales (corrección #19 de simulación)
+Agregar en Introducción o Planteamiento — tabla de 3 filas:
+
+| Grupo | Intervención |
+|-------|-------------|
+| Control | Sin tratamiento. Establece conducta base. |
+| Referencia (fluoxetina) | Antidepresivo de efecto conocido. Referencia positiva. |
+| Tratamiento experimental | Nueva molécula o intervención. Se compara con los dos grupos anteriores. |
+
+Mínimo 6-8 ratas por grupo. Si hay efecto, el perfil conductual del grupo experimental se parecerá al del grupo de referencia.
+
+---
+
+## Cambios de claridad aplicados (sesión 2026-04-30, segunda parte)
+
+### chapters/01_introduccion.tex — detalle por sección
+
+#### Antecedentes
+- **Párrafo 1 reemplazado.** Se eliminó el arranque genérico ("El análisis del comportamiento animal con herramientas computacionales cambió..."). Ahora abre con la escena concreta del laboratorio: investigador, cronómetro, video cuadro a cuadro, anotación a mano, proceso repetido por cada evaluador adicional.
+- La información de fondo (depresión, escala, FST, NOM-062, herramientas existentes) se conservó íntegra; solo cambió el orden: lo concreto primero, el contexto después.
+- "animales de laboratorio" → "ratas de laboratorio" (párrafo NOM-062).
+- "sin intervenir en ningún procedimiento con las ratas" → "sin intervenir en ningún procedimiento con los especímenes".
+
+#### Planteamiento del problema
+- **Añadido antes de los bullets:** números concretos del proceso actual.
+  - Anotar un video de 5 min lleva entre 1.5 y 2 h.
+  - Con doble anotación, ese tiempo se multiplica.
+  - Por semestre: 32–40 videos → más de 200 horas-persona solo en anotación.
+- **Bullet "Tiempo"** reescrito: ahora dice "Costo de tiempo" y referencia el volumen de anotación.
+- **Bullet "Variabilidad"** ampliado: explica la consecuencia concreta — dos evaluadores obtienen tiempos distintos → el investigador decide qué número publicar sin criterio formal → problema de reproducibilidad.
+- Frase de cierre actualizada para mencionar la dificultad de comparar resultados con otros grupos de investigación.
+
+#### Propuesta de solución
+- **Añadidos dos párrafos al inicio** (antes de cualquier descripción técnica):
+  1. Descripción en lenguaje llano: "el investigador sube el video... en minutos genera un reporte... Lo que hoy lleva horas, el sistema lo produce con los mismos criterios cada vez."
+  2. Declaración explícita: **"El sistema no diagnostica depresión ni produce información de uso clínico; su propósito es reemplazar la anotación manual de videos experimentales."**
+- El resto de la sección (pipeline + plataforma web + validación) se conservó sin cambios.
+
+#### Justificación
+- **Sección reemplazada completa.** El texto original tenía 2 frases ("tiene tres problemas... Un sistema resuelve los tres"). La versión nueva tiene 4 párrafos:
+  1. Cuantificación del costo de tiempo: 200+ horas-persona/semestre.
+  2. Impacto en reproducibilidad: por qué los datos inconsistentes son un problema científico (publicabilidad, comparación entre laboratorios). Añade el argumento: "si hay error, es el mismo error en todos los casos — documentable y corregible, no aleatorio."
+  3. Brechas de las herramientas existentes (consolidado del texto anterior + lenguaje más directo).
+  4. Párrafo de calidad ISO/IEC 25010:2023 conservado, con ligeros ajustes de redacción.
+
+#### Alcance — Fuera del alcance
+- **Añadido como primer bullet:**
+  > "Diagnóstico clínico de ningún tipo. El sistema mide conductas dentro de un protocolo experimental preclínico; no produce información de uso clínico ni permite inferir diagnósticos de depresión u otros trastornos, ni en ratas ni en humanos."
+
+### front/resumen.tex
+- **Reescrito completo.** Los cambios principales:
+  - Abre con la escena concreta: investigador anotando a mano, horas por video, cientos de horas por semestre.
+  - Eliminado "frame a frame (frame a frame)" — la redundancia desapareció.
+  - "paradigma experimental estándar" → explicado en lenguaje directo ("la prueba conductual más usada para evaluar el efecto de antidepresivos en ratas antes de pasar a ensayos en humanos").
+  - Añadida declaración explícita: **"El sistema no diagnostica depresión ni produce información de uso clínico."**
+  - Añadidos los números de escala (32–40 videos/semestre, cientos de horas-persona).
+  - Palabras clave actualizadas: "farmacología conductual" → "análisis conductual preclínico" y "farmacología experimental" (más concreto para lector no especialista).
+  - Las referencias a las normas ISO se mantienen en el último párrafo técnico.
+
+---
+
+## Pendiente — PRIORIDAD 1 (completado)
+
+~~1–7: Todos los ítems de claridad del documento escrito (cap. 1 + resumen.tex) fueron aplicados en la sesión del 2026-04-30.~~
+
+---
+
+## Pendiente — PRIORIDAD 2 (items menores)
+
+8. **Verificar overflows residuales**: compilar y confirmar que no quedan desbordamientos en las 6 longtables de cap. 4 tras los últimos ajustes de ancho.
+9. **RF-04 dos roles**: verificar que el texto actual queda claro aunque el cliente mencionó solo un rol en la entrevista.
+10. **Comparación intergrupal automática**: fuera del alcance actual; pendiente de abordar después de los items de claridad.
+11. **Presentación (gen_presentacion.py / gen_guion.py)**: las mismas mejoras narrativas que cap. 1 aplican aquí — tarea separada, no iniciada.
+
+---
+
+## Referencia rápida — archivos clave
+
+| Archivo | Contenido |
+|---------|-----------|
+| `chapters/01_introduccion.tex` | Introducción, motivación, planteamiento, propuesta, justificación, alcance, metodología, cronograma |
+| `chapters/04_analisis.tex` | RF, RNF, RN, herramientas, riesgos, justificación de umbrales |
+| `front/resumen.tex` | Resumen ejecutivo (pendiente reescritura) |
+| `bib/referencias.bib` | Bibliografía BibLaTeX |
+| `.vscode/settings.json` | Configuración LaTeX Workshop, chktex desactivado |
