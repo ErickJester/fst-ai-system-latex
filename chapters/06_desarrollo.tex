@@ -38,7 +38,7 @@ Sobre la imagen binaria limpia se extraen los contornos con \texttt{findContours
 OpenCV \cite{suzuki1985}. De cada contorno se obtiene el área, el rectángulo envolvente
 (\textit{bounding box}) y el centroide. Con esas propiedades se filtra cuál de los
 candidatos detectados corresponde a la rata y cuál es ruido, usando restricciones de
-área mínima y máxima calibradas para el tamaño esperado del animal dentro de cada
+área mínima y máxima calibradas para el tamaño esperado del espécimen dentro de cada
 cilindro.
 
 Para verificar consistencia entre cuadros consecutivos se usa la métrica IoU
@@ -49,7 +49,7 @@ tracker de correlación.
 
 \subsection{Estimación de la línea de agua}
 
-La superficie del agua puede generar reflejos que hacen que el animal aparezca
+La superficie del agua puede generar reflejos que hacen que la rata aparezca
 duplicado desde la vista lateral. Para mitigar ese efecto, el sistema estima en cada
 cuadro la posición vertical de la línea del agua: analiza el perfil de intensidad
 promedio por filas dentro de cada ROI e identifica la fila con el cambio más brusco.
@@ -161,7 +161,7 @@ Los puntos clave del listado son:
 
     \item \textbf{Líneas 23--24.} \texttt{np.diff} calcula la diferencia
     entre filas consecutivas; \texttt{argmax} localiza la fila con el cambio
-    más brusco, que corresponde a la transición agua--animal.
+    más brusco, que corresponde a la transición agua--rata.
 
     \item \textbf{Líneas 27--33.} La actualización EMA corresponde
     directamente a la ecuación~\ref{eq:ema} del capítulo de marco teórico,

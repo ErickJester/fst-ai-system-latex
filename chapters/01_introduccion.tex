@@ -34,7 +34,7 @@ El uso de animales de laboratorio en México está regulado por la Norma Oficial
 NOM-062-ZOO-1999 \cite{nom062}, que establece las especificaciones éticas, sanitarias
 y de bienestar animal para su cuidado y uso experimental. El laboratorio colaborador
 opera bajo esas disposiciones; este proyecto solo analiza los videos que resultan de
-los experimentos, sin intervenir en ningún procedimiento con los animales.
+los experimentos, sin intervenir en ningún procedimiento con las ratas.
 
 Existen herramientas para automatizar parte del análisis. EthoVision XT
 \cite{noldus_ethovision} y ANY-maze son las comerciales más usadas; ezTrack
@@ -46,7 +46,7 @@ profundo \cite{della_valle2025,meng2024_dsaan} sí alcanzan esa clasificación d
 clases, pero no están disponibles como sistemas que un laboratorio sin infraestructura
 especializada pueda desplegar.
 
-El Laboratorio de Neurociencia Conductual de la ENMyH-IPN, a cargo del Dr.\ César
+El Laboratorio de Bioquímica Estructural, Sección de Posgrado, de la Escuela Nacional de Medicina y Homeopatía (ENMyH-IPN), a cargo del Dr.\ César
 Augusto Sandino Reyes López, investigador del posgrado de esa institución, corre
 experimentos de FST regularmente y tiene un acervo de videos que
 hoy se analizan a mano. Esa es la necesidad que origina este Trabajo Terminal.
@@ -55,7 +55,7 @@ hoy se analizan a mano. Esa es la necesidad que origina este Trabajo Terminal.
 
 El laboratorio realiza experimentos de nado forzado de forma periódica para evaluar el
 efecto de distintas moléculas en grupos de ratas. Cada experimento genera videos donde
-se graban cuatro animales al mismo tiempo desde una vista lateral, con teléfono o
+se graban cuatro ratas al mismo tiempo desde una vista lateral, con teléfono o
 tableta, en dos sesiones: 20 minutos el primer día y 5 minutos el segundo.
 
 El análisis se hace completamente a mano: un investigador reproduce la grabación y va
@@ -64,7 +64,7 @@ escalar. Los problemas son:
 
 \begin{itemize}
   \item \textbf{Tiempo:} analizar un experimento completo puede llevar varias horas,
-        según el número de animales y sesiones.
+        según el número de ratas y sesiones.
   \item \textbf{Variabilidad entre evaluadores:} dos personas pueden usar criterios
         distintos para decidir cuándo empieza o termina una conducta, lo que afecta la
         reproducibilidad \cite{armario2021}. La norma ISO/IEC~25010:2023 \cite{iso25010}
@@ -97,16 +97,16 @@ El sistema tiene dos partes:
   \item \textbf{Pipeline de análisis de video:} recibe el video, identifica a cada rata
         dentro de su cilindro y clasifica cuadro a cuadro la conducta que realiza (nado,
         inmovilidad o escalamiento) con un modelo de aprendizaje supervisado. La salida
-        es el tiempo total por conducta y animal y, como funcionalidad opcional, el
+        es el tiempo total por conducta y rata y, como funcionalidad opcional, el
         desglose por minuto.
   \item \textbf{Plataforma web:} interfaz desde el navegador donde el investigador sube
-        los videos, consulta el estado del análisis, revisa resultados por animal y
+        los videos, consulta el estado del análisis, revisa resultados por rata y
         sesión, y descarga reportes. Los datos se almacenan en base de datos para
         comparar experimentos.
 \end{itemize}
 
 El sistema asume calidad mínima de entrada: vista lateral con los cuatro cilindros
-visibles, contraste suficiente entre el animal y el fondo, y cámara estable. Los videos
+visibles, contraste suficiente entre la rata y el fondo, y cámara estable. Los videos
 disponibles hasta ahora tienen variaciones de iluminación y contraste que pueden afectar
 el desempeño; durante el desarrollo se evaluará la robustez de los algoritmos y se
 documentarán los requisitos mínimos de calidad conforme al atributo \textit{performance
@@ -114,7 +114,7 @@ efficiency} de la ISO/IEC~25010:2023 \cite{iso25010}.
 
 La validación compara las predicciones del sistema con los registros conductuales
 manuales del laboratorio (gold standard), usando el coeficiente kappa de Cohen y el
-error absoluto medio por animal.
+error absoluto medio por rata.
 
 \section{Objetivo general}
 
@@ -177,9 +177,9 @@ aceptación de la validación final.
   \item Clasificación de tres conductas: nado activo, inmovilidad e intentos de escape.
         Si el sistema no logra distinguir con precisión suficiente nado y escalamiento,
         ambos se reportarán juntos como conducta activa.
-  \item Métricas por animal y por sesión: tiempo total de cada conducta en los
+  \item Métricas por rata y por sesión: tiempo total de cada conducta en los
         5~minutos del día~2 y desglose por minuto como funcionalidad opcional.
-  \item Comparación entre sesiones día~1 y día~2 para el mismo animal o grupo.
+  \item Comparación entre sesiones día~1 y día~2 para la misma rata o grupo.
   \item Plataforma web con carga de videos, consulta de resultados y generación de
         reportes en PDF y CSV.
   \item Validación contra el gold standard del laboratorio con $\kappa$ de Cohen y
@@ -193,81 +193,156 @@ aceptación de la validación final.
   \item Análisis en tiempo real sobre video en vivo.
   \item Corrección automática de videos con mala iluminación, reflejos excesivos u
         otros problemas de calidad de grabación.
-  \item Cualquier intervención en los experimentos con animales; eso lo hace el
+  \item Cualquier intervención en los experimentos con ratas; eso lo hace el
         laboratorio bajo la NOM-062-ZOO-1999 \cite{nom062}.
   \item Despliegue institucional definitivo; el producto entregado es un prototipo
         funcional.
   \item Análisis de paradigmas conductuales distintos al FST en esta versión.
 \end{itemize}
 
-%\section{Metodología}
+\section{Metodología}
 
-%El proyecto usa una metodología ágil basada en Scrum, adaptada a un equipo de dos
-%personas con entregas en dos etapas académicas (TT1 y TT2). El motivo de elegir este
-%enfoque es directo: el proyecto tiene partes muy distintas ---el módulo de video, el
-%clasificador, la plataforma web, la base de datos--- y no tiene sentido diseñar todo
-%desde el inicio sin saber cómo va a quedar el módulo de seguimiento hasta probarlo.
-%Scrum permite ajustar decisiones al cierre de cada bloque, con base en lo que funcionó.
+El proyecto usa una metodología ágil basada en Scrum, adaptada a un equipo de dos
+personas con entregas en dos etapas académicas (TT1 y TT2). El motivo de elegir este
+enfoque es directo: el proyecto tiene partes muy distintas ---el módulo de video, el
+clasificador, la plataforma web, la base de datos--- y no tiene sentido diseñar todo
+desde el inicio sin saber cómo va a quedar el módulo de seguimiento hasta probarlo.
+Scrum permite ajustar decisiones al cierre de cada bloque, con base en lo que funcionó.
 
-%Cada iteración termina con un entregable revisable con los directores en sesiones
-%quincenales. Las actividades se organizan según los procesos de implementación y
-%verificación de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}: criterios de aceptación
-%definidos antes de codificar, revisión del producto al cierre de cada bloque, y
-%registro de ajustes para el siguiente ciclo.
+Cada iteración termina con un entregable revisable con los directores en sesiones
+quincenales. Las actividades se organizan según los procesos de implementación y
+verificación de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}: criterios de aceptación
+definidos antes de codificar, revisión del producto al cierre de cada bloque, y
+registro de ajustes para el siguiente ciclo.
 
-%La Tabla~\ref{tab:plan_trabajo} muestra la distribución de actividades por etapa y por
-%integrante. Ángel Ali es responsable del sistema web e infraestructura (backend, base
-%de datos, frontend); Vanesa es responsable del pipeline de IA (preprocesamiento de
-%video, clasificador de conducta, validación).
+La responsabilidad de cada integrante está delimitada por frente técnico:
+Ángel Ali es responsable del sistema web e infraestructura (backend, base de datos,
+frontend, despliegue); Vanesa es responsable del pipeline de IA (preprocesamiento de
+video, clasificador de conducta, validación contra el gold standard).
 
-\begin{table}[ht]
+Las Tablas~\ref{tab:cronograma_angel} y~\ref{tab:cronograma_vanesa} muestran el
+cronograma mes a mes de cada integrante. La columna TT1 abarca febrero--junio
+(documentación, análisis y diseño); la columna TT2 abarca julio--enero
+(implementación, integración, pruebas y defensa).
+
+% ── Cronograma Ángel Ali ─────────────────────────────────────────────────────
+\begin{sidewaystable}
 \centering
-\caption{Plan de trabajo por etapa académica.}
-\label{tab:plan_trabajo}
+\caption{Cronograma de actividades --- Frausto Robles Ángel Ali.}
+\label{tab:cronograma_angel}
 \small
-\begin{tabular}{|p{1.0cm}|p{3.8cm}|p{4.0cm}|p{4.0cm}|}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|p{8.5cm}|c|c|c|c|c||c|c|c|c|c|c|c|}
 \hline
-\textbf{Etapa} & \textbf{Bloque} & \textbf{Ángel Ali (sistema web)} & \textbf{Vanesa (pipeline IA)} \\
+\textbf{Actividad}
+  & \textbf{Feb} & \textbf{Mar} & \textbf{Abr} & \textbf{May} & \textbf{Jun}
+  & \textbf{Jul} & \textbf{Ago} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Dic} & \textbf{Ene} \\
 \hline
-\multirow{4}{*}{\textbf{TT1} \newline Feb--Jun}
-  & Documentación caps.~1--2
-  & Introducción, planteamiento, estado del arte y comparativa tecnológica.
-  & Antecedentes FST, técnicas de visión por computadora y modelos ML/DL aplicables. \\
-\cline{2-4}
-  & Análisis (cap.~3)
-  & RF/RNF, casos de uso, matriz de trazabilidad y criterios de aceptación por módulo.
-  & Especificación de conductas, métricas, protocolo de anotación y plan de validación. \\
-\cline{2-4}
-  & Diseño (cap.~4)
-  & Arquitectura del sistema, modelo E-R, API REST, diagramas UML y wireframes.
-  & Pipeline de preprocesamiento, separación por sujeto, descriptores y arquitectura del clasificador. \\
-\cline{2-4}
-  & Entregable TT1
-  & \multicolumn{2}{p{8.0cm}|}{Protocolo registrado en CATT-ESCOM; documentación de caps.~1--4 aprobada por directores.} \\
+\multicolumn{13}{|l|}{\textbf{TT1 --- Documentación, análisis y diseño (febrero--junio)}} \\
 \hline
-\multirow{4}{*}{\textbf{TT2} \newline Jul--Ene}
-  & Implementación base
-  & Backend Flask + PostgreSQL, esquema de BD, API REST de sesiones y autenticación.
-  & Baseline de sustracción de fondo, curación de videos y anotación del gold standard con BORIS. \\
-\cline{2-4}
-  & Implementación principal
-  & Vistas React.js (carga, dashboard, reportes) e integración frontend-backend.
-  & Clasificador entrenado (nado/inmovilidad/escape), ajuste de hiperparámetros y métricas por individuo. \\
-\cline{2-4}
-  & Integración, pruebas y robustez
-  & Integración del módulo de IA al backend (worker/cola), pruebas unitarias y de sistema.
-  & Pruebas con distintas condiciones de grabación, manejo de oclusiones y reporte de métricas finales. \\
-\cline{2-4}
-  & Entregable TT2
-  & \multicolumn{2}{p{8.0cm}|}{Sistema desplegado con Docker Compose; manuales técnico y de usuario; material de defensa.} \\
+Caps.~1--2: introducción, planteamiento y estado del arte
+  & $\bullet$ & $\bullet$ & $\bullet$ & & & & & & & & & \\
+\hline
+Cap.~4 Análisis: RF, RNF, casos de uso y criterios de aceptación
+  & & & $\bullet$ & $\bullet$ & & & & & & & & \\
+\hline
+Cap.~5 Diseño: arquitectura, BD, API REST, UML y wireframes
+  & & & & $\bullet$ & $\bullet$ & & & & & & & \\
+\hline
+Revisiones mensuales con directores e investigador del laboratorio
+  & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & & & & & & & \\
+\hline
+\multicolumn{13}{|l|}{\textbf{TT2 --- Implementación, pruebas y despliegue (julio--enero)}} \\
+\hline
+Entorno Flask\,/\,PostgreSQL\,/\,Docker, esquema BD y API REST
+  & & & & & & $\bullet$ & $\bullet$ & & & & & \\
+\hline
+Autenticación y control de acceso (JWT, roles)
+  & & & & & & & $\bullet$ & & & & & \\
+\hline
+Vistas React.js: carga de video, dashboard y seguimiento de progreso
+  & & & & & & & $\bullet$ & $\bullet$ & & & & \\
+\hline
+Integración frontend--backend y módulo de gestión de sesiones
+  & & & & & & & & $\bullet$ & & & & \\
+\hline
+Visualización de resultados y generación de reportes PDF
+  & & & & & & & & & $\bullet$ & & & \\
+\hline
+Integración IA con backend $+$ pruebas unitarias y de sistema
+  & & & & & & & & & $\bullet$ & $\bullet$ & & \\
+\hline
+Corrección de defectos y ajustes de rendimiento
+  & & & & & & & & & & $\bullet$ & & \\
+\hline
+Docker Compose, manuales, despliegue ESCOM y material de defensa
+  & & & & & & & & & & & $\bullet$ & $\bullet$ \\
 \hline
 \end{tabular}
-\end{table}
+\end{sidewaystable}
+
+% ── Cronograma Vanesa ─────────────────────────────────────────────────────────
+\begin{sidewaystable}
+\centering
+\caption{Cronograma de actividades --- Rodríguez Verdín Sandoval Vanesa.}
+\label{tab:cronograma_vanesa}
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|p{8.5cm}|c|c|c|c|c||c|c|c|c|c|c|c|}
+\hline
+\textbf{Actividad}
+  & \textbf{Feb} & \textbf{Mar} & \textbf{Abr} & \textbf{May} & \textbf{Jun}
+  & \textbf{Jul} & \textbf{Ago} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Dic} & \textbf{Ene} \\
+\hline
+\multicolumn{13}{|l|}{\textbf{TT1 --- Documentación, análisis y diseño (febrero--junio)}} \\
+\hline
+Caps.~1--2: antecedentes FST, técnicas de visión y modelos ML/DL
+  & $\bullet$ & $\bullet$ & $\bullet$ & & & & & & & & & \\
+\hline
+Cap.~4 Análisis: conductas, métricas y protocolo de anotación
+  & & & $\bullet$ & $\bullet$ & & & & & & & & \\
+\hline
+Cap.~5 Diseño del pipeline de IA: preprocesamiento y clasificador
+  & & & & $\bullet$ & $\bullet$ & & & & & & & \\
+\hline
+Revisiones mensuales con directores e investigador del laboratorio
+  & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & & & & & & & \\
+\hline
+\multicolumn{13}{|l|}{\textbf{TT2 --- Implementación, pruebas y validación (julio--enero)}} \\
+\hline
+Baseline: sustracción de fondo, flujo óptico y curación de videos
+  & & & & & & $\bullet$ & & & & & & \\
+\hline
+Anotación gold standard con BORIS y extracción de descriptores
+  & & & & & & $\bullet$ & $\bullet$ & & & & & \\
+\hline
+Entrenamiento del clasificador ResNet-18 (nado\,/\,inmovilidad\,/\,escape)
+  & & & & & & & $\bullet$ & $\bullet$ & & & & \\
+\hline
+Ajuste de hiperparámetros y evaluación contra gold standard
+  & & & & & & & & $\bullet$ & & & & \\
+\hline
+Generación de métricas por individuo y por sesión
+  & & & & & & & & & $\bullet$ & & & \\
+\hline
+Pruebas con distintas condiciones $+$ oclusiones y reflejos
+  & & & & & & & & & $\bullet$ & $\bullet$ & & \\
+\hline
+Reporte de métricas finales ($\kappa$ de Cohen, MAE, F1)
+  & & & & & & & & & & $\bullet$ & & \\
+\hline
+Redacción de caps.\ resultados, manuales y material de defensa
+  & & & & & & & & & & & $\bullet$ & $\bullet$ \\
+\hline
+\end{tabular}
+\end{sidewaystable}
 
 El stack técnico cubre los dos frentes del proyecto: Python con Flask, OpenCV,
-TensorFlow/scikit-learn y PostgreSQL para el pipeline y el backend; React.js para
-el frontend; BORIS para anotar el gold standard; Git con Docker para control de
-versiones y despliegue.
+PyTorch (YOLOv8, ResNet-18) y PostgreSQL para el pipeline y el backend; React.js
+para el frontend; BORIS para anotar el gold standard; Git con Docker para control
+de versiones y despliegue.
 
 En la práctica, Ángel y Vanesa trabajan en ramas separadas del repositorio y se
 sincronizan en los sprint reviews semanales. La integración entre los dos módulos

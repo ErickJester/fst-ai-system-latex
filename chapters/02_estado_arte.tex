@@ -35,8 +35,8 @@ intentado resolver el mismo problema o uno parecido, y qué resultados reportaro
 \subsection{DSAAN: clasificación sin umbral en el FST}
 
 Meng et al.\ \cite{meng2024_dsaan} propusieron DSAAN (Dual-Stream Attention-Augmented
-Network), un método con dos ramas paralelas que procesan apariencia y movimiento del
-animal por separado y luego combinan esa información para clasificar el estado cuadro a
+Network), un método con dos ramas paralelas que procesan apariencia y movimiento de la
+rata por separado y luego combinan esa información para clasificar el estado cuadro a
 cuadro. La arquitectura procesa diferencias entre cuadros consecutivos (flujo de
 movimiento) en paralelo con la imagen original (apariencia), y un módulo de atención
 pondera la contribución de cada rama según el cuadro.
@@ -77,10 +77,10 @@ considerable.
 \subsection{YOLO-Behaviour: detección y clasificación en dos etapas}
 
 Chan et al.\ \cite{chan2025_yolo} presentaron un sistema que separa la detección del
-animal de la clasificación de su conducta. Primero YOLOv8 detecta y recorta la región
-del animal en cada cuadro; luego un clasificador independiente opera sobre ese recorte.
+la rata de la clasificación de su conducta. Primero YOLOv8 detecta y recorta la región
+de la rata en cada cuadro; luego un clasificador independiente opera sobre ese recorte.
 Separar las dos tareas tiene una ventaja práctica: el clasificador trabaja sobre una
-imagen más limpia, sin el fondo ni los otros animales como distracción.
+imagen más limpia, sin el fondo ni las otras ratas como distracción.
 
 Ese enfoque de dos etapas ---detección por YOLO seguida de clasificación sobre el
 recorte--- es la arquitectura que adopta este proyecto.
@@ -93,11 +93,11 @@ recorte--- es la arquitectura que adopta este proyecto.
 
 EthoVision XT (Noldus Information Technology) es el software más usado en laboratorios
 de neurociencia conductual para seguimiento automático de animales en video
-\cite{noldus_ethovision}. Detecta al animal en cada cuadro por sustracción de fondo y
+\cite{noldus_ethovision}. Detecta a la rata en cada cuadro por sustracción de fondo y
 umbralización, y registra posición, velocidad y tiempo de inmovilidad. Tiene módulos
 para múltiples arenas simultáneas y exporta datos a formatos estadísticos estándar.
 
-Para el FST, EthoVision detecta si el animal se mueve o no, pero no distingue entre
+Para el FST, EthoVision detecta si la rata se mueve o no, pero no distingue entre
 nado, inmovilidad y escalamiento \cite{della_valle2025}. Esa limitación no es menor:
 sin distinguir las tres conductas, no es posible inferir sobre qué sistema
 neurotransmisor actúa el fármaco evaluado. Adicionalmente, requiere condiciones de
@@ -122,9 +122,9 @@ diseñada para investigadores sin experiencia en programación. Corre sobre Jupy
 Notebooks y cuantifica el movimiento comparando la diferencia absoluta entre cuadros
 consecutivos: los píxeles que cambian más de un umbral se consideran movimiento.
 
-Es útil para experimentos simples donde solo importa si el animal se mueve o no. Hace
+Es útil para experimentos simples donde solo importa si la rata se mueve o no. Hace
 clasificación binaria (móvil/inmóvil) y asume condiciones de grabación controladas:
-iluminación uniforme, fondo constante, un solo animal por arena. No fue diseñada para
+iluminación uniforme, fondo constante, una sola rata por arena. No fue diseñada para
 vista lateral con varios cilindros al mismo tiempo, que es exactamente el encuadre
 que usa el laboratorio.
 
@@ -132,13 +132,13 @@ que usa el laboratorio.
 
 DBscorer \cite{nandi2021_dbscorer} es la herramienta de código abierto más específica
 para el FST y el test de suspensión de cola (TST). La desarrolló el Indian Institute of
-Science en MATLAB. Cuantifica la inmovilidad comparando el tamaño de la región del
-animal entre cuadros consecutivos: si el área varía poco, el animal se considera inmóvil.
+Science en MATLAB. Cuantifica la inmovilidad comparando el tamaño de la región de la
+rata entre cuadros consecutivos: si el área varía poco, la rata se considera inmóvil.
 
 Es un paso adelante frente al análisis manual, pero tiene limitaciones que no tienen
 fácil solución dentro de su arquitectura: es sensible a cambios de iluminación y
 reflejos del agua, solo distingue móvil/inmóvil sin separar nado de escalamiento,
-está diseñada para un solo animal a la vez en perspectiva lateral, y no tiene interfaz
+está diseñada para una sola rata a la vez en perspectiva lateral, y no tiene interfaz
 web. La dependencia de MATLAB además implica una licencia que no siempre está
 disponible en el contexto académico.
 
@@ -180,7 +180,7 @@ proyecto. El modelo no generaliza bien cuando el fondo cambia mucho entre condic
 lo que hay que considerar durante el entrenamiento.
 
 La separación entre detección y clasificación tiene una ventaja práctica concreta: el
-clasificador trabaja sobre un recorte limpio del animal, sin el fondo ni los otros
+clasificador trabaja sobre un recorte limpio de la rata, sin el fondo ni los otros
 cilindros como fuente de error. El cap.~4 detalla por qué ese trade-off es conveniente
 dado el tamaño del dataset disponible.
 
@@ -192,8 +192,8 @@ eliminar la variabilidad entre evaluadores humanos en el FST. El resultado fue
 sólido, pero el enfoque requiere marcar manualmente los puntos clave del cuerpo en
 decenas de cuadros antes de empezar ---nariz, patas, cola--- lo que implica un trabajo
 de anotación previo considerable. La pregunta que queda abierta es si esa inversión
-inicial se justifica frente a enfoques que operan directamente sobre el recorte del
-animal, sin necesidad de estimar la pose.
+inicial se justifica frente a enfoques que operan directamente sobre el recorte de la
+rata, sin necesidad de estimar la pose.
 
 \subsection{Trackers de correlación: CSRT y KCF}
 
@@ -286,7 +286,7 @@ Valle et al.\ \cite{della_valle2025} usan este enfoque y logran la clasificació
 tres conductas. El costo es computacional: las redes 3D requieren más memoria y tiempo
 de inferencia que las 2D, lo que puede ser una limitación en hardware sin GPU.
 
-Para este proyecto, la primera opción es ResNet-18 en 2D sobre el recorte del animal
+Para este proyecto, la primera opción es ResNet-18 en 2D sobre el recorte de la rata
 (más simple, menor costo computacional). Las redes 3D quedan como alternativa si el
 clasificador 2D no alcanza la precisión necesaria.
 
@@ -313,7 +313,7 @@ sus objetivos. Para este proyecto, los atributos relevantes son:
         usabilidad con al menos un usuario real del laboratorio.
 \end{itemize}
 
-Además, el error absoluto medio (MAE) en segundos por animal y conducta completa los
+Además, el error absoluto medio (MAE) en segundos por rata y conducta completa los
 criterios de evaluación cuantitativos del clasificador.
 
 % -----------------------------------------------------------

@@ -284,7 +284,7 @@ def slide_problema(total):
 
     add_rect(s, 0.8, 1.7, 5.9, 5.3, WHITE)
     add_rect(s, 0.8, 1.7, 5.9, 0.7, MIDNIGHT)
-    add_text(s, 0.95, 1.7, 5.7, 0.7, "Laboratorio de Neurociencia Conductual",
+    add_text(s, 0.95, 1.7, 5.7, 0.7, "Laboratorio de Bioquímica Estructural, Sección de Posgrado",
              size=16, bold=True, color=WHITE, anchor=MSO_ANCHOR.MIDDLE, font="Georgia")
     add_text(s, 0.95, 2.5, 5.6, 0.35, "ENMyH-IPN  ·  Dr. Sandino Reyes López",
              size=12, color=TEXT_MUTE, italic=True)
@@ -341,7 +341,7 @@ def slide_propuesta(total):
          "Un investigador sube videos desde el navegador y recibe reportes cuantitativos.",
          ["Carga de videos Día 1 / Día 2",
           "Dashboard con estado y progreso en tiempo real",
-          "Resultados por animal, sesión y minuto",
+          "Resultados por rata, sesión y minuto",
           "Reportes descargables en PDF y CSV",
           "Gestión de usuarios y roles"],
          BLUE, "02"),
@@ -433,14 +433,14 @@ def slide_justificacion_alcance(total):
         "Análisis de videos FST del laboratorio (vista lateral, 4 cilindros).",
         "Clasificación de 3 conductas (nado, inmovilidad, escalamiento).",
         "Fallback: si no se alcanza κ>0.80, nado+escalamiento = 'conducta activa'.",
-        "Métricas por animal y sesión; desglose por minuto (opcional).",
+        "Métricas por rata y sesión; desglose por minuto (opcional).",
         "Comparación Día 1 vs. Día 2; reportes PDF/CSV.",
         "Validación contra gold standard (κ de Cohen y MAE).",
     ]
     fuera = [
         "Análisis en tiempo real sobre video en vivo.",
         "Corrección automática de videos con mala iluminación.",
-        "Intervención con animales (lo hace el laboratorio bajo NOM-062).",
+        "Intervención con ratas (lo hace el laboratorio bajo NOM-062).",
         "Despliegue institucional definitivo (prototipo funcional).",
         "Otros paradigmas (laberinto en cruz, campo abierto, etc.).",
     ]
@@ -531,11 +531,11 @@ def slide_marco_conductual(total):
 
     conductas = [
         ("Inmovilidad",
-         "El animal flota con lo mínimo para no hundirse.",
+         "El espécimen flota con lo mínimo para no hundirse.",
          "Indicador principal de desesperanza conductual.",
          NAVY),
         ("Nado activo",
-         "Paladas que desplazan al animal horizontalmente.",
+         "Paladas que desplazan a la rata horizontalmente.",
          "Asociado al sistema serotoninérgico (ISRS, fluoxetina).",
          BLUE),
         ("Intentos de escape",
@@ -686,7 +686,7 @@ def slide_rf(total):
             "Reporte de error con PDF de diagnóstico",
         ]),
         ("Resultados", "RF-18 → RF-21", BLUE, [
-            "Tiempo y % por conducta y animal",
+            "Tiempo y % por conducta y rata",
             "Desglose por minuto · comparación DAY1 vs DAY2",
             "Exportación PDF y CSV",
         ]),
@@ -756,7 +756,7 @@ def slide_rnf_reglas(total):
         "RN-04 · Análisis iniciado por el sistema.",
         "RN-05 · Video borrado a 30 días + aviso 7 días.",
         "RN-06 · Resultados persistentes indefinidamente.",
-        "RN-07 · Una conducta por cuadro por animal.",
+        "RN-07 · Una conducta por cuadro por rata.",
         "RN-08 · Investigador ve lo propio · Admin ve todo.",
         "RN-09 · Eliminación permanente con confirmación.",
         "RN-10 · Rechazo de no-MP4 en cliente.",
@@ -1012,7 +1012,7 @@ def slide_vistas(total):
         ("Creación de experimento",
          "Formulario en tres pasos",
          ["Metadatos (nombre, fecha, tratamiento)",
-          "Asignación de ROIs a animales",
+          "Asignación de ROIs a ratas",
           "Carga de videos DAY1 / DAY2"],
          MIDNIGHT),
         ("Progreso del análisis",
@@ -1024,7 +1024,7 @@ def slide_vistas(total):
         ("Resultados del experimento",
          "Cuatro pestañas",
          ["Resumen por conducta",
-          "Detalle por animal",
+          "Detalle por rata",
           "Desglose por minuto · DAY1 vs DAY2"],
          ACCENT),
         ("Panel de administración",
@@ -1069,7 +1069,7 @@ def slide_metricas(total):
          "Balance precisión/recall por conducta; detecta sesgos de clase minoritaria.",
          BLUE),
         ("MAE", "Error absoluto medio",
-         "Segundos por animal y conducta respecto al registro manual.",
+         "Segundos por rata y conducta respecto al registro manual.",
          ACCENT),
     ]
     card_w = 4.0; card_h = 2.6; gap = 0.25

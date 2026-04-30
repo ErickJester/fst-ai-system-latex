@@ -283,14 +283,14 @@ V(doc, "La depresión afecta a más de 280 millones de personas en el mundo. Par
 # ── DIAPOSITIVA 4 — Planteamiento del problema ───────────────
 add_slide_heading(doc, 4, "Planteamiento del problema")
 add_tiempo(doc, 70)
-V(doc, "El Laboratorio de Neurociencia Conductual de la ENMyH-IPN, dirigido por el Doctor Sandino Reyes López, registra estos experimentos grabando cuatro ratas simultáneamente en vista lateral. Cada sesión dura entre 5 y 20 minutos, y hoy el análisis se realiza de manera manual: cronómetro en mano, cuadro a cuadro. Esto genera cuatro problemas concretos.")
-A(doc, "Primero, el tiempo: analizar un experimento completo toma varias horas por animal y sesión. Segundo, la variabilidad: dos evaluadores pueden usar criterios distintos al clasificar una misma conducta, comprometiendo la reproducibilidad. Tercero, no existe registro centralizado; los resultados quedan dispersos en hojas de cálculo y notas físicas. Y cuarto, la granularidad: un desglose minuto a minuto —relevante para la dinámica farmacológica— es inviable a mano.")
+V(doc, "El Laboratorio de Bioquímica Estructural, Sección de Posgrado, de la ENMyH-IPN, dirigido por el Doctor Sandino Reyes López, registra estos experimentos grabando cuatro ratas simultáneamente en vista lateral. Cada sesión dura entre 5 y 20 minutos, y hoy el análisis se realiza de manera manual: cronómetro en mano, cuadro a cuadro. Esto genera cuatro problemas concretos.")
+A(doc, "Primero, el tiempo: analizar un experimento completo toma varias horas por rata y sesión. Segundo, la variabilidad: dos evaluadores pueden usar criterios distintos al clasificar una misma conducta, comprometiendo la reproducibilidad. Tercero, no existe registro centralizado; los resultados quedan dispersos en hojas de cálculo y notas físicas. Y cuarto, la granularidad: un desglose minuto a minuto —relevante para la dinámica farmacológica— es inviable a mano.")
 
 # ── DIAPOSITIVA 5 — Propuesta de solución ────────────────────
 add_slide_heading(doc, 5, "Propuesta de solución")
 add_tiempo(doc, 80)
 A(doc, "Nuestra propuesta integra dos componentes. El primero es un pipeline de análisis de video que detecta automáticamente a cada rata dentro de su cilindro y clasifica cuadro a cuadro su conducta. Utiliza sustracción de fondo con CLAHE para corregir contraste, YOLOv8 para la detección, ByteTrack con filtro de Kalman para el seguimiento multi-objeto y ResNet-18 con transfer learning para la clasificación. Si el equipo no cuenta con GPU, el sistema dispone de un respaldo clásico con CSRT o KCF.")
-V(doc, "El segundo componente es la plataforma web que permite a un investigador subir sus videos desde el navegador y recibir reportes cuantitativos de manera automática. Incluye carga de videos para el Día 1 y el Día 2, un dashboard con progreso en tiempo real, resultados desglosados por animal y por minuto, reportes descargables en PDF y CSV, y gestión de roles para administradores e investigadores.")
+V(doc, "El segundo componente es la plataforma web que permite a un investigador subir sus videos desde el navegador y recibir reportes cuantitativos de manera automática. Incluye carga de videos para el Día 1 y el Día 2, un dashboard con progreso en tiempo real, resultados desglosados por rata y por minuto, reportes descargables en PDF y CSV, y gestión de roles para administradores e investigadores.")
 
 # ── DIAPOSITIVA 6 — Objetivos ─────────────────────────────────
 add_slide_heading(doc, 6, "Objetivos")
@@ -301,7 +301,7 @@ A(doc, "El objetivo general es diseñar, desarrollar y validar un prototipo de s
 # ── DIAPOSITIVA 7 — Justificación y Alcance ──────────────────
 add_slide_heading(doc, 7, "Justificación y Alcance")
 add_tiempo(doc, 75)
-V(doc, "El sistema está justificado por cuatro razones: reduce las horas de trabajo manual y homogeniza criterios entre evaluadores; es completamente abierto y desplegable con Docker conforme a ISO/IEC/IEEE 12207; su clasificador es modular y podría adaptarse a otros paradigmas conductuales; y sus atributos de calidad son verificables con métricas concretas bajo ISO/IEC 25010. En cuanto al alcance, el sistema analiza videos del FST del laboratorio en vista lateral con cuatro cilindros y clasifica las tres conductas mutuamente excluyentes generando reportes comparativos Día 1 versus Día 2. Quedan fuera del alcance el análisis en tiempo real, la corrección automática de iluminación, la intervención con animales —bajo NOM-062— y el despliegue institucional definitivo.")
+V(doc, "El sistema está justificado por cuatro razones: reduce las horas de trabajo manual y homogeniza criterios entre evaluadores; es completamente abierto y desplegable con Docker conforme a ISO/IEC/IEEE 12207; su clasificador es modular y podría adaptarse a otros paradigmas conductuales; y sus atributos de calidad son verificables con métricas concretas bajo ISO/IEC 25010. En cuanto al alcance, el sistema analiza videos del FST del laboratorio en vista lateral con cuatro cilindros y clasifica las tres conductas mutuamente excluyentes generando reportes comparativos Día 1 versus Día 2. Quedan fuera del alcance el análisis en tiempo real, la corrección automática de iluminación, la intervención con ratas —bajo NOM-062— y el despliegue institucional definitivo.")
 
 # ── DIAPOSITIVA 8 — Estado del Arte ──────────────────────────
 add_slide_heading(doc, 8, "Estado del Arte")
@@ -311,13 +311,13 @@ A(doc, "Al revisar las herramientas existentes encontramos que las soluciones co
 # ── DIAPOSITIVA 9 — Marco Teórico Conductual ─────────────────
 add_slide_heading(doc, 9, "Marco Teórico Conductual")
 add_tiempo(doc, 65)
-V(doc, "El FST define tres conductas mutuamente excluyentes, cada una asociada a un sistema neurotransmisor distinto. La inmovilidad —el animal flota con el mínimo movimiento para no hundirse— es el indicador principal de desesperanza conductual. El nado activo —paladas horizontales que desplazan al animal— está asociado al sistema serotoninérgico y es el que reducen los ISRS como la fluoxetina. Los intentos de escape —movimientos rápidos hacia las paredes del cilindro— se asocian al sistema noradrenérgico, como en el caso de la desipramina. Distinguir estas tres conductas permite inferir sobre qué mecanismo molecular actúa el fármaco evaluado.")
+V(doc, "El FST define tres conductas mutuamente excluyentes, cada una asociada a un sistema neurotransmisor distinto. La inmovilidad —el espécimen flota con el mínimo movimiento para no hundirse— es el indicador principal de desesperanza conductual. El nado activo —paladas horizontales que desplazan a la rata— está asociado al sistema serotoninérgico y es el que reducen los ISRS como la fluoxetina. Los intentos de escape —movimientos rápidos hacia las paredes del cilindro— se asocian al sistema noradrenérgico, como en el caso de la desipramina. Distinguir estas tres conductas permite inferir sobre qué mecanismo molecular actúa el fármaco evaluado.")
 
 # ── DIAPOSITIVA 10 — Marco Teórico Visión/DL ─────────────────
 add_slide_heading(doc, 10, "Marco Teórico de Visión y Aprendizaje Profundo")
 add_tiempo(doc, 90)
 A(doc, "El pipeline se apoya en cuatro conceptos clave. La sustracción de fondo por mediana pixel a pixel modela el fondo estático de los primeros cuadros; CLAHE —Contrast Limited Adaptive Histogram Equalization— corrige el contraste local antes del umbralado de Otsu, y la morfología por apertura elimina el ruido residual.")
-A(doc, "ByteTrack usa un filtro de Kalman para predecir la posición del animal y aplica asociación en dos pasos: primero detecciones de alta confianza, luego las de baja confianza, para recuperar trayectorias incluso en casos de oclusión parcial.")
+A(doc, "ByteTrack usa un filtro de Kalman para predecir la posición de la rata y aplica asociación en dos pasos: primero detecciones de alta confianza, luego las de baja confianza, para recuperar trayectorias incluso en casos de oclusión parcial.")
 A(doc, "ResNet-18 es una red residual cuyos bloques de salto aprenden F(x) = H(x) − x, lo que permite que el gradiente fluya sin atenuación durante el entrenamiento de redes profundas.")
 A(doc, "Y el transfer learning nos permite partir de los pesos preentrenados en ImageNet —con aproximadamente un millón de imágenes y mil clases—, congelar las capas de extracción de características y reentrenar únicamente la capa final con tres salidas, una por conducta, usando cuadros etiquetados manualmente en BORIS.")
 
@@ -333,7 +333,7 @@ add_tiempo(doc, 90)
 add_note(doc, "Ángel recorre los seis módulos señalando en pantalla.")
 A(doc, "Definimos 29 requerimientos funcionales en seis módulos. Autenticación —RF-01 a RF-04—: login con correo institucional del IPN, logout con JWT, recuperación de contraseña y gestión de roles. Gestión de usuarios —RF-05 a RF-07—: el administrador crea, modifica y desactiva cuentas; el investigador actualiza su propio perfil.")
 A(doc, "Carga de video —RF-08 a RF-12—: acepta únicamente archivos MP4, valida en cliente y servidor, registra metadatos y encola automáticamente el análisis. Análisis conductual —RF-13 a RF-17—: ejecuta el pipeline en cuatro etapas con progreso en tiempo real, detecta cilindros con confianza mínima de 0.70, clasifica cuadro a cuadro de forma mutuamente excluyente y genera un PDF de diagnóstico ante errores.")
-A(doc, "Resultados —RF-18 a RF-21—: tiempo y porcentaje por conducta y animal, desglose por minuto, comparación entre días y exportación en PDF y CSV. Dashboard de administración —RF-22 a RF-29—: gestión de experimentos, avisos de expiración de videos a 30 días y monitoreo de disco, cola y análisis activos.")
+A(doc, "Resultados —RF-18 a RF-21—: tiempo y porcentaje por conducta y rata, desglose por minuto, comparación entre días y exportación en PDF y CSV. Dashboard de administración —RF-22 a RF-29—: gestión de experimentos, avisos de expiración de videos a 30 días y monitoreo de disco, cola y análisis activos.")
 
 # ── DIAPOSITIVA 13 — RNF y Reglas de Negocio ─────────────────
 add_slide_heading(doc, 13, "Requerimientos No Funcionales y Reglas de Negocio")
@@ -359,7 +359,7 @@ add_slide_heading(doc, 16, "Diseño del Pipeline de IA")
 add_tiempo(doc, 80)
 A(doc, "El pipeline ejecuta cuatro etapas secuenciales. La primera es el preprocesamiento: se decodifica el video, se aplica CLAHE si el contraste cae bajo el umbral configurable y se limpia el ruido con morfología de apertura.")
 A(doc, "La segunda es la detección de cilindros: YOLOv8 localiza los cuatro ROIs con confianza mínima de 0.70; si falla, se genera un reporte de diagnóstico en PDF con la imagen del cuadro problemático.")
-A(doc, "La tercera es el seguimiento: YOLOv8 detecta a las ratas cuadro a cuadro y ByteTrack con filtro de Kalman mantiene la identidad de cada animal a lo largo del video; el respaldo CSRT o KCF opera si no hay GPU disponible.")
+A(doc, "La tercera es el seguimiento: YOLOv8 detecta a las ratas cuadro a cuadro y ByteTrack con filtro de Kalman mantiene la identidad de cada rata a lo largo del video; el respaldo CSRT o KCF opera si no hay GPU disponible.")
 A(doc, "La cuarta es la clasificación: ResNet-18 con transfer learning desde ImageNet asigna a cada cuadro una de las tres conductas. ResNet-50 está disponible como alternativa de mayor precisión si el tiempo de inferencia lo permite.")
 
 # ── DIAPOSITIVA 17 — Base de Datos ───────────────────────────
@@ -372,7 +372,7 @@ V(doc, "El diseño cumple las reglas de negocio clave: eliminar un experimento e
 add_slide_heading(doc, 18, "Vistas del Prototipo")
 add_tiempo(doc, 75)
 V(doc, "El prototipo contempla seis vistas principales. El Login con validación de correo institucional y mensaje de error genérico según RN-01. El Dashboard del investigador con estado de todos sus experimentos y avisos de expiración. La Creación de experimento con un formulario de tres pasos: metadatos, asignación de ROIs y carga de videos.")
-V(doc, "La pantalla de Progreso del análisis con barra de avance por etapa del pipeline y manejo de error con reporte. La pantalla de Resultados con cuatro pestañas: resumen, detalle por animal, desglose por minuto y comparación Día 1 versus Día 2. Y el Panel de administración con monitoreo de disco, cola de trabajos y gestión de usuarios, con alertas al 80 % de capacidad.")
+V(doc, "La pantalla de Progreso del análisis con barra de avance por etapa del pipeline y manejo de error con reporte. La pantalla de Resultados con cuatro pestañas: resumen, detalle por rata, desglose por minuto y comparación Día 1 versus Día 2. Y el Panel de administración con monitoreo de disco, cola de trabajos y gestión de usuarios, con alertas al 80 % de capacidad.")
 
 # ── DIAPOSITIVA 19 — Validación y Métricas ───────────────────
 add_slide_heading(doc, 19, "Validación y Métricas")
@@ -413,7 +413,7 @@ run_add(p, "Posibles preguntas del jurado y respuestas de apoyo", bold=True, col
 
 faq = [
     ("¿Por qué usar ByteTrack y no DeepSORT?",
-     "ByteTrack evita descartar las detecciones de baja confianza: las asocia en un segundo paso con las trayectorias existentes, lo que reduce pérdidas de identidad durante oclusiones. En el FST, donde los animales pueden solaparse parcialmente, esto es una ventaja directa sobre DeepSORT, que simplemente descarta esas detecciones."),
+     "ByteTrack evita descartar las detecciones de baja confianza: las asocia en un segundo paso con las trayectorias existentes, lo que reduce pérdidas de identidad durante oclusiones. En el FST, donde las ratas pueden solaparse parcialmente, esto es una ventaja directa sobre DeepSORT, que simplemente descarta esas detecciones."),
     ("¿Por qué ResNet-18 y no una arquitectura más moderna como ViT?",
      "El sistema debe operar en la CPU del equipo del laboratorio sin GPU. ResNet-18 ofrece el mejor balance precisión-velocidad para ese requisito. Los Vision Transformers tienen una huella computacional significativamente mayor, inviable sin GPU. Si el hardware lo permite, ResNet-50 está disponible como alternativa."),
     ("¿Por qué la kappa de Cohen como métrica de concordancia?",
