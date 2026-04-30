@@ -32,7 +32,7 @@ niveles de prioridad: \textbf{Alta} (sin esto el prototipo no funciona),
 \textbf{Baja} (deseable pero no urgente). Cada requerimiento se derivó directamente
 de los prototipos de interfaz diseñados \cite{pressman2014,sommerville2016}.
 
-\begin{longtable}{|>{\bfseries}p{1.1cm}|>{\raggedright}p{2.0cm}|>{\raggedright\arraybackslash}p{6.7cm}|p{1.3cm}|p{1.7cm}|}
+\begin{longtable}{|>{\bfseries}p{1.1cm}|>{\raggedright}p{2.8cm}|>{\raggedright\arraybackslash}p{5.7cm}|p{1.3cm}|p{2.2cm}|}
 \caption{Requerimientos Funcionales (RF).
 \label{tab:rf}}\\
 \hline
@@ -66,7 +66,9 @@ RF-03 & Autenticación
 \hline
 RF-04 & Autenticación
       & El sistema debe gestionar dos roles con permisos distintos: Investigador
-        (acceso a sus propios experimentos) y Administrador (acceso a todo el sistema).
+        (puede consultar todos los experimentos del laboratorio) y Administrador
+        (mismos permisos que el Investigador, más la capacidad de aprobar registros,
+        modificar y desactivar cuentas).
       & Alta & Sistema \\
 \hline
 
@@ -206,9 +208,10 @@ RF-23 & Dashboard
         7~días de ser eliminado automáticamente, indicando el nombre del experimento
         y la fecha de vencimiento exacta. El período de 7~días da tiempo suficiente
         para descargar reportes antes del borrado, conforme al atributo
-        \textit{user error protection} de la ISO/IEC~25010:2023 \cite{iso25010},
-        que establece que el sistema debe proteger al usuario de consecuencias
-        no intencionadas de sus acciones u omisiones.
+        \textit{user error protection} (protección contra errores del usuario) de
+        la ISO/IEC~25010:2023 \cite{iso25010}, que establece que el sistema debe
+        proteger al usuario de consecuencias no intencionadas de sus acciones u
+        omisiones.
       & Media & Sistema \\
 \hline
 RF-24 & Dashboard
@@ -270,7 +273,7 @@ operaciones interactivas cortas (navegación, filtros, consultas) el umbral est�
 de 1 a 3 segundos; para operaciones de procesamiento intensivo (análisis de video) el
 tiempo aceptable se determina con el usuario durante las pruebas \cite{iso25010}.
 
-\begin{longtable}{|>{\bfseries}p{1.1cm}|>{\raggedright}p{1.8cm}|>{\raggedright}p{5.9cm}|>{\raggedright\arraybackslash}p{4.3cm}|}
+\begin{longtable}{|>{\bfseries}p{1.2cm}|>{\raggedright}p{2.9cm}|>{\raggedright}p{5.2cm}|>{\raggedright\arraybackslash}p{3.8cm}|}
 \caption{Requerimientos No Funcionales (RNF).
 \label{tab:rnf}}\\
 \hline
@@ -551,7 +554,7 @@ agrupan en cuatro áreas.
 
 \subsection{Detección de objetos y seguimiento}
 
-\begin{longtable}{|p{2.3cm}|p{4.8cm}|p{4.8cm}|p{1.3cm}|}
+\begin{longtable}{|p{2.7cm}|p{4.4cm}|p{4.8cm}|p{1.3cm}|}
 \caption{Técnicas de detección de objetos y seguimiento.
 \label{tab:herr_cv}}\\
 \hline
@@ -613,7 +616,7 @@ el modo CPU es funcional pero más lento.}
 
 \subsection{Aprendizaje profundo para clasificación de conductas}
 
-\begin{longtable}{|p{2.3cm}|p{5.4cm}|p{5.4cm}|}
+\begin{longtable}{|p{2.7cm}|p{5.2cm}|p{5.2cm}|}
 \caption{Arquitecturas de aprendizaje profundo para clasificación de conductas.
 \label{tab:herr_dl}}\\
 \hline
@@ -660,7 +663,7 @@ BORIS \cite{friard2016}
 
 \subsection{Desarrollo web e infraestructura}
 
-\begin{longtable}{|p{2.3cm}|p{5.4cm}|p{5.4cm}|}
+\begin{longtable}{|p{2.7cm}|p{5.2cm}|p{5.2cm}|}
 \caption{Herramientas de desarrollo web e infraestructura.
 \label{tab:herr_web}}\\
 \hline
@@ -707,7 +710,7 @@ La identificación de riesgos sigue el modelo de la norma ISO~31000 \cite{iso310
 define el riesgo como la combinación entre la probabilidad de un evento y su impacto.
 Para cada riesgo se documenta una acción concreta de mitigación.
 
-\begin{longtable}{|>{\bfseries}p{0.9cm}|p{3.4cm}|p{1.3cm}|p{1.2cm}|p{1.1cm}|p{4.6cm}|}
+\begin{longtable}{|>{\bfseries}p{0.9cm}|p{3.4cm}|p{1.3cm}|p{1.7cm}|p{1.1cm}|p{4.1cm}|}
 \caption{Matriz de riesgos del proyecto.
 \label{tab:riesgos}}\\
 \hline

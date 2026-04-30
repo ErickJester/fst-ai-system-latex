@@ -402,12 +402,50 @@ Mínimo 6-8 ratas por grupo. Si hay efecto, el perfil conductual del grupo exper
 
 ---
 
-## Pendiente — PRIORIDAD 2 (items menores)
+## Cambios aplicados en rama `claridad-documento` (sesión 2026-04-30, tercera parte)
 
-8. **Verificar overflows residuales**: compilar y confirmar que no quedan desbordamientos en las 6 longtables de cap. 4 tras los últimos ajustes de ancho.
-9. **RF-04 dos roles**: verificar que el texto actual queda claro aunque el cliente mencionó solo un rol en la entrevista.
-10. **Comparación intergrupal automática**: fuera del alcance actual; pendiente de abordar después de los items de claridad.
-11. **Presentación (gen_presentacion.py / gen_guion.py)**: las mismas mejoras narrativas que cap. 1 aplican aquí — tarea separada, no iniciada.
+### Tabla de grupos experimentales (cap. 1 Antecedentes)
+- **Tabla~\ref{tab:grupos_experimentales} añadida** al final de Antecedentes, antes de Planteamiento.
+- Tres filas: Control (sin tratamiento, línea base), Referencia/fluoxetina (efecto conocido), Tratamiento experimental (molécula nueva). Descripción del criterio de decisión por similitud de perfil conductual.
+- Párrafo introductorio: "las ratas se dividen en tres grupos de entre 6 y 8 especímenes cada uno."
+
+### "animales" eliminado en todo el documento
+- `01_introduccion.tex`: "modelos animales" → "modelos preclínicos con roedores"
+- `02_estado_arte.tex`: "seguimiento de animales" → "seguimiento de roedores" (3 ocurrencias: intro, EthoVision, título de sección)
+- `03_marco_teorico.tex`: "modelos animales" → "modelos preclínicos" (subsección y texto), "modelo animal" → "modelo preclínico"
+- `05_diseno.tex`: entidad BD `\textbf{animales}` → `\textbf{especímenes}`
+- **0 ocurrencias residuales** (verificado con grep).
+
+### "ISRS" eliminado del cuerpo del texto
+- `03_marco_teorico.tex`: "ISRS (como la fluoxetina)" → "antidepresivos como la fluoxetina (antidepresivo de referencia)"
+- `front/glosario.tex`: 3 menciones de ISRS en entradas de Conducta de nado activo, Dopaminérgico y Serotoninérgico → reemplazadas por "fluoxetina" o "antidepresivos como la fluoxetina"
+- La **entrada de glosario** `\textbf{ISRS}` se conserva como definición de referencia. Es la única ocurrencia que queda.
+
+### Regla de inglés con traducción en cap. 4
+- `\textit{user error protection}` → añadida traducción `(protección contra errores del usuario)` en primera aparición (RF-15).
+- Los demás términos ISO en cap. 4 (`time behaviour`, `functional correctness`, `usability`) son usos posteriores a cap. 1, donde ya tienen traducción. ✓
+- `\textit{tracking}` en RF-13 ya tenía formato correcto: "seguimiento de ratas (\textit{tracking})". ✓
+
+### RF-04 corregido (consistencia con RN-08)
+- Texto anterior: "Investigador (acceso a sus propios experimentos)"
+- **Inconsistencia con RN-08**, que dice que todos los investigadores ven todos los experimentos.
+- Texto nuevo: "Investigador (puede consultar todos los experimentos del laboratorio) y Administrador (mismos permisos que el Investigador, más la capacidad de aprobar registros, modificar y desactivar cuentas)."
+
+### Overflows en longtables cap. 4
+- **No verificable por terminal**: `pdflatex` no está en el PATH del sistema. Compilar desde LaTeX Workshop (Ctrl+S) para confirmar.
+
+---
+
+## Pendiente — Único ítem del documento
+
+- **Revisar menciones de métricas de validación (κ de Cohen, MAE, gold standard)**: el bullet se eliminó del Alcance, pero las menciones siguen en Propuesta de solución, OE-5, resumen.tex, cap. 4 (RNF-02, sec:umbrales), caps. 2, 3, 5 y 7. Requiere decisión sobre qué se elimina, qué se reubica y qué se conserva como marco teórico. **Hacer con revisión cuidadosa.**
+
+---
+
+## Pendiente — Presentación (fuera del documento escrito)
+
+- Presentación (gen_presentacion.py / gen_guion.py): mismas mejoras narrativas que cap. 1 — tarea separada, no iniciada.
+- Los 22 ítems de la simulación de defensa para las diapositivas siguen pendientes.
 
 ---
 
@@ -415,8 +453,12 @@ Mínimo 6-8 ratas por grupo. Si hay efecto, el perfil conductual del grupo exper
 
 | Archivo | Contenido |
 |---------|-----------|
-| `chapters/01_introduccion.tex` | Introducción, motivación, planteamiento, propuesta, justificación, alcance, metodología, cronograma |
+| `chapters/01_introduccion.tex` | Introducción, motivación, planteamiento, propuesta, justificación, alcance, metodología, cronograma, tabla de grupos experimentales |
+| `chapters/02_estado_arte.tex` | Estado del arte, herramientas, técnicas de visión |
+| `chapters/03_marco_teorico.tex` | Marco teórico: depresión, FST, conductas, métricas |
 | `chapters/04_analisis.tex` | RF, RNF, RN, herramientas, riesgos, justificación de umbrales |
-| `front/resumen.tex` | Resumen ejecutivo (pendiente reescritura) |
+| `chapters/05_diseno.tex` | Diseño: arquitectura, BD, pipeline |
+| `front/resumen.tex` | Resumen ejecutivo |
+| `front/glosario.tex` | Glosario de términos |
 | `bib/referencias.bib` | Bibliografía BibLaTeX |
 | `.vscode/settings.json` | Configuración LaTeX Workshop, chktex desactivado |
