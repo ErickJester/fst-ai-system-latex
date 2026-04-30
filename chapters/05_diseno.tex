@@ -57,7 +57,7 @@ cada componente son:
         otras peticiones mientras el video se procesa.
 
   \item \textbf{Base de datos (PostgreSQL):} almacena usuarios, experimentos,
-        sesiones de video, resultados por animal y conducta, y reportes generados.
+        sesiones de video, resultados por rata y conducta, y reportes generados.
         Los archivos de video se guardan en el sistema de archivos del servidor, no
         en la base de datos.
 \end{itemize}
@@ -73,8 +73,8 @@ escalar el número de workers de forma independiente si el volumen de análisis 
 % -----------------------------------------------------------
 
 El pipeline recibe un video del FST y produce como salida los tiempos totales de cada
-conducta por animal y, de forma opcional, el desglose por minuto. Tiene cinco etapas
-secuenciales: preprocesamiento, detección de cilindros, seguimiento de animales,
+conducta por rata y, de forma opcional, el desglose por minuto. Tiene cinco etapas
+secuenciales: preprocesamiento, detección de cilindros, seguimiento de ratas,
 clasificación de conducta y generación de resultados.
 
 \begin{figure}[ht]
@@ -97,10 +97,10 @@ se detiene y genera un reporte de diagnóstico (ver RN-11).
 El sistema localiza los cuatro cilindros en el encuadre usando detección de contornos
 sobre los primeros cuadros del video, después de construir el modelo de fondo por
 mediana. Cada cilindro detectado se convierte en una región de interés (ROI) que
-delimita el área de análisis de cada animal. La detección requiere una confianza mínima
+delimita el área de análisis de cada rata. La detección requiere una confianza mínima
 de 0.70; si no se alcanza para los cuatro cilindros, el pipeline se detiene.
 
-\subsection{Seguimiento de animales}
+\subsection{Seguimiento de ratas}
 
 Dentro de cada ROI, el seguimiento opera en cuatro niveles de respaldo:
 
@@ -118,12 +118,12 @@ Dentro de cada ROI, el seguimiento opera en cuatro niveles de respaldo:
         con el cuadro anterior (IoU $\geq$ umbral), se acepta como detección válida.
   \item \textbf{Tracker CSRT / KCF}: si la segmentación falla o produce un resultado
         inconsistente, el tracker CSRT \cite{lukezic2017} mantiene la estimación de
-        posición usando la apariencia del animal en cuadros anteriores. KCF
+        posición usando la apariencia del espécimen en cuadros anteriores. KCF
         \cite{henriques2015} actúa como segundo nivel de respaldo si CSRT no está
         disponible.
   \item \textbf{Congelación de posición}: si todos los niveles anteriores fallan,
         la última posición conocida se conserva con una confianza decreciente hasta
-        que el detector vuelva a encontrar al animal.
+        que el detector vuelva a encontrar a la rata.
 \end{enumerate}
 
 La estimación de la línea de agua se estabiliza con un promedio móvil exponencial
@@ -151,13 +151,13 @@ interpretación de la salida del clasificador.
 
 Los cuatro cilindros se graban en una sola toma cenital. La separación por sujeto
 se hace asignando cada ROI detectada en la etapa de detección de cilindros a un
-identificador de animal (Animal~1 a Animal~4). La asignación usa la posición
+identificador de rata (Rata~1 a Rata~4). La asignación usa la posición
 espacial de cada ROI en el encuadre: se ordena primero por fila (arriba/abajo) y
 luego por columna (izquierda/derecha), lo que produce una numeración consistente
 entre sesiones mientras el encuadre no cambie.
 
 Si el número de cilindros detectados es menor a cuatro, el sistema reporta cuántos
-animales pudo procesar y cuáles no, en lugar de abortar el análisis completo.
+ratas pudo procesar y cuáles no, en lugar de abortar el análisis completo.
 
 % -----------------------------------------------------------
 \section{Diseño de la base de datos}
@@ -180,7 +180,7 @@ Las tablas principales y sus responsabilidades son:
         bcrypt), rol (investigador/administrador) y estado (activo/inactivo).
 
   \item \textbf{experimentos}: agrupa los videos y resultados de un experimento.
-        Campos: nombre, fecha, tratamiento, notas, número esperado de animales y
+        Campos: nombre, fecha, tratamiento, notas, número esperado de ratas y
         referencia al usuario propietario.
 
   \item \textbf{videos}: un experimento puede tener hasta dos videos (Día~1 y
@@ -188,11 +188,11 @@ Las tablas principales y sus responsabilidades son:
         (en cola, procesando, completado, error), fecha de carga y fecha límite de
         eliminación (30 días desde la finalización del análisis).
 
-  \item \textbf{animales}: cada video procesado genera un registro por animal
-        detectado, con su identificador y posición en el encuadre.
+  \item \textbf{animales}: cada video procesado genera un registro por rata
+        detectada, con su identificador y posición en el encuadre.
 
   \item \textbf{resultados\_conducta}: almacena el tiempo en segundos de cada
-        conducta por animal, sesión y, opcionalmente, por minuto dentro de la
+        conducta por rata, sesión y, opcionalmente, por minuto dentro de la
         sesión. Es la tabla central para la generación de reportes.
 
   \item \textbf{reportes}: registros de los archivos PDF y CSV generados, con su
@@ -253,7 +253,7 @@ POST & \texttt{/experiments/\{id\}/videos} & Sube un video (Día~1 o Día~2) y e
 GET  & \texttt{/experiments/\{id\}/status} & Devuelve el progreso del análisis en porcentaje. & Investigador \\
 \hline
 
-GET  & \texttt{/experiments/\{id\}/results} & Devuelve los resultados por animal y sesión. & Investigador \\
+GET  & \texttt{/experiments/\{id\}/results} & Devuelve los resultados por rata y sesión. & Investigador \\
 \hline
 GET  & \texttt{/experiments/\{id\}/results/byminute} & Devuelve el desglose por minuto. & Investigador \\
 \hline
@@ -301,7 +301,7 @@ Los casos de uso principales son:
         incorrectas muestran un error genérico (ver RN-01).
 
   \item \textbf{CU-02 Crear experimento:} el investigador registra los metadatos del
-        experimento (nombre, fecha, tratamiento, número de animales) y sube uno o
+        experimento (nombre, fecha, tratamiento, número de ratas) y sube uno o
         dos videos. El análisis inicia automáticamente al completarse la carga válida.
 
   \item \textbf{CU-03 Consultar progreso:} el investigador puede ver el estado del
@@ -309,7 +309,7 @@ Los casos de uso principales son:
         diagnóstico.
 
   \item \textbf{CU-04 Ver resultados:} una vez completado el análisis, el
-        investigador puede consultar los tiempos por animal y conducta, el desglose
+        investigador puede consultar los tiempos por rata y conducta, el desglose
         por minuto y, si ambos videos fueron procesados, la comparación Día~1
         vs.\ Día~2.
 
@@ -630,7 +630,7 @@ limpiar los archivos parciales. Si en el futuro surge esa necesidad, el endpoint
 \subsection{Resultados del experimento}
 
 Cuatro pestañas: resumen por sesión con totales en segundos y porcentaje por conducta,
-tabla detallada por animal (RF-18), desglose por minuto (RF-19) y comparación
+tabla detallada por rata (RF-18), desglose por minuto (RF-19) y comparación
 Día~1 vs.\ Día~2 (RF-20, disponible solo si ambos videos fueron procesados). Incluye
 botones de descarga en PDF y CSV.
 

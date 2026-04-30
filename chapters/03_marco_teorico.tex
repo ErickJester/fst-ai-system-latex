@@ -8,7 +8,7 @@
 
 El FST produce videos de ratas nadando en cilindros. Para analizarlos
 automáticamente hace falta entender qué conductas se observan y qué
-significan, cómo procesar las imágenes para detectar al animal, qué
+significan, cómo procesar las imágenes para detectar a la rata, qué
 arquitectura de red neuronal puede clasificar esas conductas con pocos
 datos etiquetados, y cómo organizar todo eso en un sistema web que el
 laboratorio pueda usar. Lo que sigue cubre esos cuatro bloques en ese
@@ -47,11 +47,11 @@ conductual--- se asocia con la pérdida de motivación propia de la depresión
 En el FST se distinguen tres conductas mutuamente excluyentes \cite{armario2021,cryan2005}:
 
 \begin{itemize}
-    \item \textbf{Inmovilidad}: el animal flota haciendo solo lo necesario para no
+    \item \textbf{Inmovilidad}: el espécimen flota haciendo solo lo necesario para no
           hundirse. Es el indicador principal de desesperanza conductual y el parámetro
           que más se reporta en la literatura.
 
-    \item \textbf{Nado activo}: movimientos de paladas que desplazan al animal
+    \item \textbf{Nado activo}: movimientos de paladas que desplazan a la rata
           horizontalmente. Se asocia al sistema serotoninérgico; los antidepresivos tipo
           ISRS (como la fluoxetina) aumentan esta conducta específicamente.
 
@@ -143,7 +143,7 @@ si cae por debajo de un umbral se activa el respaldo del tracker de correlación
 
 \subsection{Estimación de la línea de agua}
 
-La superficie del agua puede generar reflejos que hacen que el animal aparezca duplicado
+La superficie del agua puede generar reflejos que hacen que la rata aparezca duplicada
 desde la vista lateral. Para mitigar ese efecto, el sistema estima la posición vertical
 de la línea del agua analizando el perfil de intensidad por filas dentro de cada ROI e
 identificando la fila con el cambio más brusco. Como esa estimación oscila por ruido
@@ -165,7 +165,7 @@ estable pero tarda en adaptarse.
 
 Cuando el detector falla en un cuadro ---por oclusión parcial, reflejo, o un cuadro
 donde la rata está demasiado quieta para distinguirse del fondo--- el sistema necesita
-mantener la estimación de posición sin perder al animal. Para eso usa trackers de
+mantener la estimación de posición sin perder a la rata. Para eso usa trackers de
 correlación como respaldo.
 
 CSRT (\textit{Discriminative Correlation Filter with Channel and Spatial Reliability})
@@ -173,7 +173,7 @@ CSRT (\textit{Discriminative Correlation Filter with Channel and Spatial Reliabi
 más discriminativas del objeto. Es el más preciso de los dos pero también el más lento.
 
 KCF (\textit{Kernelized Correlation Filters}) \cite{henriques2015} trabaja eficientemente
-en el espacio de características circular. Más rápido que CSRT, pero pierde al animal
+en el espacio de características circular. Más rápido que CSRT, pero pierde a la rata
 ante cambios bruscos de apariencia: en el FST eso ocurre cuando la rata sale a escalar
 y vuelve al agua.
 
@@ -222,7 +222,7 @@ de SORT \cite{bewley2016_sort}, su predecesor directo.
 DeepSORT \cite{wojke2017_deepsort} extiende SORT añadiendo un descriptor de apariencia
 por red neuronal para reidentificar objetos entre cuadros distantes. En el contexto del
 FST, con exactamente una rata por cilindro y sin necesidad de reidentificación
-entre animales, esa complejidad adicional es innecesaria; ByteTrack logra continuidad
+entre ratas, esa complejidad adicional es innecesaria; ByteTrack logra continuidad
 con solo IoU y Kalman.
 
 La estimación de la línea de agua se estabiliza con un promedio móvil exponencial para
@@ -350,7 +350,7 @@ PostgreSQL es un sistema de gestión de bases de datos relacionales de código a
 con soporte para transacciones ACID (\textit{Atomicity, Consistency, Isolation,
 Durability}), que garantizan que las operaciones de escritura son seguras incluso ante
 fallos del sistema. El esquema de datos incluye tablas para usuarios, experimentos,
-sesiones de video y resultados por animal y conducta. Las consultas se abstraen con
+sesiones de video y resultados por rata y conducta. Las consultas se abstraen con
 SQLAlchemy como ORM (\textit{Object-Relational Mapper}), lo que permite cambiar el
 motor de base de datos sin modificar el código de la aplicación.
 
@@ -410,8 +410,8 @@ reportado por el laboratorio para cada conducta:
     \label{eq:mae}
 \end{equation}
 
-donde $\hat{t}_i$ es el tiempo predicho por el sistema para el animal $i$ y $t_i$ es el
-tiempo registrado manualmente. El MAE se reporta en segundos por animal para que el
+donde $\hat{t}_i$ es el tiempo predicho por el sistema para la rata $i$ y $t_i$ es el
+tiempo registrado manualmente. El MAE se reporta en segundos por rata para que el
 laboratorio pueda interpretar el error en términos de su flujo de trabajo real.
 
 \subsection{Tiempo de análisis}

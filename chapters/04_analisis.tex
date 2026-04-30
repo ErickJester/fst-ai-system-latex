@@ -9,7 +9,7 @@
 En este capítulo se definen los requerimientos del sistema a partir de los prototipos
 de interfaz desarrollados para el flujo de trabajo del laboratorio colaborador y de
 reuniones con el Dr.\ César Augusto Sandino Reyes López, investigador del Laboratorio
-de Neurociencia Conductual de la ENMyH-IPN. Se documentan
+de Bioquímica Estructural, Sección de Posgrado, de la ENMyH-IPN. Se documentan
 también las reglas de negocio, los riesgos identificados y la factibilidad del proyecto
 desde cuatro ángulos: tecnológico, operativo, económico y legal.
 
@@ -83,24 +83,27 @@ RF-06 & Gestión de usuarios
       & Media & Investigador \\
 \hline
 RF-07 & Gestión de usuarios
-      & \textbf{[PENDIENTE — entrevista con el Dr.\ Sandino]:} ¿Los
-        investigadores pueden registrarse solos con confirmación por correo, o solo
-        el Administrador puede crear cuentas? Definir antes de iniciar
-        la implementación del módulo de autenticación.
+      & El sistema debe permitir que un investigador se registre de forma autónoma
+        proporcionando nombre, correo institucional y contraseña. La cuenta queda
+        inactiva hasta que el Administrador la apruebe explícitamente desde el panel
+        de administración. El solicitante recibe una notificación por correo al
+        momento del registro y otra cuando su cuenta es aprobada.
       & Alta & Admin \\
 \hline
 
 % ── Carga de video ─────────────────────────────────────────
 RF-08 & Carga de video
-      & El sistema solo acepta archivos en formato \texttt{.mp4}. Cualquier otro
-        formato se rechaza con un mensaje de error específico antes de intentar
-        subirlo al servidor.
+      & El sistema debe aceptar únicamente archivos en formato \texttt{.mp4}.
+        Cualquier otro formato debe ser rechazado con un mensaje de error específico
+        antes de intentar subirlo al servidor.
       & Alta & Sistema \\
 \hline
 RF-09 & Carga de video
       & El sistema debe permitir subir uno o dos videos por experimento: Día~1
-        (sesión basal, 20~min) y Día~2 (sesión post-tratamiento, 5~min). Ambos son
-        opcionales individualmente; el análisis usa los que se proporcionen.
+        (sesión de estrés, 20~min) y Día~2 (sesión post-tratamiento, 5~min). Ambos
+        son opcionales individualmente. El pipeline analiza el video de Día~2
+        completo; del video de Día~1 analiza únicamente los primeros 5~minutos y
+        solo cuando corresponde al grupo control (ver RN-03).
       & Alta & Investigador \\
 \hline
 RF-10 & Carga de video
@@ -111,8 +114,9 @@ RF-10 & Carga de video
 \hline
 RF-11 & Carga de video
       & Al crear un experimento el investigador debe registrar: nombre del
-        experimento, fecha, número esperado de animales (típicamente~4), tratamiento o
-        condición experimental, y notas adicionales opcionales.
+        experimento, fecha, número de ratas a analizar (típicamente~4, pero puede
+        ser entre~1 y~4 según el diseño experimental), tratamiento o condición
+        experimental, y notas adicionales opcionales.
       & Alta & Investigador \\
 \hline
 RF-12 & Carga de video
@@ -123,10 +127,11 @@ RF-12 & Carga de video
 
 % ── Análisis conductual ────────────────────────────────────
 RF-13 & Análisis conductual
-      & El pipeline de análisis ejecuta cuatro etapas secuenciales: preprocesamiento
-        del video (decodificación y corrección de contraste), detección de cilindros,
-        seguimiento de animales (\textit{tracking}) y clasificación de conductas.
-        Cada etapa tiene un indicador de estado en la pantalla de progreso.
+      & El pipeline de análisis debe ejecutar cuatro etapas secuenciales:
+        preprocesamiento del video (decodificación y corrección de contraste),
+        detección de cilindros, seguimiento de ratas (\textit{tracking}) y
+        clasificación de conductas. Cada etapa debe tener un indicador de estado
+        visible en la pantalla de progreso.
       & Alta & Sistema \\
 \hline
 RF-14 & Análisis conductual
@@ -142,38 +147,50 @@ RF-15 & Análisis conductual
       & Alta & Investigador \\
 \hline
 RF-16 & Análisis conductual
-      & Si el análisis falla, el sistema muestra el código de error, la descripción
-        del problema y un botón para descargar el reporte de diagnóstico en PDF.
-        El investigador no puede reiniciar el análisis desde esta pantalla (ver RN-04).
+      & Si el análisis falla, el sistema debe mostrar el código de error, la
+        descripción del problema y un botón para descargar el reporte de diagnóstico
+        en PDF. El investigador no puede reiniciar el análisis desde esta pantalla
+        (ver RN-04).
       & Alta & Investigador \\
 \hline
 RF-17 & Análisis conductual
-      & El sistema debe clasificar cuadro a cuadro la conducta de cada animal: nado
-        activo, inmovilidad o escalamiento \cite{armario2021}. Las conductas son
-        mutuamente excluyentes (ver RN-07).
+      & El sistema debe clasificar cuadro a cuadro la conducta de cada rata: nado
+        activo, inmovilidad o escalamiento \cite{armario2021}. El buceo se clasifica
+        como nado activo. Las conductas son mutuamente excluyentes (ver RN-07).
+      & Alta & Sistema \\
+\hline
+RF-30 & Análisis conductual
+      & El sistema debe contabilizar una conducta como episodio válido únicamente si
+        se mantiene de forma continua durante al menos 3~segundos consecutivos. Las
+        conductas con duración inferior a ese umbral deben ignorarse. Este criterio
+        reproduce el estándar del laboratorio en el análisis manual.
       & Alta & Sistema \\
 \hline
 
 % ── Resultados ─────────────────────────────────────────────
 RF-18 & Resultados
       & La pantalla de resultados debe mostrar el tiempo total en segundos y el
-        porcentaje de cada conducta por animal y por sesión, en una tabla
+        porcentaje de cada conducta por rata y por sesión, en una tabla
         descargable.
       & Alta & Investigador \\
 \hline
 RF-19 & Resultados
-      & El sistema debe ofrecer un desglose de conductas por minuto para cada animal.
+      & El sistema debe ofrecer un desglose de conductas por minuto para cada rata.
       & Media & Investigador \\
 \hline
 RF-20 & Resultados
       & Cuando ambos videos del mismo experimento estén procesados, el sistema debe
         mostrar una comparación Día~1 vs.\ Día~2 con barras de distribución por
-        animal.
+        rata.
       & Alta & Investigador \\
 \hline
 RF-21 & Resultados
-      & El investigador debe poder descargar el reporte de resultados en PDF y en
-        CSV desde la pantalla de resultados y desde el dashboard.
+      & El investigador debe poder descargar los datos de resultados en formato CSV
+        y XLSX desde la pantalla de resultados y desde el dashboard. El archivo debe
+        contener las columnas: \texttt{Tiempo (min:seg)}, \texttt{Nado},
+        \texttt{Escalamiento} e \texttt{Inmovilidad}, con una fila por minuto
+        analizado. El reporte de diagnóstico y el resumen ejecutivo se descargan
+        por separado en PDF.
       & Alta & Investigador \\
 \hline
 
@@ -227,9 +244,17 @@ RF-28 & Administración
       & Baja & Admin \\
 \hline
 RF-29 & Administración
-      & El Administrador puede ver y gestionar los experimentos de cualquier
+      & El Administrador debe poder ver y gestionar los experimentos de cualquier
         investigador (ver RN-08).
       & Media & Admin \\
+\hline
+RF-31 & Resultados
+      & El sistema debe calcular estadísticas de grupo a partir de los experimentos
+        que comparten el mismo tratamiento: media, desviación estándar y varianza
+        del tiempo total de cada conducta entre las ratas del grupo. Estas
+        estadísticas deben incluirse en el reporte descargable (CSV/XLSX) junto con
+        los datos individuales por rata.
+      & Media & Investigador \\
 \hline
 
 \end{longtable}
@@ -267,24 +292,30 @@ RNF-01 & Rendimiento
        & Tiempo de respuesta $\leq 3$~s en el 95\,\% de las solicitudes en condiciones
          normales de red. \\
 \hline
-RNF-02 & Rendimiento
-       & \textbf{[PENDIENTE — entrevista con el Dr.\ Sandino]:} El tiempo máximo
-         aceptable para analizar un video de 5~min (Día~2, resolución típica de celular)
-         se definirá con el laboratorio durante la fase de pruebas y validación.
-       & Tiempo máximo a medir y documentar durante las pruebas con videos reales
-         del laboratorio. \\
+RNF-02 & Calidad del análisis
+       & El tiempo de procesamiento no es el criterio prioritario para el laboratorio.
+         El criterio de calidad es la concordancia del sistema con el evaluador experto:
+         se considera aceptable una concordancia $\geq 85$\,\% por conducta. Este umbral
+         fue declarado por el investigador colaborador en la entrevista de levantamiento
+         como la variabilidad actual entre analistas humanos (véase la
+         justificación de umbrales en la sección~\ref{sec:umbrales}).
+       & Concordancia $\geq 85$\,\% entre la clasificación automática y el gold
+         standard del laboratorio, medida sobre el conjunto de prueba de la
+         fase de validación (TT2). \\
 \hline
 RNF-03 & Disponibilidad
-       & El sistema debe estar disponible en el horario de trabajo del laboratorio.
-         No se requiere disponibilidad 24/7 para el prototipo.
-       & 95\,\% de disponibilidad de lunes a viernes, 8:00--20:00~h. \\
+       & El sistema debe estar disponible las 24 horas del día, los 7 días de la
+         semana, para permitir que los investigadores dejen análisis corriendo fuera
+         del horario laboral.
+       & $\geq 95$\,\% de disponibilidad mensual medida en el entorno de despliegue. \\
 \hline
 RNF-04 & Seguridad
        & Solo los usuarios autenticados pueden acceder al sistema. La autenticación
-         usa tokens JWT con tiempo de expiración configurable. Los datos de cada
-         investigador no son visibles para otros usuarios sin autorización explícita.
-       & Autenticación con JWT. Datos aislados por usuario en la base de datos.
-         Verificado en las pruebas de integración de la fase de implementación. \\
+         usa tokens JWT con tiempo de expiración configurable. Todos los
+         investigadores con cuenta activa pueden consultar los experimentos y
+         resultados de cualquier otro investigador del laboratorio (ver RN-08).
+       & Autenticación con JWT verificada en pruebas de integración. Acceso a datos
+         de otros investigadores restringido a usuarios con sesión activa. \\
 \hline
 RNF-05 & Seguridad
        & Las contraseñas deben almacenarse cifradas con sal, nunca en texto plano.
@@ -327,10 +358,10 @@ RNF-09 & Almacenamiento
          por falta de espacio. \\
 \hline
 RNF-10 & Portabilidad
-       & El sistema debe poder levantarse con Docker Compose en cualquier equipo
-         con Docker instalado, sin dependencias adicionales en el sistema anfitrión.
-         Derivado del proceso de despliegue de la ISO/IEC/IEEE~12207:2017
-         \cite{iso12207}.
+       & El sistema debe poder levantarse con Docker Compose en el servidor
+         institucional provisto por la ESCOM, sin dependencias adicionales en el
+         sistema anfitrión. Derivado del proceso de despliegue de la
+         ISO/IEC/IEEE~12207:2017 \cite{iso12207}.
        & Despliegue documentado y verificado en al menos dos entornos distintos. \\
 \hline
 RNF-11 & Escalabilidad
@@ -347,14 +378,67 @@ RNF-12 & Mantenibilidad
          implementación. \\
 \hline
 RNF-13 & Concurrencia
-       & \textbf{[PENDIENTE — entrevista con el Dr.\ Sandino]:} Número de
-         usuarios y análisis simultáneos que debe soportar el sistema, e
-         infraestructura disponible en el laboratorio. Definir antes de la
-         fase de pruebas de carga.
-       & Pendiente. Se documenta antes de iniciar las pruebas de carga. \\
+       & El sistema debe soportar hasta 4 usuarios registrados trabajando en el
+         mismo periodo de tiempo. El uso simultáneo estricto no se requiere: los
+         análisis se encolan y procesan de forma secuencial (ver RN-04). Este valor
+         fue declarado por el investigador colaborador en la entrevista de
+         levantamiento (véase la justificación de umbrales en la
+         sección~\ref{sec:umbrales}).
+       & Pruebas con 4 sesiones de usuario activas simultáneamente y al menos 1
+         análisis en cola, sin degradación de respuesta $> 3$~s en operaciones
+         de interfaz. \\
 \hline
 
 \end{longtable}
+
+% -----------------------------------------------------------
+\subsection{Justificación de umbrales y valores numéricos}
+\label{sec:umbrales}
+% -----------------------------------------------------------
+
+Los requerimientos y reglas de negocio contienen valores numéricos concretos.
+A continuación se documenta el origen de cada uno para que puedan auditarse y
+ajustarse en la fase de validación (TT2).
+
+\begin{itemize}
+  \item \textbf{Confianza de detección de cilindros: $\geq 0.70$.}
+        Valor provisional obtenido de las pruebas preliminares de detección
+        realizadas con los videos del laboratorio (véase la
+        sección~\ref{sec:fact_tecnologica}). No se extrae directamente de la
+        literatura sobre YOLOv8 \cite{stadler2024_yolov8}, cuyo contexto de
+        validación es detección de objetos en general. Se ajustará con los
+        videos reales durante TT2.
+
+  \item \textbf{Concordancia mínima con el evaluador experto: $\geq 85$\,\%.}
+        Umbral declarado por el investigador colaborador (Dr.\ César Augusto
+        Sandino Reyes López) en la entrevista de levantamiento de requerimientos.
+        Corresponde a la variabilidad actual entre analistas humanos que anotan
+        los mismos videos de forma independiente. El objetivo del sistema es
+        igualar o superar ese nivel de consistencia.
+
+  \item \textbf{Duración mínima de episodio: 3~segundos.}
+        Criterio declarado por el investigador colaborador en la entrevista de
+        levantamiento. En el análisis manual, una conducta se contabiliza únicamente
+        si se mantiene de forma continua alrededor de 3 a 5 segundos; el sistema
+        adopta el límite inferior como umbral conservador (ver RF-30).
+
+  \item \textbf{Período de retención de videos: 30~días.}
+        Confirmado por el investigador colaborador en la entrevista de levantamiento
+        como plazo suficiente para descargar reportes antes del borrado automático
+        (ver RN-05, RF-24, RNF-08).
+
+  \item \textbf{Capacidad de usuarios: 4 personas.}
+        Declarado por el investigador colaborador: el laboratorio trabaja con un
+        máximo de tres tesistas más el responsable del laboratorio, todos usando
+        el sistema en el mismo periodo académico aunque no de forma simultánea
+        (ver RNF-13).
+
+  \item \textbf{Umbral de alerta de disco: 80\,\% / limpieza: 90\,\%.}
+        Umbrales estándar de gestión de capacidad en sistemas de almacenamiento
+        \cite{pressman2014}. Dejan margen operativo suficiente antes de que el
+        disco se llene y evitan pérdida de datos por falta de espacio. Se
+        revisarán según el volumen real de videos generados por semestre (ver RNF-09).
+\end{itemize}
 
 % -----------------------------------------------------------
 \subsection{Reglas de negocio}
@@ -406,15 +490,16 @@ RN-06 & Los resultados y reportes (PDF y CSV) se conservan indefinidamente aunqu
         el video original ya haya sido borrado.
       & Los datos de investigación tienen valor a largo plazo. Ver RF-25. \\
 \hline
-RN-07 & En cada cuadro del video, a cada animal se le asigna exactamente una
+RN-07 & En cada cuadro del video, a cada rata se le asigna exactamente una
         conducta: nado activo, inmovilidad o escalamiento. No pueden coexistir dos
-        conductas al mismo tiempo para el mismo animal.
+        conductas al mismo tiempo para la misma rata.
       & El FST define estas conductas como mutuamente excluyentes
         \cite{armario2021,cryan2005}. Ver RF-17, RF-18. \\
 \hline
-RN-08 & Cada investigador solo puede ver sus propios experimentos y resultados. El
-        Administrador puede ver y gestionar los de cualquier investigador.
-      & Control de acceso. Ver RF-04, RF-29. \\
+RN-08 & Todos los investigadores con cuenta activa pueden consultar los experimentos
+        y resultados de cualquier otro investigador del laboratorio. El Administrador
+        puede además modificar y desactivar cuentas.
+      & Definido en entrevista de levantamiento. Ver RF-04, RNF-04, RF-29. \\
 \hline
 RN-09 & Borrar un experimento es permanente e irreversible: se eliminan el video,
         los resultados y los reportes. El sistema requiere confirmación explícita
@@ -428,16 +513,12 @@ RN-10 & El sistema rechaza cualquier archivo que no sea \texttt{.mp4} antes de
 RN-11 & La detección de cilindros requiere una confianza mínima de 0.70. Si no se
         alcanza ese umbral, el pipeline se detiene y genera un reporte de
         diagnóstico descargable automáticamente. El umbral de 0.70 es un valor
-        provisional definido a partir de las pruebas preliminares de detección
-        realizadas con los videos del laboratorio (véase la
-        sección~\ref{sec:fact_tecnologica}); no se deriva directamente de
-        \cite{stadler2024_yolov8}, cuyo contexto de validación corresponde a
-        detección de objetos en general y no a la detección específica de
-        cilindros en el FST. Este valor se ajustará con base en los videos reales
-        durante la fase de validación y robustez (TT2).
-        conservador estándar en detección con YOLOv8 para fondos consistentes
-        \cite{stadler2024_yolov8}; se ajustará con base en las pruebas con los
-        videos reales del laboratorio durante la fase de validación.
+        provisional obtenido de las pruebas preliminares realizadas con los videos
+        del laboratorio (véase la sección~\ref{sec:fact_tecnologica}); no se
+        deriva de \cite{stadler2024_yolov8}, cuyo contexto corresponde a detección
+        de objetos en general y no a la detección específica de cilindros en el
+        FST. Este valor se ajustará durante la fase de validación en TT2 (véase la
+        justificación de umbrales en la sección~\ref{sec:umbrales}).
       & Evita que el sistema produzca resultados incorrectos sin advertir al
         usuario. Ver RF-14, RF-16. \\
 \hline
@@ -759,8 +840,8 @@ la clase más común de problemas de compatibilidad en el despliegue \cite{merke
 El objetivo de la factibilidad operativa es establecer si el sistema propuesto puede
 emplearse adecuadamente en el contexto académico y experimental para el que fue
 concebido. Este proyecto responde a una necesidad concreta expresada por el
-Dr.\ César Augusto Sandino Reyes López, investigador del Laboratorio de Neurociencia
-Conductual de la Escuela Nacional de Medicina y Homeopatía (ENMyH) del IPN, quien
+Dr.\ César Augusto Sandino Reyes López, investigador del Laboratorio de Bioquímica
+Estructural, Sección de Posgrado, de la Escuela Nacional de Medicina y Homeopatía (ENMyH-IPN), quien
 realiza experimentos de nado forzado de forma regular y actualmente analiza los videos
 de forma manual.
 
@@ -832,7 +913,7 @@ license (PostgreSQL), Apache~2.0 (Docker, OpenCV), AGPL-3.0 para uso no comercia
 
 Los videos son propiedad del grupo de investigación de la ENMyH-IPN y su uso está
 respaldado por la colaboración formal entre los directores del TT y el laboratorio.
-El equipo de desarrollo no interviene en ningún experimento con animales; eso lo hace
+El equipo de desarrollo no interviene en ningún experimento con ratas; eso lo hace
 el laboratorio bajo la NOM-062-ZOO-1999 \cite{nom062}. El desarrollo del sistema
 cumple con los Lineamientos de Propiedad Intelectual y Transferencia de Conocimiento
 del IPN (2023).

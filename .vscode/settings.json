@@ -56,5 +56,7 @@
         }
     ],
     "latex-workshop.view.pdf.viewer": "tab",
-    "latex-workshop.synctex.afterBuild.enabled": true
+    "latex-workshop.synctex.afterBuild.enabled": true,
+    "latex-workshop.chktex.enabled": false,
+    "latex-workshop.linting.chktex.enabled": false
 }
