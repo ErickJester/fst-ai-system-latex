@@ -20,10 +20,28 @@
 - No aplica a siglas de uso común en español técnico (GPU, API, REST, JSON, CSV, PDF, etc.).
 - Ejemplos correctos ya aplicados: `\textit{performance efficiency}` (eficiencia de desempeño), `\textit{functional correctness}` (corrección funcional), `\textit{time behaviour}` (desempeño temporal), `\textit{usability}` (usabilidad).
 
-## PENDIENTE IMPORTANTE — revisar menciones de métricas de validación
-- **NO hacer aún.** Requiere revisión cuidadosa de todo el documento.
-- En el Alcance (Incluido) se eliminó el bullet "Validación contra el gold standard del laboratorio con κ de Cohen y error absoluto medio."
-- **Pendiente:** revisar y eliminar (o reubicar) todas las demás menciones de κ de Cohen, MAE (Mean Absolute Error / error absoluto medio) y \textit{gold standard} en el documento escrito, incluyendo: Propuesta de solución, Objetivo general (OE-5), Metodología, resumen.tex y cap. 4 (RNF-02, sec:umbrales). Hacer con cuidado para no romper la coherencia del documento.
+## DECISIÓN PROVISIONAL — métricas de validación eliminadas del documento
+
+> ⚠️ **PROVISIONAL** — Aplicado el 2026-04-30. Pendiente confirmación con el Dr. Sandino antes de la siguiente reunión con directores.
+
+### Qué cambió
+- κ de Cohen, MAE y \textit{gold standard} **eliminados** de todos los archivos `.tex`.
+- OE-5 **reformulado**: ya no menciona gold standard ni κ. Ahora dice "Evaluar el desempeño del clasificador con métricas de clasificación estándar (precisión, \textit{recall} y F1 por clase)."
+- RNF-02: "concordancia ≥ 85 %" reformulado como "F1 ≥ 85 % por clase".
+- RN-13: condición de fallback ya no usa "$\kappa > 0.80$".
+- Cap. 3 Marco teórico: subsecciones de "Kappa de Cohen" y "Error absoluto medio (MAE)" eliminadas.
+
+### Por qué
+- El clasificador se entrenará CON videos del laboratorio pero SIN usar las anotaciones manuales del Dr. Sandino.
+- Las anotaciones manuales se descartan como gold standard para entrenamiento Y validación.
+- Evita sobreentrenamiento (overfitting) en los patrones específicos de un solo anotador.
+
+### Pregunta abierta (requiere respuesta del Dr. Sandino)
+- **¿Cuál es la métrica de validación en TT-II si no hay gold standard?**
+- ¿Es académicamente aceptable presentar la tesis con solo F1/precisión/recall sobre conjunto de prueba propio?
+- Hasta que esto se confirme, F1/precisión/recall queda como placeholder en el documento.
+
+### Regla: NO reintroducir κ de Cohen, MAE ni "gold standard" sin confirmación explícita del usuario.
 
 ---
 

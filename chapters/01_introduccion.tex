@@ -169,9 +169,8 @@ el desempeño; durante el desarrollo se evaluará la robustez de los algoritmos 
 documentarán los requisitos mínimos de calidad conforme al atributo \textit{performance
 efficiency} (eficiencia de desempeño) de la ISO/IEC~25010:2023 \cite{iso25010}.
 
-La validación compara las predicciones del sistema con los registros conductuales
-manuales del laboratorio (gold standard), usando el coeficiente kappa de Cohen y el
-error absoluto medio por rata.
+El desempeño del clasificador se evalúa con métricas de clasificación estándar
+(precisión, \textit{recall} y F1 por clase) sobre un conjunto de prueba independiente.
 
 \section{Objetivo general}
 
@@ -196,9 +195,9 @@ atributos de calidad de la norma ISO/IEC~25010:2023 \cite{iso25010}.
         de videos, pipeline de análisis, base de datos y visualización de resultados.
   \item Implementar el módulo de análisis conductual con visión por computadora y un
         clasificador supervisado para las tres conductas del FST.
-  \item Validar el desempeño del sistema comparando sus predicciones contra los
-        registros conductuales del laboratorio (gold standard), usando el coeficiente
-        kappa de Cohen ($\kappa$) y el error absoluto medio como métricas principales.
+  \item Evaluar el desempeño del clasificador de conductas con métricas de
+        clasificación estándar (precisión, \textit{recall} y F1 por clase) sobre un
+        conjunto de prueba independiente.
   \item Cuantificar la reducción de tiempo de análisis respecto al proceso manual, y
         dejar documentado qué tendría que cambiar en el pipeline si el laboratorio
         quisiera aplicarlo a otro paradigma conductual.
@@ -358,7 +357,7 @@ registro de ajustes para el siguiente ciclo.
 La responsabilidad de cada integrante está delimitada por frente técnico:
 Ángel Ali es responsable del sistema web e infraestructura (backend, base de datos,
 frontend, despliegue); Vanesa es responsable del pipeline de IA (preprocesamiento de
-video, clasificador de conducta, validación contra el gold standard).
+video, clasificador de conducta, evaluación del desempeño por clase).
 
 Las Tablas~\ref{tab:cronograma_angel} y~\ref{tab:cronograma_vanesa} muestran el
 cronograma mes a mes de cada integrante. La columna TT1 abarca febrero--junio
@@ -455,13 +454,13 @@ Revisiones mensuales con directores e investigador del laboratorio
 Baseline: sustracción de fondo, flujo óptico y curación de videos
   & & & & & & $\bullet$ & & & & & & \\
 \hline
-Anotación gold standard con BORIS y extracción de descriptores
+Anotación de conductas con BORIS y extracción de descriptores
   & & & & & & $\bullet$ & $\bullet$ & & & & & \\
 \hline
 Entrenamiento del clasificador ResNet-18 (nado\,/\,inmovilidad\,/\,escape)
   & & & & & & & $\bullet$ & $\bullet$ & & & & \\
 \hline
-Ajuste de hiperparámetros y evaluación contra gold standard
+Ajuste de hiperparámetros y evaluación del clasificador
   & & & & & & & & $\bullet$ & & & & \\
 \hline
 Generación de métricas por individuo y por sesión
@@ -470,7 +469,7 @@ Generación de métricas por individuo y por sesión
 Pruebas con distintas condiciones $+$ oclusiones y reflejos
   & & & & & & & & & $\bullet$ & $\bullet$ & & \\
 \hline
-Reporte de métricas finales ($\kappa$ de Cohen, MAE, F1)
+Reporte de métricas de clasificación por clase (F1, precisión y \textit{recall})
   & & & & & & & & & & $\bullet$ & & \\
 \hline
 Redacción de caps.\ resultados, manuales y material de defensa
@@ -481,7 +480,7 @@ Redacción de caps.\ resultados, manuales y material de defensa
 
 El stack técnico cubre los dos frentes del proyecto: Python con Flask, OpenCV,
 PyTorch (YOLOv8, ResNet-18) y PostgreSQL para el pipeline y el backend; React.js
-para el frontend; BORIS para anotar el gold standard; Git con Docker para control
+para el frontend; BORIS para anotar el dataset de conductas; Git con Docker para control
 de versiones y despliegue.
 
 En la práctica, Ángel y Vanesa trabajan en ramas separadas del repositorio y se
