@@ -18,3 +18,6 @@
 Thumbs.db
 .claude/
 ESCOM_ene2025.pptx
+
+# PDF compilado
+build/main.pdf
