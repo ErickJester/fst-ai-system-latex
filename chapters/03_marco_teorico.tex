@@ -283,7 +283,7 @@ $\mathcal{F}(\mathbf{x}) = \mathcal{H}(\mathbf{x}) - \mathbf{x}$:
 Esto permite al gradiente fluir directamente hacia atrás sin atenuarse, lo que hace
 posible entrenar redes de 50, 101 o 152 capas. Para este proyecto se considera ResNet-18
 como primera opción por su balance entre precisión y velocidad de inferencia, y
-ResNet-50 como alternativa si no se alcanza $\kappa > 0.80$.
+ResNet-50 como alternativa si no se alcanza el F1 objetivo en las tres clases.
 
 \subsection{Clasificación de las tres conductas}
 
@@ -307,8 +307,7 @@ incorrectas con alta confianza:
 
 donde $y_c = 1$ si la etiqueta correcta es la clase $c$ y 0 en caso contrario. Las
 etiquetas las generan los autores del proyecto usando BORIS, tomando como referencia los
-registros conductuales proporcionados por el laboratorio. Esos mismos registros
-constituyen el gold standard para la validación del sistema.
+registros conductuales proporcionados por el laboratorio.
 
 % ============================================================
 \section{Arquitectura del sistema web}
@@ -364,23 +363,6 @@ definidos en la norma ISO/IEC~25010:2023 \cite{iso25010}: \textit{functional
 correctness} (precisión de las predicciones), \textit{time behaviour} (tiempo de
 procesamiento) y \textit{usability} (facilidad de uso para el investigador).
 
-\subsection{Kappa de Cohen}
-
-El coeficiente kappa de Cohen ($\kappa$) mide la concordancia entre dos evaluadores
----en este caso el sistema y el gold standard del laboratorio--- descontando la
-concordancia que ocurriría por azar:
-
-\begin{equation}
-    \kappa = \frac{p_o - p_e}{1 - p_e}
-    \label{eq:kappa}
-\end{equation}
-
-donde $p_o$ es la proporción de acuerdos observados y $p_e$ es la proporción de acuerdos
-esperados por azar. Un $\kappa = 1$ indica concordancia perfecta; $\kappa = 0$ indica
-que el acuerdo no supera el azar. Según la escala de Landis y Koch, $\kappa > 0.80$
-corresponde a concordancia casi perfecta (\textit{almost perfect agreement}), que es el
-umbral objetivo para este proyecto.
-
 \subsection{Precisión, recall y F1 por clase}
 
 Para cada conducta $c$ se calculan:
@@ -400,20 +382,6 @@ donde $TP_c$, $FP_c$ y $FN_c$ son los verdaderos positivos, falsos positivos y f
 negativos de la clase $c$ respectivamente. El F1 es útil cuando las clases están
 desbalanceadas, que es esperable en el FST donde la inmovilidad suele dominar en los
 primeros experimentos.
-
-\subsection{Error absoluto medio (MAE)}
-
-El error absoluto medio mide cuántos segundos se aleja el sistema del tiempo total
-reportado por el laboratorio para cada conducta:
-
-\begin{equation}
-    \text{MAE} = \frac{1}{n} \sum_{i=1}^{n} \bigl| \hat{t}_i - t_i \bigr|
-    \label{eq:mae}
-\end{equation}
-
-donde $\hat{t}_i$ es el tiempo predicho por el sistema para la rata $i$ y $t_i$ es el
-tiempo registrado manualmente. El MAE se reporta en segundos por rata para que el
-laboratorio pueda interpretar el error en términos de su flujo de trabajo real.
 
 \subsection{Tiempo de análisis}
 

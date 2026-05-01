@@ -297,14 +297,13 @@ RNF-01 & Rendimiento
 \hline
 RNF-02 & Calidad del análisis
        & El tiempo de procesamiento no es el criterio prioritario para el laboratorio.
-         El criterio de calidad es la concordancia del sistema con el evaluador experto:
-         se considera aceptable una concordancia $\geq 85$\,\% por conducta. Este umbral
-         fue declarado por el investigador colaborador en la entrevista de levantamiento
-         como la variabilidad actual entre analistas humanos (véase la
+         El criterio de calidad es el desempeño del clasificador por clase: se considera
+         aceptable un F1 $\geq 85$\,\% por conducta. Este umbral corresponde a la
+         variabilidad aceptada entre analistas humanos, declarada por el investigador
+         colaborador en la entrevista de levantamiento (véase la
          justificación de umbrales en la sección~\ref{sec:umbrales}).
-       & Concordancia $\geq 85$\,\% entre la clasificación automática y el gold
-         standard del laboratorio, medida sobre el conjunto de prueba de la
-         fase de validación (TT2). \\
+       & F1 $\geq 85$\,\% por clase (nado, inmovilidad, escalamiento) sobre el
+         conjunto de prueba de la fase de validación (TT2). \\
 \hline
 RNF-03 & Disponibilidad
        & El sistema debe estar disponible las 24 horas del día, los 7 días de la
@@ -412,12 +411,11 @@ ajustarse en la fase de validación (TT2).
         validación es detección de objetos en general. Se ajustará con los
         videos reales durante TT2.
 
-  \item \textbf{Concordancia mínima con el evaluador experto: $\geq 85$\,\%.}
-        Umbral declarado por el investigador colaborador (Dr.\ César Augusto
-        Sandino Reyes López) en la entrevista de levantamiento de requerimientos.
-        Corresponde a la variabilidad actual entre analistas humanos que anotan
-        los mismos videos de forma independiente. El objetivo del sistema es
-        igualar o superar ese nivel de consistencia.
+  \item \textbf{F1 mínimo por clase: $\geq 85$\,\%.}
+        Umbral derivado de la variabilidad aceptada entre analistas humanos, declarada
+        por el investigador colaborador (Dr.\ César Augusto Sandino Reyes López) en la
+        entrevista de levantamiento. El objetivo del sistema es alcanzar un desempeño
+        por clase equivalente o superior a ese nivel de consistencia.
 
   \item \textbf{Duración mínima de episodio: 3~segundos.}
         Criterio declarado por el investigador colaborador en la entrevista de
@@ -530,7 +528,7 @@ RN-12 & La comparación Día~1 vs.\ Día~2 solo se genera si ambos videos del mi
       & No tiene sentido comparar con datos incompletos. Ver RF-20. \\
 \hline
 RN-13 & Si durante la fase de validación el clasificador no alcanza
-        $\kappa > 0.80$ distinguiendo las tres conductas por separado,
+        el F1 objetivo distinguiendo las tres conductas por separado,
         el nado activo y el escalamiento se reportan juntos como
         \textit{conducta activa}. El reporte generado indica
         explícitamente qué nivel de clasificación se aplicó, de modo
@@ -640,7 +638,7 @@ ResNet-18 \cite{he2016}
 ResNet-50 \cite{he2016}
     & Versión más profunda (50~capas). Mayor capacidad que ResNet-18 a costa de más
       tiempo de entrenamiento e inferencia.
-    & Se usará si ResNet-18 no alcanza $\kappa > 0.80$. \\
+    & Se usará si ResNet-18 no alcanza el F1 objetivo en las tres clases. \\
 \hline
 TensorFlow 2.x / Keras \cite{abadi2016}
     & Framework de aprendizaje profundo con API de alto nivel para fine-tuning de
@@ -649,14 +647,14 @@ TensorFlow 2.x / Keras \cite{abadi2016}
 \hline
 scikit-learn \cite{pedregosa2011}
     & Biblioteca de ML para métricas y validación cruzada.
-    & Se usa para calcular el coeficiente $\kappa$ de Cohen, F1 por clase y MAE. \\
+    & Se usa para calcular métricas de clasificación (F1, precisión y \textit{recall} por clase) y validación cruzada. \\
 \hline
 BORIS \cite{friard2016}
     & Software de anotación conductual cuadro a cuadro. Exporta en formatos
       compatibles con Python.
     & Los autores del proyecto anotan los cuadros de video con BORIS usando los
       registros conductuales del laboratorio como referencia, generando el dataset
-      de entrenamiento y el gold standard de validación. \\
+      de entrenamiento del clasificador. \\
 \hline
 
 \end{longtable}
@@ -734,7 +732,7 @@ R-01 & Videos con reflejos, iluminación variable o ratas de pelaje claro que ha
       sigue por debajo de 0.70, se genera el reporte de diagnóstico (ver RN-11). \\
 \hline
 R-02 & El dataset de cuadros etiquetados no alcanza para entrenar un clasificador
-      con $\kappa > 0.80$.
+      con F1 objetivo.
     & Alta & Alto & Alto
     & Ampliar el dataset anotando más cuadros con BORIS. Usar data augmentation.
       Si escalamiento no se distingue con precisión, reportarlo junto con nado

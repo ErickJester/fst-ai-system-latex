@@ -273,7 +273,7 @@ este proyecto. Tiene 18 capas con conexiones residuales (\textit{skip connection
 facilitan el entrenamiento en redes profundas al permitir que el gradiente fluya sin
 desvanecerse. Es ligera ---ocupa menos de 50~MB--- entrena rápido con datasets pequeños
 y tiene un buen balance entre precisión y velocidad de inferencia. Si ResNet-18 no
-alcanza la métrica objetivo ($\kappa > 0.80$), se prueba ResNet-50 como alternativa más
+alcanza el F1 objetivo en las tres clases, se prueba ResNet-50 como alternativa más
 profunda.
 
 \subsection{Redes 3D para información temporal}
@@ -299,11 +299,9 @@ y software, y establece atributos medibles que permiten verificar si un sistema 
 sus objetivos. Para este proyecto, los atributos relevantes son:
 
 \begin{itemize}
-  \item \textbf{Functional correctness:} los resultados del sistema deben ser
-        consistentes con las anotaciones del laboratorio. Se mide con el coeficiente
-        kappa de Cohen ($\kappa$), que cuantifica la concordancia entre dos evaluadores
-        descontando el azar. El umbral objetivo es $\kappa > 0.80$, que corresponde a
-        concordancia casi perfecta según la escala de Landis y Koch.
+  \item \textbf{Functional correctness:} los resultados del sistema deben clasificar
+        correctamente las tres conductas del FST. Se evalúa con métricas de
+        clasificación estándar: precisión, \textit{recall} y F1 por clase.
   \item \textbf{Time behaviour:} el tiempo de análisis de un video de 5~minutos debe
         ser aceptable para el flujo de trabajo del laboratorio. Se mide en minutos de
         procesamiento por minuto de video y se define el umbral concreto con el
@@ -312,9 +310,6 @@ sus objetivos. Para este proyecto, los atributos relevantes son:
         poder operar el sistema sin ayuda técnica. Se evalúa con una prueba de
         usabilidad con al menos un usuario real del laboratorio.
 \end{itemize}
-
-Además, el error absoluto medio (MAE) en segundos por rata y conducta completa los
-criterios de evaluación cuantitativos del clasificador.
 
 % -----------------------------------------------------------
 \section{Tabla comparativa}
@@ -344,7 +339,7 @@ DSAAN          & Sí    & No    & Sí  & No  & No  & No          & Precisión 88
 DeepLabCut+clf & Parc. & Parc. & Sí  & No  & Sí  & No          & $\kappa$ vs.\ experto \\
 YOLO-Behaviour & No    & ---   & Sí  & No  & Sí  & No          & Precisión, recall \\
 \hline
-\textbf{Propuesta} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{ByteTrack} & $\kappa > 0.80$, MAE, tiempo \\
+\textbf{Propuesta} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{ByteTrack} & F1 por clase, tiempo \\
 \hline
 \end{tabular}
 \end{table}

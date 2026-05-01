@@ -173,9 +173,9 @@
   % ── G ──────────────────────────────────────────────────────────────
   \textbf{Gold standard}
   & (Estándar de referencia.) Conjunto de etiquetas considerado como la verdad
-    absoluta para la evaluación del sistema. En el proyecto, lo constituyen las
-    anotaciones manuales cuadro a cuadro realizadas por el experto del laboratorio
-    colaborador, contra las cuales se comparan las predicciones del modelo. \\[5pt]
+    absoluta para la evaluación de un sistema automático. Generalmente lo constituyen
+    las anotaciones manuales realizadas por un experto, que sirven como referencia
+    para medir el desempeño del modelo. \\[5pt]
 
   % ── H ──────────────────────────────────────────────────────────────
   \textbf{Hiperparámetro}
@@ -224,8 +224,7 @@
   \textbf{Kappa de Cohen}
   & Coeficiente estadístico ($\kappa$) que mide el grado de concordancia entre
     dos evaluadores descontando el acuerdo esperado por azar. Valores $\kappa > 0.80$
-    se consideran acuerdo casi perfecto. Se reporta para cuantificar la concordancia
-    entre el sistema automático y el experto en la clasificación cuadro a cuadro. \\[5pt]
+    corresponden a acuerdo casi perfecto según la escala de Landis y Koch. \\[5pt]
 
   \textbf{KCF}
   & (\textit{Kernelized Correlation Filter}.) Algoritmo de seguimiento basado en
@@ -237,9 +236,8 @@
   \textbf{MAE}
   & (\textit{Mean Absolute Error} / Error Absoluto Medio.) Métrica de error de
     regresión definida como $\text{MAE} = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|$.
-    En la evaluación del sistema se calcula entre los tiempos de conducta
-    estimados automáticamente y los tiempos del gold standard, expresado
-    en segundos. \\[5pt]
+    Mide la diferencia promedio entre valores predichos y valores de referencia,
+    expresada en las mismas unidades que la variable medida. \\[5pt]
 
   \textbf{Modelo de fondo}
   & (\textit{Background model}.) Representación estadística de la escena sin el
