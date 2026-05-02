@@ -12,6 +12,17 @@ a través de la API REST, y cómo se ve la interfaz desde la perspectiva del inv
 También incluye el diseño del pipeline de análisis conductual: el flujo de procesamiento
 de video, la estrategia de separación por sujeto y la arquitectura del clasificador.
 
+Los diagramas de este capítulo siguen la notación \textit{Unified Modeling Language}
+(UML) versión~2.5.1, especificada por el \textit{Object Management Group}
+(OMG) \cite{omg_uml}, organismo que gestiona y publica las actualizaciones del
+estándar desde 1997. UML está también adoptado como estándar internacional bajo
+ISO/IEC~19501:2005 \cite{iso19501}, que define la notación y el metamodelo para
+diagramas de casos de uso, secuencias y clases. La estructura arquitectónica del
+sistema se documenta conforme a ISO/IEC/IEEE~42010:2011 \cite{iso42010}, norma que
+establece cómo describir una arquitectura de software mediante múltiples vistas
+---estructural, de comportamiento y de despliegue--- que atienden las preocupaciones
+de los distintos actores del sistema.
+
 La decisión de diseño más importante fue separar el worker del backend en un proceso
 independiente. La opción más simple habría sido ejecutar el pipeline dentro del mismo
 servidor Flask, pero eso significa bloquear todas las peticiones HTTP mientras un video
@@ -29,7 +40,7 @@ contenedores Docker independientes: frontend, backend y base de datos. Un cuarto
 contenedor ---el worker--- ejecuta el pipeline de análisis de forma asíncrona, sin
 bloquear al servidor web mientras procesa los videos.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/arquitectura}
 \caption{Arquitectura general del sistema [autoría propia].}
@@ -73,91 +84,112 @@ escalar el número de workers de forma independiente si el volumen de análisis 
 % -----------------------------------------------------------
 
 El pipeline recibe un video del FST y produce como salida los tiempos totales de cada
-conducta por rata y, de forma opcional, el desglose por minuto. Tiene cinco etapas
-secuenciales: preprocesamiento, detección de cilindros, seguimiento de ratas,
-clasificación de conducta y generación de resultados.
+conducta por espécimen y el desglose por minuto. Está organizado en cinco módulos
+secuenciales: preprocesamiento, detección de ROIs, seguimiento, clasificación de
+conducta y generación de resultados. La Figura~\ref{fig:pipeline} muestra el flujo
+completo con las tecnologías de cada módulo.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/pipeline}
 \caption{Diagrama de flujo del pipeline de análisis conductual [autoría propia].}
 \label{fig:pipeline}
 \end{figure}
 
-\subsection{Preprocesamiento}
+\subsection{Módulo 1: Preprocesamiento}
 
-El preprocesamiento decodifica el video y verifica que sea procesable. Si el contraste
-promedio de los cuadros cae por debajo del umbral mínimo, se aplica corrección CLAHE
-(\textit{Contrast Limited Adaptive Histogram Equalization}) \cite{bradski2000} antes
-de continuar. Si después de CLAHE el contraste sigue siendo insuficiente, el pipeline
-se detiene y genera un reporte de diagnóstico (ver RN-11).
+El preprocesamiento usa \textbf{OpenCV VideoCapture} para decodificar el video
+cuadro a cuadro. Si el contraste promedio cae por debajo del umbral mínimo, se
+aplica \textbf{CLAHE} (\textit{Contrast Limited Adaptive Histogram Equalization})
+\cite{bradski2000} para normalizarlo. Si tras la corrección el contraste sigue
+siendo insuficiente, el pipeline se detiene y genera un reporte de diagnóstico
+(ver RN-11).
 
-\subsection{Detección de cilindros}
+\subsection{Módulo 2: Detección de ROIs}
 
-El sistema localiza los cuatro cilindros en el encuadre usando detección de contornos
-sobre los primeros cuadros del video, después de construir el modelo de fondo por
-mediana. Cada cilindro detectado se convierte en una región de interés (ROI) que
-delimita el área de análisis de cada rata. La detección requiere una confianza mínima
-de 0.70; si no se alcanza para los cuatro cilindros, el pipeline se detiene.
+El sistema detecta los cilindros en el encuadre usando contornos sobre los primeros
+cuadros del video tras construir un modelo de fondo. Para cada cilindro calcula una
+\textbf{región de interés} (ROI) que delimita el área de análisis de cada espécimen.
+La \textbf{línea de agua} de cada cilindro se estima y estabiliza con un filtro de
+\textbf{media móvil exponencial} (EMA) para reducir el efecto de reflejos y
+variaciones de iluminación entre cuadros.
 
-\subsection{Seguimiento de ratas}
+\subsection{Módulo 3: Seguimiento}
 
-Dentro de cada ROI, el seguimiento opera en cuatro niveles de respaldo:
+Dentro de cada ROI, el seguimiento combina detección y asociación temporal:
 
 \begin{enumerate}
-  \item \textbf{ByteTrack} \cite{zhang2022_bytetrack}: tracker principal. YOLOv8 corre
-        en modo \texttt{.track()} con \texttt{bytetrack.yaml}, lo que activa la
-        asociación por IoU con filtro de Kalman. Las detecciones de alta y baja
-        confianza se asocian en dos pasadas para mantener la trayectoria durante
-        oclusiones breves. Requiere que el modelo \texttt{weights/rat.pt} y
-        Ultralytics estén disponibles.
-  \item \textbf{Segmentación por sustracción de fondo}: si ByteTrack no está
-        disponible (ausencia de GPU, modelo no cargado o fallo del entorno), en
-        cada cuadro se calcula la diferencia absoluta con el modelo de fondo y se
-        umbraliza con Otsu \cite{otsu1979}. Si el contorno resultante es consistente
-        con el cuadro anterior (IoU $\geq$ umbral), se acepta como detección válida.
-  \item \textbf{Tracker CSRT / KCF}: si la segmentación falla o produce un resultado
-        inconsistente, el tracker CSRT \cite{lukezic2017} mantiene la estimación de
-        posición usando la apariencia del espécimen en cuadros anteriores. KCF
-        \cite{henriques2015} actúa como segundo nivel de respaldo si CSRT no está
-        disponible.
-  \item \textbf{Congelación de posición}: si todos los niveles anteriores fallan,
-        la última posición conocida se conserva con una confianza decreciente hasta
-        que el detector vuelva a encontrar a la rata.
+  \item \textbf{YOLOv8 + ByteTrack} \cite{zhang2022_bytetrack}: el detector
+        YOLOv8 localiza al espécimen en cada cuadro usando el modelo
+        \texttt{rat.pt}; ByteTrack asocia las detecciones entre cuadros
+        consecutivos mediante IoU con filtro de Kalman, manteniendo la
+        trayectoria durante oclusiones breves.
+  \item \textbf{Asignación a ROIs por IoU máximo}: cada trayectoria activa
+        se asigna a la ROI con la que tiene mayor solapamiento, separando
+        espacialmente los especímenes aunque sus trayectorias se crucen.
+  \item \textbf{Validación de consistencia}: comprueba que las posiciones
+        predichas sean coherentes con el cuadro anterior (sin saltos abruptos
+        o cambios anómalos), descartando detecciones inconsistentes.
+  \item \textbf{Manejo de oclusiones}: cuando un espécimen desaparece
+        temporalmente de la cámara, conserva su identidad y posición estimada
+        hasta que vuelve a ser detectado dentro de su ROI.
 \end{enumerate}
 
-La estimación de la línea de agua se estabiliza con un promedio móvil exponencial
-(EMA, ecuación~\ref{eq:ema} del cap.~3) para reducir el efecto de los reflejos en la
-detección de la rata.
+\subsection{Módulo 4: Clasificación de conducta}
 
-\subsection{Clasificación de conducta}
+El clasificador recibe el recorte de imagen alrededor del espécimen, normalizado
+a $224 \times 224$ píxeles, y produce tres probabilidades: nado activo
+(\textit{swim}), inmovilidad (\textit{immobile}) y escalamiento (\textit{escape}).
+Opera en tres niveles según la confianza de la predicción (el umbral exacto
+se definirá durante la fase de validación en TT-II):
 
-El clasificador recibe el recorte de imagen alrededor de la rata (el bounding box),
-normalizado a $224 \times 224$ píxeles. Produce tres valores de probabilidad ---uno
-por conducta--- y asigna la conducta con mayor valor. La arquitectura base es
-ResNet-18 preentrenada en ImageNet con transfer learning \cite{he2016,pan2010}:
-se reemplaza la capa de clasificación original por una nueva con 3 salidas (nado
-activo, inmovilidad, escalamiento) y se re-entrena esa capa con los cuadros
-etiquetados del laboratorio.
-En caso de que durante la validación el clasificador no alcance
-el F1 objetivo diferenciando escalamiento de nado activo, el
-pipeline agrupa ambas clases en una categoría unificada denominada
-\textit{conducta activa} y lo registra explícitamente en el reporte
-generado (ver RN-13). Esta decisión no requiere modificar la
-arquitectura del sistema ni la interfaz web; solo cambia la
-interpretación de la salida del clasificador.
+\begin{enumerate}
+  \item \textbf{ResNet-18} preentrenada en ImageNet con \textit{transfer learning}
+        \cite{he2016,pan2010}: clasificador principal. Si la confianza de la
+        predicción es suficiente, se acepta directamente.
+  \item \textbf{ResNet-50} (fallback): si ResNet-18 no alcanza la confianza
+        mínima, se consulta ResNet-50, una arquitectura más profunda con mayor
+        capacidad de discriminación para casos ambiguos.
+  \item \textbf{Heurística motion + aspect ratio}: si ambas redes quedan por
+        debajo del umbral, se aplica una regla basada en el desplazamiento entre
+        cuadros y la relación de aspecto del bounding box para distinguir
+        inmovilidad de nado.
+\end{enumerate}
 
-\subsection{Estrategia de separación por sujeto}
+Las predicciones individuales se consolidan con \textbf{voto mayoritario} en una
+ventana deslizante de un segundo, reduciendo el efecto de clasificaciones ruidosas
+en cuadros aislados. En caso de que el clasificador no alcance el F1 objetivo
+diferenciando escalamiento de nado activo, el pipeline agrupa ambas clases en una
+categoría unificada denominada \textit{conducta activa} y lo registra en el reporte
+(ver RN-13).
 
-Los cuatro cilindros se graban en una sola toma cenital. La separación por sujeto
-se hace asignando cada ROI detectada en la etapa de detección de cilindros a un
-identificador de rata (Rata~1 a Rata~4). La asignación usa la posición
-espacial de cada ROI en el encuadre: se ordena primero por fila (arriba/abajo) y
-luego por columna (izquierda/derecha), lo que produce una numeración consistente
-entre sesiones mientras el encuadre no cambie.
+\subsection{Módulo 5: Resultados}
 
-Si el número de cilindros detectados es menor a cuatro, el sistema reporta cuántos
-ratas pudo procesar y cuáles no, en lugar de abortar el análisis completo.
+Al finalizar el análisis, el pipeline produce cuatro salidas:
+
+\begin{itemize}
+  \item \textbf{Tiempos totales} por espécimen: \texttt{swim\_s},
+        \texttt{immobile\_s} y \texttt{escape\_s} en segundos, almacenados
+        en la tabla \texttt{RESULTADOS\_COMPORTAMIENTO}.
+  \item \textbf{Video anotado} (\texttt{\_tracked.mp4}): video original con
+        las cajas de seguimiento y etiqueta de conducta superpuestas,
+        disponible para revisión visual del investigador.
+  \item \textbf{Desglose por minuto} (\texttt{per\_minute.json}): tiempo de
+        cada conducta agrupado por minuto, almacenado en
+        \texttt{COMPORTAMIENTO\_POR\_MINUTO}.
+  \item \textbf{Datos de seguimiento} (\texttt{\_tracking.json}): trayectorias
+        y confianzas cuadro a cuadro, útiles para depuración y auditoría del
+        análisis.
+\end{itemize}
+
+\subsection{Separación por espécimen}
+
+Los cilindros se graban en una sola toma cenital. La asignación de cada ROI a un
+espécimen usa su posición espacial en el encuadre: se ordena primero por fila
+(arriba/abajo) y luego por columna (izquierda/derecha), produciendo una numeración
+consistente entre sesiones mientras el encuadre no cambie. Si el número de
+cilindros detectados es menor al esperado, el sistema reporta cuáles especímenes
+pudo procesar y cuáles no, en lugar de abortar el análisis completo.
 
 % -----------------------------------------------------------
 \section{Diseño de la base de datos}
@@ -166,41 +198,79 @@ ratas pudo procesar y cuáles no, en lugar de abortar el análisis completo.
 El modelo de datos sigue el paradigma relacional. La Figura~\ref{fig:er} muestra el
 diagrama entidad-relación físico con las tablas, columnas y claves del sistema.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/er}
 \caption{Modelo entidad-relación físico del sistema [autoría propia].}
 \label{fig:er}
 \end{figure}
 
-Las tablas principales y sus responsabilidades son:
+Las tablas están organizadas en cuatro grupos funcionales:
 
+\textbf{Usuarios y acceso.}
 \begin{itemize}
-  \item \textbf{usuarios}: almacena credenciales (correo, hash de contraseña con
-        bcrypt), rol (investigador/administrador) y estado (activo/inactivo).
+  \item \textbf{USUARIOS}: credenciales (correo, hash bcrypt), nombre, estado
+        activo/inactivo y bandera \texttt{debe\_cambiar\_contrasena} que obliga
+        al cambio en el primer ingreso cuando la cuenta fue creada por el
+        administrador. El campo \texttt{ultimo\_acceso} permite auditoría de uso.
+\end{itemize}
 
-  \item \textbf{experimentos}: agrupa los videos y resultados de un experimento.
-        Campos: nombre, fecha, tratamiento, notas, número esperado de ratas y
-        referencia al usuario propietario.
+\textbf{Experimentos y material de video.}
+\begin{itemize}
+  \item \textbf{EXPERIMENTOS}: metadatos del experimento (nombre, fecha,
+        tratamiento, especie, disposición y notas) con referencia al usuario
+        propietario. Todos los investigadores pueden consultar cualquier
+        experimento del laboratorio (ver RN-08).
 
-  \item \textbf{videos}: un experimento puede tener hasta dos videos (Día~1 y
-        Día~2). Campos: ruta del archivo, sesión (día~1/día~2), estado del análisis
-        (en cola, procesando, completado, error), fecha de carga y fecha límite de
-        eliminación (30 días desde la finalización del análisis).
+  \item \textbf{VIDEOS}: hasta dos videos por experimento (campo \texttt{dia}:
+        \texttt{dia1} o \texttt{dia2}), ruta de almacenamiento, duración en
+        segundos y fecha de eliminación programada (30 días tras completar el
+        análisis, ver RN-06).
 
-  \item \textbf{especímenes}: cada video procesado genera un registro por rata
-        detectada, con su identificador y posición en el encuadre.
+  \item \textbf{SUJETOS}: un registro por espécimen dentro del experimento,
+        identificado por su índice numérico y una etiqueta descriptiva.
 
-  \item \textbf{resultados\_conducta}: almacena el tiempo en segundos de cada
-        conducta por rata, sesión y, opcionalmente, por minuto dentro de la
-        sesión. Es la tabla central para la generación de reportes.
+  \item \textbf{ROIS}: región de interés (\textit{bounding box}: x, y, w, h)
+        asignada a cada espécimen en cada video. La usa el pipeline para
+        delimitar el área de seguimiento de cada animal.
+\end{itemize}
 
-  \item \textbf{reportes}: registros de los archivos PDF y CSV generados, con su
-        ruta de almacenamiento y fecha de generación. Los reportes se conservan
+\textbf{Análisis y trabajos.}
+\begin{itemize}
+  \item \textbf{CONFIGURACIONES\_ANALISIS}: parámetros del pipeline en el
+        momento del análisis: nombre y hash del modelo, versión del pipeline,
+        umbrales de confianza, inmovilidad, desplazamiento y aspecto de
+        trepada. Permite reproducir o comparar resultados entre versiones del
+        modelo.
+
+  \item \textbf{TRABAJOS}: ejecución del pipeline sobre un video con una
+        configuración específica. Registra estado (\texttt{en\_cola},
+        \texttt{procesando}, \texttt{completado}, \texttt{error}), etapa
+        actual, porcentaje de progreso, marcas de tiempo de inicio y fin, y
+        mensaje de error si lo hay.
+
+  \item \textbf{ANIMALES}: tabla de enlace entre un trabajo y un sujeto.
+        Cada fila representa un espécimen procesado dentro de una ejecución
+        concreta del pipeline.
+\end{itemize}
+
+\textbf{Resultados, reportes y notificaciones.}
+\begin{itemize}
+  \item \textbf{RESULTADOS\_COMPORTAMIENTO}: tiempo total en segundos de cada
+        conducta (nado, inmovilidad, escalamiento) por animal dentro de un
+        trabajo. Es la fuente principal para los reportes.
+
+  \item \textbf{COMPORTAMIENTO\_POR\_MINUTO}: desglose temporal del mismo
+        animal, con una fila por minuto analizado. Permite el gráfico de
+        evolución temporal en la pantalla de resultados.
+
+  \item \textbf{REPORTES}: referencia a los archivos PDF, CSV y XLSX
+        generados, con su ruta y fecha de creación. Los reportes se conservan
         aunque el video original haya sido eliminado (ver RN-06).
 
-  \item \textbf{notificaciones}: avisos al investigador sobre eventos del sistema
-        (análisis completado, error en análisis, video próximo a eliminarse).
+  \item \textbf{NOTIFICACIONES}: avisos al investigador sobre eventos del
+        sistema (análisis completado, error en el pipeline, alerta de disco)
+        vinculados al usuario y, cuando aplica, al experimento correspondiente.
 \end{itemize}
 
 El diccionario de datos completo con tipos, restricciones y descripciones de cada
@@ -218,7 +288,7 @@ de contraseña. Las respuestas usan JSON con una estructura consistente: campo
 
 La Tabla~\ref{tab:api} describe los endpoints principales agrupados por recurso.
 
-\begin{longtable}{|p{1.5cm}|p{4.0cm}|p{4.0cm}|p{3.5cm}|}
+\begin{longtable}{|p{1.4cm}|p{5.8cm}|p{4.8cm}|p{1.6cm}|}
 \caption{Endpoints principales de la API REST.
 \label{tab:api}}\\
 \hline
@@ -232,46 +302,54 @@ La Tabla~\ref{tab:api} describe los endpoints principales agrupados por recurso.
 \hline
 \endfoot
 
-POST & \texttt{/auth/login} & Inicia sesión; devuelve token JWT. & Público \\
+% --- Autenticación ---
+POST   & \path{/auth/login}    & Inicia sesión; devuelve token JWT. & Público \\
 \hline
-POST & \texttt{/auth/logout} & Invalida el token activo. & Autenticado \\
+POST   & \path{/auth/logout}   & Invalida el token activo. & Autenticado \\
 \hline
-POST & \texttt{/auth/recover} & Envía enlace de recuperación por correo. & Público \\
+POST   & \path{/auth/recover}  & Envía enlace de recuperación por correo. & Público \\
 \hline
-
-GET  & \texttt{/experiments} & Lista los experimentos del usuario activo. & Investigador \\
-\hline
-POST & \texttt{/experiments} & Crea un nuevo experimento con sus metadatos. & Investigador \\
-\hline
-GET  & \texttt{/experiments/\{id\}} & Devuelve detalle y estado de un experimento. & Investigador \\
-\hline
-DELETE & \texttt{/experiments/\{id\}} & Elimina permanentemente un experimento. & Investigador \\
+PATCH  & \path{/auth/password} & Cambia la contraseña del usuario autenticado. & Autenticado \\
 \hline
 
-POST & \texttt{/experiments/\{id\}/videos} & Sube un video (Día~1 o Día~2) y encola el análisis. & Investigador \\
+% --- Experimentos ---
+GET    & \path{/experiments}         & Lista todos los experimentos del laboratorio (ver RN-08). & Investiga\-dor \\
 \hline
-GET  & \texttt{/experiments/\{id\}/status} & Devuelve el progreso del análisis en porcentaje. & Investigador \\
+POST   & \path{/experiments}         & Crea un experimento con sus metadatos. & Investiga\-dor \\
 \hline
-
-GET  & \texttt{/experiments/\{id\}/results} & Devuelve los resultados por rata y sesión. & Investigador \\
-\hline
-GET  & \texttt{/experiments/\{id\}/results/byminute} & Devuelve el desglose por minuto. & Investigador \\
-\hline
-GET  & \texttt{/experiments/\{id\}/comparison} & Devuelve la comparación Día~1 vs.\ Día~2. & Investigador \\
+GET    & \path{/experiments/{id}}    & Devuelve detalle y estado de un experimento. & Investiga\-dor \\
 \hline
 
-GET  & \texttt{/experiments/\{id\}/report/pdf} & Descarga el reporte en PDF. & Investigador \\
+% --- Videos y análisis ---
+POST   & \path{/experiments/{id}/videos}  & Sube un video (Día~1 o Día~2) y encola el análisis. & Investiga\-dor \\
 \hline
-GET  & \texttt{/experiments/\{id\}/report/csv} & Descarga los datos en CSV. & Investigador \\
+GET    & \path{/experiments/{id}/status}  & Devuelve el progreso del análisis en porcentaje. & Investiga\-dor \\
 \hline
 
-GET  & \texttt{/admin/users} & Lista todos los usuarios (filtrable por rol y estado). & Admin \\
+% --- Resultados ---
+GET    & \path{/experiments/{id}/results}          & Devuelve los resultados por espécimen y conducta. & Investiga\-dor \\
 \hline
-POST & \texttt{/admin/users} & Crea una cuenta de usuario. & Admin \\
+GET    & \path{/experiments/{id}/results/byminute} & Devuelve el desglose temporal por minuto. & Investiga\-dor \\
 \hline
-PATCH & \texttt{/admin/users/\{id\}} & Modifica o desactiva una cuenta. & Admin \\
+GET    & \path{/experiments/{id}/comparison}       & Devuelve la comparación Día~1 vs.\ Día~2. & Investiga\-dor \\
 \hline
-GET  & \texttt{/admin/system} & Devuelve métricas del sistema: disco y cola. & Admin \\
+
+% --- Reportes ---
+GET    & \path{/experiments/{id}/report/pdf}  & Descarga el reporte en PDF. & Investiga\-dor \\
+\hline
+GET    & \path{/experiments/{id}/report/csv}  & Descarga los datos en CSV. & Investiga\-dor \\
+\hline
+GET    & \path{/experiments/{id}/report/xlsx} & Descarga los datos en XLSX. & Investiga\-dor \\
+\hline
+
+% --- Administración ---
+GET    & \path{/admin/users}        & Lista todos los usuarios (filtrable por rol y estado). & Admin \\
+\hline
+POST   & \path{/admin/users}        & Crea una cuenta de usuario con contraseña temporal. & Admin \\
+\hline
+PATCH  & \path{/admin/users/{id}}   & Modifica datos o desactiva una cuenta. & Admin \\
+\hline
+GET    & \path{/admin/system}       & Devuelve métricas del sistema: disco y cola. & Admin \\
 \hline
 
 \end{longtable}
@@ -280,162 +358,237 @@ GET  & \texttt{/admin/system} & Devuelve métricas del sistema: disco y cola. & 
 \section{Diseño de casos de uso}
 % -----------------------------------------------------------
 
+Los diagramas de casos de uso se construyen conforme a la especificación UML~2.5.1
+\cite{omg_uml,iso19501}, usando actores, casos de uso y relaciones de
+\textit{include} y \textit{extend} para representar el comportamiento observable
+del sistema desde la perspectiva del usuario.
+
 El sistema tiene dos actores principales: \textbf{Investigador} y
 \textbf{Administrador}. El Investigador gestiona sus experimentos y consulta
 resultados; el Administrador gestiona usuarios y monitorea el estado del sistema.
 El Administrador hereda todas las capacidades del Investigador sobre los experimentos
 de cualquier usuario (ver RN-08).
 
-\begin{figure}[ht]
+Los casos de uso están organizados en cinco paquetes funcionales. La
+Figura~\ref{fig:cu_vision_general} muestra la visión general con los dos actores y
+sus relaciones de alto nivel; las figuras siguientes detallan cada paquete.
+
+\begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{figures/mermaid/casos_uso}
-\caption{Diagrama de casos de uso del sistema [autoría propia].}
-\label{fig:casos_uso}
+\includegraphics[width=\textwidth]{figures/mermaid/cu_vision_general}
+\caption{Diagrama de casos de uso — visión general del sistema [autoría propia].}
+\label{fig:cu_vision_general}
 \end{figure}
 
-Los casos de uso principales son:
+\subsection{Paquete 1: Autenticación y sesión}
 
-\begin{itemize}
-  \item \textbf{CU-01 Iniciar sesión:} el investigador ingresa correo y contraseña.
-        El sistema valida las credenciales y devuelve un token JWT. Las credenciales
-        incorrectas muestran un error genérico (ver RN-01).
+Agrupa los flujos de acceso al sistema: inicio de sesión con correo y contraseña,
+cierre de sesión y recuperación o cambio de contraseña. El flujo es idéntico para
+Investigador y Administrador; la diferencia de permisos se resuelve dentro del
+sistema una vez autenticados.
 
-  \item \textbf{CU-02 Crear experimento:} el investigador registra los metadatos del
-        experimento (nombre, fecha, tratamiento, número de ratas) y sube uno o
-        dos videos. El análisis inicia automáticamente al completarse la carga válida.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/mermaid/cu_paquete1}
+\caption{Casos de uso — Paquete 1: Autenticación y sesión [autoría propia].}
+\label{fig:cu_paquete1}
+\end{figure}
 
-  \item \textbf{CU-03 Consultar progreso:} el investigador puede ver el estado del
-        análisis en tiempo real. Si ocurre un error, puede descargar el reporte de
-        diagnóstico.
+\subsection{Paquete 2: Gestión de experimentos}
 
-  \item \textbf{CU-04 Ver resultados:} una vez completado el análisis, el
-        investigador puede consultar los tiempos por rata y conducta, el desglose
-        por minuto y, si ambos videos fueron procesados, la comparación Día~1
-        vs.\ Día~2.
+Cubre el ciclo de vida de un experimento: registrar metadatos (nombre, fecha,
+tratamiento, número de especímenes), subir uno o dos videos en formato MP4 y
+consultar el historial de experimentos del laboratorio (ver RN-08).
 
-  \item \textbf{CU-05 Descargar reporte:} el investigador descarga los resultados
-        en PDF o CSV desde la pantalla de resultados o desde el dashboard.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/mermaid/cu_paquete2}
+\caption{Casos de uso — Paquete 2: Gestión de experimentos [autoría propia].}
+\label{fig:cu_paquete2}
+\end{figure}
 
-  \item \textbf{CU-06 Gestionar usuarios (Admin):} el administrador crea, modifica
-        y desactiva cuentas. Las contraseñas temporales se marcan para cambio
-        obligatorio al primer ingreso.
+\subsection{Paquete 3: Análisis conductual}
 
-  \item \textbf{CU-07 Monitorear sistema (Admin):} el administrador consulta el
-        uso de disco, el tamaño de la cola y las métricas operativas del sistema.
-\end{itemize}
+Describe la interacción del investigador con el pipeline: monitorear el progreso
+del análisis en tiempo real, consultar el estado de la cola y descargar el reporte
+de diagnóstico cuando se detecta un error de calidad de video (ver RN-11).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/mermaid/cu_paquete3}
+\caption{Casos de uso — Paquete 3: Análisis conductual [autoría propia].}
+\label{fig:cu_paquete3}
+\end{figure}
+
+\subsection{Paquete 4: Resultados y reportes}
+
+Cubre la consulta de resultados una vez finalizado el análisis: tiempos por
+espécimen y conducta, desglose por minuto, comparación Día~1 vs.\ Día~2 (cuando
+ambos videos están disponibles) y descarga de reportes en PDF y CSV/XLSX.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/mermaid/cu_paquete4}
+\caption{Casos de uso — Paquete 4: Resultados y reportes [autoría propia].}
+\label{fig:cu_paquete4}
+\end{figure}
+
+\subsection{Paquete 5: Administración}
+
+Exclusivo del Administrador: gestión de cuentas de investigadores (crear, modificar,
+desactivar), aprobación de solicitudes de registro y monitoreo del estado del sistema
+(uso de disco, cola de tareas, alertas de capacidad).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/mermaid/cu_paquete5}
+\caption{Casos de uso — Paquete 5: Administración [autoría propia].}
+\label{fig:cu_paquete5}
+\end{figure}
 
 % -----------------------------------------------------------
 \section{Diagramas de secuencia}
 % -----------------------------------------------------------
 
-Los diagramas de secuencia describen el flujo de mensajes entre el frontend, el
-backend y el worker para los flujos principales del sistema, organizados por área
-funcional: autenticación y sesión, gestión de usuarios y perfil, notificaciones,
-y análisis de experimentos.
+Los diagramas de secuencia \cite{omg_uml} describen el flujo de mensajes entre el
+frontend, el backend y el worker para los flujos principales del sistema, mostrando
+el orden temporal de las interacciones entre componentes. Están organizados en
+cuatro grupos funcionales que corresponden a los paquetes de casos de uso: autenticación
+y sesión, administración, notificaciones, y análisis de experimentos.
 
-% ---- Autenticación y sesión ----
+% ---- Paquete 1: Autenticación y sesión ----
 
-\begin{figure}[ht]
+\subsection{Autenticación y sesión}
+
+Estos diagramas cubren el ciclo de acceso al sistema. El registro
+(Figura~\ref{fig:seq_registro}) lo inicia el Administrador, que crea la cuenta con
+contraseña temporal. El inicio de sesión (Figura~\ref{fig:seq_login}) es idéntico
+para Investigador y Administrador: el backend valida las credenciales contra la base
+de datos y devuelve un token JWT; las credenciales incorrectas producen un error
+genérico sin revelar cuál campo falló (ver RN-01). El cierre de sesión
+(Figura~\ref{fig:seq_logout}) invalida el token en el cliente. El cambio de
+contraseña (Figura~\ref{fig:seq_cambio_pass_inv}) aplica a cualquier usuario con
+sesión activa y es obligatorio al primer ingreso cuando la cuenta fue creada con
+contraseña temporal.
+
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/seq_registro}
 \caption{Secuencia: registro de usuario por administrador [autoría propia].}
 \label{fig:seq_registro}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/seq_login}
-\caption{Secuencia: inicio de sesión del investigador [autoría propia].}
+\caption{Secuencia: inicio de sesión (Investigador y Administrador) [autoría propia].}
 \label{fig:seq_login}
 \end{figure}
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=\textwidth]{figures/mermaid/seq_login_admin}
-\caption{Secuencia: inicio de sesión del administrador [autoría propia].}
-\label{fig:seq_login_admin}
-\end{figure}
-
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/seq_logout}
 \caption{Secuencia: cierre de sesión [autoría propia].}
 \label{fig:seq_logout}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/seq_cambio_pass_inv}
-\caption{Secuencia: cambio de contraseña del investigador [autoría propia].}
+\caption{Secuencia: cambio de contraseña del usuario [autoría propia].}
 \label{fig:seq_cambio_pass_inv}
 \end{figure}
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=\textwidth]{figures/mermaid/seq_cambio_pass_admin}
-\caption{Secuencia: restablecimiento de contraseña por administrador [autoría propia].}
-\label{fig:seq_cambio_pass_admin}
-\end{figure}
+% ---- Paquete 5: Administración ----
 
-% ---- Gestión de usuarios y perfil ----
+\subsection{Administración y perfil}
 
-\begin{figure}[ht]
+La gestión de usuarios (Figura~\ref{fig:seq_gestion_usuarios}) es exclusiva del
+Administrador: permite crear cuentas nuevas con contraseña temporal y desactivar
+cuentas existentes sin eliminarlas (ver RN-08). La configuración de perfil
+(Figura~\ref{fig:seq_perfil}) está disponible para cualquier usuario con sesión
+activa y permite actualizar nombre y correo institucional.
+
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/seq_gestion_usuarios}
 \caption{Secuencia: gestión de usuarios por administrador (crear y desactivar) [autoría propia].}
 \label{fig:seq_gestion_usuarios}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/seq_perfil}
-\caption{Secuencia: configuración de perfil del investigador [autoría propia].}
+\caption{Secuencia: configuración de perfil del usuario [autoría propia].}
 \label{fig:seq_perfil}
 \end{figure}
 
 % ---- Notificaciones ----
 
-\begin{figure}[ht]
+\subsection{Notificaciones}
+
+El sistema genera notificaciones de forma automática cuando un análisis finaliza
+(con o sin error) o cuando el espacio en disco supera el umbral de alerta (ver
+RN-11, RNF-10). La Figura~\ref{fig:seq_notificaciones} muestra cómo el backend
+persiste la notificación y cómo el frontend la consulta en el siguiente ciclo de
+actualización.
+
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/seq_notificaciones}
 \caption{Secuencia: generación y consulta de notificaciones [autoría propia].}
 \label{fig:seq_notificaciones}
 \end{figure}
 
-% ---- Análisis de experimentos ----
+% ---- Paquetes 2, 3 y 4: Análisis, progreso, resultados y reportes ----
 
-\begin{figure}[ht]
+\subsection{Análisis, resultados y reportes}
+
+Estos diagramas cubren el flujo central del sistema. La carga y análisis
+(Figura~\ref{fig:seq_analisis}) muestra cómo el investigador sube el video, el
+backend encola la tarea y el worker ejecuta el pipeline de visión por computadora;
+al finalizar, notifica al backend con los resultados. La consulta de progreso
+(Figura~\ref{fig:seq_progreso}) describe el mecanismo de \textit{polling} con el
+que el frontend verifica el estado de la tarea en la cola. El manejo de error
+(Figura~\ref{fig:seq_error}) cubre el camino alternativo cuando el pipeline detecta
+baja calidad de video (confianza~$<0.70$, ver RN-11): el worker genera el reporte
+de diagnóstico PDF y lo pone disponible para descarga. Una vez completado el
+análisis, la consulta de resultados (Figura~\ref{fig:seq_resultados}) devuelve los
+tiempos por espécimen y conducta, y la descarga de reportes
+(Figura~\ref{fig:seq_reportes}) permite exportar los datos en PDF, CSV o XLSX.
+
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/seq_analisis}
 \caption{Secuencia: carga de video y análisis automático [autoría propia].}
 \label{fig:seq_analisis}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/seq_progreso}
 \caption{Secuencia: consulta de progreso del análisis [autoría propia].}
 \label{fig:seq_progreso}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/seq_error}
-\caption{Secuencia: manejo de error en el análisis [autoría propia].}
+\caption{Secuencia: manejo de error en el análisis (calidad de video insuficiente) [autoría propia].}
 \label{fig:seq_error}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/seq_resultados}
-\caption{Secuencia: consulta de resultados [autoría propia].}
+\caption{Secuencia: consulta de resultados del análisis [autoría propia].}
 \label{fig:seq_resultados}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/seq_reportes}
-\caption{Secuencia: descarga de reportes [autoría propia].}
+\caption{Secuencia: descarga de reportes (PDF, CSV, XLSX) [autoría propia].}
 \label{fig:seq_reportes}
 \end{figure}
 
@@ -443,9 +596,24 @@ y análisis de experimentos.
 \section{Diagrama de clases}
 % -----------------------------------------------------------
 
-\begin{figure}[ht]
+El diagrama de clases \cite{omg_uml,iso42010} (Figura~\ref{fig:clases}) muestra
+las entidades principales del dominio y sus relaciones desde la perspectiva del
+backend, representando la vista estructural del sistema conforme a
+ISO/IEC/IEEE~42010:2011. Las clases centrales
+son \textbf{Experimento}, \textbf{Video} y \textbf{Trabajo}: un experimento agrupa
+uno o dos videos; cada video origina un trabajo que ejecuta el pipeline. Las clases
+\textbf{Sujeto} y \textbf{Animal} separan la identidad del espécimen (definida al
+crear el experimento) de su participación en una ejecución concreta del análisis,
+lo que permite reutilizar la misma definición de sujeto en distintas corridas. Los
+resultados se desagregan en dos clases: \textbf{ResultadoComportamiento} para los
+totales por espécimen y \textbf{ComportamientoPorMinuto} para el desglose temporal.
+La clase \textbf{ConfiguracionAnalisis} registra los hiperparámetros del pipeline
+en el momento de cada análisis, de modo que los resultados sean reproducibles aunque
+el modelo o los umbrales cambien en versiones futuras.
+
+\begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth, height=0.95\textheight, keepaspectratio]{figures/mermaid/clases}
+\includegraphics[width=\textwidth, height=0.92\textheight, keepaspectratio]{figures/mermaid/clases}
 \caption{Diagrama de clases del sistema [autoría propia].}
 \label{fig:clases}
 \end{figure}
@@ -465,7 +633,7 @@ Formulario con campos de correo institucional y contraseña. Las credenciales
 incorrectas muestran un mensaje de error genérico sin revelar cuál campo falló
 (ver RN-01). Incluye enlace de recuperación de contraseña (RF-03).
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
@@ -491,7 +659,7 @@ estado y accesos directos a resultados y descarga. Muestra avisos cuando un vide
 a menos de 7~días de ser eliminado automáticamente (RF-23). Incluye filtros por estado
 y paginación.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
@@ -530,7 +698,7 @@ puede tardar varios minutos según el tamaño del archivo: separar los metadatos
 carga permite que el investigador corrija un nombre o fecha sin necesidad de volver a
 subir el video si cometió un error en los campos de texto.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
@@ -593,7 +761,7 @@ agregar la funcionalidad implicaría manejar el estado de cancelación en el wor
 limpiar los archivos parciales. Si en el futuro surge esa necesidad, el endpoint
 \texttt{DELETE /experiments/\{id\}/videos} puede extenderse para eso.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
@@ -634,7 +802,7 @@ tabla detallada por rata (RF-18), desglose por minuto (RF-19) y comparación
 Día~1 vs.\ Día~2 (RF-20, disponible solo si ambos videos fueron procesados). Incluye
 botones de descarga en PDF y CSV.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
@@ -668,7 +836,7 @@ cola de procesamiento, análisis activos), lista de usuarios con filtros por rol
 estado, y la lista de experimentos de todos los investigadores. Incluye modales para
 crear y editar cuentas (RF-05, RF-27, RF-28).
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
