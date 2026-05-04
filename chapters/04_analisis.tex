@@ -571,7 +571,7 @@ OpenCV 4.x \cite{bradski2000}
       sustracción de fondo, umbralización de Otsu, morfología, contornos y los
       trackers de correlación CSRT y KCF (respaldo clásico frente a ByteTrack).
     & Es la herramienta de referencia para este tipo de trabajo y es compatible con
-      YOLOv8 y TensorFlow sin configuración extra.
+      YOLOv8 y PyTorch sin configuración extra.
     & No \\
 \hline
 Ultralytics YOLOv8 \cite{jocher2023}
@@ -640,10 +640,12 @@ ResNet-50 \cite{he2016}
       tiempo de entrenamiento e inferencia.
     & Se usará si ResNet-18 no alcanza el F1 objetivo en las tres clases. \\
 \hline
-TensorFlow 2.x / Keras \cite{abadi2016}
-    & Framework de aprendizaje profundo con API de alto nivel para fine-tuning de
-      modelos preentrenados.
-    & Ya se usa en el proyecto y es compatible con Docker para el despliegue. \\
+PyTorch \cite{paszke2019}
+    & Framework de aprendizaje profundo para entrenamiento e inferencia de redes
+      neuronales. Backbone nativo de Ultralytics YOLOv8 y compatible con transfer
+      learning de ResNet-18 via \texttt{torchvision.models}.
+    & Es el framework nativo de YOLOv8 (Ultralytics) y el ecosistema de referencia
+      para visión por computadora en Python. Compatible con Docker para el despliegue. \\
 \hline
 scikit-learn \cite{pedregosa2011}
     & Biblioteca de ML para métricas y validación cruzada.
@@ -808,7 +810,7 @@ implementar el prototipo de forma eficiente y sostenible \cite{pressman2014}.
 \subsubsection{Evaluación de recursos actuales y brechas tecnológicas}
 
 El equipo de desarrollo cuenta con experiencia en las herramientas del stack tecnológico
-seleccionado ---Python, OpenCV, TensorFlow, Flask y React--- adquirida en cursos de la
+seleccionado ---Python, OpenCV, PyTorch, Flask y React--- adquirida en cursos de la
 carrera en la ESCOM. Todas las herramientas son de código abierto, están bien
 documentadas y tienen comunidades activas que reducen el riesgo de incompatibilidades.
 
@@ -842,7 +844,7 @@ etapa con el dataset disponible.
 \subsubsection{Evaluación de compatibilidad e integración}
 
 El prototipo tiene una arquitectura modular que separa el pipeline de IA (Python,
-OpenCV, TensorFlow) de la plataforma web (Flask, React, PostgreSQL) mediante una
+OpenCV, PyTorch) de la plataforma web (Flask, React, PostgreSQL) mediante una
 cola de tareas asíncrona. Esa separación permite desarrollar y probar cada módulo de
 forma independiente y facilita la integración progresiva conforme avanza el desarrollo.
 
