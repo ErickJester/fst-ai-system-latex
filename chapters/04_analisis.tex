@@ -404,18 +404,36 @@ ajustarse en la fase de validación (TT2).
 
 \begin{itemize}
   \item \textbf{Confianza de detección de cilindros: $\geq 0.70$.}
-        Valor provisional obtenido de las pruebas preliminares de detección
+        En modelos de detección basados en YOLO, la confianza es un hiperparámetro
+        que controla el equilibrio entre precisión y \textit{recall}: valores más
+        altos aumentan la precisión pero reducen el número de detecciones válidas;
+        valores más bajos capturan más objetos a costa de más falsos positivos.
+        No existe un valor universal: la metodología estándar en la literatura de
+        análisis conductual automatizado consiste en trazar la curva
+        precisión-\textit{recall} sobre un conjunto de validación específico del
+        experimento y seleccionar el umbral que maximiza el F1 en ese dominio
+        concreto \cite{stadler2024_yolov8,chan2025_yolo,della_valle2025}. El valor
+        $0.70$ es provisional: se obtuvo de las pruebas preliminares de detección
         realizadas con los videos del laboratorio (véase la
-        sección~\ref{sec:fact_tecnologica}). No se extrae directamente de la
-        literatura sobre YOLOv8 \cite{stadler2024_yolov8}, cuyo contexto de
-        validación es detección de objetos en general. Se ajustará con los
-        videos reales durante TT2.
+        sección~\ref{sec:fact_tecnologica}) y será calibrado formalmente mediante
+        ese análisis de curva precisión-\textit{recall} sobre el conjunto de
+        validación real durante la fase de implementación en TT2.
 
   \item \textbf{F1 mínimo por clase: $\geq 85$\,\%.}
-        Umbral derivado de la variabilidad aceptada entre analistas humanos, declarada
-        por el investigador colaborador (Dr.\ César Augusto Sandino Reyes López) en la
-        entrevista de levantamiento. El objetivo del sistema es alcanzar un desempeño
-        por clase equivalente o superior a ese nivel de consistencia.
+        En la investigación conductual con roedores, la práctica estándar para
+        validar un sistema automatizado es comparar su clasificación contra la
+        anotación manual de analistas entrenados y exigir que la concordancia
+        alcance o supere el nivel de acuerdo típico entre dos evaluadores humanos
+        \cite{slattery2012,della_valle2025,nandi2021_dbscorer}. Ese nivel de
+        acuerdo entre humanos oscila entre el 80 y el 90\,\% en la codificación
+        de conductas del FST, dependiendo de la experiencia del evaluador y de
+        la nitidez del video \cite{slattery2012,della_valle2025}. El Dr.\ César
+        Augusto Sandino Reyes López declaró en la entrevista de levantamiento que
+        la variabilidad aceptada en su laboratorio es del 85\,\%, valor que se
+        ubica en ese rango y que es consistente con los umbrales reportados en
+        sistemas automatizados comparables \cite{nandi2021_dbscorer,meng2024_dsaan}.
+        El F1 por clase se evaluará sobre el conjunto de prueba de la fase de
+        validación en TT2.
 
   \item \textbf{Duración mínima de episodio: 3~segundos.}
         Criterio declarado por el investigador colaborador en la entrevista de
@@ -511,33 +529,29 @@ RN-10 & El sistema rechaza cualquier archivo que no sea \texttt{.mp4} antes de
         intentar subirlo al servidor. La validación de formato ocurre en el cliente.
       & Evita consumir recursos con archivos incompatibles. Ver RF-08, RF-10. \\
 \hline
-RN-11 & La detección de cilindros requiere una confianza mínima de 0.70. Si no se
-        alcanza ese umbral, el pipeline se detiene y genera un reporte de
-        diagnóstico descargable automáticamente. El umbral de 0.70 es un valor
-        provisional obtenido de las pruebas preliminares realizadas con los videos
-        del laboratorio (véase la sección~\ref{sec:fact_tecnologica}); no se
-        deriva de \cite{stadler2024_yolov8}, cuyo contexto corresponde a detección
-        de objetos en general y no a la detección específica de cilindros en el
-        FST. Este valor se ajustará durante la fase de validación en TT2 (véase la
-        justificación de umbrales en la sección~\ref{sec:umbrales}).
+RN-11 & Si la confianza de detección de los cuatro cilindros no alcanza $0.70$,
+        el pipeline se detiene y el sistema genera automáticamente un reporte de
+        diagnóstico descargable que indica el motivo del fallo. Los videos que
+        superen ese umbral continúan el análisis de forma normal.
       & Evita que el sistema produzca resultados incorrectos sin advertir al
-        usuario. Ver RF-14, RF-16. \\
+        investigador. Véase la justificación del valor en la
+        sección~\ref{sec:umbrales}. Ver RF-14, RF-16. \\
 \hline
 RN-12 & La comparación Día~1 vs.\ Día~2 solo se genera si ambos videos del mismo
         experimento fueron procesados exitosamente.
       & No tiene sentido comparar con datos incompletos. Ver RF-20. \\
 \hline
-RN-13 & Si durante la fase de validación el clasificador no alcanza
-        el F1 objetivo distinguiendo las tres conductas por separado,
-        el nado activo y el escalamiento se reportan juntos como
-        \textit{conducta activa}. El reporte generado indica
-        explícitamente qué nivel de clasificación se aplicó, de modo
-        que el investigador sepa interpretar los resultados en
-        consecuencia.
+RN-13 & Si el clasificador no alcanza F1 $\geq 85$\,\% distinguiendo
+        las tres conductas por separado, el nado activo y el escalamiento
+        se reportan juntos como \textit{conducta activa}. El reporte
+        generado indica explícitamente qué nivel de clasificación se
+        aplicó, de modo que el investigador pueda interpretar los
+        resultados en consecuencia.
       & Contemplado en el alcance (cap.~1) y en el riesgo R-08.
         Complementa RN-11 para el caso en que el pipeline completa
-        la detección pero el clasificador no alcanza la precisión
-        objetivo. Ver RF-17, RF-18. \\
+        la detección pero el clasificador no alcanza el F1 objetivo.
+        Véase la justificación del valor en la sección~\ref{sec:umbrales}.
+        Ver RF-17, RF-18. \\
 \hline
 
 \end{longtable}
