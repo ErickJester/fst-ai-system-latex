@@ -160,8 +160,8 @@ RF-17 & Análisis conductual
         activo, inmovilidad o escalamiento \cite{armario2021}. El buceo se clasifica
         como nado activo. Las conductas son mutuamente excluyentes (ver RN-07).
       & Alta & Sistema \\
-\hline
-RF-30 & Análisis conductual
+      \hline
+RF-18 & Análisis conductual
       & El sistema debe contabilizar una conducta como episodio válido únicamente si
         se mantiene de forma continua durante al menos 3~segundos consecutivos. Las
         conductas con duración inferior a ese umbral deben ignorarse. Este criterio
@@ -170,23 +170,23 @@ RF-30 & Análisis conductual
 \hline
 
 % ── Resultados ─────────────────────────────────────────────
-RF-18 & Resultados
+RF-19 & Resultados
       & La pantalla de resultados debe mostrar el tiempo total en segundos y el
         porcentaje de cada conducta por rata y por sesión, en una tabla
         descargable.
       & Alta & Investigador \\
 \hline
-RF-19 & Resultados
+RF-20 & Resultados
       & El sistema debe ofrecer un desglose de conductas por minuto para cada rata.
       & Media & Investigador \\
 \hline
-RF-20 & Resultados
+RF-21 & Resultados
       & Cuando ambos videos del mismo experimento estén procesados, el sistema debe
         mostrar una comparación Día~1 vs.\ Día~2 con barras de distribución por
         rata.
       & Alta & Investigador \\
 \hline
-RF-21 & Resultados
+RF-22 & Resultados
       & El investigador debe poder descargar los datos de resultados en formato CSV
         y XLSX desde la pantalla de resultados y desde el dashboard. El archivo debe
         contener las columnas: \texttt{Tiempo (min:seg)}, \texttt{Nado},
@@ -197,13 +197,13 @@ RF-21 & Resultados
 \hline
 
 % ── Dashboard / gestión de experimentos ──────────────────
-RF-22 & Dashboard
+RF-23 & Dashboard
       & El dashboard debe mostrar la lista de experimentos del investigador activo
         con nombre, fecha, tratamiento, sesión, estado (en proceso, completado, error)
         y accesos directos a resultados y descarga.
       & Alta & Investigador \\
 \hline
-RF-23 & Dashboard
+RF-24 & Dashboard
       & El sistema debe mostrar un aviso visible cuando un video está a menos de
         7~días de ser eliminado automáticamente, indicando el nombre del experimento
         y la fecha de vencimiento exacta. El período de 7~días da tiempo suficiente
@@ -214,18 +214,18 @@ RF-23 & Dashboard
         omisiones.
       & Media & Sistema \\
 \hline
-RF-24 & Dashboard
+RF-25 & Dashboard
       & El sistema debe borrar automáticamente los archivos de video 30~días después
         de que el análisis termine exitosamente, notificando al investigador con un
         aviso en la interfaz antes de que ocurra (ver RN-05).
       & Media & Sistema \\
 \hline
-RF-25 & Dashboard
+RF-26 & Dashboard
       & Los resultados y reportes deben conservarse indefinidamente, aunque el video
         original ya haya sido borrado.
       & Alta & Sistema \\
 \hline
-RF-26 & Dashboard
+RF-27 & Dashboard
       & El investigador debe poder eliminar un experimento desde el dashboard. La
         acción es permanente e irreversible y requiere confirmación explícita (ver
         RN-09).
@@ -233,20 +233,20 @@ RF-26 & Dashboard
 \hline
 
 % ── Administración ─────────────────────────────────────────
-RF-27 & Administración
+RF-28 & Administración
       & El Administrador debe poder ver la lista de todos los usuarios con correo,
         rol, estado (activo/inactivo), último acceso y número de experimentos. La
         lista es filtrable por rol y estado.
       & Media & Admin \\
 \hline
-RF-28 & Administración
+RF-29 & Administración
       & El Administrador debe poder monitorear el estado del sistema: porcentaje de
         uso del disco, espacio disponible en GB, tamaño de la cola de procesamiento,
         número de análisis activos y ETA estimado. El sistema alerta cuando el disco
         supera el 80\,\% de uso.
       & Baja & Admin \\
 \hline
-RF-29 & Administración
+RF-30 & Administración
       & El Administrador debe poder ver y gestionar los experimentos de cualquier
         investigador (ver RN-08).
       & Media & Admin \\
@@ -706,75 +706,89 @@ Docker + Docker Compose \cite{merkel2014}
 
 La identificación de riesgos sigue el modelo de la norma ISO~31000 \cite{iso31000}, que
 define el riesgo como la combinación entre la probabilidad de un evento y su impacto.
+Los riesgos se clasifican con un semáforo de tres niveles y se ordenan de mayor a
+menor criticidad: \textcolor{red!70!black}{\textbf{alto}} (intervención inmediata),
+\textcolor{orange!80!black}{\textbf{medio}} (monitoreo continuo) y
+\textcolor{green!55!black}{\textbf{bajo}} (seguimiento periódico).
 Para cada riesgo se documenta una acción concreta de mitigación.
 
-\begin{longtable}{|>{\bfseries}p{0.9cm}|p{3.4cm}|p{1.3cm}|p{1.7cm}|p{1.1cm}|p{4.1cm}|}
+\begin{longtable}{|>{\bfseries}p{0.9cm}|p{2.0cm}|p{4.5cm}|p{5.9cm}|}
 \caption{Matriz de riesgos del proyecto.
 \label{tab:riesgos}}\\
 \hline
-\textbf{ID} & \textbf{Descripción} & \textbf{Prob.} & \textbf{Impacto} & \textbf{Nivel} & \textbf{Mitigación} \\
+\textbf{ID} & \textbf{Nivel} & \textbf{Descripción} & \textbf{Mitigación} \\
 \hline
 \endfirsthead
 \hline
-\textbf{ID} & \textbf{Descripción} & \textbf{Prob.} & \textbf{Impacto} & \textbf{Nivel} & \textbf{Mitigación} \\
+\textbf{ID} & \textbf{Nivel} & \textbf{Descripción} & \textbf{Mitigación} \\
 \hline
 \endhead
 \hline
 \endfoot
 
-R-01 & Videos con reflejos, iluminación variable o ratas de pelaje claro que hacen
-      fallar el pipeline (confianza de detección $< 0.70$, ver RN-11).
-    & Alta & Alto & Alto
-    & Definir requisitos mínimos de calidad de video con el laboratorio. El sistema
-      aplica corrección CLAHE (\textit{Contrast Limited Adaptive Histogram
-      Equalization}) \cite{bradski2000} como primer intento automático de mejora
-      de contraste antes de abortar el pipeline; si después de CLAHE la confianza
-      sigue por debajo de 0.70, se genera el reporte de diagnóstico (ver RN-11). \\
+% ---- NIVEL ALTO (rojo) ----
+R-01 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
+     & Videos con reflejos, iluminación variable o especímenes de pelaje claro que
+       hacen fallar el pipeline (confianza de detección $< 0.70$, ver RN-11).
+     & Definir con el laboratorio los requisitos mínimos de calidad de video.
+       El sistema aplica corrección CLAHE (\textit{Contrast Limited Adaptive
+       Histogram Equalization}) \cite{bradski2000} como primer intento automático
+       de mejora de contraste; si la confianza sigue por debajo de 0.70 tras CLAHE,
+       se genera el reporte de diagnóstico (ver RN-11). \\
 \hline
-R-02 & El dataset de cuadros etiquetados no alcanza para entrenar un clasificador
-      con F1 objetivo.
-    & Alta & Alto & Alto
-    & Ampliar el dataset anotando más cuadros con BORIS. Usar data augmentation.
-      Si escalamiento no se distingue con precisión, reportarlo junto con nado
-      como ``conducta activa'' (ver alcance, cap.~1). \\
+R-02 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
+     & El dataset de cuadros etiquetados no alcanza para entrenar un clasificador
+       con el F1 objetivo.
+     & Ampliar el dataset anotando más cuadros con BORIS
+       (\textit{Behavioral Observation Research Interactive Software}) y aplicar
+       \textit{data augmentation}. Si el escalamiento no se distingue del nado
+       con la precisión objetivo, ambas conductas se reportan juntas como
+       ``conducta activa'' (ver alcance, cap.~1). \\
 \hline
-R-03 & El laboratorio no proporciona los registros conductuales en el tiempo
-      necesario para el entrenamiento y validación del clasificador.
-    & Media & Alto & Medio
-    & Acordar un calendario de entrega de registros con el laboratorio al inicio
-      de la fase de implementación y preparar los materiales de anotación con
-      anticipación para aprovechar cada sesión con el Dr.\ Sandino. \\
+
+% ---- NIVEL MEDIO (amarillo) ----
+R-03 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
+     & El laboratorio no proporciona los registros conductuales en el tiempo
+       necesario para el entrenamiento y validación del clasificador.
+     & Acordar un calendario de entrega de registros con el laboratorio al inicio
+       de la fase de implementación y preparar los materiales de anotación con
+       anticipación para aprovechar cada sesión con el Dr.\ Sandino. \\
 \hline
-R-04 & El tiempo de análisis de un video de 5~min supera lo que el laboratorio
-      puede asumir en su flujo de trabajo.
-    & Media & Medio & Medio
-    & Medir tiempos por etapa del pipeline. Evaluar reducción de resolución o
-      uso de GPU. El umbral aceptable se define con el laboratorio durante la
-      fase de pruebas (ver RNF-02). \\
+R-04 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
+     & El tiempo de análisis de un video de 5~min supera lo que el laboratorio
+       puede asumir en su flujo de trabajo.
+     & Medir tiempos por etapa del pipeline. Evaluar reducción de resolución o
+       uso de GPU. El umbral aceptable de tiempo se define con el laboratorio
+       durante la fase de pruebas (ver RNF-02). \\
 \hline
-R-05 & La integración del módulo de IA con el backend via cola asíncrona resulta
-      más compleja de lo esperado.
-    & Media & Medio & Medio
-    & Definir contratos de API al inicio de la fase de implementación y hacer
-      una prueba de integración de extremo a extremo antes de agregar más
-      funcionalidad. \\
+R-05 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
+     & La integración del módulo de visión por computadora con el \textit{backend}
+       vía cola asíncrona resulta más compleja de lo esperado.
+     & Definir contratos de \textit{API} al inicio de la fase de implementación
+       y ejecutar una prueba de integración de extremo a extremo antes de agregar
+       más funcionalidad. \\
 \hline
-R-06 & El disco del servidor se llena por acumulación de videos durante los 30~días
-      de retención.
-    & Baja & Medio & Bajo
-    & El sistema incluye alertas al 80\,\% de uso de disco y limpieza automática
-      al 90\,\% (ver RF-28, RNF-09). \\
+R-07 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
+     & El laboratorio solicita cambios en los requerimientos a mitad del desarrollo.
+     & Diseño modular del clasificador para incorporar clases adicionales sin
+       reescribir la arquitectura. Gestionar los cambios dentro del proceso de
+       revisión de \textit{sprint} conforme a la metodología Scrum. \\
 \hline
-R-07 & El laboratorio solicita cambios en los requerimientos a mitad del desarrollo.
-    & Baja & Alto & Medio
-    & Diseño modular del clasificador para agregar clases. Gestionar cambios
-      dentro del proceso de revisión de sprint. \\
+R-08 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
+     & El escalamiento y el nado activo se ven tan parecidos desde la vista lateral
+       que el modelo no los distingue con suficiente precisión.
+     & Usar en el entrenamiento únicamente clips inequívocos de escalamiento
+       (movimiento de patas delanteras hacia las paredes del cilindro). Si no se
+       alcanza la precisión objetivo, reportar ambas conductas juntas como
+       ``conducta activa'' (ver alcance, cap.~1). \\
 \hline
-R-08 & El escalamiento y el nado activo se ven tan parecidos desde la vista lateral
-      que el modelo no los distingue con suficiente precisión.
-    & Alta & Medio & Medio
-    & Contemplado en el alcance del cap.~1: ambas conductas se reportan juntas
-      como ``conducta activa'' si no se alcanza la precisión objetivo. \\
+
+% ---- NIVEL BAJO (verde) ----
+R-06 & \cellcolor{green!12}\textcolor{green!55!black}{\Large$\bullet$}~\textbf{Bajo}
+     & El disco del servidor se llena por acumulación de videos durante el período
+       de retención de 30~días.
+     & El sistema genera alertas al 80\,\% de uso de disco y ejecuta limpieza
+       automática al 90\,\% (ver RF-28, RNF-09). \\
 \hline
 
 \end{longtable}
