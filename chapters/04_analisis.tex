@@ -297,12 +297,12 @@ RNF-01 & Rendimiento
 \hline
 RNF-02 & Calidad del análisis
        & El tiempo de procesamiento no es el criterio prioritario para el laboratorio.
-         El criterio de calidad es el desempeño del clasificador por clase: se considera
+         El criterio de calidad es el desempeño del clasificador por conducta: se considera
          aceptable un F1 $\geq 85$\,\% por conducta. Este umbral corresponde a la
          variabilidad aceptada entre analistas humanos, declarada por el investigador
          colaborador en la entrevista de levantamiento (véase la
          justificación de umbrales en la sección~\ref{sec:umbrales}).
-       & F1 $\geq 85$\,\% por clase (nado, inmovilidad, escalamiento) sobre el
+       & F1 $\geq 85$\,\% por conducta (nado, inmovilidad, escalamiento) sobre el
          conjunto de prueba de la fase de validación (TT2). \\
 \hline
 RNF-03 & Disponibilidad
@@ -419,7 +419,7 @@ ajustarse en la fase de validación (TT2).
         ese análisis de curva precisión-\textit{recall} sobre el conjunto de
         validación real durante la fase de implementación en TT2.
 
-  \item \textbf{F1 mínimo por clase: $\geq 85$\,\%.}
+  \item \textbf{F1 mínimo por conducta: $\geq 85$\,\%.}
         En la investigación conductual con roedores, la práctica estándar para
         validar un sistema automatizado es comparar su clasificación contra la
         anotación manual de analistas entrenados y exigir que la concordancia
@@ -432,7 +432,7 @@ ajustarse en la fase de validación (TT2).
         la variabilidad aceptada en su laboratorio es del 85\,\%, valor que se
         ubica en ese rango y que es consistente con los umbrales reportados en
         sistemas automatizados comparables \cite{nandi2021_dbscorer,meng2024_dsaan}.
-        El F1 por clase se evaluará sobre el conjunto de prueba de la fase de
+        El F1 por conducta se evaluará sobre el conjunto de prueba de la fase de
         validación en TT2.
 
   \item \textbf{Duración mínima de episodio: 3~segundos.}
@@ -652,7 +652,7 @@ ResNet-18 \cite{he2016}
 ResNet-50 \cite{he2016}
     & Versión más profunda (50~capas). Mayor capacidad que ResNet-18 a costa de más
       tiempo de entrenamiento e inferencia.
-    & Se usará si ResNet-18 no alcanza el F1 objetivo en las tres clases. \\
+    & Se usará si ResNet-18 no alcanza el F1 objetivo en las tres conductas. \\
 \hline
 PyTorch \cite{paszke2019}
     & Framework de aprendizaje profundo para entrenamiento e inferencia de redes
@@ -663,7 +663,7 @@ PyTorch \cite{paszke2019}
 \hline
 scikit-learn \cite{pedregosa2011}
     & Biblioteca de ML para métricas y validación cruzada.
-    & Se usa para calcular métricas de clasificación (F1, precisión y \textit{recall} por clase) y validación cruzada. \\
+    & Se usa para calcular métricas de clasificación (F1, precisión y \textit{recall} por conducta) y validación cruzada. \\
 \hline
 BORIS \cite{friard2016}
     & Software de anotación conductual cuadro a cuadro. Exporta en formatos
