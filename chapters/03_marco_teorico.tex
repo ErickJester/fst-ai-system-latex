@@ -162,24 +162,17 @@ estable pero tarda en adaptarse.
 %Esta lógica está encapsulada en la clase
 %\texttt{WaterlineSmoother} del módulo \texttt{tracker.py}.
 
-\subsection{Trackers de correlación: CSRT y KCF}
+\subsection{Tracker de correlación: CSRT}
 
 Cuando el detector falla en un cuadro ---por oclusión parcial, reflejo, o un cuadro
 donde la rata está demasiado quieta para distinguirse del fondo--- el sistema necesita
-mantener la estimación de posición sin perder a la rata. Para eso usa trackers de
-correlación como respaldo.
+mantener la estimación de posición sin perder a la rata. Para eso usa CSRT como
+respaldo clásico.
 
 CSRT (\textit{Discriminative Correlation Filter with Channel and Spatial Reliability})
 \cite{lukezic2017} mantiene un mapa de confiabilidad espacial que pondera las regiones
-más discriminativas del objeto. Es el más preciso de los dos pero también el más lento.
-
-KCF (\textit{Kernelized Correlation Filters}) \cite{henriques2015} trabaja eficientemente
-en el espacio de características circular. Más rápido que CSRT, pero pierde a la rata
-ante cambios bruscos de apariencia: en el FST eso ocurre cuando la rata sale a escalar
-y vuelve al agua.
-
-El sistema usa CSRT como primera opción y KCF como respaldo si CSRT no está disponible.
-Si ambos fallan, la última posición conocida se congela con una confianza decreciente.
+más discriminativas del objeto. Si CSRT falla, la última posición conocida se congela
+con una confianza decreciente hasta que el detector vuelve a encontrar a la rata.
 
 \subsection{ByteTrack y el filtro de Kalman}
 
@@ -363,7 +356,7 @@ definidos en la norma ISO/IEC~25010:2023 \cite{iso25010}: \textit{functional
 correctness} (precisión de las predicciones), \textit{time behaviour} (tiempo de
 procesamiento) y \textit{usability} (facilidad de uso para el investigador).
 
-\subsection{Precisión, recall y F1 por clase}
+\subsection{Precisión, recall y F1 por conducta}
 
 Para cada conducta $c$ se calculan:
 

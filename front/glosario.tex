@@ -154,7 +154,7 @@
   \textbf{F1-score}
   & Media armónica entre precisión y recall: $F_1 = 2 \cdot \frac{P \cdot R}{P + R}$.
     Métrica balanceada que penaliza tanto los falsos positivos como los falsos
-    negativos; se reporta por clase (inmovilidad, nado activo, escalamiento)
+    negativos; se reporta por conducta (inmovilidad, nado activo, escalamiento)
     para evaluar el clasificador. \\[5pt]
 
   \textbf{Frame}
@@ -214,23 +214,11 @@
 
   % ── J ──────────────────────────────────────────────────────────────
   \textbf{JWT}
-  & (\textit{JSON Web Token}.) Estándar abierto (RFC 7519) para la transmisión
+  & (\textit{JSON Web Token}.) Estándar abierto para la transmisión
     segura de información entre partes como un objeto JSON firmado digitalmente.
     El backend emite un JWT al iniciar sesión; el frontend lo adjunta en el
     encabezado \texttt{Authorization} de cada petición subsecuente para
     autenticar al usuario. \\[5pt]
-
-  % ── K ──────────────────────────────────────────────────────────────
-  \textbf{Kappa de Cohen}
-  & Coeficiente estadístico ($\kappa$) que mide el grado de concordancia entre
-    dos evaluadores descontando el acuerdo esperado por azar. Valores $\kappa > 0.80$
-    corresponden a acuerdo casi perfecto según la escala de Landis y Koch. \\[5pt]
-
-  \textbf{KCF}
-  & (\textit{Kernelized Correlation Filter}.) Algoritmo de seguimiento basado en
-    correlación en el dominio de Fourier con kernel RBF, evaluado como alternativa
-    al CSRT durante el diseño del módulo de rastreo. El CSRT fue seleccionado
-    por su mayor precisión en presencia de oclusión parcial. \\[5pt]
 
   % ── M ──────────────────────────────────────────────────────────────
   \textbf{MAE}

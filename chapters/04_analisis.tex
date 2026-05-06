@@ -582,8 +582,8 @@ agrupan en cuatro áreas.
 
 OpenCV 4.x \cite{bradski2000}
     & Biblioteca estándar para procesamiento de imágenes y video en Python. Incluye
-      sustracción de fondo, umbralización de Otsu, morfología, contornos y los
-      trackers de correlación CSRT y KCF (respaldo clásico frente a ByteTrack).
+      sustracción de fondo, umbralización de Otsu, morfología, contornos y el
+      tracker de correlación CSRT (respaldo clásico frente a ByteTrack).
     & Es la herramienta de referencia para este tipo de trabajo y es compatible con
       YOLOv8 y PyTorch sin configuración extra.
     & No \\
@@ -609,16 +609,14 @@ ByteTrack \cite{zhang2022_bytetrack}
       durante oclusiones. No requiere descriptor de reidentificación por apariencia.
     & Tracker principal del pipeline. Con una rata por ROI no se necesita
       reidentificación, por lo que la simplicidad de ByteTrack es una ventaja sobre
-      DeepSORT. Se integra a través del modo \texttt{.track()} de Ultralytics con
-      \texttt{bytetrack.yaml}.
+      DeepSORT. 
     & Sí\textsuperscript{*} \\
 \hline
-Trackers de correlación CSRT \cite{lukezic2017} / KCF \cite{henriques2015}
-    & Trackers de correlación basados en filtros discriminativos. CSRT mantiene un
-      mapa de confiabilidad espacial (mayor precisión); KCF opera en el espacio de
-      características circular (mayor velocidad).
+Tracker de correlación CSRT \cite{lukezic2017}
+    & Tracker de correlación discriminativo que mantiene un mapa de confiabilidad
+      espacial ponderando las regiones más discriminativas del objeto.
     & Respaldo clásico para cuadros donde ByteTrack no está disponible (sin GPU o
-      sin modelo cargado). CSRT es la primera opción; KCF el segundo nivel.
+      sin modelo cargado). Si CSRT falla, se congela la última posición conocida.
     & No \\
 \hline
 

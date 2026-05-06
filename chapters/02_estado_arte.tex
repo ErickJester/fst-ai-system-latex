@@ -195,19 +195,18 @@ de anotación previo considerable. La pregunta que queda abierta es si esa inver
 inicial se justifica frente a enfoques que operan directamente sobre el recorte de la
 rata, sin necesidad de estimar la pose.
 
-\subsection{Trackers de correlación: CSRT y KCF}
+\subsection{Tracker de correlación: CSRT}
 
 Los trackers de correlación aprenden a reconocer cómo se ve el objeto que siguen y en
 cada cuadro buscan la región más parecida. Son distintos a los detectores: no necesitan
 saber qué es el objeto, solo cómo se veía en el cuadro anterior. CSRT
 (\textit{Discriminative Correlation Filter with Channel and Spatial Reliability})
-\cite{lukezic2017} es más preciso pero más lento; KCF (\textit{Kernelized Correlation
-Filters}) \cite{henriques2015} es más rápido pero menos robusto ante cambios bruscos de
-apariencia.
+\cite{lukezic2017} mantiene un mapa de confiabilidad espacial que pondera las regiones
+más discriminativas del objeto, lo que lo hace más robusto ante oclusión parcial.
 
-En el sistema propuesto, los trackers de correlación operan como respaldo clásico cuando
+En el sistema propuesto, el tracker CSRT opera como respaldo clásico cuando
 ByteTrack no está disponible: si YOLO no detecta a la rata en un cuadro y el modo track
-está desactivado, el tracker CSRT mantiene la estimación de posición hasta que el
+está desactivado, CSRT mantiene la estimación de posición hasta que el
 detector vuelve a encontrarla.
 
 \subsection{ByteTrack: asociación por detección completa}
@@ -271,10 +270,9 @@ texturas y formas generales, y eso se aprovecha directamente.
 ResNet-18 \cite{he2016} es la arquitectura candidata principal para el clasificador de
 este proyecto. Tiene 18 capas con conexiones residuales (\textit{skip connections}) que
 facilitan el entrenamiento en redes profundas al permitir que el gradiente fluya sin
-desvanecerse. Es ligera ---ocupa menos de 50~MB--- entrena rápido con datasets pequeños
+desvanecerse. Es ligera (ocupa menos de 50~MB) entrena rápido con datasets pequeños
 y tiene un buen balance entre precisión y velocidad de inferencia. Si ResNet-18 no
-alcanza el F1 objetivo en las tres clases, se prueba ResNet-50 como alternativa más
-profunda.
+alcanza el F1 objetivo en las tres conductas, se prueba ResNet-50 como alternativa más profunda.
 
 \subsection{Redes 3D para información temporal}
 
@@ -335,11 +333,11 @@ ANY-maze       & Parc. & No    & No  & No  & No  & No          & Posición, velo
 ezTrack        & Parc. & No    & No  & No  & Sí  & No          & \% movimiento \\
 DBscorer       & Sí    & No    & No  & No  & Sí  & No          & Tiempo inmóvil \\
 DSAAN          & Sí    & No    & Sí  & No  & No  & No          & Precisión 88.7\,\% \\
-3D-RCNN        & Sí    & Sí    & Sí  & No  & No  & No          & F1 por clase \\
+3D-RCNN        & Sí    & Sí    & Sí  & No  & No  & No          & F1 por conducta \\
 DeepLabCut+clf & Parc. & Parc. & Sí  & No  & Sí  & No          & $\kappa$ vs.\ experto \\
 YOLO-Behaviour & No    & ---   & Sí  & No  & Sí  & No          & Precisión, recall \\
 \hline
-\textbf{Propuesta} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{ByteTrack} & F1 por clase, tiempo \\
+\textbf{Propuesta} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{ByteTrack} & F1 por conducta, tiempo \\
 \hline
 \end{tabular}
 \end{table}
