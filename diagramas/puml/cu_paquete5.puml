@@ -1,0 +1,40 @@
+@startuml
+!pragma layout smetana
+title Plataforma Web FST\nPaquete 5 - Dashboard, notificaciones y administracion
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor White
+  BorderColor DarkSlateGray
+}
+actor "Investigador" as INV
+actor "Administrador" as ADMIN
+actor ":Worker:\n<<system>>" as WRK #LightYellow
+actor ":Sistema:\n<<system>>" as SYS #LightYellow
+rectangle "Plataforma Web FST - Paquete 5" {
+  usecase "Consultar dashboard\nlista experimentos + estado" as UC51
+  usecase "Filtrar / buscar experimentos\npor estado / fecha / tratamiento" as UC51a
+  usecase "Avisar expiracion de video\nnombre + fecha de vencimiento exacta" as UC52
+  usecase "Eliminar experimento\npermanente e irreversible" as UC53
+  usecase "Confirmar eliminacion\naccion explicita requerida" as UC53a
+  usecase "Borrar video automaticamente\n30 dias tras analisis exitoso" as UC54
+  usecase "Conservar resultados y reportes\nindefinidamente tras borrado" as UC55
+  usecase "Listar usuarios del sistema\nfiltrar por rol y estado" as UC56
+  usecase "Monitorear estado del sistema" as UC57
+  usecase "Notificar uso de disco\nsuperior al 80%" as UC57a
+  usecase "Gestionar experimentos globales\ncualquier investigador" as UC58
+}
+INV --> UC51
+INV --> UC53
+ADMIN --> UC56
+ADMIN --> UC57
+ADMIN --> UC58
+WRK --> UC54
+SYS --> UC52
+UC52 ..> UC51 : <<extend>>\n[video expira en < 7 dias]
+UC51a ..> UC51 : <<extend>>\n[aplica filtro]
+UC57a ..> UC57 : <<extend>>\n[disco > 80%]
+UC53 ..> UC53a : <<include>>
+UC54 ..> UC55 : <<include>>
+@enduml

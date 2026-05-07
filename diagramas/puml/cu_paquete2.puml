@@ -1,0 +1,32 @@
+@startuml
+!pragma layout smetana
+title Plataforma Web FST\nPaquete 2 - Gestion de experimentos y carga de video
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor White
+  BorderColor DarkSlateGray
+}
+actor "Investigador" as INV
+actor ":Sistema:\n<<system>>" as SYS #LightYellow
+rectangle "Plataforma Web FST - Paquete 2" {
+  usecase "Crear experimento" as UC21
+  usecase "Subir video FST\nDia 1 (20 min) o Dia 2 (5 min)" as UC22
+  usecase "Validar formato" as UC23
+  usecase "Validar video reproducible" as UC24
+  usecase "Encolar analisis\nautomatico tras validacion exitosa" as UC25
+  usecase "Notificar rechazo de video" as UC26
+  usecase "Consultar estado de experimento" as UC27
+}
+INV --> UC21
+INV --> UC22
+INV --> UC27
+SYS --> UC25
+SYS --> UC26
+UC22 ..> UC23 : <<include>>
+UC23 ..> UC24 : <<include>>
+UC24 ..> UC25 : <<include>>
+UC26 ..> UC24 : <<extend>>\n[no reproducible]
+UC26 ..> UC24 : <<extend>>\n[formato invalido]
+@enduml
