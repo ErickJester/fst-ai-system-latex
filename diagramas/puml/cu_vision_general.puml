@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+title Plataforma Web FST\nFigura 5.4 - Vision general del sistema
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor White
+  BorderColor DarkSlateGray
+}
+actor "Investigador" as INV
+actor "Administrador" as ADMIN
+actor ":Worker:\n<<system>>" as WRK #LightYellow
+rectangle "Plataforma Web FST" {
+  rectangle "Paquete 1\nAutenticacion y gestion de usuarios" as P1
+  rectangle "Paquete 2\nGestion de experimentos y carga de video" as P2
+  rectangle "Paquete 3\nPipeline de analisis conductual" as P3
+  rectangle "Paquete 4\nResultados y reportes" as P4
+  rectangle "Paquete 5\nDashboard, notificaciones y administracion" as P5
+}
+INV --> P1
+INV --> P2
+INV --> P3 : observa
+INV --> P4
+INV --> P5
+ADMIN --> P1
+ADMIN --> P5
+WRK --> P3 : ejecuta pipeline
+@enduml

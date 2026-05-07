@@ -1,0 +1,30 @@
+@startuml
+!pragma layout smetana
+title Plataforma Web FST\nPaquete 3 - Pipeline de analisis conductual
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor White
+  BorderColor DarkSlateGray
+}
+actor "Investigador\n(solo observa)" as INV
+actor ":Worker:\n<<system>>" as WRK #LightYellow
+rectangle "Plataforma Web FST - Paquete 3" {
+  usecase "Ejecutar pipeline de analisis\n4 etapas secuenciales" as UC30
+  usecase "Preprocesar video" as UC31
+  usecase "Detectar cilindros" as UC32
+  usecase "Rastrear especimenes" as UC33
+  usecase "Clasificar conducta\nnado activo / inmovilidad / escalamiento" as UC34
+  usecase "Monitorear progreso\nbarra % + etapa activa" as UC35
+  usecase "Reportar error de pipeline" as UC36
+}
+WRK --> UC30
+INV --> UC35
+UC30 ..> UC31 : <<include>>
+UC30 ..> UC32 : <<include>>
+UC30 ..> UC33 : <<include>>
+UC30 ..> UC34 : <<include>>
+UC36 ..> UC32 : <<extend>>\n[confianza < 0.70]
+UC36 ..> UC33 : <<extend>>\n[error de tracking]
+@enduml
