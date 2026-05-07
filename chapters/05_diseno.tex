@@ -143,25 +143,46 @@ a $224 \times 224$ píxeles, y produce tres probabilidades: nado activo
 Opera en tres niveles según la confianza de la predicción (el umbral exacto
 se definirá durante la fase de validación en TT-II):
 
+Los tres niveles operan en cascada: solo se pasa al siguiente si el anterior no
+alcanza el umbral de confianza mínimo.
+
 \begin{enumerate}
   \item \textbf{ResNet-18} preentrenada en ImageNet con \textit{transfer learning}
         \cite{he2016,pan2010}: clasificador principal. Si la confianza de la
-        predicción es suficiente, se acepta directamente.
-  \item \textbf{ResNet-50} (fallback): si ResNet-18 no alcanza la confianza
-        mínima, se consulta ResNet-50, una arquitectura más profunda con mayor
-        capacidad de discriminación para casos ambiguos.
-  \item \textbf{Heurística motion + aspect ratio}: si ambas redes quedan por
-        debajo del umbral, se aplica una regla basada en el desplazamiento entre
-        cuadros y la relación de aspecto del bounding box para distinguir
-        inmovilidad de nado.
+        predicción supera el umbral, la conducta se acepta directamente y no se
+        consultan los niveles siguientes.
+  \item \textbf{ResNet-50} (\textit{fallback} de primer nivel): si ResNet-18 no
+        alcanza la confianza mínima, se consulta ResNet-50, una arquitectura más
+        profunda con mayor capacidad de discriminación para cuadros ambiguos. Si
+        ResNet-50 supera el umbral, su predicción se acepta.
+  \item \textbf{Heurística \textit{motion} + \textit{aspect ratio}} (\textit{fallback}
+        de último recurso): si ambas redes quedan por debajo del umbral, se aplica
+        una regla geométrica que combina dos señales. El \textbf{desplazamiento}
+        (\textit{motion}) mide cuánto se movió el centro del \textit{bounding box}
+        entre el cuadro anterior y el actual: poco desplazamiento indica inmovilidad,
+        mucho desplazamiento indica nado. La \textbf{relación de aspecto}
+        (\textit{aspect ratio}) del \textit{bounding box} complementa esa señal:
+        una caja más ancha que alta corresponde al espécimen horizontal (nado),
+        una caja más alta que ancha corresponde al espécimen vertical flotando
+        (inmovilidad), y una caja alta y estrecha corresponde al espécimen erguido
+        contra la pared (escalamiento). La combinación de ambas señales permite
+        distinguir los tres estados sin necesidad de un modelo entrenado.
 \end{enumerate}
 
-Las predicciones individuales se consolidan con \textbf{voto mayoritario} en una
-ventana deslizante de un segundo, reduciendo el efecto de clasificaciones ruidosas
-en cuadros aislados. En caso de que el clasificador no alcance el F1 objetivo
-diferenciando escalamiento de nado activo, el pipeline agrupa ambas conductas en una
-categoría unificada denominada \textit{conducta activa} y lo registra en el reporte
-(ver RN-13).
+Las predicciones individuales de cada cuadro se consolidan mediante \textbf{voto
+mayoritario} en una ventana deslizante de un segundo. El objetivo es suavizar
+clasificaciones ruidosas: un espécimen que está nadando puede aparecer clasificado
+como ``inmóvil'' en dos o tres cuadros aislados por un reflejo, una oclusión breve
+o ruido en la imagen. Sin suavizado, eso generaría episodios falsos de fracciones
+de segundo. Con la ventana de un segundo, se cuentan los votos de todos los cuadros
+dentro de la ventana y la conducta con más votos se asigna como resultado de ese
+intervalo. A 30 fps, por ejemplo, si 24 cuadros clasifican nado, 4 inmovilidad y
+2 escalamiento, el resultado es nado. La granularidad de un segundo es coherente
+con la duración mínima de episodio definida en RN (ver sec.~\ref{sec:umbrales}).
+
+En caso de que el clasificador no alcance el F1 objetivo diferenciando escalamiento
+de nado activo, el pipeline agrupa ambas conductas en una categoría unificada
+denominada \textit{conducta activa} y lo registra en el reporte (ver RN-13).
 
 \subsection{Módulo 5: Resultados}
 
@@ -305,11 +326,11 @@ La Tabla~\ref{tab:api} describe los endpoints principales agrupados por recurso.
 % --- Autenticación ---
 POST   & \path{/auth/login}    & Inicia sesión; devuelve token JWT. & Público \\
 \hline
-POST   & \path{/auth/logout}   & Invalida el token activo. & Autenticado \\
+POST   & \path{/auth/logout}   & Invalida el token activo. & Autenti\-cado \\
 \hline
 POST   & \path{/auth/recover}  & Envía enlace de recuperación por correo. & Público \\
 \hline
-PATCH  & \path{/auth/password} & Cambia la contraseña del usuario autenticado. & Autenticado \\
+PATCH  & \path{/auth/password} & Cambia la contraseña del usuario autenticado. & Autenti\-cado \\
 \hline
 
 % --- Experimentos ---
@@ -598,8 +619,7 @@ tiempos por espécimen y conducta, y la descarga de reportes
 
 El diagrama de clases \cite{omg_uml,iso42010} (Figura~\ref{fig:clases}) muestra
 las entidades principales del dominio y sus relaciones desde la perspectiva del
-backend, representando la vista estructural del sistema conforme a
-ISO/IEC/IEEE~42010:2011. Las clases centrales
+backend. Las clases centrales
 son \textbf{Experimento}, \textbf{Video} y \textbf{Trabajo}: un experimento agrupa
 uno o dos videos; cada video origina un trabajo que ejecuta el pipeline. Las clases
 \textbf{Sujeto} y \textbf{Animal} separan la identidad del espécimen (definida al
@@ -611,13 +631,12 @@ La clase \textbf{ConfiguracionAnalisis} registra los hiperparámetros del pipeli
 en el momento de cada análisis, de modo que los resultados sean reproducibles aunque
 el modelo o los umbrales cambien en versiones futuras.
 
-\begin{figure}[p]
+\begin{sidewaysfigure}
 \centering
-\includegraphics[width=\textwidth, height=0.92\textheight, keepaspectratio]{figures/mermaid/clases}
-\caption{Diagrama de clases del sistema [autoría propia].}
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{diagramas/clases}
+\caption*{Diagrama de clases del sistema [autoría propia].}
 \label{fig:clases}
-\end{figure}
-
+\end{sidewaysfigure}
 % -----------------------------------------------------------
 \section{Diseño de la interfaz web}
 % -----------------------------------------------------------

@@ -319,12 +319,12 @@ revisados frente a los criterios más relevantes para el proyecto. La columna
 criterios de calidad de la ISO/IEC~25010:2023 \cite{iso25010} adoptados en este
 proyecto.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \caption{Comparativa de herramientas y trabajos relacionados con el análisis del FST.}
 \label{tab:comparativa_herramientas}
-\small
-\begin{tabular}{lccccccp{2.5cm}}
+{\setlength{\tabcolsep}{4pt}\footnotesize
+\begin{tabular}{p{2.4cm}p{1.1cm}p{1.0cm}p{0.6cm}p{0.6cm}p{1.0cm}p{1.7cm}p{3.2cm}}
 \hline
 \textbf{Sistema} & \textbf{Espec. FST} & \textbf{3 cond.} & \textbf{DL} & \textbf{Web} & \textbf{Abierto} & \textbf{Tracker MOT} & \textbf{Métricas reportadas} \\
 \hline
@@ -334,12 +334,12 @@ ezTrack        & Parc. & No    & No  & No  & Sí  & No          & \% movimiento 
 DBscorer       & Sí    & No    & No  & No  & Sí  & No          & Tiempo inmóvil \\
 DSAAN          & Sí    & No    & Sí  & No  & No  & No          & Precisión 88.7\,\% \\
 3D-RCNN        & Sí    & Sí    & Sí  & No  & No  & No          & F1 por conducta \\
-DeepLabCut+clf & Parc. & Parc. & Sí  & No  & Sí  & No          & $\kappa$ vs.\ experto \\
+DeepLabCut+clf & Parc. & Parc. & Sí  & No  & Sí  & No          & Concordancia con experto \\
 YOLO-Behaviour & No    & ---   & Sí  & No  & Sí  & No          & Precisión, recall \\
 \hline
 \textbf{Propuesta} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{ByteTrack} & F1 por conducta, tiempo \\
 \hline
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 Ningún sistema existente cubre los cinco criterios al mismo tiempo. Los comerciales no
