@@ -1,0 +1,307 @@
+% ============================================================
+%  Apéndice C — Entrevista de requerimientos con el Dr. Sandino
+%  TT 2026-B066 | ESCOM-IPN
+% ============================================================
+
+\chapter{Entrevista de requerimientos con el investigador del laboratorio}
+\label{ap:entrevista}
+
+El presente apéndice recoge la transcripción de la entrevista de requerimientos
+aplicada al Dr.\ César Augusto Sandino Reyes López, investigador del Laboratorio de
+Bioquímica Estructural (Sección de Posgrado, ENMyH-IPN). Las respuestas fundamentan los valores numéricos y las decisiones de
+diseño documentadas en el capítulo~4 (véase en particular la sección~\ref{sec:umbrales}).
+
+\bigskip
+\noindent\textbf{Entrevistado:} Dr.\ César A. Sandino R. L. \\
+\textbf{Laboratorio:} Bioquímica Estructural, Sección de Posgrado, ENMyH-IPN
+
+% -----------------------------------------------------------
+\section*{Sección 1. Acceso y usuarios del sistema}
+% -----------------------------------------------------------
+
+\textbf{P1.} ¿Quién tiene permitido subir videos y consultar resultados en el
+laboratorio? ¿Solo usted o también sus estudiantes y tesistas? ¿Preferiría que cada
+persona tuviera su propia cuenta o que compartieran una sola cuenta?
+
+\begin{quote}
+Todos los que participan en los proyectos podrían subir sus propios videos. Bastaría
+con un rol de investigador en general; no se necesitan permisos diferenciados entre
+ellos.
+\end{quote}
+
+\textbf{P14.} ¿Cuántas personas usarían el sistema al mismo tiempo? ¿Es probable que
+dos investigadores suban videos en paralelo o generalmente lo usaría una persona a la vez?
+
+\begin{quote}
+Una persona a la vez, seguramente. En estos proyectos trabajan al mismo tiempo máximo
+tres personas más el doctor, lo que da cuatro usuarios posibles, pero no de forma
+simultánea, sino en el mismo periodo de tiempo.
+\end{quote}
+
+% -----------------------------------------------------------
+\section*{Sección 2. Protocolo experimental y grabación}
+% -----------------------------------------------------------
+
+\textbf{P2.} ¿Con qué dispositivo graban los videos actualmente (celular, tableta,
+cámara fija)? ¿La cámara siempre queda en la misma posición entre sesiones o varía?
+¿Tienen algún protocolo establecido de iluminación, distancia o encuadre?
+
+\begin{quote}
+\textit{No se obtuvo respuesta registrada en la transcripción para esta pregunta.
+Pendiente de confirmar en siguiente reunión.}
+\end{quote}
+
+\textbf{P3.} ¿Los videos siempre muestran los cuatro cilindros simultáneamente, o hay
+casos con menos cilindros o encuadres distintos? ¿Hay experimentos con solo 1, 2 o 3
+especímenes por toma?
+
+\begin{quote}
+\textit{No se obtuvo respuesta registrada en la transcripción para esta pregunta.
+Pendiente de confirmar en siguiente reunión.}
+\end{quote}
+
+\textbf{P4.} ¿La duración siempre es exactamente 20 minutos el Día 1 y 5 minutos el
+Día 2, o hay variaciones? ¿Existe algún experimento con más de dos sesiones?
+
+\begin{quote}
+Sí, siempre son esas duraciones. El Día 1 de 20 minutos sirve para generar estrés en
+los especímenes; de esos 20 minutos solo se analizan los primeros 5 del grupo control
+para conocer la conducta basal. El video del Día 2 (5 minutos, grabado 24 horas
+después) es el que contiene la información del efecto de los tratamientos y es el que
+el sistema debe analizar para todos los grupos. No hay experimentos con más de dos
+sesiones.
+\end{quote}
+
+\textbf{P5.} ¿En qué formato graban actualmente los videos (MP4, MOV, AVI)? ¿Tienen
+grabaciones antiguas en otros formatos que necesitarían analizar con el sistema?
+
+\begin{quote}
+Siempre MP4. Graban con Mac y siempre guardan como MP4. Todos los videos que tienen
+acumulados son MP4.
+\end{quote}
+
+% -----------------------------------------------------------
+\section*{Sección 3. Conductas y criterios de clasificación}
+% -----------------------------------------------------------
+
+\textbf{P6.} Cuando anotan manualmente, ¿usan algún criterio de duración mínima de
+un episodio? Por ejemplo, ¿un movimiento de menos de 1 segundo cuenta como
+escalamiento o lo ignoran?
+
+\begin{quote}
+Sí, la conducta debe mantenerse alrededor de 3 a 5 segundos para contarse como
+episodio válido.
+\end{quote}
+
+\textbf{P7.} ¿Observan alguna conducta adicional en el FST además de nado,
+inmovilidad y escalamiento (sacudidas, buceos, giros)? ¿Necesitarían que el sistema
+las registre?
+
+\begin{quote}
+No, solo son tres conductas: nado activo, inmovilidad y escalamiento. El buceo podría
+ser una variante del nado y se clasificaría como tal. Es la conducta que podría costar
+un poco más de trabajo clasificar, pero se trataría como nado.
+\end{quote}
+
+\textbf{P8.} Cuando dos evaluadores anotan el mismo video, ¿en qué conducta suelen
+diferir más (escalamiento vs.\ nado, o inmovilidad vs.\ nado)? ¿Qué nivel de
+concordancia entre el sistema y el experto consideraría aceptable?
+
+\begin{quote}
+La mayor diferencia entre analistas ocurre al distinguir escalamiento y nado. Si la
+concordancia con el sistema supera el 85\,\% estamos bien, que es más o menos la
+variabilidad que hay entre analistas. El objetivo principal no es tanto la velocidad
+sino reducir la variabilidad del factor humano.
+\end{quote}
+
+% -----------------------------------------------------------
+\section*{Sección 4. Grupos experimentales}
+% -----------------------------------------------------------
+
+\textbf{PA.} ¿Cómo están estructurados los grupos experimentales? ¿Cuántos
+especímenes tiene cada grupo?
+
+\begin{quote}
+Siempre se usan entre 6 y 8 especímenes por grupo. Normalmente trabajan con mínimo
+tres grupos: (1) grupo control, al que solo se le aplica el nado forzado sin ninguna
+intervención farmacológica; (2) grupo de referencia, al que se le administra un
+antidepresivo conocido como fluoxetina o desipramina; y (3) grupo de tratamiento
+experimental, al que se le aplica la nueva molécula o intervención que se quiere
+evaluar (por ejemplo, acupuntura). Los resultados de cada conducta se comparan
+estadísticamente entre grupos, obteniendo media, desviación estándar y varianza.
+\end{quote}
+
+\textbf{PB.} ¿El grupo control recibe algún placebo o solo entra al cilindro sin
+ninguna sustancia?
+
+\begin{quote}
+Solo se mete al cilindro, 20 minutos el Día 1 y 5 minutos el Día 2, sin ningún
+tratamiento, fármaco ni placebo.
+\end{quote}
+
+% -----------------------------------------------------------
+\section*{Sección 5. Resultados, reportes y exportación}
+% -----------------------------------------------------------
+
+\textbf{P9.} ¿Qué datos necesita ver al final del análisis? ¿Solo el tiempo total por
+conducta por animal, o también el porcentaje, número de episodios y duración promedio
+de cada episodio?
+
+\begin{quote}
+Necesita: (1) el tiempo total de cada conducta por animal y por sesión; (2) el
+desglose por minuto de cada conducta, es decir, el porcentaje de nado, escalamiento e
+inmovilidad en el minuto 1, 2, 3, 4 y 5. Esto es relevante para la dinámica
+farmacológica.
+\end{quote}
+
+\textbf{P10.} El archivo CSV que genere el sistema, ¿lo abriría en Excel o lo
+importaría a algún software estadístico (SPSS, GraphPad Prism, R)? ¿Necesita alguna
+columna o estructura específica para que importe bien?
+
+\begin{quote}
+Lo abriría en Excel primero y desde ahí lo importaría a cualquier software
+estadístico. La estructura que necesitan es: una cabecera con el tiempo en segundos
+(o minutos), y columnas independientes para nado, escalamiento e inmovilidad, cada
+una con su valor en segundos.
+\end{quote}
+
+\textbf{P11.} Cuando compara Día 1 vs.\ Día 2, ¿lo hace animal por animal o como
+promedio del grupo? ¿Necesitaría comparar también entre distintos grupos de
+tratamiento dentro del mismo \textit{dashboard}?
+
+\begin{quote}
+Analizan estadísticamente por grupo: calculan media y desviación estándar de todas las
+ratas del grupo para cada conducta y luego comparan ese grupo contra los demás grupos
+de diferentes tratamientos. Normalmente son mínimo tres grupos los que se están
+evaluando al mismo tiempo.
+\end{quote}
+
+% -----------------------------------------------------------
+\section*{Sección 6. Rendimiento, infraestructura y disponibilidad}
+% -----------------------------------------------------------
+
+\textbf{P12.} ¿Cuánto tiempo les toma actualmente analizar manualmente un video de
+5 minutos con 4 especímenes? ¿Y uno de 20 minutos?
+
+\begin{quote}
+El de 20 minutos no lo analizan completo, solo los primeros 5 minutos del grupo
+control. Para un video de 5 minutos con 4 ratas, el análisis manual tarda alrededor
+de 30 minutos por rata (se repasa el video tres veces, una por conducta). Con 4 ratas,
+un solo video toma aproximadamente 2 horas en total. Además cada analista lo hace de
+forma independiente, entonces con 3 analistas se multiplica ese tiempo.
+\end{quote}
+
+\textbf{P13.} Si el sistema tardara $X$ minutos en procesar un video de 5 minutos
+(con 4 especímenes), ¿cuánto sería el máximo aceptable?
+
+\begin{quote}
+No tienen mayor problema con el tiempo que tarde el análisis. Lo que más importa es
+que haya menos variabilidad, es decir, que el factor del analista influya lo menos
+posible. Lo ideal sería que el mismo video analizado múltiples veces arroje siempre
+el mismo resultado, con una variabilidad máxima de entre el 5 y el 10\,\%.
+\end{quote}
+
+\textbf{P15.} ¿Con qué equipo cuenta el laboratorio para correr el sistema (laptop,
+PC de escritorio, servidor)? ¿Alguno tiene GPU? ¿O preferiría que corriera en la nube?
+
+\begin{quote}
+De preferencia en la nube, para que los cambios en el equipamiento impacten lo menos
+posible. Tienen un par de Mac (una más antigua y una Mac mini más reciente) y un
+servidor pequeño (clúster) pendiente de revisar sus especificaciones de tarjeta gráfica
+y procesadores. Mejor GPU, mejor rendimiento del clasificador.
+\end{quote}
+
+\textbf{P16.} ¿El sistema necesita estar disponible solo en horario laboral o también
+fuera de él (por ejemplo, para dejar un análisis largo corriendo durante la noche)?
+
+\begin{quote}
+Disponibilidad 24/7 sería ideal, para poder dejar análisis corriendo en la noche.
+\end{quote}
+
+% -----------------------------------------------------------
+\section*{Sección 7. Datos, retención y volumen}
+% -----------------------------------------------------------
+
+\textbf{P17.} ¿Cuánto tiempo necesita conservar los videos originales después del
+análisis? El sistema actualmente los borra a los 30 días. ¿Es suficiente ese plazo o
+prefiere más tiempo?
+
+\begin{quote}
+Ese plazo es suficiente, sí.
+\end{quote}
+
+\textbf{P18.} ¿Los videos y resultados son datos sensibles que requieran acceso
+restringido entre investigadores del mismo laboratorio, o es aceptable que todos los
+usuarios con cuenta puedan ver todos los experimentos?
+
+\begin{quote}
+Sería recomendable que todos los que tienen cuenta puedan ver todos los resultados de
+todos los experimentos sin restricción entre ellos.
+\end{quote}
+
+\textbf{P19.} ¿Cuántos experimentos de FST realizan aproximadamente por mes/semestre?
+¿Y cuántos videos acumulados tienen actualmente?
+
+\begin{quote}
+No hay una serie mensual programada; depende del avance de las tesis. Por semestre se
+realizan entre 3 y 4 experimentos independientes, con promedio de 4 grupos y 32 a 48
+especímenes, lo que genera alrededor de 8 videos por experimento. En total: entre 32 y
+40 videos nuevos por semestre. De videos acumulados, tienen aproximadamente 80 a 100
+videos desde hace 10--12 años, todos ya analizados manualmente, que podrían usarse para
+entrenar y probar el sistema.
+\end{quote}
+
+% -----------------------------------------------------------
+\section*{Sección 8. Preguntas adicionales derivadas de la retroalimentación}
+% -----------------------------------------------------------
+
+\textbf{PC.} ¿El sistema debe analizar el video completo de 20 minutos del Día 1 o
+solo una porción?
+
+\begin{quote}
+No es necesario analizar los 20 minutos completos. Solo se analizan los primeros
+5 minutos del grupo control del Día 1, como referencia de conducta basal (espécimen
+sin estrés previo, sin intervención). El video principal de análisis para todos los
+grupos es siempre el de 5 minutos del Día 2.
+\end{quote}
+
+\textbf{PD.} Sobre el entrenamiento del modelo: ¿recomienda usar los reportes manuales
+existentes directamente como datos de entrenamiento?
+
+\begin{quote}
+No es recomendable usar los reportes completos para entrenamiento porque el modelo
+podría sobre-entrenarse hacia esos patrones específicos. Lo ideal es entrenar con clips
+cortos donde la conducta sea inequívoca: momentos donde claramente el espécimen está
+escalando, claramente nadando o claramente inmóvil. Una vez entrenado, sí se pueden
+usar los videos ya analizados manualmente como conjunto de prueba para medir qué tan
+cerca llega el modelo (80\,\% o más de concordancia es un umbral razonable).
+\end{quote}
+
+\textbf{PE.} ¿Cuál es el nombre correcto del laboratorio colaborador para usarlo en
+toda la documentación?
+
+\begin{quote}
+Laboratorio de Bioquímica Estructural, Sección de Posgrado, Escuela Nacional de
+Medicina y Homeopatía (ENMyH-IPN). El nombre ``Laboratorio de Neurociencia
+Conductual'' que aparecía en versiones anteriores es incorrecto.
+\end{quote}
+
+\textbf{PF.} ¿Es suficiente referirse solo a ``fluoxetina'' en lugar de
+``ISRS~+~fluoxetina'' en la presentación?
+
+\begin{quote}
+Sí, es la recomendación. La fluoxetina es el antidepresivo más utilizado en la
+clínica. Con decir ``fluoxetina, que es un antidepresivo de referencia'' es suficiente.
+Usar la sigla ISRS abre líneas de pregunta sobre farmacología que no son necesarias
+para la defensa del TT.
+\end{quote}
+
+\textbf{PG.} ¿El Dr.\ Sandino tiene disponibles videos y reportes manuales para
+compartir con el equipo como material de entrenamiento?
+
+\begin{quote}
+Sí. Ya se subió al canal de Teams la presentación del año anterior con videos
+embebidos de las tres conductas. Están localizando los archivos de Excel donde los
+alumnos capturaron los análisis manuales para empatar archivo con video. Se comprometió
+a compartir esos reportes y también la guía/manual de cómo identificar las conductas.
+\end{quote}

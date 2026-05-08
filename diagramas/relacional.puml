@@ -1,0 +1,197 @@
+@startuml relacional
+' ============================================================
+'  Diagrama Relacional — Base de datos FST
+'  TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Ángel Ali · Rodríguez Verdín Sandoval Vanesa
+' ============================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam BackgroundColor White
+
+skinparam class {
+  BackgroundColor       #FAFAFA
+  BorderColor           #3A3A3A
+  BorderThickness       1
+  HeaderBackgroundColor #1B4F8A
+  HeaderFontColor       #FFFFFF
+  HeaderFontSize        11
+  HeaderFontStyle       bold
+  AttributeFontSize     9
+  AttributeFontColor    #1A1A1A
+}
+
+skinparam arrow {
+  Color     #3A3A3A
+  Thickness 1
+  FontSize  8
+  FontColor #3A3A3A
+}
+
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+'  TABLAS
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+class USUARIOS {
+  <u>id : INTEGER [PK]</u>
+  --
+  correo : VARCHAR
+  contrasena_hash : VARCHAR
+  nombre : VARCHAR
+  rol : VARCHAR
+  activo : BOOLEAN
+  debe_cambiar_contrasena : BOOLEAN
+  creado_en : DATETIME
+  ultimo_acceso : DATETIME
+}
+
+class EXPERIMENTOS {
+  <u>id : INTEGER [PK]</u>
+  --
+  id_usuario : INTEGER [FK]
+  nombre : VARCHAR
+  fecha_experimento : DATETIME
+  tratamiento : VARCHAR
+  especie : VARCHAR
+  disposicion : VARCHAR
+  notas : TEXT
+  creado_en : DATETIME
+}
+
+class SUJETOS {
+  <u>id : INTEGER [PK]</u>
+  --
+  id_experimento : INTEGER [FK]
+  indice_rata : INTEGER
+  etiqueta : VARCHAR
+}
+
+class VIDEOS {
+  <u>id : INTEGER [PK]</u>
+  --
+  id_experimento : INTEGER [FK]
+  dia : VARCHAR
+  nombre_archivo : VARCHAR
+  ruta : VARCHAR
+  duracion_s : FLOAT
+  fecha_eliminacion : DATETIME
+  creado_en : DATETIME
+}
+
+class ROIS {
+  <u>id : INTEGER [PK]</u>
+  --
+  id_video : INTEGER [FK]
+  id_sujeto : INTEGER [FK]
+  x : INTEGER
+  y : INTEGER
+  w : INTEGER
+  h : INTEGER
+}
+
+class CONFIGURACIONES_ANALISIS {
+  <u>id : INTEGER [PK]</u>
+  --
+  nombre_modelo : VARCHAR
+  hash_modelo : VARCHAR
+  version_pipeline : VARCHAR
+  umbral_confianza : FLOAT
+  segundos_omitir : FLOAT
+  umbral_inmovil : FLOAT
+  umbral_desplazamiento : FLOAT
+  umbral_std_posicion : FLOAT
+  umbral_aspecto_trepada : FLOAT
+  creado_en : DATETIME
+}
+
+class TRABAJOS {
+  <u>id : INTEGER [PK]</u>
+  --
+  id_video : INTEGER [FK]
+  id_config : INTEGER [FK]
+  estado : VARCHAR
+  etapa : VARCHAR
+  progreso_pct : INTEGER
+  error : TEXT
+  creado_en : DATETIME
+  iniciado_en : DATETIME
+  finalizado_en : DATETIME
+}
+
+class ANIMALES {
+  <u>id : INTEGER [PK]</u>
+  --
+  id_trabajo : INTEGER [FK]
+  id_sujeto : INTEGER [FK]
+}
+
+class RESULTADOS_COMPORTAMIENTO {
+  <u>id : INTEGER [PK]</u>
+  --
+  id_animal : INTEGER [FK]
+  nado_s : FLOAT
+  inmovil_s : FLOAT
+  escape_s : FLOAT
+  total_analizado_s : FLOAT
+}
+
+class COMPORTAMIENTO_POR_MINUTO {
+  <u>id : INTEGER [PK]</u>
+  --
+  id_animal : INTEGER [FK]
+  minuto : INTEGER
+  nado_s : FLOAT
+  inmovil_s : FLOAT
+  escape_s : FLOAT
+}
+
+class REPORTES {
+  <u>id : INTEGER [PK]</u>
+  --
+  id_experimento : INTEGER [FK]
+  formato : VARCHAR
+  ruta : VARCHAR
+  creado_en : DATETIME
+}
+
+class NOTIFICACIONES {
+  <u>id : INTEGER [PK]</u>
+  --
+  id_usuario : INTEGER [FK]
+  id_experimento : INTEGER [FK]
+  tipo : VARCHAR
+  mensaje : TEXT
+  leido : BOOLEAN
+  creado_en : DATETIME
+}
+
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+'  RELACIONES  (1 — 0..*)
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+USUARIOS             "1" --o "0..*" EXPERIMENTOS               : id_usuario
+USUARIOS             "1" --o "0..*" NOTIFICACIONES              : id_usuario
+
+EXPERIMENTOS         "1" --o "0..*" VIDEOS                      : id_experimento
+EXPERIMENTOS         "1" --o "0..*" SUJETOS                     : id_experimento
+EXPERIMENTOS         "1" --o "0..*" REPORTES                    : id_experimento
+EXPERIMENTOS         "1" --o "0..*" NOTIFICACIONES              : id_experimento
+
+VIDEOS               "1" --o "0..*" TRABAJOS                    : id_video
+VIDEOS               "1" --o "0..*" ROIS                        : id_video
+
+SUJETOS              "1" --o "0..*" ROIS                        : id_sujeto
+SUJETOS              "1" --o "0..*" ANIMALES                    : id_sujeto
+
+CONFIGURACIONES_ANALISIS "1" --o "0..*" TRABAJOS                : id_config
+
+TRABAJOS             "1" --o "0..*" ANIMALES                    : id_trabajo
+
+ANIMALES             "1" --o "0..*" RESULTADOS_COMPORTAMIENTO   : id_animal
+ANIMALES             "1" --o "0..*" COMPORTAMIENTO_POR_MINUTO   : id_animal
+
+@enduml
