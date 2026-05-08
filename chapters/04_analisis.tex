@@ -408,7 +408,7 @@ ajustarse en la fase de validación (TT2).
         que controla el equilibrio entre precisión y \textit{recall}: valores más
         altos aumentan la precisión pero reducen el número de detecciones válidas;
         valores más bajos capturan más objetos a costa de más falsos positivos.
-        No existe un valor universal: la metodología estándar en la literatura de
+        No existe un valor universal: la metodología estándar en estudios de
         análisis conductual automatizado consiste en trazar la curva
         precisión-\textit{recall} sobre un conjunto de validación específico del
         experimento y seleccionar el umbral que maximiza el F1 en ese dominio
@@ -591,8 +591,8 @@ OpenCV 4.x \cite{bradski2000}
 Ultralytics YOLOv8 \cite{jocher2023}
     & Detector de objetos estado del arte. Con 100--350 imágenes etiquetadas logra
       detección casi perfecta en fondos consistentes \cite{stadler2024_yolov8}.
-    & El detector de rata ya fue entrenado (\texttt{weights/rat.pt}) y su viabilidad
-      técnica está confirmada con los videos del laboratorio.
+    & Se entrenará con imágenes del laboratorio; su viabilidad técnica para
+      fondos consistentes está respaldada por estudios previos \cite{stadler2024_yolov8}.
     & Sí \\
 \hline
 Sustracción de fondo por mediana \cite{piccardi2004}
@@ -848,7 +848,7 @@ grabación reales del laboratorio: vista lateral, cuatro cilindros simultáneos,
 celular \cite{stadler2024_yolov8}. Esa prueba reduce el riesgo técnico de la etapa de
 detección antes de comprometer recursos en el desarrollo completo.
 
-Para el clasificador de conducta, la literatura reporta precisiones superiores al
+Para el clasificador de conducta, estudios previos reportan precisiones superiores al
 88\,\% con datasets de menos de 100 imágenes cuando se usa transfer learning desde
 ImageNet \cite{meng2024_dsaan}, lo que da respaldo empírico a la viabilidad de esa
 etapa con el dataset disponible.
@@ -866,84 +866,228 @@ la clase más común de problemas de compatibilidad en el despliegue \cite{merke
 
 \subsection{Factibilidad operativa}
 
-El objetivo de la factibilidad operativa es establecer si el sistema propuesto puede
-emplearse adecuadamente en el contexto académico y experimental para el que fue
-concebido. Este proyecto responde a una necesidad concreta expresada por el
-Dr.\ César Augusto Sandino Reyes López, investigador del Laboratorio de Bioquímica
-Estructural, Sección de Posgrado, de la Escuela Nacional de Medicina y Homeopatía (ENMyH-IPN), quien
-realiza experimentos de nado forzado de forma regular y actualmente analiza los videos
-de forma manual.
+La factibilidad operativa analiza si el sistema encajará en la rutina de trabajo real
+del laboratorio una vez entregado, es decir, si los usuarios lo adoptarán sin que
+represente una carga adicional sobre la que ya tienen. Tres preguntas concretas guían
+este análisis: ¿quién lo usará y qué tan familiarizado está con herramientas digitales?,
+¿cómo se integra con el flujo de trabajo actual del laboratorio?, y ¿qué pasa si algo
+falla durante un experimento?
 
-Para respaldar esta factibilidad, se realizan reuniones con el Dr.\ Sandino en las
-que se aplica un instrumento de recolección de datos ---una entrevista estructurada
-con preguntas abiertas--- orientado a obtener información concreta sobre la demanda
-del sistema, los indicadores más relevantes para el laboratorio, las condiciones reales
-de operación y los criterios de aceptación desde la perspectiva del usuario experto.
-Los resultados de esa entrevista se incorporan a este documento antes de la entrega
-final; el instrumento completo se incluye en los anexos.
+\subsubsection{Perfil del usuario y contexto de uso}
 
-Con base en las reuniones de arranque del proyecto y en el análisis del protocolo
-experimental del laboratorio (cap.~1), se pueden anticipar las siguientes ventajas
-operativas del sistema: reducción del tiempo de análisis de varias horas a minutos,
-estandarización del criterio de evaluación entre sesiones y evaluadores, generación
-automática de reportes en los formatos que ya usa el laboratorio (PDF, CSV) y
-posibilidad de comparar grupos y tratamientos desde una interfaz centralizada.
+El usuario principal es el Dr.\ César Augusto Sandino Reyes López, investigador del
+Laboratorio de Bioquímica Estructural (Sección de Posgrado, ENMyH-IPN), junto con los
+estudiantes de posgrado que participan en los experimentos. Ninguno de ellos es
+desarrollador de software, lo que impone una restricción de diseño clara: la interfaz
+debe requerir cero configuración técnica del lado del usuario. Cargar un video,
+asignar grupos y descargar el reporte deben ser las únicas acciones necesarias.
+
+El laboratorio realiza entre 3 y 5 experimentos de nado forzado (FST) por semestre,
+cada uno con entre 6 y 8 especímenes divididos en grupos (control, referencia y
+tratamiento experimental). Cada experimento genera entre 6 y 8 videos de 5~min en el
+segundo día del protocolo. El análisis de esos videos es el cuello de botella actual:
+anotarlos manualmente ocupa entre 1.5 y 2~h cada uno, lo que convierte el análisis en
+una actividad que compite con el tiempo de investigación del laboratorio.
+
+\subsubsection{Integración con el protocolo experimental}
+
+El sistema no modifica el protocolo del laboratorio; se inserta al final, cuando los
+videos ya están grabados. El investigador sube los archivos desde cualquier computadora
+con navegador ---sin instalar nada--- y el sistema los procesa de forma asíncrona
+mientras él continúa con otras tareas. Los resultados se descargan en los formatos que
+el laboratorio ya usa para sus análisis estadísticos: CSV y XLSX para datos tabulares
+y PDF para el reporte diagnóstico de calidad del video.
+
+Esta ausencia de cambio en el protocolo de grabación es una ventaja operativa
+importante: el laboratorio no necesita adaptar su metodología ni adquirir equipo nuevo.
+Los videos grabados con el teléfono o cámara actual son suficientes, siempre que el
+cilindro sea visible en su totalidad desde la vista lateral.
+
+\subsubsection{Criterios de aceptación operativa}
+
+Con base en las reuniones sostenidas con el Dr.\ Sandino durante el arranque del
+proyecto, los criterios que determinan si el sistema es operativamente aceptable son:
+
+\begin{itemize}
+  \item El tiempo de procesamiento de un video de 5~min no debe superar el tiempo
+        que tomaría anotarlo manualmente (entre 1.5 y 2~h). Cualquier resultado en
+        ese rango o por debajo ya representa una ganancia operativa.
+  \item El reporte generado debe incluir, al menos, la duración acumulada por conducta
+        (nado activo, inmovilidad y escalamiento) desglosada por minuto, de modo que
+        sea directamente comparable con la tabla que el investigador construye hoy a
+        mano.
+  \item Cuando la calidad del video impida una detección confiable (umbral de confianza
+        por debajo de 0.70 según RN-11), el sistema debe notificarlo explícitamente en
+        el reporte en lugar de entregar un resultado silencioso potencialmente erróneo.
+\end{itemize}
+
+Estos tres criterios se verificarán durante la etapa de validación en TT-II con los
+videos y el juicio experto del Dr.\ Sandino como referencia.
 
 \subsection{Factibilidad económica}
 
-El proyecto no requiere licencias de software. Todas las herramientas del stack son
-de código abierto con licencias compatibles con uso académico. El desarrollo lo realiza
-el equipo del TT sin costo adicional, y la infraestructura de despliegue usa el equipo
-del laboratorio o las computadoras del equipo de desarrollo.
+La factibilidad económica determina si el proyecto puede concluirse dentro de los
+recursos con que cuenta el equipo sin necesidad de financiamiento externo. Dado que
+todas las herramientas del \textit{stack} son de código abierto y el laboratorio ya
+cuenta con equipo de cómputo y cámara, la inversión se concentra en gastos menores
+de documentación y, de forma contingente, en servicios de cómputo en la nube durante
+la etapa de entrenamiento.
 
-\begin{longtable}{|p{5.8cm}|p{7.5cm}|}
-\caption{Análisis de costos del proyecto.
-\label{tab:costos}}\\
+\subsubsection{Costos fijos}
+
+Se consideran costos fijos aquellos que no dependen del ritmo de avance ni del número
+de iteraciones del desarrollo:
+
+\begin{longtable}{|p{6.5cm}|p{6.8cm}|}
+\caption{Costos fijos estimados.
+\label{tab:costos_fijos}}\\
 \hline
-\textbf{Concepto} & \textbf{Costo estimado} \\
+\textbf{Rubro} & \textbf{Monto aproximado (MXN)} \\
 \hline
 \endfirsthead
 \hline
-\textbf{Concepto} & \textbf{Costo estimado} \\
+\textbf{Rubro} & \textbf{Monto aproximado (MXN)} \\
 \hline
 \endhead
 \hline
 \endfoot
 
-Licencias de software (Python, Flask, React, PostgreSQL, Docker, YOLOv8, OpenCV, BORIS)
-    & \$0.00 --- todas de código abierto con licencias compatibles con uso académico. \\
+Equipo de cómputo y cámara de grabación
+    & \$0 --- el Laboratorio de Bioquímica Estructural (ENMyH-IPN) pone a disposición
+      el equipo existente. \\
 \hline
-Entrenamiento del modelo (GPU)
-    & \$0.00 --- Google Colab gratuito (hasta 12~h de GPU por sesión). \\
+Cómputo acelerado por GPU (entrenamiento del clasificador)
+    & \$0 --- se empleará Google Colab en su capa gratuita, que ofrece sesiones de
+      hasta 12~h con GPU T4. \\
 \hline
-Infraestructura de despliegue
-    & Sin costo adicional --- equipo del laboratorio o computadora del equipo de TT. \\
+Herramientas de desarrollo (Python, Flask, React, PostgreSQL, Docker, OpenCV,
+      YOLOv8, BORIS)
+    & \$0 --- distribución bajo licencias de código abierto sin costo para uso
+      académico. \\
 \hline
-Almacenamiento de videos
-    & $\approx$500~MB por experimento de 5~min en MP4. La política de eliminación
-      automática a 30~días (RN-05) evita que el espacio crezca sin control. \\
+Impresión y encuadernación del documento recepcional
+    & \$1{,}200 \\
 \hline
-\textbf{Costo total de herramientas y desarrollo} & \textbf{\$0.00} \\
+Trámites y gestiones administrativas
+    & \$400 \\
+\hline
+\textbf{Subtotal costos fijos} & \textbf{\$1{,}600} \\
 \hline
 
 \end{longtable}
 
-El proyecto no requiere financiamiento externo ni aprobaciones institucionales para
-iniciar el desarrollo.
+\subsubsection{Costos variables}
+
+Los costos variables están condicionados al avance del proyecto y solo se incurre en
+ellos si determinadas situaciones se materializan:
+
+\begin{longtable}{|p{6.5cm}|p{6.8cm}|}
+\caption{Costos variables estimados.
+\label{tab:costos_variables}}\\
+\hline
+\textbf{Rubro} & \textbf{Monto aproximado (MXN)} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Rubro} & \textbf{Monto aproximado (MXN)} \\
+\hline
+\endhead
+\hline
+\endfoot
+
+Cómputo en la nube (plan de pago en Colab, solo si el dataset supera la
+      capacidad del nivel gratuito)
+    & \$0--\$600 \\
+\hline
+Insumos de soporte audiovisual (almacenamiento externo, cables)
+    & \$600 \\
+\hline
+Formación técnica complementaria (materiales de estudio, acceso a plataformas
+      de cursos de visión por computadora)
+    & \$800 \\
+\hline
+\textbf{Subtotal costos variables} & \textbf{\$2{,}000} \\
+\hline
+
+\end{longtable}
+
+\subsubsection{Resumen y conclusión económica}
+
+\begin{longtable}{|p{6.5cm}|p{6.8cm}|}
+\caption{Estimación total de costos del proyecto.
+\label{tab:costos_total}}\\
+\hline
+\textbf{Concepto} & \textbf{Monto aproximado (MXN)} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Concepto} & \textbf{Monto aproximado (MXN)} \\
+\hline
+\endhead
+\hline
+\endfoot
+
+Costos fijos & \$1{,}600 \\
+\hline
+Costos variables & \$2{,}000 \\
+\hline
+\textbf{Costo total estimado} & \textbf{\$3{,}600} \\
+\hline
+
+\end{longtable}
+
+Con un costo total estimado de \$3{,}600~MXN, la factibilidad económica del proyecto
+queda demostrada. El laboratorio recupera esa inversión con la reducción de carga de
+trabajo: anotar manualmente un video de 5~min toma entre 1.5 y 2~h; con más de
+32~videos por semestre, eso supone más de 200~horas-persona que el sistema elimina.
+Al no requerir compra de hardware ni contratar servicios pagos de forma obligatoria,
+el prototipo puede desarrollarse con los recursos del equipo académico sin depender de
+convocatorias de financiamiento externas.
 
 \subsection{Factibilidad legal}
 
-Todas las herramientas del proyecto usan licencias de código abierto que permiten el
-uso académico sin restricciones: PSF (Python), BSD (Flask), MIT (React), PostgreSQL
-license (PostgreSQL), Apache~2.0 (Docker, OpenCV), AGPL-3.0 para uso no comercial
-(YOLOv8) y GNU GPL v3 (BORIS \cite{friard2016}).
+El marco legal del proyecto está determinado por su naturaleza académica, su uso de
+herramientas de código abierto y el contexto experimental en que operará: un laboratorio
+de farmacología preclínica que trabaja con especímenes de roedores bajo protocolos
+aprobados por el IPN.
 
-Los videos son propiedad del grupo de investigación de la ENMyH-IPN y su uso está
-respaldado por la colaboración formal entre los directores del TT y el laboratorio.
-El equipo de desarrollo no interviene en ningún experimento con ratas; eso lo hace
-el laboratorio bajo la NOM-062-ZOO-1999 \cite{nom062}. El desarrollo del sistema
-cumple con los Lineamientos de Propiedad Intelectual y Transferencia de Conocimiento
-del IPN (2023).
+\subsubsection{Privacidad y manejo de información}
+
+El sistema no registra ni procesa datos personales de seres humanos. Los únicos datos
+que almacena son coordenadas de seguimiento, duraciones de conducta y metadatos del
+experimento (grupo, fecha, tratamiento). Las credenciales de los investigadores
+registrados en la plataforma se manejan bajo las directrices de la Ley Federal de
+Protección de Datos Personales en Posesión de los Particulares (LFPDPPP), empleando
+almacenamiento cifrado y acceso autenticado con \textit{JSON Web Token} (JWT).
+
+\subsubsection{Uso ético de especímenes}
+
+Los procedimientos experimentales con ratas son realizados íntegramente por el personal
+del Laboratorio de Bioquímica Estructural de la ENMyH-IPN. El equipo de desarrollo
+recibe únicamente los archivos de video ya grabados y no participa en ningún procedimiento
+con los especímenes. El laboratorio opera en apego a la NOM-062-ZOO-1999
+\cite{nom062}, norma que define los criterios técnicos, sanitarios y éticos para el
+manejo de animales en investigación biomédica.
+
+\subsubsection{Licencias de software y propiedad del código}
+
+Cada herramienta del \textit{stack} tecnológico se distribuye bajo una licencia que
+permite su uso, modificación y distribución en contextos académicos sin costo:
+PSF (Python), BSD-3-Clause (Flask), MIT (React), PostgreSQL License (PostgreSQL),
+Apache~2.0 (Docker y OpenCV), AGPL-3.0 sin fines de lucro (YOLOv8) y GNU GPL~v3
+(BORIS \cite{friard2016}). El código fuente, los modelos entrenados y la documentación
+producidos durante el TT son obra intelectual del equipo desarrollador y quedan
+amparados por la Ley Federal del Derecho de Autor (LFDA).
+
+\subsubsection{Marco institucional del IPN}
+
+El proyecto se inscribe en el programa de Trabajo Terminal de la ESCOM-IPN y se rige
+por los Lineamientos de Propiedad Intelectual y Transferencia de Conocimiento del
+IPN (2023). Su aplicación es exclusivamente científica y educativa, sin
+aprovechamiento comercial. Los videos del protocolo FST son propiedad del grupo de
+investigación de la ENMyH-IPN; el equipo desarrollador accede a ellos en virtud de la
+colaboración académica formal establecida entre los directores del TT y el Dr.\
+César Augusto Sandino Reyes López.
 
 % -----------------------------------------------------------
 \section{Análisis de sostenibilidad}

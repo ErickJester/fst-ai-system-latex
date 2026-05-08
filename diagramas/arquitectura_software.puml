@@ -1,0 +1,87 @@
+@startuml arquitectura_software
+' ============================================================
+'  Arquitectura de software por capas — FST
+'  TT 2026-B066 | ESCOM-IPN
+' ============================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+skinparam BackgroundColor White
+skinparam ArrowColor      #2C3E50
+skinparam ArrowThickness  1.5
+skinparam ArrowFontSize   9
+skinparam ArrowFontColor  #2C3E50
+skinparam RectangleBorderThickness 2
+skinparam RectangleBorderColor     #AAAAAA
+skinparam QueueBorderColor         #AAAAAA
+skinparam DatabaseBorderColor      #AAAAAA
+skinparam FolderBorderColor        #AAAAAA
+
+top to bottom direction
+
+' ═══════════════════════════════════════════════════════════
+'  ACTOR
+' ═══════════════════════════════════════════════════════════
+
+actor "Investigador\n(navegador web)" as INV
+
+' ═══════════════════════════════════════════════════════════
+'  CAPA 1 — Presentacion
+' ═══════════════════════════════════════════════════════════
+
+rectangle "Docker: frontend" as C_FE #E3F2FD {
+  rectangle "React.js + Vite\n\nInterfaz del investigador\nFormularios de experimento\nVisualizacion de resultados\nDescarga de reportes (PDF / CSV / XLSX)" as FE #EBF5FB
+}
+
+' ═══════════════════════════════════════════════════════════
+'  CAPA 2 — Logica de negocio
+' ═══════════════════════════════════════════════════════════
+
+rectangle "Docker: backend" as C_BE #E8F8F5 {
+  rectangle "Flask + SQLAlchemy + Flask-JWT-Extended\n\nAPI REST (JSON)\nAutenticacion con JWT\nValidacion de archivos .mp4\nEncolado de tareas de analisis" as BE #F0FBF8
+}
+
+' ═══════════════════════════════════════════════════════════
+'  CAPA 3 — Procesamiento asincrono
+' ═══════════════════════════════════════════════════════════
+
+rectangle "Docker: worker" as C_WK #FEF9E7 {
+  rectangle "Pipeline de analisis conductual\n\nOpenCV       Preprocesamiento y correccion CLAHE\nYOLOv8       Deteccion de especimenes por ROI\nByteTrack    Seguimiento cuadro a cuadro\nResNet-18 / ResNet-50   Clasificador de conducta\n(PyTorch  +  Transfer Learning desde ImageNet)" as WK #FFFEF2
+}
+
+' ═══════════════════════════════════════════════════════════
+'  CAPA 4 — Datos (Redis · PostgreSQL · Archivos)
+' ═══════════════════════════════════════════════════════════
+
+rectangle "Capa de datos" as DATOS #F4F6F7 {
+
+  rectangle "Docker: redis" as C_RD #F5EEF8 {
+    queue "Redis\nCola de tareas" as RD
+  }
+
+  rectangle "Docker: db" as C_DB #EBF5FB {
+    database "PostgreSQL\n\nUSUARIOS  EXPERIMENTOS  VIDEOS\nTRABAJOS  CONFIGURACIONES_ANALISIS\nANIMALES  SUJETOS  ROIS\nRESULTADOS_COMPORTAMIENTO\nCOMPORTAMIENTO_POR_MINUTO\nREPORTES  NOTIFICACIONES" as DB
+  }
+
+  rectangle "Volumen compartido" as C_FS #EAEDED {
+    folder "Sistema de archivos local\n\nVideos .mp4 originales\nVideos anotados  _tracked.mp4\nReportes PDF / CSV / XLSX" as FS
+  }
+
+}
+
+' ═══════════════════════════════════════════════════════════
+'  RELACIONES
+' ═══════════════════════════════════════════════════════════
+
+INV  -down->  FE  : "HTTPS"
+FE   -down->  BE  : "API REST\n(JSON + JWT)"
+BE   -down->  RD  : "encola tarea\nde analisis"
+RD   -down->  WK  : "consume tarea"
+BE   -->      DB  : "lee / escribe\n(SQLAlchemy ORM)"
+WK   -->      DB  : "escribe resultados\ndel analisis"
+WK   -->      FS  : "guarda archivos\ngenerados"
+BE   -->      FS  : "lee y sirve archivos\nal frontend"
+
+@enduml
