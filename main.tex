@@ -10,23 +10,23 @@
 
 % --- Preliminares (numeración romana) ---
 \clearpage
-\pagenumbering{roman}
-\setcounter{page}{1}
+
 
 %\input{front/resumen}
 %\input{front/abstract}
 %\input{front/agradecimientos}
 
-\input{front/glosario}
 
 \tableofcontents
 \listoffigures
 \listoftables
 
-% --- Cuerpo (numeración arábiga) ---
-\clearpage
 \pagenumbering{arabic}
 \setcounter{page}{1}
+\input{front/glosario}
+
+% --- Cuerpo (numeración arábiga) ---
+\clearpage
 
 \include{chapters/01_introduccion}
 \include{chapters/02_estado_arte}
