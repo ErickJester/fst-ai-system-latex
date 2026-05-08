@@ -586,10 +586,10 @@ Los diagramas de casos de uso se construyen conforme a la especificación UML~2.
 del sistema desde la perspectiva del usuario.
 
 El sistema tiene dos actores principales: \textbf{Investigador} y
-\textbf{Administrador}. El Investigador gestiona sus experimentos y consulta
-resultados; el Administrador gestiona usuarios y monitorea el estado del sistema.
-El Administrador hereda todas las capacidades del Investigador sobre los experimentos
-de cualquier usuario (ver RN-08).
+\textbf{Administrador}. El Investigador gestiona experimentos y consulta
+resultados de cualquier investigador del laboratorio (ver RN-08); el Administrador
+gestiona usuarios y monitorea el estado del sistema. El Administrador hereda todas
+las capacidades del Investigador y además puede modificar y desactivar cuentas.
 
 Los casos de uso están organizados en cinco paquetes funcionales. La
 Figura~\ref{fig:cu_vision_general} muestra la visión general con los dos actores y
@@ -602,7 +602,7 @@ sus relaciones de alto nivel; las figuras siguientes detallan cada paquete.
 \label{fig:cu_vision_general}
 \end{figure}
 
-\subsection{Paquete 1: Autenticación y sesión}
+\subsection{Paquete 1: Autenticación y gestión de usuarios}
 
 Agrupa los flujos de acceso al sistema: inicio de sesión con correo y contraseña,
 cierre de sesión y recuperación o cambio de contraseña. El flujo es idéntico para
@@ -612,11 +612,11 @@ sistema una vez autenticados.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/cu_paquete1}
-\caption{Casos de uso — Paquete 1: Autenticación y sesión [autoría propia].}
+\caption{Casos de uso — Paquete 1: Autenticación y gestión de usuarios [autoría propia].}
 \label{fig:cu_paquete1}
 \end{figure}
 
-\subsection{Paquete 2: Gestión de experimentos}
+\subsection{Paquete 2: Gestión de experimentos y carga de video}
 
 Cubre el ciclo de vida de un experimento: registrar metadatos (nombre, fecha,
 tratamiento, número de especímenes), subir uno o dos videos en formato MP4 y
@@ -625,7 +625,7 @@ consultar el historial de experimentos del laboratorio (ver RN-08).
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/cu_paquete2}
-\caption{Casos de uso — Paquete 2: Gestión de experimentos [autoría propia].}
+\caption{Casos de uso — Paquete 2: Gestión de experimentos y carga de video [autoría propia].}
 \label{fig:cu_paquete2}
 \end{figure}
 
@@ -655,7 +655,7 @@ ambos videos están disponibles) y descarga de reportes en PDF y CSV/XLSX.
 \label{fig:cu_paquete4}
 \end{figure}
 
-\subsection{Paquete 5: Administración}
+\subsection{Paquete 5: Dashboard, notificaciones y administración}
 
 Exclusivo del Administrador: gestión de cuentas de investigadores (crear, modificar,
 desactivar), aprobación de solicitudes de registro y monitoreo del estado del sistema
@@ -664,7 +664,7 @@ desactivar), aprobación de solicitudes de registro y monitoreo del estado del s
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/cu_paquete5}
-\caption{Casos de uso — Paquete 5: Administración [autoría propia].}
+\caption{Casos de uso — Paquete 5: Dashboard, notificaciones y administración [autoría propia].}
 \label{fig:cu_paquete5}
 \end{figure}
 
@@ -705,7 +705,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -726,7 +726,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -764,7 +764,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -779,7 +779,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -817,7 +817,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -838,7 +838,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -878,7 +878,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -893,7 +893,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -931,7 +931,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -950,7 +950,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -988,7 +988,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1007,7 +1007,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1045,7 +1045,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1064,7 +1064,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1102,7 +1102,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1123,7 +1123,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1161,7 +1161,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1180,7 +1180,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1220,7 +1220,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1239,7 +1239,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1277,7 +1277,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1292,7 +1292,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1330,7 +1330,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1347,7 +1347,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1385,7 +1385,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1402,7 +1402,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1440,7 +1440,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1467,7 +1467,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1505,7 +1505,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1522,7 +1522,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1560,7 +1560,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1579,7 +1579,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1617,7 +1617,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1632,7 +1632,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1670,7 +1670,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1687,7 +1687,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1727,7 +1727,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1748,7 +1748,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1786,7 +1786,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1799,7 +1799,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1828,16 +1828,16 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa.} \\
 \hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Lista de experimentos del investigador mostrada con estados, accesos directos y avisos de expiración activos.} \\
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Lista de experimentos del laboratorio mostrada con estados, accesos directos y avisos de expiración activos.} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pantalla principal del investigador. Muestra todos sus experimentos con nombre, fecha, tratamiento, sesión, estado y accesos directos a resultados o progreso. Incluye avisos cuando algún video expira en menos de 7 días.} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pantalla principal del investigador. Muestra todos los experimentos del laboratorio con nombre, fecha, tratamiento, sesión, estado y accesos directos a resultados o progreso (ver RN-08). Incluye avisos cuando algún video expira en menos de 7 días.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Al acceder al \textit{dashboard}, el sistema recupera la lista de experimentos del investigador y muestra cualquier aviso de expiración próxima. El investigador puede filtrar la lista o acceder directamente a un experimento.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Al acceder al \textit{dashboard}, el sistema recupera la lista de experimentos del laboratorio (ver RN-08) y muestra cualquier aviso de expiración próxima. El investigador puede filtrar la lista o acceder directamente a un experimento.} \\
 \hline
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1845,7 +1845,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 1 & Investigador & Accede al \textit{dashboard} principal de la aplicación tras iniciar sesión. \\
 \hline
-2 & Sistema & Recupera la lista de experimentos del investigador activo con nombre, fecha, tratamiento, sesión y estado. \\
+2 & Sistema & Recupera la lista de experimentos del laboratorio con nombre, fecha, tratamiento, sesión y estado (ver RN-08). \\
 \hline
 3 & Sistema & Verifica si algún video expira en menos de 7 días y muestra aviso con nombre del experimento y fecha exacta de eliminación (ver RF-23). \\
 \hline
@@ -1854,7 +1854,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1894,7 +1894,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1913,7 +1913,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -1951,7 +1951,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -1970,7 +1970,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -2008,7 +2008,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{3.3cm}|p{10.0cm}|}
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
 \hline
 \multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
 \hline
@@ -2027,7 +2027,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \end{tabular}
 
 \noindent
-\begin{tabular}{|p{1.0cm}|p{13.3cm}|}
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
 \hline
 \multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
 \hline
@@ -2046,11 +2046,11 @@ Los diagramas de secuencia \cite{omg_uml} describen el flujo de mensajes entre e
 frontend, el backend y el worker para los flujos principales del sistema, mostrando
 el orden temporal de las interacciones entre componentes. Están organizados en
 cuatro grupos funcionales que corresponden a los paquetes de casos de uso: autenticación
-y sesión, administración, notificaciones, y análisis de experimentos.
+y gestión de usuarios, administración y perfil, notificaciones, y análisis de experimentos.
 
-% ---- Paquete 1: Autenticación y sesión ----
+% ---- Paquete 1: Autenticación y gestión de usuarios ----
 
-\subsection{Autenticación y sesión}
+\subsection{Autenticación y gestión de usuarios}
 
 Estos diagramas cubren el ciclo de acceso al sistema. El registro
 (Figura~\ref{fig:seq_registro}) lo inicia el Administrador, que crea la cuenta con
@@ -2091,7 +2091,7 @@ contraseña temporal.
 \label{fig:seq_cambio_pass_inv}
 \end{figure}
 
-% ---- Paquete 5: Administración ----
+% ---- Paquete 5: Dashboard, notificaciones y administración ----
 
 \subsection{Administración y perfil}
 
@@ -2136,23 +2136,33 @@ actualización.
 
 \subsection{Análisis, resultados y reportes}
 
-Estos diagramas cubren el flujo central del sistema. La carga y análisis
-(Figura~\ref{fig:seq_analisis}) muestra cómo el investigador sube el video, el
-backend encola la tarea y el worker ejecuta el pipeline de visión por computadora;
-al finalizar, notifica al backend con los resultados. La consulta de progreso
-(Figura~\ref{fig:seq_progreso}) describe el mecanismo de \textit{polling} con el
-que el frontend verifica el estado de la tarea en la cola. El manejo de error
-(Figura~\ref{fig:seq_error}) cubre el camino alternativo cuando el pipeline detecta
-baja calidad de video (confianza~$<0.70$, ver RN-11): el worker genera el reporte
-de diagnóstico PDF y lo pone disponible para descarga. Una vez completado el
-análisis, la consulta de resultados (Figura~\ref{fig:seq_resultados}) devuelve los
-tiempos por espécimen y conducta, y la descarga de reportes
-(Figura~\ref{fig:seq_reportes}) permite exportar los datos en PDF, CSV o XLSX.
+Estos diagramas cubren el flujo central del sistema. La carga de video
+(Figura~\ref{fig:seq_carga}) muestra cómo el investigador selecciona el archivo,
+el backend valida que no exista un duplicado, registra el video y encola la tarea
+de análisis. El análisis automático (Figura~\ref{fig:seq_analisis}) detalla la
+ejecución del pipeline por parte del Worker: lectura del video, procesamiento en
+el módulo de visión por computadora y almacenamiento de resultados. La consulta
+de progreso (Figura~\ref{fig:seq_progreso}) describe el mecanismo de
+\textit{polling} con el que el frontend verifica el estado de la tarea en la cola.
+El manejo de error (Figura~\ref{fig:seq_error}) cubre el camino alternativo cuando
+el pipeline detecta baja calidad de video (confianza~$<0.70$, ver RN-11): el
+worker genera el reporte de diagnóstico PDF y lo pone disponible para descarga.
+Una vez completado el análisis, la consulta de resultados
+(Figura~\ref{fig:seq_resultados}) devuelve los tiempos por espécimen y conducta,
+y la descarga de reportes (Figura~\ref{fig:seq_reportes}) permite exportar los
+datos en PDF, CSV o XLSX.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/mermaid/seq_carga}
+\caption{Secuencia: carga de video y encolado de análisis [autoría propia].}
+\label{fig:seq_carga}
+\end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/seq_analisis}
-\caption{Secuencia: carga de video y análisis automático [autoría propia].}
+\caption{Secuencia: análisis automático (ejecución del pipeline por el Worker) [autoría propia].}
 \label{fig:seq_analisis}
 \end{figure}
 
@@ -2244,10 +2254,10 @@ incorrectas muestran un mensaje de error genérico sin revelar cuál campo fall�
 
 \subsection{Dashboard del investigador}
 
-Lista de experimentos del investigador activo con nombre, fecha, tratamiento, sesión,
-estado y accesos directos a resultados y descarga. Muestra avisos cuando un video está
-a menos de 7~días de ser eliminado automáticamente (RF-23). Incluye filtros por estado
-y paginación.
+Lista de experimentos del laboratorio con nombre, fecha, tratamiento, sesión,
+estado y accesos directos a resultados y descarga (ver RN-08). Muestra avisos cuando
+un video está a menos de 7~días de ser eliminado automáticamente (RF-23). Incluye
+filtros por estado y paginación.
 
 \begin{figure}[H]
 \centering

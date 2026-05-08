@@ -85,11 +85,10 @@ RF-06 & Gestión de usuarios
       & Media & Investigador \\
 \hline
 RF-07 & Gestión de usuarios
-      & El sistema debe permitir que un investigador se registre de forma autónoma
-        proporcionando nombre, correo institucional y contraseña. La cuenta queda
-        inactiva hasta que el Administrador la apruebe explícitamente desde el panel
-        de administración. El solicitante recibe una notificación por correo al
-        momento del registro y otra cuando su cuenta es aprobada.
+      & Solo el Administrador puede crear cuentas de usuario. No existe formulario
+        público de autoregistro. El Administrador asigna nombre, correo institucional
+        y contraseña temporal; el sistema obliga al usuario a cambiarla en el primer
+        ingreso.
       & Alta & Admin \\
 \hline
 
@@ -198,9 +197,9 @@ RF-22 & Resultados
 
 % ── Dashboard / gestión de experimentos ──────────────────
 RF-23 & Dashboard
-      & El dashboard debe mostrar la lista de experimentos del investigador activo
+      & El dashboard debe mostrar la lista de todos los experimentos del laboratorio
         con nombre, fecha, tratamiento, sesión, estado (en proceso, completado, error)
-        y accesos directos a resultados y descarga.
+        y accesos directos a resultados y descarga (ver RN-08).
       & Alta & Investigador \\
 \hline
 RF-24 & Dashboard
@@ -927,11 +926,12 @@ videos y el juicio experto del Dr.\ Sandino como referencia.
 \subsection{Factibilidad económica}
 
 La factibilidad económica determina si el proyecto puede concluirse dentro de los
-recursos con que cuenta el equipo sin necesidad de financiamiento externo. Dado que
-todas las herramientas del \textit{stack} son de código abierto y el laboratorio ya
-cuenta con equipo de cómputo y cámara, la inversión se concentra en gastos menores
-de documentación y, de forma contingente, en servicios de cómputo en la nube durante
-la etapa de entrenamiento.
+recursos con que cuenta el equipo de desarrollo. El principal costo del proyecto es
+el recurso humano: dos integrantes que destinan aproximadamente 500~horas cada uno
+durante TT-I y TT-II combinados. Los demás costos corresponden a servicios de cómputo
+en la nube, documentación e insumos de soporte. Dado que las herramientas del
+\textit{stack} son de código abierto y el laboratorio ya dispone de equipo de
+grabación, no se requiere adquisición de hardware especializado.
 
 \subsubsection{Costos fijos}
 
@@ -952,34 +952,42 @@ de iteraciones del desarrollo:
 \hline
 \endfoot
 
+Recurso humano --- 2 desarrolladores $\times$ 500~h~c/u a \$40/h
+      (tarifa referencial de pasante de ingeniería)
+    & \$40{,}000 \\
+\hline
 Equipo de cómputo y cámara de grabación
     & \$0 --- el Laboratorio de Bioquímica Estructural (ENMyH-IPN) pone a disposición
       el equipo existente. \\
 \hline
-Cómputo acelerado por GPU (entrenamiento del clasificador)
-    & \$0 --- se empleará Google Colab en su capa gratuita, que ofrece sesiones de
-      hasta 12~h con GPU T4. \\
+Cómputo acelerado por GPU --- Google Colab Pro (plan anual, entrenamiento
+      del clasificador)
+    & \$3{,}300 \\
+\hline
+Conectividad e infraestructura (internet y electricidad durante el desarrollo,
+      12~meses)
+    & \$4{,}500 \\
 \hline
 Herramientas de desarrollo (Python, Flask, React, PostgreSQL, Docker, OpenCV,
       YOLOv8, BORIS)
     & \$0 --- distribución bajo licencias de código abierto sin costo para uso
       académico. \\
 \hline
-Impresión y encuadernación del documento recepcional
-    & \$1{,}200 \\
+Impresión y encuadernación de dos ejemplares del documento recepcional
+    & \$2{,}400 \\
 \hline
-Trámites y gestiones administrativas
-    & \$400 \\
+Trámites y gestiones administrativas (titulación, registro)
+    & \$800 \\
 \hline
-\textbf{Subtotal costos fijos} & \textbf{\$1{,}600} \\
+\textbf{Subtotal costos fijos} & \textbf{\$51{,}000} \\
 \hline
 
 \end{longtable}
 
 \subsubsection{Costos variables}
 
-Los costos variables están condicionados al avance del proyecto y solo se incurre en
-ellos si determinadas situaciones se materializan:
+Los costos variables están condicionados al avance del proyecto y solo se incurren si
+determinadas situaciones se materializan durante el desarrollo:
 
 \begin{longtable}{|p{6.5cm}|p{6.8cm}|}
 \caption{Costos variables estimados.
@@ -995,18 +1003,18 @@ ellos si determinadas situaciones se materializan:
 \hline
 \endfoot
 
-Cómputo en la nube (plan de pago en Colab, solo si el dataset supera la
-      capacidad del nivel gratuito)
-    & \$0--\$600 \\
+Cómputo adicional en la nube (almacenamiento ampliado en Google Drive o similar,
+      solo si el dataset de video supera la capacidad del nivel gratuito)
+    & \$0--\$1{,}500 \\
 \hline
-Insumos de soporte audiovisual (almacenamiento externo, cables)
-    & \$600 \\
+Insumos de soporte audiovisual (almacenamiento externo, adaptadores, cables)
+    & \$2{,}000 \\
 \hline
-Formación técnica complementaria (materiales de estudio, acceso a plataformas
-      de cursos de visión por computadora)
-    & \$800 \\
+Formación técnica complementaria (acceso a cursos especializados de visión por
+      computadora y despliegue con Docker)
+    & \$2{,}000 \\
 \hline
-\textbf{Subtotal costos variables} & \textbf{\$2{,}000} \\
+\textbf{Subtotal costos variables} & \textbf{\$5{,}500} \\
 \hline
 
 \end{longtable}
@@ -1027,22 +1035,24 @@ Formación técnica complementaria (materiales de estudio, acceso a plataformas
 \hline
 \endfoot
 
-Costos fijos & \$1{,}600 \\
+Costos fijos & \$51{,}000 \\
 \hline
-Costos variables & \$2{,}000 \\
+Costos variables & \$5{,}500 \\
 \hline
-\textbf{Costo total estimado} & \textbf{\$3{,}600} \\
+\textbf{Costo total estimado} & \textbf{\$56{,}500} \\
 \hline
 
 \end{longtable}
 
-Con un costo total estimado de \$3{,}600~MXN, la factibilidad económica del proyecto
-queda demostrada. El laboratorio recupera esa inversión con la reducción de carga de
-trabajo: anotar manualmente un video de 5~min toma entre 1.5 y 2~h; con más de
-32~videos por semestre, eso supone más de 200~horas-persona que el sistema elimina.
-Al no requerir compra de hardware ni contratar servicios pagos de forma obligatoria,
-el prototipo puede desarrollarse con los recursos del equipo académico sin depender de
-convocatorias de financiamiento externas.
+Con un costo total estimado de \$56{,}500~MXN, el rubro principal es el recurso
+humano (\$40{,}000), que refleja el esfuerzo real de desarrollo en un contexto
+académico. El resto de la inversión corresponde a servicios de cómputo en la nube para
+el entrenamiento del clasificador, conectividad, documentación e insumos menores. El
+retorno es inmediato para el laboratorio: anotar manualmente un video de 5~min toma
+entre 1.5 y 2~h; con más de 32~videos por semestre, el sistema elimina más de
+200~horas-persona de trabajo manual por ciclo. Al no requerir compra de hardware
+especializado ni licencias de software comercial, el proyecto es económicamente viable
+con los recursos del equipo académico.
 
 \subsection{Factibilidad legal}
 
