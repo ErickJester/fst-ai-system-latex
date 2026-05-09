@@ -250,12 +250,12 @@ trabajo, y cada trabajo analiza especímenes que producen resultados. Las entida
 \textbf{REPORTES} y \textbf{NOTIFICACIONES} se derivan también del experimento,
 y \textbf{CONFIGURACIONES} agrupa los parámetros del pipeline que usa cada trabajo.
 
-\begin{figure}[H]
+\begin{sidewaysfigure}
 \centering
-\includegraphics[width=0.72\textwidth]{figures/mermaid/entidadRelacion}
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/mermaid/entidadRelacion}
 \caption{Diagrama entidad-relación conceptual del sistema [autoría propia].}
 \label{fig:der}
-\end{figure}
+\end{sidewaysfigure}
 
 A partir del DER se derivó el esquema físico aplicando las reglas de conversión
 al modelo relacional: cada entidad se convierte en una tabla, cada relación se
@@ -264,9 +264,9 @@ implementa mediante claves foráneas, y se agregan columnas técnicas de auditor
 (\texttt{estado}, \texttt{progreso\_pct}). La Figura~\ref{fig:er} muestra el
 resultado.
 
-\begin{figure}[H]
+\begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{figures/mermaid/er2}
+\includegraphics[width=\textwidth, height=0.90\textheight, keepaspectratio]{figures/mermaid/er2}
 \caption{Esquema físico de la base de datos [autoría propia].}
 \label{fig:er}
 \end{figure}
@@ -365,6 +365,7 @@ esquema sea más fácil de mantener cuando el sistema evolucione durante TT-II.
 Las doce tablas del sistema son: \texttt{USUARIOS}, \texttt{EXPERIMENTOS},
 \texttt{VIDEOS}, \texttt{SUJETOS}, \texttt{ROIS}, \texttt{CONFIGURACIONES\_ANALISIS},
 \texttt{TRABAJOS}, \texttt{ANIMALES}, \texttt{RESULTADOS\_COMPORTAMIENTO},
+
 \texttt{COMPORTAMIENTO\_POR\_MINUTO}, \texttt{REPORTES} y \texttt{NOTIFICACIONES}.
 Las subsecciones siguientes explican cómo se aplicó cada forma normal sobre este
 conjunto.
