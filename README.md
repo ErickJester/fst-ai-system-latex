@@ -65,9 +65,23 @@ El proyecto de documentación está organizado de la siguiente manera para facil
 │   └── pdf/              #   Diagramas exportados a PDF
 ├── mockups/              # Mockups de interfaz en HTML
 ├── scripts/              # Generadores en Python (se ejecutan desde la raíz)
-├── docs/                 # Documentos de trabajo en Word y PDFs generados
+├── docs/                 # Documentos de trabajo, PDFs generados y el checklist en HTML
 └── build/                # Salida de compilación (ignorada por git)
 ```
+
+### El checklist de correcciones
+
+Existe en dos formas, con propósitos distintos:
+
+| Archivo | Para qué sirve |
+|---------|----------------|
+| `CORRECCIONES.md` | Registro versionado. Es la referencia con el detalle completo de cada ítem, y su historial queda en git junto a los cambios que lo van cerrando. |
+| `docs/correcciones.html` | Copia del código fuente de la página publicada como Artifact, donde se marca el avance. |
+
+> La página publicada **se guarda a sí misma**: al marcar una casilla republica su
+> propia versión con el estado dentro, de modo que todos ven el mismo avance.
+> Por eso `docs/correcciones.html` es solo el respaldo del código fuente y **no
+> refleja las marcas** hechas después de subirlo.
 
 > Las presentaciones `.pptx` no se versionan en este repositorio. Pesaban cerca de
 > 300 MB y se eliminaron también del historial, que pasó de 628 MB a 34 MB. Las

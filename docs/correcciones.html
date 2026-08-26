@@ -1,0 +1,782 @@
+<title>Correcciones TT 2026-B066</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+
+<style id="estilos">
+  :root {
+    --paper:   #EDF1F5;
+    --surface: #FBFCFD;
+    --sunken:  #E3E9EF;
+    --ink:     #131820;
+    --ink-2:   #3C4653;
+    --ink-3:   #6C7885;
+    --rule:    #C6D0DA;
+    --rule-2:  #DCE3EA;
+    --accent:  #B0362A;
+    --blue:    #1F4E79;
+    --ok:      #2C6A4E;
+
+    --font-body: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+    --font-ui:   "IBM Plex Sans Condensed", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+    --shadow: 0 1px 2px rgba(19, 24, 32, .06), 0 8px 24px -12px rgba(19, 24, 32, .18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:   #0E1319;
+      --surface: #161C24;
+      --sunken:  #1B222B;
+      --ink:     #E7ECF2;
+      --ink-2:   #AAB5C1;
+      --ink-3:   #78838F;
+      --rule:    #2A323D;
+      --rule-2:  #222932;
+      --accent:  #E27E6C;
+      --blue:    #7FB0DB;
+      --ok:      #6BB894;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:   #0E1319;
+    --surface: #161C24;
+    --sunken:  #1B222B;
+    --ink:     #E7ECF2;
+    --ink-2:   #AAB5C1;
+    --ink-3:   #78838F;
+    --rule:    #2A323D;
+    --rule-2:  #222932;
+    --accent:  #E27E6C;
+    --blue:    #7FB0DB;
+    --ok:      #6BB894;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0 20px 96px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 940px; margin: 0 auto; }
+
+  /* ── Bloque de título ──────────────────────────────────── */
+
+  .titleblock {
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    margin: 40px 0 0;
+    box-shadow: var(--shadow);
+  }
+
+  .tb-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 26px 28px 22px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .eyebrow {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 8px;
+  }
+
+  h1 {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: clamp(30px, 5vw, 42px);
+    line-height: 1.05;
+    letter-spacing: -.015em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .sub {
+    margin: 10px 0 0;
+    color: var(--ink-2);
+    font-size: 15px;
+    max-width: 56ch;
+  }
+
+  .dial { text-align: right; font-family: var(--font-ui); flex-shrink: 0; }
+  .dial-num {
+    font-size: 44px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -.03em;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+  .dial-num span { color: var(--ink-3); font-size: 22px; font-weight: 500; }
+  .dial-label {
+    font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-3); margin-top: 6px; font-weight: 600;
+  }
+
+  .bar {
+    height: 5px; background: var(--sunken); border: 1px solid var(--rule);
+    border-left: 0; border-right: 0; overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%; width: 0%; background: var(--ok);
+    transition: width .35s cubic-bezier(.4,0,.2,1);
+  }
+
+  .tb-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+  .tb-cell { padding: 14px 28px 16px; border-right: 1px solid var(--rule-2); }
+  .tb-cell:last-child { border-right: 0; }
+  .tb-k {
+    font-family: var(--font-ui); font-size: 10px; font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3);
+  }
+  .tb-v {
+    font-family: var(--font-mono); font-size: 14px; color: var(--ink);
+    margin-top: 3px; font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Estado de guardado ────────────────────────────────── */
+
+  .guardado {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-ui); font-size: 12.5px;
+    padding: 10px 28px; border-top: 1px solid var(--rule-2);
+    color: var(--ink-3); background: var(--sunken);
+  }
+  .punto {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--ink-3); flex-shrink: 0;
+  }
+  .guardado[data-modo="compartido"] .punto { background: var(--ok); }
+  .guardado[data-modo="guardando"] .punto { background: var(--blue); animation: latido 1s ease-in-out infinite; }
+  .guardado[data-modo="local"] .punto     { background: var(--accent); }
+  .guardado[data-modo="lectura"] .punto   { background: var(--ink-3); }
+  @keyframes latido { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
+
+  /* ── Franja de críticos ────────────────────────────────── */
+
+  .crit-strip {
+    margin: 28px 0 0;
+    border: 1px solid var(--accent);
+    background: var(--surface);
+    padding: 18px 22px 20px;
+  }
+  .crit-strip h2 {
+    font-family: var(--font-ui); font-size: 11px; font-weight: 700;
+    letter-spacing: .16em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 12px;
+  }
+  .crit-list {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    list-style: none; margin: 0; padding: 0;
+  }
+  .crit-list li {
+    font-family: var(--font-ui); font-size: 13.5px;
+    background: var(--sunken); border: 1px solid var(--rule);
+    padding: 5px 11px; color: var(--ink-2);
+  }
+  .crit-list li.hecho { opacity: .45; text-decoration: line-through; }
+  .crit-list b {
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--accent); font-weight: 600; margin-right: 7px;
+  }
+
+  /* ── Bloques ───────────────────────────────────────────── */
+
+  .block { margin: 52px 0 0; }
+
+  .block-head {
+    display: flex; align-items: baseline; gap: 14px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 8px;
+  }
+  .block-n {
+    font-family: var(--font-mono); font-size: 13px; font-weight: 600;
+    color: var(--accent); font-variant-numeric: tabular-nums;
+  }
+  .block-head h2 {
+    font-family: var(--font-ui); font-size: 23px; font-weight: 700;
+    letter-spacing: -.01em; margin: 0; flex: 1;
+  }
+  .block-count {
+    font-family: var(--font-mono); font-size: 13px; color: var(--ink-3);
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .block-count .done { color: var(--ok); font-weight: 600; }
+
+  .block-note {
+    font-style: italic; color: var(--ink-2); font-size: 15px;
+    margin: 14px 0 0; padding-left: 14px;
+    border-left: 2px solid var(--rule);
+    max-width: 68ch;
+  }
+
+  .group-label {
+    font-family: var(--font-ui); font-size: 11px; font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3);
+    margin: 32px 0 0; padding-bottom: 6px; border-bottom: 1px solid var(--rule-2);
+  }
+
+  /* ── Ítems ─────────────────────────────────────────────── */
+
+  .items { list-style: none; margin: 0; padding: 0; }
+
+  .item {
+    display: grid;
+    grid-template-columns: 30px 66px 1fr;
+    gap: 0 14px;
+    align-items: start;
+    padding: 15px 14px 15px 10px;
+    border-bottom: 1px solid var(--rule-2);
+    transition: background .15s;
+  }
+  .item:hover { background: var(--surface); }
+  .item.is-crit { box-shadow: inset 3px 0 0 var(--accent); }
+  .item.is-done { opacity: .5; }
+  .item.is-done .item-title { text-decoration: line-through; text-decoration-thickness: 1px; }
+
+  .box {
+    appearance: none; -webkit-appearance: none;
+    width: 19px; height: 19px; margin: 3px 0 0;
+    border: 1.5px solid var(--ink-3); background: var(--surface);
+    cursor: pointer; position: relative; flex-shrink: 0;
+    transition: border-color .15s, background .15s;
+  }
+  .box:hover { border-color: var(--ink); }
+  .box:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .box:checked { background: var(--ok); border-color: var(--ok); }
+  .box:checked::after {
+    content: ""; position: absolute; left: 5px; top: 1px;
+    width: 5px; height: 10px;
+    border: solid #fff; border-width: 0 2px 2px 0;
+    transform: rotate(43deg);
+  }
+  .box:disabled { cursor: not-allowed; opacity: .55; }
+
+  .item-id {
+    font-family: var(--font-mono); font-size: 12.5px; font-weight: 600;
+    color: var(--accent); padding-top: 5px; letter-spacing: -.02em;
+  }
+  .item-body { min-width: 0; }
+  .item-title {
+    font-family: var(--font-ui); font-size: 16.5px; font-weight: 600;
+    line-height: 1.35; margin: 2px 0 0; color: var(--ink);
+  }
+  .item-desc {
+    font-size: 14.5px; color: var(--ink-2); margin: 6px 0 0;
+    max-width: 72ch; line-height: 1.55;
+  }
+  .item-desc code, .ref {
+    font-family: var(--font-mono); font-size: 12.5px;
+    background: var(--sunken); padding: 1px 5px;
+    border: 1px solid var(--rule-2); color: var(--ink);
+    word-break: break-word;
+  }
+  .item-desc em { color: var(--ink); font-style: italic; }
+  .item-quote {
+    font-style: italic; color: var(--ink-2); font-size: 14.5px;
+    border-left: 2px solid var(--accent); padding-left: 12px;
+    margin: 9px 0 0; max-width: 66ch;
+  }
+  .refs { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* ── Tabla de orden de ataque ──────────────────────────── */
+
+  .table-scroll { overflow-x: auto; margin-top: 18px; border: 1px solid var(--rule); }
+  table { border-collapse: collapse; width: 100%; background: var(--surface); font-size: 14.5px; }
+  th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--rule-2); vertical-align: top; }
+  th {
+    font-family: var(--font-ui); font-size: 10.5px; font-weight: 700;
+    letter-spacing: .13em; text-transform: uppercase; color: var(--ink-3);
+    background: var(--sunken); white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child {
+    font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+    color: var(--accent); font-weight: 600; width: 40px;
+  }
+  td b { font-family: var(--font-ui); font-weight: 600; }
+  .td-ids { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-3); white-space: nowrap; }
+
+  footer {
+    margin-top: 56px; padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    font-size: 13.5px; color: var(--ink-3);
+    display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between;
+  }
+  .reset {
+    font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase;
+    background: none; border: 1px solid var(--rule); color: var(--ink-3);
+    padding: 6px 12px; cursor: pointer;
+  }
+  .reset:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .reset:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .reset:disabled { opacity: .4; cursor: not-allowed; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+
+  @media (max-width: 620px) {
+    .item { grid-template-columns: 26px 1fr; gap: 0 11px; }
+    .item-id { grid-column: 2; padding-top: 0; }
+    .item-body { grid-column: 2; }
+    .tb-top { padding: 22px 20px 18px; }
+    .tb-cell { padding: 12px 20px 14px; }
+    .guardado { padding: 10px 20px; }
+  }
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script id="estado-json" type="application/json">{"DOC-11":true}</script>
+
+<script id="logica">
+// ── Datos de la auditoría ────────────────────────────────────────────────
+const BLOCKS = [
+  {
+    n: "01", title: "Base de datos",
+    note: "El esquema declara normalización en el texto pero no la implementa en el modelo. No hay una sola restricción de dominio, longitud, nulidad, unicidad ni borrado en las 12 tablas.",
+    groups: [
+      { label: "Valores abiertos — dominio cerrado guardado como VARCHAR libre", items: [
+        { id: "BD-01", t: "USUARIOS.rol → catálogo ROLES", d: "También resuelve la nota manuscrita: «el tema de roles, es recomendable tener tabla»." },
+        { id: "BD-02", t: "EXPERIMENTOS.tratamiento → catálogo TRATAMIENTOS", d: "Control / fluoxetina / experimental, con dosis y vía. Nota manuscrita: «la situación actual por el medicamento denota que no está en 3FN»." },
+        { id: "BD-03", t: "EXPERIMENTOS.especie → catálogo ESPECIES", d: "" },
+        { id: "BD-04", t: "EXPERIMENTOS.disposicion → CHECK o catálogo", d: "Valores reales: 2×2, 1×4, etc." },
+        { id: "BD-05", t: "VIDEOS.dia → CHECK de dos valores", d: "Solo puede ser <code>dia1</code> o <code>dia2</code>." },
+        { id: "BD-06", t: "TRABAJOS.estado → CHECK o catálogo", d: "Cuatro valores: en_cola, procesando, completado, error." },
+        { id: "BD-07", t: "TRABAJOS.etapa → catálogo ETAPAS_PIPELINE", d: "Las cuatro etapas del pipeline." },
+        { id: "BD-08", t: "REPORTES.formato → CHECK", d: "PDF, CSV, XLSX." },
+        { id: "BD-09", t: "NOTIFICACIONES.tipo → catálogo TIPOS_NOTIFICACION", d: "" },
+        { id: "BD-10", t: "CONFIGURACIONES_ANALISIS.nombre_modelo y version_pipeline → catálogo MODELOS", d: "Conecta con la nota manuscrita «sobre ResNet-18: sacarlo como tabla»." }
+      ]},
+      { label: "Restricciones ausentes en las 12 tablas", items: [
+        { id: "BD-11", t: "Declarar longitud en todos los VARCHAR", d: "Hoy ninguno de los 18 campos de texto tiene <code>(n)</code>." },
+        { id: "BD-12", t: "Declarar NOT NULL y los cuatro UNIQUE que faltan", d: "<code>USUARIOS.correo</code> · <code>SUJETOS (id_experimento, indice_rata)</code> · <code>VIDEOS (id_experimento, dia)</code> · <code>ROIS (id_video, id_sujeto)</code>." },
+        { id: "BD-13", t: "Declarar ON DELETE en las 14 claves foráneas", d: "RN-09 dice que borrar un experimento elimina video, resultados y reportes, así que hace falta <code>CASCADE</code> explícito." }
+      ]},
+      { label: "Problema estructural", items: [
+        { id: "BD-14", crit: true, t: "Las conductas están como columnas fijas",
+          d: "<code>RESULTADOS_COMPORTAMIENTO</code> y <code>COMPORTAMIENTO_POR_MINUTO</code> guardan <code>nado_s</code>, <code>inmovil_s</code> y <code>escape_s</code> como columnas. Analizar otro paradigma exigiría <code>ALTER TABLE</code>. <em>Solución:</em> catálogo <code>CONDUCTAS</code> más una fila por espécimen y conducta. Esto además hace la 1FN real y no solo declarativa.",
+          q: "«El módulo de clasificación debe poder reconfigurarse para soportar paradigmas conductuales distintos al FST sin modificar la plataforma web.» — RNF-11, contradicho por el diseño actual",
+          refs: ["chapters/04_analisis.tex:368"] }
+      ]},
+      { label: "Cardinalidades que contradicen las reglas de negocio", items: [
+        { id: "BD-15", t: "EXPERIMENTOS → VIDEOS debe ser 0..2, no 0..*", d: "RN-03: «Un experimento tiene como máximo dos videos»." },
+        { id: "BD-16", t: "ANIMALES → RESULTADOS_COMPORTAMIENTO debe ser 1..1", d: "Hay un resultado por espécimen y por trabajo. El desglose temporal ya vive en <code>COMPORTAMIENTO_POR_MINUTO</code>." }
+      ]},
+      { label: "Terminología y justificación", items: [
+        { id: "BD-17", t: "Renombrar la tabla ANIMALES a ESPECIMENES_ANALIZADOS",
+          d: "Quedan 12 ocurrencias de «animal» en el capítulo 5. <em>Verificado:</em> la rama <code>claridad-documento</code> sí está mergeada; la corrección de terminología simplemente nunca alcanzó los nombres de entidad de base de datos.",
+          refs: ["05_diseno.tex:245, 301, 318, 326, 330, 367, 415, 477, 479, 2207"] },
+        { id: "BD-18", t: "Justificar por qué progreso_pct se almacena en vez de calcularse",
+          d: "El frontend hace <em>polling</em> y necesita leerlo; llega a valor fijo 100 % al terminar. Hoy no está justificado, y ese silencio invita la pregunta del jurado." }
+      ]}
+    ]
+  },
+  {
+    n: "02", title: "Casos de uso y diagramas",
+    note: "Los cinco paquetes comparten tres fallas estructurales, y hay cuatro contradicciones directas entre los diagramas y las fichas de caso de uso.",
+    groups: [
+      { label: "Fallas que atraviesan los cinco paquetes", items: [
+        { id: "CU-01", t: "El «Sistema» aparece como actor de sí mismo",
+          d: "Un actor es externo al sistema por definición. Eliminar <code>:Sistema:</code> como actor en P2 y P5.", refs: ["cu_paquete2.puml:12, 25-26"] },
+        { id: "CU-02", t: "Descomposición funcional disfrazada de casos de uso",
+          d: "No entregan valor observable a un actor: <code>UC31–UC34</code> (las cuatro etapas del pipeline, que pertenecen a un diagrama de actividad), <code>UC23</code> y <code>UC24</code> (validaciones internas), <code>UC14</code> (verificar rol y permisos) y <code>UC55</code> (conservar resultados, que es la regla RN-06)." },
+        { id: "CU-03", t: "Catálogo de actores inconsistente",
+          d: "La vista general usa INV/ADMIN/WRK, P1 inventa «Usuario autenticado», P2 y P5 inventan «Sistema». Cuatro juegos de actores en cinco diagramas." }
+      ]},
+      { label: "Paquete 1 — Autenticación", items: [
+        { id: "CU-04", t: "El actor padre es imposible",
+          d: "<code>UA &lt;|-- INV</code> con UA = «Usuario <em>autenticado</em>», y luego <code>UA → UC11 (Iniciar sesión)</code>. Nadie puede estar autenticado antes de autenticarse. El padre debe ser «Usuario», a secas.", refs: ["cu_paquete1.puml:11-14, 26"] },
+        { id: "CU-05", t: "«Crear cuenta» no incluye «Cambiar contraseña al primer acceso»",
+          d: "Otro actor y otro momento. Es una postcondición, no un <code>&lt;&lt;include&gt;&gt;</code>." },
+        { id: "CU-06", t: "«Desactivar cuenta» no puede ser include",
+          d: "Desactivar es opcional; <code>&lt;&lt;include&gt;&gt;</code> significa «siempre». Debe ser <code>&lt;&lt;extend&gt;&gt;</code> o un caso de uso independiente." },
+        { id: "CU-07", t: "Falta el caso de uso de recuperación de contraseña",
+          d: "RF-03 lo exige y existe <code>POST /auth/recover</code> en la tabla de la API.", refs: ["05_diseno.tex:533"] },
+        { id: "CU-08", t: "El Administrador no tiene ruta a «Actualizar perfil propio»", d: "" },
+        { id: "CU-09", t: "Los nombres de caso de uso llevan detalle de implementación",
+          d: "«Iniciar sesión · correo @ipn.mx + contraseña» debe ser verbo más objeto." }
+      ]},
+      { label: "Paquete 2 — Experimentos y carga de video", items: [
+        { id: "CU-10", t: "Cadena de includes con causalidad falsa",
+          d: "<code>UC22 → UC23 → UC24 → UC25</code> afirma que «Validar formato» <em>incluye</em> «Encolar análisis». Validar un formato no encola nada: los tres deben colgar directamente de <code>UC22</code>.", refs: ["cu_paquete2.puml:27-29"] },
+        { id: "CU-11", t: "Relación duplicada entre el mismo par de casos de uso",
+          d: "<code>UC26 → UC24 &lt;&lt;extend&gt;&gt;</code> aparece dos veces con condiciones distintas, y «formato inválido» pertenece a <code>UC23</code>." }
+      ]},
+      { label: "Paquete 4 — Resultados y reportes", items: [
+        { id: "CU-12", t: "Solo existe «Descargar reporte PDF»", d: "RF-21 exige también CSV y XLSX." },
+        { id: "CU-13", t: "RF-31 no tiene ningún caso de uso", d: "Los estadísticos de grupo (media, desviación estándar y varianza) no están cubiertos." }
+      ]},
+      { label: "Paquete 5 — Dashboard y administración", items: [
+        { id: "CU-14", crit: true, t: "Cualquier investigador puede borrar los datos de otro",
+          d: "<code>INV → UC53 (Eliminar experimento, permanente e irreversible)</code>. Combinado con RN-08 (todos ven todo), cualquiera de los cuatro usuarios puede destruir irreversiblemente el trabajo de otro, y deja sin sentido el rol de Administrador.", refs: ["cu_paquete5.puml:29"] },
+        { id: "CU-15", t: "La alerta de disco está invertida",
+          d: "<code>UC57a (Notificar disco &gt; 80 %) → UC57 (Monitorear estado) &lt;&lt;extend&gt;&gt;</code> hace que la alerta solo exista si el admin está mirando el panel." },
+        { id: "CU-16", t: "Actor equivocado en el borrado automático",
+          d: "<code>WRK → UC54</code>, pero RNF-08 dice que el borrado a los 30 días es un <em>cron job</em>, no el worker de análisis." }
+      ]},
+      { label: "Contradicciones entre diagramas y fichas — las más peligrosas", items: [
+        { id: "CU-17", crit: true, t: "En la vista general el Administrador no puede subir videos ni ver resultados",
+          d: "Solo se conecta a P1 y P5. Pero RF-04 dice «mismos permisos que el Investigador, más…» y las fichas CU-05 y CU-08 listan «Inv. / Admin.» como actores. El jurado tiene ambas cosas enfrente.", refs: ["cu_vision_general.puml:26-27"] },
+        { id: "CU-18", t: "CU-05 «incluye» CU-07, pero monitorear es opcional",
+          d: "<code>&lt;&lt;include&gt;&gt;</code> significa que siempre ocurre, y RF-15 dice que el análisis continúa aunque el investigador cierre la pestaña. Debe ser <code>&lt;&lt;extend&gt;&gt;</code>.", refs: ["05_diseno.tex:1152"] },
+        { id: "CU-19", t: "La dirección de la extensión de CU-08 está al revés",
+          d: "Dice «Extendido por CU-07», pero es CU-08 (descargar diagnóstico) el que extiende a CU-07, porque solo ocurre si hubo error.", refs: ["05_diseno.tex:1496"] },
+        { id: "CU-20", t: "RF-04 contra RF-07",
+          d: "RF-04 le da al Admin «la capacidad de aprobar registros»; RF-07 dice que «no existe formulario público de autoregistro». Si nadie se registra, no hay nada que aprobar." },
+        { id: "CU-21", t: "Tres casos de uso para el mismo objetivo",
+          d: "<code>UC27</code> (P2), <code>UC35</code> (P3) y <code>UC51</code> (P5) responden todos a «ver en qué va mi experimento»." }
+      ]},
+      { label: "Pendiente externo", items: [
+        { id: "CU-22", t: "Agendar revisión con la Dra. Martha Rosa Cordero López",
+          d: "Punto 6 de la retroalimentación de la simulación de defensa. Llevar los diagramas ya corregidos." }
+      ]}
+    ]
+  },
+  {
+    n: "03", title: "Escala del sistema",
+    note: "La evidencia está en el propio Anexo C. La entrevista al Dr. Sandino dice que bastaría un solo rol de investigador «sin permisos diferenciados», y que el uso sería «una persona a la vez, cuatro usuarios posibles, pero no de forma simultánea». El documento construye encima de eso un sistema de escala empresarial.",
+    groups: [
+      { label: "", items: [
+        { id: "ESC-01", t: "Eliminar el escalado horizontal de workers",
+          d: "«Permite escalar el número de workers de forma independiente si el volumen de análisis aumenta».", refs: ["05_diseno.tex:87"] },
+        { id: "ESC-02", t: "RNF-01: quitar el percentil",
+          d: "«≤ 3 s en el 95 % de las solicitudes» no tiene sentido con un usuario a la vez. Reformular como tiempo de respuesta objetivo simple." },
+        { id: "ESC-03", t: "RNF-03: quitar el SLA de disponibilidad",
+          d: "«24/7, ≥ 95 % de disponibilidad mensual medida» exige infraestructura de monitoreo que no se va a construir." },
+        { id: "ESC-04", t: "RNF-09: quitar el borrado automático al 90 % de disco",
+          d: "Automatización destructiva excesiva para un laboratorio de 32 a 40 videos por semestre. Cambiar a bloqueo de cargas más aviso al administrador." },
+        { id: "ESC-05", t: "RNF-13: reformular la prueba de concurrencia",
+          d: "Probar con cuatro sesiones concurrentes contradice el «no de forma simultánea» de la entrevista." },
+        { id: "ESC-06", t: "Reformular la cola de tareas",
+          d: "Con RN-04 (secuencial), lo que existe es un ejecutor de un trabajo a la vez en segundo plano, no una «cola de tareas asíncrona escalable». Es más honesto y más defendible." },
+        { id: "ESC-07", t: "Revisar la justificación de dos roles más RBAC",
+          d: "La entrevista pidió un solo rol. Si se conservan dos, justificar por qué se decidió ir más allá de lo solicitado." }
+      ]},
+      { label: "Lo que no se toca", items: [
+        { id: "—", nobox: true, t: "La separación worker/backend se queda tal cual",
+          d: "Está bien justificada: un video de 20 minutos bloquearía Flask. Lo que sobra es el lenguaje de escalado alrededor, no la decisión.", refs: ["05_diseno.tex:26-32"] }
+      ]}
+    ]
+  },
+  {
+    n: "04", title: "Faltantes del documento",
+    note: "Dos promesas colgadas que el jurado va a buscar, la nomenclatura formal que piden las notas manuscritas, y la higiene del repositorio.",
+    groups: [
+      { label: "Promesas colgadas", items: [
+        { id: "DOC-01", crit: true, t: "El diccionario de datos no existe",
+          d: "El capítulo 5 promete que «el diccionario de datos completo con tipos, restricciones y descripciones de cada columna se incluye en los anexos». Pero <code>apendice_A.tex</code> (195 bytes) y <code>apendice_B.tex</code> (213 bytes) son stubs vacíos y están comentados en <code>main.tex</code>.", refs: ["05_diseno.tex:343", "main.tex:53-54"] },
+        { id: "DOC-02", crit: true, t: "No hay capítulo de conclusiones",
+          d: "<code>main.tex</code> compila solo los capítulos 1 a 5 más el anexo C. Para TT-I es un hueco grave, y es el punto 14 de la retroalimentación de defensa: alinear una conclusión con cada objetivo específico." }
+      ]},
+      { label: "Nomenclatura formal ausente", items: [
+        { id: "DOC-03", t: "Declarar el nivel de madurez de Richardson",
+          d: "La API está en nivel 2 de facto: recursos, verbos HTTP y códigos de estado, sin HATEOAS. Nunca se declara." },
+        { id: "DOC-04", t: "Definir SPA",
+          d: "El frontend es React con Vite, o sea una <em>Single Page Application</em>, pero el término no aparece nunca en el documento." },
+        { id: "DOC-05", t: "Clasificar el patrón cliente-servidor",
+          d: "Hoy solo dice «cliente-servidor de tres capas». Falta decir de qué tipo: tres capas o N capas, cliente ligero.", refs: ["05_diseno.tex:38"] },
+        { id: "DOC-06", t: "Nombrar RBAC y separar autenticación de autorización",
+          d: "Autenticación es verificar identidad al iniciar sesión; autorización es qué puede hacer cada rol una vez dentro. El mecanismo está descrito pero los términos no." },
+        { id: "DOC-07", t: "Declarar la semántica de PATCH",
+          d: "Solo para actualizaciones parciales. El uso actual es correcto; falta explicitarlo." },
+        { id: "DOC-08", t: "Definir cada norma citada en su primera aparición",
+          d: "ISO/IEC 25010, ISO/IEC/IEEE 12207, ISO 31000, ISO 14064-1, ISO/IEC 19501, ISO/IEC/IEEE 42010 y NOM-062 aparecen como número sin explicar qué son." }
+      ]},
+      { label: "Sin justificar en el texto", items: [
+        { id: "DOC-09", t: "Convertir la cascada de clasificadores en tabla comparativa",
+          d: "ResNet-18 → ResNet-50 → heurística, hoy como lista. Columnas: nivel, modelo o regla, condición de activación y ventaja.", refs: ["05_diseno.tex:169-179"] },
+        { id: "DOC-10", t: "Justificar el almacenamiento de progreso_pct", d: "Es el mismo trabajo que BD-18: marcar los dos juntos." }
+      ]},
+      { label: "Higiene del repositorio", items: [
+        { id: "DOC-11", t: "Mergear la rama claridad-documento",
+          d: "<em>Resuelto:</em> se verificó que <code>claridad-documento</code> ya estaba contenida en <code>main</code>, y <code>modificaciones</code> se integró por <em>fast-forward</em>. El trabajo real que quedaba pendiente es BD-17, no un merge." },
+        { id: "DOC-12", t: "Uniformar la bibliografía",
+          d: "El PDF local usa «y col.» y otra compilación usa «et al.». Fijar la configuración de <code>biblatex</code> para que sea estable." }
+      ]}
+    ]
+  }
+];
+
+const CRITICOS = [
+  ["BD-14", "Conductas como columnas fijas"],
+  ["CU-14", "Agujero de autorización"],
+  ["CU-17", "El Admin no puede subir videos"],
+  ["DOC-01", "Diccionario de datos inexistente"],
+  ["DOC-02", "Sin capítulo de conclusiones"]
+];
+
+const PASOS = [
+  ["1", "Rediseñar el esquema relacional", "BD-01…18", "Es la base de todo lo demás. Toca <code>relacional.puml</code>, la sección de normalización del cap. 5 y el diagrama de clases."],
+  ["2", "Reconstruir los casos de uso", "CU-01…21", "Depende de los nombres de estado y etapa que fije el paso 1."],
+  ["3", "Bajar la escala del sistema", "ESC-01…07", "Independiente. Se apoya en citar la entrevista del Anexo C."],
+  ["4", "Escribir el diccionario de datos", "DOC-01", "Solo se puede escribir con el esquema ya cerrado."],
+  ["5", "Escribir las conclusiones de TT-I", "DOC-02", "Una conclusión por cada objetivo específico."],
+  ["6", "Nomenclatura formal", "DOC-03…08", "Lo más rápido. Se puede intercalar en cualquier momento."],
+  ["7", "Revisión con la Dra. Cordero", "CU-22", "Después del paso 2, con los diagramas ya corregidos."]
+];
+
+const TOTAL = 59;
+const CLAVE_LOCAL = "tt-b066-correcciones";
+
+// ── Estado ───────────────────────────────────────────────────────────────
+let estado = {};
+try {
+  estado = JSON.parse(document.getElementById("estado-json").textContent) || {};
+} catch (e) { estado = {}; }
+
+let artefacto = null;      // namespace de la capacidad, si está disponible
+let soloLectura = false;
+let pendiente = null;      // timer de publicación agrupada
+let publicando = false;
+
+// ── Render ───────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function hechos() {
+  return Object.keys(estado).filter(function (k) { return estado[k]; }).length;
+}
+
+function render() {
+  const app = document.getElementById("app");
+  const n = hechos();
+
+  let html = '';
+
+  // Bloque de título
+  html += '<div class="titleblock"><div class="tb-top"><div>' +
+    '<p class="eyebrow">Auditoría técnica · Documento escrito</p>' +
+    '<h1>Correcciones TT 2026-B066</h1>' +
+    '<p class="sub">Base de datos, casos de uso, escala del sistema y huecos del documento. ' +
+    'Cada ítem lleva evidencia con archivo y línea.</p></div>' +
+    '<div class="dial"><div class="dial-num">' + n + '<span>/' + TOTAL + '</span></div>' +
+    '<div class="dial-label">Ítems cerrados</div></div></div>' +
+    '<div class="bar"><div class="bar-fill" style="width:' + (n / TOTAL * 100) + '%"></div></div>' +
+    '<div class="tb-meta">' +
+    '<div class="tb-cell"><div class="tb-k">Rama</div><div class="tb-v">main</div></div>' +
+    '<div class="tb-cell"><div class="tb-k">Auditoría</div><div class="tb-v">2026-08-25</div></div>' +
+    '<div class="tb-cell"><div class="tb-k">Bloques</div><div class="tb-v">4</div></div>' +
+    '<div class="tb-cell"><div class="tb-k">Críticos</div><div class="tb-v">5</div></div>' +
+    '</div><div class="guardado" id="guardado"><span class="punto"></span><span id="guardado-txt">Preparando…</span></div></div>';
+
+  // Críticos
+  html += '<div class="crit-strip"><h2>Prioridad máxima</h2><ul class="crit-list">';
+  CRITICOS.forEach(function (c) {
+    html += '<li class="' + (estado[c[0]] ? "hecho" : "") + '"><b>' + c[0] + '</b>' + esc(c[1]) + '</li>';
+  });
+  html += '</ul></div>';
+
+  // Bloques
+  BLOCKS.forEach(function (b) {
+    const total = b.groups.reduce(function (a, g) {
+      return a + g.items.filter(function (i) { return !i.nobox; }).length;
+    }, 0);
+    const done = b.groups.reduce(function (a, g) {
+      return a + g.items.filter(function (i) { return !i.nobox && estado[i.id]; }).length;
+    }, 0);
+
+    html += '<section class="block"><div class="block-head">' +
+      '<span class="block-n">' + b.n + '</span><h2>' + esc(b.title) + '</h2>' +
+      '<span class="block-count"><span class="' + (done === total ? "done" : "") + '">' + done +
+      '</span> / ' + total + '</span></div>';
+
+    if (b.note) html += '<p class="block-note">' + esc(b.note) + '</p>';
+
+    b.groups.forEach(function (g) {
+      if (g.label) html += '<p class="group-label">' + esc(g.label) + '</p>';
+      html += '<ul class="items">';
+      g.items.forEach(function (it) {
+        const marcado = !!estado[it.id];
+        html += '<li class="item' + (it.crit ? " is-crit" : "") + (marcado ? " is-done" : "") + '">';
+        html += it.nobox
+          ? '<span></span>'
+          : '<input type="checkbox" class="box" data-id="' + it.id + '"' +
+            (marcado ? " checked" : "") + (soloLectura ? " disabled" : "") +
+            ' aria-label="Marcar ' + it.id + ' como hecho">';
+        html += '<span class="item-id">' + it.id + '</span><div class="item-body">' +
+          '<p class="item-title">' + it.t + '</p>';
+        if (it.d) html += '<p class="item-desc">' + it.d + '</p>';
+        if (it.q) html += '<p class="item-quote">' + esc(it.q) + '</p>';
+        if (it.refs && it.refs.length) {
+          html += '<div class="refs">' + it.refs.map(function (r) {
+            return '<code class="ref">' + esc(r) + '</code>';
+          }).join("") + '</div>';
+        }
+        html += '</div></li>';
+      });
+      html += '</ul>';
+    });
+    html += '</section>';
+  });
+
+  // Orden de ataque
+  html += '<div class="block"><div class="block-head"><span class="block-n">→</span>' +
+    '<h2>Orden de ataque</h2></div>' +
+    '<p class="block-note">Los bloques 1 y 2 están acoplados: si el esquema cambia, las fichas ' +
+    'de caso de uso que mencionan estado y etapa también cambian.</p>' +
+    '<div class="table-scroll"><table><thead><tr><th>#</th><th>Paso</th><th>Ítems</th>' +
+    '<th>Por qué en este orden</th></tr></thead><tbody>';
+  PASOS.forEach(function (p) {
+    html += '<tr><td>' + p[0] + '</td><td><b>' + esc(p[1]) + '</b></td>' +
+      '<td class="td-ids">' + esc(p[2]) + '</td><td>' + p[3] + '</td></tr>';
+  });
+  html += '</tbody></table></div></div>';
+
+  html += '<footer><span>El archivo <code class="ref">CORRECCIONES.md</code> del repositorio ' +
+    'conserva el detalle completo de cada ítem.</span>' +
+    '<button class="reset" id="reset"' + (soloLectura ? " disabled" : "") + '>Limpiar marcas</button></footer>';
+
+  app.innerHTML = html;
+  pintarEstadoGuardado();
+}
+
+function pintarEstadoGuardado() {
+  const caja = document.getElementById("guardado");
+  const txt = document.getElementById("guardado-txt");
+  if (!caja || !txt) return;
+  let modo, mensaje;
+  if (publicando) {
+    modo = "guardando"; mensaje = "Guardando…";
+  } else if (soloLectura) {
+    modo = "lectura"; mensaje = "Vista de solo lectura: puedes consultar el avance, pero no marcar ítems.";
+  } else if (artefacto) {
+    modo = "compartido"; mensaje = "El avance se guarda en la página: quien la abra ve las mismas marcas.";
+  } else {
+    modo = "local"; mensaje = "Guardado solo en este navegador (la página no pudo conectar con el servidor).";
+  }
+  caja.dataset.modo = modo;
+  txt.textContent = mensaje;
+}
+
+// ── Documento completo para republicar ───────────────────────────────────
+function documento() {
+  const css = document.getElementById("estilos").textContent;
+  const js = document.getElementById("logica").textContent;
+  return '<!doctype html>\n<html lang="es">\n<head>\n<meta charset="utf-8">\n' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+    '<title>Correcciones TT 2026-B066</title>\n' +
+    '<link rel="preconnect" href="https://fonts.googleapis.com">\n' +
+    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n' +
+    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&display=swap">\n' +
+    '<style id="estilos">' + css + '<\/style>\n</head>\n<body>\n' +
+    '<div class="wrap" id="app"></div>\n' +
+    '<script id="estado-json" type="application/json">' + JSON.stringify(estado) + '<\/script>\n' +
+    '<script id="logica">' + js + '<\/script>\n</body>\n</html>';
+}
+
+// ── Guardado ─────────────────────────────────────────────────────────────
+function guardarLocal() {
+  try { localStorage.setItem(CLAVE_LOCAL, JSON.stringify(estado)); } catch (e) {}
+}
+
+function programarPublicacion() {
+  if (!artefacto || soloLectura) { guardarLocal(); return; }
+  if (pendiente) clearTimeout(pendiente);
+  // Agrupa clics seguidos en una sola publicación
+  pendiente = setTimeout(publicar, 1400);
+}
+
+async function publicar() {
+  pendiente = null;
+  if (!artefacto || soloLectura || publicando) return;
+  publicando = true;
+  pintarEstadoGuardado();
+  try {
+    await artefacto.publish(documento());
+    // La vista se recarga sola con la versión nueva.
+  } catch (err) {
+    const code = err && err.code;
+    if (code === "conflict") {
+      // Alguien publicó primero; la vista ya se está recargando. No reintentar.
+      return;
+    }
+    if (code === "not_writer" || code === "not_granted" || code === "not_declared" ||
+        code === "consent_required" || code === "capability_disabled" ||
+        code === "capability_removed") {
+      soloLectura = true;
+      guardarLocal();
+      render();
+      return;
+    }
+    // rate_limited y upstream_error: conserva el avance localmente y avisa
+    guardarLocal();
+    publicando = false;
+    const txt = document.getElementById("guardado-txt");
+    const caja = document.getElementById("guardado");
+    if (txt && caja) {
+      caja.dataset.modo = "local";
+      txt.textContent = "No se pudo guardar en la página; el avance quedó en este navegador.";
+    }
+    return;
+  }
+  publicando = false;
+  pintarEstadoGuardado();
+}
+
+// ── Interacción ──────────────────────────────────────────────────────────
+document.addEventListener("change", function (e) {
+  if (!e.target.classList || !e.target.classList.contains("box")) return;
+  if (soloLectura) { e.target.checked = !e.target.checked; return; }
+  const id = e.target.dataset.id;
+  if (e.target.checked) estado[id] = true; else delete estado[id];
+  render();
+  programarPublicacion();
+});
+
+document.addEventListener("click", function (e) {
+  if (!e.target || e.target.id !== "reset") return;
+  if (soloLectura) return;
+  estado = {};
+  try { localStorage.removeItem(CLAVE_LOCAL); } catch (err) {}
+  render();
+  programarPublicacion();
+});
+
+// ── Arranque ─────────────────────────────────────────────────────────────
+render();
+
+(async function () {
+  if (!window.claude || !window.claude.use) { pintarEstadoGuardado(); return; }
+  try {
+    artefacto = await window.claude.use("artifact");
+  } catch (e) {
+    artefacto = null;
+  }
+  if (!artefacto) {
+    // Sin capacidad: recupera lo que hubiera en este navegador
+    try {
+      const local = JSON.parse(localStorage.getItem(CLAVE_LOCAL) || "null");
+      if (local && Object.keys(local).length) { estado = local; }
+    } catch (e) {}
+    render();
+    return;
+  }
+  pintarEstadoGuardado();
+})();
+</script>
