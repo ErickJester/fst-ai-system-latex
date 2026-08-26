@@ -1,5 +1,5 @@
 """
-Genera build/casos_uso.pdf: los seis diagramas de casos de uso del capítulo 5,
+Genera docs/casos_uso.pdf: los seis diagramas de casos de uso del capítulo 5,
 cada uno en una página completa en orientación horizontal (carta apaisada).
 
 Alternativa a casos_uso.tex para cuando no hay una distribución de TeX instalada.
@@ -16,7 +16,7 @@ from pdf_diagramas import construir
 
 REPO = Path(__file__).resolve().parent.parent
 FIGS = REPO / "figures" / "mermaid"
-OUT = REPO / "build" / "casos_uso.pdf"
+OUT = REPO / "docs" / "casos_uso.pdf"
 
 DIAGRAMAS = [
     (FIGS / "cu_vision_general.png", "Visión general del sistema"),

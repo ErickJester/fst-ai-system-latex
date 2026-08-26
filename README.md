@@ -65,7 +65,7 @@ El proyecto de documentación está organizado de la siguiente manera para facil
 │   └── pdf/              #   Diagramas exportados a PDF
 ├── mockups/              # Mockups de interfaz en HTML
 ├── scripts/              # Generadores en Python (se ejecutan desde la raíz)
-├── docs/                 # Documentos de trabajo en Word
+├── docs/                 # Documentos de trabajo en Word y PDFs generados
 └── build/                # Salida de compilación (ignorada por git)
 ```
 

@@ -1,5 +1,5 @@
 """
-Genera build/diagramas.pdf: todos los diagramas del documento EXCEPTO los de
+Genera docs/diagramas.pdf: todos los diagramas del documento EXCEPTO los de
 casos de uso, que tienen su propio PDF (ver gen_casos_uso_pdf.py).
 
 Son 19 diagramas del capítulo 5, en el mismo orden en que aparecen en el
@@ -19,7 +19,7 @@ from pdf_diagramas import construir
 REPO = Path(__file__).resolve().parent.parent
 FIGS = REPO / "figures" / "mermaid"
 DIAG = REPO / "diagramas"
-OUT = REPO / "build" / "diagramas.pdf"
+OUT = REPO / "docs" / "diagramas.pdf"
 
 # (ruta de la imagen, título). El orden sigue al del capítulo 5.
 DIAGRAMAS = [

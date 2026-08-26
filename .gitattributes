@@ -1,0 +1,11 @@
+# Binarios: nunca aplicar conversión de fin de línea (LF/CRLF).
+# core.autocrlf=true en Windows puede corromper bytes internos de estos
+# formatos si no se marcan explícitamente como binarios.
+*.pdf   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.docx  binary
+*.pptx  binary
+*.xlsx  binary
+*.svg   binary
