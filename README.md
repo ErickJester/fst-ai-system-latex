@@ -69,9 +69,10 @@ El proyecto de documentación está organizado de la siguiente manera para facil
 └── build/                # Salida de compilación (ignorada por git)
 ```
 
-> Las presentaciones `.pptx` ya no se versionan aquí: pesaban cerca de 300 MB y
-> hacían el repositorio innecesariamente lento de clonar. Las versiones anteriores
-> siguen disponibles en el historial (commit `e2f0cc4`).
+> Las presentaciones `.pptx` no se versionan en este repositorio. Pesaban cerca de
+> 300 MB y se eliminaron también del historial, que pasó de 628 MB a 34 MB. Las
+> versiones anteriores se conservan fuera del repositorio, en el respaldo local
+> del equipo. El `.gitignore` impide que vuelvan a entrar.
 
 ### Ejecutar los scripts
 
