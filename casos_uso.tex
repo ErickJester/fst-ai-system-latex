@@ -1,0 +1,82 @@
+% ============================================================
+%  Diagramas de casos de uso — documento independiente
+%  TT 2026-B066 | ESCOM-IPN
+%  Frausto Robles Ángel Ali · Rodríguez Verdín Sandoval Vanesa
+%
+%  Recopila los seis diagramas de casos de uso incluidos en el
+%  capítulo 5 del documento principal. Cada diagrama ocupa una
+%  página completa en orientación horizontal.
+%
+%  Compilar desde la raíz del repositorio:
+%      pdflatex -output-directory=build casos_uso.tex
+%  o con el script:  ./compilar.sh casos_uso
+% ============================================================
+
+\documentclass[12pt,letterpaper,landscape]{article}
+
+\usepackage[spanish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage[
+  landscape,
+  left=1.5cm, right=1.5cm,
+  top=1.6cm,  bottom=1.4cm,
+  headheight=15pt,
+  headsep=10pt,
+  footskip=18pt
+]{geometry}
+
+\usepackage{graphicx}
+\graphicspath{{figures/}{figures/mermaid/}}
+
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{azulIPN}{HTML}{2F5496}
+\definecolor{grisRegla}{HTML}{B4BCC6}
+
+% ---------- Encabezado y pie ----------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{grisRegla}\leaders\hrule height \headrulewidth\hfill}}
+\fancyhead[L]{\footnotesize\textcolor{azulIPN}{\textbf{TT 2026-B066}} \textcolor{grisRegla}{|}\ Diagramas de casos de uso}
+\fancyhead[R]{\footnotesize\textcolor{grisRegla}{ESCOM-IPN}}
+\fancyfoot[C]{\footnotesize\thepage\ / \pageref{LastPage}}
+
+% ---------- Una página por diagrama ----------
+% #1 título del diagrama   #2 archivo de imagen
+\newcommand{\paginaDiagrama}[2]{%
+  \clearpage
+  \begingroup
+  \centering
+  {\large\bfseries\textcolor{azulIPN}{#1}}\par
+  \vspace{6pt}
+  % La imagen ocupa todo el espacio disponible respetando su proporción.
+  % \dimexpr descuenta el título y su separación de la altura de texto.
+  \includegraphics[
+    width=\linewidth,
+    height=\dimexpr\textheight-2.2\baselineskip\relax,
+    keepaspectratio
+  ]{#2}\par
+  \endgroup
+}
+
+\begin{document}
+
+\paginaDiagrama{Visión general del sistema}{cu_vision_general}
+
+\paginaDiagrama{Paquete 1 --- Autenticación y gestión de usuarios}{cu_paquete1}
+
+\paginaDiagrama{Paquete 2 --- Gestión de experimentos y carga de video}{cu_paquete2}
+
+\paginaDiagrama{Paquete 3 --- Análisis conductual}{cu_paquete3}
+
+\paginaDiagrama{Paquete 4 --- Resultados y reportes}{cu_paquete4}
+
+\paginaDiagrama{Paquete 5 --- Dashboard, notificaciones y administración}{cu_paquete5}
+
+\end{document}
