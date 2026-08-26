@@ -22,8 +22,8 @@ Thumbs.db
 __pycache__/
 *.pyc
 
-# Presentacion pesada que no se versiona
-presentaciones/ESCOM_ene2025.pptx
+# Presentaciones: no se versionan en este repositorio
+*.pptx
 
 # PDF compilado y directorio de build
 build/

@@ -30,8 +30,12 @@ except ImportError:
 
 # ── Rutas ─────────────────────────────────────────────────────────────────────
 BASE   = r"C:\Users\ID634\Desktop\proyectos\latexFST\fst-ai-system-latex"
-PPTX_IN  = os.path.join(BASE, "presentaciones", "Presentacion_TT_B066_v17.pptx")
-PPTX_OUT = os.path.join(BASE, "presentaciones", "Presentacion_B066_Defensa.pptx")
+# NOTA: Presentacion_TT_B066_v17.pptx se eliminó del repositorio.
+# Para volver a ejecutar este script, recupérala del historial de git:
+#   git checkout e2f0cc4 -- presentaciones/Presentacion_TT_B066_v17.pptx
+# y colócala en docs/.
+PPTX_IN  = os.path.join(BASE, "docs", "Presentacion_TT_B066_v17.pptx")
+PPTX_OUT = os.path.join(BASE, "docs", "Presentacion_B066_Defensa.pptx")
 DIAG     = os.path.join(BASE, "diagramas")
 MERMAID  = os.path.join(BASE, "figures", "mermaid")
 

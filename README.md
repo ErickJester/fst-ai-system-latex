@@ -66,9 +66,12 @@ El proyecto de documentación está organizado de la siguiente manera para facil
 ├── mockups/              # Mockups de interfaz en HTML
 ├── scripts/              # Generadores en Python (se ejecutan desde la raíz)
 ├── docs/                 # Documentos de trabajo en Word
-├── presentaciones/       # Presentaciones .pptx y capturas de diapositivas
 └── build/                # Salida de compilación (ignorada por git)
 ```
+
+> Las presentaciones `.pptx` ya no se versionan aquí: pesaban cerca de 300 MB y
+> hacían el repositorio innecesariamente lento de clonar. Las versiones anteriores
+> siguen disponibles en el historial (commit `e2f0cc4`).
 
 ### Ejecutar los scripts
 
