@@ -8,7 +8,7 @@ from PIL import Image
 import os
 
 BASE_DIR = r"C:\Users\ID634\Desktop\proyectos\latexFST\fst-ai-system-latex\diagramas"
-OUTPUT   = r"C:\Users\ID634\Desktop\proyectos\latexFST\fst-ai-system-latex\diagramas.docx"
+OUTPUT   = r"C:\Users\ID634\Desktop\proyectos\latexFST\fst-ai-system-latex\docs\diagramas.docx"
 MARGIN   = Cm(1)
 
 # (archivo, titulo)

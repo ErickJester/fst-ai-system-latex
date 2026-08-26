@@ -46,12 +46,37 @@ El proyecto de documentación está organizado de la siguiente manera para facil
 /
 ├── main.tex              # Archivo maestro que estructura todo el documento
 ├── preamble.tex          # Configuración de paquetes, márgenes y bibliografía
-├── front/                # Portada, Resumen, Abstract, Agradecimientos
-├── chapters/             # Capítulos (Introducción, Estado del Arte, Metodología, etc.)
-├── back/                 # Apéndices y Trabajos Futuros
-├── bib/                  # Archivo de referencias bibliográficas (.bib)
-├── figures/              # Imágenes, diagramas y gráficos del documento
-└── tables/               # Tablas complejas (opcional)
+├── compilar.sh           # Script de compilación (pdflatex + biber, 3 pasadas)
+├── CORRECCIONES.md       # Checklist de correcciones pendientes del documento
+│
+│   # ── Fuentes del documento LaTeX ──────────────────────────
+├── front/                # Portada, resumen, glosario, abreviaturas
+├── chapters/             # Capítulos 1–5
+├── back/                 # Apéndices y trabajo futuro
+├── bib/                  # Referencias bibliográficas (.bib)
+├── figures/              # Imágenes que el documento incluye
+│   ├── mermaid/          #   Diagramas exportados a PNG
+│   └── mockups/          #   Capturas de los mockups de interfaz
+├── logos/                # Logos institucionales (IPN, ESCOM)
+│
+│   # ── Material de trabajo (no entra a la compilación) ──────
+├── diagramas/            # Fuentes de diagramas (.puml, .svg) y exportaciones
+│   ├── puml/             #   Casos de uso por paquete
+│   └── pdf/              #   Diagramas exportados a PDF
+├── mockups/              # Mockups de interfaz en HTML
+├── scripts/              # Generadores en Python (se ejecutan desde la raíz)
+├── docs/                 # Documentos de trabajo en Word
+├── presentaciones/       # Presentaciones .pptx y capturas de diapositivas
+└── build/                # Salida de compilación (ignorada por git)
+```
+
+### Ejecutar los scripts
+
+Los scripts de `scripts/` resuelven sus rutas respecto a la raíz del repositorio,
+así que se invocan desde la raíz:
+
+```bash
+python scripts/convert_mermaid.py
 ```
 
 ## 🚀 Instrucciones de Compilación

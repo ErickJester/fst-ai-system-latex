@@ -10,7 +10,8 @@ from docx.oxml import OxmlElement
 from copy import deepcopy
 import os
 
-OUT = os.path.join(os.path.dirname(__file__), "Guion_Defensa_TT_2026-B066.docx")
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT = os.path.join(REPO, "docs", "Guion_Defensa_TT_2026-B066.docx")
 
 # ── Colores ──────────────────────────────────────────────────
 NAVY   = RGBColor(0x0D, 0x1B, 0x3E)

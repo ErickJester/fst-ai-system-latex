@@ -31,7 +31,7 @@ GRID       = RGBColor(0xE2, 0xE8, 0xF0)
 BASE = r"C:\Users\ID634\Desktop\proyectos\latexFST\fst-ai-system-latex"
 DIAG = os.path.join(BASE, "diagramas")
 LOGOS = os.path.join(BASE, "logos")
-OUT = os.path.join(BASE, "Presentacion_TT_2026-B066.pptx")
+OUT = os.path.join(BASE, "presentaciones", "Presentacion_TT_2026-B066.pptx")
 
 prs = Presentation()
 prs.slide_width  = Inches(13.333)

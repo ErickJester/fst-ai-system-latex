@@ -30,8 +30,8 @@ except ImportError:
 
 # ── Rutas ─────────────────────────────────────────────────────────────────────
 BASE   = r"C:\Users\ID634\Desktop\proyectos\latexFST\fst-ai-system-latex"
-PPTX_IN  = os.path.join(BASE, "Presentacion_TT_B066_v17.pptx")
-PPTX_OUT = os.path.join(BASE, "Presentacion_B066_Defensa.pptx")
+PPTX_IN  = os.path.join(BASE, "presentaciones", "Presentacion_TT_B066_v17.pptx")
+PPTX_OUT = os.path.join(BASE, "presentaciones", "Presentacion_B066_Defensa.pptx")
 DIAG     = os.path.join(BASE, "diagramas")
 MERMAID  = os.path.join(BASE, "figures", "mermaid")
 

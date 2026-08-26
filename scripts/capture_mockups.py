@@ -7,7 +7,8 @@ import asyncio
 from pathlib import Path
 from playwright.async_api import async_playwright
 
-BASE = Path(__file__).parent
+BASE = Path(__file__).resolve().parent.parent
+MOCKUPS = BASE / "mockups"
 OUT  = BASE / "figures" / "mockups"
 OUT.mkdir(parents=True, exist_ok=True)
 
@@ -85,7 +86,7 @@ async def capture_all():
                     await page.close()
                 page = await browser.new_page()
                 await page.set_viewport_size(VIEWPORT)
-                url = (BASE / html_file).as_uri()
+                url = (MOCKUPS / html_file).as_uri()
                 await page.goto(url, wait_until="networkidle")
                 current_file = html_file
                 print(f"\n  Cargado: {html_file}")

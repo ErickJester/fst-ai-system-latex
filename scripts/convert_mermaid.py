@@ -11,8 +11,9 @@ import requests
 from pathlib import Path
 from mermaid import Mermaid
 
-TEX_FILE = Path(__file__).parent / "chapters" / "05_diseno.tex"
-OUT_DIR  = Path(__file__).parent / "figures" / "mermaid"
+REPO     = Path(__file__).resolve().parent.parent
+TEX_FILE = REPO / "chapters" / "05_diseno.tex"
+OUT_DIR  = REPO / "figures" / "mermaid"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 def render_mermaid_ink(code: str, out: Path) -> bool:

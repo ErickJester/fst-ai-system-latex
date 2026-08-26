@@ -411,6 +411,6 @@ add_entry(doc,
     'Como tener un historial médico completo: el doctor puede ver todas las consultas y qué medicamentos tomaste. Sin trazabilidad, no sabes de dónde viene un resultado.',
     'El sistema genera un reporte de diagnóstico con nivel de confianza por espécimen y un video anotado donde el Dr. Sandino puede revisar cuadro a cuadro qué clasificó el modelo.')
 
-out = r'C:\Users\ID634\Desktop\proyectos\latexFST\fst-ai-system-latex\Glosario_TT_B066.docx'
+out = r'C:\Users\ID634\Desktop\proyectos\latexFST\fst-ai-system-latex\docs\Glosario_TT_B066.docx'
 doc.save(out)
 print("OK:", out)

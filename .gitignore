@@ -17,7 +17,13 @@
 .DS_Store
 Thumbs.db
 .claude/
-ESCOM_ene2025.pptx
+
+# Python
+__pycache__/
+*.pyc
+
+# Presentacion pesada que no se versiona
+presentaciones/ESCOM_ene2025.pptx
 
 # PDF compilado y directorio de build
 build/
