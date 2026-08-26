@@ -17,8 +17,8 @@ Marcar `[x]` conforme se apliquen. Actualizar la tabla de avance al cierre de ca
 | 1. Base de datos | 18 | 0 | 🔴 No iniciado |
 | 2. Casos de uso y diagramas | 22 | 0 | 🔴 No iniciado |
 | 3. Escala del sistema | 7 | 0 | 🔴 No iniciado |
-| 4. Faltantes del documento | 12 | 0 | 🔴 No iniciado |
-| **Total** | **59** | **0** | |
+| 4. Faltantes del documento | 12 | 1 | 🟡 En proceso |
+| **Total** | **59** | **1** | |
 
 **Prioridad máxima (🔴):** BD-14 (conductas como columnas fijas), CU-14 (agujero de autorización),
 CU-17 (el Admin no puede subir videos), DOC-01 (diccionario de datos inexistente),
@@ -86,7 +86,8 @@ pero están declarados como texto libre en [`diagramas/relacional.puml`](diagram
 - [ ] **BD-17** — Renombrar la tabla `ANIMALES` → `ESPECIMENES_ANALIZADOS`.
   Quedan **12 ocurrencias** de «animal» en el cap. 5:
   [`05_diseno.tex`](chapters/05_diseno.tex) líneas 245, 301, 318, 326, 330, 367, 415, 477, 479, 2207.
-  La corrección se aplicó en la rama `claridad-documento` pero **nunca se mergeó** a `modificaciones`.
+  *Verificado el 2026-08-25:* la rama `claridad-documento` **sí está mergeada**; la corrección de
+  terminología simplemente nunca alcanzó los nombres de entidad de base de datos del capítulo 5.
 - [ ] **BD-18** — Justificar en el texto por qué `TRABAJOS.progreso_pct` se **almacena** en vez de
   calcularse (el frontend hace *polling* y necesita leerlo; llega a valor fijo 100 % al terminar).
   Hoy no está justificado, y ese silencio invita la pregunta del jurado.
@@ -247,8 +248,10 @@ pero están declarados como texto libre en [`diagramas/relacional.puml`](diagram
 
 ## 4.4 Higiene del repositorio
 
-- [ ] **DOC-11** — **Mergear la rama `claridad-documento`** a `modificaciones`, o reaplicar sus
-  cambios. Las correcciones de «animales» → «espécimen» y otras se hicieron ahí y no están en la rama activa.
+- [x] **DOC-11** — ~~Mergear la rama `claridad-documento`.~~ **Resuelto el 2026-08-25:**
+  se verificó que `claridad-documento` ya estaba contenida en `main`, y `modificaciones`
+  se integró a `main` por *fast-forward*. Las tres ramas apuntan al mismo commit.
+  El trabajo real que quedaba pendiente es BD-17, no un merge.
 - [ ] **DOC-12** — Uniformar la bibliografía: el PDF local usa «y col.» y otra compilación usa
   «et al.». Fijar la configuración de `biblatex` para que sea estable.
 
@@ -276,3 +279,4 @@ mencionan `estado` y `etapa` también cambian. Conviene hacerlos en este orden.
 | Fecha | Ítems cerrados | Notas |
 |-------|----------------|-------|
 | 2026-08-25 | — | Auditoría inicial. 59 ítems identificados. |
+| 2026-08-25 | DOC-11 | Reorganización del repositorio: material de trabajo movido a `docs/`, `scripts/`, `mockups/` y `diagramas/pdf/`. Presentaciones eliminadas del historial (628 MB → 34 MB). `modificaciones` integrada a `main`. |
