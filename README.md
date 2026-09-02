@@ -4,6 +4,14 @@
 
 Este repositorio contiene el código fuente en **LaTeX** correspondiente a la documentación, protocolo y reportes de avance del Trabajo Terminal desarrollado en la Escuela Superior de Cómputo (ESCOM - IPN).
 
+> ### 🗄️ ¿Vienes a trabajar en la base de datos?
+>
+> Lee primero **[DISENO-BD.md](DISENO-BD.md)**. Es el punto de partida del diseño de la
+> base de datos: explica la metodología que seguimos, en qué fuentes nos basamos, qué
+> está hecho, qué falta y qué partes del documento LaTeX **no** deben usarse como
+> referencia. El diseño de BD del capítulo 5 y los diagramas actuales están
+> desactualizados y son el objetivo a reemplazar.
+
 ## 📄 Resumen del Proyecto
 
 La depresión es un problema de salud pública estudiado experimentalmente mediante la prueba de nado forzado (Forced Swim Test, FST). Este proyecto propone un **sistema web asistido por inteligencia artificial (IA)** que analiza grabaciones de FST para clasificar automáticamente conductas como:
@@ -48,6 +56,7 @@ El proyecto de documentación está organizado de la siguiente manera para facil
 ├── preamble.tex          # Configuración de paquetes, márgenes y bibliografía
 ├── compilar.sh           # Script de compilación (pdflatex + biber, 3 pasadas)
 ├── CORRECCIONES.md       # Checklist de correcciones pendientes del documento
+├── DISENO-BD.md          # Punto de partida del diseño de la base de datos
 │
 │   # ── Fuentes del documento LaTeX ──────────────────────────
 ├── front/                # Portada, resumen, glosario, abreviaturas
