@@ -1,0 +1,236 @@
+@startuml clases
+' ================================================================
+'  Diagrama de clases - Sistema de analisis conductual del FST
+'  TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Figura "fig:clases" de chapters/05_diseno.tex
+'  Salida: diagramas/clases.png
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam nodesep 45
+skinparam ranksep 55
+
+' ----------------------------------------------------------------
+'  P1 - Autenticacion y gestion de usuarios
+' ----------------------------------------------------------------
+package P1_Autenticacion_y_usuarios {
+
+  abstract class Usuario {
+    -id : Integer
+    -correo : String
+    -contrasenaHash : String
+    -nombre : String
+    -rol : String
+    -activo : Boolean
+    -debeCambiarContrasena : Boolean
+    +iniciarSesion(correo, contrasena) : String
+    +cerrarSesion(token) : void
+    +cambiarContrasena(nueva) : void
+  }
+
+  class Investigador {
+    +crearExperimento(datos) : Experimento
+    +subirVideo(idExperimento, archivo) : Video
+    +eliminarExperimento(id) : void
+    +descargarReporte(idExperimento, formato) : Reporte
+  }
+
+  class Administrador {
+    +crearCuentaUsuario(datos) : Usuario
+    +desactivarCuentaUsuario(id) : void
+    +listarUsuarios() : List<Usuario>
+    +monitorearSistema() : void
+  }
+}
+
+' ----------------------------------------------------------------
+'  P2 - Experimentos y carga de video
+' ----------------------------------------------------------------
+package P2_Experimentos_y_carga_de_video {
+
+  class Experimento {
+    -id : Integer
+    -nombre : String
+    -fechaExperimento : Date
+    -tratamiento : String
+    -especie : String
+    -notas : String
+    +validarNombreUnico() : Boolean
+    +consultarEstado() : String
+  }
+
+  class Video {
+    -id : Integer
+    -dia : String
+    -ruta : String
+    -duracionS : Float
+    -fechaEliminacion : DateTime
+    +validarFormatoMp4() : Boolean
+    +validarReproducible() : Boolean
+    +estaProximaEliminacion(dias) : Boolean
+  }
+
+  class Sujeto {
+    -id : Integer
+    -indiceRata : Integer
+    -etiqueta : String
+  }
+}
+
+' ----------------------------------------------------------------
+'  P3 - Pipeline de analisis conductual
+' ----------------------------------------------------------------
+package P3_Pipeline_de_analisis_conductual {
+
+  class Worker <<system>> {
+    +procesarCola() : void
+    +borrarVideosExpirados() : void
+  }
+
+  class PipelineAnalisis <<system>> {
+    -UMBRAL_CONFIANZA : Float = 0.70
+    +preprocesarVideo(video) : void
+    +detectarCilindros() : List<ROI>
+    +rastrearEspecimenes(rois) : void
+    +clasificarConducta(animal, frame) : String
+    +generarReporte(trabajo, tipo) : Reporte
+  }
+
+  class Trabajo {
+    -id : Integer
+    -estado : String
+    -etapa : String
+    -progresoPct : Integer
+    -error : String
+    -iniciadoEn : DateTime
+    -finalizadoEn : DateTime
+    +actualizarProgreso(pct, etapa) : void
+    +marcarError(codigo, descripcion) : void
+  }
+
+  class ConfiguracionAnalisis {
+    -id : Integer
+    -nombreModelo : String
+    -hashModelo : String
+    -versionPipeline : String
+    -umbralConfianza : Float
+    -umbralInmovil : Float
+    -umbralDesplazamiento : Float
+    -umbralAspecto : Float
+  }
+
+  class ROI {
+    -id : Integer
+    -x : Integer
+    -y : Integer
+    -w : Integer
+    -h : Integer
+  }
+
+  class Animal {
+    -id : Integer
+  }
+}
+
+' ----------------------------------------------------------------
+'  P4 - Resultados y reportes
+' ----------------------------------------------------------------
+package P4_Resultados_y_reportes {
+
+  class ResultadoComportamiento {
+    -id : Integer
+    -nadoS : Float
+    -inmovilS : Float
+    -escapeS : Float
+    -totalAnalizadoS : Float
+    +calcularPorcentajes() : Map<String, Float>
+  }
+
+  class ComportamientoPorMinuto {
+    -id : Integer
+    -minuto : Integer
+    -nadoS : Float
+    -inmovilS : Float
+    -escapeS : Float
+  }
+
+  class Reporte {
+    -id : Integer
+    -formato : String
+    -ruta : String
+    -creadoEn : DateTime
+    +generar(experimento, formato) : void
+    +descargar() : File
+  }
+}
+
+' ----------------------------------------------------------------
+'  P5 - Dashboard y notificaciones
+' ----------------------------------------------------------------
+package P5_Dashboard_y_notificaciones {
+
+  class Notificacion {
+    -id : Integer
+    -tipo : String
+    -mensaje : String
+    -leido : Boolean
+    -creadoEn : DateTime
+    +marcarComoLeida() : void
+  }
+}
+
+' ================================================================
+'  RELACIONES
+' ================================================================
+
+' -- Herencia de actores --
+Investigador  -[#A020A0]-|> Usuario
+Administrador -[#A020A0]-|> Usuario
+
+' -- Usuarios hacia experimentos y notificaciones --
+Investigador  "1" -[#0000FF]-> "0..*" Experimento  : registra
+Administrador "1" -[#0000FF]-> "0..*" Experimento  : gestiona
+Usuario       "1" -[#FFA500]-> "0..*" Notificacion : recibe
+
+' -- Composicion del experimento --
+Experimento "1" *-[#8B0000]- "0..2" Video  : contiene
+Experimento "1" *-[#8B0000]- "1..8" Sujeto : incluye
+
+' -- Artefactos derivados del experimento --
+Experimento "1" -[#808080]-> "0..*" Reporte      : origina
+Experimento "1" -[#FFA500]-> "0..*" Notificacion : origina
+
+' -- Sujeto: region de interes e instancia analizada --
+Sujeto "1"     -[#8B0000]-> "0..2" ROI    : define
+Sujeto "1"     -[#8B0000]-> "1"    Animal : representa
+ROI    "0..*"  -[#000080]-> "1"    Video  : pertenece a
+
+' -- Ejecucion del pipeline --
+Trabajo "0..*" -[#008080]-> "1"    Video                 : procesa
+Trabajo "0..*" -[#FF00FF]-> "1"    ConfiguracionAnalisis : usa
+Trabajo "1"    -[#008080]-> "1..*" Animal                : produce
+
+' -- Resultados por especimen --
+Animal "1" -[#008080]-> "1"    ResultadoComportamiento : tiene
+Animal "1" -[#008080]-> "0..*" ComportamientoPorMinuto : detalla
+
+' -- Dependencias del proceso worker --
+Worker .[#008000].> PipelineAnalisis : invoca
+Worker .[#008000].> Trabajo          : procesa
+Worker .[#FF0000].> Video            : elimina
+
+' -- Dependencias del pipeline --
+PipelineAnalisis .[#FF1493].> Trabajo                 : actualiza
+PipelineAnalisis .[#FF8C00].> ROI                     : crea
+PipelineAnalisis .[#00BFFF].> Video                   : procesa
+PipelineAnalisis .[#9932CC].> Animal                  : origina
+PipelineAnalisis .[#2E8B57].> ResultadoComportamiento : genera
+
+@enduml

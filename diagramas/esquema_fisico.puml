@@ -1,0 +1,189 @@
+@startuml esquema_fisico
+' ================================================================
+'  Esquema fisico de la base de datos - Sistema FST
+'  TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Figura "fig:er" de chapters/05_diseno.tex
+'  Salida: figures/mermaid/er2.png
+'  Gestor: PostgreSQL - 12 tablas, 14 claves foraneas
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam linetype ortho
+skinparam classAttributeIconSize 10
+
+' ----------------------------------------------------------------
+'  Usuarios y acceso
+' ----------------------------------------------------------------
+entity USUARIOS {
+  * id : INTEGER <<PK>>
+  --
+  correo : VARCHAR
+  contrasena_hash : VARCHAR
+  nombre : VARCHAR
+  rol : VARCHAR
+  activo : BOOLEAN
+  debe_cambiar_contrasena : BOOLEAN
+  creado_en : DATETIME
+  ultimo_acceso : DATETIME
+}
+
+' ----------------------------------------------------------------
+'  Experimentos y material de video
+' ----------------------------------------------------------------
+entity EXPERIMENTOS {
+  * id : INTEGER <<PK>>
+  --
+  id_usuario : INTEGER <<FK>>
+  creado_en : DATETIME
+  nombre : VARCHAR
+  fecha_experimento : DATETIME
+  tratamiento : VARCHAR
+  especie : VARCHAR
+  disposicion : VARCHAR
+  notas : TEXT
+}
+
+entity SUJETOS {
+  * id : INTEGER <<PK>>
+  --
+  id_experimento : INTEGER <<FK>>
+  indice_rata : INTEGER
+  etiqueta : VARCHAR
+}
+
+entity VIDEOS {
+  * id : INTEGER <<PK>>
+  --
+  id_experimento : INTEGER <<FK>>
+  creado_en : DATETIME
+  dia : VARCHAR
+  nombre_archivo : VARCHAR
+  ruta : VARCHAR
+  duracion_s : FLOAT
+  fecha_eliminacion : DATETIME
+}
+
+entity ROIS {
+  * id : INTEGER <<PK>>
+  --
+  id_video : INTEGER <<FK>>
+  id_sujeto : INTEGER <<FK>>
+  x : INTEGER
+  y : INTEGER
+  w : INTEGER
+  h : INTEGER
+}
+
+' ----------------------------------------------------------------
+'  Analisis y trabajos
+' ----------------------------------------------------------------
+entity CONFIGURACIONES_ANALISIS {
+  * id : INTEGER <<PK>>
+  --
+  creado_en : DATETIME
+  nombre_modelo : VARCHAR
+  hash_modelo : VARCHAR
+  version_pipeline : VARCHAR
+  umbral_confianza : FLOAT
+  segundos_omitir : FLOAT
+  umbral_inmovil : FLOAT
+  umbral_desplazamiento : FLOAT
+  umbral_std_posicion : FLOAT
+  umbral_aspecto_trepada : FLOAT
+}
+
+entity TRABAJOS {
+  * id : INTEGER <<PK>>
+  --
+  id_video : INTEGER <<FK>>
+  id_config : INTEGER <<FK>>
+  creado_en : DATETIME
+  iniciado_en : DATETIME
+  finalizado_en : DATETIME
+  estado : VARCHAR
+  etapa : VARCHAR
+  progreso_pct : INTEGER
+  error : TEXT
+}
+
+entity ANIMALES {
+  * id : INTEGER <<PK>>
+  --
+  id_trabajo : INTEGER <<FK>>
+  id_sujeto : INTEGER <<FK>>
+}
+
+' ----------------------------------------------------------------
+'  Resultados, reportes y notificaciones
+' ----------------------------------------------------------------
+entity RESULTADOS_COMPORTAMIENTO {
+  * id : INTEGER <<PK>>
+  --
+  id_animal : INTEGER <<FK>>
+  nado_s : FLOAT
+  inmovil_s : FLOAT
+  escape_s : FLOAT
+  total_analizado_s : FLOAT
+}
+
+entity COMPORTAMIENTO_POR_MINUTO {
+  * id : INTEGER <<PK>>
+  --
+  id_animal : INTEGER <<FK>>
+  minuto : INTEGER
+  nado_s : FLOAT
+  inmovil_s : FLOAT
+  escape_s : FLOAT
+}
+
+entity REPORTES {
+  * id : INTEGER <<PK>>
+  --
+  id_experimento : INTEGER <<FK>>
+  creado_en : DATETIME
+  formato : VARCHAR
+  ruta : VARCHAR
+}
+
+entity NOTIFICACIONES {
+  * id : INTEGER <<PK>>
+  --
+  id_usuario : INTEGER <<FK>>
+  id_experimento : INTEGER <<FK>>
+  creado_en : DATETIME
+  tipo : VARCHAR
+  mensaje : TEXT
+  leido : BOOLEAN
+}
+
+' ================================================================
+'  RELACIONES  (1 a 0..*, implementadas con clave foranea)
+' ================================================================
+
+USUARIOS                 "1" -[#FF0000]- "0..*" EXPERIMENTOS              : id_usuario
+USUARIOS                 "1" -[#00AA00]- "0..*" NOTIFICACIONES            : id_usuario
+
+EXPERIMENTOS             "1" -[#FF8C00]- "0..*" SUJETOS                   : id_experimento
+EXPERIMENTOS             "1" -[#0000FF]- "0..*" VIDEOS                    : id_experimento
+EXPERIMENTOS             "1" -[#9400D3]- "0..*" REPORTES                  : id_experimento
+EXPERIMENTOS             "1" -[#00CED1]- "0..*" NOTIFICACIONES            : id_experimento
+
+SUJETOS                  "1" -[#FF4500]- "0..*" ROIS                      : id_sujeto
+SUJETOS                  "1" -[#B8860B]- "0..*" ANIMALES                  : id_sujeto
+
+VIDEOS                   "1" -[#2F4F4F]- "0..*" ROIS                      : id_video
+VIDEOS                   "1" -[#FF1493]- "0..*" TRABAJOS                  : id_video
+
+CONFIGURACIONES_ANALISIS "1" -[#32CD32]- "0..*" TRABAJOS                  : id_config
+
+TRABAJOS                 "1" -[#1E90FF]- "0..*" ANIMALES                  : id_trabajo
+
+ANIMALES                 "1" -[#8B4513]- "0..*" RESULTADOS_COMPORTAMIENTO : id_animal
+ANIMALES                 "1" -[#E67E22]- "0..*" COMPORTAMIENTO_POR_MINUTO : id_animal
+
+@enduml
