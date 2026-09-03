@@ -1,0 +1,406 @@
+% ============================================================
+%  El protocolo del laboratorio, paso a paso — documento independiente
+%  TT 2026-B066 | ESCOM-IPN
+%  Frausto Robles Ángel Ali · Rodríguez Verdín Sandoval Vanesa
+%
+%  Narración cronológica del protocolo de la prueba de nado forzado,
+%  desde que se abre el estudio hasta el único dato que el sistema mide.
+%  En cada paso se justifica dónde queda registrado ese hecho: primero
+%  en el diagrama entidad-relación de la etapa conceptual y después en
+%  el grafo relacional de la etapa lógica, ya validado con formas
+%  normales.
+%
+%  Compilar desde la raíz del repositorio:
+%      pdflatex -output-directory=build protocolo_fst.tex
+% ============================================================
+
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage[spanish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+
+\usepackage[
+  left=2.4cm, right=2.4cm,
+  top=2.2cm,  bottom=2.2cm,
+  headheight=15pt,
+  headsep=12pt,
+  footskip=20pt
+]{geometry}
+
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{tinta}{HTML}{0D1F21}
+\definecolor{suave}{HTML}{3A4E4E}
+\definecolor{apagado}{HTML}{677978}
+\definecolor{acento}{HTML}{0F6F70}
+\definecolor{acentoTenue}{HTML}{DCEBEA}
+\definecolor{ambar}{HTML}{A65D2E}
+\definecolor{ambarTenue}{HTML}{F4E7DC}
+\definecolor{regla}{HTML}{D3DBD8}
+
+\hypersetup{
+  pdftitle={El protocolo del laboratorio, paso a paso},
+  pdfauthor={Frausto Robles A. A. \& Rodriguez Verdin S. V.},
+  pdfsubject={TT 2026-B066 - Protocolo FST contra el modelo de datos}
+}
+
+% ---------- Encabezado y pie ----------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{regla}%
+  \leaders\hrule height \headrulewidth\hfill}}
+\fancyhead[L]{\footnotesize\sffamily\color{apagado}%
+  Protocolo FST · narración cronológica}
+\fancyhead[R]{\footnotesize\sffamily\color{apagado}%
+  \thepage\ / \pageref{LastPage}}
+\fancyfoot[L]{\scriptsize\sffamily\color{apagado}%
+  TT 2026-B066 · ESCOM-IPN}
+\fancyfoot[R]{\scriptsize\sffamily\color{apagado}%
+  Diseño de base de datos · etapas conceptual y lógica}
+
+% ---------- Títulos ----------
+\titleformat{\section}
+  {\sffamily\bfseries\large\color{tinta}}{}{0pt}{}
+  [{\vspace{2pt}\color{tinta}\titlerule[1pt]}]
+\titlespacing*{\section}{0pt}{22pt}{10pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+% ---------- Bloques ----------
+\newsavebox{\cajaTag}
+
+% \bloque{color}{etiqueta}{texto}
+\newcommand{\bloque}[3]{%
+  \par\addvspace{6pt}\noindent
+  \sbox{\cajaTag}{%
+    \begin{minipage}{\dimexpr\linewidth-16pt\relax}
+      {\footnotesize\sffamily\bfseries\color{#1}\MakeUppercase{#2}}\par
+      \vspace{3pt}
+      {\small\color{suave}#3}
+    \end{minipage}}%
+  \textcolor{#1}{\rule[-\dp\cajaTag]{2pt}{\dimexpr\ht\cajaTag+\dp\cajaTag\relax}}%
+  \hspace{12pt}\usebox{\cajaTag}\par\addvspace{6pt}}
+
+\newcommand{\conceptual}[1]{\bloque{acento}{En el esquema conceptual}{#1}}
+\newcommand{\relacional}[1]{\bloque{ambar}{En el grafo relacional}{#1}}
+
+% \aviso{etiqueta}{texto}
+\newcommand{\aviso}[2]{%
+  \par\addvspace{8pt}\noindent
+  \fcolorbox{ambar}{ambarTenue}{%
+    \begin{minipage}{\dimexpr\linewidth-16pt\relax}
+      \vspace{2pt}
+      {\footnotesize\sffamily\bfseries\color{ambar}\MakeUppercase{#1}}\par
+      \vspace{3pt}
+      {\small\color{tinta}#2}
+      \vspace{3pt}
+    \end{minipage}}\par\addvspace{8pt}}
+
+% \paso{numero}{titulo}
+\newcommand{\paso}[2]{%
+  \par\addvspace{14pt}\noindent
+  {\sffamily\bfseries\color{acento}#1}\hspace{10pt}%
+  {\sffamily\bfseries\color{tinta}#2}\par\addvspace{3pt}}
+
+\newcommand{\cod}[1]{{\small\texttt{#1}}}
+
+% ============================================================
+\begin{document}
+
+% ---------- Portada breve ----------
+{\footnotesize\sffamily\color{acento}%
+ TT 2026-B066 · ESCOM-IPN · DISEÑO DE BASE DE DATOS}
+
+\vspace{6pt}
+{\LARGE\sffamily\bfseries\color{tinta}%
+ El protocolo del laboratorio, paso a paso}
+
+\vspace{4pt}
+{\color{tinta}\rule{\linewidth}{1.2pt}}
+
+\vspace{8pt}
+{\color{suave}Cada paso dice qué ocurre en el Laboratorio de Bioquímica
+Estructural y, enseguida, dónde queda registrado ese hecho: primero en el
+diagrama entidad-relación de la etapa conceptual, después en el grafo
+relacional de la etapa lógica, ya validado con formas normales.}
+
+\section*{El protocolo, de principio a fin}
+
+% ---------- 0 ----------
+\paso{0}{Alguien abre el estudio}
+
+Un investigador decide correr una prueba de nado forzado para evaluar si un
+compuesto tiene efecto tipo antidepresivo. Eso es \textbf{un experimento}: un
+estudio independiente completo, no una grabación. Según la entrevista (P19),
+trae de 4 a 6 grupos, entre 32 y 48 especímenes, y genera alrededor de 8 videos
+del Día 2.
+
+\conceptual{\cod{Usuario} $\to$ \emph{registra} (0,N / 1,1) $\to$ \cod{Experimento}.
+El (1,1) del lado del experimento dice que \textbf{todo experimento tiene siempre
+un creador}; el (0,N) del lado del usuario dice que un investigador puede no
+haber creado ninguno.}
+
+\relacional{\cod{EXPERIMENTO(idExperimento, nombre, fecha, notas, idBoleta*)}.
+La foránea \cod{idBoleta} es obligatoria: así se implementa el (1,1). Es autoría
+y trazabilidad, \textbf{no} control de acceso: cualquier investigador con cuenta
+activa ve todos los experimentos del laboratorio (P18, RN-08).}
+
+% ---------- 1 ----------
+\paso{1}{Las ratas se reparten en grupos de tratamiento}
+
+El investigador separa a los especímenes en grupos según \textbf{qué recibe cada
+uno}: control (sin fármaco), referencia (fluoxetina, el antidepresivo de
+referencia) y tratamiento experimental (el compuesto a probar). Mínimo tres
+grupos; en la práctica de 4 a 6. Entre 6 y 8 ratas por grupo (PA). Este es el
+\textbf{hecho científico central del protocolo}: a qué tratamiento pertenece cada
+rata. Todo lo demás es logística.
+
+\conceptual{\cod{Experimento} $\to$ \emph{compone} (3,N / 1,1) $\to$ \cod{Grupo} y
+\cod{Grupo} $\to$ \emph{agrupa} (6,8 / 1,1) $\to$ \cod{Espécimen}. El (3,N)
+codifica el mínimo de tres grupos; el (6,8) es literalmente el rango que declaró
+el laboratorio.}
+
+\relacional{\cod{GRUPO(idGrupo, etiqueta, tipo, tratamiento, idExperimento*)}.
+El atributo \cod{tipo} tiene dominio cerrado \{control, referencia, tratamiento
+experimental\}; \cod{tratamiento} admite nulo solo si \cod{tipo = control}. La
+\cod{etiqueta} distingue grupos del mismo tipo dentro de un experimento, de ahí
+la restricción \cod{UNIQUE (idExperimento, etiqueta)}.}
+
+% ---------- 2 ----------
+\paso{2}{El grupo no cabe en una sola grabación}
+
+Aquí aparece el nivel que \textbf{ninguna fuente había nombrado}. La cámara web
+encuadra máximo 4 cilindros a la vez, y siempre más de 2. Un grupo de 6 a 8 ratas
+no cabe. Entonces el laboratorio graba el grupo en \textbf{dos tandas}: primero
+3 o 4 ratas, después las otras 3 o 4. La aritmética cierra por tres lados contra
+lo que el propio doctor declaró:
+
+\vspace{4pt}
+{\small
+\begin{tabularx}{\linewidth}{@{}p{4.6cm}p{3.6cm}X@{}}
+\multicolumn{3}{@{}l}{\color{regla}\rule{\linewidth}{0.6pt}}\\[-6pt]
+{\sffamily\footnotesize\color{apagado}COMPROBACIÓN} &
+{\sffamily\footnotesize\color{apagado}RESULTADO} &
+{\sffamily\footnotesize\color{apagado}CONTRA LA FUENTE}\\[2pt]
+\multicolumn{3}{@{}l}{\color{regla}\rule{\linewidth}{0.6pt}}\\[-4pt]
+4 grupos $\times$ 8 ratas & 32 especímenes & P19: «32 a 48»\\
+8 ratas $\div$ 4 por cuadro & 2 tandas por grupo & Equipo: máximo 4 a cuadro\\
+4 grupos $\times$ 2 tandas & 8 videos de Día 2 & P19: «alrededor de 8»\\[2pt]
+\multicolumn{3}{@{}l}{\color{regla}\rule{\linewidth}{0.6pt}}\\
+\end{tabularx}}
+
+\conceptual{\cod{Grupo} $\to$ \emph{se graba en} (2,N / 1,1) $\to$ \cod{Tanda} y
+\cod{Tanda} $\to$ \emph{aloja} (3,4 / 1,1) $\to$ \cod{Espécimen}. El (2,N) sale de
+la división; el (3,4) es el encuadre.}
+
+\relacional{\cod{TANDA(idTanda, ordinal, nCilindros, idGrupo*)}, con
+\cod{CHECK nCilindros BETWEEN 3 AND 4} y \cod{UNIQUE (idGrupo, ordinal)}.}
+
+\aviso{Cuidado con el nombre}{«Tanda» es vocabulario nuestro, no del laboratorio.
+Es exactamente la pregunta \textbf{P-05} de la reunión de verificación.}
+
+% ---------- 3 ----------
+\paso{3}{Cada rata queda identificada y asignada a un cilindro}
+
+El laboratorio identifica físicamente a cada rata (respuesta a \textbf{P-01}).
+Además, al montar la grabación, cada rata ocupa un cilindro del encuadre,
+contados de izquierda a derecha. Esa posición \textbf{no es lo que identifica a
+la rata} —antes sí lo era, y por eso el modelo viejo tenía una cascada de seis
+entidades débiles—. Hoy es solo la pista que el pipeline de visión por
+computadora usa para saber qué mancha del video corresponde a qué espécimen.
+
+\conceptual{\cod{Espécimen} es \textbf{entidad fuerte}, con \cod{idEspecimen}
+propio e \cod{idLaboratorio} como clave alterna. Cuelga de \textbf{dos padres}:
+del \cod{Grupo} (qué tratamiento recibió) y de la \cod{Tanda} (en qué grabación
+salió).}
+
+\relacional{\cod{ESPECIMEN(idEspecimen, idLaboratorio, numeroCilindro, idTanda*)}.
+La foránea \cod{idGrupo} \textbf{no está}: la validación de 3FN encontró que
+\cod{idEspecimen} $\to$ \cod{idTanda} $\to$ \cod{idGrupo} era una dependencia
+transitiva. Como una tanda pertenece a un solo grupo, saber la tanda ya dice el
+grupo, y guardarlo dos veces permitiría que las copias se contradijeran. El grupo
+se alcanza uniendo \cod{ESPECIMEN} $\to$ \cod{TANDA} $\to$ \cod{GRUPO}.
+Restricciones: \cod{UNIQUE (idTanda, numeroCilindro)}, \cod{UNIQUE idLaboratorio}
+(alcance por confirmar, P-03) y \cod{numeroCilindro} $\leq$ \cod{TANDA.nCilindros}.}
+
+\aviso{De qué depende esta corrección}{Toda la eliminación de \cod{idGrupo}
+descansa en \textbf{P-04}: si una grabación pudiera mezclar ratas de dos grupos,
+la dependencia transitiva se rompe y la foránea \cod{idGrupo} tiene que volver a
+\cod{ESPECIMEN}.}
+
+% ---------- 4 ----------
+\paso{4}{Día 1 — el estrés agudo}
+
+Se pone a las ratas de una tanda en sus cilindros y se graba una sesión larga, de
+unos 20 minutos. Es el pretest: induce el estado que se va a medir al día
+siguiente. De este día \textbf{solo se analiza el grupo control} (fuente PC): los
+demás se graban, pero su Día 1 no entra al pipeline.
+
+% ---------- 5 ----------
+\paso{5}{Día 2 — la medición real, 24 horas después}
+
+Las mismas ratas, la misma tanda, el mismo encuadre, los mismos cilindros. Ahora
+se graban \textbf{5 minutos}, y esta es la sesión que produce el dato del
+experimento. Que la cámara no se mueva entre los dos días es una garantía
+explícita del laboratorio, y es lo que permite comparar Día 1 contra Día 2 del
+mismo espécimen.
+
+\conceptual{\cod{Tanda} $\to$ \emph{produce} (1,2 / 1,1) $\to$ \cod{Video}, con
+\cod{sesión} en \{Día 1, Día 2\}. El \textbf{(1,2)} es exactamente esto: una tanda
+tiene \emph{siempre} su video de Día 2, y \emph{a veces} además el de Día 1.}
+
+\relacional{\cod{VIDEO(idVideo, sesion, archivo, duracion, fechaCarga, idTanda*)},
+con \cod{UNIQUE (idTanda, sesion)}: una tanda no puede tener dos videos del mismo
+día. \textbf{Segunda divergencia con el diagrama}: en el conceptual la duración
+era «20 min Día 1 / 5 min Día 2»; la 3FN detectó que eso era la transitiva
+\cod{sesion} $\to$ \cod{duracion}, así que en el esquema definitivo \cod{duracion}
+es la duración \emph{real} del archivo y los 20/5 minutos se vuelven verificación
+con tolerancia.}
+
+% ---------- 6 ----------
+\paso{6}{El video se sube y se procesa}
+
+El investigador carga el MP4. El sistema encola un análisis: preprocesamiento,
+detección de cilindros, seguimiento de cada espécimen y clasificación de conducta
+por cuadro (visión por computadora y aprendizaje supervisado). Si la confianza de
+detección baja de 0.70, el pipeline se detiene en vez de entregar un resultado
+silenciosamente incorrecto: por eso importa que la iluminación no esté
+garantizada. Un video \textbf{se puede volver a analizar}.
+
+\conceptual{\cod{Video} $\to$ \emph{procesa} (1,N / 1,1) $\to$ \cod{Análisis}.
+El (1,N) es la respuesta directa del equipo: «sí, se puede volver a hacer».}
+
+\relacional{\cod{ANALISIS(idAnalisis, estado, etapaActiva, confianza,
+nivelClasificacion, fechaAnalisis, idVideo*)}. El atributo
+\cod{nivelClasificacion} registra si el clasificador logró separar las tres
+conductas o si operó degradado con dos.}
+
+% ---------- 7 ----------
+\paso{7}{Se empareja cada rata con el video donde aparece}
+
+Antes de poder decir «esta rata nadó tantos segundos», hay que fijar de qué rata
+y de qué video se habla. Ese par —un espécimen concreto en un video concreto— es
+una \textbf{observación}. Aquí es donde las dos ramas que se abrieron en el Grupo,
+tratamiento por un lado y grabación por el otro, \textbf{se vuelven a juntar}.
+
+\conceptual{\cod{Observación} es \textbf{entidad asociativa} con
+\cod{idObservacion} propio y dos interrelaciones: \cod{Espécimen} $\to$
+\emph{aparece en} (1,2 / 1,1) y \cod{Video} $\to$ \emph{contiene} (3,4 / 1,1).
+El (1,2): una rata aparece en 1 o 2 videos, su Día 2 y quizá su Día 1. El (3,4):
+un video contiene una observación por cilindro ocupado. \textbf{Por qué no una
+ternaria} Espécimen–Video–Conducta: permitiría emparejar una rata con el video de
+otra tanda. La entidad asociativa cierra primero el par válido y clasifica
+después.}
+
+\relacional{\cod{OBSERVACION(idObservacion, idEspecimen*, idVideo*)} con
+\cod{UNIQUE (idEspecimen, idVideo)}. \textbf{Lo que se perdió al pasar a llaves
+subrogadas}: con llaves naturales, las dos foráneas compartían sus primeras
+columnas y eso garantizaba \emph{por estructura} que rata y video fueran de la
+misma tanda. Ahora hay que declararlo con un \cod{CHECK} o disparador:
+\cod{ESPECIMEN.idTanda = VIDEO.idTanda}.}
+
+% ---------- 8 ----------
+\paso{8}{Los 5 minutos se parten en minutos}
+
+El laboratorio no quiere un total: quiere el desglose minuto a minuto, porque la
+curva importa (P9). Los 5 minutos del Día 2 dan exactamente cinco tramos.
+
+\conceptual{\cod{Observación} $\to$ \emph{se divide en} (5,5 / 1,1) $\to$
+\cod{Intervalo}, con \cod{minuto} en 1..5. El (5,5) es una cardinalidad
+\textbf{fija}, no un rango: siempre cinco.}
+
+\relacional{\cod{INTERVALO(idIntervalo, minuto, idObservacion*)} con
+\cod{UNIQUE (idObservacion, minuto)} y \cod{CHECK minuto BETWEEN 1 AND 5}.}
+
+% ---------- 9 ----------
+\paso{9}{En cada minuto se contabilizan los segundos por conducta}
+
+Y aquí, por fin, \textbf{el único dato que el sistema mide en todo el protocolo}:
+cuántos segundos pasó esa rata, en ese minuto, nadando, inmóvil o escalando. El
+buceo cuenta como nado activo (P7); un episodio cuenta si dura de 3 a 5 segundos
+continuos (P6). Las tres conductas son mutuamente excluyentes por cuadro.
+
+\conceptual{\cod{Intervalo} $\to$ \emph{presenta} (2,3 / 0,N) $\to$ \cod{Conducta},
+con \cod{segundos} como \textbf{atributo de la interrelación}. El (2,3) no es
+capricho: en modo normal son tres conductas, en modo degradado el catálogo baja
+a dos.}
+
+\relacional{\cod{PRESENTA(idIntervalo*, conducta*, segundos)}, llave primaria de
+\textbf{dos} componentes. En el modelo viejo esta misma tabla terminaba con una
+llave de \textbf{siete} columnas y una sola de dato; ese fue el argumento
+decisivo para adoptar llaves subrogadas.}
+
+% ---------- 10 ----------
+\paso{10}{Lo que el investigador consulta (y que no se guarda)}
+
+Total por conducta y por espécimen, comparación Día 1 contra Día 2, media,
+desviación estándar y varianza por grupo, comparación entre grupos, exportación
+a CSV, XLSX y PDF.
+
+\relacional{\textbf{Nada de eso está almacenado}: todo se deriva de
+\cod{PRESENTA.segundos} sumando hacia arriba por el grafo. Es la actividad 6 del
+método conceptual, sin redundancia. Si el desempeño lo exigiera, materializarlos
+es una decisión de la \textbf{etapa física}, donde el método sí admite
+«redundancia controlada», y justificada por medición, no antes.}
+
+% ============================================================
+\section*{Dónde el grafo relacional no se lee igual que el diagrama}
+
+Son las tres correcciones que encontró la validación con formas normales.
+Conviene tenerlas claras antes de la revisión de notación, porque son justo lo
+que puede preguntar la Dra. Cordero.
+
+\vspace{4pt}
+{\small
+\begin{tabularx}{\linewidth}{@{}p{4.4cm}p{4.2cm}X@{}}
+\multicolumn{3}{@{}l}{\color{regla}\rule{\linewidth}{0.6pt}}\\[-6pt]
+{\sffamily\footnotesize\color{apagado}EN EL DIAGRAMA E-R} &
+{\sffamily\footnotesize\color{apagado}EN EL GRAFO RELACIONAL} &
+{\sffamily\footnotesize\color{apagado}POR QUÉ}\\[2pt]
+\multicolumn{3}{@{}l}{\color{regla}\rule{\linewidth}{0.6pt}}\\[-4pt]
+\cod{Espécimen} tiene dos padres: Grupo y Tanda &
+\cod{ESPECIMEN} tiene una sola foránea: \cod{idTanda} &
+3FN: \cod{idGrupo} era transitiva. El grupo se alcanza por la tanda\\[4pt]
+\cod{Video.duración} = 20 min / 5 min según sesión &
+\cod{VIDEO.duracion} = duración real del archivo &
+3FN: \cod{sesion} $\to$ \cod{duracion} era transitiva\\[4pt]
+\cod{Usuario.nombre} &
+\cod{USUARIO.nombre} + \cod{USUARIO.apellidos} &
+1FN: era un dominio compuesto\\[2pt]
+\multicolumn{3}{@{}l}{\color{regla}\rule{\linewidth}{0.6pt}}\\
+\end{tabularx}}
+
+\textbf{La semántica del protocolo no cambia en ninguna de las tres.} La rata
+sigue perteneciendo a un tratamiento; simplemente el esquema no guarda ese hecho
+dos veces.
+
+% ============================================================
+\section*{Una pieza del protocolo que el esquema todavía no representa}
+
+\cod{OBSERVACION} cuelga de \cod{VIDEO}, pero la cardinalidad \cod{VIDEO} $\to$
+\cod{ANALISIS} es (1,N). Si se reanaliza un video y el resultado cambia, ese
+segundo resultado \textbf{no tiene dónde escribirse}, y desde una fila de
+\cod{PRESENTA} no se puede saber qué análisis la produjo ni con qué nivel de
+clasificación.
+
+\bloque{acento}{Corrección propuesta}{Que \cod{OBSERVACION} referencie
+\cod{idAnalisis} en lugar de \cod{idVideo}; el video se alcanza por
+\cod{ANALISIS} $\to$ \cod{VIDEO}. No cambia el número de relaciones ni rompe BCNF.}
+
+\aviso{No aplicar todavía}{Depende de \textbf{P-08}. Si el laboratorio prefiere
+que el reanálisis reemplace al anterior, el esquema se queda como está, pero se
+pierde la evidencia de repetibilidad, que es justo el criterio que el laboratorio
+pidió como principal.}
+
+\end{document}
