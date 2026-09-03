@@ -208,7 +208,7 @@ posterior, o no hay autoregistro en absoluto y el Admin crea las cuentas. No pue
 
 Y P18 confirma que el acceso a datos es uniforme, pero tampoco dice quién crea las cuentas.
 
-**Rastro probable:** las notas del proyecto (`CLAUDE.md`) registran que RF-07 se resolvió en su
+**Rastro probable:** las notas del proyecto (`HISTORIAL.md`) registran que RF-07 se resolvió en su
 momento como «autoregistro + aprobación admin + notificaciones email», que es exactamente lo
 que dice el cap. 1. Después RF-07 se reescribió al texto actual, pero **el cap. 1 se quedó con
 la redacción vieja**. Es la hipótesis más simple, aunque conviene confirmarla.

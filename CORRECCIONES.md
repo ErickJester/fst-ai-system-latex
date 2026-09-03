@@ -14,85 +14,29 @@ Marcar `[x]` conforme se apliquen. Actualizar la tabla de avance al cierre de ca
 
 | Bloque | Ítems | Hechos | Estado |
 |--------|-------|--------|--------|
-| 1. Base de datos | 18 | 0 | 🔴 No iniciado |
+| 1. Base de datos | — | — | ⚫ Superado — esquema rehecho |
 | 2. Casos de uso y diagramas | 22 | 0 | 🔴 No iniciado |
 | 3. Escala del sistema | 7 | 0 | 🔴 No iniciado |
 | 4. Faltantes del documento | 12 | 1 | 🟡 En proceso |
-| **Total** | **59** | **1** | |
+| **Total vigente** | **41** | **1** | |
 
-**Prioridad máxima (🔴):** BD-14 (conductas como columnas fijas), CU-14 (agujero de autorización),
+**Prioridad máxima (🔴):** CU-14 (agujero de autorización),
 CU-17 (el Admin no puede subir videos), DOC-01 (diccionario de datos inexistente),
 DOC-02 (sin capítulo de conclusiones).
 
 ---
 
-# Bloque 1 — Base de datos
+# Bloque 1 — Base de datos  ·  SUPERADO
 
-> **Diagnóstico:** el esquema declara normalización en el texto pero no la implementa en el modelo.
-> No hay una sola restricción de dominio, longitud, nulidad, unicidad ni borrado en las 12 tablas.
-
-## 1.1 Valores abiertos (dominio cerrado guardado como `VARCHAR` libre)
-
-Los 11 campos siguientes solo pueden tomar un conjunto conocido y finito de valores,
-pero están declarados como texto libre en [`diagramas/relacional.puml`](diagramas/relacional.puml).
-
-- [ ] **BD-01** — `USUARIOS.rol` → FK a catálogo `ROLES`
-  *(también resuelve la nota manuscrita «el tema de roles, es recomendable tener [tabla]»)*
-- [ ] **BD-02** — `EXPERIMENTOS.tratamiento` → FK a catálogo `TRATAMIENTOS` (control / fluoxetina / experimental, con dosis y vía)
-  *(nota manuscrita: «situación actual por el medicamento denota que no está en 3FN»)*
-- [ ] **BD-03** — `EXPERIMENTOS.especie` → FK a catálogo `ESPECIES`
-- [ ] **BD-04** — `EXPERIMENTOS.disposicion` → `CHECK` o catálogo (2×2, 1×4, …)
-- [ ] **BD-05** — `VIDEOS.dia` → `CHECK (dia IN ('dia1','dia2'))`
-- [ ] **BD-06** — `TRABAJOS.estado` → `CHECK` o catálogo `ESTADOS_TRABAJO` (en_cola, procesando, completado, error)
-- [ ] **BD-07** — `TRABAJOS.etapa` → FK a catálogo `ETAPAS_PIPELINE` (4 etapas)
-- [ ] **BD-08** — `REPORTES.formato` → `CHECK (formato IN ('PDF','CSV','XLSX'))`
-- [ ] **BD-09** — `NOTIFICACIONES.tipo` → FK a catálogo `TIPOS_NOTIFICACION`
-- [ ] **BD-10** — `CONFIGURACIONES_ANALISIS.nombre_modelo` y `version_pipeline` → FK a catálogo `MODELOS`
-  *(conecta con la nota «sobre ResNet-18: sacarlo como tabla»)*
-
-## 1.2 Restricciones ausentes en las 12 tablas
-
-- [ ] **BD-11** — Declarar longitud en todos los `VARCHAR` (hoy ninguno tiene `(n)`)
-- [ ] **BD-12** — Declarar `NOT NULL`, y añadir los 3 `UNIQUE` que faltan:
-  - `USUARIOS.correo`
-  - `SUJETOS (id_experimento, indice_rata)`
-  - `VIDEOS (id_experimento, dia)`
-  - `ROIS (id_video, id_sujeto)`
-- [ ] **BD-13** — Declarar comportamiento `ON DELETE` en las 14 claves foráneas.
-  RN-09 dice que borrar un experimento elimina video, resultados y reportes → hace falta `CASCADE` explícito.
-
-## 1.3 Problema estructural: conductas como columnas fijas
-
-- [ ] **BD-14** — 🔴 **CRÍTICO.** `RESULTADOS_COMPORTAMIENTO` y `COMPORTAMIENTO_POR_MINUTO`
-  guardan las tres conductas como columnas fijas (`nado_s`, `inmovil_s`, `escape_s`).
-
-  **Contradice el RNF-11** ([`chapters/04_analisis.tex:368`](chapters/04_analisis.tex#L368)):
-  > «El módulo de clasificación debe poder reconfigurarse para soportar paradigmas conductuales
-  > distintos al FST sin modificar la plataforma web.»
-
-  Con el diseño actual, analizar otro paradigma (p. ej. test de suspensión de cola) exige
-  `ALTER TABLE`. **Acción:** catálogo `CONDUCTAS` + una fila por `(espécimen, conducta)`.
-  Esto además hace la 1FN real y no solo declarativa.
-
-## 1.4 Cardinalidades que contradicen las reglas de negocio
-
-- [ ] **BD-15** — `EXPERIMENTOS "1" --o "0..*" VIDEOS` → debe ser `0..2`
-  (RN-03: «Un experimento tiene como máximo dos videos»)
-- [ ] **BD-16** — `ANIMALES "1" --o "0..*" RESULTADOS_COMPORTAMIENTO` → debe ser `1 --o 1`
-  (un resultado por espécimen por trabajo; el desglose ya vive en `COMPORTAMIENTO_POR_MINUTO`)
-
-## 1.5 Terminología y justificación
-
-- [ ] **BD-17** — Renombrar la tabla `ANIMALES` → `ESPECIMENES_ANALIZADOS`.
-  Quedan **12 ocurrencias** de «animal» en el cap. 5:
-  [`05_diseno.tex`](chapters/05_diseno.tex) líneas 245, 301, 318, 326, 330, 367, 415, 477, 479, 2207.
-  *Verificado el 2026-08-25:* la rama `claridad-documento` **sí está mergeada**; la corrección de
-  terminología simplemente nunca alcanzó los nombres de entidad de base de datos del capítulo 5.
-- [ ] **BD-18** — Justificar en el texto por qué `TRABAJOS.progreso_pct` se **almacena** en vez de
-  calcularse (el frontend hace *polling* y necesita leerlo; llega a valor fijo 100 % al terminar).
-  Hoy no está justificado, y ese silencio invita la pregunta del jurado.
-
----
+> Los 18 ítems BD-01 a BD-18 de esta auditoría se referían al esquema anterior
+> (`diagramas/relacional.puml`, 12 tablas). **Ese esquema se descartó por completo.**
+>
+> El diseño se rehizo desde el universo del discurso siguiendo las 15 actividades de la
+> metodología, y el resultado —11 relaciones en BCNF, con 29 restricciones de integridad
+> documentadas— ya cubre todo lo que este bloque señalaba: dominios cerrados, longitudes,
+> nulidad, unicidad y cardinalidades.
+>
+> **Ver `DISENO-BD.md`.** No hay nada que aplicar de este bloque.
 
 # Bloque 2 — Casos de uso y diagramas
 

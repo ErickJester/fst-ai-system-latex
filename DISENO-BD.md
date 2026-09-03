@@ -92,7 +92,7 @@ definida en [`errores/README.md`](errores/README.md):
 | 1 | Respuestas directas del equipo en sesión | Registradas en `errores/` |
 | 2 | Entrevista formal con el Dr. Sandino | `docs/entrevista_sandino.docx` |
 | 3 | Transcripciones de reuniones informales | `errores/fuentes/transcripcion_01_no-formal.md` |
-| 4 | Retroalimentación de la simulación de defensa | `CLAUDE.md`, `docs/Retroalimentacion_*.docx` |
+| 4 | Retroalimentación de la simulación de defensa | `HISTORIAL.md`, `docs/Retroalimentacion_*.docx` |
 | 5 | Documento LaTeX | `chapters/`, `front/` |
 
 > **Regla dura:** el LaTeX es el **destino** de las correcciones, no el árbitro. Ninguna
@@ -240,82 +240,63 @@ Usuario ──registra──> Experimento
 
 ---
 
-## 5. Estado actual y qué sigue
+## 5. Estado actual
 
-### Etapa conceptual
+**Las dos etapas están cerradas.** Conceptual: 8 de 8 actividades. Lógica: 7 de 7.
+Resultado: 11 relaciones en BCNF, 11 llaves foráneas de una columna, 29 restricciones
+documentadas (11 referenciales, 8 de identidad, 10 semánticas).
 
-| # | Actividad | Estado |
-|---|-----------|--------|
-| 1–6 | Conceptos, dominios, identificadores, modelo, esquema, revisión | ✅ Hechas |
-| 7 | Presentación al usuario | ⏳ **Preparada, no ejecutada** — faltan dos reuniones |
-| 8 | Documentación y diccionario | ✅ Hecha (27 atributos) |
+La respuesta a **P-01** —la rata sí tiene identificador propio— cerró la decisión que
+estaba bloqueando todo: desapareció la cadena de seis entidades débiles, las diez
+entidades quedaron fuertes, la agregación se volvió innecesaria y la llave más larga bajó
+de siete componentes a dos.
 
-La actividad 7 requiere **dos revisiones distintas**:
-- **Dr. César Sandino** — que el modelo refleje el protocolo real. Llevar la jerarquía
-  Experimento → Grupo → Tanda → Espécimen, el nombre del nivel «Tanda» (es un nombre de
-  trabajo, el laboratorio no tiene término propio) y las preguntas abiertas Q-06 y Q-07.
-- **Dra. Martha Rosa Cordero** — que los diagramas estén bien construidos. Llevar la
-  agregación, las entidades débiles y las cardinalidades.
+La validación encontró **tres defectos reales**, así que el esquema definitivo no es igual
+al preliminar:
 
-Material de apoyo: [`errores/preguntas-doctor.md`](errores/preguntas-doctor.md).
+| Forma | Dónde | Corrección |
+|-------|-------|-----------|
+| 1FN | `USUARIO` | `nombre` era dominio compuesto → se partió en `nombre` y `apellidos` |
+| 3FN | `ESPECIMEN` | `idGrupo` era derivable de la tanda → columna eliminada |
+| 3FN | `VIDEO` | `duracion` dependía de la sesión → ahora es la duración real del archivo |
 
-### Etapa lógica
+### Lo que falta
 
-| # | Actividad | Estado |
-|---|-----------|--------|
-| 1 | Selección del modelo lógico (relacional, PostgreSQL) | ✅ Hecha |
-| 2 | Transformación → 11 relaciones | ✅ Hecha, en dos versiones |
-| 3 | Restricciones de integridad e identidad | ⏳ Se puede adelantar para las 7 relaciones estables |
-| 4 | Elementos no estructurales para la etapa física | ✅ Ya existen — salen de la actividad 8 del conceptual |
-| 5 | Integración de vistas | ➖ No aplica: una sola vista, sin permisos diferenciados |
-| 6 | Validación con formas normales | 🔴 **Esperar** — normalizar cuatro tablas cuya llave va a cambiar es trabajo que se tira |
-| 7 | Documentación | ⏳ Después de la 6 |
+| Qué | Estado |
+|-----|--------|
+| Revisión del protocolo con el Dr. Sandino | Reunión del 3-sep. Material: `Reunion_Sandino_2026-09-03.pdf` |
+| Revisión de notación con la Dra. Cordero | Misma reunión — es directora del TT |
+| Reescribir el cap. 5 del LaTeX | No iniciado. Es el trabajo grande |
+| Etapa de diseño físico | Arranca cuando cierren las dos revisiones |
 
-### La decisión abierta más importante: llaves naturales vs. subrogadas
+Hasta que ocurran esas dos revisiones, en los términos del método lo que existe es el
+**Esquema Conceptual Inicial**, no el Definitivo.
 
-La transformación al pie de la letra produce una cadena de seis entidades débiles donde
-las llaves se acumulan: `PRESENTA` termina con una **llave primaria de siete
-componentes** y una sola columna de dato. Ambas versiones están documentadas y
-comparadas en el artifact lógico.
+### Preguntas que siguen abiertas
 
-**No decidas esto por tu cuenta.** Depende de si la rata resulta tener un identificador
-propio (pregunta P-01 al Dr. Sandino): si lo tiene, la cadena se acorta sola y el
-problema pierde gravedad; si no, la llave subrogada pasa de conveniencia a necesidad.
-Es la misma pregunta la que resuelve las dos cosas.
-
-> Nota: al pasar a llaves subrogadas **se pierde algo real**. Con llaves naturales, las
-> FK de `OBSERVACION` hacia `ESPECIMEN` y `VIDEO` comparten sus tres primeras columnas,
-> y ese solapamiento garantiza *por estructura* que ambos sean de la misma tanda. Con
-> subrogadas esa restricción deja de ser estructural y pasa a `CHECK` o disparador.
-
-### Preguntas abiertas que bloquean
-
-| ID | Pregunta | Qué bloquea |
-|----|----------|-------------|
-| **P-01** | ¿La rata tiene un identificador propio (arete, marca, número de jaula)? | Si `Espécimen` es entidad débil o fuerte. Reescribe 4 de las 11 relaciones. **La de mayor impacto.** |
-| Q-06 | ¿3–4 experimentos por semestre o por bimestre? | Cadencia de datos, factibilidad |
-| Q-07 | ¿Algún grupo ha superado los 8 especímenes? | Si siempre son 2 tandas por grupo |
-| Q-08 | ¿Autoregistro con aprobación (cap. 1) o solo el Admin crea cuentas (cap. 4, RF-07)? | Si `Usuario` necesita atributo discriminante o especialización |
-| — | Identificador de `Experimento`: ninguna fuente declara clave natural | Decidir entre subrogada o la pareja (nombre, fecha) |
+| ID | Pregunta | Qué decide |
+|----|----------|-----------|
+| P-03 | ¿Con qué se identifica físicamente a la rata: arete, jaula, código? | El dominio de `idLaboratorio` y el alcance de su unicidad. Único atributo del diccionario sin cerrar |
+| P-04 | ¿Una grabación puede mezclar ratas de dos grupos? | Sostiene la corrección de 3FN sobre `ESPECIMEN` |
+| P-02 | ¿La rata usa el mismo cilindro los dos días? | Si `numeroCilindro` vive en `ESPECIMEN` o en `OBSERVACION` |
+| P-05 | ¿Cómo llama el laboratorio a la «tanda»? | El nombre en documento, diagrama e interfaz |
+| P-08 | Al reanalizar un video, ¿se conservan ambos resultados? | Ver la errata estructural de la sección 8 |
+| Q-08 | ¿Autoregistro con aprobación (cap. 1) o solo el Admin (cap. 4, RF-07)? | Si `USUARIO` necesita atributo discriminante |
 
 ### El trabajo grande que falta en el documento
 
-El LaTeX **todavía no refleja el modelo de los artifacts**. Los capítulos 1 y 4 siguen
-usando la noción vieja y plana donde «experimento» = una grabación de ~4 ratas con ≤2
-videos. Los puntos concretos:
+El LaTeX **todavía no refleja el modelo nuevo**. Los capítulos 1 y 4 usan la noción vieja
+y plana donde «experimento» = una grabación de ~4 ratas con ≤2 videos:
 
-- **RF-09, RF-11, RN-03, RF-31** (cap. 4) están escritos con la semántica equivocada de
-  «experimento» y hay que reescribirlos con los niveles Grupo y Tanda.
-- **RF-14** fija «los cuatro cilindros»; el dominio correcto es 3 ó 4, variable.
-  Igual en cap. 1 (4 ocurrencias) y cap. 3 (1).
-- **«Cámara de celular»** aparece en caps. 2, 3 y 4. Es **cámara web** (respuesta del
-  equipo, Q-04).
-- **§3.4 del cap. 3** describe las tablas de la BD sin Grupo ni Tanda.
+- **RF-09, RF-11, RN-03, RF-31** (cap. 4): escritos con la semántica equivocada de
+  «experimento». Reescribir con los niveles Grupo y Tanda.
+- **RF-14** fija «los cuatro cilindros»; el dominio correcto es 3 ó 4. Igual en cap. 1
+  (4 ocurrencias) y cap. 3 (1).
+- **«Cámara de celular»** en caps. 2, 3 y 4 → es **cámara web**.
+- **§3.4 del cap. 3** describe tablas sin Grupo ni Tanda.
 - **RN-04 y RF-16** implican que un video no se reanaliza nunca; el modelo dice (1,N).
-  Hay que distinguir reinicio manual del investigador (prohibido) de reanálisis
-  administrativo (permitido).
 
-Detalle completo por capítulo en [`errores/`](errores/).
+Detalle por capítulo en [`errores/`](errores/).
 
 ---
 
@@ -361,22 +342,27 @@ Además de las de `CLAUDE.md`, que aplican siempre:
 
 ---
 
-## 8. Erratas conocidas en los artifacts
+## 8. Pendientes conocidos en los artifacts
 
-Detectadas en revisión y **pendientes de corregir**:
+### Errata estructural — sin resolver
 
-**Diseño Conceptual**
-- Actividad 1 dice «10 relaciones»; son **9**.
-- Actividad 8 dice «26 atributos» en tres lugares; el conteo real y el recuadro de
-  totales dicen **27**.
-- Actividad 6, tabla de transacciones: dice «por animal» → debe ser «por espécimen».
-- El enlace compartido muestra una **versión anterior fijada**, no la actual.
+`OBSERVACION` cuelga de `VIDEO`, pero la cardinalidad Video–Análisis es (1,N): un video
+puede analizarse varias veces. Como `OBSERVACION` es única por el par (espécimen, video),
+**un reanálisis con resultado distinto no tiene dónde escribirse**, y desde una fila de
+`PRESENTA` no se puede saber qué análisis la produjo ni con qué nivel de clasificación.
 
-**Diseño Lógico**
-- El pie dice `30-08-2026`; la última actualización fue el 02-09.
-- La tabla «Qué es provisional» lista 6 filas pero el recuadro dice 4 provisionales
-  (las 2 últimas tienen reserva menor, pero no llevan distintivo en las tarjetas).
+**Corrección propuesta:** que `OBSERVACION` referencie `idAnalisis` en lugar de `idVideo`,
+con unicidad sobre (espécimen, análisis). El video se alcanza por `ANALISIS → VIDEO`. No
+cambia el número de relaciones ni rompe BCNF.
+
+**No aplicar todavía:** depende de la respuesta a P-08. Si el laboratorio prefiere que el
+reanálisis reemplace al anterior, el esquema se queda como está.
+
+### Publicación
+
+Los enlaces compartidos de ambos artifacts muestran **versiones anteriores fijadas**, no
+la actual. Si alguien externo va a abrirlos, hay que mover el anclaje de compartición.
 
 ---
 
-*Última actualización: 2026-09-01*
+*Última actualización: 2026-09-02*

@@ -17,7 +17,7 @@ la fuente de **menor** autoridad: es el destino de las correcciones, no el árbi
 | 1 | Respuestas directas del equipo en sesión de trabajo | Registradas en este catálogo |
 | 2 | Entrevista formal con el Dr. Sandino | `docs/entrevista_sandino.docx` |
 | 3 | Transcripciones de reuniones informales | [`fuentes/transcripcion_01_no-formal.md`](fuentes/transcripcion_01_no-formal.md) |
-| 4 | Retroalimentación de la simulación de defensa | `CLAUDE.md`, `docs/Retroalimentacion_*.docx` |
+| 4 | Retroalimentación de la simulación de defensa | `HISTORIAL.md`, `docs/Retroalimentacion_*.docx` |
 | 5 | Documento LaTeX | `chapters/`, `front/` |
 
 > **Regla:** ninguna corrección se aplica al LaTeX sin que exista una fuente de rango
@@ -55,10 +55,7 @@ la fuente de **menor** autoridad: es el destino de las correcciones, no el árbi
 | 2 · Estado del arte | [02_estado_arte/errores.md](02_estado_arte/errores.md) | 0 | 2 | 3 | 5 |
 | 3 · Marco teórico | [03_marco_teorico/errores.md](03_marco_teorico/errores.md) | 4 | 4 | 0 | 8 |
 | 4 · Análisis | [04_analisis/errores.md](04_analisis/errores.md) | 4 | 3 | 0 | 7 |
-| 5 · Diseño | [05_diseno/errores.md](05_diseno/errores.md) | — | — | — | *sin revisar* |
-| 6 · Desarrollo | [06_desarrollo/errores.md](06_desarrollo/errores.md) | — | — | — | *sin revisar* |
-| 7 · Pruebas y resultados | [07_pruebas_resultados/errores.md](07_pruebas_resultados/errores.md) | — | — | — | *sin revisar* |
-| 8 · Conclusiones | [08_conclusiones/errores.md](08_conclusiones/errores.md) | — | — | — | *sin revisar* |
+| 5 a 8 | [pendientes.md](pendientes.md) | — | — | — | *sin revisar — consolidados* |
 | Preliminares | [front/errores.md](front/errores.md) | 0 | 2 | 0 | 2 |
 
 ---
