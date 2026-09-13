@@ -16,7 +16,7 @@ la fuente de **menor** autoridad: es el destino de las correcciones, no el árbi
 |-------|--------|-----------|
 | 1 | Respuestas directas del equipo en sesión de trabajo | Registradas en este catálogo |
 | 2 | Entrevista formal con el Dr. Sandino | `docs/entrevista_sandino.docx` |
-| 3 | Transcripciones de reuniones informales | [`fuentes/transcripcion_01_no-formal.md`](fuentes/transcripcion_01_no-formal.md) |
+| 3 | Transcripciones de reuniones | [`fuentes/transcripcion_01_no-formal.md`](fuentes/transcripcion_01_no-formal.md) · [`fuentes/transcripcion_02_reunion_2026-09-03.md`](fuentes/transcripcion_02_reunion_2026-09-03.md) |
 | 4 | Retroalimentación de la simulación de defensa | `HISTORIAL.md`, `docs/Retroalimentacion_*.docx` |
 | 5 | Documento LaTeX | `chapters/`, `front/` |
 

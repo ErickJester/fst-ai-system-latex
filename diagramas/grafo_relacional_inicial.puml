@@ -1,0 +1,204 @@
+@startuml grafo_relacional_inicial
+' ================================================================
+'  Grafo Relacional INICIAL - Esquema Logico Preliminar
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Salida de la actividad 2 (transformacion) de la etapa de diseno
+'  logico, ANTES de validarla contra las formas normales.
+'
+'  Es el PRIMERO de los dos entregables que pide el metodo. Existe
+'  para dejar evidencia del paso de validacion: sin el, la
+'  actividad 6 no tiene un antes contra el cual comparar.
+'
+'  11 relaciones - 46 atributos - 12 llaves foraneas.
+'  ESPECIMEN es la unica relacion con dos padres.
+'
+'  Diferencias contra grafo_relacional_final.puml (5):
+'    1FN    USUARIO.nombre sin separar de apellidos
+'    3FN    ESPECIMEN.idGrupo, derivable por la tanda
+'    3FN    VIDEO.duracion = duracion nominal de la sesion
+'    3-sep  ESPECIMEN.idLaboratorio, unico en todo el laboratorio
+'    3-sep  GRUPO.tratamiento admite nulo
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/grafo_relacional_inicial.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam BackgroundColor White
+skinparam nodesep 38
+skinparam ranksep 48
+
+' Esto es un grafo relacional, no un diagrama de clases: fuera el
+' circulo <<C>> de UML que PlantUML pone en cada cabecera.
+hide circle
+
+title Grafo relacional **inicial**\nEsquema Logico Preliminar — sin validar\n11 relaciones · 46 atributos · 12 llaves foraneas
+
+skinparam class {
+  BackgroundColor       #FAFAFA
+  BorderColor           #3A3A3A
+  BorderThickness       1
+  HeaderBackgroundColor #1B4F8A
+  HeaderFontColor       #FFFFFF
+  HeaderFontSize        11
+  HeaderFontStyle       bold
+  AttributeFontSize     9
+  AttributeFontColor    #1A1A1A
+}
+
+skinparam arrow {
+  Color     #3A3A3A
+  Thickness 1
+  FontSize  8
+  FontColor #3A3A3A
+}
+
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+'  RELACIONES  (las cinco marcadas en rojo son las que la
+'  validacion de la actividad 6 y la revision del 3-sep corrigen)
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+class USUARIO #FFF4F0 {
+  <u>idBoleta</u>
+  --
+  nombre   <&warning> dominio compuesto
+  correo   [AK]
+  contrasena
+}
+
+class EXPERIMENTO {
+  <u>idExperimento</u>
+  --
+  idBoleta   [FK]
+  nombre
+  fecha
+  notas   (nulo)
+}
+
+class GRUPO #FFF4F0 {
+  <u>idGrupo</u>
+  --
+  idExperimento   [FK] [AK]
+  etiqueta   [AK]
+  tipo
+  tratamiento   (nulo)
+}
+
+class TANDA {
+  <u>idTanda</u>
+  --
+  idGrupo   [FK] [AK]
+  ordinal   [AK]
+  nCilindros
+}
+
+class ESPECIMEN #FFF4F0 {
+  <u>idEspecimen</u>
+  --
+  idGrupo   [FK]   <&warning> transitiva
+  idTanda   [FK] [AK]
+  idLaboratorio   [AK global]
+  numeroCilindro   [AK]
+}
+
+class VIDEO #FFF4F0 {
+  <u>idVideo</u>
+  --
+  idTanda   [FK] [AK]
+  sesion   [AK]
+  archivo
+  duracion   <&warning> nominal de la sesion
+  fechaCarga
+}
+
+class ANALISIS {
+  <u>idAnalisis</u>
+  --
+  idVideo   [FK]
+  estado
+  etapa
+  confianza
+  nivelClasif
+  fechaAnalisis
+}
+
+class OBSERVACION {
+  <u>idObservacion</u>
+  --
+  idEspecimen   [FK] [AK]
+  idVideo   [FK] [AK]
+}
+
+class INTERVALO {
+  <u>idIntervalo</u>
+  --
+  idObservacion   [FK] [AK]
+  minuto   [AK]
+}
+
+class CONDUCTA {
+  <u>nombre</u>
+}
+
+class PRESENTA {
+  <u>idIntervalo</u>   [FK]
+  <u>conducta</u>   [FK]
+  --
+  segundos
+}
+
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+'  ARISTAS  -  doce, una por llave foranea
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+USUARIO      "1" --o "0..*" EXPERIMENTO   : idBoleta
+EXPERIMENTO  "1" --o "3..*" GRUPO         : idExperimento
+GRUPO        "1" --o "2..*" TANDA         : idGrupo
+GRUPO        "1" --o "6..*" ESPECIMEN     : idGrupo
+TANDA        "1" --o "3..4" ESPECIMEN     : idTanda
+TANDA        "1" --o "1..2" VIDEO         : idTanda
+VIDEO        "1" --o "1..*" ANALISIS      : idVideo
+ESPECIMEN    "1" --o "1..2" OBSERVACION   : idEspecimen
+VIDEO        "1" --o "3..4" OBSERVACION   : idVideo
+OBSERVACION  "1" --o "5"    INTERVALO     : idObservacion
+INTERVALO    "1" --o "2..3" PRESENTA      : idIntervalo
+CONDUCTA     "1" --o "0..*" PRESENTA      : conducta
+
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+'  NOTAS  -  los tres defectos que la actividad 6 encuentra
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+note left of USUARIO
+  **Defecto 1 — 1FN.**
+  nombre guarda el nombre completo, que
+  es un valor descomponible. Se parte en
+  nombre + apellidos.
+end note
+
+note left of ESPECIMEN
+  **Defecto 2 — 3FN.**
+  idEspecimen → idTanda → idGrupo. Una
+  tanda pertenece a un solo grupo, asi que
+  guardar idGrupo aqui es guardar dos veces
+  el mismo hecho. Se elimina: ESPECIMEN
+  queda con un solo padre y las FK bajan
+  de 12 a 11.
+end note
+
+note right of VIDEO
+  **Defecto 3 — 3FN.**
+  duracion es la del protocolo: 20 min el
+  Dia 1, 5 min el Dia 2. Luego
+  sesion → duracion, y sesion no es la
+  llave. Se redefine como la duracion real
+  del archivo cargado.
+end note
+
+@enduml

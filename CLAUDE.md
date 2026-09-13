@@ -6,6 +6,13 @@
 
 ---
 
+## Modo de lectura
+
+Al iniciar cada sesión en este proyecto, activa el modo i-have-adhd (skill i-have-adhd) y
+mantenlo activo hasta que el usuario diga "stop adhd mode" o "normal mode".
+
+---
+
 ## Commits y autoría
 
 - NUNCA agregar `Co-Authored-By: Claude` ni ninguna referencia a Claude, Anthropic o IA

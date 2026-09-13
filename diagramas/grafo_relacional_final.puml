@@ -1,0 +1,183 @@
+@startuml grafo_relacional_final
+' ================================================================
+'  Grafo Relacional FINAL - Esquema Logico Definitivo
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Salida de la actividad 6 (validacion) de la etapa de diseno
+'  logico, ya normalizado. Es el SEGUNDO de los dos entregables
+'  que pide el metodo: el primero es grafo_relacional_inicial.puml,
+'  y los dos deben presentarse juntos --- publicar solo el final
+'  deja sin evidencia el paso de validacion.
+'
+'  11 relaciones - 46 atributos - 11 llaves foraneas, todas de una
+'  sola columna. Verificado en BCNF relacion por relacion.
+'
+'  NO lleva tipos de dato (VARCHAR, INTEGER...): los tipos son de
+'  la etapa fisica. Este es el modelo logico.
+'
+'  Sustituye a diagramas/relacional.puml, que modelaba el esquema
+'  anterior (sin los niveles Grupo y Tanda).
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/grafo_relacional_final.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam BackgroundColor White
+skinparam nodesep 38
+skinparam ranksep 48
+
+' Esto es un grafo relacional, no un diagrama de clases: fuera el
+' circulo <<C>> de UML que PlantUML pone en cada cabecera.
+hide circle
+
+' Sin titulo y sin notas a proposito: el grafo se presenta desnudo.
+' Lo que decia el titulo (BCNF, 11 relaciones, 46 atributos, 11 FK)
+' va en el pie de figura del capitulo 5; lo que decian las notas
+' --- por que ESPECIMEN tiene un solo padre, el pendiente D-04 de
+' la clave alterna, y que 'segundos' es el unico dato medido ---
+' va en la prosa de la seccion de normalizacion.
+' El grafo inicial si las conserva: ahi marcan los tres defectos.
+
+skinparam class {
+  BackgroundColor       #FAFAFA
+  BorderColor           #3A3A3A
+  BorderThickness       1
+  HeaderBackgroundColor #1B4F8A
+  HeaderFontColor       #FFFFFF
+  HeaderFontSize        11
+  HeaderFontStyle       bold
+  AttributeFontSize     9
+  AttributeFontColor    #1A1A1A
+}
+
+skinparam arrow {
+  Color     #3A3A3A
+  Thickness 1
+  FontSize  8
+  FontColor #3A3A3A
+}
+
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+'  RELACIONES
+'  <u>subrayado</u> = llave primaria
+'  [FK] = llave foranea     [AK] = participa en una clave alterna
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+class USUARIO {
+  <u>idBoleta</u>
+  --
+  nombre
+  apellidos
+  correo   [AK]
+  contrasena
+}
+
+class EXPERIMENTO {
+  <u>idExperimento</u>
+  --
+  idBoleta   [FK]
+  nombre
+  fecha
+  notas   (nulo)
+}
+
+class GRUPO {
+  <u>idGrupo</u>
+  --
+  idExperimento   [FK] [AK]
+  etiqueta   [AK]
+  tipo
+  tratamiento
+}
+
+class TANDA {
+  <u>idTanda</u>
+  --
+  idGrupo   [FK] [AK]
+  ordinal   [AK]
+  nCilindros
+}
+
+class ESPECIMEN {
+  <u>idEspecimen</u>
+  --
+  idTanda   [FK] [AK]
+  numeroRata   [AK]
+  numeroCilindro   [AK]
+}
+
+class VIDEO {
+  <u>idVideo</u>
+  --
+  idTanda   [FK] [AK]
+  sesion   [AK]
+  archivo
+  duracion
+  fechaCarga
+}
+
+class ANALISIS {
+  <u>idAnalisis</u>
+  --
+  idVideo   [FK]
+  estado
+  etapa
+  confianza
+  nivelClasif
+  fechaAnalisis
+}
+
+class OBSERVACION {
+  <u>idObservacion</u>
+  --
+  idEspecimen   [FK] [AK]
+  idVideo   [FK] [AK]
+}
+
+class INTERVALO {
+  <u>idIntervalo</u>
+  --
+  idObservacion   [FK] [AK]
+  minuto   [AK]
+}
+
+class CONDUCTA {
+  <u>nombre</u>
+}
+
+class PRESENTA {
+  <u>idIntervalo</u>   [FK]
+  <u>conducta</u>   [FK]
+  --
+  segundos
+}
+
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+'  ARISTAS  -  una por llave foranea, dirigidas a la relacion
+'  referenciada. Las multiplicidades vienen del esquema conceptual.
+'
+'  Sin etiqueta de atributo: el nombre de cada foranea ya se lee
+'  en la relacion de origen, marcado [FK]. Ponerlo tambien sobre
+'  la arista lo repite.
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+USUARIO      "1" --o "0..*" EXPERIMENTO
+EXPERIMENTO  "1" --o "3..*" GRUPO
+GRUPO        "1" --o "2..*" TANDA
+TANDA        "1" --o "3..4" ESPECIMEN
+TANDA        "1" --o "1..2" VIDEO
+VIDEO        "1" --o "1..*" ANALISIS
+ESPECIMEN    "1" --o "1..2" OBSERVACION
+VIDEO        "1" --o "3..4" OBSERVACION
+OBSERVACION  "1" --o "5"    INTERVALO
+INTERVALO    "1" --o "2..3" PRESENTA
+CONDUCTA     "1" --o "0..*" PRESENTA
+
+@enduml

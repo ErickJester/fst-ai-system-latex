@@ -1,194 +1,166 @@
-# Material para la próxima reunión con el Dr. Sandino
+# Material para la reunión presencial en ESCOM
 
-**Última actualización:** 2026-08-30
-**Propósito:** acumular lo que hay que validar y preguntar. De aquí se formulan las preguntas de cada reunión.
+**Última actualización:** 2026-09-03, tras la reunión virtual del mismo día
+**Cuándo:** lunes o viernes, 14:00–16:00 · pendiente confirmar disponibilidad de la Dra. Martha Cordero
+**Asistentes previstos:** Dr. Sandino · Dr. Israel Salas · Dra. Martha Cordero · Ángel · Vanesa
 
-> **Cómo usar este documento.** La sección 1 son **conceptos que entendimos y hay que confirmar** —se le leen al doctor tal cual—. La sección 2 son **preguntas directas**. La sección 3 registra datos nuevos que aún no llegan al documento. La sección 4 lista lo ya respondido, para no volver a preguntarlo.
->
-> Jerarquía de fuentes y catálogo de errores: ver [README.md](README.md).
-
----
-
-# 1 · Conceptos a validar
-
-Cosas que dedujimos al modelar la base de datos y que **hay que confirmar con el laboratorio** antes de fijarlas en el documento del TT.
-
-## 1.1 · Qué estamos llamando «tanda»
-
-> **Para leerle al doctor.** El objetivo es que confirme si entendimos bien, y sobre todo si el laboratorio ya tiene una palabra propia para esto.
-
-### El problema que la hizo aparecer
-
-Al modelar la base de datos encontramos que la palabra **«experimento»** se estaba usando para dos cosas distintas:
-
-- **El estudio completo** — 4 grupos, entre 32 y 48 ratas, alrededor de 8 videos
-- **Una sola grabación** — las 3 o 4 ratas que salen juntas en un mismo video
-
-Son cosas distintas y hacía falta un nombre para la segunda. Le pusimos **«tanda»** de forma provisional.
-
-### Qué llamamos tanda
-
-> Una **tanda** es el conjunto de ratas que se graban **juntas en el mismo video**, es decir, las que comparten encuadre.
-
-Como en el encuadre caben **máximo 4 cilindros** y un grupo tiene entre **6 y 8 ratas**, un grupo no cabe en una sola grabación: **necesita dos tandas**.
-
-### Ejemplo concreto
-
-```
-Experimento «Molécula X»  (el estudio completo)
-│
-├── Grupo control            8 ratas
-│     ├── Tanda 1   →  4 ratas  →  video Día 1  +  video Día 2
-│     └── Tanda 2   →  4 ratas  →  video Día 1  +  video Día 2
-│
-├── Grupo fluoxetina         8 ratas
-│     ├── Tanda 1   →  4 ratas  →  video Día 1  +  video Día 2
-│     └── Tanda 2   →  4 ratas  →  video Día 1  +  video Día 2
-│
-├── Grupo tratamiento A      8 ratas   → 2 tandas
-└── Grupo tratamiento B      8 ratas   → 2 tandas
-                                        ─────────────
-                              8 tandas  →  8 videos de Día 2
-```
-
-Eso cuadra con lo que el doctor declaró en la entrevista: *«promedio de 4 grupos y 32 a 48 especímenes, lo que genera alrededor de 8 videos por experimento»*.
-
-### Lo que ya está confirmado sobre la tanda
-
-| Afirmación | Estado |
-|---|---|
-| Las ratas de una tanda son **siempre del mismo grupo** experimental | ✅ confirmado |
-| La **misma tanda** se graba los dos días, con las mismas ratas en los mismos cilindros | ✅ confirmado |
-| El encuadre y la posición de los cilindros **no cambian** entre el Día 1 y el Día 2 | ✅ confirmado |
-| Caben entre **3 y 4 cilindros** a cuadro, nunca más de 4 | ✅ confirmado |
-
-### Lo que falta preguntar
-
-**¿El laboratorio ya tiene una palabra para esto?** «Tanda» es un nombre que inventamos nosotros. Puede que ustedes le digan *corrida*, *lote*, *sesión de grabación*, *bloque* o algo más.
-
-**Por qué importa el nombre:** va a aparecer en el documento escrito del TT, en el diagrama de la base de datos y en la interfaz del sistema. Es mucho mejor usar el término que el laboratorio ya usa que imponer uno inventado.
+> La reunión del 3-sep cerró siete preguntas. Lo que queda son tres para el laboratorio, un
+> bloque para la Dra. Cordero —que no estuvo en la virtual— y los compromisos pendientes.
+> Fuente de las respuestas nuevas: [`fuentes/transcripcion_02_reunion_2026-09-03.md`](fuentes/transcripcion_02_reunion_2026-09-03.md).
 
 ---
 
-# 2 · Preguntas abiertas
+# 1 · Preguntas prioritarias
 
-Ordenadas por impacto en el diseño. Las tres primeras cambian el modelo de datos.
+## Q-A · Las dos técnicas de cuantificación 🔴
 
-## P-01 · ¿Cómo se identifica a una rata individualmente? 🔴
+**Por qué se pregunta.** En la reunión apareció que el laboratorio ha usado dos formas de
+contar la conducta, y producen números de distinta naturaleza:
 
-**Por qué se pregunta.** Hasta ahora, en todo el material disponible, la única forma de distinguir una rata de otra es **la posición del cilindro en el encuadre**. Ninguna fuente menciona arete, tatuaje, marca, número ni peso.
-
-**Qué preguntar concretamente:**
-- ¿Cada rata tiene algún identificador propio? ¿Arete, marca con plumón, tatuaje, número de jaula?
-- ¿Ese identificador se anota en algún lado —bitácora, Excel— junto con el video?
-- ¿Se puede saber, viendo un video, cuál rata es cuál más allá de su posición?
-
-**Qué cambia según la respuesta:**
-
-| Si la respuesta es… | Consecuencia en el modelo |
-|---|---|
-| **No hay identificador** — solo la posición | Se queda como está: la rata es una «entidad débil» que solo existe dentro de su tanda, y todo depende de que el encuadre no cambie |
-| **Sí hay identificador** | La rata pasa a ser una entidad con identidad propia. El modelo mejora: deja de depender del encuadre, y se podría seguir a la misma rata entre experimentos distintos |
-
-**La segunda opción es mejor**, así que vale la pena insistir en esta pregunta.
-
-## P-02 · ¿Cómo le dicen ustedes a lo que llamamos «tanda»? 🟡
-
-Ver la explicación completa en la sección 1.1. Se trata de adoptar el término del laboratorio en vez del que inventamos.
-
-## P-03 · ¿El sistema usará número de boleta como identificador de usuario? 🟡
-
-**Contexto.** Se decidió que cada usuario del sistema tenga un identificador único: el **número de boleta**.
-
-**El problema.** En el IPN la boleta es de **estudiantes**. Los profesores e investigadores tienen **número de empleado**, no boleta. Y según la entrevista (P14), los usuarios del sistema serían *«máximo tres personas más el doctor»* — es decir, el Dr. Sandino **es usuario del sistema**.
-
-**Qué preguntar:**
-- ¿El doctor tiene número de boleta, o su identificador institucional es otro?
-- ¿Los usuarios serán siempre tesistas y estudiantes, o también personal con nombramiento?
-
-**Por qué importa:** si algunos usuarios no tienen boleta, el identificador no puede ser la boleta a secas. Habría que usar un identificador institucional más general, o una clave propia del sistema.
-
-## P-04 · ¿Los experimentos son por semestre o por bimestre? 🟡
-
-**Contexto.** En la grabación de la entrevista el doctor dice *«por bimestre se pueden realizar entre tres y cuatro experimentos independientes»*, pero cierra la cuenta con *«por semestre estaríamos hablando de entre 32 y 40 videos»*.
-
-Las dos cifras solo cuadran si son **por semestre**: con «bimestre» saldrían más de 70 videos por semestre, que no coincide con lo que él mismo reportó.
-
-**Qué preguntar:** ¿cuántos experimentos independientes se realizan por semestre? Probablemente fue un lapsus al hablar, pero conviene confirmarlo porque afecta la planeación de TT-II.
-
-## P-05 · ¿Algún grupo experimental ha tenido más de 8 ratas? 🟡
-
-**Por qué se pregunta.** Con 6–8 ratas por grupo y máximo 4 por encuadre, salen siempre **dos tandas por grupo**. Si algún grupo puede tener más de 8, serían tres o más tandas y el modelo tiene que admitirlo.
-
-**Qué preguntar:** ¿el rango de 6 a 8 ratas por grupo es fijo, o alguna vez han trabajado con grupos más grandes?
-
-## P-06 · ¿Cómo se crea una cuenta en el sistema? 🟡
-
-**Por qué se pregunta.** El documento del TT se contradice a sí mismo:
-
-| Fuente | Dice |
-|---|---|
-| Capítulo 1 | «registro de usuario **con aprobación del administrador**» → el usuario se registra solo y alguien aprueba |
-| Capítulo 4 (RF-07) | «Solo el Administrador puede crear cuentas. **No existe formulario público de autoregistro**» |
-
-**Qué preguntar:**
-- ¿Prefiere que la gente se registre sola y usted (o alguien) apruebe, o que alguien cree las cuentas directamente?
-- ¿Quién haría de administrador?
-
----
-
-# 3 · Datos nuevos registrados
-
-Decisiones y datos que llegaron después de la última versión del documento del TT y que todavía **no están escritos en el LaTeX**.
-
-| Dato | Detalle | Estado |
+| | Cómo se hace | Qué sale |
 |---|---|---|
-| **Identificador de usuario** | Será un identificador único: `idBoleta` | Decidido por el equipo · ver P-03 |
-| **Identificador de rata** | Se quiere que exista, pero falta definir cuál | Pendiente · ver P-01 |
-| **Dispositivo de grabación** | Cámara **web**, no celular. El documento dice «cámara de celular» y está mal | Confirmado · corregir en cap. 3 y 4 |
-| **Iluminación** | ~2,500 lúmenes es el estándar del laboratorio | Confirmado |
-| **Acervo histórico** | Los 80–100 videos antiguos **quedan fuera** del sistema; solo se usan para entrenar el modelo | Confirmado |
-| **Unidad del desglose** | En **segundos** | Confirmado |
-| **Reanálisis** | Un video **sí** se puede volver a analizar | Confirmado |
-| **El «otro equipo»** | Trabaja con ansiolíticos y laberinto T elevado — otro paradigma, no compite con el FST | Confirmado |
+| **Por segundo** (continua) | Cronómetro corriendo; se acumula cuánto duró cada conducta | «Nadó 43 segundos» |
+| **Por eventos** | Se mira a la rata exactamente en 0:05, 0:10, 0:15… y se anota qué hace en ese instante | «12 eventos de nado» |
+
+El sistema produce **segundos**. Si un archivo de referencia está hecho por eventos y se usa para
+medir el desempeño del clasificador, se estarían comparando segundos contra conteos y el
+resultado no significaría nada.
+
+**Qué preguntar:**
+
+1. De los archivos de Excel que nos va a compartir, ¿cómo distinguimos cuáles se hicieron
+   contando segundos y cuáles por eventos? ¿Viene indicado en el archivo o hay que preguntarlo
+   caso por caso?
+2. ¿La técnica por eventos se sigue usando hoy, o ya solo cuentan por segundo?
+3. ¿Le serviría que el sistema, además de los segundos, reporte el conteo por eventos? Es
+   barato de calcular a partir del mismo análisis.
+
+**Qué cambia según la respuesta:** si la mayoría de los análisis manuales son por eventos, el
+conjunto de prueba se reduce a los que sean continuos, o hay que agregar el reporte por eventos
+para poder comparar. Afecta al objetivo específico 5 y al requisito RNF-02.
+
+**De paso, aclarar una duda relacionada:** el criterio de que una conducta debe durar de 3 a 5
+segundos para contar, ¿pertenece al conteo continuo, o viene de la técnica que muestrea cada 5
+segundos? El requisito RF-18 del documento lo tiene fijado en 3 segundos continuos.
+
+## Q-B · Cuántos videos deja un experimento completo 🔴
+
+**Por qué se pregunta.** Es una cuenta que no cierra y que está metida en el diagrama. La
+entrevista dice que un experimento genera «alrededor de 8 videos». Pero si 32 ratas se graban de
+4 en 4, son 8 tandas — y si cada tanda se graba los dos días, serían 16 videos, no 8.
+
+**Qué preguntar, en concreto:**
+
+> En un experimento completo de tres grupos de 8 ratas: ¿cuántos archivos de video quedan
+> grabados en total? ¿Solo los del Día 2, o también se graban los del Día 1 de cada grupo?
+
+**Qué cambia:** el número que aparece en el diagrama y en el capítulo 1. Hoy asumimos que los
+8 son los del Día 2 y que el Día 1 se graba solo a veces — pero esa lectura es nuestra, él nunca
+lo dijo así.
+
+## Q-C · Volumen real de trabajo 🟡
+
+**Por qué se pregunta.** El capítulo 1 justifica el proyecto con «en un semestre con entre 32 y
+40 videos… más de 200 horas-persona». Esa cifra venía de la entrevista formal. En la reunión dijo
+que no hay cadencia por calendario: los experimentos dependen del avance del proyecto, y un
+proyecto dura de 1 a 4 años. Con eso, «por semestre» deja de ser una unidad defendible.
+
+**Qué preguntar, evitando el marco del calendario:**
+
+1. ¿Cuántos experimentos completos alcanzaron a correr **en el último año**?
+2. ¿Cuántos videos de nado forzado tienen guardados **en total** a día de hoy?
+3. Cuando corren un experimento, ¿cuánto tiempo pasa entre que se graba y que terminan de
+   analizarlo a mano?
+
+**Por qué así.** Las tres son retrospectivas y contables, no tasas. Con la primera y la respuesta
+a Q-B sale el volumen anual sin discutir semestres.
+
+**Qué haríamos con la respuesta:** reformular la justificación del capítulo 1 **por experimento**
+en vez de por semestre. Un experimento de 8 videos de Día 2, a ~2 h por video y por analista, con
+tres analistas, son ~48 horas-persona por experimento. Ese número aguanta cualquier cadencia.
 
 ---
 
-# 4 · Ya respondido — no volver a preguntar
+# 2 · Preguntas sin prioridad
 
-Para no repetir preguntas que el doctor ya contestó.
+## Q-D · El nivel «proyecto» ⚪
+
+En la reunión mencionó que un proyecto contiene 5 o 6 experimentos y dura de 1 a 4 años. Nuestro
+modelo no tiene ese nivel: el `Experimento` es lo más alto.
+
+**Decisión tomada:** no se modela, y **no se escribe nada sobre «proyecto» en el documento**
+hasta confirmar a qué se refiere. No hay prisa por preguntarlo.
+
+Si alguna vez preguntan: ¿le sería útil ver sus experimentos agrupados por proyecto dentro del
+sistema, o con la lista plana es suficiente?
+
+---
+
+# 3 · Para la Dra. Martha Cordero — revisión de notación
+
+No estuvo en la reunión virtual, así que la revisión de construcción de diagramas que quedó
+solicitada en la simulación de defensa sigue pendiente. Llevar el diagrama entidad-relación y el
+grafo relacional final.
+
+| Ref | Qué poner sobre la mesa |
+|-----|-------------------------|
+| MC-01 | La **entidad asociativa** `Observación`: reúne una rata con un video y de ahí cuelga el desglose por minuto. La modelamos con identificador propio y dos interrelaciones ordinarias, no como agregación. ¿Está bien construida así? |
+| MC-02 | `Espécimen` **cuelga de dos entidades**: del Grupo, que dice qué tratamiento recibió, y de la Tanda, que dice en qué video salió. ¿Se lee bien esa doble dependencia? |
+| MC-03 | Las **cardinalidades** están anotadas como par mínimo-máximo en cada extremo, con valores del protocolo. ¿La notación es correcta y están del lado que corresponde? |
+| MC-04 | Confirmar que los **tres diagramas** corresponden a lo esperado: el entidad-relación es la etapa conceptual, el grafo relacional es la lógica en sus dos versiones, y el de clases es UML por otro eje |
+| MC-05 | Los **casos de uso** que quedaron observados: la autenticación no es visible en el diagrama general, el `extend` no refleja las condiciones del flujo, y los casos de uso por paquete no se ven |
+
+---
+
+# 4 · Compromisos pendientes del laboratorio
+
+| Entregable | Estado |
+|---|---|
+| Carpeta «nado forzado» en Teams con los videos faltantes | Prometido para el día siguiente a la reunión |
+| Artículo de Porsolt — describe cómo se interpreta cada conducta | Prometido |
+| Video de protocolos que explica conducta por conducta | Lo iba a buscar; puede que ya no esté disponible |
+| Presentación en Teams › Compartidos › «Sesión Depresión» | ✅ Entregado en la sesión |
+| Acceso a Teams para Ángel y Vanesa | ✅ Concedido en la sesión |
+
+**Del equipo:** recordarle por la mañana lo de los videos y los artículos.
+
+---
+
+# 5 · Ya respondido — no volver a preguntar
 
 | Tema | Respuesta | Fuente |
-|---|---|---|
-| Roles de usuario | Un solo rol de investigador, sin permisos diferenciados entre ellos | Entrevista P1 |
-| Acceso a resultados | Todos los que tengan cuenta pueden ver todos los experimentos | Entrevista P18 |
-| Usuarios simultáneos | Una persona a la vez; 4 usuarios posibles en el mismo periodo | Entrevista P14 |
+|------|-----------|--------|
+| Identificación de la rata | Marca de plumón indeleble en la cola, con líneas. Numeradas del 1 al 8 dentro de su grupo | Reunión 3-sep |
+| Alcance del identificador | Vive solo mientras dura el experimento: las ratas se sacrifican al terminar. No hay seguimiento entre experimentos | Equipo |
+| ¿Un video mezcla grupos? | No. Cada video lleva solo ratas del mismo tratamiento | Reunión 3-sep |
+| Posición entre sesiones | La misma rata vuelve al mismo cilindro el Día 2 | Reunión 3-sep · equipo (90 % de certeza) |
+| Tamaño de grupo | 8 es lo normal, 6 el mínimo, 12 lo habitual como máximo. **Sin límite** en el sistema | Reunión 3-sep · equipo |
+| Nombre de «tanda» | El laboratorio no tiene palabra para ese nivel. Sí llama «sesión» a cada una de las dos grabaciones | Reunión 3-sep |
+| Reanálisis de un video | Se conserva solo el análisis más reciente. No hay escenario real de reanálisis desde el laboratorio | Reunión 3-sep · equipo |
+| Día 1 | Cada grupo puede tener o no su Día 1. Sirve para verificar que todas lleguen igual de estresadas, no para medir el efecto del tratamiento | Equipo |
+| Grupo control | Sí recibe placebo el Día 2, porque el estrés de la inyección debe ser igual en los tres grupos. El Día 1 nadie recibe nada | Equipo |
+| Qué se compara | Los 5 minutos del Día 2, entre los tres grupos | Reunión 3-sep |
+| Roles de usuario | Un solo rol de investigador, sin permisos diferenciados | Entrevista P1 |
+| Acceso a resultados | Todos los que tengan cuenta ven todos los experimentos | Entrevista P18 |
 | Formato de video | Siempre MP4 | Entrevista P5 |
-| Duración de sesiones | 20 min el Día 1, 5 min el Día 2, 24 h de diferencia | Entrevista P4 |
-| Qué se analiza del Día 1 | Solo los primeros 5 min, y solo del grupo control | Entrevista PC |
 | Conductas | Tres: nado activo, inmovilidad y escalamiento. El buceo cuenta como nado | Entrevista P7 |
-| Episodio válido | La conducta debe mantenerse de 3 a 5 segundos | Entrevista P6 |
 | Concordancia aceptable | 85 % o más contra el analista humano | Entrevista P8 |
-| Variabilidad humana actual | 15–20 % entre analistas | Transcripción informal |
-| Tiempo de análisis manual | ~30 min por rata; ~2 h por video de 4 ratas; por triplicado | Entrevista P12 · transcripción |
-| Grupos experimentales | 6–8 ratas por grupo, mínimo 3 grupos, promedio 4 | Entrevista PA · P19 |
-| El grupo control | Sin placebo ni fármaco, solo nado forzado | Entrevista PB |
+| Variabilidad humana actual | 15–20 % entre analistas | Transcripción 01 |
+| Tiempo de análisis manual | ~30 min por rata; ~2 h por video de 4 ratas; por triplicado | Entrevista P12 |
 | Retención de videos | 30 días es suficiente | Entrevista P17 |
 | Disponibilidad | 24/7 sería lo ideal | Entrevista P16 |
 | Infraestructura | Preferentemente en la nube | Entrevista P15 |
 | Estructura del CSV | Cabecera de tiempo + una columna por conducta, en segundos | Entrevista P10 |
-| Comparación estadística | Por grupo: media, desviación estándar y varianza; luego grupo contra grupo | Entrevista P11 |
 | Entrenamiento del modelo | Con clips cortos de conducta inequívoca, no con los reportes completos | Entrevista PD |
 | Nombre del laboratorio | Laboratorio de Bioquímica Estructural, Sección de Posgrado, ENMyH-IPN | Entrevista PE |
 
 ---
 
-# 5 · Compromisos pendientes del laboratorio
+# 6 · Decisiones internas, no son para el laboratorio
 
-Cosas que el Dr. Sandino se comprometió a entregar y que conviene recordar en la reunión.
-
-| Entregable | Estado |
-|---|---|
-| Reportes / análisis manuales de los videos ya compartidos | Pendiente — «estoy localizando los archivos de Excel» |
-| Guía o manual de cómo identificar las conductas | Pendiente — mencionado en la reunión |
-| Coordinar reunión conjunta con el otro equipo y el Dr. Israel Salas | Pendiente |
+| Ref | Decisión | Quién |
+|-----|----------|-------|
+| D-01 | Cómo se crea una cuenta: el cap. 1 dice «registro con aprobación del administrador» y el cap. 4 (RF-07) dice que no existe autoregistro. Hay que elegir uno | Directores |
+| D-02 | Identificador de usuario: la boleta no sirve, el Dr. Sandino tiene número de empleado | Directores |
+| D-03 | Si reprocesar videos viejos tras reentrenar el clasificador en TT-II. Es motivo del sistema, no del laboratorio, y decide si `Video — Análisis` es (1,1) o (1,N) | Equipo |
+| D-04 | Cómo se garantiza que el número de rata no se repita dentro de su grupo, ahora que `idGrupo` no está en `ESPECIMEN`: disparador o redundancia controlada | Equipo |

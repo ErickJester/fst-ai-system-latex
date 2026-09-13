@@ -1,0 +1,185 @@
+% ================================================================
+%  Esquema Conceptual - Base de datos FST
+%  TT 2026-B066 | ESCOM-IPN
+%  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+% ----------------------------------------------------------------
+%  Salida de la actividad 5 de la etapa de diseno conceptual.
+%  Modelo: Entidad-Relacion Extendido (EER), notacion de Chen con
+%  cardinalidades (minimo,maximo).
+%
+%  Sustituye a figures/mermaid/entidadRelacion.png, que pese a su
+%  titulo mostraba el esquema fisico (tipos SQL, PK/FK) y no un
+%  esquema conceptual.
+%
+%  Por que TikZ y no PlantUML: las cardinalidades (3,4) (5,5) (6,N)
+%  (2,3) (1,2) no son expresables en notacion de pata de gallo, que
+%  es la unica que PlantUML soporta para ER.
+%
+%  10 entidades - todas fuertes - y 11 interrelaciones.
+%  Los atributos NO se dibujan: son 34 y harian ilegible la figura.
+%  Van en el diccionario de datos (anexo). La unica excepcion es
+%  'segundos', atributo de la interrelacion 'presenta', porque es
+%  estructuralmente significativo: es el unico dato que el sistema
+%  mide, y colgar de una interrelacion es justo lo que justifica
+%  que 'presenta' sea N:M.
+%
+%  Compilar:
+%      pdflatex -output-directory=build diagramas/esquema_conceptual.tex
+%  Incluir en el documento:
+%      \includegraphics[width=\textheight,keepaspectratio]{esquema_conceptual}
+% ================================================================
+
+\documentclass[border=8pt]{standalone}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, calc}
+
+\begin{document}
+\begin{tikzpicture}[
+  % ---------- estilos ----------
+  ent/.style   = {draw, thick, rectangle, minimum width=2.7cm,
+                  minimum height=0.9cm, align=center, font=\small},
+  rel/.style   = {draw, thick, diamond, aspect=2.4, inner sep=1.5pt,
+                  align=center, font=\scriptsize},
+  att/.style   = {draw, thick, ellipse, minimum width=2.6cm,
+                  minimum height=0.75cm, font=\scriptsize},
+  lin/.style   = {draw, thick},
+  % sin 'fill': las etiquetas van junto a la linea, no encima, para
+  % que su caja no muerda el borde de las entidades vecinas.
+  card/.style  = {font=\scriptsize\ttfamily, inner sep=1.6pt}
+]
+
+% ================================================================
+%  ENTIDADES E INTERRELACIONES
+% ================================================================
+
+\node[ent] (usuario)   at ( 2.1,  -0.9) {Usuario};
+\node[rel] (registra)  at ( 4.7,  -0.9) {registra};
+\node[ent] (experim)   at ( 7.4,  -0.9) {Experimento};
+
+\node[rel] (compone)   at ( 7.4,  -2.3) {compone};
+\node[ent] (grupo)     at ( 7.4,  -3.7) {Grupo};
+
+\node[rel] (agrupa)    at ( 3.6,  -5.1) {agrupa};
+\node[rel] (grabaen)   at (11.1,  -5.1) {se graba en};
+
+\node[ent] (especimen) at ( 3.6,  -6.5) {Espécimen};
+\node[rel] (aloja)     at ( 7.4,  -6.5) {aloja};
+\node[ent] (tanda)     at (11.1,  -6.5) {Tanda};
+
+\node[rel] (produce)   at (11.1,  -7.9) {produce};
+\node[ent] (video)     at (11.1,  -9.3) {Video};
+\node[rel] (procesa)   at (14.5,  -9.3) {procesa};
+\node[ent] (analisis)  at (17.6,  -9.3) {Análisis};
+
+\node[rel] (aparece)   at ( 3.6, -10.6) {aparece en};
+\node[rel] (contiene)  at (11.1, -10.6) {contiene};
+\node[ent] (observ)    at ( 7.4, -12.0) {Observación};
+
+\node[rel] (divide)    at ( 7.4, -13.4) {se divide en};
+\node[ent] (interv)    at ( 7.4, -14.8) {Intervalo};
+
+\node[rel] (presenta)  at (11.1, -14.8) {presenta};
+\node[ent] (conducta)  at (14.4, -14.8) {Conducta};
+\node[att] (segundos)  at (11.1, -16.4) {segundos};
+
+% ================================================================
+%  ARISTAS CON CARDINALIDAD (minimo,maximo)
+% ================================================================
+
+% -- Usuario registra Experimento -------------------------------
+\draw[lin] (usuario) -- node[card, above, pos=0.35] {(0,N)} (registra);
+\draw[lin] (registra) -- node[card, above, pos=0.65] {(1,1)} (experim);
+
+% -- Experimento se compone de Grupos ---------------------------
+% Minimo tres grupos: control, referencia y tratamiento (Cap. 1, PA)
+\draw[lin] (experim) -- node[card, right, pos=0.55] {(3,N)} (compone);
+\draw[lin] (compone) -- node[card, right, pos=0.45] {(1,1)} (grupo);
+
+% -- Bus de salida del Grupo hacia sus dos ramas ----------------
+\coordinate (bus) at ($(grupo.south) + (0,-0.35)$);
+\draw[lin] (grupo.south) -- (bus);
+\draw[lin] (bus) -| (agrupa.north);
+\draw[lin] (bus) -| (grabaen.north);
+
+% -- Grupo agrupa Especimenes  (el hecho experimental) ----------
+% (6,N): 6 es el minimo util; el laboratorio pidio que no haya
+% tope superior (reunion 3-sep). Antes era (6,8).
+\node[card, anchor=south east] at ($(agrupa.north) + (-0.10,0.05)$) {(6,N)};
+\draw[lin] (agrupa) -- node[card, right, pos=0.45] {(1,1)} (especimen);
+
+% -- Grupo se graba en Tandas  (la logistica de camara) ---------
+% (2,N): un grupo de 6-8 no cabe en un encuadre de 4 cilindros,
+% asi que son 2 tandas como minimo; sin tope, porque el grupo
+% tampoco lo tiene.
+\node[card, anchor=south west] at ($(grabaen.north) + (0.10,0.05)$) {(2,N)};
+\draw[lin] (grabaen) -- node[card, right, pos=0.45] {(1,1)} (tanda);
+
+% -- Tanda aloja Especimenes ------------------------------------
+% (3,4): el encuadre admite tres o cuatro cilindros a cuadro.
+\draw[lin] (especimen) -- node[card, above, pos=0.30] {(1,1)} (aloja);
+\draw[lin] (aloja) -- node[card, above, pos=0.70] {(3,4)} (tanda);
+
+% -- Tanda produce Videos ---------------------------------------
+% (1,2): Dia 1 y Dia 2. El Dia 1 es opcional (reunion 3-sep),
+% por eso el minimo es 1 y no 2.
+\draw[lin] (tanda) -- node[card, right, pos=0.55] {(1,2)} (produce);
+\draw[lin] (produce) -- node[card, right, pos=0.45] {(1,1)} (video);
+
+% -- Video se procesa en Analisis -------------------------------
+% (1,N) pendiente de la decision D-03: si no se conserva historial
+% de reprocesamientos, baja a (1,1).
+\draw[lin] (video) -- node[card, above, pos=0.35] {(1,N)} (procesa);
+\draw[lin] (procesa) -- node[card, above, pos=0.65] {(1,1)} (analisis);
+
+% -- Especimen aparece en Observaciones -------------------------
+% (1,2): una por sesion. Minimo 1 porque el Dia 1 es opcional.
+\draw[lin] (especimen) -- node[card, right, pos=0.60] {(1,2)} (aparece);
+\draw[lin] (aparece.south) |- node[card, above, pos=0.72] {(1,1)} (observ.west);
+
+% -- Video contiene Observaciones -------------------------------
+% (3,4): una por cilindro del encuadre.
+\draw[lin] (video) -- node[card, right, pos=0.60] {(3,4)} (contiene);
+\draw[lin] (contiene.south) |- node[card, above, pos=0.72] {(1,1)} (observ.east);
+
+% -- Observacion se divide en Intervalos ------------------------
+% (5,5): el desglose es siempre de cinco minutos (P9).
+\draw[lin] (observ) -- node[card, right, pos=0.55] {(5,5)} (divide);
+\draw[lin] (divide) -- node[card, right, pos=0.45] {(1,1)} (interv);
+
+% -- Intervalo presenta Conductas -------------------------------
+% (2,3): tres conductas en modo normal, dos en modo degradado
+% (cuando el clasificador no separa nado de escalamiento).
+% (0,N) del lado Conducta: es un catalogo, puede no usarse.
+\draw[lin] (interv) -- node[card, above, pos=0.35] {(2,3)} (presenta);
+\draw[lin] (presenta) -- node[card, above, pos=0.65] {(0,N)} (conducta);
+
+% -- Atributo de la interrelacion -------------------------------
+\draw[lin, dashed] (presenta) -- (segundos);
+
+% ================================================================
+%  LEYENDA
+% ================================================================
+
+\begin{scope}[shift={(0.4,-16.0)}]
+  \node[draw, thick, rectangle, minimum width=0.85cm, minimum height=0.38cm]
+        (lg1) at (0,0) {};
+  \node[font=\tiny, anchor=west] at (0.5,0) {entidad};
+
+  \node[draw, thick, diamond, aspect=2.2, minimum width=0.85cm,
+        minimum height=0.38cm, inner sep=0pt] (lg2) at (0,-0.62) {};
+  \node[font=\tiny, anchor=west] at (0.5,-0.62) {interrelación};
+
+  \node[draw, thick, ellipse, minimum width=0.85cm, minimum height=0.38cm]
+        (lg3) at (0,-1.24) {};
+  \node[font=\tiny, anchor=west] at (0.5,-1.24) {atributo de interrelación};
+
+  \node[font=\tiny\ttfamily, anchor=west] at (-0.42,-1.86) {(mín,máx)};
+  \node[font=\tiny, anchor=west] at (0.5,-1.86) {cardinalidad};
+\end{scope}
+
+\end{tikzpicture}
+\end{document}

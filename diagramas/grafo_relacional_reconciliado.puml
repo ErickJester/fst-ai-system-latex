@@ -1,0 +1,246 @@
+@startuml grafo_relacional_reconciliado
+' ================================================================
+'  Grafo Relacional RECONCILIADO - definitivo, validado en BCNF
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Las 11 relaciones del esquema logico definitivo mas las cuatro
+'  que el sistema necesita y que el universo del discurso del
+'  laboratorio no contenia: MODELO, CONFIGURACION, REPORTE y
+'  NOTIFICACION.
+'
+'  15 relaciones - 71 atributos - 16 llaves foraneas.
+'  Validado relacion por relacion: las cuatro nuevas quedan en BCNF.
+'
+'  ---- Que cambio respecto de la version de 14 ----
+'  Se separo MODELO (hashModelo, nombreModelo). En la version de 14,
+'  CONFIGURACION guardaba las dos columnas y eso rompia la 3FN:
+'  hashModelo -> nombreModelo es una dependencia real (un hash
+'  identifica el archivo, y el archivo tiene nombre), y hashModelo
+'  NO es clave candidata de CONFIGURACION, porque el mismo modelo
+'  aparece varias veces con umbrales distintos. Determinante que no
+'  es clave + atributo no primo = transitiva.
+'
+'  ---- Que NO entra, y por que ----
+'  ROIS   El pipeline calcula el recuadro en cada corrida (modulo 2)
+'         y lo unico que conserva es el orden espacial, ya guardado
+'         como ESPECIMEN.numeroCilindro. Guardar (x,y,w,h) seria
+'         almacenar un derivado inestable. Si algun dia hay pantalla
+'         para corregir a mano un cilindro mal detectado, el
+'         recuadro pasa a ser dato del usuario y si necesitaria
+'         tabla.
+'
+'  ---- Determinantes examinados y descartados ----
+'  tipo -> mensaje        en NOTIFICACION. No se cumple: los
+'                         mensajes de error llevan diagnostico por
+'                         instancia (modulo 1, RN-11), no plantilla.
+'                         Si algun dia se vuelven plantilla pura,
+'                         el texto debe mudarse a un catalogo
+'                         TIPO_NOTIFICACION, como CONDUCTA.
+'  ruta -> formato        en REPORTE. Si se cumple (la extension del
+'                         archivo), pero 'ruta' es clave candidata,
+'                         asi que no viola BCNF.
+'  estado -> etapa        en ANALISIS. Ya descartado en la etapa
+'                         logica: un analisis en proceso puede estar
+'                         en cualquiera de las cuatro etapas.
+'
+'  ---- Pendiente ----
+'  D-03  VIDEO--ANALISIS sigue en (1,N). Mientras siga asi, los
+'        resultados cuelgan de VIDEO y no del ANALISIS que los
+'        produjo. Si se cierra en (1,1) el modelo es consistente.
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/grafo_relacional_reconciliado.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam BackgroundColor White
+skinparam nodesep 38
+skinparam ranksep 48
+
+hide circle
+
+skinparam class {
+  BackgroundColor       #FAFAFA
+  BorderColor           #3A3A3A
+  BorderThickness       1
+  HeaderBackgroundColor #1B4F8A
+  HeaderFontColor       #FFFFFF
+  HeaderFontSize        11
+  HeaderFontStyle       bold
+  AttributeFontSize     9
+  AttributeFontColor    #1A1A1A
+}
+
+skinparam arrow {
+  Color     #3A3A3A
+  Thickness 1
+  FontSize  8
+  FontColor #3A3A3A
+}
+
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+'  DOMINIO EXPERIMENTAL  -  las 11 del esquema logico definitivo
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+class USUARIO {
+  <u>idBoleta</u>
+  --
+  nombre
+  apellidos
+  correo   [AK]
+  contrasena
+}
+
+class EXPERIMENTO {
+  <u>idExperimento</u>
+  --
+  idBoleta   [FK]
+  nombre
+  fecha
+  notas   (nulo)
+}
+
+class GRUPO {
+  <u>idGrupo</u>
+  --
+  idExperimento   [FK] [AK]
+  etiqueta   [AK]
+  tipo
+  tratamiento
+}
+
+class TANDA {
+  <u>idTanda</u>
+  --
+  idGrupo   [FK] [AK]
+  ordinal   [AK]
+  nCilindros
+}
+
+class ESPECIMEN {
+  <u>idEspecimen</u>
+  --
+  idTanda   [FK] [AK]
+  numeroRata   [AK]
+  numeroCilindro   [AK]
+}
+
+class VIDEO {
+  <u>idVideo</u>
+  --
+  idTanda   [FK] [AK]
+  sesion   [AK]
+  archivo
+  duracion
+  fechaCarga
+}
+
+class ANALISIS {
+  <u>idAnalisis</u>
+  --
+  idVideo   [FK]
+  idConfig   [FK]
+  estado
+  etapa
+  confianza
+  nivelClasif
+  fechaAnalisis
+}
+
+class OBSERVACION {
+  <u>idObservacion</u>
+  --
+  idEspecimen   [FK] [AK]
+  idVideo   [FK] [AK]
+}
+
+class INTERVALO {
+  <u>idIntervalo</u>
+  --
+  idObservacion   [FK] [AK]
+  minuto   [AK]
+}
+
+class CONDUCTA {
+  <u>nombre</u>
+}
+
+class PRESENTA {
+  <u>idIntervalo</u>   [FK]
+  <u>conducta</u>   [FK]
+  --
+  segundos
+}
+
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+'  SOPORTE DEL SISTEMA  -  las cuatro que el laboratorio no nombra
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+class MODELO {
+  <u>hashModelo</u>
+  --
+  nombreModelo
+}
+
+class CONFIGURACION {
+  <u>idConfig</u>
+  --
+  hashModelo   [FK] [AK]
+  versionPipeline   [AK]
+  umbralConfianza   [AK]
+  segundosOmitir   [AK]
+  umbralInmovil   [AK]
+  umbralDesplazamiento   [AK]
+  umbralStdPosicion   [AK]
+  umbralAspectoTrepada   [AK]
+  fechaCreacion
+}
+
+class REPORTE {
+  <u>idReporte</u>
+  --
+  idExperimento   [FK]
+  formato
+  ruta   [AK]
+  fechaGeneracion
+}
+
+class NOTIFICACION {
+  <u>idNotificacion</u>
+  --
+  idBoleta   [FK]
+  idExperimento   [FK] (nulo)
+  tipo
+  mensaje
+  leido
+  fechaCreacion
+}
+
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+'  ARISTAS  -  una por llave foranea
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+USUARIO        "1" --o "0..*" EXPERIMENTO
+EXPERIMENTO    "1" --o "3..*" GRUPO
+GRUPO          "1" --o "2..*" TANDA
+TANDA          "1" --o "3..4" ESPECIMEN
+TANDA          "1" --o "1..2" VIDEO
+VIDEO          "1" --o "1..*" ANALISIS
+CONFIGURACION  "1" --o "0..*" ANALISIS
+MODELO         "1" --o "0..*" CONFIGURACION
+ESPECIMEN      "1" --o "1..2" OBSERVACION
+VIDEO          "1" --o "3..4" OBSERVACION
+OBSERVACION    "1" --o "5"    INTERVALO
+INTERVALO      "1" --o "2..3" PRESENTA
+CONDUCTA       "1" --o "0..*" PRESENTA
+EXPERIMENTO    "1" --o "0..*" REPORTE
+USUARIO        "1" --o "0..*" NOTIFICACION
+EXPERIMENTO    "1" --o "0..*" NOTIFICACION
+
+@enduml

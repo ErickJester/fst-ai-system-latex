@@ -358,6 +358,15 @@ cambia el número de relaciones ni rompe BCNF.
 **No aplicar todavía:** depende de la respuesta a P-08. Si el laboratorio prefiere que el
 reanálisis reemplace al anterior, el esquema se queda como está.
 
+### Corrección pendiente por la reunión del 3-sep
+
+`GRUPO.tratamiento` **nunca es nulo**: el grupo control recibe placebo, porque el estrés de la
+inyección tiene que ser el mismo en los tres grupos. Cae la restricción semántica «`tratamiento`
+es nulo si y solo si `tipo` = control», y `EXPERIMENTO.notas` queda como el único atributo
+nulable del esquema. La nota «Sobre los nulos» de la etapa lógica dice dos; hay que corregirla.
+
+Fuente: [`errores/fuentes/transcripcion_02_reunion_2026-09-03.md`](errores/fuentes/transcripcion_02_reunion_2026-09-03.md) §4.1.
+
 ### Publicación
 
 Los enlaces compartidos de ambos artifacts muestran **versiones anteriores fijadas**, no
