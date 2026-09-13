@@ -161,6 +161,18 @@ grafo relacional final.
 | Ref | Decisión | Quién |
 |-----|----------|-------|
 | D-01 | Cómo se crea una cuenta: el cap. 1 dice «registro con aprobación del administrador» y el cap. 4 (RF-07) dice que no existe autoregistro. Hay que elegir uno | Directores |
-| D-02 | Identificador de usuario: la boleta no sirve, el Dr. Sandino tiene número de empleado | Directores |
+| D-02 | ~~Identificador de usuario: la boleta no sirve, el Dr. Sandino tiene número de empleado~~ **Resuelto (equipo, 2026-09-12):** identificador institucional único, un solo campo que acepta boleta (estudiantes) o número de empleado (personal). Falta afinar la regla que distingue cuál es cuál al validar — detalle menor, no bloquea | Equipo |
 | D-03 | Si reprocesar videos viejos tras reentrenar el clasificador en TT-II. Es motivo del sistema, no del laboratorio, y decide si `Video — Análisis` es (1,1) o (1,N) | Equipo |
 | D-04 | Cómo se garantiza que el número de rata no se repita dentro de su grupo, ahora que `idGrupo` no está en `ESPECIMEN`: disparador o redundancia controlada | Equipo |
+| D-07 | **Idea sin decidir, dos partes.** (a) Que el usuario dibuje el recuadro sobre las 4 ratas antes del análisis, en vez de que el pipeline lo detecte solo (Módulo 2, "Detección de ROIs"). (b) Que el usuario también pueda ajustar a mano la **línea de agua** (waterline) de cada cilindro, en vez de que el filtro EMA la estime sola (mismo Módulo 2). Las dos son correcciones manuales al mismo módulo. De confirmarse cualquiera de las dos: `ROI` deja de ser 100% derivado (revierte `CAMBIOS-CAP5.md` §E); el Módulo 2 de `chapters/05_diseno.tex:127`–`134` deja de describir detección automática; el diagrama del pipeline (`docs/diagramas.pdf` pág. 3) y los métodos de `PipelineAnalisis` en `diagramas/clases.puml` necesitarían rehacerse. **No aplicar todavía**, son solo ideas | Equipo |
+| D-08 | **Hueco encontrado al construir el diagrama de clases (2026-09-12):** `USUARIO` en el grafo reconciliado no tiene ninguna columna que distinga a `Investigador` de `Administrador` (ni `rol`, ni tabla de subtipo). El modelo viejo sí tenía `rol : String`. Sin esto, el sistema no puede saber qué permisos tiene un usuario al leerlo de la BD | Equipo |
+| D-09 | **Hueco encontrado al construir el diagrama de clases (2026-09-12):** `ANALISIS` en el grafo reconciliado no tiene columnas de seguimiento de progreso (`progresoPct`, `error`, `iniciadoEn`, `finalizadoEn`) que sí tenía `TRABAJOS` en el modelo viejo. El endpoint `GET /experiments/{id}/status` (cap. 5, §API REST) promete devolver "el progreso del análisis en porcentaje" — sin estas columnas no hay de dónde leerlo | Equipo |
+
+> **Sugerencia para D-08 (no es decisión):** Kendall & Kendall, *Análisis y Diseño de
+> Sistemas*, cap. 13 "Diseño de bases de datos", p. 405, define **subtipo de entidad**:
+> "una relación especial de uno a uno empleada para representar los atributos
+> adicionales de otra entidad que tal vez no estén presentes en todos los registros...
+> elimina la situación en la que una entidad puede tener campos nulos". Encaja con
+> `Investigador`/`Administrador` como subclases UML de `Usuario` — en la BD sería
+> `USUARIO (1,1) — (0,1) ADMINISTRADOR`, en vez de una columna `rol` con reglas
+> distintas por valor. Es una opción, no la única; falta que el equipo decida.

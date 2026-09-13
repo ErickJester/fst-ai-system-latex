@@ -189,8 +189,12 @@ Dos artifacts publicados. **Son la fuente de verdad del diseño**, por encima de
 
 | Artifact | URL | Cubre | Estado |
 |----------|-----|-------|--------|
-| **Diseño Conceptual FST** | https://claude.ai/code/artifact/441abfbd-3944-4412-8dca-0c40ab3964ba | Actividades 1–8 de la etapa conceptual | 7 de 8 hechas; la 7 está *preparada*, no ejecutada |
-| **Diseño Lógico FST** | https://claude.ai/code/artifact/0f0abf49-bb77-4424-b5e8-6ea88a578143 | Actividades 1–2 de las 7 de la etapa lógica | 2 de 7 |
+| **Diseño Conceptual FST · Revisión 3-sep** | https://claude.ai/code/artifact/fc01fd30-0bc4-43dd-86a0-f5f961970ab6 | Actividades 1–8 de la etapa conceptual | 8 de 8; la actividad 7 (presentación al usuario) solo en su primera mitad — el Dr. Sandino ya revisó el modelo, falta la revisión de notación con la Dra. Cordero |
+| **Diseño Lógico FST · Revisión 3-sep** | https://claude.ai/code/artifact/73df37d9-ce09-4689-a8ca-475c47c81618 | Actividades 1–7 de la etapa lógica, más la reconciliación del 6-sep (4 tablas de soporte del sistema que el laboratorio no nombra) | Cerrada — 15 relaciones en BCNF |
+
+> Estas URLs se verificaron con `Artifact action:"list"` el 2026-09-12. Los enlaces de
+> arriba en versiones previas de este archivo (`441abfbd…`, `0f0abf49…`) apuntaban a
+> artifacts anteriores a la revisión del 3-sep — quedaron obsoletos, no los reabras.
 
 Cada artifact está organizado por actividad, y cada actividad muestra tres cosas: qué
 pide el método, cómo lo resuelve el ejemplo del concesionario del libro, y qué resultó
@@ -203,20 +207,30 @@ de actualizar el existente.
 
 ### El modelo, en corto
 
+> Esta versión ya refleja P-01 resuelto (la rata tiene identificador propio): ninguna
+> entidad es débil y la agregación desapareció. Si ves una copia de este bloque con
+> entidades «(débil · …)» y una `AGREGACIÓN`, es la versión pre-3-sep — está mal.
+
 ```
 Usuario ──registra──> Experimento
-                          └── Grupo          (débil · etiqueta)   tipo ∈ {control, referencia, tratamiento}
-                                └── Tanda    (débil · ordinal)    nCilindros ∈ {3,4}
-                                      ├── Espécimen  (débil · posición del cilindro)
-                                      └── Video      (débil · sesión ∈ {Día 1, Día 2})
-                                                └── Análisis  (1,N — un video se puede reanalizar)
+                          └── Grupo     (fuerte · etiqueta)   tipo ∈ {control, referencia, tratamiento}
+                                                                tratamiento NUNCA nulo (el control recibe placebo)
+                                └── Tanda    (fuerte · ordinal)    nCilindros ∈ {3,4}
+                                      ├── Espécimen  (fuerte · numeroRata, relativo al grupo, sin tope de grupo)
+                                      └── Video      (fuerte · sesión ∈ {Día 1, Día 2}, Día 1 opcional)
+                                                └── Análisis  (1,N — un video se puede reanalizar · pendiente P-08/D-03)
 
-     Observación = AGREGACIÓN( Espécimen ──aparece en──> Video )
-           └── Intervalo (débil · minuto 1..5)
+     Observación (fuerte, asociativa) = Espécimen ──aparece en──> Video
+           └── Intervalo (fuerte · minuto 1..5)
                  └──presenta──> Conducta     [ segundos ]  ← el único dato medido del sistema
+
+     + 4 relaciones de soporte del sistema, añadidas en la reconciliación del 6-sep
+       (no las nombra el laboratorio): Modelo, Configuración, Reporte, Notificación
 ```
 
-**9 entidades + 1 agregación + 9 interrelaciones → 11 relaciones** en el esquema lógico.
+**10 entidades del dominio (todas fuertes, sin agregación) + 4 de soporte del sistema,
+15 interrelaciones (14 binarias 1:N + 1 N:M) → 15 relaciones** en el esquema lógico
+definitivo.
 
 ### Las cuatro decisiones que sostienen el modelo
 
@@ -243,22 +257,26 @@ Usuario ──registra──> Experimento
 ## 5. Estado actual
 
 **Las dos etapas están cerradas.** Conceptual: 8 de 8 actividades. Lógica: 7 de 7.
-Resultado: 11 relaciones en BCNF, 11 llaves foráneas de una columna, 29 restricciones
-documentadas (11 referenciales, 8 de identidad, 10 semánticas).
+Resultado: **15 relaciones** en BCNF (11 del dominio experimental + 4 de soporte del
+sistema), 16 llaves foráneas de una columna (una de ellas nulable —
+`NOTIFICACION.idExperimento`—, la única del esquema), 41 restricciones documentadas
+(16 referenciales, 11 de identidad, 14 semánticas).
 
 La respuesta a **P-01** —la rata sí tiene identificador propio— cerró la decisión que
 estaba bloqueando todo: desapareció la cadena de seis entidades débiles, las diez
 entidades quedaron fuertes, la agregación se volvió innecesaria y la llave más larga bajó
 de siete componentes a dos.
 
-La validación encontró **tres defectos reales**, así que el esquema definitivo no es igual
-al preliminar:
+La validación encontró **cuatro defectos reales**, así que el esquema definitivo no es
+igual al preliminar. Los primeros tres vienen del dominio; el cuarto salió al reconciliar
+con las cuatro tablas de soporte del sistema (6-sep):
 
 | Forma | Dónde | Corrección |
 |-------|-------|-----------|
 | 1FN | `USUARIO` | `nombre` era dominio compuesto → se partió en `nombre` y `apellidos` |
 | 3FN | `ESPECIMEN` | `idGrupo` era derivable de la tanda → columna eliminada |
 | 3FN | `VIDEO` | `duracion` dependía de la sesión → ahora es la duración real del archivo |
+| 3FN | `CONFIGURACION` | `hashModelo → nombreModelo` es transitiva → se separa `MODELO(hashModelo, nombreModelo)` |
 
 ### Lo que falta
 
@@ -276,12 +294,19 @@ Hasta que ocurran esas dos revisiones, en los términos del método lo que exist
 
 | ID | Pregunta | Qué decide |
 |----|----------|-----------|
-| P-03 | ¿Con qué se identifica físicamente a la rata: arete, jaula, código? | El dominio de `idLaboratorio` y el alcance de su unicidad. Único atributo del diccionario sin cerrar |
-| P-04 | ¿Una grabación puede mezclar ratas de dos grupos? | Sostiene la corrección de 3FN sobre `ESPECIMEN` |
+| P-03 | ¿Con qué se identifica físicamente a la rata: arete, jaula, código? | **Cerrada (3-sep):** marca de plumón indeleble en la cola, numerada 1–8 dentro de su grupo. Ver `numeroRata` |
+| P-04 | ¿Una grabación puede mezclar ratas de dos grupos? | **Cerrada (3-sep):** no, siempre del mismo grupo |
 | P-02 | ¿La rata usa el mismo cilindro los dos días? | Si `numeroCilindro` vive en `ESPECIMEN` o en `OBSERVACION` |
-| P-05 | ¿Cómo llama el laboratorio a la «tanda»? | El nombre en documento, diagrama e interfaz |
-| P-08 | Al reanalizar un video, ¿se conservan ambos resultados? | Ver la errata estructural de la sección 8 |
+| P-05 | ¿Cómo llama el laboratorio a la «tanda»? | **Cerrada (3-sep):** el laboratorio no tiene palabra propia; llama «sesión» a cada grabación |
+| P-08 / D-03 | Al reanalizar un video, ¿se conservan ambos resultados o se reemplaza? | Ver la errata estructural de la sección 8. El laboratorio dijo que se queda con el último; falta cerrarlo formalmente |
+| D-04 | ¿Cómo se garantiza que `numeroRata` no se repita dentro de su **grupo**, si `idGrupo` ya no vive en `ESPECIMEN`? | Disparador vs. reintroducir `idGrupo` como redundancia controlada — decisión de mayor peso pendiente, del equipo |
+| D-05 | ¿El sistema permite correr dos veces la misma `CONFIGURACION` sobre el mismo video? | Si `(idVideo, idConfig)` es clave alterna de `ANALISIS`. Se cruza con P-08/D-03 |
+| D-06 | El pipeline usa más de un modelo (YOLOv8 + ResNet-18/50), pero `CONFIGURACION` solo guarda un `hashModelo` | Puede requerir que `MODELO`↔`CONFIGURACION` sea N:M en vez de 1:N |
 | Q-08 | ¿Autoregistro con aprobación (cap. 1) o solo el Admin (cap. 4, RF-07)? | Si `USUARIO` necesita atributo discriminante |
+| Q-09 | ¿`NOTIFICACION.mensaje` lleva detalle por instancia o es plantilla por tipo? | Si fuera plantilla, `tipo → mensaje` sería transitiva y haría falta catálogo `TIPO_NOTIFICACION` |
+
+> D-04, D-05, D-06 y Q-09 son pendientes **del equipo**, no del laboratorio — no van en la
+> agenda de la próxima reunión con el Dr. Sandino.
 
 ### El trabajo grande que falta en el documento
 
@@ -344,7 +369,7 @@ Además de las de `CLAUDE.md`, que aplican siempre:
 
 ## 8. Pendientes conocidos en los artifacts
 
-### Errata estructural — sin resolver
+### Errata estructural — sin resolver (P-08 / D-03)
 
 `OBSERVACION` cuelga de `VIDEO`, pero la cardinalidad Video–Análisis es (1,N): un video
 puede analizarse varias veces. Como `OBSERVACION` es única por el par (espécimen, video),
@@ -355,15 +380,23 @@ puede analizarse varias veces. Como `OBSERVACION` es única por el par (espécim
 con unicidad sobre (espécimen, análisis). El video se alcanza por `ANALISIS → VIDEO`. No
 cambia el número de relaciones ni rompe BCNF.
 
-**No aplicar todavía:** depende de la respuesta a P-08. Si el laboratorio prefiere que el
-reanálisis reemplace al anterior, el esquema se queda como está.
+**No aplicar todavía:** el laboratorio ya dijo informalmente que se queda con el último
+análisis, lo que apuntaría a dejar el esquema como está — pero falta cerrarlo
+formalmente. El artifact lógico llama a este mismo pendiente **D-03**; es una sola
+decisión con dos nombres, no dos pendientes distintos.
 
-### Corrección pendiente por la reunión del 3-sep
+### Ya corregido — `GRUPO.tratamiento` sin nulo
 
 `GRUPO.tratamiento` **nunca es nulo**: el grupo control recibe placebo, porque el estrés de la
-inyección tiene que ser el mismo en los tres grupos. Cae la restricción semántica «`tratamiento`
-es nulo si y solo si `tipo` = control», y `EXPERIMENTO.notas` queda como el único atributo
-nulable del esquema. La nota «Sobre los nulos» de la etapa lógica dice dos; hay que corregirla.
+inyección tiene que ser el mismo en los tres grupos. Cayó la restricción semántica
+«`tratamiento` es nulo si y solo si `tipo` = control», y `EXPERIMENTO.notas` es el único
+atributo nulable del dominio experimental (`NOTIFICACION.idExperimento`, de las tablas de
+soporte del sistema, es el otro nulo del esquema completo — ver D-06/reconciliación).
+
+Ya aplicado en el artifact lógico (revisión 3-sep) y en
+[`diagramas/grafo_relacional_final.puml`](diagramas/grafo_relacional_final.puml). Esta
+sección quedó marcada como «pendiente» en una versión anterior de este archivo por error
+de sincronización — ya no lo está.
 
 Fuente: [`errores/fuentes/transcripcion_02_reunion_2026-09-03.md`](errores/fuentes/transcripcion_02_reunion_2026-09-03.md) §4.1.
 
@@ -374,4 +407,6 @@ la actual. Si alguien externo va a abrirlos, hay que mover el anclaje de compart
 
 ---
 
-*Última actualización: 2026-09-02*
+*Última actualización: 2026-09-12 — URLs de los artifacts corregidas a las versiones
+"Revisión 3-sep", y el resto del documento sincronizado con ellas (modelo sin entidades
+débiles ni agregación, 15 relaciones, defectos de normalización, pendientes abiertos).*

@@ -13,6 +13,44 @@ mantenlo activo hasta que el usuario diga "stop adhd mode" o "normal mode".
 
 ---
 
+## Leer commits — el equipo trabaja sin avisar en el chat
+
+Otros miembros del equipo (p. ej. ErickJester) comitean directo al repo sin pasar por
+esta conversación. Si no se leen sus commits completos (diff, no solo el mensaje), se
+trabaja con información vieja sin saberlo.
+
+- **Al iniciar una conversación nueva:** `git log -1 -p` — leer completo el último commit.
+- **Al primer mensaje de un día nuevo** (aunque la conversación ya esté en curso):
+  `git log -3 -p` — leer completos los últimos tres commits.
+- **Después de cualquier `git pull`:** leer completo cada commit que haya llegado, no
+  solo el mensaje — `git log <HEAD-antes>..<HEAD-después> -p`, o `git log -p` acotado al
+  rango que trajo el pull.
+
+"Completo" significa el diff real, no `git log --oneline` ni solo el asunto del commit.
+
+---
+
+## Cómo hacer preguntas
+
+El usuario tiene ADHD: nunca varias preguntas sueltas en una respuesta de chat. Antes de
+anotar algo sin resolver, distingue **quién** lo resuelve:
+
+1. **Pregunta para el laboratorio** → `errores/preguntas-doctor.md` §1–2 (Q-A, Q-B...).
+2. **Decisión que el equipo/directores resuelven solos** → `errores/preguntas-doctor.md`
+   §6 (D-01, D-02...).
+3. **Tema para hablar a fondo, solo tú y el usuario** — si dice "hay que hablar de eso"
+   refiriéndose a ti, no al equipo ni al doctor: **no documentar nada todavía.**
+   Sostenerlo en la conversación; documentar solo la conclusión, cuando llegue.
+
+Para tus propias preguntas puntuales al usuario (no las de arriba): escríbelas en
+`PREGUNTAS.md` (raíz del repo, una por punto), avisa en el chat que hay preguntas nuevas
+sin repetirlas ahí, y bórralas en cuanto se respondan. Si la respuesta debe persistir,
+muévela al `.md` correspondiente antes de borrarla — `PREGUNTAS.md` no es guardado
+permanente. Excepción: una sola pregunta aislada de desambiguación sí va directo en el
+chat.
+
+---
+
 ## Commits y autoría
 
 - NUNCA agregar `Co-Authored-By: Claude` ni ninguna referencia a Claude, Anthropic o IA
@@ -22,6 +60,10 @@ mantenlo activo hasta que el usuario diga "stop adhd mode" o "normal mode".
 - Los commits deben parecer escritos enteramente por el desarrollador.
 - No mencionar herramientas de IA en ningún mensaje de commit, descripción de PR ni
   comentario de código.
+- **Antes de comitear**, resumir completo todo lo hecho **desde el último `git pull`**
+  (no solo el diff que se va a comitear) — commits intermedios incluidos, si los hubo.
+  Ese resumen completo es la base del mensaje, no el diff del momento aislado: evita
+  mensajes fragmentados cuando se acumuló trabajo relacionado entre pulls.
 
 ---
 
@@ -97,11 +139,15 @@ posición.
 
 ## Dónde está cada cosa
 
+No se resume el estado del proyecto aquí — cambia demasiado rápido y este archivo debe
+quedarse solo con reglas vigentes, no con una foto que se vuelve vieja en días.
+
 | Necesitas | Abre |
 |-----------|------|
-| Trabajar en la base de datos | `DISENO-BD.md` — punto de partida obligatorio |
+| Trabajar en la base de datos, o ver el estado real del diseño | `DISENO-BD.md` — punto de partida obligatorio, siempre actualizado |
+| Qué falta cambiar en el capítulo 5 y qué tan avanzado va | `CAMBIOS-CAP5.md` |
 | Contradicciones detectadas en el LaTeX | `errores/README.md` y `errores/<capítulo>/` |
-| Preparar una reunión con el Dr. Sandino | `errores/preguntas-doctor.md` |
+| Preguntas para el laboratorio y decisiones internas del equipo | `errores/preguntas-doctor.md` |
 | Correcciones pendientes de casos de uso y documento | `CORRECCIONES.md` |
 | Los 22 ítems de la simulación de defensa | `HISTORIAL.md` |
 | Diagramas y guion de la reunión del 3-sep | `Reunion_Sandino_2026-09-03.pdf` |
@@ -109,12 +155,3 @@ posición.
 ### Archivos del documento
 
 `chapters/01`–`08` · `front/resumen.tex` · `front/glosario.tex` · `bib/referencias.bib`
-
----
-
-## Estado en una línea
-
-Cap. 1–4 revisados y corregidos. **Diseño de BD rehecho por completo**: etapas conceptual
-y lógica cerradas, esquema en BCNF. Pendiente: reescribir el cap. 5 con el diseño nuevo,
-las dos revisiones (Dr. Sandino sobre protocolo, Dra. Cordero sobre notación) y los 22
-ítems de la presentación.

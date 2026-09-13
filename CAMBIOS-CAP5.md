@@ -213,6 +213,29 @@ Es una relación asociativa legítima, no una tabla vacía por error.
 
 ---
 
+## G. `protocolo_fst.tex` — desincronizado, encontrado el 2026-09-12 🔴
+
+**Ubicación:** `protocolo_fst.tex` (raíz del repo) + `Protocolo_FST_paso_a_paso.pdf`.
+Documento independiente, no es uno de los 8 capítulos, pero se usa como material de
+apoyo para la revisión con el laboratorio y con la Dra. Cordero.
+
+**Problema:** el commit `8b26dd6` (3-sep, 17:59) quedó escrito con el modelo **de antes**
+de que la reunión de esa misma tarde cerrara las correcciones. Nadie lo resincronizó
+después.
+
+| Ahí dice | Debe decir |
+|---|---|
+| `ESPECIMEN(idEspecimen, idLaboratorio, numeroCilindro, idTanda*)` | `numeroRata` en vez de `idLaboratorio` — ya no es clave global, es relativa al grupo |
+| `Grupo → agrupa (6,8 / 1,1) → Espécimen` | `(6,N)` — sin tope, el laboratorio lo pidió explícitamente |
+| «`UNIQUE idLaboratorio` (alcance por confirmar, P-03)» | P-03 ya está cerrada — marca de plumón, numerada 1–8 dentro del grupo |
+| `ANALISIS(..., etapaActiva, ..., nivelClasificacion, ...)` | Reconciliar nombres contra `grafo_relacional_final.puml`, que usa `etapa` y `nivelClasif` |
+
+**Cómo se descubrió:** al leer el diff completo del commit `8b26dd6` tras el `git pull`
+de esta sesión (regla nueva en `CLAUDE.md` — leer commits completos, no solo el
+resumen). El `git log --stat` que se revisó al principio no mostraba nada de esto.
+
+---
+
 ## F. Nota sobre `DISENO-BD.md`
 
 Su §8 dice que hay que corregir la nota «Sobre los nulos» porque declara dos atributos
