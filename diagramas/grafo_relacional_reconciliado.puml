@@ -7,10 +7,14 @@
 '  Las 11 relaciones del esquema logico definitivo mas las cuatro
 '  que el sistema necesita y que el universo del discurso del
 '  laboratorio no contenia: MODELO, CONFIGURACION, REPORTE y
-'  NOTIFICACION.
+'  NOTIFICACION. Mas ADMINISTRADOR (D-08, 13-sep): no es un tipo
+'  de usuario aparte, es un investigador con permisos extra,
+'  modelado como subtipo -- si el usuario no aparece aqui, es
+'  investigador simple.
 '
-'  15 relaciones - 71 atributos - 16 llaves foraneas.
-'  Validado relacion por relacion: las cuatro nuevas quedan en BCNF.
+'  16 relaciones - 73 atributos - 17 llaves foraneas.
+'  Validado relacion por relacion: las cuatro de la reconciliacion
+'  y ADMINISTRADOR quedan en BCNF.
 '
 '  ---- Que cambio respecto de la version de 14 ----
 '  Se separo MODELO (hashModelo, nombreModelo). En la version de 14,
@@ -44,11 +48,12 @@
 '                         logica: un analisis en proceso puede estar
 '                         en cualquiera de las cuatro etapas.
 '
-'  ---- Pendiente ----
-'  D-03  VIDEO--ANALISIS sigue en (1,N). Mientras siga asi, los
-'        resultados cuelgan de VIDEO y no del ANALISIS que los
-'        produjo. Si se cierra en (1,1) el modelo es consistente.
+'  ---- D-03 resuelto (equipo, 13-sep) ----
+'  Se reemplaza: un video tiene como mucho un analisis vigente. Al
+'  reanalizar, el resultado nuevo sustituye al anterior, no se
+'  conserva historial. VIDEO--ANALISIS baja de (1,N) a (1,1).
 '
+
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/grafo_relacional_reconciliado.puml
 ' ================================================================
@@ -89,18 +94,19 @@ skinparam arrow {
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class USUARIO {
-  <u>idBoleta</u>
+  <u>idInstitucional</u>
   --
   nombre
   apellidos
   correo   [AK]
-  contrasena
+  contrasenaHash
+  activo
 }
 
 class EXPERIMENTO {
   <u>idExperimento</u>
   --
-  idBoleta   [FK]
+  idInstitucional   [FK]
   nombre
   fecha
   notas   (nulo)
@@ -178,6 +184,10 @@ class PRESENTA {
   segundos
 }
 
+class ADMINISTRADOR {
+  <u>idInstitucional</u>   [FK]
+}
+
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 '  SOPORTE DEL SISTEMA  -  las cuatro que el laboratorio no nombra
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -214,7 +224,7 @@ class REPORTE {
 class NOTIFICACION {
   <u>idNotificacion</u>
   --
-  idBoleta   [FK]
+  idInstitucional   [FK]
   idExperimento   [FK] (nulo)
   tipo
   mensaje
@@ -231,7 +241,7 @@ EXPERIMENTO    "1" --o "3..*" GRUPO
 GRUPO          "1" --o "2..*" TANDA
 TANDA          "1" --o "3..4" ESPECIMEN
 TANDA          "1" --o "1..2" VIDEO
-VIDEO          "1" --o "1..*" ANALISIS
+VIDEO          "1" --o "1"    ANALISIS
 CONFIGURACION  "1" --o "0..*" ANALISIS
 MODELO         "1" --o "0..*" CONFIGURACION
 ESPECIMEN      "1" --o "1..2" OBSERVACION
@@ -242,5 +252,6 @@ CONDUCTA       "1" --o "0..*" PRESENTA
 EXPERIMENTO    "1" --o "0..*" REPORTE
 USUARIO        "1" --o "0..*" NOTIFICACION
 EXPERIMENTO    "1" --o "0..*" NOTIFICACION
+USUARIO        "1" --o "0..1" ADMINISTRADOR
 
 @enduml

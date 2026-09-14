@@ -22,7 +22,8 @@ el checklist, y solo entonces dibuja. Marca el estado en la bitácora del §5.
 
 Fuente: [`diagramas/grafo_relacional_reconciliado.puml`](diagramas/grafo_relacional_reconciliado.puml)
 — las 11 relaciones del esquema lógico definitivo más las 4 de soporte del sistema, ya
-con la corrección de la reunión del 3-sep (`GRUPO.tratamiento` nunca nulo).
+con la corrección de la reunión del 3-sep (`GRUPO.tratamiento` nunca nulo), más
+`ADMINISTRADOR` (D-08, 13-sep): **16 relaciones en total**, no 15.
 
 > **Verificado contra los artifacts, no solo contra los `.puml`.** Los `.puml`/`.tex` de
 > `diagramas/` dicen derivarse de los artifacts, pero se comprobó línea por línea contra
@@ -36,17 +37,35 @@ con la corrección de la reunión del 3-sep (`GRUPO.tratamiento` nunca nulo).
 > mismo pendiente que el artifact lógico llama **D-03** — mismo problema, dos nombres en
 > dos documentos. No son dos pendientes distintos.
 >
-> **Tres pendientes que `CAMBIOS-CAP5.md` no tiene todavía** (salieron de la
-> reconciliación del 6-sep, son del equipo, no del laboratorio — ver §3.2 y §4):
-> - **D-05** — ¿el sistema permite correr dos veces la misma `CONFIGURACION` sobre el
->   mismo video? Decide si `(idVideo, idConfig)` es clave alterna de `ANALISIS`.
-> - **D-06** — el pipeline usa más de un modelo (YOLOv8 + ResNet-18/50), pero
->   `CONFIGURACION` solo guarda un `hashModelo`. Puede necesitar que
->   `MODELO`↔`CONFIGURACION` sea N:M en vez de 1:N — **revisar antes de dar el grafo
->   relacional por definitivo** (§3.2).
+> **Un pendiente que `CAMBIOS-CAP5.md` no tiene todavía** (salió de la
+> reconciliación del 6-sep, es del equipo, no del laboratorio):
 > - **Q-09** — ¿`NOTIFICACION.mensaje` lleva detalle por instancia o es plantilla por
 >   tipo? Si es plantilla, `tipo → mensaje` sería transitiva y haría falta un catálogo
 >   `TIPO_NOTIFICACION`.
+>
+> **D-05 y D-06, resueltos (equipo, 2026-09-13):** D-06 no cambia la relación
+> `MODELO`↔`CONFIGURACION` — se queda en 1:N, lo que importa es el resultado, no la
+> combinación exacta de modelos. Y D-05 (¿se puede correr dos veces la misma
+> `CONFIGURACION` sobre el mismo video?) **se disolvió solo** al resolver D-03: si el
+> reanálisis reemplaza en vez de conservar historial, un video nunca tiene más de un
+> `ANALISIS` a la vez, así que la pregunta de si `(idVideo, idConfig)` se repite ya no
+> aplica — no puede haber una segunda fila que compita con la primera.
+>
+> **Ocho decisiones más, todas del 13-sep, que tampoco están en `CAMBIOS-CAP5.md`
+> todavía** (D-11 a D-18 — SGBD, seguridad, redundancia, tipos de dato, dominios y
+> respaldo; detalle completo en `errores/preguntas-doctor.md` §6 y en el artifact de
+> Diseño Físico). Son de la **etapa física**, no de la lógica — no tocan este archivo de
+> migración de diagramas más que en un punto: D-08 (`ADMINISTRADOR`) sí es de la etapa
+> lógica y ya está aplicado en el `.puml` (ver arriba y §3.2).
+>
+> **Cinco decisiones más, del 13-sep, que salieron de construir los diagramas de
+> secuencia (§3.4), no de la etapa física:** D-19 (cómo infiere el sistema la Tanda al
+> subir video), D-20 (todo o nada si no detecta los 4 cilindros — provisional, ver Q-G),
+> D-21 (caché y regeneración de `REPORTE`), D-22 (porcentaje de avance aproximado por
+> etapa) y D-23 (columna nueva `ANALISIS.rutaDiagnostico`). Detalle completo en
+> `errores/preguntas-doctor.md` §6. **D-23 es la única que toca este `.puml`** — está
+> **pendiente de aplicar** en `grafo_relacional_reconciliado.puml`, no se toca hasta que
+> se pida explícitamente (ver §3.2).
 
 ```
 USUARIO ──registra──> EXPERIMENTO ──compone──> GRUPO ──agrupa──> ESPECIMEN
@@ -62,6 +81,7 @@ USUARIO ──registra──> EXPERIMENTO ──compone──> GRUPO ──agrup
 EXPERIMENTO ──origina──> REPORTE
 USUARIO / EXPERIMENTO ──origina──> NOTIFICACION
 MODELO ──1:N──> CONFIGURACION
+USUARIO ──subtipo (1,1)-(0,1)──> ADMINISTRADOR
 ```
 
 **Dominio experimental (11 relaciones, lo que el laboratorio reconoce):** `USUARIO`,
@@ -70,6 +90,10 @@ MODELO ──1:N──> CONFIGURACION
 
 **Soporte de sistema (4 relaciones, el laboratorio no las nombra):** `MODELO`,
 `CONFIGURACION`, `REPORTE`, `NOTIFICACION`.
+
+**Subtipo de seguridad (1 relación, decidida el 13-sep, D-08):** `ADMINISTRADOR` — ni del
+laboratorio ni del sistema en el mismo sentido que las cuatro de arriba; es un subtipo de
+`USUARIO`, así que se cuenta aparte. Total: 11 + 4 + 1 = **16 relaciones**.
 
 **Lo único que el sistema mide de verdad:** `segundos`, atributo de `PRESENTA`. Todo lo
 demás es estructura para ubicarlo o metadato del análisis. Los totales por espécimen y
@@ -88,14 +112,13 @@ las comparaciones entre grupos se **derivan en consulta**, no se almacenan.
    repita dentro del grupo una vez que `idGrupo` salió de `ESPECIMEN` por 3FN (**D-04**,
    ver §3.3).
 
-> **D-02 resuelto (2026-09-12).** `USUARIO.idBoleta` estaba mal — confirmado y ya
-> corregido en `errores/preguntas-doctor.md` §6. **Nuevo esquema: un identificador
-> institucional único** (nombre de atributo propuesto: `idInstitucional`), que acepta
-> boleta (estudiantes) o número de empleado (personal), con una regla de formato/tipo
-> pendiente de afinar para distinguir cuál es cuál — detalle menor, no bloquea el §3.2 ni
-> el §3.3. **Falta ejecutar el renombre** en `diagramas/grafo_relacional_final.puml` y
-> `diagramas/grafo_relacional_reconciliado.puml` (hoy siguen con `idBoleta`); hacerlo
-> cuando se toquen esos archivos, junto con el diagrama de clases nuevo.
+> **D-02 resuelto (2026-09-12), renombre ejecutado (2026-09-13).** `USUARIO.idBoleta`
+> estaba mal — corregido en `errores/preguntas-doctor.md` §6. **Nuevo esquema: un
+> identificador institucional único** (`idInstitucional`), que acepta boleta
+> (estudiantes) o número de empleado (personal), con una regla de formato/tipo pendiente
+> de afinar para distinguir cuál es cuál — detalle menor, no bloquea. Ya renombrado en
+> `diagramas/clases.puml`, `grafo_relacional_final.puml`, `grafo_relacional_reconciliado.puml`
+> y `grafo_relacional_inicial.puml` — los cuatro compilan.
 
 ---
 
@@ -127,7 +150,7 @@ diagrama de clases — todas construidas sobre las mismas 12 tablas).
 
 | Tabla vieja | Destino en el modelo nuevo | Veredicto |
 |---|---|---|
-| `USUARIOS` | `USUARIO` | Sobrevive. PK pasa de `id` autogenerado a `idBoleta` — **pero ver el hallazgo de §0**: D-02 (rango 1) ya dijo que la boleta no sirve para personal con nombramiento. Nombre de la PK probablemente cambia |
+| `USUARIOS` | `USUARIO` | Sobrevive. PK pasa de `id` autogenerado a `idInstitucional` (D-02, ver §0) — identificador único que acepta boleta o número de empleado |
 | `EXPERIMENTOS` | `EXPERIMENTO` | Sobrevive, pero pierde `tratamiento`, `especie`, `disposicion` — esos bajan a `GRUPO` (el tratamiento es por grupo, no por experimento completo) |
 | `VIDEOS` | `VIDEO` | Sobrevive, pero ahora cuelga de `TANDA`, no de `EXPERIMENTO`. `dia` → `sesion` |
 | `SUJETOS` | `ESPECIMEN` | Sobrevive, pero cuelga de `TANDA`, no de `EXPERIMENTO`. `indice_rata`+`etiqueta` → `numeroRata`+`numeroCilindro` |
@@ -137,7 +160,7 @@ diagrama de clases — todas construidas sobre las mismas 12 tablas).
 | `ANIMALES` | — | **Desaparece como tabla de enlace.** El enlace espécimen↔video lo hace `OBSERVACION` |
 | `RESULTADOS_COMPORTAMIENTO` + `COMPORTAMIENTO_POR_MINUTO` | `OBSERVACION` → `INTERVALO` → `PRESENTA` | Se funden. Solo se guarda `segundos` por intervalo de un minuto; los totales se derivan en consulta |
 | `REPORTES` | `REPORTE` | Casi igual, FK sigue siendo a `EXPERIMENTO` |
-| `NOTIFICACIONES` | `NOTIFICACION` | Casi igual, FK de usuario ahora es `idBoleta` |
+| `NOTIFICACIONES` | `NOTIFICACION` | Casi igual, FK de usuario ahora es `idInstitucional` |
 
 **Nuevo, sin equivalente en el modelo viejo:** `GRUPO`, `TANDA`, `OBSERVACION`,
 `INTERVALO`, `CONDUCTA` (catálogo).
@@ -198,31 +221,50 @@ Checklist de verificación (no de construcción, ya existe):
 
 Fuente: `diagramas/grafo_relacional_inicial.puml` (preliminar, con los 3 defectos
 marcados) + `diagramas/grafo_relacional_final.puml` (validado, BCNF) +
-`diagramas/grafo_relacional_reconciliado.puml` (+ 4 tablas de sistema, este es el que de
-verdad sustituye a `fig:er`).
+`diagramas/grafo_relacional_reconciliado.puml` (+ 4 tablas de sistema + `ADMINISTRADOR`,
+16 relaciones en total — este es el que de verdad sustituye a `fig:er`).
 
 Antes de maquetar:
 - [ ] Van los **tres** grafos, no solo uno: inicial y final son el par obligatorio que
       documenta el paso de validación (lo pidió el Prof. Israel Salas); el reconciliado es
       el candidato real a `fig:er`
-- [ ] Al reconciliado le faltan tipos PostgreSQL y columnas de auditoría — eso es etapa
-      física, todavía no arranca (`DISENO-BD.md` §5 «Lo que falta»)
-- [ ] Revisar **P-08 / D-03** (mismo pendiente, ver §0) antes de compilar como definitivo:
-      si el laboratorio quiere conservar historial de reanálisis, `OBSERVACION` debe
-      referenciar `idAnalisis` en vez de `idVideo`, y `VIDEO—ANALISIS` se queda en (1,N)
-      tal como está; si no, baja a (1,1) y el esquema es más simple. El laboratorio ya dijo
-      que se queda con el último análisis — falta cerrarlo formalmente
-- [ ] Revisar **D-06**: si `CONFIGURACION` necesita referenciar más de un `MODELO` (el
-      pipeline usa YOLOv8 + ResNet-18/50), la relación `MODELO`↔`CONFIGURACION` del grafo
-      podría ser N:M y no 1:N. No dibujar la cardinalidad como cerrada sin resolver esto
-- [ ] **D-02 resuelto:** usar `idInstitucional` en vez de `idBoleta` como PK de `USUARIO`
-      al regenerar este grafo (ver §0)
+- [ ] Al reconciliado le faltan tipos PostgreSQL y columnas de auditoría — eso es del
+      **esquema físico**, no de este grafo lógico. La etapa física ya cerró sus 6
+      decisiones (D-11 a D-18 — SGBD, seguridad, redundancia, tipos, dominios y respaldo;
+      ver `errores/preguntas-doctor.md` §6 y el artifact de Diseño Físico), pero falta
+      ejecutar el DDL real. Ese trabajo no toca este `.puml`, que se queda en BCNF
+      estricta a propósito — la única redundancia física (D-04, `ESPECIMEN.idGrupo`) se
+      declara solo en el DDL, nunca aquí
+- [x] **P-08 / D-03 resuelto (equipo, 2026-09-13):** se reemplaza, no se conserva
+      historial de reanálisis. `VIDEO—ANALISIS` baja de (1,N) a (1,1) — ya aplicado en
+      `grafo_relacional_reconciliado.puml`, compila. `OBSERVACION` no necesita cambiar:
+      sigue referenciando `idVideo` directo, porque con reemplazo nunca hay ambigüedad de
+      cuál análisis corresponde a un video
+- [x] **D-06 resuelto (equipo, 2026-09-13):** no cambia, se queda en 1:N. Lo que importa
+      registrar es el resultado (F1, precisión, recall), no la combinación exacta de
+      modelos que lo produjo — no hace falta la relación N:M
+- [x] **D-02 ejecutado (2026-09-13):** `idInstitucional` ya es la PK de `USUARIO` en los
+      tres grafos (ver §0)
+- [x] **D-08 ejecutado (2026-09-13):** `ADMINISTRADOR(idInstitucional* [FK])` agregado a
+      `grafo_relacional_reconciliado.puml` en relación (1,1)-(0,1) con `USUARIO` — pasa de
+      15 a 16 relaciones, 16 a 17 llaves foráneas. Compila
+- [ ] **D-23 pendiente de aplicar (13-sep):** columna nueva `ANALISIS.rutaDiagnostico`
+      (nula salvo `estado = 'error'`), que salió de construir
+      `diagramas/seq_consulta_progreso.puml` (§3.4) — ni `ANALISIS` ni `REPORTE` tenían
+      dónde guardar la ruta del PDF de diagnóstico que genera el Worker. No se toca este
+      `.puml` hasta que se pida explícitamente
 
 ### 3.3 Diagrama de clases (`diagramas/clases.puml`, `fig:clases` en `:2199`–`:2218`)
 
-**Estado:** 🟡 borrador hecho, compila (verificado con PlantUML 2026-09-12). Falta pulir
-el layout (`Observacion` se encima con el borde de P4 — cosmético) y cerrar D-08/D-09
-antes de generar el PNG final para el capítulo.
+**Estado:** 🟢 sin pendientes de decisión — compila (verificado con PlantUML). D-08, D-09
+y D-10 resueltos (2026-09-13): `Administrador` no es un tipo aparte, es `Investigador`
+con permisos extra — `Investigador` se fusionó con `Usuario` (ya no abstracta) y
+`Administrador` hereda de `Usuario`. El progreso del análisis vive solo en memoria de
+`PipelineAnalisis`/`Worker`, no toca `Analisis`. `USUARIO` ganó `activo : Boolean`
+(justificado con Kendall & Kendall p. 425-426 y Cardona Apéndice A p. 117-118) — ya
+aplicado también en `grafo_relacional_final.puml` y `grafo_relacional_reconciliado.puml`.
+Solo falta pulir el layout (`Observacion` se encima con el borde de P4 — cosmético) antes
+de generar el PNG final para el capítulo.
 
 Qué se recicla tal cual: paquete `P1_Autenticacion_y_usuarios` completo
 (`Usuario`/`Investigador`/`Administrador`), las clases de sistema en `P3`
@@ -273,36 +315,71 @@ Checklist antes de dibujar:
       bien” en el diagrama
 - [ ] Si después de editar sigue apareciendo `Sujeto` o `Animal` en cualquier paquete, es
       señal de que la migración quedó a medias
-- [ ] **D-02 resuelto:** el atributo de la clase `Usuario` se llama `idInstitucional`, no
-      `idBoleta` (ver §0)
+- [x] **D-02 ejecutado:** el atributo de la clase `Usuario` es `idInstitucional` (ver §0)
 
 ### 3.4 Diagramas de secuencia
 
-**Reciclables sin cambio** (no tocan entidades del dominio experimental): registro de
-usuario por admin, login, logout, cambio de contraseña, gestión de usuarios, perfil,
-notificaciones, manejo de error de calidad de video, consulta de progreso.
+**Estado:** 🟢 los cinco diagramas del dominio experimental están rehechos. Fuente de
+cada uno y decisiones que salieron de construirlos, abajo.
 
-**Necesitan revisión:**
+**Siguen reciclables sin cambio** (no tocan entidades del dominio experimental): registro
+de usuario por admin, login, logout, cambio de contraseña, gestión de usuarios, perfil,
+notificaciones.
 
-- **Carga de video** (`seq_carga`, pág. 14 del PDF viejo). Hoy sube el video "para ese
-  día" directo al experimento. En el modelo nuevo el video pertenece a una `Tanda` dentro
-  de un `Grupo`. Pregunta antes de rehacerlo: ¿la pantalla le pide Grupo+Tanda al
-  investigador, o el sistema los infiere del orden de carga? Si no hay fuente que lo
-  responda, es pregunta abierta, no se inventa.
+**Ya no son reciclables — se rehicieron:**
 
-- **Consulta de resultados** (`seq_resultados`, pág. 18). Hoy es "por animal", comparando
-  Día 1 vs Día 2. La comparación real que pide el protocolo es **entre grupos**
-  (control/fluoxetina/tratamiento) usando solo el Día 2 — ver
-  [`errores/preguntas-doctor.md`](errores/preguntas-doctor.md) sección "Ya respondido":
-  *"Qué se compara — Los 5 minutos del Día 2, entre los tres grupos"*. Reescribir la
-  secuencia sobre esa comparación, no sobre día1-vs-día2 por animal.
+- **Carga de video** → [`diagramas/seq_carga_video.puml`](diagramas/seq_carga_video.puml),
+  reemplaza a `seq_carga`. El video ahora cuelga de `Tanda` dentro de `Grupo`, no del
+  experimento directo. La pregunta abierta de este mismo §3.4 (¿el sistema pide Grupo+Tanda
+  o los infiere?) se resolvió como **D-19**: el investigador escribe el nombre del
+  grupo/tratamiento con autocompletado: si coincide con un grupo del mismo experimento, el
+  sistema infiere la siguiente tanda (letra A, B, C... en pantalla) y pre-llena un campo
+  editable, pero pide confirmación explícita antes de guardar.
 
-- **Análisis automático** (`seq_analisis`). Revisar si nombra `SUJETOS`/`ANIMALES`
-  explícitamente. Si solo habla de `Video`/`Trabajo` en abstracto, sobrevive con
-  renombrar `Trabajo` → `Análisis`.
+- **Análisis automático** →
+  [`diagramas/seq_analisis_automatico.puml`](diagramas/seq_analisis_automatico.puml),
+  reemplaza a `seq_analisis`. No nombraba `SUJETOS`/`ANIMALES` de forma literal, pero sí
+  tenía el participante "Pipeline IA" (término prohibido, ver `CLAUDE.md`) y decía "rastrea
+  a los animales" — corregido. Se le agregó el curso alterno de error que le faltaba
+  (RN-11, confianza de detección < 0.70) y el registro del nivel de clasificación (D-17).
+  Al revisarlo contra `chapters/05_diseno.tex:225-232` salió **D-20**: ese capítulo describe
+  procesamiento parcial si detecta menos cilindros de los esperados, pero el equipo decidió
+  todo-o-nada (si falla la detección de los 4 cilindros, es error completo) — queda como
+  **Q-G**, pendiente de confirmar con el laboratorio.
 
-- **Descarga de reportes** (`seq_reportes`). Cambio menor: `REPORTE` sigue colgando de
-  `EXPERIMENTO`, no hay impacto de fondo.
+- **Consulta de progreso** (+ **descarga del reporte de diagnóstico**, fusionado) →
+  [`diagramas/seq_consulta_progreso.puml`](diagramas/seq_consulta_progreso.puml),
+  reemplaza a `seq_progreso` **y** a `seq_error`. El diagrama viejo de progreso leía
+  "estado, etapa y porcentaje" de la base de datos, pero D-09 ya había resuelto que el
+  progreso vive solo en memoria del Worker — `ANALISIS` no tiene columna de porcentaje.
+  **D-22** resuelve que el porcentaje se aproxima por etapa (25% fijo por cada una de las 4
+  etapas de D-16), sin que el Worker comparta memoria con nadie. El viejo `seq_error`
+  mezclaba tres cosas que hoy viven cada una en su lugar correcto: que el Worker detecte el
+  error (`seq_analisis_automatico.puml`), que el investigador se entere (rama de error de
+  este diagrama) y la descarga del PDF de diagnóstico (agregada a esa misma rama en vez de
+  vivir en un archivo aparte — CU-08 está marcado "Secundario" en el `.tex`, y Kendall &
+  Kendall cap. 10, p. 295-296, dice que los escenarios de menor importancia no siempre
+  necesitan su propio diagrama de secuencia; separarlo obligaba a una nota de precondición
+  que solo repetía lo que ya pasa en este mismo diagrama). De ahí salió **D-23**: ni
+  `ANALISIS` ni `REPORTE` tenían dónde guardar la ruta del PDF de diagnóstico — se agrega
+  `ANALISIS.rutaDiagnostico`, pendiente de aplicar al grafo relacional (ver §3.2).
+
+- **Consulta de resultados** →
+  [`diagramas/seq_consulta_resultados.puml`](diagramas/seq_consulta_resultados.puml),
+  reemplaza a `seq_resultados`. Ya no es "por animal" comparando Día 1 vs Día 2 — ahora es
+  la comparación real que pide el protocolo, **entre los tres grupos** usando solo el Día 2
+  (ver [`errores/preguntas-doctor.md`](errores/preguntas-doctor.md) sección "Ya
+  respondido"). Al construirlo salieron dos preguntas de laboratorio, no de equipo —
+  **Q-E** (¿se compara por promedio o por total del grupo?) y **Q-F** (¿qué hacer si un
+  grupo mezcla especímenes "preciso" y "agrupado", D-17?) — ambas con una decisión
+  provisional (promedio; mostrar separado con aviso) documentada en el propio `.puml`.
+
+- **Descarga de reportes** →
+  [`diagramas/seq_descarga_reportes.puml`](diagramas/seq_descarga_reportes.puml),
+  reemplaza a `seq_reportes`. `REPORTE` sigue colgando de `EXPERIMENTO`, sin cambio de
+  fondo en el modelo, pero CU-10 ya insinuaba caché ("el sistema genera o recupera el
+  archivo") sin decir cómo se invalida — **D-21** resuelve que se regenera solo si hubo un
+  análisis más reciente que el reporte guardado (reanálisis, D-03).
 
 ### 3.5 Diagramas de casos de uso (`:581`–`:2042`)
 
@@ -325,28 +402,62 @@ datos; auditar por separado cuando toque la sección de interfaz.
 
 Mayormente genéricas y reciclables — no nombran entidades de dominio salvo la página 1.
 
-- [ ] **Página 1 (arquitectura por capas):** el contenedor `Docker: db` lista las 12
-      tablas viejas (`USUARIOS EXPERIMENTOS VIDEOS TRABAJOS...`). Sustituir por las 15
-      nuevas o quitar la lista y remitir a la figura del esquema físico.
+- [x] **Página 1 (arquitectura por capas) — rehecha (13-sep):**
+      [`diagramas/arquitectura_software.puml`](diagramas/arquitectura_software.puml). El
+      contenedor `Docker: db` ya no lista las 12 tablas viejas — remite al diagrama de
+      esquema físico en vez de repetir las 16 relaciones aquí. De paso, al revisar el
+      archivo completo (no solo la lista de tablas) salió un segundo problema que no
+      estaba en este pendiente: el diagrama tenía un contenedor `Docker: redis` con cola
+      de mensajes que **no existe en ningún capítulo** — `05_diseno.tex:38-39` dice
+      explícitamente "tres capas... frontend, backend y base de datos. Un cuarto
+      contenedor —el worker—" (cuatro contenedores, nunca cinco), y el mecanismo real,
+      confirmado en CU-07, es *polling* del Worker a la tabla de análisis, sin cola de
+      mensajes aparte. Se quitó Redis y se agregó el volumen de modelos entrenados
+      (`rat.pt`, `resnet18_fst.pt`, `resnet50_fst.pt`) que `05_diseno.tex:47-49` sí
+      menciona y el diagrama viejo no tenía.
+- [x] **Página 2 (flujo general) — rehecha (13-sep):**
+      [`diagramas/flujo_general.puml`](diagramas/flujo_general.puml) (no había fuente
+      editable, solo la imagen). El bloque "Referencia y validación" encadenaba
+      Anotación experta (conjunto de prueba) → Dataset de referencia → Entrenamiento del
+      modelo — es decir, alimentaba el entrenamiento con la anotación del Dr. Sandino
+      guardada como "conjunto de prueba", que es un gold standard con otro nombre.
+      Corregido dos veces: la primera versión seguía usando BORIS como conjunto de
+      prueba (insuficiente); la versión final no usa BORIS/anotación experta en ningún
+      punto — entrenamiento y prueba propia salen de los mismos clips inequívocos, según
+      la "Prohibición vigente" de `CLAUDE.md`. Sigue marcado "provisional" porque esa
+      prohibición depende de una pregunta abierta sin confirmar con el Dr. Sandino.
 - [x] **Página 3 (pipeline) — verificado a fondo el 2026-09-12**, no solo por inspección
       visual: se leyó completo `chapters/05_diseno.tex:102`–`234` (los 5 módulos +
       "Separación por espécimen"). Los módulos describen procesamiento de video cuadro a
       cuadro (contraste, cilindros, tracking YOLOv8/ByteTrack, clasificación ResNet en
       cascada) — nunca dependieron de `Grupo`/`Tanda`/`Experimento`, y "Separación por
       espécimen" asigna por posición espacial del cilindro, no por estructura de grupo.
-      **Confirmado: no requiere cambio — pero solo mientras D-07 siga sin decidir.**
-      Los métodos de `PipelineAnalisis` en `diagramas/clases.puml` (§3.3) se verificaron
-      contra estos 5 módulos uno a uno. **Contingencia real, no hipotética:** D-07 no es
-      solo el recuadro — también cubre que el usuario ajuste a mano la línea de agua del
-      Módulo 2 (ver `errores/preguntas-doctor.md` §6). Si se confirma cualquiera de las
-      dos, el Módulo 2 deja de describir detección 100% automática, y hay que rehacer:
-      la prosa de `chapters/05_diseno.tex:127`–`134`, el diagrama de esta página, y los
-      métodos `detectarCilindros()` / la estimación de línea de agua en
-      `PipelineAnalisis`. No es trabajo perdido si eso pasa — es la razón por la que D-07
-      sigue abierto en vez de cerrado en falso.
-- Página 2 (flujo general): no nombra tablas, no requiere cambio (sin verificación tan
-  exhaustiva como la página 3, pero es un diagrama de bloques genérico sin prosa propia
-  que auditar).
+      **Confirmado: no requiere cambio de fondo — pero solo mientras D-07 siga sin
+      decidir.** Los métodos de `PipelineAnalisis` en `diagramas/clases.puml` (§3.3) se
+      verificaron contra estos 5 módulos uno a uno. **Contingencia real, no hipotética:**
+      D-07 no es solo el recuadro — también cubre que el usuario ajuste a mano la línea
+      de agua del Módulo 2 (ver `errores/preguntas-doctor.md` §6). Si se confirma
+      cualquiera de las dos, el Módulo 2 deja de describir detección 100% automática, y
+      hay que rehacer: la prosa de `chapters/05_diseno.tex:127`–`134`, el diagrama de
+      esta página, y los métodos `detectarCilindros()` / la estimación de línea de agua
+      en `PipelineAnalisis`. No es trabajo perdido si eso pasa — es la razón por la que
+      D-07 sigue abierto en vez de cerrado en falso.
+  - [ ] **Pendiente sin resolver (13-sep) — revisar el texto de la imagen, no solo el
+        contenido.** Esta página no tiene fuente editable (era raster puro, a diferencia
+        de las páginas 1 y 2, que ya se recrearon en `.puml`), así que lo de abajo no se
+        pudo corregir directamente, solo se deja anotado:
+        1. El nodo "¿Confianza ResNet-18?" / "¿Confianza ResNet-50?" se ve como un umbral
+           ya decidido, igual que el 0.70 de RN-11 (detección de cilindros) — pero
+           `05_diseno.tex:162-163` dice que ese umbral de la cascada de clasificación
+           "se definirá durante la fase de validación en TT-II", **todavía no existe**.
+           Falta una nota visual que distinga ambos casos.
+        2. Las etiquetas en inglés "swim / immobile / escape" (ResNet-18) y "swim s,
+           immobile s, escape s" (etapa de Resultados) no coinciden con los nombres de
+           columna que el propio capítulo 5 usa para lo mismo — `nado_s`, `inmovil_s`,
+           `escape_s` (`05_diseno.tex:211-212`) — ni con la terminología en español del
+           resto del documento (nado activo, inmovilidad, escalamiento). Quedaron así
+           porque nunca se recreó esta página como `.puml`; hace falta rehacerla (no solo
+           retocar el texto de la imagen) para corregirlo.
 
 ---
 
@@ -359,8 +470,9 @@ Mayormente genéricas y reciclables — no nombran entidades de dominio salvo la
 - [ ] ¿Nada dice "cámara de celular", "animales" ni "inteligencia artificial" a secas, y
       nada reintroduce κ de Cohen, MAE o "gold standard"? (ver `CLAUDE.md`)
 - [ ] Si es conceptual: ¿está en lenguaje natural, sin SQL ni tipos de dato?
-- [ ] ¿Se revisó contra los pendientes abiertos (P-08/D-03, D-02, D-04, D-05, D-06, Q-08,
-      Q-09, revisión de la Dra. Cordero) antes de llamarlo "definitivo"?
+- [ ] ¿Se revisó contra los pendientes abiertos (P-08/D-03, D-02, D-04, D-05, D-06, D-19 a
+      D-23, Q-08, Q-09, Q-E, Q-F, Q-G, revisión de la Dra. Cordero) antes de llamarlo
+      "definitivo"?
 
 ---
 
@@ -369,16 +481,17 @@ Mayormente genéricas y reciclables — no nombran entidades de dominio salvo la
 | Diagrama | Estado | Nota |
 |---|---|---|
 | DER conceptual | 🟢 hecho | verificar checklist §3.1 antes de dar por cerrado |
-| Grafo relacional (inicial+final+reconciliado) | 🟡 insumo listo | falta compilar a PNG e insertar en el `.tex` |
-| Diagrama de clases | 🟡 borrador compila | pendiente: layout + D-08/D-09 (ver `PREGUNTAS.md`) |
-| Secuencia — Carga de video | 🔴 no iniciado | pregunta abierta: ¿UI pide Grupo+Tanda o los infiere? |
-| Secuencia — Consulta de resultados | 🔴 no iniciado | cambiar a comparación entre grupos, Día 2 |
-| Secuencia — Análisis automático | ⚪ sin auditar | revisar si nombra SUJETOS/ANIMALES |
-| Secuencia — Descarga de reportes | ⚪ sin auditar | cambio menor esperado |
+| Grafo relacional (inicial+final+reconciliado) | 🟡 insumo listo | falta compilar a PNG e insertar en el `.tex`. Reconciliado ya con `ADMINISTRADOR` (16 relaciones); pendiente D-23 (`rutaDiagnostico`), no se aplica hasta que se pida |
+| Diagrama de clases | 🟢 sin pendientes de decisión | solo falta pulir layout cosmético |
+| Secuencia — Carga de video | 🟢 hecho | `seq_carga_video.puml`, inferencia de tanda por D-19 |
+| Secuencia — Análisis automático | 🟢 hecho | `seq_analisis_automatico.puml`, todo-o-nada por D-20 (provisional, ver Q-G) |
+| Secuencia — Consulta de progreso + diagnóstico | 🟢 hecho | `seq_consulta_progreso.puml` (fusiona el viejo `seq_progreso` y `seq_error`), % por etapa (D-22), `rutaDiagnostico` (D-23) |
+| Secuencia — Consulta de resultados | 🟢 hecho | `seq_consulta_resultados.puml`, comparación entre grupos, Día 2; promedio/nivel mixto provisional (Q-E, Q-F) |
+| Secuencia — Descarga de reportes | 🟢 hecho | `seq_descarga_reportes.puml`, caché con invalidación por reanálisis (D-21) |
 | Casos de uso | 🟢 casi listo | solo 3 retoques, ver §3.5 |
 | Mockups de UI | ⚪ sin auditar | |
-| Arquitectura pág. 1 (`docs/diagramas.pdf`) | 🔴 no iniciado | lista de tablas desactualizada |
-| `idBoleta` en `USUARIO` (D-02) | 🟢 resuelto | renombrar a `idInstitucional` al tocar §3.2 y §3.3 |
+| Arquitectura pág. 1 (`docs/diagramas.pdf`) | 🟢 hecho | `arquitectura_software.puml`: quitó las 12 tablas viejas y el contenedor Redis inexistente (era polling), agregó el volumen de modelos entrenados |
+| `idBoleta` → `idInstitucional` en `USUARIO` (D-02) | 🟢 ejecutado | renombrado en los 3 grafos + `clases.puml`, compilan |
 
 ---
 

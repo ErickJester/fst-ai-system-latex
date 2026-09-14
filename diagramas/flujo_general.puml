@@ -1,0 +1,113 @@
+@startuml flujo_general
+' ================================================================
+'  Flujo general del sistema
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Reemplaza a docs/diagramas.pdf pagina 2 / figures/mermaid/arquitectura.png
+'  (no habia .puml/.mmd fuente, solo la imagen renderizada).
+'
+'  Que corrige, con fuente:
+'  El bloque viejo "Referencia y validacion" encadenaba: Anotacion
+'  experta (conjunto de prueba) -> Dataset de referencia ->
+'  Entrenamiento del modelo -> Modelo entrenado. Eso alimenta el
+'  entrenamiento con la anotacion experta que se guardo como
+'  "conjunto de prueba" -- exactamente lo contrario de la estrategia
+'  ya acordada por el equipo: el clasificador se entrena con CLIPS
+'  INEQUIVOCOS de conducta, y los reportes BORIS (anotacion experta)
+'  se usan SOLO COMO PRUEBA, nunca para entrenar -- para no
+'  sobreajustar a los patrones de un solo anotador. Ademas, ese
+'  "Dataset de referencia" alimentando el entrenamiento es la misma
+'  figura de "gold standard" que CLAUDE.md marca como eliminada
+'  (prohibicion vigente, 2026-04-30, provisional).
+'
+'  Primera corrección (insuficiente): separar clips -> entrenamiento
+'  de BORIS -> conjunto de prueba -> evaluación seguía sin resolver
+'  el problema de fondo -- BORIS es la anotación manual del Dr.
+'  Sandino, y compararse contra ella para sacar F1 ES un gold
+'  standard con otro nombre, aunque ya no se llame así.
+'
+'  Corrección real: la prohibición vigente de CLAUDE.md dice que el
+'  clasificador se entrena "sin usar las anotaciones manuales del
+'  Dr. Sandino" y que F1 se mide sobre un "conjunto de prueba
+'  PROPIO" -- ni siquiera la prueba usa BORIS. Por eso este diagrama
+'  ya NO tiene ningún bloque de "Reportes BORIS" ni "anotación
+'  experta": tanto el entrenamiento como la prueba salen de los
+'  mismos clips inequívocos (un recorte held-out de esos clips sirve
+'  de conjunto de prueba propio). Únicamente el modelo entrenado
+'  (nunca el conjunto de prueba) alimenta el análisis de conducta en
+'  vivo.
+'
+'  Sigue marcado "provisional" porque la pregunta abierta de
+'  CLAUDE.md ("¿es académicamente aceptable presentar TT-II con solo
+'  F1 sobre conjunto de prueba propio?") no está confirmada con el
+'  Dr. Sandino todavía.
+'
+'  El resto del diagrama (Sistema web, Analisis de conducta,
+'  Almacenamiento) no cambia de fondo respecto del viejo.
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/flujo_general.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+skinparam BackgroundColor White
+skinparam ArrowColor      #2C3E50
+skinparam ArrowThickness  1.5
+skinparam RectangleBorderColor #AAAAAA
+skinparam RectangleBorderThickness 2
+skinparam DatabaseBorderColor  #AAAAAA
+skinparam FolderBorderColor    #AAAAAA
+
+top to bottom direction
+
+rectangle "Video FST" as VID #FFFFFF
+
+rectangle "Entrenamiento y evaluación del modelo (provisional)\n(offline, antes de desplegar -- no es parte del flujo por video)\nSIN anotación del Dr. Sandino, ni para entrenar ni para probar" as REF #FFF9DB {
+  rectangle "Clips inequívocos\nde conducta" as CLIPS
+  rectangle "Entrenamiento\ndel modelo" as ENT
+  database "Modelo entrenado" as MOD
+  rectangle "Conjunto de prueba propio\n(held-out de los mismos clips,\nno anotación experta)" as TEST
+  rectangle "Evaluación\nF1 por conducta (OE-5, RNF-02)" as EVAL
+
+  CLIPS -right-> ENT
+  CLIPS -down-> TEST : "held-out"
+  ENT -right-> MOD
+  MOD -down-> EVAL
+  TEST -up-> EVAL
+}
+
+rectangle "Sistema web" as WEBBOX #FFF9DB {
+  rectangle "Interfaz\nCarga y consulta" as IFZ
+  rectangle "API\nGestión de sesiones" as API
+  rectangle "Procesamiento asíncrono\n(cola / worker)" as ASYNC
+
+  IFZ -right-> API
+  API -right-> ASYNC
+}
+
+rectangle "Análisis de conducta" as CONDUCTA #FFF9DB {
+  rectangle "Preprocesamiento\n(cuadros y limpieza)" as PRE
+  rectangle "Clasificación de conducta\n(nado activo, inmovilidad, escalamiento)" as CLASIF
+  rectangle "Resultados\nTiempos y reporte" as RES
+
+  PRE -right-> CLASIF
+  CLASIF -right-> RES
+}
+
+rectangle "Almacenamiento" as ALM #FFF9DB {
+  database "Archivos\nVideos y reportes" as ARCH
+  database "Base de datos\nSesiones y resultados" as BD
+}
+
+VID -right-> IFZ
+ASYNC -right-> PRE
+MOD -down-> CLASIF : "modelo entrenado\n(nunca el conjunto de prueba)"
+API -down-> BD
+RES -right-> ARCH
+RES -down-> BD
+
+@enduml

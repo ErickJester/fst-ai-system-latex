@@ -51,6 +51,19 @@ chat.
 
 ---
 
+## No propagar actualizaciones sin que se pida
+
+Resolver una decisión y registrarla en `errores/preguntas-doctor.md` (regla de arriba) es
+lo único que se hace sin que lo pidan. **No** propagar esa decisión a los artifacts
+publicados (Conceptual/Lógico/Físico), a `DISENO-BD.md`, a los `.puml` del grafo
+relacional, ni a ningún otro archivo — aunque parezca el siguiente paso obvio y aunque ya
+se haya hecho antes en la misma conversación. Esperar a que el usuario diga explícitamente
+qué actualizar ("actualiza el artifact", "sincroniza X"). Si pide "que todo esté al
+corriente" o similar, eso sí autoriza una pasada completa — pero una decisión resuelta,
+por sí sola, no.
+
+---
+
 ## Commits y autoría
 
 - NUNCA agregar `Co-Authored-By: Claude` ni ninguna referencia a Claude, Anthropic o IA
@@ -134,6 +147,13 @@ posición.
 - El login de administrador usa el mismo diagrama que el de investigador.
 - «DER» se reserva para modelos conceptuales sin tipos ni llaves foráneas. El PlantUML con
   tablas, tipos y FKs es **esquema físico** o **modelo relacional**, nunca «DER».
+- **Nunca reciclar un atributo o método de un diagrama viejo sin verificar que el grafo
+  relacional vigente lo respalde.** Que algo existiera en el modelo viejo no es
+  suficiente — hay que comprobar que la columna/atributo sigue existiendo en
+  `grafo_relacional_final.puml` / `grafo_relacional_reconciliado.puml` antes de copiarlo.
+  Si no está: no inventarlo ni copiarlo. Se quita del diagrama y se registra como hueco
+  nuevo (`D-XX` en `errores/preguntas-doctor.md` §6), igual que D-08/D-09/D-10. Pasó dos
+  veces en esta migración por copiar del diagrama de clases viejo sin este chequeo.
 
 ---
 

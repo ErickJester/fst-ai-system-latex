@@ -1,0 +1,107 @@
+@startuml seq_consulta_progreso
+' ================================================================
+'  Secuencia - Consulta de progreso del análisis (polling) y
+'  descarga del reporte de diagnóstico si falla
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Reemplaza a figures/mermaid/seq_progreso.png y a
+'  figures/mermaid/seq_error.png. Cubre CU-07 "Monitorear progreso
+'  del análisis", la parte que ve el investigador
+'  (chapters/05_diseno.tex:1425-1468, RF-15) -- la ejecución del
+'  pipeline por el Worker es un diagrama aparte
+'  (seq_analisis_automatico.puml) -- Y CU-08 "Descargar reporte de
+'  diagnóstico" (05_diseno.tex:1490-1534, RF-14, RF-16), fusionado
+'  aquí dentro de la rama de error en vez de vivir en su propio
+'  archivo.
+'
+'  Por qué CU-08 se fusiona en vez de tener su propio diagrama
+'  (decisión del usuario, 13-sep, tras revisar Kendall & Kendall):
+'  el libro (cap. 10, p. 295-296) dice que "cada escenario de caso
+'  de uso puede crear un diagrama de secuencia, aunque éstos no
+'  siempre se crean para escenarios de menor importancia". CU-08 está
+'  marcado "Tipo: Secundario" en el propio .tex (línea 1494) y todo
+'  su curso normal depende de una precondición que solo existe
+'  dentro de la rama de error de este mismo diagrama -- separarlo
+'  obligaba a una nota inicial que solo repetía "esto ya pasó en otro
+'  diagrama", señal de que no es un proceso independiente.
+'
+'  Por qué cambia respecto de los diagramas viejos, con fuente:
+'  - El "seq_progreso" viejo tenía un "Servidor" que devolvía "estado,
+'    etapa y porcentaje de avance" leyendo la base de datos. Pero
+'    D-09 (13-sep) ya resolvió que el progreso vive SOLO en memoria
+'    del Worker mientras corre -- ANALISIS no tiene columna de
+'    porcentaje, solo etapa. Un backend aparte del Worker no puede
+'    leer ese porcentaje de la base de datos porque no está ahí.
+'  - D-22 (13-sep) resuelve cómo se calcula entonces: el porcentaje
+'    se aproxima por etapa, 25% fijo por cada una de las 4 etapas de
+'    D-16 (preprocesamiento=25%, detección=50%, seguimiento=75%,
+'    clasificación=100%), calculado al vuelo a partir de
+'    ANALISIS.etapa -- no hace falta que el Worker comparta memoria
+'    con nadie más.
+'  - El experimento puede tener varios análisis corriendo a la vez
+'    (uno por video, vía sus tandas), igual que el diagrama viejo ya
+'    mostraba con su "lista de tareas" -- eso no cambia.
+'  - RF-15: el análisis sigue en segundo plano aunque el investigador
+'    cierre la pestaña, por eso el polling solo ocurre mientras la
+'    pantalla está abierta, no controla si el Worker sigue o no.
+'  - El "seq_error" viejo mezclaba tres cosas: que el Worker detecte
+'    el error (ya está en seq_analisis_automatico.puml, RN-11), que
+'    el investigador se entere (rama de error de abajo) y la descarga
+'    del PDF (agregada aquí). D-23 (13-sep) agrega la columna
+'    ANALISIS.rutaDiagnostico (nula salvo con estado = "error"),
+'    porque ni ANALISIS ni REPORTE tenían dónde guardar esa ruta --
+'    pendiente de aplicar en grafo_relacional_reconciliado.puml.
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/seq_consulta_progreso.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
+
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant "Archivos" as fs
+
+inv -> ui: abre la pantalla de progreso del experimento\n(o llega redirigido tras subir un video)
+
+loop cada 3 a 5 segundos, mientras haya análisis en cola o procesando
+  ui -> api: consulta el estado de los análisis del experimento
+  api -> db: busca los análisis de este experimento\n(vía sus grupos, tandas y videos)
+  db --> api: cada análisis, con su estado y su etapa
+  api -> api: calcula el porcentaje de avance de cada uno\nsegún su etapa: 25% fijo por etapa (D-22)
+  api --> ui: estado, etapa y porcentaje de cada análisis
+  ui -> inv: actualiza la barra de progreso de cada video
+end
+
+alt algún análisis llegó a "completado"
+  ui -> inv: habilita el acceso a los resultados\n(ver seq_consulta_resultados.puml)
+else algún análisis llegó a "error"
+  ui -> inv: muestra el código y la descripción del error,\ny habilita la descarga del reporte de diagnóstico
+
+  inv -> ui: selecciona la descarga del reporte de diagnóstico
+  ui -> api: pide el PDF de diagnóstico de este análisis
+  api -> db: busca la ruta guardada en ANALISIS.rutaDiagnostico (D-23)
+
+  alt el Worker ya guardó la ruta del PDF
+    db --> api: ruta del archivo
+    api -> fs: recupera el PDF de diagnóstico
+    fs --> api: archivo listo
+    api --> ui: PDF de diagnóstico
+    ui --> inv: descarga inmediata en el navegador
+  else el Worker todavía no termina de generarlo\n(la ruta sigue en blanco)
+    db --> api: sin ruta todavía
+    api --> ui: aún no está disponible
+    ui -> inv: muestra indicación de espera
+    ui -> api: reintenta automáticamente tras unos segundos
+  end
+end
+
+@enduml

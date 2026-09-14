@@ -71,18 +71,19 @@ skinparam arrow {
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class USUARIO {
-  <u>idBoleta</u>
+  <u>idInstitucional</u>
   --
   nombre
   apellidos
   correo   [AK]
-  contrasena
+  contrasenaHash
+  activo
 }
 
 class EXPERIMENTO {
   <u>idExperimento</u>
   --
-  idBoleta   [FK]
+  idInstitucional   [FK]
   nombre
   fecha
   notas   (nulo)

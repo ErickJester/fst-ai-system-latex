@@ -1,0 +1,85 @@
+@startuml seq_carga_video
+' ================================================================
+'  Secuencia - Carga de video, con inferencia de tanda (D-19)
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Reemplaza a figures/mermaid/seq_carga.png (modelo viejo: el video
+'  colgaba directo de Experimento, sin Grupo ni Tanda).
+'
+'  Cubre CU-04 "Subir video para analisis" (RF-08, RF-09, RF-12) mas
+'  la inferencia de tanda decidida en D-19: al escribir el nombre del
+'  grupo/tratamiento, si coincide con uno ya usado en el MISMO
+'  experimento, el sistema sugiere la siguiente tanda (letra A, B,
+'  C... en pantalla; en la base de datos sigue siendo TANDA.ordinal
+'  entero) en un campo editable, pero pide confirmacion explicita
+'  antes de guardar -- no basta con dejar el valor precargado sin
+'  que el investigador lo confirme.
+'
+'  El encolado del analisis es solo crear el registro con estado
+'  "en cola" (D-15); el Worker lo toma despues por polling a la
+'  tabla de analisis (cap. 5, CU-07) -- no hay cola aparte tipo
+'  Redis, esa pieza de docs/diagramas.pdf pag. 1 esta desactualizada
+'  (ver MIGRACION-DIAGRAMAS.md SS3.7).
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/seq_carga_video.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
+
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+inv -> ui: selecciona el experimento activo
+inv -> ui: escribe el nombre del grupo o tratamiento
+
+ui -> api: busca coincidencias del nombre
+api -> db: consulta los grupos de este experimento
+db --> api: grupos con nombre parecido, si existen
+api --> ui: sugerencias para autocompletar
+
+alt el nombre coincide con un grupo de este mismo experimento
+  inv -> ui: selecciona la sugerencia
+  ui -> api: pide la siguiente tanda de ese grupo
+  api -> db: cuenta las tandas ya registradas del grupo
+  db --> api: siguiente tanda disponible (por ejemplo, la B)
+  api --> ui: precarga la tanda sugerida en un campo editable
+  ui -> inv: pide confirmar\n"¿esta es la tanda B de [grupo]?"
+  inv -> ui: confirma la tanda, o la corrige a mano
+else no hay ningun grupo con ese nombre en este experimento
+  ui -> inv: pide los datos del grupo nuevo\n(tipo, tratamiento)
+  inv -> ui: captura el grupo nuevo
+  note right of ui
+    la primera tanda de un
+    grupo nuevo siempre es "A"
+  end note
+end
+
+inv -> ui: elige la sesion (Día 1 o Día 2) y selecciona el archivo .mp4
+ui -> api: envía el video del experimento
+
+api -> api: valida formato y reproducibilidad del archivo
+
+alt el archivo no es válido
+  api --> ui: reporta el error de validación
+  ui --> inv: muestra el mensaje, no avanza
+else el archivo es válido
+  api -> api: guarda el archivo en el volumen compartido
+  api -> db: guarda el grupo, si es nuevo
+  api -> db: guarda la tanda, nueva o existente
+  api -> db: guarda el video, con su tanda y su sesión
+  api -> db: crea el análisis del video, con estado "en cola"
+  db --> api: confirma que todo quedó guardado
+  api --> ui: video almacenado, análisis en cola
+  ui --> inv: confirmación, y redirección a la pantalla de progreso
+end
+
+@enduml

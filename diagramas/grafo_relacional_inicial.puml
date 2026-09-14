@@ -66,17 +66,17 @@ skinparam arrow {
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class USUARIO #FFF4F0 {
-  <u>idBoleta</u>
+  <u>idInstitucional</u>
   --
   nombre   <&warning> dominio compuesto
   correo   [AK]
-  contrasena
+  contrasenaHash
 }
 
 class EXPERIMENTO {
   <u>idExperimento</u>
   --
-  idBoleta   [FK]
+  idInstitucional   [FK]
   nombre
   fecha
   notas   (nulo)
@@ -158,7 +158,7 @@ class PRESENTA {
 '  ARISTAS  -  doce, una por llave foranea
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-USUARIO      "1" --o "0..*" EXPERIMENTO   : idBoleta
+USUARIO      "1" --o "0..*" EXPERIMENTO   : idInstitucional
 EXPERIMENTO  "1" --o "3..*" GRUPO         : idExperimento
 GRUPO        "1" --o "2..*" TANDA         : idGrupo
 GRUPO        "1" --o "6..*" ESPECIMEN     : idGrupo

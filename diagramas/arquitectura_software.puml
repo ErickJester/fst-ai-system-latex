@@ -2,6 +2,36 @@
 ' ============================================================
 '  Arquitectura de software por capas — FST
 '  TT 2026-B066 | ESCOM-IPN
+' ------------------------------------------------------------
+'  Corrige dos cosas desactualizadas del diagrama viejo, con
+'  fuente en chapters/05_diseno.tex:26-49 (Arquitectura general):
+'
+'  - Quita el contenedor Redis y la cola de mensajes. El texto
+'    dice "tres capas... frontend, backend y base de datos. Un
+'    cuarto contenedor -el worker-" -- CUATRO contenedores, nunca
+'    cinco, y Redis no aparece en NINGUN capitulo (se buscó en los
+'    ocho .tex). El mecanismo real, confirmado también en CU-07
+'    (05_diseno.tex:1452) y en la tabla de trabajos (05_diseno.tex:
+'    1276), es polling: el backend inserta la tarea en la tabla de
+'    analisis con estado "en cola" (D-15) y el Worker la toma en su
+'    siguiente ciclo de polling -- sin cola de mensajes aparte.
+'
+'  - Agrega el volumen de modelos entrenados, que el diagrama viejo
+'    no tenia: "los modelos rat.pt, resnet18_fst.pt y resnet50_fst.pt
+'    residen en un volumen Docker dedicado que el worker monta al
+'    arrancar el contenedor" (05_diseno.tex:47-49) -- distinto del
+'    volumen compartido de videos/reportes, y de solo lectura para
+'    el Worker.
+'
+'  - Quita la lista de las 12 tablas viejas (USUARIOS, EXPERIMENTOS,
+'    TRABAJOS, ANIMALES, SUJETOS, ROIS...) del contenedor de base de
+'    datos -- ya no existen (ver MIGRACION-DIAGRAMAS.md SS2). Se
+'    remite al diagrama de esquema físico en vez de repetir aquí las
+'    16 relaciones del modelo nuevo, para no duplicar mantenimiento
+'    entre dos diagramas.
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/arquitectura_software.puml
 ' ============================================================
 
 !theme plain
@@ -52,21 +82,21 @@ rectangle "Docker: worker" as C_WK #FEF9E7 {
 }
 
 ' ═══════════════════════════════════════════════════════════
-'  CAPA 4 — Datos (Redis · PostgreSQL · Archivos)
+'  CAPA 4 — Datos (PostgreSQL · Archivos · Modelos entrenados)
 ' ═══════════════════════════════════════════════════════════
 
 rectangle "Capa de datos" as DATOS #F4F6F7 {
 
-  rectangle "Docker: redis" as C_RD #F5EEF8 {
-    queue "Redis\nCola de tareas" as RD
-  }
-
   rectangle "Docker: db" as C_DB #EBF5FB {
-    database "PostgreSQL\n\nUSUARIOS  EXPERIMENTOS  VIDEOS\nTRABAJOS  CONFIGURACIONES_ANALISIS\nANIMALES  SUJETOS  ROIS\nRESULTADOS_COMPORTAMIENTO\nCOMPORTAMIENTO_POR_MINUTO\nREPORTES  NOTIFICACIONES" as DB
+    database "PostgreSQL\n\nEsquema relacional\n(ver diagrama de esquema fisico)" as DB
   }
 
   rectangle "Volumen compartido" as C_FS #EAEDED {
-    folder "Sistema de archivos local\n\nVideos .mp4 originales\nVideos anotados  _tracked.mp4\nReportes PDF / CSV / XLSX" as FS
+    folder "Sistema de archivos local\n\nVideos .mp4 originales\nVideos anotados  _tracked.mp4\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF" as FS
+  }
+
+  rectangle "Volumen de modelos" as C_MD #F5EEF8 {
+    folder "Modelos entrenados (solo lectura)\n\nrat.pt\nresnet18_fst.pt\nresnet50_fst.pt" as MD
   }
 
 }
@@ -77,11 +107,10 @@ rectangle "Capa de datos" as DATOS #F4F6F7 {
 
 INV  -down->  FE  : "HTTPS"
 FE   -down->  BE  : "API REST\n(JSON + JWT)"
-BE   -down->  RD  : "encola tarea\nde analisis"
-RD   -down->  WK  : "consume tarea"
-BE   -->      DB  : "lee / escribe\n(SQLAlchemy ORM)"
-WK   -->      DB  : "escribe resultados\ndel analisis"
+BE   -down->  DB  : "encola tarea de analisis\n(INSERT, estado = en cola)"
+WK   -->      DB  : "toma la siguiente tarea\n(polling periodico)\ny escribe los resultados"
 WK   -->      FS  : "guarda archivos\ngenerados"
 BE   -->      FS  : "lee y sirve archivos\nal frontend"
+WK   -->      MD  : "carga los modelos\nal iniciar el contenedor"
 
 @enduml

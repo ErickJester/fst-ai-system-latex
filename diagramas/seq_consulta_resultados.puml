@@ -1,0 +1,87 @@
+@startuml seq_consulta_resultados
+' ================================================================
+'  Secuencia - Consulta de resultados, comparacion entre grupos
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Reemplaza a CU-09 "Consultar resultados del analisis"
+'  (chapters/05_diseno.tex:1540-1591) y a figures/mermaid/seq_resultados.
+'
+'  Por que cambia, con fuente:
+'  - CU-09 compara "Dia 1 vs Dia 2 por especimen" y lee de las tablas
+'    viejas ResultadoComportamiento / ComportamientoPorMinuto, que ya
+'    no existen. La comparacion real que pide el protocolo es OTRA:
+'    "Los 5 minutos del Dia 2, entre los tres grupos" (Reunion 3-sep,
+'    ver errores/preguntas-doctor.md SS5 "Ya respondido").
+'  - El Dia 1 no mide el efecto del tratamiento, solo verifica que
+'    las ratas lleguen igual de estresadas (mismo SS5). No entra en
+'    esta comparacion.
+'  - Camino de datos real: GRUPO -> TANDA -> ESPECIMEN -> OBSERVACION
+'    (del video con sesion = "Dia 2") -> INTERVALO -> PRESENTA
+'    (segundos por conducta). Se suma por especimen y se agrega por
+'    grupo -- nada de esto se preguarda, se deriva en consulta
+'    (ver DISENO-BD.md SS0, "Decisiones que sostienen el modelo").
+'  - D-17 (13-sep): un analisis puede ser "preciso" (tres conductas
+'    separadas) o "agrupado" (nado activo + escalamiento fundidos en
+'    "conducta activa"), segun si el clasificador alcanzo F1 >= 85%.
+'    Si dentro de un mismo grupo hay especimenes con los dos niveles,
+'    comparar sus segundos por conducta sin avisar mezclaria
+'    categorias que no significan lo mismo -- CU-09 nunca contemplo
+'    esto porque D-15/D-16/D-17 son posteriores.
+'
+'  ---- Provisional, pendiente de confirmar con el laboratorio ----
+'  Q-E  Se promedia por especimen, no se suma por grupo, para que el
+'       tamano del grupo no distorsione la comparacion. Sin confirmar
+'       si el laboratorio de verdad compara asi o por total.
+'  Q-F  Si un grupo mezcla niveles "preciso"/"agrupado", se muestran
+'       separados con aviso, en vez de forzar todo a "agrupado". Sin
+'       confirmar cual prefiere el laboratorio.
+'  Ver errores/preguntas-doctor.md SS2 (Q-E, Q-F) para el detalle.
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/seq_consulta_resultados.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
+
+actor "Investigador / Administrador" as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+inv -> ui: abre resultados del experimento\n(desde el dashboard o la pantalla de progreso)
+ui -> api: pide la comparación entre grupos
+api -> db: busca los tres grupos del experimento
+
+db --> api: grupos (control, referencia, tratamiento)
+
+loop por cada grupo
+  api -> db: busca los especímenes del grupo, vía sus tandas
+  api -> db: para cada espécimen, busca su observación\ndel video con sesión "Día 2"
+
+  alt el espécimen ya tiene su Día 2 analizado
+    api -> db: suma los segundos por conducta\nde los 5 intervalos de esa observación
+    db --> api: segundos de nado activo, inmovilidad y escalamiento
+  else el Día 2 de ese espécimen no tiene resultado\n(análisis en cola, procesando, con error, o sin subir)
+    api -> api: marca al espécimen como dato faltante\npara este grupo
+  end
+end
+
+api -> api: promedia los segundos por conducta\nentre los especímenes analizados de cada grupo\n(no se suman, para que el tamaño del grupo\nno distorsione la comparación -- Q-E)
+
+alt los especímenes de un grupo no coinciden en el nivel de clasificación\n("preciso" y "agrupado" mezclados)
+  api -> api: separa el resultado por nivel de clasificación\nen vez de sumarlos juntos
+  api --> ui: comparación entre grupos, con aviso de nivel mixto
+else todos los especímenes analizados coinciden en su nivel
+  api --> ui: comparación entre grupos, un solo nivel
+end
+
+ui -> inv: muestra la comparación de los tres grupos\n(solo Día 2), con los especímenes faltantes señalados
+inv -> ui: puede pedir el reporte descargable (ver CU-10)
+
+@enduml

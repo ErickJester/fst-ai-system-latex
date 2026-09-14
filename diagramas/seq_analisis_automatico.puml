@@ -1,0 +1,99 @@
+@startuml seq_analisis_automatico
+' ================================================================
+'  Secuencia - Analisis automatico (ejecucion del pipeline por el Worker)
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Reemplaza a figures/mermaid/seq_analisis.png. Cubre el curso normal
+'  de CU-07 "Monitorear progreso del analisis" (chapters/05_diseno.tex:
+'  1425-1468), la parte que ejecuta el Worker -- no la pantalla de
+'  progreso ni el reporte de diagnostico, que siguen siendo diagramas
+'  aparte (seq_progreso, seq_error) y quedan pendientes por decision
+'  explicita del usuario (13-sep): no fusionar los tres en uno solo.
+'
+'  Que cambia respecto del diagrama viejo, con fuente:
+'  - Participante "Pipeline IA" eliminado. El pipeline no es un
+'    componente aparte, es el propio Worker ejecutando sus cuatro
+'    etapas (CU-07, paso 2: "el Worker ejecuta el pipeline completo").
+'    Ademas evita el termino prohibido "IA" (CLAUDE.md, terminologia):
+'    las etapas de deteccion/seguimiento son vision por computadora,
+'    la de clasificacion es aprendizaje supervisado.
+'  - "Rastrea a los animales" -> "rastrea a los especimenes"
+'    (terminologia obligatoria, CLAUDE.md).
+'  - "Detecta las zonas de interes" -> "detecta los cilindros", igual
+'    a como lo nombra CU-07 paso 4, y agrega el umbral de confianza
+'    0.70 de RN-11 -- el diagrama viejo no tenia el curso alterno de
+'    error (CU-07, alterno del paso 4): confianza < 0.70 detiene el
+'    pipeline, marca el analisis en estado "error" (D-15) y genera el
+'    reporte de diagnostico (CU-08). El investigador no puede
+'    reiniciar el analisis (RN-04) -- por eso el pipeline no reintenta,
+'    solo se detiene.
+'  - "Guarda los resultados por animal" (un paso plano) -> se abre en
+'    la jerarquia real del modelo: por cada especimen, una OBSERVACION
+'    de este video, con sus 5 INTERVALO y los segundos por conducta en
+'    cada uno (PRESENTA) -- nada de esto se guarda como total, los
+'    totales se derivan en consulta (ver seq_consulta_resultados.puml).
+'  - Se agrega el registro del nivel de clasificacion (D-17, 13-sep):
+'    el Worker etiqueta el analisis como "preciso" o "agrupado" segun
+'    la capacidad del modelo activo (RN-13, F1 >= 85% por conducta) --
+'    esto no se calcula por video, es una propiedad conocida del
+'    modelo/configuracion en uso (idConfig), no una decision en vivo.
+'  - Los cuatro nombres de etapa vienen de D-16 (13-sep): preprocesa-
+'    miento, deteccion, seguimiento, clasificacion.
+'  - Se agrega la eliminacion programada del video (RNF-08, 30 dias
+'    tras terminar el analisis) -- ya estaba en el diagrama viejo, se
+'    conserva igual porque sigue vigente.
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/seq_analisis_automatico.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
+
+participant Worker as w
+participant "Archivos" as fs
+database "Base de datos" as db
+
+w -> db: revisa la tabla de análisis, buscando uno en cola\n(polling periódico)
+db --> w: siguiente análisis en cola, si hay alguno
+w -> db: marca el análisis como "procesando"
+
+w -> fs: lee el archivo de video de la tanda
+fs --> w: video listo para procesar
+
+w -> db: actualiza la etapa a "preprocesamiento"
+w -> w: mejora la calidad de imagen\n(normalización de fotogramas)
+
+w -> db: actualiza la etapa a "detección"
+w -> w: detecta los cilindros y calcula\nla confianza de la detección
+
+alt confianza de detección >= 0.70 (RN-11)
+  w -> db: guarda la confianza obtenida
+
+  w -> db: actualiza la etapa a "seguimiento"
+  w -> w: rastrea a los especímenes\ncuadro a cuadro
+
+  w -> db: actualiza la etapa a "clasificación"
+  w -> w: clasifica la conducta de cada especímen\n(según el nivel del modelo activo: preciso o agrupado, D-17)
+
+  loop por cada especímen detectado en el video
+    w -> db: guarda su observación de este video
+    w -> db: guarda sus 5 intervalos, con los segundos\npor conducta de cada uno
+  end
+
+  w -> db: marca el análisis como "completado",\ncon su nivel de clasificación
+  w -> db: programa la eliminación del video\n30 días después (RNF-08)
+  w -> db: crea la notificación de análisis terminado
+else confianza de detección < 0.70 (RN-11)
+  w -> db: guarda la confianza obtenida
+  w -> w: genera el reporte de diagnóstico PDF (ver CU-08)
+  w -> db: marca el análisis como "error"\n(el investigador no puede reiniciarlo, RN-04)
+  w -> db: crea la notificación de error en el análisis
+end
+
+@enduml

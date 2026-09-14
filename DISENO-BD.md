@@ -185,12 +185,13 @@ conceptual estaba prohibido.
 
 ## 4. Dónde está el trabajo hecho
 
-Dos artifacts publicados. **Son la fuente de verdad del diseño**, por encima del LaTeX.
+Tres artifacts publicados. **Son la fuente de verdad del diseño**, por encima del LaTeX.
 
 | Artifact | URL | Cubre | Estado |
 |----------|-----|-------|--------|
 | **Diseño Conceptual FST · Revisión 3-sep** | https://claude.ai/code/artifact/fc01fd30-0bc4-43dd-86a0-f5f961970ab6 | Actividades 1–8 de la etapa conceptual | 8 de 8; la actividad 7 (presentación al usuario) solo en su primera mitad — el Dr. Sandino ya revisó el modelo, falta la revisión de notación con la Dra. Cordero |
-| **Diseño Lógico FST · Revisión 3-sep** | https://claude.ai/code/artifact/73df37d9-ce09-4689-a8ca-475c47c81618 | Actividades 1–7 de la etapa lógica, más la reconciliación del 6-sep (4 tablas de soporte del sistema que el laboratorio no nombra) | Cerrada — 15 relaciones en BCNF |
+| **Diseño Lógico FST · Revisión 3-sep** | https://claude.ai/code/artifact/73df37d9-ce09-4689-a8ca-475c47c81618 | Actividades 1–7 de la etapa lógica, más la reconciliación del 6-sep (4 tablas de soporte del sistema que el laboratorio no nombra) y el `ADMINISTRADOR` del 13-sep (D-08) | Cerrada — 16 relaciones en BCNF |
+| **Diseño Físico FST** | https://claude.ai/code/artifact/41a09816-4c3f-4002-9598-4c86642bf750 | Las 6 actividades de la etapa física | Decisiones cerradas — 6 de 6 (D-11 SGBD, D-14 a D-17 tipos y dominios, D-12/D-13 seguridad, D-04 redundancia, D-18 respaldo). Falta ejecutar: el DDL real, no hay más decisiones pendientes |
 
 > Estas URLs se verificaron con `Artifact action:"list"` el 2026-09-12. Los enlaces de
 > arriba en versiones previas de este archivo (`441abfbd…`, `0f0abf49…`) apuntaban a
@@ -226,11 +227,14 @@ Usuario ──registra──> Experimento
 
      + 4 relaciones de soporte del sistema, añadidas en la reconciliación del 6-sep
        (no las nombra el laboratorio): Modelo, Configuración, Reporte, Notificación
+
+     + Administrador (13-sep, D-08): subtipo de Usuario con permisos extra,
+       (1,1)–(0,1) — no es un tipo de usuario aparte
 ```
 
-**10 entidades del dominio (todas fuertes, sin agregación) + 4 de soporte del sistema,
-15 interrelaciones (14 binarias 1:N + 1 N:M) → 15 relaciones** en el esquema lógico
-definitivo.
+**10 entidades del dominio (todas fuertes, sin agregación) + 4 de soporte del sistema +
+Administrador (subtipo), 16 interrelaciones (15 binarias 1:N + 1 N:M) → 16 relaciones**
+en el esquema lógico definitivo.
 
 ### Las cuatro decisiones que sostienen el modelo
 
@@ -257,10 +261,18 @@ definitivo.
 ## 5. Estado actual
 
 **Las dos etapas están cerradas.** Conceptual: 8 de 8 actividades. Lógica: 7 de 7.
-Resultado: **15 relaciones** en BCNF (11 del dominio experimental + 4 de soporte del
-sistema), 16 llaves foráneas de una columna (una de ellas nulable —
-`NOTIFICACION.idExperimento`—, la única del esquema), 41 restricciones documentadas
-(16 referenciales, 11 de identidad, 14 semánticas).
+Resultado: **16 relaciones** en BCNF (11 del dominio experimental + 4 de soporte del
+sistema + `ADMINISTRADOR`, agregado el 13-sep por D-08), 17 llaves foráneas de una
+columna (una de ellas nulable — `NOTIFICACION.idExperimento`—, la única del esquema).
+Las 41 restricciones documentadas (16 referenciales, 11 de identidad, 14 semánticas) son
+de antes de D-08 — faltan la referencial y la de identidad que trae `ADMINISTRADOR`.
+
+**La etapa física ya arrancó y sus seis actividades tienen decisión tomada**, aunque las
+dos revisiones pendientes (Cordero, notación) no hayan cerrado — ver el artifact de Diseño
+Físico en la sección 4. Lo que falta de aquí en adelante es ejecutar (escribir el DDL de
+las 16 relaciones, correr el disparador de D-04, programar el respaldo de D-18), no
+decidir. Detalles menores sin resolver, que no bloquean nada: la regla exacta para
+distinguir boleta de número de empleado al validar el identificador institucional (D-02).
 
 La respuesta a **P-01** —la rata sí tiene identificador propio— cerró la decisión que
 estaba bloqueando todo: desapareció la cadena de seis entidades débiles, las diez
@@ -285,7 +297,7 @@ con las cuatro tablas de soporte del sistema (6-sep):
 | Revisión del protocolo con el Dr. Sandino | Reunión del 3-sep. Material: `Reunion_Sandino_2026-09-03.pdf` |
 | Revisión de notación con la Dra. Cordero | Misma reunión — es directora del TT |
 | Reescribir el cap. 5 del LaTeX | No iniciado. Es el trabajo grande |
-| Etapa de diseño físico | Arranca cuando cierren las dos revisiones |
+| Etapa de diseño físico | Ya arrancó sin esperar las dos revisiones — ver §4. Las 6 actividades tienen decisión tomada; falta ejecutar el DDL real |
 
 Hasta que ocurran esas dos revisiones, en los términos del método lo que existe es el
 **Esquema Conceptual Inicial**, no el Definitivo.
@@ -299,14 +311,21 @@ Hasta que ocurran esas dos revisiones, en los términos del método lo que exist
 | P-02 | ¿La rata usa el mismo cilindro los dos días? | Si `numeroCilindro` vive en `ESPECIMEN` o en `OBSERVACION` |
 | P-05 | ¿Cómo llama el laboratorio a la «tanda»? | **Cerrada (3-sep):** el laboratorio no tiene palabra propia; llama «sesión» a cada grabación |
 | P-08 / D-03 | Al reanalizar un video, ¿se conservan ambos resultados o se reemplaza? | Ver la errata estructural de la sección 8. El laboratorio dijo que se queda con el último; falta cerrarlo formalmente |
-| D-04 | ¿Cómo se garantiza que `numeroRata` no se repita dentro de su **grupo**, si `idGrupo` ya no vive en `ESPECIMEN`? | Disparador vs. reintroducir `idGrupo` como redundancia controlada — decisión de mayor peso pendiente, del equipo |
+| D-04 | ~~¿Cómo se garantiza que `numeroRata` no se repita dentro de su **grupo**, si `idGrupo` ya no vive en `ESPECIMEN`?~~ **Cerrada (equipo, 2026-09-13):** redundancia controlada — `idGrupo` reingresa a `ESPECIMEN` como columna redundante, con `UNIQUE (idGrupo, numeroRata)`. Solo en el esquema físico, no toca el grafo lógico | Falta decidir cómo mantener `idGrupo` sincronizado si una rata cambia de tanda (caso raro) |
 | D-05 | ¿El sistema permite correr dos veces la misma `CONFIGURACION` sobre el mismo video? | Si `(idVideo, idConfig)` es clave alterna de `ANALISIS`. Se cruza con P-08/D-03 |
 | D-06 | El pipeline usa más de un modelo (YOLOv8 + ResNet-18/50), pero `CONFIGURACION` solo guarda un `hashModelo` | Puede requerir que `MODELO`↔`CONFIGURACION` sea N:M en vez de 1:N |
-| Q-08 | ¿Autoregistro con aprobación (cap. 1) o solo el Admin (cap. 4, RF-07)? | Si `USUARIO` necesita atributo discriminante |
+| Q-08 / D-01 | ~~¿Autoregistro con aprobación (cap. 1) o solo el Admin (cap. 4, RF-07)?~~ **Cerrada (equipo, 2026-09-13):** solo el Admin crea cuentas | El cap. 1 queda mal, hay que corregirlo al RF-07 |
 | Q-09 | ¿`NOTIFICACION.mensaje` lleva detalle por instancia o es plantilla por tipo? | Si fuera plantilla, `tipo → mensaje` sería transitiva y haría falta catálogo `TIPO_NOTIFICACION` |
 
-> D-04, D-05, D-06 y Q-09 son pendientes **del equipo**, no del laboratorio — no van en la
+> D-05, D-06 y Q-09 son pendientes **del equipo**, no del laboratorio — no van en la
 > agenda de la próxima reunión con el Dr. Sandino.
+
+**D-08 cerrada (equipo, 2026-09-13):** `Administrador` no es un tipo de usuario aparte —
+es un `Investigador` con permisos extra (una misma persona puede ser los dos, como el Dr.
+Sandino). Se modela como subtipo/generalización: nueva relación
+`ADMINISTRADOR(idInstitucional*)` en (1,1)–(0,1) con `USUARIO`. **Ya aplicado** en
+`diagramas/grafo_relacional_reconciliado.puml` y en `diagramas/clases.puml` — el esquema
+reconciliado sube de 15 a 16 relaciones, 16 a 17 llaves foráneas.
 
 ### El trabajo grande que falta en el documento
 
@@ -407,6 +426,11 @@ la actual. Si alguien externo va a abrirlos, hay que mover el anclaje de compart
 
 ---
 
-*Última actualización: 2026-09-12 — URLs de los artifacts corregidas a las versiones
-"Revisión 3-sep", y el resto del documento sincronizado con ellas (modelo sin entidades
-débiles ni agregación, 15 relaciones, defectos de normalización, pendientes abiertos).*
+*Última actualización: 2026-09-13 — `ADMINISTRADOR` (D-08) aplicado en el grafo
+reconciliado y sincronizado en los tres artifacts (15→16 relaciones, 16→17 llaves
+foráneas); `contrasena` renombrada a `contrasenaHash` en los tres `grafo_relacional_*`
+para que coincida con `clases.puml`; agregado el artifact de Diseño Físico a la tabla de
+la sección 4. Cerradas las seis actividades de la etapa física (D-14 hash de modelo, D-15
+estado de análisis, D-16 etapas del pipeline, D-17 nivel de clasificación, D-18 respaldo
+de la base de datos) — ya no queda ninguna decisión de equipo pendiente ahí, solo falta
+ejecutar el DDL.*
