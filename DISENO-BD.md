@@ -189,13 +189,14 @@ Tres artifacts publicados. **Son la fuente de verdad del diseño**, por encima d
 
 | Artifact | URL | Cubre | Estado |
 |----------|-----|-------|--------|
-| **Diseño Conceptual FST · Revisión 3-sep** | https://claude.ai/code/artifact/fc01fd30-0bc4-43dd-86a0-f5f961970ab6 | Actividades 1–8 de la etapa conceptual | 8 de 8; la actividad 7 (presentación al usuario) solo en su primera mitad — el Dr. Sandino ya revisó el modelo, falta la revisión de notación con la Dra. Cordero |
-| **Diseño Lógico FST · Revisión 3-sep** | https://claude.ai/code/artifact/73df37d9-ce09-4689-a8ca-475c47c81618 | Actividades 1–7 de la etapa lógica, más la reconciliación del 6-sep (4 tablas de soporte del sistema que el laboratorio no nombra) y el `ADMINISTRADOR` del 13-sep (D-08) | Cerrada — 16 relaciones en BCNF |
+| **Diseño Conceptual FST v4** | https://claude.ai/code/artifact/fc01fd30-0bc4-43dd-86a0-f5f961970ab6 | Actividades 1–8 de la etapa conceptual | 8 de 8, diccionario completo (10 entidades) — sin marcado de revisión, listo para entregar. La actividad 7 (presentación al usuario) sigue solo en su primera mitad: el Dr. Sandino ya revisó el modelo (3-sep), la revisión de notación con la Dra. Cordero está en curso |
+| **Diseño Lógico FST v5** | https://claude.ai/code/artifact/73df37d9-ce09-4689-a8ca-475c47c81618 | Actividades 1–7 de la etapa lógica, más la reconciliación del 6-sep (4 tablas de soporte del sistema que el laboratorio no nombra) y el `ADMINISTRADOR` del 13-sep (D-08) | Cerrada — 16 relaciones en BCNF, diccionario completo — sin marcado de revisión, listo para entregar |
 | **Diseño Físico FST** | https://claude.ai/code/artifact/41a09816-4c3f-4002-9598-4c86642bf750 | Las 6 actividades de la etapa física | Decisiones cerradas — 6 de 6 (D-11 SGBD, D-14 a D-17 tipos y dominios, D-12/D-13 seguridad, D-04 redundancia, D-18 respaldo). Falta ejecutar: el DDL real, no hay más decisiones pendientes |
 
-> Estas URLs se verificaron con `Artifact action:"list"` el 2026-09-12. Los enlaces de
-> arriba en versiones previas de este archivo (`441abfbd…`, `0f0abf49…`) apuntaban a
-> artifacts anteriores a la revisión del 3-sep — quedaron obsoletos, no los reabras.
+> Estas URLs se verificaron con `Artifact action:"list"` el 2026-09-14. Los dos artifacts
+> anteriores a la revisión del 3-sep (`441abfbd…`, `0f0abf49…`) siguen publicados pero
+> ahora están titulados explícitamente **«· OBSOLETO»** en la galería de artifacts, para
+> que no se confundan con los vigentes de arriba — no los reabras.
 
 Cada artifact está organizado por actividad, y cada actividad muestra tres cosas: qué
 pide el método, cómo lo resuelve el ejemplo del concesionario del libro, y qué resultó
@@ -267,9 +268,10 @@ columna (una de ellas nulable — `NOTIFICACION.idExperimento`—, la única del
 Las 41 restricciones documentadas (16 referenciales, 11 de identidad, 14 semánticas) son
 de antes de D-08 — faltan la referencial y la de identidad que trae `ADMINISTRADOR`.
 
-**La etapa física ya arrancó y sus seis actividades tienen decisión tomada**, aunque las
-dos revisiones pendientes (Cordero, notación) no hayan cerrado — ver el artifact de Diseño
-Físico en la sección 4. Lo que falta de aquí en adelante es ejecutar (escribir el DDL de
+**La etapa física ya arrancó y sus seis actividades tienen decisión tomada**, aunque la
+revisión de notación con la Dra. Cordero (en curso, sin cambios grandes esperados) no haya
+cerrado formalmente — ver el artifact de Diseño Físico en la sección 4. Lo que falta de
+aquí en adelante es ejecutar (escribir el DDL de
 las 16 relaciones, correr el disparador de D-04, programar el respaldo de D-18), no
 decidir. Detalles menores sin resolver, que no bloquean nada: la regla exacta para
 distinguir boleta de número de empleado al validar el identificador institucional (D-02).
@@ -294,8 +296,8 @@ con las cuatro tablas de soporte del sistema (6-sep):
 
 | Qué | Estado |
 |-----|--------|
-| Revisión del protocolo con el Dr. Sandino | Reunión del 3-sep. Material: `Reunion_Sandino_2026-09-03.pdf` |
-| Revisión de notación con la Dra. Cordero | Misma reunión — es directora del TT |
+| Revisión del protocolo con el Dr. Sandino | Reunión del 3-sep hecha. Material: `Reunion_Sandino_2026-09-03.pdf`. **Próxima reunión: lunes 2026-09-21** |
+| Revisión de notación con la Dra. Cordero | En curso — es directora del TT. Sin cambios grandes esperados |
 | Reescribir el cap. 5 del LaTeX | No iniciado. Es el trabajo grande |
 | Etapa de diseño físico | Ya arrancó sin esperar las dos revisiones — ver §4. Las 6 actividades tienen decisión tomada; falta ejecutar el DDL real |
 

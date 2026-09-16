@@ -22,11 +22,12 @@ que refleje el diseño de base de datos rehecho, qué está ya hecho y qué falt
 |--------|-------|--------|--------|
 | A. Diagramas nuevos | 4 | 4 | 🟢 Hecho |
 | B. Prosa y figuras del capítulo | 8 | 0 | 🔴 No iniciado |
-| C. Bloqueados por decisión | 4 | 0 | ⚫ En espera |
+| C. Bloqueados por decisión | 4 | 3 | 🟡 Solo falta Rev. 2 (Cordero, en curso) |
 | D. Infraestructura de build | 3 | 0 | 🔴 No iniciado |
 
 **Nada se ha tocado todavía en `05_diseno.tex`.** Los diagramas existen como archivos
-nuevos y no pisan a los viejos.
+nuevos y no pisan a los viejos. Las tres decisiones del equipo que bloqueaban el bloque B
+ya se cerraron (13-sep) — ver bloque C.
 
 ---
 
@@ -132,28 +133,30 @@ sustituirla por el pase del bloque A: cuatro defectos, determinantes descartados
 columnas** (el modelo más los siete parámetros). Es el mejor argumento del esquema a favor
 de las llaves subrogadas, mejor que cualquiera de los que ya estaban.
 
-### C5-06 — Diccionario de datos 🔴
+### C5-06 — Diccionario de datos 🟢
 
-**Ubicación:** `:342`–`:343` · **Estado:** Pendiente · **Cruza con DOC-01 de `CORRECCIONES.md`**
+**Ubicación:** `:342`–`:343` · **Estado:** Material listo, falta trasladarlo al `.tex` ·
+**Cruza con DOC-01 de `CORRECCIONES.md`**
 
 La prosa promete «El diccionario de datos completo con tipos, restricciones y descripciones
 de cada columna se incluye en los anexos». `CORRECCIONES.md` lo marca como prioridad máxima
 con la nota «diccionario de datos inexistente».
 
-Material disponible: la actividad 8 del artifact conceptual trae el diccionario de `Grupo`,
-`Espécimen` y `Video`; la actividad 7 del lógico trae el de las relaciones que la revisión
-tocó. **Faltan las demás.**
+**Ya no falta material.** La actividad 8 del artifact conceptual (v4) trae el diccionario
+completo de las 10 entidades; la actividad 7 del lógico (v5) trae el de las 16 relaciones.
+Lo único pendiente es trasladarlo a los anexos del `.tex` — es trabajo de redacción, no de
+investigación.
 
-### C5-07 — Diagrama de clases 🟡
+### C5-07 — Diagrama de clases 🟢
 
-**Ubicación:** `:2199`–`:2218` · **Estado:** Pendiente
+**Ubicación:** `:2199`–`:2218` · **Estado:** El `.puml` ya está rehecho, falta actualizar
+la prosa del capítulo que lo describe
 
-`diagramas/clases.puml` tiene `Sujeto`, `Trabajo`, `ROI`, `Animal`,
-`ResultadoComportamiento` y `ComportamientoPorMinuto` — todas del modelo viejo. No tiene
-`Grupo`, `Tanda`, `Observacion`, `Intervalo` ni `Conducta`.
-
-Solo la capa de dominio cambia; los paquetes P1–P5 y las clases de sistema (`Worker`,
-`PipelineAnalisis`) se quedan.
+`diagramas/clases.puml` se reescribió por completo (commit `f43c0da`, 12-sep): ya tiene
+`Grupo`, `Tanda`, `Observacion`, `Intervalo`, `Conducta`, `Modelo`, `Configuracion`,
+`Reporte`, `Notificacion` y `Administrador` — nada de `Sujeto`/`Trabajo`/`Animal` del
+modelo viejo. Lo que queda pendiente es que la prosa de `05_diseno.tex` en `:2199`–`:2218`
+describa este diagrama nuevo, no el viejo.
 
 ### C5-08 — Casos de uso 🟢
 
@@ -170,16 +173,18 @@ Los artifacts casi no los tocan. Solo tres retoques:
 
 ## C. Bloqueados por una decisión
 
-| ID | Decisión | Bloquea | Quién decide |
-|----|----------|---------|--------------|
-| **P-08** | ¿El reanálisis reemplaza al anterior, o se conserva historial? | C5-03, C5-04. Si se conserva historial, `OBSERVACION` debe referenciar `idAnalisis` en vez de `idVideo` — ver [`DISENO-BD.md`](DISENO-BD.md) §8 «Errata estructural» | Laboratorio |
-| **D-04** | Disparador vs. reintroducir `ESPECIMEN.idGrupo` como redundancia controlada | C5-03 | Equipo |
-| **Q-08** | ¿Autoregistro con aprobación, o solo el administrador crea cuentas? El cap. 1 y el cap. 4 se contradicen | C5-08, atributos de `USUARIO` | Equipo |
-| **Rev. 2** | Revisión de notación con la **Dra. Martha Rosa Cordero** | Todo el bloque A, si cambia convenciones | Directora |
+**Actualizado 2026-09-15: las tres decisiones del equipo ya se cerraron el 13-sep.** Solo
+queda la revisión de la directora, y no bloquea empezar a escribir.
 
-> **P-08 es el de mayor peso.** Mientras `VIDEO—ANALISIS` siga en `(1,N)`, los resultados
-> cuelgan de `VIDEO` y no del análisis que los produjo: desde una fila de `PRESENTA` no se
-> puede saber cuál análisis la escribió. Con `(1,1)` el esquema es consistente tal como está.
+| ID | Decisión | Bloqueaba | Estado |
+|----|----------|---------|--------------|
+| ~~**P-08**~~ | ¿El reanálisis reemplaza al anterior, o se conserva historial? | C5-03, C5-04 | **Cerrada como D-03 (equipo, 13-sep):** reemplaza, no se conserva historial. `VIDEO—ANALISIS` baja de (1,N) a (1,1) — ya aplicado en `grafo_relacional_reconciliado.puml` y en `clases.puml` |
+| ~~**D-04**~~ | Disparador vs. reintroducir `ESPECIMEN.idGrupo` como redundancia controlada | C5-03 | **Cerrada (equipo, 13-sep):** redundancia controlada — `idGrupo` reingresa a `ESPECIMEN` como columna redundante con `UNIQUE (idGrupo, numeroRata)`. Solo en el esquema físico |
+| ~~**Q-08**~~ | ¿Autoregistro con aprobación, o solo el administrador crea cuentas? | C5-08, atributos de `USUARIO` | **Cerrada como D-01 (equipo, 13-sep):** solo el administrador crea cuentas. El cap. 1 queda mal, hay que corregirlo al RF-07 |
+| **Rev. 2** | Revisión de notación con la **Dra. Martha Rosa Cordero** | Convenciones del bloque A, si cambian | **En curso** (2026-09-15) — directora del TT, sin cambios grandes esperados |
+
+> Con las tres primeras cerradas, **nada estructural sigue bloqueando el bloque B.** El
+> esquema es consistente en `(1,1)` tal como está en los artifacts vigentes (v4/v5).
 
 ---
 

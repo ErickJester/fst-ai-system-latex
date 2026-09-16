@@ -178,7 +178,7 @@ Grupo       "1" *--> "2..*" Tanda     : "se graba en"
 Tanda       "1" *--> "3..4" Especimen : aloja
 Tanda       "1" *--> "1..2" Video     : produce
 
-Analisis "1..*" --> "1" Video         : procesa
+Analisis "1" --> "1" Video            : procesa
 Analisis "0..*" --> "1" Configuracion : usa
 Configuracion "0..*" --> "1" Modelo   : configura
 
