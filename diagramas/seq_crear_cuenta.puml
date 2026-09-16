@@ -1,0 +1,86 @@
+@startuml seq_crear_cuenta
+' ================================================================
+'  Secuencia - Crear cuenta de usuario (CU-12), con verificacion
+'  de rol (D-12) y contraseña temporal obligatoria (D-25)
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Reemplaza a diagramas/seq_registro.png. Ese diagrama viejo no
+'  tenia ningun paso de verificacion de rol -- confiaba en que el
+'  frontend escondiera el boton de "Crear cuenta". D-12 (13-sep)
+'  exige las dos cosas: esconder EN LA INTERFAZ y ademas verificar
+'  el rol EN EL BACKEND antes de ejecutar la accion, sin importar
+'  por donde llegue la peticion.
+'
+'  Cubre CU-12 "Crear cuenta de usuario" (RF-05, RF-07).
+'
+'  Cambios deliberados contra CU-12 tal como esta escrito hoy en
+'  chapters/05_diseno.tex:1739 (no se toca ese .tex en esta sesion,
+'  solo se deja registrado aqui por que el diagrama no lo sigue):
+'    - El paso 2 de CU-12 dice que el formulario pide un campo
+'      "rol". Eso ya no es correcto contra D-08: USUARIO no tiene
+'      columna rol, y ADMINISTRADOR es una tabla aparte que no se
+'      crea desde este caso de uso. Este diagrama omite ese campo.
+'    - Se agrega el paso de verificacion de rol que CU-12 no
+'      describe (el hueco que marcaba COMPARATIVA-FIGURAS-CAP5.md
+'      para esta figura).
+'
+'  D-25 (15-sep): la cuenta se crea con cambioRequerido = true, asi
+'  el login (fuera de este diagrama) sabe que debe forzar el
+'  cambio de contraseña en el primer ingreso.
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/seq_crear_cuenta.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
+
+actor Administrador as admin
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+admin -> ui: entra al panel de administración
+note right of ui
+  la sección de administración
+  solo aparece si el usuario es
+  Administrador (D-12, ocultamiento
+  en la interfaz) - no evita por sí
+  sola el siguiente paso
+end note
+
+admin -> ui: selecciona "Crear cuenta"
+ui -> admin: muestra el formulario\n(nombre completo, correo institucional)
+
+admin -> ui: completa los datos y confirma
+ui -> api: POST /admin/usuarios {nombre, correo}\ncon la sesión activa del Administrador
+
+api -> db: ¿el idInstitucional de la sesión está en ADMINISTRADOR?
+db --> api: sí / no
+
+alt no está en ADMINISTRADOR
+  api --> ui: 403, no autorizado
+  ui --> admin: muestra el error, no crea la cuenta
+else sí está en ADMINISTRADOR
+  api -> db: ¿el correo ya está registrado?
+  db --> api: sí / no
+
+  alt el correo ya está registrado
+    api --> ui: informa el conflicto
+    ui --> admin: muestra el error, no crea el duplicado
+  else el correo está disponible
+    api -> api: genera contraseña temporal
+    api -> db: crea USUARIO\n(nombre, correo, contrasenaHash,\nactivo=true, cambioRequerido=true)
+    db --> api: confirma la creación
+    api -> api: envía correo al nuevo investigador\ncon sus credenciales de acceso inicial
+    api --> ui: 201 Created
+    ui --> admin: confirma la cuenta creada\ny que se notificó al investigador
+  end
+end
+
+@enduml

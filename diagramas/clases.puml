@@ -18,6 +18,7 @@ package P1_Autenticacion_y_usuarios {
     -correo : String
     -contrasenaHash : String
     -activo : Boolean
+    -cambioRequerido : Boolean
     +iniciarSesion(correo, contrasena) : String
     +cerrarSesion(token) : void
     +cambiarContrasena(nueva) : void

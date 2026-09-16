@@ -234,11 +234,27 @@ grafo relacional final.
 | D-21 | ~~`REPORTE` cachea el archivo generado (`ruta` es AK, CU-10 dice "genera o recupera") — pero si el experimento se reanaliza después de generar un reporte (D-03, reemplaza resultados), ¿el reporte cacheado se sigue sirviendo tal cual, o se regenera?~~ **Resuelto (equipo, 2026-09-13):** se invalida solo si hubo reanálisis. Al pedir la descarga, el sistema compara `REPORTE.fechaGeneracion` contra la fecha del análisis más reciente del experimento (`ANALISIS.fechaAnalisis`, vía sus videos); si hay un análisis más nuevo que el reporte guardado, lo regenera y reemplaza `ruta`; si no, reusa el archivo existente. Evita servir un reporte con datos que ya no reflejan un reanálisis, sin regenerar en cada descarga cuando nada cambió | Equipo |
 | D-19 | ~~Cómo infiere el sistema la Tanda al subir un video — para el diagrama de secuencia de carga de video (`MIGRACION-DIAGRAMAS.md` §3.4), sin fuente previa~~ **Resuelto (equipo, 2026-09-13):** al subir un video, el investigador escribe el nombre del grupo/tratamiento con autocompletado. Si el nombre coincide con un grupo **del mismo experimento** ya usado antes, el sistema infiere que es la siguiente tanda de ese grupo y pre-llena el campo de tanda (letra `A`, `B`, `C`... en la interfaz — sigue siendo `TANDA.ordinal` entero en la base de datos). El campo es editable, pero además el sistema pide una **confirmación explícita** ("¿esta es la tanda B de [grupo]?") antes de guardar — no basta con dejar el valor pre-llenado sin que el investigador lo confirme, porque una tanda mal asignada contamina la comparación entre grupos sin que se note. La coincidencia de nombre se busca **solo dentro del experimento actual**, nunca en todo el sistema, para no cruzar grupos de experimentos distintos que compartan el mismo nombre de tratamiento (p. ej. "fluoxetina" como referencia se repite entre experimentos) | Equipo |
 
-> **Sugerencia para D-08 (no es decisión):** Kendall & Kendall, *Análisis y Diseño de
-> Sistemas*, cap. 13 "Diseño de bases de datos", p. 405, define **subtipo de entidad**:
-> "una relación especial de uno a uno empleada para representar los atributos
-> adicionales de otra entidad que tal vez no estén presentes en todos los registros...
-> elimina la situación en la que una entidad puede tener campos nulos". Encaja con
-> `Investigador`/`Administrador` como subclases UML de `Usuario` — en la BD sería
-> `USUARIO (1,1) — (0,1) ADMINISTRADOR`, en vez de una columna `rol` con reglas
-> distintas por valor. Es una opción, no la única; falta que el equipo decida.
+| D-24 | ~~`ANALISIS.idVideo` tiene cardinalidad (1,1) declarada en `grafo_relacional_reconciliado.puml` (D-03), pero la columna no lleva `[AK]` — la regla "un video, un análisis vigente" no está forzada por ninguna restricción, solo por convención de la aplicación~~ **Resuelto (equipo, 2026-09-15):** se declara `UNIQUE (idVideo)` en `ANALISIS`. Respaldado por Kendall & Kendall, cap. 13 "Diseño de bases de datos", p. 425 (sección "Restricciones de integridad"): el libro reconoce la "clave única" como herramienta de integridad de entidad para forzar unicidad en una columna que no es la llave primaria. Aplica el principio general de la etapa física: una regla de negocio ya decidida en la lógica (D-03) se traduce a una restricción real del gestor, no se deja dependiendo de que la aplicación siempre borre antes de insertar. **Consecuencia sobre la actividad 3 del artifact "Diseño Físico FST":** `ANALISIS.idVideo` pasa de la columna "8 · hay que declarar el índice" a la de "9 · ya queda indexada" (UNIQUE crea su índice solo) — ese artifact queda en 8/9 y no en 9/8. **Pendiente de aplicar** ahí — no se toca hasta que se pida explícitamente | Equipo |
+
+| D-25 | ~~RF-05/RF-07 y CU-12 dicen que el sistema obliga a cambiar la contraseña temporal en el primer ingreso, pero ni `clases.puml` ni `grafo_relacional_reconciliado.puml` tienen columna para guardar ese estado — `USUARIO` solo tiene `activo`. El esquema físico viejo sí traía `debe_cambiar_contrasena`, se perdió en el rediseño sin registrarse~~ **Resuelto (equipo, 2026-09-15):** se agrega `USUARIO.cambioRequerido : boolean`. Mismo patrón que `activo` (D-10): la regla se declara en la base de datos en vez de vivir solo en el código. Se descartó inferirlo por fechas (comparar creación contra último cambio de contraseña) porque exigiría una columna nueva de todas formas, con lógica más frágil. **Aplicado** en `grafo_relacional_reconciliado.puml`, `clases.puml` y `esquema_fisico.puml` — los tres vigentes. No se tocó `grafo_relacional_inicial.puml`, `grafo_relacional_final.puml` ni `relacional.puml`: son fotos históricas del método (el "antes" y el "después" de la validación de la etapa lógica), no se actualizan con decisiones posteriores | Equipo |
+
+> **Fundamento de D-08, verificado en los dos libros (15-sep):**
+> - Kendall & Kendall, *Análisis y Diseño de Sistemas*, cap. 13 "Diseño de bases de
+>   datos", p. 405, define **subtipo de entidad**: "una relación especial de uno a uno
+>   empleada para representar los atributos adicionales de otra entidad que tal vez no
+>   estén presentes en todos los registros... elimina la situación en la que una entidad
+>   puede tener campos nulos". En su notación conceptual se dibuja como un rectángulo más
+>   pequeño *anidado dentro* del rectángulo de la entidad — no como tabla aparte; esa
+>   notación es de la etapa conceptual, y `ADMINISTRADOR` no está dibujado en
+>   `diagramas/esquema_conceptual.tex` todavía, solo en lógico/físico.
+> - Cardona, *Diseño e implementación de bases de datos desde una perspectiva práctica*,
+>   sección 2.5.2 "Generalización", pp. 35-37: **"las cardinalidades mínimas y máximas
+>   siempre son (1,1) en el supertipo y (0,1) en los subtipos"** — cita textual, coincide
+>   exacto con `USUARIO (1,1) — (0,1) ADMINISTRADOR`. La Figura 2.34 del libro usa
+>   "administrador" como ejemplo de subtipo (con "persona" y "director"), aunque no es tu
+>   caso exacto. Nota: los 4 patrones con nombre del libro (parcial/total ×
+>   exclusiva/solapada) están pensados para 2+ subtipos hermanos; con un solo subtipo
+>   (tu caso) ese eje no aplica, solo la regla general de cardinalidad.
+> - Lo que no se pudo verificar: el símbolo gráfico exacto de Cardona para la
+>   generalización (está en figuras/imágenes del PDF, sin lector de páginas disponible
+>   en este entorno).

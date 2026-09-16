@@ -12,7 +12,7 @@
 | 5.2 | Diagrama de flujo del sistema | `arquitectura.png` *(misma imagen que 5.1 — dos figuras compartían fuente)* | `flujo_general.puml` | 🟢 Lista |
 | 5.3 | Flujo del pipeline de análisis | `pipeline.png` | — | ⚪ Sin tocar — no depende del modelo de BD |
 | 5.4 | ER conceptual | `entidadRelacion.png` (en realidad físico mal titulado) | `esquema_conceptual.tex` | 🟢 Lista |
-| 5.5 | Esquema físico | `er2.png` | — | 🔴 No existe |
+| 5.5 | Esquema físico | `er2.png` | `esquema_fisico.puml` | 🟢 Lista — construida 15-sep sobre el grafo reconciliado + D-04, D-23, D-24 |
 | 5.6–5.11 | Casos de uso (6, un paquete c/u) | `diagramas/puml/cu_*.puml` | *mismas fuentes* | 🟡 Sin rehacer — último toque fue previo al 3-sep. Faltan los 3 ajustes de C5-08 (sin tope de grupo, Día 1 opcional, quitar «seguir misma rata») |
 | 5.12 | Registro de usuario por admin | `seq_registro.png` | — | 🟡 Debería tocarse — le falta el paso de verificación de rol que exige D-12 |
 | 5.13 | Inicio de sesión | `seq_login.png` | — | ⚪ Sin tocar |
@@ -34,10 +34,8 @@
 
 De 31 figuras:
 
-- **10 ya tienen fuente nueva lista**: 5.1, 5.2, 5.4, 5.19, 5.20, 5.21, 5.22 (fusionada
-  en 5.21), 5.23, 5.24, 5.25.
-- **1 no existe todavía**: 5.5 (esquema físico) — los datos están (relaciones + tipos
-  PostgreSQL de D-14 a D-17), pero nadie dibujó el diagrama.
+- **11 ya tienen fuente nueva lista**: 5.1, 5.2, 5.4, 5.5, 5.19, 5.20, 5.21, 5.22
+  (fusionada en 5.21), 5.23, 5.24, 5.25.
 - **6 de casos de uso** (5.6–5.11) necesitan 3 ajustes textuales/de cardinalidad
   menores (C5-08).
 - **2 de secuencia** (5.12, 5.16) deberían tocarse por decisiones del 13-sep aunque
@@ -45,9 +43,9 @@ De 31 figuras:
 - **12 son neutrales** al modelo de datos: pipeline (5.3), cinco de sesión/perfil
   (5.13–5.15, 5.17, 5.18) y seis mockups (5.26–5.31).
 
-**Ninguna de las 10 "listas" está insertada todavía en `05_diseno.tex`** — ese archivo
+**Ninguna de las 11 "listas" está insertada todavía en `05_diseno.tex`** — ese archivo
 sigue sin tocarse (bloque B de [`CAMBIOS-CAP5.md`](CAMBIOS-CAP5.md)).
 
 ---
 
-*Generado: 2026-09-15.*
+*Generado: 2026-09-15. Actualizado: 2026-09-15 (5.5 pasa a lista).*

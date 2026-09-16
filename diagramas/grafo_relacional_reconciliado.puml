@@ -12,7 +12,8 @@
 '  modelado como subtipo -- si el usuario no aparece aqui, es
 '  investigador simple.
 '
-'  16 relaciones - 73 atributos - 17 llaves foraneas.
+'  16 relaciones - 74 atributos - 17 llaves foraneas.
+'  (D-25, 15-sep: se agrego USUARIO.cambioRequerido, sube de 73 a 74)
 '  Validado relacion por relacion: las cuatro de la reconciliacion
 '  y ADMINISTRADOR quedan en BCNF.
 '
@@ -101,6 +102,7 @@ class USUARIO {
   correo   [AK]
   contrasenaHash
   activo
+  cambioRequerido
 }
 
 class EXPERIMENTO {
