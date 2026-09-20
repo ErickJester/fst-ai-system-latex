@@ -13,7 +13,7 @@
 | 5.3 | Flujo del pipeline de análisis | `pipeline.png` | — | ⚪ Sin tocar — no depende del modelo de BD |
 | 5.4 | ER conceptual | `entidadRelacion.png` (en realidad físico mal titulado) | `esquema_conceptual.tex` | 🟢 Lista |
 | 5.5 | Esquema físico | `er2.png` | `esquema_fisico.puml` | 🟢 Lista — construida 15-sep sobre el grafo reconciliado + D-04, D-23, D-24 |
-| 5.6–5.11 | Casos de uso (6, un paquete c/u) | `diagramas/puml/cu_*.puml` | *mismas fuentes* | 🟡 Sin rehacer — último toque fue previo al 3-sep. Faltan los 3 ajustes de C5-08 (sin tope de grupo, Día 1 opcional, quitar «seguir misma rata») |
+| 5.6–5.11 | Casos de uso (6, un paquete c/u) | `diagramas/puml/cu_*.puml` | *mismas fuentes, corregidas* | 🟢 Lista — corregidas 19-sep: jerarquía de actores (Investigador/Administrador), quitado «rol», grupo/tanda en «Subir video», UC43 cambia a comparar grupos en Día 2. Texto de CU-04/CU-05 en `05_diseno.tex` también corregido |
 | 5.12 | Registro de usuario por admin | `seq_registro.png` | `seq_crear_cuenta.puml` | 🟢 Lista — construida 15-sep, agrega el chequeo de rol (D-12) y `cambioRequerido` (D-25) |
 | 5.13 | Inicio de sesión | `seq_login.png` | — | ⚪ Sin tocar |
 | 5.14 | Cierre de sesión | `seq_logout.png` | — | ⚪ Sin tocar |
@@ -34,16 +34,18 @@
 
 De 31 figuras:
 
-- **13 ya tienen fuente nueva lista**: 5.1, 5.2, 5.4, 5.5, 5.12, 5.16, 5.19, 5.20,
-  5.21, 5.22 (fusionada en 5.21), 5.23, 5.24, 5.25.
-- **6 de casos de uso** (5.6–5.11) necesitan 3 ajustes textuales/de cardinalidad
-  menores (C5-08).
+- **19 ya tienen fuente nueva lista**: 5.1, 5.2, 5.4, 5.5, 5.6–5.11, 5.12, 5.16, 5.19,
+  5.20, 5.21, 5.22 (fusionada en 5.21), 5.23, 5.24, 5.25.
 - **12 son neutrales** al modelo de datos: pipeline (5.3), cinco de sesión/perfil
   (5.13–5.15, 5.17, 5.18) y seis mockups (5.26–5.31).
+- **0 pendientes de corrección.** Todo lo que dependía del modelo de BD ya está listo.
 
-**Ninguna de las 13 "listas" está insertada todavía en `05_diseno.tex`** — ese archivo
-sigue sin tocarse (bloque B de [`CAMBIOS-CAP5.md`](CAMBIOS-CAP5.md)).
+**Ninguna de las 19 "listas" está insertada todavía en `05_diseno.tex` como figura** — la
+inserción de las figuras en el capítulo sigue sin empezar (bloque B de
+[`CAMBIOS-CAP5.md`](CAMBIOS-CAP5.md)); las correcciones de texto de CU-04/CU-05 sí se
+aplicaron (19-sep), pero eso es distinto de insertar las 19 figuras.
 
 ---
 
-*Generado: 2026-09-15. Actualizado: 2026-09-19 (5.12 y 5.16 pasan a listas).*
+*Generado: 2026-09-15. Actualizado: 2026-09-19 (5.6–5.11, 5.12 y 5.16 pasan a listas — 0
+diagramas pendientes de corrección).*
