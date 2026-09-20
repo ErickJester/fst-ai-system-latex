@@ -1,0 +1,92 @@
+@startuml seq_gestion_usuarios
+' ================================================================
+'  Secuencia - Gestion de usuarios: listar y desactivar (CU-11),
+'  con verificacion de rol (D-12) y regla del ultimo administrador
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Reemplaza a diagramas/seq_gestion_usuarios.png. Ese diagrama
+'  viejo hacia "SELECT usuarios (rol, activo, nombre)" - USUARIO no
+'  tiene columna rol (D-08: ADMINISTRADOR es tabla aparte, no un
+'  valor de columna). Es el mismo hueco que marcaba
+'  COMPARATIVA-FIGURAS-CAP5.md para esta figura.
+'
+'  Cubre CU-11 "Gestionar cuenta de investigador" (RF-05, RF-06,
+'  RF-07). CU-11 declara <<include>> de CU-12 para la parte de
+'  crear cuenta (chapters/05_diseno.tex:920) - por eso ese tramo se
+'  referencia con "ref over" en vez de repetirse: ya tiene su
+'  propio diagrama, diagramas/seq_crear_cuenta.puml. Copiar los
+'  mismos pasos aqui otra vez es el riesgo que ya se discutio en
+'  sesion: dos diagramas describiendo el mismo tramo pueden
+'  desincronizarse con el tiempo.
+'
+'  El viejo tampoco verificaba el rol de quien pide la accion
+'  (D-12) ni la regla de "debe existir al menos un Administrador
+'  activo en todo momento" que ya esta escrita en
+'  chapters/05_diseno.tex:1697 (curso alterno 4a de CU-11) pero
+'  nunca se habia dibujado. Los dos se agregan aqui.
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/seq_gestion_usuarios.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
+
+actor Administrador as admin
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+admin -> ui: abre el panel de usuarios
+ui -> api: GET /admin/usuarios\ncon la sesión activa del Administrador
+
+api -> db: ¿el idInstitucional de la sesión está en ADMINISTRADOR?
+db --> api: sí / no
+
+alt no está en ADMINISTRADOR
+  api --> ui: 403, no autorizado
+  ui --> admin: muestra el error, no abre el panel
+else sí está en ADMINISTRADOR
+  api -> db: consulta los usuarios (nombre, correo, activo)
+  db --> api: lista de usuarios
+  api -> db: consulta cuáles de esos usuarios tienen fila en ADMINISTRADOR
+  db --> api: lista de idInstitucional con permisos de administrador
+  api -> api: combina ambas listas\n(marca en cada fila si es Administrador)
+  api --> ui: 200 OK {usuarios, con marca de administrador}
+  ui --> admin: muestra la tabla de usuarios
+
+  admin -> ui: elige la acción sobre un usuario
+
+  alt crear cuenta nueva
+    ref over ui, api, db
+      ver CU-12 "Crear cuenta de usuario"
+      diagramas/seq_crear_cuenta.puml
+    end ref
+    ui --> admin: la tabla se actualiza con la cuenta nueva
+
+  else desactivar cuenta
+
+    admin -> ui: selecciona un usuario y confirma la desactivación
+    ui -> api: PATCH /admin/usuarios/{id} {activo: false}
+
+    api -> db: si este usuario es Administrador,\n¿cuántos Administradores activos quedarían después?
+    db --> api: cantidad restante (o "no aplica" si no es Administrador)
+
+    alt quedarían 0 Administradores activos
+      api --> ui: rechaza la desactivación
+      ui --> admin: muestra la advertencia\n"debe existir al menos un Administrador activo"
+    else se puede desactivar
+      api -> db: actualiza USUARIO, marca activo = false
+      db --> api: confirma la actualización
+      api --> ui: 200 OK
+      ui --> admin: usuario marcado como inactivo en la tabla
+    end
+  end
+end
+
+@enduml

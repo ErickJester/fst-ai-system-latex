@@ -1,6 +1,6 @@
 @startuml
 !pragma layout smetana
-title Plataforma Web FST\nFigura 5.4 - Vision general del sistema
+title Plataforma Web FST\nVision general del sistema
 left to right direction
 skinparam packageStyle rectangle
 skinparam actorStyle awesome

@@ -12,7 +12,7 @@ actor "Investigador" as INV
 actor ":Sistema:\n<<system>>" as SYS #LightYellow
 rectangle "Plataforma Web FST - Paquete 2" {
   usecase "Crear experimento" as UC21
-  usecase "Subir video FST\nDia 1 (20 min) o Dia 2 (5 min)" as UC22
+  usecase "Subir video FST\nindica grupo/tratamiento y sesion\n(Dia 1, 20 min / Dia 2, 5 min);\nla tanda se infiere sola (D-19)" as UC22
   usecase "Validar formato" as UC23
   usecase "Validar video reproducible" as UC24
   usecase "Encolar analisis\nautomatico tras validacion exitosa" as UC25
