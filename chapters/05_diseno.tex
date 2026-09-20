@@ -1098,7 +1098,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador crear un nuevo experimento FST registrando los metadatos del protocolo.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador completa el formulario con nombre, fecha, número de especímenes (predeterminado: 4, máximo: 8), tratamiento y notas opcionales; el sistema valida y crea el registro, dejando el experimento listo para recibir los videos (DAY1 y/o DAY2).} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador completa el formulario con nombre, fecha y notas opcionales; el sistema valida y crea el registro, dejando el experimento listo para recibir los grupos y sus videos (Día 1 y/o Día 2). El tratamiento, el tipo de grupo y el número de especímenes se capturan después, por grupo, al subir el primer video de cada uno (ver CU-05).} \\
 \hline
 \end{tabular}
 
@@ -1113,7 +1113,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 2 & Sistema & Muestra el formulario de registro del experimento. \\
 \hline
-3 & Investigador & Completa: nombre único del experimento, fecha, número de especímenes (predeterminado: 4, máximo: 8), tratamiento o condición experimental y notas opcionales. \\
+3 & Investigador & Completa: nombre único del experimento, fecha y notas opcionales. \\
 \hline
 4 & Investigador & Confirma el registro. \\
 \hline
@@ -1157,7 +1157,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador subir el archivo de video del experimento para su análisis automático.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador selecciona el archivo MP4; el sistema valida formato y reproducibilidad, lo almacena y encola la tarea de análisis de forma automática, sin intervención adicional del usuario.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador escribe el nombre del grupo o tratamiento; si coincide con un grupo ya usado en el mismo experimento, el sistema sugiere la siguiente tanda y pide confirmación explícita (D-19). Elige la sesión (Día 1 o Día 2) y el archivo MP4; el sistema valida formato y reproducibilidad, lo almacena y encola la tarea de análisis de forma automática.} \\
 \hline
 \end{tabular}
 
@@ -1168,15 +1168,23 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
 \hline
-1 & Inv. / Admin. & Selecciona el archivo \texttt{.mp4} desde su equipo mediante el selector de archivos. \\
+1 & Inv. / Admin. & Selecciona el experimento activo y escribe el nombre del grupo o tratamiento. \\
 \hline
-2 & Sistema & Valida que el archivo esté en formato \texttt{.mp4} y que sea reproducible. \\
+2 & Sistema & Busca coincidencias del nombre dentro del mismo experimento y sugiere autocompletado. \\
 \hline
-3 & Sistema & Sube el archivo al volumen compartido del servidor. \\
+3 & Inv. / Admin. & Selecciona la sugerencia del grupo ya existente. \\
 \hline
-4 & Sistema & Encola automáticamente la tarea de análisis conductual (ver RF-12). \\
+4 & Sistema & Calcula la siguiente tanda disponible del grupo y la precarga en un campo editable. \\
 \hline
-5 & Sistema & Muestra confirmación y redirige a la pantalla de progreso del análisis. \\
+5 & Inv. / Admin. & Confirma la tanda sugerida, o la corrige a mano; elige la sesión (Día 1 o Día 2) y selecciona el archivo \texttt{.mp4}. \\
+\hline
+6 & Sistema & Valida que el archivo esté en formato \texttt{.mp4} y que sea reproducible. \\
+\hline
+7 & Sistema & Guarda la tanda y el video; sube el archivo al volumen compartido del servidor. \\
+\hline
+8 & Sistema & Encola automáticamente la tarea de análisis conductual (ver RF-12). \\
+\hline
+9 & Sistema & Muestra confirmación y redirige a la pantalla de progreso del análisis. \\
 \hline
 \end{tabular}
 
@@ -1187,9 +1195,11 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
-2 & El archivo no es \texttt{.mp4}: el sistema rechaza la carga con mensaje de error específico antes de iniciar la transmisión (ver RF-08). \\
+3 & Ningún grupo del experimento coincide con el nombre escrito: el sistema pide los datos del grupo nuevo (tipo, tratamiento); la primera tanda de un grupo nuevo siempre es la A. \\
 \hline
-2 & El archivo no es reproducible o está corrupto: el sistema lo rechaza tras la validación e indica al investigador que proporcione un archivo válido. \\
+6 & El archivo no es \texttt{.mp4}: el sistema rechaza la carga con mensaje de error específico antes de iniciar la transmisión (ver RF-08). \\
+\hline
+6 & El archivo no es reproducible o está corrupto: el sistema lo rechaza tras la validación e indica al investigador que proporcione un archivo válido. \\
 \hline
 \end{tabular}
 

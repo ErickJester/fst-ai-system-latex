@@ -20,7 +20,7 @@ rectangle "Plataforma Web FST - Paquete 5" {
   usecase "Confirmar eliminacion\naccion explicita requerida" as UC53a
   usecase "Borrar video automaticamente\n30 dias tras analisis exitoso" as UC54
   usecase "Conservar resultados y reportes\nindefinidamente tras borrado" as UC55
-  usecase "Listar usuarios del sistema\nfiltrar por rol y estado" as UC56
+  usecase "Listar usuarios del sistema\nfiltrar por administrador/investigador y estado" as UC56
   usecase "Monitorear estado del sistema" as UC57
   usecase "Notificar uso de disco\nsuperior al 80%" as UC57a
   usecase "Gestionar experimentos globales\ncualquier investigador" as UC58
