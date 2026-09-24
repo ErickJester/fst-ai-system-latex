@@ -1,0 +1,356 @@
+@startuml esquema_fisico
+' ================================================================
+'  Esquema fisico de la base de datos - Sistema FST
+'  TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Figura 5.5 de chapters/05_diseno.tex
+'  Gestor: PostgreSQL (D-11) - 16 tablas, 18 llaves foraneas
+'
+'  Este diagrama REEMPLAZA POR COMPLETO al esquema fisico anterior
+'  (12 tablas: USUARIOS, EXPERIMENTOS, SUJETOS, VIDEOS, ROIS,
+'  CONFIGURACIONES_ANALISIS, TRABAJOS, ANIMALES,
+'  RESULTADOS_COMPORTAMIENTO, COMPORTAMIENTO_POR_MINUTO, REPORTES,
+'  NOTIFICACIONES). Ningun nombre, tipo ni atributo de ese modelo
+'  se reutilizo aqui - regla de CLAUDE.md sobre no reciclar
+'  contenido de diagramas viejos sin verificar contra el grafo
+'  relacional vigente.
+'
+'  ---- Fuentes ----
+'  Estructura  : diagramas/grafo_relacional_reconciliado.puml
+'                (16 relaciones, 74 atributos, 17 FK, BCNF)
+'                74 = 73 + USUARIO.cambioRequerido (D-25, 15-sep)
+'  Tipos y DDL : artifact "Diseno Fisico FST" (13-sep) - actividades
+'                1 a 6 de la etapa fisica, todas resueltas
+'  Decisiones  : errores/preguntas-doctor.md - D-02, D-04, D-08,
+'                D-10 a D-18, D-23, D-24
+'
+'  ---- Que agrega esta etapa sobre el grafo logico ----
+'  1. Tipos concretos de PostgreSQL por dominio (ver tabla abajo).
+'  2. Siete dominios cerrados via CREATE DOMAIN + CHECK (D-14 a D-17
+'     mas los tres ya cerrados en la etapa logica).
+'  3. D-04: columna ESPECIMEN.idGrupo, redundante a proposito -
+'     SOLO existe aqui, en el fisico. El grafo logico se queda en
+'     BCNF estricta, sin idGrupo en ESPECIMEN. Esto agrega una FK
+'     mas (GRUPO -> ESPECIMEN) que no esta en el logico: por eso
+'     el fisico tiene 18 llaves foraneas y el logico 17.
+'  4. D-24 (15-sep, esta sesion): ANALISIS.idVideo se declara UNIQUE
+'     para forzar estructuralmente la cardinalidad (1,1) de D-03.
+'     Kendall & Kendall p.425 respalda la "clave unica" como
+'     herramienta de integridad de entidad. Efecto en indices: pasa
+'     de la lista "hay que declarar el indice" a la de "ya queda
+'     indexada" (UNIQUE crea su indice solo) - el artifact "Diseno
+'     Fisico FST" todavia no refleja esto (queda pendiente ahi).
+'  5. D-23: ANALISIS.rutaDiagnostico, nula salvo estado = 'error'.
+'     Se aplica aqui por primera vez a peticion explicita del
+'     usuario (15-sep) - hasta ahora estaba solo registrada en
+'     preguntas-doctor.md, sin propagar a ningun diagrama.
+'
+'  ---- Convenciones de tipo (ver artifact para el razonamiento) ----
+'  Identificador subrogado -> integer GENERATED ALWAYS AS IDENTITY
+'  Identificador institucional (USUARIO) -> varchar(10)      [D-02]
+'  Texto corto      -> varchar(n)
+'  Texto libre/rutas -> text
+'  Fecha sin hora    -> date
+'  Marca de tiempo   -> timestamptz
+'  Umbrales/segundos -> numeric(p,s)   (nunca real/double: la AK de
+'                       CONFIGURACION compara ocho umbrales por
+'                       igualdad, y la igualdad entre flotantes no
+'                       es fiable)
+'  Contadores cortos -> smallint
+'  Booleano          -> boolean
+'  Hash del modelo   -> char(64)                              [D-14]
+'
+'  ---- Los siete dominios cerrados (CREATE DOMAIN ... CHECK) ----
+'  tipo_grupo             varchar(24) IN ('control','referencia',
+'                          'tratamiento experimental')
+'  sesion_video            varchar(6) IN ('Dia 1','Dia 2')
+'  formato_reporte         varchar(4) IN ('CSV','XLSX','PDF')
+'  tipo_notificacion      varchar(32) IN ('analisis completado',
+'                          'error del pipeline','alerta de disco')
+'  estado_analisis        varchar(10) IN ('en cola','procesando',
+'                          'completado','error')                [D-15]
+'  etapa_analisis         varchar(16) IN ('preprocesamiento',
+'                          'deteccion','seguimiento',
+'                          'clasificacion')                     [D-16]
+'  nivel_clasif_analisis   varchar(8) IN ('preciso','agrupado')  [D-17]
+'  (CONFIGURACION.umbralConfianza no es lista, es rango: CHECK
+'  BETWEEN 0 AND 1, sobre la columna directamente)
+'
+'  ---- Todas las FK: ON UPDATE NO ACTION ON DELETE NO ACTION ----
+'  La base de datos rechaza el borrado en vez de propagarlo - por
+'  eso USUARIO.activo (D-10) existe: dar de baja sin poder borrar.
+'
+'  ---- CONDUCTA sigue siendo tabla, no dominio cerrado ----
+'  Su extension cambia segun el modo del clasificador (tres valores
+'  en modo completo, dos en modo degradado / D-17) - un dominio
+'  cerrado no puede expresar eso.
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/esquema_fisico.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 9
+skinparam shadowing false
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam BackgroundColor White
+skinparam nodesep 34
+skinparam ranksep 42
+
+hide circle
+
+skinparam class {
+  BackgroundColor       #FAFAFA
+  BorderColor           #3A3A3A
+  BorderThickness       1
+  HeaderBackgroundColor #1B4F8A
+  HeaderFontColor       #FFFFFF
+  HeaderFontSize        10
+  HeaderFontStyle       bold
+  AttributeFontSize     8
+  AttributeFontColor    #1A1A1A
+}
+
+skinparam arrow {
+  Color     #3A3A3A
+  Thickness 1
+  FontSize  7
+  FontColor #3A3A3A
+}
+
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+'  DOMINIO EXPERIMENTAL
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+entity USUARIO {
+  * idInstitucional : varchar(10) <<PK>>
+  --
+  nombre : varchar(n)
+  apellidos : varchar(n)
+  correo : varchar(n) <<UK>>
+  contrasenaHash : varchar(n)
+  activo : boolean
+  cambioRequerido : boolean
+}
+note bottom of USUARIO
+  D-10: activo evita el DELETE. Contraseña con
+  bcrypt + sal (RNF-05, ya resuelto en el .tex).
+  D-25 (15-sep): cambioRequerido obliga a cambiar la
+  contraseña temporal en el primer ingreso (RF-05,
+  RF-07, CU-12) - mismo patron que activo, la regla
+  se declara en la BD en vez de vivir solo en la app.
+end note
+
+entity EXPERIMENTO {
+  * idExperimento : integer <<PK>>
+  --
+  idInstitucional : varchar(10) <<FK>>
+  nombre : varchar(n)
+  fecha : date
+  notas : text (nulo)
+}
+
+entity GRUPO {
+  * idGrupo : integer <<PK>>
+  --
+  idExperimento : integer <<FK>>
+  etiqueta : varchar(n)
+  tipo : tipo_grupo
+  tratamiento : text
+  ..
+  UK (idExperimento, etiqueta)
+}
+
+entity TANDA {
+  * idTanda : integer <<PK>>
+  --
+  idGrupo : integer <<FK>>
+  ordinal : smallint
+  nCilindros : smallint
+  ..
+  UK (idGrupo, ordinal)
+}
+
+entity ESPECIMEN {
+  * idEspecimen : integer <<PK>>
+  --
+  idTanda : integer <<FK>>
+  idGrupo : integer <<FK>> (redundante · D-04)
+  numeroRata : smallint
+  numeroCilindro : smallint
+  ..
+  UK (idTanda, numeroCilindro)
+  UK (idGrupo, numeroRata) · D-04
+  CK numeroRata >= 1
+}
+note bottom of ESPECIMEN
+  D-04: idGrupo NO existe en el grafo logico (3FN lo
+  quita - se alcanza via TANDA). Aqui se repone como
+  redundancia controlada, para declarar "numeroRata
+  unico por grupo" en vez de dejarlo en codigo, y para
+  que los reportes comparen grupos sin pasar por TANDA.
+  Sincronizado por disparador BEFORE INSERT OR UPDATE
+  OF idTanda -> fn_sincronizar_grupo_especimen() (ver
+  artifact "Diseño Físico FST", actividad 5).
+end note
+
+entity VIDEO {
+  * idVideo : integer <<PK>>
+  --
+  idTanda : integer <<FK>>
+  sesion : sesion_video
+  archivo : text
+  duracion : numeric(p,s)
+  fechaCarga : timestamptz
+  ..
+  UK (idTanda, sesion)
+}
+
+entity ANALISIS {
+  * idAnalisis : integer <<PK>>
+  --
+  idVideo : integer <<FK>> <<UK>> (D-24)
+  idConfig : integer <<FK>>
+  estado : estado_analisis
+  etapa : etapa_analisis
+  confianza : numeric(p,s)
+  nivelClasif : nivel_clasif_analisis
+  fechaAnalisis : timestamptz
+  rutaDiagnostico : text (nulo salvo error) · D-23
+}
+note bottom of ANALISIS
+  D-24 (15-sep): idVideo UNIQUE fuerza la cardinalidad
+  (1,1) de D-03 - un video, un analisis vigente, sin
+  depender de que la aplicacion borre antes de insertar.
+  D-23: rutaDiagnostico solo se llena si estado='error',
+  mismo patron que VIDEO.archivo. Aplicado aqui por
+  primera vez a peticion del usuario (15-sep).
+end note
+
+entity OBSERVACION {
+  * idObservacion : integer <<PK>>
+  --
+  idEspecimen : integer <<FK>>
+  idVideo : integer <<FK>>
+  ..
+  UK (idEspecimen, idVideo)
+}
+
+entity INTERVALO {
+  * idIntervalo : integer <<PK>>
+  --
+  idObservacion : integer <<FK>>
+  minuto : smallint
+  ..
+  UK (idObservacion, minuto)
+}
+
+entity CONDUCTA {
+  * nombre : varchar(n) <<PK>>
+}
+
+entity PRESENTA {
+  * idIntervalo : integer <<PK>> <<FK>>
+  * conducta : varchar(n) <<PK>> <<FK>>
+  --
+  segundos : numeric(p,s)
+}
+
+entity ADMINISTRADOR {
+  * idInstitucional : varchar(10) <<PK>> <<FK>>
+}
+note bottom of ADMINISTRADOR
+  D-08: no es un tipo de usuario aparte, es subtipo de
+  USUARIO. Su PK es la misma FK, asi que PostgreSQL la
+  indexa sola al declarar el PRIMARY KEY.
+end note
+
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+'  SOPORTE DEL SISTEMA
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+entity MODELO {
+  * hashModelo : char(64) <<PK>>
+  --
+  nombreModelo : varchar(n)
+}
+note bottom of MODELO
+  D-14: hashModelo = SHA-256 del archivo del modelo
+  (hashlib.sha256(archivo).hexdigest()). 64 es la
+  longitud fija de su salida.
+end note
+
+entity CONFIGURACION {
+  * idConfig : integer <<PK>>
+  --
+  hashModelo : char(64) <<FK>>
+  versionPipeline : varchar(n)
+  umbralConfianza : numeric(p,s)
+  segundosOmitir : numeric(p,s)
+  umbralInmovil : numeric(p,s)
+  umbralDesplazamiento : numeric(p,s)
+  umbralStdPosicion : numeric(p,s)
+  umbralAspectoTrepada : numeric(p,s)
+  fechaCreacion : timestamptz
+  ..
+  UK (hashModelo, versionPipeline, umbralConfianza,
+      segundosOmitir, umbralInmovil, umbralDesplazamiento,
+      umbralStdPosicion, umbralAspectoTrepada)
+  CK umbralConfianza BETWEEN 0 AND 1
+}
+
+entity REPORTE {
+  * idReporte : integer <<PK>>
+  --
+  idExperimento : integer <<FK>>
+  formato : formato_reporte
+  ruta : text <<UK>>
+  fechaGeneracion : timestamptz
+}
+
+entity NOTIFICACION {
+  * idNotificacion : integer <<PK>>
+  --
+  idInstitucional : varchar(10) <<FK>>
+  idExperimento : integer <<FK>> (nulo)
+  tipo : tipo_notificacion
+  mensaje : text
+  leido : boolean
+  fechaCreacion : timestamptz
+}
+
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+'  RELACIONES - 18 FK (17 del grafo logico + 1 fisica: D-04)
+'  Todas ON UPDATE NO ACTION ON DELETE NO ACTION
+' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+USUARIO        "1" --o "0..*" EXPERIMENTO              : idInstitucional
+USUARIO        "1" --o "0..*" NOTIFICACION              : idInstitucional
+USUARIO        "1" --o "0..1" ADMINISTRADOR             : idInstitucional
+
+EXPERIMENTO    "1" --o "3..*" GRUPO                     : idExperimento
+EXPERIMENTO    "1" --o "0..*" REPORTE                   : idExperimento
+EXPERIMENTO    "1" --o "0..*" NOTIFICACION               : idExperimento
+
+GRUPO          "1" --o "2..*" TANDA                     : idGrupo
+GRUPO          "1" --o "3..4" ESPECIMEN                 : idGrupo <color:#8A5A0B>· D-04</color>
+
+TANDA          "1" --o "3..4" ESPECIMEN                 : idTanda
+TANDA          "1" --o "1..2" VIDEO                     : idTanda
+
+VIDEO          "1" --o "1"    ANALISIS                  : idVideo <color:#8A5A0B>· UK, D-24</color>
+VIDEO          "1" --o "3..4" OBSERVACION                : idVideo
+
+CONFIGURACION  "1" --o "0..*" ANALISIS                  : idConfig
+MODELO         "1" --o "0..*" CONFIGURACION              : hashModelo
+
+ESPECIMEN      "1" --o "1..2" OBSERVACION                : idEspecimen
+
+OBSERVACION    "1" --o "5"    INTERVALO                 : idObservacion
+INTERVALO      "1" --o "2..3" PRESENTA                  : idIntervalo
+CONDUCTA       "1" --o "0..*" PRESENTA                  : conducta
+
+@enduml
