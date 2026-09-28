@@ -336,7 +336,7 @@ EXPERIMENTO    "1" --o "0..*" REPORTE                   : idExperimento
 EXPERIMENTO    "1" --o "0..*" NOTIFICACION               : idExperimento
 
 GRUPO          "1" --o "2..*" TANDA                     : idGrupo
-GRUPO          "1" --o "3..4" ESPECIMEN                 : idGrupo <color:#8A5A0B>· D-04</color>
+GRUPO          "1" --o "6..*" ESPECIMEN                 : idGrupo <color:#8A5A0B>· D-04</color>
 
 TANDA          "1" --o "3..4" ESPECIMEN                 : idTanda
 TANDA          "1" --o "1..2" VIDEO                     : idTanda

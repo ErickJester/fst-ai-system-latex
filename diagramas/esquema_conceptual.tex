@@ -130,9 +130,9 @@
 \draw[lin] (produce) -- node[card, right, pos=0.45] {(1,1)} (video);
 
 % -- Video se procesa en Analisis -------------------------------
-% (1,N) pendiente de la decision D-03: si no se conserva historial
-% de reprocesamientos, baja a (1,1).
-\draw[lin] (video) -- node[card, above, pos=0.35] {(1,N)} (procesa);
+% (1,1): el reanalisis reemplaza el resultado anterior, no se
+% conserva historial (D-03, reunion 3-sep).
+\draw[lin] (video) -- node[card, above, pos=0.35] {(1,1)} (procesa);
 \draw[lin] (procesa) -- node[card, above, pos=0.65] {(1,1)} (analisis);
 
 % -- Especimen aparece en Observaciones -------------------------
