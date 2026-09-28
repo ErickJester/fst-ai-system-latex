@@ -13,17 +13,17 @@ actor "Administrador" as ADMIN
 actor ":Worker:\n<<system>>" as WRK #LightYellow
 actor ":Sistema:\n<<system>>" as SYS #LightYellow
 rectangle "Plataforma Web FST - Paquete 5" {
-  usecase "Consultar dashboard\nlista experimentos + estado" as UC51
-  usecase "Filtrar / buscar experimentos\npor estado / fecha / tratamiento" as UC51a
-  usecase "Avisar expiracion de video\nnombre + fecha de vencimiento exacta" as UC52
-  usecase "Eliminar experimento\npermanente e irreversible" as UC53
-  usecase "Confirmar eliminacion\naccion explicita requerida" as UC53a
-  usecase "Borrar video automaticamente\n30 dias tras analisis exitoso" as UC54
-  usecase "Conservar resultados y reportes\nindefinidamente tras borrado" as UC55
-  usecase "Listar usuarios del sistema\nfiltrar por administrador/investigador y estado" as UC56
+  usecase "Consultar dashboard" as UC51
+  usecase "Filtrar experimentos" as UC51a
+  usecase "Avisar expiracion de video" as UC52
+  usecase "Eliminar experimento" as UC53
+  usecase "Confirmar eliminacion" as UC53a
+  usecase "Borrar video automaticamente" as UC54
+  usecase "Conservar resultados y reportes" as UC55
+  usecase "Listar usuarios" as UC56
   usecase "Monitorear estado del sistema" as UC57
-  usecase "Notificar uso de disco\nsuperior al 80%" as UC57a
-  usecase "Gestionar experimentos globales\ncualquier investigador" as UC58
+  usecase "Notificar uso de disco" as UC57a
+  usecase "Gestionar experimentos globales" as UC58
 }
 INV --> UC51
 INV --> UC53

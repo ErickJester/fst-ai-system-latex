@@ -11,10 +11,10 @@ skinparam usecase {
 actor "Investigador" as INV
 rectangle "Plataforma Web FST - Paquete 4" {
   usecase "Consultar resultados por especimen" as UC41
-  usecase "Desglosar por minuto\nconductas/min por animal" as UC42
-  usecase "Comparar grupos en Dia 2\ncontrol / referencia / tratamiento\nbarras de distribucion" as UC43
+  usecase "Desglosar por minuto" as UC42
+  usecase "Comparar grupos en Dia 2" as UC43
   usecase "Descargar reporte PDF" as UC45
-  usecase "Generar archivo de reporte\nconservado indefinidamente en servidor" as UC46
+  usecase "Generar archivo de reporte" as UC46
 }
 INV --> UC41
 INV --> UC43
