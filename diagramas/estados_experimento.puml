@@ -1,0 +1,16 @@
+@startuml estados_experimento
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+[*] --> sin_videos : se creó el experimento\n(CU-04)
+
+sin_videos --> en_cola : se subió y encoló\nel primer video (CU-05)
+en_cola --> procesando : el Worker empezó a\nprocesar alguna tanda
+procesando --> completado : todas las tandas\nterminaron sin error
+procesando --> con_error : alguna tanda\nterminó en error
+completado --> procesando : se agregó una tanda\nnueva (CU-05)
+con_error --> procesando : se agregó una tanda\nnueva (CU-05)
+
+@enduml

@@ -4,15 +4,15 @@
 
 En el Laboratorio de Bioquímica Estructural de la Escuela Nacional de Medicina y
 Homeopatía, analizar un experimento de nado forzado funciona así: el investigador abre
-el video en la computadora, pone en marcha un cronómetro y observa. Cada vez que la
-rata cambia de conducta (empieza a nadar, se queda inmóvil, intenta escalar las
+el video en la computadora, pone en marcha un cronómetro y observa. Cada vez que el
+espécimen cambia de conducta (empieza a nadar, se queda inmóvil, intenta escalar las
 paredes del cilindro) registra la hora a mano. Al terminar los cinco minutos, tiene
-una tabla con los tiempos de cada conducta para una sola rata. Luego repite el proceso
+una tabla con los tiempos de cada conducta para un solo espécimen. Luego repite el proceso
 con la siguiente. Si el protocolo requiere que dos evaluadores hagan la anotación de
 forma independiente para verificar consistencia, el mismo video se revisa dos veces más.
 
 Ese proceso existe porque el nado forzado es el modelo conductual más usado en
-neurociencia preclínica para evaluar el efecto de antidepresivos en ratas. La depresión
+neurociencia preclínica para evaluar el efecto de antidepresivos en especímenes. La depresión
 mayor afecta a más de 280 millones de personas y es una de las principales causas de
 discapacidad según la OMS \cite{who_depression_2025}. Para probar nuevas moléculas
 antes de pasar a ensayos clínicos en humanos, los investigadores necesitan modelos
@@ -21,20 +21,20 @@ de nado forzado (Forced Swim Test, FST), propuesta por Porsolt et al.\ en 1977
 \cite{porsolt1977}; desde el año 2000 hay más de 8{,}000 artículos que lo reportan
 \cite{della_valle2025}.
 
-El experimento consiste en colocar a la rata en un cilindro con agua del que no puede
+El experimento consiste en colocar al espécimen en un cilindro con agua del que no puede
 salir y registrar cómo responde. Al principio intenta escapar activamente; después de
 un rato empieza a flotar con movimientos mínimos. Esa conducta pasiva ---llamada
 \textit{desesperanza conductual} o \textit{behavioral despair}--- se asocia con la
 pérdida de motivación propia de la depresión \cite{armario2021}. Los antidepresivos
 reducen el tiempo de inmovilidad, y eso es lo que se mide \cite{slattery2012,cryan2005}.
 
-Las ratas son el modelo biológico estándar para este tipo de estudio. Su fisiología y
+Los especímenes son el modelo biológico estándar para este tipo de estudio. Su fisiología y
 neuroanatomía tienen correspondencia suficiente con la humana, en particular en la
 organización del sistema nervioso central y las respuestas neuroendocrinas al estrés
 \cite{armario2021}. A eso se suman razones prácticas: manejo sencillo, ciclos
 reproductivos cortos y bajo costo de mantenimiento.
 
-El uso de ratas de laboratorio en México está regulado por la Norma Oficial Mexicana
+El uso de especímenes de laboratorio en México está regulado por la Norma Oficial Mexicana
 NOM-062-ZOO-1999 \cite{nom062}, que establece las especificaciones éticas, sanitarias
 y de bienestar animal para su cuidado y uso experimental. El laboratorio colaborador
 opera bajo esas disposiciones; este proyecto solo analiza los videos que resultan de
@@ -56,7 +56,7 @@ López, investigador del posgrado de esa institución, corre experimentos de FST
 regularmente y tiene un acervo de videos que hoy se analizan a mano. Esa es la
 necesidad que origina este Trabajo Terminal.
 
-En un experimento de FST típico, las ratas se dividen en tres grupos de entre 6 y 8
+En un experimento de FST típico, los especímenes se dividen en tres grupos de entre 6 y 8
 especímenes cada uno. Cada grupo cumple un papel distinto en la evaluación, como se
 muestra en la Tabla~\ref{tab:grupos_experimentales}.
 
@@ -70,7 +70,7 @@ muestra en la Tabla~\ref{tab:grupos_experimentales}.
 \textbf{Grupo} & \textbf{Intervención} \\
 \hline
 Control
-  & Sin tratamiento farmacológico. Las ratas solo son sometidas al protocolo de nado
+  & Sin tratamiento farmacológico. Los especímenes solo son sometidos al protocolo de nado
     forzado (20~min el día~1, 5~min el día~2). Sus conductas establecen la línea base
     contra la que se comparan los demás grupos. \\
 \hline
@@ -92,8 +92,8 @@ Tratamiento experimental
 \section{Planteamiento del problema}
 
 El laboratorio realiza experimentos de nado forzado de forma periódica para evaluar el
-efecto de distintas moléculas en grupos de ratas. Cada experimento graba cuatro ratas
-al mismo tiempo desde una vista lateral, en dos sesiones: 20 minutos el primer día y
+efecto de distintas moléculas en grupos de especímenes. Cada experimento graba cuatro
+especímenes al mismo tiempo desde una vista lateral, en dos sesiones: 20 minutos el primer día y
 5 minutos el segundo.
 
 El análisis de esos videos se hace completamente a mano. Anotar el video de 5 minutos
@@ -109,12 +109,14 @@ Los problemas que genera ese proceso son los siguientes:
   \item \textbf{Costo de tiempo:} el volumen de anotación manual limita cuántos
         experimentos puede procesar el laboratorio en un período.
   \item \textbf{Variabilidad entre evaluadores:} las transiciones entre conductas
-        ---el momento exacto en que la rata pasa de nadar a quedarse inmóvil, por
+        ---el momento exacto en que el espécimen pasa de nadar a quedarse inmóvil, por
         ejemplo--- no siempre son nítidas. Dos evaluadores pueden registrar tiempos
-        distintos para la misma rata en el mismo video. Cuando eso ocurre, el
+        distintos para el mismo espécimen en el mismo video. Cuando eso ocurre, el
         investigador debe decidir qué número incluir en el reporte; esa decisión no
         tiene criterio formal y afecta la reproducibilidad de los resultados
-        \cite{armario2021}. La norma ISO/IEC~25010:2023 \cite{iso25010} define la
+        \cite{armario2021}. La norma ISO/IEC (International Organization for
+        Standardization / International Electrotechnical Commission)~25010:2023
+        \cite{iso25010} define la
         consistencia entre evaluaciones como un atributo de calidad funcional
         (\textit{correctness}) que un sistema automatizado puede garantizar donde el
         proceso manual no puede.
@@ -143,27 +145,28 @@ reemplazar la anotación manual de videos experimentales.
 
 La propuesta es un prototipo de sistema web con visión por computadora y aprendizaje
 supervisado que analice automáticamente los videos del FST del laboratorio. El desarrollo sigue el ciclo de
-vida de software de la norma ISO/IEC/IEEE~12207:2017 \cite{iso12207}, que organiza el
-proceso en fases de definición de requerimientos, diseño, implementación y verificación.
+vida de software de la norma ISO/IEC/IEEE (Institute of Electrical and Electronics
+Engineers)~12207:2017 \cite{iso12207}, que organiza el proceso en fases de definición
+de requerimientos, diseño, implementación y verificación.
 La adaptación concreta de ese ciclo al proyecto se describe en la sección de
 metodología.
 
 El sistema tiene dos partes:
 
 \begin{itemize}
-  \item \textbf{Pipeline de análisis de video:} recibe el video, identifica a cada rata
-        dentro de su cilindro y clasifica cuadro a cuadro la conducta que realiza (nado,
-        inmovilidad o escalamiento) con un modelo de aprendizaje supervisado. La salida
-        es el tiempo total por conducta y rata y, como funcionalidad opcional, el
+  \item \textbf{Pipeline de análisis de video:} recibe el video, identifica a cada
+        espécimen dentro de su cilindro y clasifica cuadro a cuadro la conducta que realiza
+        (nado, inmovilidad o escalamiento) con un modelo de aprendizaje supervisado. La
+        salida es el tiempo total por conducta y espécimen y, como funcionalidad opcional, el
         desglose por minuto.
   \item \textbf{Plataforma web:} interfaz desde el navegador donde el investigador sube
-        los videos, consulta el estado del análisis, revisa resultados por rata y
+        los videos, consulta el estado del análisis, revisa resultados por espécimen y
         sesión, y descarga reportes. Los datos se almacenan en base de datos para
         comparar experimentos.
 \end{itemize}
 
 El sistema asume calidad mínima de entrada: vista lateral con los cuatro cilindros
-visibles, contraste suficiente entre la rata y el fondo, y cámara estable. Los videos
+visibles, contraste suficiente entre el espécimen y el fondo, y cámara estable. Los videos
 disponibles hasta ahora tienen variaciones de iluminación y contraste que pueden afectar
 el desempeño; durante el desarrollo se evaluará la robustez de los algoritmos y se
 documentarán los requisitos mínimos de calidad conforme al atributo \textit{performance
@@ -176,9 +179,9 @@ El desempeño del clasificador se evalúa con métricas de clasificación están
 
 Diseñar, desarrollar y validar un prototipo de sistema web con visión por computadora
 y aprendizaje supervisado que automatice la detección y cuantificación de las conductas
-de la prueba de nado forzado en ratas ---nado activo, inmovilidad e intentos de
+de la prueba de nado forzado en especímenes ---nado activo, inmovilidad e intentos de
 escape--- con
-resultados comparables a la evaluación manual del laboratorio y cumpliendo los
+desempeño validado mediante métricas de clasificación estándar y cumpliendo los
 atributos de calidad de la norma ISO/IEC~25010:2023 \cite{iso25010}.
 
 \subsection{Objetivos específicos}
@@ -213,7 +216,7 @@ verificar consistencia, ese tiempo se duplica. Son horas que los investigadores 
 están usando para diseñar experimentos, analizar resultados ni escribir publicaciones.
 
 El impacto en reproducibilidad importa igual para la ciencia. Cuando dos evaluadores
-obtienen tiempos distintos para la misma rata ---algo habitual en las transiciones entre
+obtienen tiempos distintos para el mismo espécimen ---algo habitual en las transiciones entre
 conductas--- el investigador debe decidir qué número reportar. Esa decisión no tiene
 criterio formal: depende del evaluador, y distintos laboratorios pueden resolverla de
 forma diferente. El resultado es que el mismo experimento puede producir datos distintos
@@ -231,8 +234,8 @@ conductas, sin costo de licencia, con interfaz web accesible desde el navegador.
 
 En cuanto a calidad del software, el sistema se diseña para cumplir atributos concretos
 de la ISO/IEC~25010:2023 \cite{iso25010}: \textit{functional correctness} (corrección
-funcional), que mide la consistencia de los resultados con las anotaciones del
-laboratorio; \textit{time behaviour} (desempeño temporal), que establece que el análisis
+funcional), que mide el desempeño del clasificador con métricas de clasificación
+estándar sobre el conjunto de prueba; \textit{time behaviour} (desempeño temporal), que establece que el análisis
 debe terminar en un tiempo asumible en el flujo de trabajo; y \textit{usability}
 (usabilidad), que garantiza que un investigador sin conocimientos de programación puede
 operar el sistema sin ayuda técnica. Esos tres atributos son los criterios de aceptación
@@ -251,7 +254,7 @@ de la validación final.
         cargarse opcionalmente como referencia basal.
 
   \item \textbf{Detección y seguimiento de especímenes:} identificación automática de
-        hasta cuatro ratas dentro de la grabación, distinguiéndolas por su posición
+        hasta cuatro especímenes dentro de la grabación, distinguiéndolos por su posición
         en el encuadre. Los cilindros son fijos y no cambian de posición entre sesiones,
         lo que permite asignar cada región a un espécimen de forma estable a lo largo
         del video.
@@ -263,11 +266,13 @@ de la validación final.
         el clasificador no logra distinguir con precisión suficiente nado activo de
         escalamiento, ambas conductas se reportan juntas como conducta activa.
 
-  \item \textbf{Métricas por espécimen y por grupo:} tiempo total de cada conducta en
+  \item \textbf{Métricas y comparación por grupo:} tiempo total de cada conducta en
         los 5~min del día~2, desglose por minuto como funcionalidad opcional, y
         estadísticos de grupo (media, desviación estándar y varianza por conducta)
         para caracterizar el perfil conductual del conjunto de especímenes de cada
-        grupo experimental.
+        grupo experimental. El sistema también compara automáticamente los tres
+        grupos (control, referencia y tratamiento) del día~2 mediante gráficas de
+        barras de distribución por conducta.
 
   \item \textbf{Reportes y exportaciones:} reporte de diagnóstico en PDF con
         indicadores de calidad del análisis (nivel de confianza del clasificador por
@@ -275,8 +280,8 @@ de la validación final.
         Tiempo (min:seg), Nado activo, Escalamiento e Inmovilidad, desglosadas por
         espécimen y por minuto.
 
-  \item \textbf{Plataforma web:} interfaz accesible desde el navegador con registro
-        de usuario con aprobación del administrador, carga de videos, cola de
+  \item \textbf{Plataforma web:} interfaz accesible desde el navegador con creación
+        de cuenta de usuario por parte del administrador, carga de videos, cola de
         procesamiento secuencial para hasta cuatro análisis en un mismo período,
         consulta de resultados por espécimen y sesión, y descarga de reportes. Los
         datos se almacenan en base de datos para permitir comparar sesiones y
@@ -293,7 +298,7 @@ de la validación final.
 \begin{itemize}
   \item \textbf{Diagnóstico clínico:} el sistema mide conductas dentro de un protocolo
         experimental preclínico. No produce información de uso clínico ni permite
-        inferir diagnósticos de depresión u otros trastornos, ni en ratas ni en
+        inferir diagnósticos de depresión u otros trastornos, ni en especímenes ni en
         humanos.
 
   \item \textbf{Video completo del día~1:} el experimento del día~1 dura 20~minutos;
@@ -307,12 +312,6 @@ de la validación final.
         pero no corrige ni preprocesa el video de forma automática. El umbral mínimo
         de confianza para que el análisis se considere válido es de 0.70.
 
-  \item \textbf{Comparación automática entre grupos experimentales:} el sistema genera
-        métricas por espécimen y estadísticos dentro de cada grupo, pero no compara
-        automáticamente el perfil conductual entre el grupo control, el de referencia y
-        el de tratamiento. Esa comparación queda a criterio del investigador usando
-        los datos exportados.
-
   \item \textbf{Reentrenamiento del clasificador:} el sistema no actualiza el modelo
         de clasificación a partir de nuevas anotaciones del usuario. Cualquier
         modificación del clasificador requiere intervención técnica externa al sistema.
@@ -325,7 +324,7 @@ de la validación final.
         navegador de escritorio. No existe versión para dispositivos móviles ni tabletas.
 
   \item \textbf{Intervención en los experimentos:} el proyecto no incluye ningún
-        procedimiento con ratas. Los experimentos los realiza el laboratorio bajo la
+        procedimiento con especímenes. Los experimentos los realiza el laboratorio bajo la
         NOM-062-ZOO-1999 \cite{nom062}; este sistema únicamente analiza los videos
         resultantes.
 
@@ -335,7 +334,7 @@ de la validación final.
         Terminal, aunque el prototipo está diseñado para ejecutarse en ese entorno.
 
   \item \textbf{Otros paradigmas conductuales:} el sistema está diseñado y entrenado
-        específicamente para el FST con ratas. No se garantiza su funcionamiento con
+        específicamente para el FST con especímenes. No se garantiza su funcionamiento con
         otras pruebas conductuales ni con otras especies.
 \end{itemize}
 
@@ -480,7 +479,8 @@ Redacción de caps.\ resultados, manuales y material de defensa
 
 El stack técnico cubre los dos frentes del proyecto: Python con Flask, OpenCV,
 PyTorch (YOLOv8, ResNet-18) y PostgreSQL para el pipeline y el backend; React.js
-para el frontend; BORIS para anotar el dataset de conductas; Git con Docker para control
+para el frontend; BORIS (Behavioral Observation Research Interactive Software) para
+anotar el dataset de conductas; Git con Docker para control
 de versiones y despliegue.
 
 En la práctica, Ángel y Vanesa trabajan en ramas separadas del repositorio y se

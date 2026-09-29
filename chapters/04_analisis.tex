@@ -30,7 +30,7 @@ Los requerimientos funcionales están organizados por módulo de la interfaz con
 niveles de prioridad: \textbf{Alta} (sin esto el prototipo no funciona),
 \textbf{Media} (importante pero puede quedar para una iteración posterior) y
 \textbf{Baja} (deseable pero no urgente). Cada requerimiento se derivó directamente
-de los prototipos de interfaz diseñados \cite{pressman2014,sommerville2016}.
+de los prototipos de interfaz diseñados \cite{pressman2014,sommerville2011}.
 
 \begin{longtable}{|>{\bfseries}p{1.1cm}|>{\raggedright}p{2.8cm}|>{\raggedright\arraybackslash}p{5.7cm}|p{1.3cm}|p{2.2cm}|}
 \caption{Requerimientos Funcionales (RF).
@@ -67,8 +67,8 @@ RF-03 & Autenticación
 RF-04 & Autenticación
       & El sistema debe gestionar dos roles con permisos distintos: Investigador
         (puede consultar todos los experimentos del laboratorio) y Administrador
-        (mismos permisos que el Investigador, más la capacidad de aprobar registros,
-        modificar y desactivar cuentas).
+        (mismos permisos que el Investigador, más la capacidad de crear, modificar
+        y desactivar cuentas de usuario, y monitorear el estado del sistema).
       & Alta & Sistema \\
 \hline
 
@@ -100,11 +100,15 @@ RF-08 & Carga de video
       & Alta & Sistema \\
 \hline
 RF-09 & Carga de video
-      & El sistema debe permitir subir uno o dos videos por experimento: Día~1
+      & El sistema debe permitir subir uno o dos videos por tanda: Día~1
         (sesión de estrés, 20~min) y Día~2 (sesión post-tratamiento, 5~min). Ambos
         son opcionales individualmente. El pipeline analiza el video de Día~2
         completo; del video de Día~1 analiza únicamente los primeros 5~minutos y
-        solo cuando corresponde al grupo control (ver RN-03).
+        solo cuando la tanda pertenece al grupo control (ver RN-03). Al subir el
+        primer video de una tanda nueva, el investigador indica el grupo y el
+        tratamiento; si el nombre coincide con un grupo ya registrado en el mismo
+        experimento, el sistema sugiere la siguiente tanda y pide confirmación
+        antes de guardar.
       & Alta & Investigador \\
 \hline
 RF-10 & Carga de video
@@ -114,10 +118,11 @@ RF-10 & Carga de video
       & Alta & Sistema \\
 \hline
 RF-11 & Carga de video
-      & Al crear un experimento el investigador debe registrar: nombre del
-        experimento, fecha, número de ratas a analizar (típicamente~4, pero puede
-        ser entre~1 y~4 según el diseño experimental), tratamiento o condición
-        experimental, y notas adicionales opcionales.
+      & Al crear un experimento el investigador debe registrar: nombre único del
+        experimento, fecha y notas adicionales opcionales. El grupo (control,
+        referencia o tratamiento), el tratamiento o condición experimental y el
+        número de especímenes de cada tanda (entre~3 y~4) se capturan después,
+        por grupo, al subir el primer video de cada uno (ver RF-09).
       & Alta & Investigador \\
 \hline
 RF-12 & Carga de video
@@ -130,7 +135,7 @@ RF-12 & Carga de video
 RF-13 & Análisis conductual
       & El pipeline de análisis debe ejecutar cuatro etapas secuenciales:
         preprocesamiento del video (decodificación y corrección de contraste),
-        detección de cilindros, seguimiento de ratas (\textit{tracking}) y
+        detección de cilindros, seguimiento de especímenes (\textit{tracking}) y
         clasificación de conductas. Cada etapa debe tener un indicador de estado
         visible en la pantalla de progreso.
       & Alta & Sistema \\
@@ -155,7 +160,7 @@ RF-16 & Análisis conductual
       & Alta & Investigador \\
 \hline
 RF-17 & Análisis conductual
-      & El sistema debe clasificar cuadro a cuadro la conducta de cada rata: nado
+      & El sistema debe clasificar cuadro a cuadro la conducta de cada espécimen: nado
         activo, inmovilidad o escalamiento \cite{armario2021}. El buceo se clasifica
         como nado activo. Las conductas son mutuamente excluyentes (ver RN-07).
       & Alta & Sistema \\
@@ -171,18 +176,18 @@ RF-18 & Análisis conductual
 % ── Resultados ─────────────────────────────────────────────
 RF-19 & Resultados
       & La pantalla de resultados debe mostrar el tiempo total en segundos y el
-        porcentaje de cada conducta por rata y por sesión, en una tabla
+        porcentaje de cada conducta por espécimen y por sesión, en una tabla
         descargable.
       & Alta & Investigador \\
 \hline
 RF-20 & Resultados
-      & El sistema debe ofrecer un desglose de conductas por minuto para cada rata.
+      & El sistema debe ofrecer un desglose de conductas por minuto para cada espécimen.
       & Media & Investigador \\
 \hline
 RF-21 & Resultados
-      & Cuando ambos videos del mismo experimento estén procesados, el sistema debe
+      & Cuando ambos videos de la misma tanda estén procesados, el sistema debe
         mostrar una comparación Día~1 vs.\ Día~2 con barras de distribución por
-        rata.
+        espécimen.
       & Alta & Investigador \\
 \hline
 RF-22 & Resultados
@@ -198,8 +203,11 @@ RF-22 & Resultados
 % ── Dashboard / gestión de experimentos ──────────────────
 RF-23 & Dashboard
       & El dashboard debe mostrar la lista de todos los experimentos del laboratorio
-        con nombre, fecha, tratamiento, sesión, estado (en proceso, completado, error)
-        y accesos directos a resultados y descarga (ver RN-08).
+        con nombre, fecha, número de grupos, sesión, estado (en cola, procesando,
+        completado, error) y accesos directos a resultados y descarga (ver RN-08).
+        La lista es filtrable por estado, fecha o tratamiento; el filtro por
+        tratamiento muestra los experimentos que tengan al menos un grupo con
+        ese tratamiento.
       & Alta & Investigador \\
 \hline
 RF-24 & Dashboard
@@ -234,8 +242,9 @@ RF-27 & Dashboard
 % ── Administración ─────────────────────────────────────────
 RF-28 & Administración
       & El Administrador debe poder ver la lista de todos los usuarios con correo,
-        rol, estado (activo/inactivo), último acceso y número de experimentos. La
-        lista es filtrable por rol y estado.
+        si es administrador o investigador, estado (activo/inactivo), último
+        acceso y número de experimentos. La lista es filtrable por
+        administrador/investigador y estado.
       & Media & Admin \\
 \hline
 RF-29 & Administración
@@ -251,11 +260,12 @@ RF-30 & Administración
       & Media & Admin \\
 \hline
 RF-31 & Resultados
-      & El sistema debe calcular estadísticas de grupo a partir de los experimentos
-        que comparten el mismo tratamiento: media, desviación estándar y varianza
-        del tiempo total de cada conducta entre las ratas del grupo. Estas
-        estadísticas deben incluirse en el reporte descargable (CSV/XLSX) junto con
-        los datos individuales por rata.
+      & El sistema debe calcular estadísticas por grupo experimental (control,
+        referencia, tratamiento) dentro de cada experimento: media, desviación
+        estándar y varianza del tiempo total de cada conducta entre los
+        especímenes de ese grupo, agregando todas sus tandas. Estas estadísticas
+        deben incluirse en el reporte descargable (CSV/XLSX) junto con los datos
+        individuales por espécimen.
       & Media & Investigador \\
 \hline
 
@@ -486,12 +496,14 @@ RN-01 & Las credenciales incorrectas muestran un mensaje de error genérico que 
         especifica si el correo o la contraseña es lo que falló.
       & Seguridad básica contra enumeración de usuarios. Ver RF-01. \\
 \hline
-RN-02 & Un video pertenece a exactamente un experimento. No se puede reutilizar un
-        video ya subido en un experimento distinto.
+RN-02 & Un video pertenece a exactamente una tanda (y, a través de ella, a un
+        grupo y un experimento). No se puede reutilizar un video ya subido en
+        una tanda distinta.
       & Trazabilidad de resultados. Ver RF-09. \\
 \hline
-RN-03 & Un experimento tiene como máximo dos videos: uno del Día~1 (20~min) y uno
-        del Día~2 (5~min).
+RN-03 & Una tanda tiene como máximo dos videos: uno del Día~1 (20~min) y uno del
+        Día~2 (5~min). Un experimento, al tener varios grupos y tandas, puede
+        acumular muchos más de dos videos en total.
       & Así funciona el protocolo FST del laboratorio \cite{slattery2012}. Ver RF-09. \\
 \hline
 RN-04 & El análisis lo inicia el sistema automáticamente al terminar la carga. El
@@ -508,9 +520,9 @@ RN-06 & Los resultados y reportes (PDF y CSV) se conservan indefinidamente aunqu
         el video original ya haya sido borrado.
       & Los datos de investigación tienen valor a largo plazo. Ver RF-25. \\
 \hline
-RN-07 & En cada cuadro del video, a cada rata se le asigna exactamente una
+RN-07 & En cada cuadro del video, a cada espécimen se le asigna exactamente una
         conducta: nado activo, inmovilidad o escalamiento. No pueden coexistir dos
-        conductas al mismo tiempo para la misma rata.
+        conductas al mismo tiempo para el mismo espécimen.
       & El FST define estas conductas como mutuamente excluyentes
         \cite{armario2021,cryan2005}. Ver RF-17, RF-18. \\
 \hline
@@ -536,8 +548,8 @@ RN-11 & Si la confianza de detección de los cuatro cilindros no alcanza $0.70$,
         investigador. Véase la justificación del valor en la
         sección~\ref{sec:umbrales}. Ver RF-14, RF-16. \\
 \hline
-RN-12 & La comparación Día~1 vs.\ Día~2 solo se genera si ambos videos del mismo
-        experimento fueron procesados exitosamente.
+RN-12 & La comparación Día~1 vs.\ Día~2 solo se genera si ambos videos de la
+        misma tanda fueron procesados exitosamente.
       & No tiene sentido comparar con datos incompletos. Ver RF-20. \\
 \hline
 RN-13 & Si el clasificador no alcanza F1 $\geq 85$\,\% distinguiendo
@@ -596,7 +608,7 @@ Ultralytics YOLOv8 \cite{jocher2023}
 \hline
 Sustracción de fondo por mediana \cite{piccardi2004}
     & El fondo se estima como la mediana píxel a píxel de los primeros $N$ cuadros,
-      evitando que una rata inmóvil al inicio contamine el modelo.
+      evitando que un espécimen inmóvil al inicio contamine el modelo.
     & Más simple y predecible que el GMM \cite{zivkovic2004} para el caso de cámara
       fija. No requiere parámetros de color ni modelos adaptativos, lo que reduce
       la sensibilidad a variaciones de iluminación entre sesiones.
@@ -606,7 +618,7 @@ ByteTrack \cite{zhang2022_bytetrack}
     & Algoritmo MOT basado en filtro de Kalman y asociación por IoU. Asocia
       detecciones de alta y baja confianza en dos pasadas para mantener trayectorias
       durante oclusiones. No requiere descriptor de reidentificación por apariencia.
-    & Tracker principal del pipeline. Con una rata por ROI no se necesita
+    & Tracker principal del pipeline. Con un espécimen por ROI no se necesita
       reidentificación, por lo que la simplicidad de ByteTrack es una ventaja sobre
       DeepSORT. 
     & Sí\textsuperscript{*} \\
@@ -882,9 +894,10 @@ debe requerir cero configuración técnica del lado del usuario. Cargar un video
 asignar grupos y descargar el reporte deben ser las únicas acciones necesarias.
 
 El laboratorio realiza entre 3 y 5 experimentos de nado forzado (FST) por semestre,
-cada uno con entre 6 y 8 especímenes divididos en grupos (control, referencia y
-tratamiento experimental). Cada experimento genera entre 6 y 8 videos de 5~min en el
-segundo día del protocolo. El análisis de esos videos es el cuello de botella actual:
+cada uno con tres grupos (control, referencia y tratamiento experimental) de entre
+6 y 8 especímenes cada uno. Cada experimento genera aproximadamente entre 12 y 16
+videos de 5~min en el segundo día del protocolo (dos tandas por grupo, un video de
+Día~2 por tanda). El análisis de esos videos es el cuello de botella actual:
 anotarlos manualmente ocupa entre 1.5 y 2~h cada uno, lo que convierte el análisis en
 una actividad que compite con el tiempo de investigación del laboratorio.
 
@@ -921,7 +934,7 @@ proyecto, los criterios que determinan si el sistema es operativamente aceptable
 \end{itemize}
 
 Estos tres criterios se verificarán durante la etapa de validación en TT-II con los
-videos y el juicio experto del Dr.\ Sandino como referencia.
+videos del laboratorio y las métricas de clasificación definidas en RNF-02.
 
 \subsection{Factibilidad económica}
 
@@ -1072,7 +1085,7 @@ almacenamiento cifrado y acceso autenticado con \textit{JSON Web Token} (JWT).
 
 \subsubsection{Uso ético de especímenes}
 
-Los procedimientos experimentales con ratas son realizados íntegramente por el personal
+Los procedimientos experimentales con especímenes son realizados íntegramente por el personal
 del Laboratorio de Bioquímica Estructural de la ENMyH-IPN. El equipo de desarrollo
 recibe únicamente los archivos de video ya grabados y no participa en ningún procedimiento
 con los especímenes. El laboratorio opera en apego a la NOM-062-ZOO-1999
