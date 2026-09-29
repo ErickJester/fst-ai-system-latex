@@ -6,9 +6,9 @@
 
 \chapter{Marco teórico}
 
-El FST produce videos de ratas nadando en cilindros. Para analizarlos
+El FST produce videos de especímenes nadando en cilindros. Para analizarlos
 automáticamente hace falta entender qué conductas se observan y qué
-significan, cómo procesar las imágenes para detectar a la rata, qué
+significan, cómo procesar las imágenes para detectar al espécimen, qué
 arquitectura de red neuronal puede clasificar esas conductas con pocos
 datos etiquetados, y cómo organizar todo eso en un sistema web que el
 laboratorio pueda usar. Lo que sigue cubre esos cuatro bloques en ese
@@ -36,7 +36,7 @@ inmovilidad en este test \cite{cryan2005}.
 \subsection{La prueba de nado forzado (FST)}
 
 La prueba de nado forzado fue propuesta por Porsolt et al.\ en 1977 \cite{porsolt1977}.
-Consiste en poner a la rata en un cilindro con agua del que no puede salir y registrar
+Consiste en poner al espécimen en un cilindro con agua del que no puede salir y registrar
 cómo responde. Al principio intenta escapar; después de un rato empieza a flotar con
 movimientos mínimos. Esa conducta pasiva ---\textit{behavioral despair} o desesperanza
 conductual--- se asocia con la pérdida de motivación propia de la depresión
@@ -51,7 +51,7 @@ En el FST se distinguen tres conductas mutuamente excluyentes \cite{armario2021,
           hundirse. Es el indicador principal de desesperanza conductual y el parámetro
           que más se reporta en publicaciones especializadas.
 
-    \item \textbf{Nado activo}: movimientos de paladas que desplazan a la rata
+    \item \textbf{Nado activo}: movimientos de paladas que desplazan al espécimen
           horizontalmente. Se asocia al sistema serotoninérgico; los antidepresivos tipo
           antidepresivos como la fluoxetina (antidepresivo de referencia) aumentan
           esta conducta específicamente.
@@ -65,17 +65,17 @@ En el FST se distinguen tres conductas mutuamente excluyentes \cite{armario2021,
 
 Distinguir las tres conductas importa porque cada una refleja la activación de un sistema
 neurotransmisor distinto, lo que permite inferir el mecanismo de acción del fármaco
-evaluado. Un sistema que solo detecta si la rata se mueve o no pierde esa información
+evaluado. Un sistema que solo detecta si el espécimen se mueve o no pierde esa información
 \cite{della_valle2025}.
 
 \subsection{Protocolo del laboratorio colaborador}
 
-En el laboratorio de la ENMyH las ratas se colocan individualmente en cilindros
+En el laboratorio de la ENMyH los especímenes se colocan individualmente en cilindros
 transparentes con agua. Hay dos sesiones: 20 minutos el día 1 (línea base) y 5 minutos
 el día 2 (después del tratamiento), con 24 horas de diferencia. Los videos se graban
 desde una vista lateral con cámara de celular, capturando los cuatro cilindros al mismo
-tiempo. La iluminación y el nivel del agua varían entre experimentos, y con ratas de
-pelaje claro el contraste contra el cilindro puede ser bajo. El sistema debe funcionar
+tiempo. La iluminación y el nivel del agua varían entre experimentos, y con especímenes
+de pelaje claro el contraste contra el cilindro puede ser bajo. El sistema debe funcionar
 bajo esas condiciones; los requisitos mínimos de calidad de video se definirán durante
 las pruebas de validación.
 
@@ -95,7 +95,7 @@ representación completa de un cuadro de resolución $W \times H$ ocupa $W \time
 \subsection{Modelo de fondo y sustracción}
 
 El primer paso del pipeline es construir un modelo del fondo: una imagen de referencia
-del cilindro sin la rata. Se calcula como la mediana píxel a píxel de los primeros
+del cilindro sin el espécimen. Se calcula como la mediana píxel a píxel de los primeros
 $N$ cuadros del video:
 
 \begin{equation}
@@ -103,9 +103,10 @@ $N$ cuadros del video:
     \label{eq:fondo}
 \end{equation}
 
-Usar la mediana en vez del promedio evita que una rata inmóvil al inicio contamine el
-modelo. Una vez que se tiene el fondo, en cada cuadro se calcula la diferencia absoluta:
-los píxeles con diferencia mayor a un umbral son el primer plano (la rata). Este enfoque
+Usar la mediana en vez del promedio evita que un espécimen inmóvil al inicio contamine
+el modelo. Una vez que se tiene el fondo, en cada cuadro se calcula la diferencia
+absoluta: los píxeles con diferencia mayor a un umbral son el primer plano (el
+espécimen). Este enfoque
 es más predecible que el modelo de mezcla gaussiana (GMM) \cite{zivkovic2004} para el
 caso de cámara fija \cite{piccardi2004}.
 
@@ -144,7 +145,7 @@ si cae por debajo de un umbral se activa el respaldo del tracker de correlación
 
 \subsection{Estimación de la línea de agua}
 
-La superficie del agua puede generar reflejos que hacen que la rata aparezca duplicada
+La superficie del agua puede generar reflejos que hacen que el espécimen aparezca duplicado
 desde la vista lateral. Para mitigar ese efecto, el sistema estima la posición vertical
 de la línea del agua analizando el perfil de intensidad por filas dentro de cada ROI e
 identificando la fila con el cambio más brusco. Como esa estimación oscila por ruido
@@ -165,14 +166,15 @@ estable pero tarda en adaptarse.
 \subsection{Tracker de correlación: CSRT}
 
 Cuando el detector falla en un cuadro ---por oclusión parcial, reflejo, o un cuadro
-donde la rata está demasiado quieta para distinguirse del fondo--- el sistema necesita
-mantener la estimación de posición sin perder a la rata. Para eso usa CSRT como
+donde el espécimen está demasiado quieto para distinguirse del fondo--- el sistema
+necesita mantener la estimación de posición sin perder al espécimen. Para eso usa CSRT
+como
 respaldo clásico.
 
 CSRT (\textit{Discriminative Correlation Filter with Channel and Spatial Reliability})
 \cite{lukezic2017} mantiene un mapa de confiabilidad espacial que pondera las regiones
 más discriminativas del objeto. Si CSRT falla, la última posición conocida se congela
-con una confianza decreciente hasta que el detector vuelve a encontrar a la rata.
+con una confianza decreciente hasta que el detector vuelve a encontrar al espécimen.
 
 \subsection{ByteTrack y el filtro de Kalman}
 
@@ -215,12 +217,12 @@ de SORT \cite{bewley2016_sort}, su predecesor directo.
 
 DeepSORT \cite{wojke2017_deepsort} extiende SORT añadiendo un descriptor de apariencia
 por red neuronal para reidentificar objetos entre cuadros distantes. En el contexto del
-FST, con exactamente una rata por cilindro y sin necesidad de reidentificación
-entre ratas, esa complejidad adicional es innecesaria; ByteTrack logra continuidad
+FST, con exactamente un espécimen por cilindro y sin necesidad de reidentificación
+entre especímenes, esa complejidad adicional es innecesaria; ByteTrack logra continuidad
 con solo IoU y Kalman.
 
 La estimación de la línea de agua se estabiliza con un promedio móvil exponencial para
-reducir el efecto de los reflejos en la detección de la rata
+reducir el efecto de los reflejos en la detección del espécimen
 (véase ecuación~\ref{eq:ema}).
 
 % ============================================================
@@ -253,7 +255,7 @@ práctica se reemplaza la capa de clasificación original por una nueva con 3 sa
 laboratorio.
 
 Este enfoque reduce los requerimientos de datos cuando el dominio de origen (ImageNet)
-y el de destino (recortes de rata en FST) comparten características visuales básicas
+y el de destino (recortes de especímenes en el FST) comparten características visuales básicas
 \cite{pan2010}.
 
 \subsection{ResNet y conexiones residuales}
@@ -280,7 +282,7 @@ ResNet-50 como alternativa si no se alcanza el F1 objetivo en las tres clases.
 
 \subsection{Clasificación de las tres conductas}
 
-El clasificador recibe el recorte de imagen alrededor de la rata (el bounding box),
+El clasificador recibe el recorte de imagen alrededor del espécimen (el bounding box),
 normalizado a $224 \times 224$ píxeles. La capa de salida produce tres valores de
 activación que la función \textit{softmax} convierte en probabilidades:
 
@@ -299,8 +301,10 @@ incorrectas con alta confianza:
 \end{equation}
 
 donde $y_c = 1$ si la etiqueta correcta es la clase $c$ y 0 en caso contrario. Las
-etiquetas las generan los autores del proyecto usando BORIS, tomando como referencia los
-registros conductuales proporcionados por el laboratorio.
+etiquetas las generan los autores del proyecto usando BORIS, con base en criterios de
+conducta descritos por escrito a partir de la documentación del protocolo
+experimental; el laboratorio no proporcionó registros conductuales propios que
+pudieran usarse como referencia.
 
 % ============================================================
 \section{Arquitectura del sistema web}
@@ -343,7 +347,7 @@ PostgreSQL es un sistema de gestión de bases de datos relacionales de código a
 con soporte para transacciones ACID (\textit{Atomicity, Consistency, Isolation,
 Durability}), que garantizan que las operaciones de escritura son seguras incluso ante
 fallos del sistema. El esquema de datos incluye tablas para usuarios, experimentos,
-sesiones de video y resultados por rata y conducta. Las consultas se abstraen con
+sesiones de video y resultados por espécimen y conducta. Las consultas se abstraen con
 SQLAlchemy como ORM (\textit{Object-Relational Mapper}), lo que permite cambiar el
 motor de base de datos sin modificar el código de la aplicación.
 

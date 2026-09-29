@@ -18,8 +18,8 @@ aprendizaje profundo son más robustos en principio, pero dependen de que el con
 de entrenamiento represente las condiciones reales de uso.
 
 Los videos del laboratorio colaborador tienen características que complican las cosas:
-grabación con cámara de celular, variaciones de iluminación entre sesiones, y ratas de
-pelaje claro con poco contraste frente al cilindro. El sistema no garantiza robustez
+grabación con cámara de celular, variaciones de iluminación entre sesiones, y
+especímenes de pelaje claro con poco contraste frente al cilindro. El sistema no garantiza robustez
 ante todas esas condiciones desde el inicio; evaluar qué tan bien funciona con los videos
 disponibles es parte del trabajo de desarrollo. La hipótesis es que los videos son
 suficientemente buenos para que el sistema funcione, pero eso se confirma o se ajusta
@@ -35,9 +35,9 @@ intentado resolver el mismo problema o uno parecido, y qué resultados reportaro
 \subsection{DSAAN: clasificación sin umbral en el FST}
 
 Meng et al.\ \cite{meng2024_dsaan} propusieron DSAAN (Dual-Stream Attention-Augmented
-Network), un método con dos ramas paralelas que procesan apariencia y movimiento de la
-rata por separado y luego combinan esa información para clasificar el estado cuadro a
-cuadro. La arquitectura procesa diferencias entre cuadros consecutivos (flujo de
+Network), un método con dos ramas paralelas que procesan apariencia y movimiento del
+espécimen por separado y luego combinan esa información para clasificar el estado
+cuadro a cuadro. La arquitectura procesa diferencias entre cuadros consecutivos (flujo de
 movimiento) en paralelo con la imagen original (apariencia), y un módulo de atención
 pondera la contribución de cada rama según el cuadro.
 
@@ -77,10 +77,11 @@ considerable.
 \subsection{YOLO-Behaviour: detección y clasificación en dos etapas}
 
 Chan et al.\ \cite{chan2025_yolo} presentaron un sistema que separa la detección del
-la rata de la clasificación de su conducta. Primero YOLOv8 detecta y recorta la región
-de la rata en cada cuadro; luego un clasificador independiente opera sobre ese recorte.
-Separar las dos tareas tiene una ventaja práctica: el clasificador trabaja sobre una
-imagen más limpia, sin el fondo ni las otras ratas como distracción.
+espécimen de la clasificación de su conducta. Primero YOLOv8 detecta y recorta la
+región del espécimen en cada cuadro; luego un clasificador independiente opera sobre
+ese recorte. Separar las dos tareas tiene una ventaja práctica: el clasificador
+trabaja sobre una imagen más limpia, sin el fondo ni los otros especímenes como
+distracción.
 
 Ese enfoque de dos etapas ---detección por YOLO seguida de clasificación sobre el
 recorte--- es la arquitectura que adopta este proyecto.
@@ -93,11 +94,11 @@ recorte--- es la arquitectura que adopta este proyecto.
 
 EthoVision XT (Noldus Information Technology) es el software más usado en laboratorios
 de neurociencia conductual para seguimiento automático de roedores en video
-\cite{noldus_ethovision}. Detecta a la rata en cada cuadro por sustracción de fondo y
+\cite{noldus_ethovision}. Detecta al espécimen en cada cuadro por sustracción de fondo y
 umbralización, y registra posición, velocidad y tiempo de inmovilidad. Tiene módulos
 para múltiples arenas simultáneas y exporta datos a formatos estadísticos estándar.
 
-Para el FST, EthoVision detecta si la rata se mueve o no, pero no distingue entre
+Para el FST, EthoVision detecta si el espécimen se mueve o no, pero no distingue entre
 nado, inmovilidad y escalamiento \cite{della_valle2025}. Esa limitación no es menor:
 sin distinguir las tres conductas, no es posible inferir sobre qué sistema
 neurotransmisor actúa el fármaco evaluado. Adicionalmente, requiere condiciones de
@@ -122,9 +123,9 @@ diseñada para investigadores sin experiencia en programación. Corre sobre Jupy
 Notebooks y cuantifica el movimiento comparando la diferencia absoluta entre cuadros
 consecutivos: los píxeles que cambian más de un umbral se consideran movimiento.
 
-Es útil para experimentos simples donde solo importa si la rata se mueve o no. Hace
-clasificación binaria (móvil/inmóvil) y asume condiciones de grabación controladas:
-iluminación uniforme, fondo constante, una sola rata por arena. No fue diseñada para
+Es útil para experimentos simples donde solo importa si el espécimen se mueve o no.
+Hace clasificación binaria (móvil/inmóvil) y asume condiciones de grabación
+controladas: iluminación uniforme, fondo constante, un solo espécimen por arena. No fue diseñada para
 vista lateral con varios cilindros al mismo tiempo, que es exactamente el encuadre
 que usa el laboratorio.
 
@@ -132,13 +133,14 @@ que usa el laboratorio.
 
 DBscorer \cite{nandi2021_dbscorer} es la herramienta de código abierto más específica
 para el FST y el test de suspensión de cola (TST). La desarrolló el Indian Institute of
-Science en MATLAB. Cuantifica la inmovilidad comparando el tamaño de la región de la
-rata entre cuadros consecutivos: si el área varía poco, la rata se considera inmóvil.
+Science en MATLAB. Cuantifica la inmovilidad comparando el tamaño de la región del
+espécimen entre cuadros consecutivos: si el área varía poco, el espécimen se considera
+inmóvil.
 
 Es un paso adelante frente al análisis manual, pero tiene limitaciones que no tienen
 fácil solución dentro de su arquitectura: es sensible a cambios de iluminación y
 reflejos del agua, solo distingue móvil/inmóvil sin separar nado de escalamiento,
-está diseñada para una sola rata a la vez en perspectiva lateral, y no tiene interfaz
+está diseñada para un solo espécimen a la vez en perspectiva lateral, y no tiene interfaz
 web. La dependencia de MATLAB además implica una licencia que no siempre está
 disponible en el contexto académico.
 
@@ -152,14 +154,14 @@ La sustracción de fondo es la técnica más básica para detectar objetos en mo
 en un video con cámara fija. El principio es simple: se estima una imagen de referencia
 del fondo (el cilindro vacío) y en cada cuadro se calcula la diferencia con esa
 referencia. Los píxeles con diferencia mayor a un umbral se clasifican como primer plano
-(la rata).
+(el espécimen).
 
 El modelo de mezcla gaussiana (Gaussian Mixture Model, GMM) \cite{zivkovic2004} es
 la versión adaptativa más usada: mantiene un modelo estadístico del fondo que se
 actualiza con cada cuadro, lo que le permite adaptarse a cambios lentos de iluminación.
 Para el caso de cámara fija que tiene el laboratorio, una alternativa más simple y
 predecible es calcular la mediana píxel a píxel de los primeros $N$ cuadros. Usar la
-mediana en vez del promedio evita que una rata inmóvil al inicio del video contamine
+mediana en vez del promedio evita que un espécimen inmóvil al inicio del video contamine
 el modelo de fondo \cite{piccardi2004}.
 
 \subsection{YOLO (You Only Look Once)}
@@ -180,7 +182,7 @@ proyecto. El modelo no generaliza bien cuando el fondo cambia mucho entre condic
 lo que hay que considerar durante el entrenamiento.
 
 La separación entre detección y clasificación tiene una ventaja práctica concreta: el
-clasificador trabaja sobre un recorte limpio de la rata, sin el fondo ni los otros
+clasificador trabaja sobre un recorte limpio del espécimen, sin el fondo ni los otros
 cilindros como fuente de error. El cap.~4 detalla por qué ese trade-off es conveniente
 dado el tamaño del dataset disponible.
 
@@ -192,8 +194,8 @@ eliminar la variabilidad entre evaluadores humanos en el FST. El resultado fue
 sólido, pero el enfoque requiere marcar manualmente los puntos clave del cuerpo en
 decenas de cuadros antes de empezar ---nariz, patas, cola--- lo que implica un trabajo
 de anotación previo considerable. La pregunta que queda abierta es si esa inversión
-inicial se justifica frente a enfoques que operan directamente sobre el recorte de la
-rata, sin necesidad de estimar la pose.
+inicial se justifica frente a enfoques que operan directamente sobre el recorte del
+espécimen, sin necesidad de estimar la pose.
 
 \subsection{Tracker de correlación: CSRT}
 
@@ -205,7 +207,7 @@ saber qué es el objeto, solo cómo se veía en el cuadro anterior. CSRT
 más discriminativas del objeto, lo que lo hace más robusto ante oclusión parcial.
 
 En el sistema propuesto, el tracker CSRT opera como respaldo clásico cuando
-ByteTrack no está disponible: si YOLO no detecta a la rata en un cuadro y el modo track
+ByteTrack no está disponible: si YOLO no detecta al espécimen en un cuadro y el modo track
 está desactivado, CSRT mantiene la estimación de posición hasta que el
 detector vuelve a encontrarla.
 
@@ -229,7 +231,7 @@ Frente a DeepSORT \cite{wojke2017_deepsort} ---que añade un descriptor de apari
 por red neuronal para reidentificación--- ByteTrack logra resultados comparables sin
 requerir un modelo de \textit{embedding} adicional, lo que reduce la latencia.
 
-En el FST, con exactamente una rata por cilindro, la ausencia de ambigüedad de
+En el FST, con exactamente un espécimen por cilindro, la ausencia de ambigüedad de
 identidad hace que la reidentificación de DeepSORT sea innecesaria. ByteTrack cubre
 el caso de uso con menor complejidad: solo IoU y Kalman. La integración se realiza a
 través del modo \texttt{.track()} de Ultralytics YOLOv8 con la configuración
@@ -284,7 +286,7 @@ Valle et al.\ \cite{della_valle2025} usan este enfoque y logran la clasificació
 tres conductas. El costo es computacional: las redes 3D requieren más memoria y tiempo
 de inferencia que las 2D, lo que puede ser una limitación en hardware sin GPU.
 
-Para este proyecto, la primera opción es ResNet-18 en 2D sobre el recorte de la rata
+Para este proyecto, la primera opción es ResNet-18 en 2D sobre el recorte del espécimen
 (más simple, menor costo computacional). Las redes 3D quedan como alternativa si el
 clasificador 2D no alcanza la precisión necesaria.
 

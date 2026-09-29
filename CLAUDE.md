@@ -103,7 +103,7 @@ respalde. Si no hay fuente, se registra como *pregunta abierta*, no como error.
 | Nunca escribir | Escribir |
 |----------------|----------|
 | «inteligencia artificial» | **visión por computadora** (detección y seguimiento) y **aprendizaje supervisado** (clasificador) |
-| «animales» | **espécimen** (sujeto individual) o **rata** (modelo animal en general) |
+| «animales» o «rata» en el cuerpo del texto | **espécimen** — la entrada de glosario indica que el espécimen es una rata blanca de laboratorio (única mención permitida de "rata") |
 | «Laboratorio de Neurociencia Conductual» | **Laboratorio de Bioquímica Estructural, Sección de Posgrado, ENMyH-IPN** |
 | «ISRS» en el cuerpo del texto | **fluoxetina (antidepresivo de referencia)** — la entrada de glosario sí se conserva |
 | «cámara de celular» | **cámara web** |
