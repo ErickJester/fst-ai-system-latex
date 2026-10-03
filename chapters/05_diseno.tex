@@ -83,7 +83,7 @@ Las responsabilidades de cada componente son:
 La separación en contenedores cumple con el atributo de portabilidad de la
 ISO/IEC/IEEE~12207:2017 \cite{iso12207}: el sistema puede desplegarse en cualquier
 equipo con Docker instalado sin dependencias adicionales. La separación entre worker
-y backend también satisface el RF-12 (análisis automático en segundo plano) y permite
+y backend también satisface el RF-12 y el RF-15 (análisis automático en segundo plano) y permite
 escalar el número de workers de forma independiente si el volumen de análisis aumenta.
 
 La Figura~\ref{fig:flujo_sistema} muestra el flujo funcional del sistema: cómo
@@ -102,8 +102,8 @@ al clasificador de conducta.
 \section{Diseño del pipeline de análisis conductual}
 % -----------------------------------------------------------
 
-El pipeline recibe un video del FST y produce como salida los tiempos totales de cada
-conducta por espécimen y el desglose por minuto. Sigue el patrón arquitectónico de
+El pipeline recibe un video del FST, analiza solo sus primeros 300 segundos y produce
+como salida los tiempos totales de cada conducta por espécimen y el desglose por minuto. Sigue el patrón arquitectónico de
 tubería y filtro (\textit{pipe and filter}) \cite{sommerville2011}: cada módulo es
 un filtro discreto que transforma los datos y los pasa al siguiente. Está organizado
 en cinco módulos secuenciales: preprocesamiento, detección de ROIs, seguimiento,
@@ -122,9 +122,8 @@ muestra el flujo completo con las tecnologías de cada módulo.
 El preprocesamiento usa \textbf{OpenCV VideoCapture} para decodificar el video
 cuadro a cuadro. Si el contraste promedio cae por debajo del umbral mínimo, se
 aplica \textbf{CLAHE} (\textit{Contrast Limited Adaptive Histogram Equalization})
-\cite{bradski2000} para normalizarlo. Si tras la corrección el contraste sigue
-siendo insuficiente, el pipeline se detiene y genera un reporte de diagnóstico
-(ver RN-11).
+\cite{bradski2000} para normalizarlo. Si tras la corrección no se logran encontrar
+los cilindros, el pipeline se detiene y genera un reporte de diagnóstico (ver RN-11).
 
 \subsection{Módulo 2: Detección de ROIs}
 
@@ -201,20 +200,23 @@ intervalo. A 30 fps, por ejemplo, si 24 cuadros clasifican nado, 4 inmovilidad y
 2 escalamiento, el resultado es nado. La granularidad de un segundo es coherente
 con la duración mínima de episodio definida en RN (ver sec.~\ref{sec:umbrales}).
 
-En caso de que el clasificador no alcance el F1 objetivo diferenciando escalamiento
-de nado activo, el pipeline agrupa ambas conductas en una categoría unificada
-denominada \textit{conducta activa} y lo registra en el reporte (ver RN-13).
+Cuando el clasificador sabe que el espécimen no está inmóvil pero no decide entre
+nado activo y escalamiento, ese segundo se registra como \textit{conducta activa},
+una cuarta conducta, y los reportes la muestran como una columna más (ver RN-13).
 
 \subsection{Módulo 5: Resultados}
 
 Al finalizar el análisis, el pipeline produce tres salidas:
 
 \begin{itemize}
-  \item \textbf{Tiempos por conducta}: segundos de nado activo, inmovilidad
-        y escalamiento por minuto, almacenados en \texttt{PRESENTA} (una
-        fila por intervalo y conducta, ligada a la \texttt{OBSERVACION} del
-        espécimen en ese video). El tiempo total por espécimen y el
-        desglose por minuto se derivan de esta misma tabla.
+  \item \textbf{Tiempos por conducta}: segundos de nado activo, inmovilidad,
+        escalamiento y conducta activa por minuto, almacenados en
+        \texttt{PRESENTA} (una fila por intervalo y conducta, ligada a la
+        \texttt{OBSERVACION} del espécimen en ese video). El tiempo total por
+        espécimen y el desglose por minuto se derivan de esta misma tabla.
+  \item \textbf{Etiqueta de cada segundo}: la conducta asignada a cada segundo
+        analizado, almacenada en \texttt{SEGUNDO}. Es la fuente de la pantalla de
+        revisión y de \texttt{PRESENTA}.
   \item \textbf{Video anotado}: video original con
         las cajas de seguimiento y etiqueta de conducta superpuestas,
         disponible para revisión visual del investigador.
@@ -229,8 +231,8 @@ Cada análisis individual pasa por un conjunto fijo de estados (D-15),
 representado en el diagrama de estados de la Figura~\ref{fig:estados_analisis}.
 Al encolarse, el análisis inicia en \texttt{en cola}; cuando el Worker lo toma,
 pasa a \texttt{procesando} y avanza por las cuatro etapas del pipeline (D-16:
-preprocesamiento, detección, seguimiento, clasificación). Si la confianza de
-detección de cilindros no alcanza 0.70 (RN-11), el análisis termina en
+preprocesamiento, detección, seguimiento, clasificación). Si no se puede abrir
+el video o no se encuentran los cilindros (RN-11), el análisis termina en
 \texttt{error} y se genera el reporte de diagnóstico (D-23); si las cuatro
 etapas terminan con éxito, termina en \texttt{completado}. No existe
 transición de regreso: el investigador no puede reiniciar ni cancelar un
@@ -283,8 +285,8 @@ sistema: un usuario crea experimentos; cada experimento se organiza en grupos
 (control, referencia, tratamiento); cada grupo se graba en una o más tandas de
 hasta cuatro especímenes; cada tanda tiene uno o dos videos (Día~1 y/o Día~2); y
 cada video se procesa mediante un análisis que produce observaciones de conducta
-por espécimen (\textbf{OBSERVACION}, \textbf{INTERVALO}, \textbf{PRESENTA},
-\textbf{CONDUCTA}). Un usuario puede además ser \textbf{ADMINISTRADOR}, modelado
+por espécimen (\textbf{OBSERVACION}, \textbf{SEGUNDO}, \textbf{INTERVALO},
+\textbf{PRESENTA}, \textbf{CONDUCTA}). Un usuario puede además ser \textbf{ADMINISTRADOR}, modelado
 como subtipo con permisos adicionales. Las entidades \textbf{REPORTE} y
 \textbf{NOTIFICACION} se derivan también del experimento, y
 \textbf{CONFIGURACION} agrupa los parámetros del pipeline que usa cada análisis,
@@ -372,12 +374,20 @@ Las tablas están organizadas en cuatro grupos funcionales:
 
   \item \textbf{INTERVALO}: cada minuto analizado dentro de una observación.
 
-  \item \textbf{CONDUCTA}: catálogo cerrado de las tres conductas del FST
-        (nado activo, inmovilidad, escalamiento).
+  \item \textbf{CONDUCTA}: catálogo cerrado de las cuatro conductas (nado
+        activo, inmovilidad, escalamiento y conducta activa, esta última
+        cuando el clasificador no decide entre nado y escalamiento; ver RN-13).
+
+  \item \textbf{SEGUNDO}: una fila por espécimen y por segundo analizado, con
+        la conducta asignada (o ninguna, si el espécimen no se ve), la
+        propuesta original del sistema y el origen de la etiqueta (propuesta del
+        sistema, confirmada, corregida o dudosa). Es lo que el usuario revisa y
+        corrige al terminar el análisis (ver RF-32).
 
   \item \textbf{PRESENTA}: segundos de cada conducta dentro de cada
         intervalo. Es la fuente de los tiempos totales y del desglose
-        por minuto.
+        por minuto, y se recalcula a partir de \texttt{SEGUNDO} cada vez que
+        el usuario guarda correcciones.
 
   \item \textbf{REPORTE}: referencia a los archivos PDF, CSV y XLSX
         generados, con su ruta y fecha de creación. Se conservan aunque el
@@ -412,11 +422,11 @@ estuviese copiado en las tablas de videos y de resultados, una actualización pa
 produciría registros con datos contradictorios. Normalizar también hace que el
 esquema sea más fácil de mantener cuando el sistema evolucione durante TT-II.
 
-Las dieciséis relaciones del sistema son: \texttt{USUARIO}, \texttt{ADMINISTRADOR},
+Las diecisiete relaciones del sistema son: \texttt{USUARIO}, \texttt{ADMINISTRADOR},
 \texttt{EXPERIMENTO}, \texttt{GRUPO}, \texttt{TANDA}, \texttt{ESPECIMEN},
 \texttt{VIDEO}, \texttt{MODELO}, \texttt{CONFIGURACION}, \texttt{ANALISIS},
-\texttt{OBSERVACION}, \texttt{INTERVALO}, \texttt{CONDUCTA}, \texttt{PRESENTA},
-\texttt{REPORTE} y \texttt{NOTIFICACION}. Las subsecciones siguientes explican
+\texttt{OBSERVACION}, \texttt{SEGUNDO}, \texttt{INTERVALO}, \texttt{CONDUCTA},
+\texttt{PRESENTA}, \texttt{REPORTE} y \texttt{NOTIFICACION}. Las subsecciones siguientes explican
 cómo se aplicó cada forma normal sobre este conjunto.
 
 \subsection{Primera Forma Normal (1FN)}
@@ -438,9 +448,9 @@ por umbral o por versión sin parsear texto.
 Los resultados de conducta siguen el mismo principio, pero evitando además una
 columna por conducta: en vez de columnas fijas para nado, inmovilidad y
 escalamiento, cada combinación de intervalo y conducta es una fila en
-\texttt{PRESENTA}, con su propia columna \texttt{segundos}. Esto evita tener que
-agregar una columna nueva si el clasificador llegara a distinguir una cuarta
-conducta, y permite consultar todas las conductas de un intervalo con una sola
+\texttt{PRESENTA}, con su propia columna \texttt{segundos}. Esto evitó tener que
+agregar una columna nueva cuando se incorporó una cuarta conducta (la conducta
+activa), y permite consultar todas las conductas de un intervalo con una sola
 condición sobre la clave foránea, en vez de una columna por caso. Todas las
 tablas con clave subrogada usan un campo entero autogenerado como clave
 primaria.
@@ -461,6 +471,12 @@ guardado una descripción de la conducta, esa columna dependería solo de
 \texttt{conducta}, no del par completo. Esa es la razón por la que
 \texttt{CONDUCTA} es un catálogo aparte: su nombre y cualquier atributo propio de
 la conducta viven ahí, no repetidos en cada fila de \texttt{PRESENTA}.
+
+\texttt{SEGUNDO} también tiene clave compuesta (\texttt{idObservacion},
+\texttt{segundo}). Sus columnas no clave ---la conducta asignada, la propuesta
+original y el origen de la etiqueta--- describen ese segundo específico de esa
+observación específica, así que dependen de la clave completa y no de una de sus
+partes.
 
 \subsection{Tercera Forma Normal (3FN)}
 
@@ -509,7 +525,18 @@ El resto de las relaciones se revisó una por una: en cada una, los únicos
 determinantes son su clave primaria y, cuando la tiene, su clave alterna. Por
 ejemplo, \texttt{GRUPO} tiene como determinantes \texttt{idGrupo} (primaria) y la
 combinación (\texttt{idExperimento}, \texttt{etiqueta}) (alterna). Con eso, las
-dieciséis relaciones del esquema cumplen FNBC.
+diecisiete relaciones del esquema lógico cumplen FNBC.
+
+Hay una excepción deliberada en el esquema físico: la tabla \texttt{ESPECIMEN}
+repite la columna \texttt{idGrupo}, que ya se obtiene a través de \texttt{TANDA}
+(de \texttt{idTanda} se deduce \texttt{idGrupo}, y \texttt{idTanda} no es clave de
+\texttt{ESPECIMEN}). Por eso, en el esquema físico, esa tabla deja de cumplir FNBC.
+Se aceptó como redundancia controlada (D-04) por dos razones: permite declarar en la
+propia base de datos que el número de espécimen es único dentro de su grupo, y evita
+pasar por \texttt{TANDA} cada vez que un reporte compara grupos. La aplicación no
+envía esa columna: la calcula un disparador a partir de la tanda, así que no puede
+quedar desactualizada. El esquema lógico no incluye la columna y por eso conserva la
+FNBC.
 
 \subsection{Resumen de formas normales aplicadas}
 
@@ -533,15 +560,18 @@ las tablas afectadas y la decisión de diseño concreta en cada caso.
 \hline
 1FN &
   Clave primaria que identifica cada fila de forma única &
-  Las 16 relaciones &
+  Las 17 relaciones &
   Clave subrogada autogenerada, salvo \texttt{USUARIO}/\texttt{ADMINISTRADOR}
-  (\texttt{idInstitucional}) y \texttt{CONDUCTA} (\texttt{nombre}) \\
+  (\texttt{idInstitucional}), \texttt{CONDUCTA} (\texttt{nombre}) y
+  \texttt{SEGUNDO} (clave compuesta \texttt{idObservacion}, \texttt{segundo}) \\
 \hline
 2FN &
   Eliminación de dependencias parciales &
-  \texttt{PRESENTA}, \texttt{CONDUCTA} &
+  \texttt{PRESENTA}, \texttt{SEGUNDO}, \texttt{CONDUCTA} &
   \texttt{segundos} depende del par completo (\texttt{idIntervalo},
-  \texttt{conducta}); atributos de la conducta viven en \texttt{CONDUCTA} \\
+  \texttt{conducta}); las columnas de \texttt{SEGUNDO} dependen de
+  (\texttt{idObservacion}, \texttt{segundo}); atributos de la conducta viven en
+  \texttt{CONDUCTA} \\
 \hline
 3FN &
   Eliminación de dependencias transitivas entre columnas no clave &
@@ -557,7 +587,7 @@ las tablas afectadas y la decisión de diseño concreta en cada caso.
 \hline
 FNBC &
   Todo determinante es clave candidata &
-  Las 16 relaciones &
+  Las 17 relaciones &
   Verificado relación por relación; \texttt{MODELO}/\texttt{CONFIGURACION} era
   el único caso que requería corrección \\
 \hline
@@ -593,7 +623,7 @@ La Tabla~\ref{tab:api} describe los endpoints principales agrupados por recurso.
 % --- Autenticación ---
 POST   & \path{/auth/login}    & Inicia sesión; devuelve token JWT. & Público \\
 \hline
-POST   & \path{/auth/logout}   & Invalida el token activo. & Autenti\-cado \\
+POST   & \path{/auth/logout}   & Cierra la sesión; el navegador descarta el token. & Autenti\-cado \\
 \hline
 POST   & \path{/auth/recover}  & Envía enlace de recuperación por correo. & Público \\
 \hline
@@ -628,6 +658,14 @@ GET    & \path{/experiments/{id}/report/pdf}  & Descarga el reporte en PDF. & In
 GET    & \path{/experiments/{id}/report/csv}  & Descarga los datos en CSV. & Investiga\-dor \\
 \hline
 GET    & \path{/experiments/{id}/report/xlsx} & Descarga los datos en XLSX. & Investiga\-dor \\
+\hline
+
+% --- Revisión segundo a segundo ---
+GET    & \path{/experiments/{id}/analyses/{idAnalisis}/review}   & Devuelve los especímenes, las etiquetas de cada segundo y los recuadros de los tubos de un análisis completado. & Investiga\-dor \\
+\hline
+GET    & \path{/experiments/{id}/analyses/{idAnalisis}/video}    & Entrega el video de la revisión por partes, para poder adelantar y retroceder. & Investiga\-dor \\
+\hline
+PUT    & \path{/experiments/{id}/analyses/{idAnalisis}/segundos} & Guarda las correcciones por segundo y recalcula los totales por minuto. & Investiga\-dor \\
 \hline
 
 % --- Administración ---
@@ -685,7 +723,7 @@ sistema una vez autenticados.
 \subsection{Paquete 2: Gestión de experimentos y carga de video}
 
 Cubre el ciclo de vida de un experimento: registrar metadatos (nombre, fecha,
-tratamiento, número de especímenes), subir uno o dos videos en formato MP4 y
+tratamiento, número de especímenes), subir uno o dos videos en formato MP4 o MOV y
 consultar el historial de experimentos del laboratorio (ver RN-08).
 
 \begin{figure}[H]
@@ -699,7 +737,7 @@ consultar el historial de experimentos del laboratorio (ver RN-08).
 
 Describe la interacción del investigador con el pipeline: monitorear el progreso
 del análisis en tiempo real, consultar el estado de la cola y descargar el reporte
-de diagnóstico cuando se detecta un error de calidad de video (ver RN-11).
+de diagnóstico cuando el video no se puede procesar (ver RN-11).
 
 \begin{figure}[H]
 \centering
@@ -712,7 +750,9 @@ de diagnóstico cuando se detecta un error de calidad de video (ver RN-11).
 
 Cubre la consulta de resultados una vez finalizado el análisis: tiempos por
 espécimen y conducta, desglose por minuto, comparación Día~1 vs.\ Día~2 (cuando
-ambos videos están disponibles) y descarga de reportes en PDF y CSV/XLSX.
+ambos videos están disponibles), descarga de reportes en PDF y CSV/XLSX y, cuando
+el análisis termina, revisión y corrección de las etiquetas segundo a segundo (ver
+RF-32 y RN-14).
 
 \begin{figure}[H]
 \centering
@@ -724,7 +764,7 @@ ambos videos están disponibles) y descarga de reportes en PDF y CSV/XLSX.
 \subsection{Paquete 5: Dashboard, notificaciones y administración}
 
 Exclusivo del Administrador: gestión de cuentas de investigadores (crear, modificar,
-desactivar), aprobación de solicitudes de registro y monitoreo del estado del sistema
+desactivar), creación de cuentas y monitoreo del estado del sistema
 (uso de disco, cola de tareas, alertas de capacidad).
 
 \begin{figure}[H]
@@ -760,7 +800,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-01, RF-04} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El usuario tiene cuenta registrada y aprobada por el Administrador.} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El usuario tiene una cuenta creada por el Administrador.} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión iniciada; JWT emitido y almacenado en el cliente; usuario redirigido al \textit{dashboard}.} \\
 \hline
@@ -821,11 +861,11 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa con JWT válido.} \\
 \hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{JWT invalidado; usuario redirigido a la pantalla de inicio de sesión.} \\
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Token JWT descartado en el navegador; usuario redirigido a la pantalla de inicio de sesión.} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al usuario terminar su sesión de forma segura, invalidando el token de autenticación activo.} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al usuario terminar su sesión descartando el token de autenticación activo.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El usuario selecciona la opción de cierre de sesión; el sistema invalida el JWT en el servidor y redirige a la pantalla de inicio de sesión.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El usuario selecciona la opción de cierre de sesión; el navegador descarta el JWT y redirige a la pantalla de inicio de sesión; el servidor no guarda tokens cancelados.} \\
 \hline
 \end{tabular}
 
@@ -838,7 +878,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 1 & Inv. / Admin. & Selecciona «Cerrar sesión» en el menú de usuario, disponible desde cualquier pantalla. \\
 \hline
-2 & Sistema & Invalida el JWT activo en el servidor. \\
+2 & Sistema & Descarta el JWT activo en el navegador (el servidor no guarda tokens cancelados). \\
 \hline
 3 & Sistema & Redirige al usuario a la pantalla de inicio de sesión. \\
 \hline
@@ -1182,7 +1222,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 4 & Investigador & Confirma el registro. \\
 \hline
-5 & Sistema & Valida los campos obligatorios (nombre único por investigador, según RN-15) y crea el registro en la base de datos. \\
+5 & Sistema & Valida los campos obligatorios (nombre único del experimento, según RF-11) y crea el registro en la base de datos. \\
 \hline
 6 & Sistema & Redirige a la pantalla de carga de video del experimento. \\
 \hline
@@ -1216,13 +1256,13 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-08, RF-09, RF-10, RF-12. Extendido por: CU-04. Incluye: CU-07 (Monitorear progreso).} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Experimento registrado (CU-04 completado); sesión activa; archivo a subir en formato \texttt{.mp4}.} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Experimento registrado (CU-04 completado); sesión activa; archivo a subir en formato \texttt{.mp4} o \texttt{.mov}.} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Archivo almacenado en el volumen compartido; tarea de análisis encolada automáticamente; investigador en la pantalla de progreso.} \\
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador subir el archivo de video del experimento para su análisis automático.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador escribe el nombre del grupo o tratamiento; si coincide con un grupo ya usado en el mismo experimento, el sistema sugiere la siguiente tanda y pide confirmación explícita (D-19). Elige la sesión (Día 1 o Día 2) y el archivo MP4; el sistema valida formato y reproducibilidad, lo almacena y encola la tarea de análisis de forma automática.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador escribe el nombre del grupo o tratamiento; si coincide con un grupo ya usado en el mismo experimento, el sistema sugiere la siguiente tanda y pide confirmación explícita (D-19). Elige la sesión (Día 1 o Día 2) y el archivo MP4 o MOV; el sistema valida formato, reproducibilidad y orientación (horizontal), lo almacena y encola la tarea de análisis de forma automática.} \\
 \hline
 \end{tabular}
 
@@ -1241,9 +1281,9 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 4 & Sistema & Calcula la siguiente tanda disponible del grupo y la precarga en un campo editable. \\
 \hline
-5 & Inv. / Admin. & Confirma la tanda sugerida, o la corrige a mano; elige la sesión (Día 1 o Día 2) y selecciona el archivo \texttt{.mp4}. \\
+5 & Inv. / Admin. & Confirma la tanda sugerida, o la corrige a mano; elige la sesión (Día 1 o Día 2) y selecciona el archivo \texttt{.mp4} o \texttt{.mov}. \\
 \hline
-6 & Sistema & Valida que el archivo esté en formato \texttt{.mp4} y que sea reproducible. \\
+6 & Sistema & Valida que el archivo esté en formato \texttt{.mp4} o \texttt{.mov}, que sea reproducible y que el video esté en horizontal. \\
 \hline
 7 & Sistema & Guarda la tanda y el video; sube el archivo al volumen compartido del servidor. \\
 \hline
@@ -1262,7 +1302,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 3 & Ningún grupo del experimento coincide con el nombre escrito: el sistema pide los datos del grupo nuevo (tipo, tratamiento); la primera tanda de un grupo nuevo siempre es la A. \\
 \hline
-6 & El archivo no es \texttt{.mp4}: el sistema rechaza la carga con mensaje de error específico antes de iniciar la transmisión (ver RF-08). \\
+6 & El archivo no es \texttt{.mp4} ni \texttt{.mov}, o el video está en vertical (cámara girada): el sistema rechaza la carga con mensaje de error específico antes de iniciar la transmisión (ver RF-08). \\
 \hline
 6 & El archivo no es reproducible o está corrupto: el sistema lo rechaza tras la validación e indica al investigador que proporcione un archivo válido. \\
 \hline
@@ -1342,7 +1382,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-12, RN-04} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Video validado en formato \texttt{.mp4} y reproducible; almacenado en el volumen compartido.} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Video validado en formato \texttt{.mp4} o \texttt{.mov}, reproducible y en horizontal; almacenado en el volumen compartido.} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Registro de análisis creado en estado «en cola» (ver D-15); \textit{Worker} disponible para procesarlo en la siguiente iteración.} \\
 \hline
@@ -1395,7 +1435,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-08, RF-10, RN-10} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Video rechazado por no cumplir la validación de formato (\texttt{.mp4}) o de reproducibilidad en el servidor.} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Video rechazado por no cumplir la validación de formato (\texttt{.mp4} o \texttt{.mov}), de orientación (horizontal) o de reproducibilidad en el servidor.} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Mensaje de error específico mostrado al investigador; archivo no almacenado; la tanda queda sin ese video (Día~1 o Día~2, según corresponda).} \\
 \hline
@@ -1448,7 +1488,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-22} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-23} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; al menos un experimento registrado.} \\
 \hline
@@ -1528,7 +1568,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 3 & \textit{Worker} & Ejecuta la 1.ª etapa: preprocesamiento del video (normalización de fotogramas). \\
 \hline
-4 & \textit{Worker} & Ejecuta la 2.ª etapa: detección de cilindros con confianza mínima de 0.70. \\
+4 & \textit{Worker} & Ejecuta la 2.ª etapa: detección de los cilindros. \\
 \hline
 5 & \textit{Worker} & Ejecuta la 3.ª etapa: rastreo de especímenes cuadro a cuadro. \\
 \hline
@@ -1549,7 +1589,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
-4 & El \textit{Worker} no alcanza confianza $\geq 0.70$ en la detección de cilindros (ver RN-11): detiene el pipeline, genera el reporte de diagnóstico PDF (ver CU-08) y actualiza el estado de la tarea a «error». El sistema muestra alerta con código y descripción del error. El investigador no puede reiniciar el análisis (ver RN-04). \\
+4 & El \textit{Worker} no puede abrir el video o no encuentra los cilindros (ver RN-11): detiene el pipeline, genera el reporte de diagnóstico PDF (ver CU-08) y actualiza el estado de la tarea a «error». El sistema muestra alerta con código y descripción del error. El investigador no puede reiniciar el análisis (ver RN-04). \\
 \hline
 \end{tabular}
 
@@ -1570,11 +1610,11 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-14, RF-16. Extendido por: CU-07 (Monitorear progreso).} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pipeline detenido por error (confianza de detección $<0.70$, ver RN-11); reporte PDF generado por el \textit{Worker}; sesión activa.} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pipeline detenido por error (no se pudo abrir el video o no se encontraron los cilindros, ver RN-11); reporte PDF generado por el \textit{Worker}; sesión activa.} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Reporte PDF de diagnóstico descargado en el equipo del investigador.} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} genera automáticamente un PDF de diagnóstico cuando el pipeline falla por calidad de video insuficiente. El investigador descarga ese reporte para evaluar las condiciones de grabación.} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} genera automáticamente un PDF de diagnóstico cuando el pipeline falla porque no puede abrir el video o no encuentra los cilindros. El investigador descarga ese reporte para evaluar las condiciones de grabación.} \\
 \hline
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} genera y almacena el PDF de diagnóstico al detener el pipeline por error. El sistema pone disponible el botón de descarga en la pantalla de progreso. El investigador descarga el reporte para decidir si es necesario repetir la grabación.} \\
 \hline
@@ -1644,7 +1684,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 1 & Inv. / Admin. & Accede a la pantalla de resultados desde el \textit{dashboard} o desde la pantalla de progreso. \\
 \hline
-2 & Sistema & Recupera de la base de datos los registros de \textbf{ResultadoComportamiento} y \textbf{ComportamientoPorMinuto}. \\
+2 & Sistema & Recupera de la base de datos los registros de \textbf{OBSERVACION}, \textbf{INTERVALO} y \textbf{PRESENTA} del análisis. \\
 \hline
 3 & Sistema & Muestra tabla de tiempos por espécimen: nado activo, inmovilidad y escalamiento, con totales en segundos y porcentaje. \\
 \hline
@@ -1704,6 +1744,171 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 2 & Sistema & Genera o recupera el archivo con los datos del análisis en el formato seleccionado. \\
 \hline
 3 & Sistema & Sirve el archivo al navegador del investigador para su descarga inmediata. \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
+\hline
+\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
+\hline
+--- & No se identifican cursos alternos para este caso de uso. \\
+\hline
+\end{tabular}
+
+\normalsize\bigskip
+
+\noindent\textbf{Revisar segundo a segundo}
+
+\noindent\small
+\begin{tabular}{|p{2.8cm}|p{7.9cm}|p{4.0cm}|}
+\hline
+\textbf{Caso de Uso} & Revisar segundo a segundo & \textbf{Identificador:} CU-25 \\
+\hline
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Investigador / Administrador} \\
+\hline
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
+\hline
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-32, RN-14. Extendido por: CU-26 (Corregir etiqueta de un segundo).} \\
+\hline
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Análisis en estado «completado»; sesión activa.} \\
+\hline
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pantalla de revisión abierta con las etiquetas de cada segundo; si el usuario no corrige nada, los datos no cambian.} \\
+\hline
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite revisar, con el video, la conducta que el sistema asignó a cada espécimen en cada segundo.} \\
+\hline
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Cuando el análisis termina, el usuario abre una pantalla con el video y una línea de tiempo por espécimen, coloreada por conducta. Revisa un espécimen a la vez, con el video corriendo; cada segundo ya trae la etiqueta propuesta por el sistema.} \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
+\hline
+\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
+\hline
+\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
+\hline
+1 & Inv. / Admin. & Elige «Revisar segundo a segundo» desde la pantalla de progreso o la de resultados. \\
+\hline
+2 & Sistema & Comprueba que el análisis esté completado y consulta la etiqueta de cada segundo de cada espécimen. \\
+\hline
+3 & Sistema & Muestra el video, la línea de tiempo de cada espécimen y la etiqueta propuesta para cada segundo. \\
+\hline
+4 & Inv. / Admin. & Revisa un espécimen a la vez con el video corriendo, y corrige las etiquetas que no coincidan con lo que observa (ver CU-26). \\
+\hline
+5 & Inv. / Admin. & Elige «Guardar». \\
+\hline
+6 & Sistema & Guarda las correcciones y confirma. \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
+\hline
+\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
+\hline
+2 & El análisis no está completado: el sistema rechaza la petición e informa el motivo. \\
+\hline
+\end{tabular}
+
+\normalsize\bigskip
+
+\noindent\textbf{Corregir etiqueta de un segundo}
+
+\noindent\small
+\begin{tabular}{|p{2.8cm}|p{7.9cm}|p{4.0cm}|}
+\hline
+\textbf{Caso de Uso} & Corregir etiqueta de un segundo & \textbf{Identificador:} CU-26 \\
+\hline
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Investigador / Administrador} \\
+\hline
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<extend>>} de CU-25 Revisar segundo a segundo)} \\
+\hline
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-32, RN-14. Incluye: CU-27 (Recalcular totales por minuto).} \\
+\hline
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pantalla de revisión abierta (CU-25); la etiqueta propuesta no coincide con lo que el usuario observa.} \\
+\hline
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{La etiqueta corregida queda guardada con su origen; la propuesta original del sistema se conserva.} \\
+\hline
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite cambiar la conducta asignada a uno o varios segundos de un espécimen.} \\
+\hline
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El usuario pulsa la conducta correcta. Con el video corriendo, el cambio se aplica desde 0.4~s antes del clic (lo que tarda una persona en reaccionar) hasta el siguiente cambio de color; en pausa, solo cambia el segundo actual.} \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
+\hline
+\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
+\hline
+\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
+\hline
+1 & Inv. / Admin. & Pulsa la conducta correcta (nado, inmovilidad, escalamiento, conducta activa o «no se ve»). \\
+\hline
+2 & Sistema & Aplica el cambio a los segundos correspondientes en un borrador y marca su origen como «corregida». \\
+\hline
+3 & Inv. / Admin. & Elige «Guardar». \\
+\hline
+4 & Sistema & Guarda las etiquetas de cada segundo conservando la propuesta original, y recalcula los totales por minuto (CU-27). \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
+\hline
+\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
+\hline
+1 & El usuario deja un segundo sin conducta a propósito: queda marcado como «dudosa». \\
+\hline
+1 & La etiqueta que el usuario elige coincide con la propuesta: queda marcada como «confirmada». \\
+\hline
+4 & No se puede guardar: el borrador se conserva en el navegador y el sistema informa el error. \\
+\hline
+\end{tabular}
+
+\normalsize\bigskip
+
+\noindent\textbf{Recalcular totales por minuto}
+
+\noindent\small
+\begin{tabular}{|p{2.8cm}|p{7.9cm}|p{4.0cm}|}
+\hline
+\textbf{Caso de Uso} & Recalcular totales por minuto & \textbf{Identificador:} CU-27 \\
+\hline
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sistema} \\
+\hline
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<include>>} de CU-26 Corregir etiqueta de un segundo)} \\
+\hline
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-32, RN-14} \\
+\hline
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El usuario guardó correcciones en al menos un espécimen.} \\
+\hline
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Los segundos por conducta de cada minuto de los especímenes corregidos coinciden con sus etiquetas por segundo; los reportes guardados del experimento se eliminaron para regenerarse.} \\
+\hline
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Mantiene coherentes los totales por minuto con las etiquetas que el usuario corrigió.} \\
+\hline
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Para cada espécimen cuyas etiquetas cambiaron, el sistema cuenta los segundos de cada conducta en cada uno de los cinco minutos y actualiza el resumen por minuto.} \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
+\hline
+\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
+\hline
+\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
+\hline
+1 & Sistema & Cuenta los segundos de cada conducta en cada minuto de los especímenes corregidos. \\
+\hline
+2 & Sistema & Actualiza el resumen por minuto (una fila por cada una de las cuatro conductas, incluso con 0 segundos). \\
+\hline
+3 & Sistema & Elimina los reportes guardados del experimento para que se regeneren con los datos nuevos. \\
 \hline
 \end{tabular}
 
@@ -1923,7 +2128,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 2 & Sistema & Recupera la lista de experimentos del laboratorio con nombre, fecha, número de grupos, sesión y estado (ver RN-08). \\
 \hline
-3 & Sistema & Verifica si algún video expira en menos de 7 días y muestra aviso con nombre del experimento y fecha exacta de eliminación (ver RF-23). \\
+3 & Sistema & Verifica si algún video expira en menos de 7 días y muestra aviso con nombre del experimento y fecha exacta de eliminación (ver RF-24). \\
 \hline
 4 & Investigador & Selecciona un experimento para ver su detalle, progreso o resultados, o aplica filtros para acotar la lista. \\
 \hline
@@ -1957,7 +2162,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-26, RN-09} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-27, RN-09} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; experimento existente a nombre del investigador.} \\
 \hline
@@ -2094,7 +2299,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 2 & \textit{Worker} & Consulta la base de datos para identificar videos con análisis exitoso hace $\geq 23$ días y $< 30$ días. \\
 \hline
-3 & Sistema & Muestra aviso de expiración en el \textit{dashboard} del investigador correspondiente: nombre del experimento y fecha exacta de eliminación (ver RF-23). \\
+3 & Sistema & Muestra aviso de expiración en el \textit{dashboard} del investigador correspondiente: nombre del experimento y fecha exacta de eliminación (ver RF-24). \\
 \hline
 4 & \textit{Worker} & Al cumplirse los 30 días, elimina el archivo de video del volumen de almacenamiento. \\
 \hline
@@ -2135,7 +2340,7 @@ temporal; no existe autorregistro. El inicio de sesión (Figura~\ref{fig:seq_log
 para Investigador y Administrador: el backend valida las credenciales contra la base
 de datos y devuelve un token JWT; las credenciales incorrectas producen un error
 genérico sin revelar cuál campo falló (ver RN-01). El cierre de sesión
-(Figura~\ref{fig:seq_logout}) invalida el token en el cliente. El cambio de
+(Figura~\ref{fig:seq_logout}) descarta el token en el navegador; el servidor no guarda tokens cancelados. El cambio de
 contraseña (Figura~\ref{fig:seq_cambio_pass_inv}) aplica a cualquier usuario con
 sesión activa y es obligatorio al primer ingreso cuando la cuenta fue creada con
 contraseña temporal.
@@ -2199,7 +2404,7 @@ activa y permite actualizar nombre y correo institucional.
 
 El sistema genera notificaciones de forma automática cuando un análisis finaliza
 (con o sin error) o cuando el espacio en disco supera el umbral de alerta (ver
-RN-11, RNF-10). La Figura~\ref{fig:seq_notificaciones} muestra cómo el backend
+RN-11, RNF-09). La Figura~\ref{fig:seq_notificaciones} muestra cómo el backend
 persiste la notificación y cómo el frontend la consulta en el siguiente ciclo de
 actualización.
 
@@ -2222,13 +2427,15 @@ el backend lo valida, lo registra y encola el análisis. El análisis automátic
 Worker: lectura del video, procesamiento en el módulo de visión por computadora y
 almacenamiento de resultados. La consulta de progreso (Figura~\ref{fig:seq_progreso})
 describe el mecanismo de \textit{polling} con el que el frontend verifica el
-estado del análisis, incluyendo el camino alternativo cuando el pipeline detecta
-baja calidad de video (confianza~$<0.70$, ver RN-11): el Worker genera el reporte
-de diagnóstico PDF y lo pone disponible para descarga, sin necesidad de un
-diagrama aparte para ese caso. Una vez completado el análisis, la consulta de
+estado del análisis, incluyendo el camino alternativo cuando el video no se puede
+procesar (no se abre o no se encuentran los cilindros, ver RN-11): el Worker genera
+el reporte de diagnóstico PDF y lo pone disponible para descarga, sin necesidad de
+un diagrama aparte para ese caso. Una vez completado el análisis, la consulta de
 resultados (Figura~\ref{fig:seq_resultados}) devuelve los tiempos por espécimen
 y conducta, y la descarga de reportes (Figura~\ref{fig:seq_reportes}) permite
-exportar los datos en PDF, CSV o XLSX.
+exportar los datos en PDF, CSV o XLSX. Además, el usuario puede revisar el análisis
+y corregir las etiquetas segundo a segundo (Figura~\ref{fig:seq_revision}; ver CU-25
+a CU-27), lo que recalcula los totales por minuto.
 
 \begin{figure}[H]
 \centering
@@ -2265,6 +2472,13 @@ exportar los datos en PDF, CSV o XLSX.
 \label{fig:seq_reportes}
 \end{figure}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/mermaid/seq_revision_segundos}
+\caption{Secuencia: revisión y corrección segundo a segundo [autoría propia].}
+\label{fig:seq_revision}
+\end{figure}
+
 % -----------------------------------------------------------
 \section{Diagrama de clases}
 % -----------------------------------------------------------
@@ -2274,7 +2488,7 @@ las entidades principales del dominio y sus relaciones desde la perspectiva del
 backend. Las clases centrales del dominio experimental son \textbf{Usuario},
 \textbf{Experimento}, \textbf{Grupo}, \textbf{Tanda}, \textbf{Especimen} y
 \textbf{Video}: un experimento se compone de varios grupos (control, referencia,
-tratamiento), cada grupo se graba en una o más tandas, cada tanda aloja de tres a
+tratamiento), cada grupo se graba en una o más tandas, cada tanda aloja de dos a
 cuatro especímenes y produce uno o dos videos. \textbf{Administrador} hereda de
 \textbf{Usuario} (D-08): no es un tipo de usuario aparte, sino un usuario con
 permisos adicionales para gestionar cuentas y monitorear el sistema.
@@ -2303,7 +2517,7 @@ catálogo \textbf{Conducta} y los segundos que ocupó cada una.
 \section{Diseño de la interfaz web}
 % -----------------------------------------------------------
 
-La interfaz tiene seis pantallas principales, diseñadas para que un investigador sin
+La interfaz tiene siete pantallas principales, diseñadas para que un investigador sin
 experiencia en programación pueda completar el flujo completo ---crear experimento,
 esperar el análisis, consultar y descargar resultados--- sin necesitar asistencia
 técnica (ver RNF-06).
@@ -2337,7 +2551,7 @@ incorrectas muestran un mensaje de error genérico sin revelar cuál campo fall�
 
 Lista de experimentos del laboratorio con nombre, fecha, número de grupos, sesión,
 estado y accesos directos a resultados y descarga (ver RN-08). Muestra avisos cuando
-un video está a menos de 7~días de ser eliminado automáticamente (RF-23). Incluye
+un video está a menos de 7~días de ser eliminado automáticamente (RF-24). Incluye
 filtros por estado y paginación.
 
 \begin{figure}[H]
@@ -2360,7 +2574,7 @@ filtros por estado y paginación.
   \begin{subfigure}[t]{0.70\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/mockups/ui_dashboard_alerta}
-    \caption{Aviso de vencimiento próximo de video (RF-23).}
+    \caption{Aviso de vencimiento próximo de video (RF-24).}
     \label{fig:ui_dashboard_alerta}
   \end{subfigure}
 \caption{Dashboard del investigador [autoría propia].}
@@ -2372,7 +2586,7 @@ filtros por estado y paginación.
 Formulario en tres pasos: metadatos del experimento (nombre, fecha y notas, ver
 CU-04); grupo, tratamiento y video de la tanda correspondiente, con la tanda
 sugerida por el sistema y sujeta a confirmación (ver CU-05, D-19); y confirmación
-final. Solo acepta archivos \texttt{.mp4}; el rechazo de formato ocurre en el
+final. Solo acepta archivos \texttt{.mp4} o \texttt{.mov} en horizontal; el rechazo de formato ocurre en el
 cliente antes de iniciar la subida. Una vez completada la carga válida, el
 análisis inicia automáticamente (RF-12). El segundo paso se repite cada vez que
 se agrega una nueva tanda al experimento, no ocurre una sola vez.
@@ -2500,7 +2714,7 @@ procesados). Incluye botones de descarga en PDF y CSV.
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/mockups/ui_resultados_comparacion}
-    \caption{Comparación Día~1 vs.\ Día~2 (RF-20).}
+    \caption{Comparación Día~1 vs.\ Día~2 (RF-21).}
     \label{fig:ui_resultados_comparacion}
   \end{subfigure}
 
@@ -2508,11 +2722,32 @@ procesados). Incluye botones de descarga en PDF y CSV.
   \begin{subfigure}[t]{0.70\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/mockups/ui_resultados_minutos}
-    \caption{Desglose por minuto expandido (RF-19).}
+    \caption{Desglose por minuto expandido (RF-20).}
     \label{fig:ui_resultados_minutos}
   \end{subfigure}
 \caption{Pantalla de resultados del experimento [autoría propia].}
 \label{fig:ui_resultados}
+\end{figure}
+
+\subsection{Revisión segundo a segundo}
+
+Se abre solo cuando el análisis está completado, desde la pantalla de progreso o
+desde la de resultados (RF-32, RN-14). Muestra el video, con el tubo del espécimen
+que se revisa destacado, y una línea de tiempo por espécimen coloreada por
+conducta: una vista ampliada de 40~s alrededor del segundo actual y otra de los
+300~s completos. Cada segundo ya trae la etiqueta propuesta por el sistema; cuando
+no coincide con lo que el usuario observa, pulsa la conducta correcta. Con el video
+corriendo, el cambio se aplica desde 0.4~s antes del clic hasta el siguiente cambio
+de color; en pausa, cambia solo el segundo actual. Se revisa un espécimen a la vez y
+el avance se guarda como borrador en el navegador hasta que el usuario elige
+«Guardar», momento en que el sistema registra las correcciones, conserva la
+propuesta original y recalcula los totales por minuto (CU-25 a CU-27).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/mockups/ui_revision}
+\caption{Pantalla de revisión segundo a segundo [autoría propia].}
+\label{fig:ui_revision}
 \end{figure}
 
 \subsection{Panel de administración}
@@ -2521,7 +2756,7 @@ Vista exclusiva para quienes pertenecen a \texttt{ADMINISTRADOR} (ver CU-15).
 Muestra métricas del sistema (uso de disco, cola de procesamiento, análisis
 activos), lista de usuarios con filtros por administrador/investigador y
 estado, y la lista de experimentos de todos los investigadores. Incluye modales
-para crear y editar cuentas (RF-05, RF-27, RF-28).
+para crear y editar cuentas (RF-05, RF-28).
 
 \begin{figure}[H]
 \centering

@@ -171,14 +171,14 @@ class PRESENTA {
 
 USUARIO      "1" --o "0..*" EXPERIMENTO
 EXPERIMENTO  "1" --o "3..*" GRUPO
-GRUPO        "1" --o "2..*" TANDA
-TANDA        "1" --o "3..4" ESPECIMEN
+GRUPO        "1" --o "1..*" TANDA
+TANDA        "1" --o "2..4" ESPECIMEN
 TANDA        "1" --o "1..2" VIDEO
 VIDEO        "1" --o "1..*" ANALISIS
 ESPECIMEN    "1" --o "1..2" OBSERVACION
-VIDEO        "1" --o "3..4" OBSERVACION
+VIDEO        "1" --o "2..4" OBSERVACION
 OBSERVACION  "1" --o "5"    INTERVALO
-INTERVALO    "1" --o "2..3" PRESENTA
+INTERVALO    "1" --o "2..4" PRESENTA
 CONDUCTA     "1" --o "0..*" PRESENTA
 
 @enduml

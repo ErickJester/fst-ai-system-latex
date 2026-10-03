@@ -15,10 +15,16 @@ rectangle "Plataforma Web FST - Paquete 4" {
   usecase "Comparar grupos en Dia 2" as UC43
   usecase "Descargar reporte PDF" as UC45
   usecase "Generar archivo de reporte" as UC46
+  usecase "Revisar segundo a segundo" as UC47
+  usecase "Corregir etiqueta de un segundo" as UC48
+  usecase "Recalcular totales por minuto" as UC49
 }
 INV --> UC41
 INV --> UC43
 INV --> UC45
 UC42 ..> UC41 : <<extend>>\n[solicita desglose]
 UC45 ..> UC46 : <<include>>
+INV --> UC47
+UC48 ..> UC47 : <<extend>>\n[la etiqueta no coincide\ncon la propuesta]
+UC48 ..> UC49 : <<include>>
 @enduml

@@ -15,7 +15,8 @@
 %  (2,3) (1,2) no son expresables en notacion de pata de gallo, que
 %  es la unica que PlantUML soporta para ER.
 %
-%  10 entidades - todas fuertes - y 11 interrelaciones.
+%  11 entidades - todas fuertes - y 13 interrelaciones
+%  (D-35, 3-oct: se agrego Segundo y sus dos interrelaciones).
 %  Los atributos NO se dibujan: son 34 y harian ilegible la figura.
 %  Van en el diccionario de datos (anexo). La unica excepcion es
 %  'segundos', atributo de la interrelacion 'presenta', porque es
@@ -86,6 +87,11 @@
 \node[ent] (conducta)  at (14.4, -14.8) {Conducta};
 \node[att] (segundos)  at (11.1, -16.4) {segundos};
 
+% D-35 (3-oct): una etiqueta por especimen y por segundo
+\node[rel] (etiqueta)  at ( 3.6, -13.4) {se etiqueta\\en};
+\node[ent] (segundo)   at ( 3.6, -14.8) {Segundo};
+\node[rel] (clasifica) at ( 9.0, -18.2) {se clasifica\\como};
+
 % ================================================================
 %  ARISTAS CON CARDINALIDAD (minimo,maximo)
 % ================================================================
@@ -106,22 +112,24 @@
 \draw[lin] (bus) -| (grabaen.north);
 
 % -- Grupo agrupa Especimenes  (el hecho experimental) ----------
-% (6,N): 6 es el minimo util; el laboratorio pidio que no haya
-% tope superior (reunion 3-sep). Antes era (6,8).
-\node[card, anchor=south east] at ($(agrupa.north) + (-0.10,0.05)$) {(6,N)};
+% (2,N): un grupo puede tener una sola tanda con 2 especimenes;
+% sin tope superior (reunion 3-sep). Decision del equipo, 3-oct.
+% Antes era (6,N).
+\node[card, anchor=south east] at ($(agrupa.north) + (-0.10,0.05)$) {(2,N)};
 \draw[lin] (agrupa) -- node[card, right, pos=0.45] {(1,1)} (especimen);
 
 % -- Grupo se graba en Tandas  (la logistica de camara) ---------
-% (2,N): un grupo de 6-8 no cabe en un encuadre de 4 cilindros,
-% asi que son 2 tandas como minimo; sin tope, porque el grupo
-% tampoco lo tiene.
-\node[card, anchor=south west] at ($(grabaen.north) + (0.10,0.05)$) {(2,N)};
+% (1,N): un grupo tiene al menos una tanda (la A); las demas
+% (B, C...) son opcionales. Sin tope, porque el grupo tampoco lo
+% tiene. Decision del equipo, 3-oct. Antes era (2,N).
+\node[card, anchor=south west] at ($(grabaen.north) + (0.10,0.05)$) {(1,N)};
 \draw[lin] (grabaen) -- node[card, right, pos=0.45] {(1,1)} (tanda);
 
 % -- Tanda aloja Especimenes ------------------------------------
-% (3,4): el encuadre admite tres o cuatro cilindros a cuadro.
+% (2,4): el encuadre admite de dos a cuatro cilindros a cuadro.
+% Decision del equipo, 3-oct. Antes era (3,4).
 \draw[lin] (especimen) -- node[card, above, pos=0.30] {(1,1)} (aloja);
-\draw[lin] (aloja) -- node[card, above, pos=0.70] {(3,4)} (tanda);
+\draw[lin] (aloja) -- node[card, above, pos=0.70] {(2,4)} (tanda);
 
 % -- Tanda produce Videos ---------------------------------------
 % (1,2): Dia 1 y Dia 2. El Dia 1 es opcional (reunion 3-sep),
@@ -141,8 +149,8 @@
 \draw[lin] (aparece.south) |- node[card, above, pos=0.72] {(1,1)} (observ.west);
 
 % -- Video contiene Observaciones -------------------------------
-% (3,4): una por cilindro del encuadre.
-\draw[lin] (video) -- node[card, right, pos=0.60] {(3,4)} (contiene);
+% (2,4): una por cilindro del encuadre. Antes era (3,4).
+\draw[lin] (video) -- node[card, right, pos=0.60] {(2,4)} (contiene);
 \draw[lin] (contiene.south) |- node[card, above, pos=0.72] {(1,1)} (observ.east);
 
 % -- Observacion se divide en Intervalos ------------------------
@@ -151,20 +159,31 @@
 \draw[lin] (divide) -- node[card, right, pos=0.45] {(1,1)} (interv);
 
 % -- Intervalo presenta Conductas -------------------------------
-% (2,3): tres conductas en modo normal, dos en modo degradado
-% (cuando el clasificador no separa nado de escalamiento).
+% (2,4): hay cuatro conductas (nado activo, inmovilidad, escalamiento
+% y conducta activa, D-29); cada minuto registra de dos a cuatro.
+% Antes era (2,3).
 % (0,N) del lado Conducta: es un catalogo, puede no usarse.
-\draw[lin] (interv) -- node[card, above, pos=0.35] {(2,3)} (presenta);
+\draw[lin] (interv) -- node[card, above, pos=0.35] {(2,4)} (presenta);
 \draw[lin] (presenta) -- node[card, above, pos=0.65] {(0,N)} (conducta);
 
 % -- Atributo de la interrelacion -------------------------------
 \draw[lin, dashed] (presenta) -- (segundos);
 
+% -- Observacion se etiqueta en Segundos (D-35) ------------------
+% (1,300): hasta 300 segundos analizados por observacion.
+\draw[lin] (observ.south west) -- node[card, above left, pos=0.55] {(1,300)} (etiqueta.east);
+\draw[lin] (etiqueta.south) -- node[card, right, pos=0.5] {(1,1)} (segundo.north);
+
+% -- Segundo se clasifica como Conducta (D-35) -------------------
+% (0,1): el segundo puede quedar sin conducta ("no se ve").
+\draw[lin] (segundo.south) |- node[card, above, pos=0.75] {(0,1)} (clasifica.west);
+\draw[lin] (clasifica.east) -| node[card, above, pos=0.25] {(0,N)} (conducta.south);
+
 % ================================================================
 %  LEYENDA
 % ================================================================
 
-\begin{scope}[shift={(0.4,-16.0)}]
+\begin{scope}[shift={(0.4,-19.6)}]
   \node[draw, thick, rectangle, minimum width=0.85cm, minimum height=0.38cm]
         (lg1) at (0,0) {};
   \node[font=\tiny, anchor=west] at (0.5,0) {entidad};

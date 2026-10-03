@@ -70,29 +70,29 @@ w -> db: actualiza la etapa a "preprocesamiento"
 w -> w: mejora la calidad de imagen\n(normalización de fotogramas)
 
 w -> db: actualiza la etapa a "detección"
-w -> w: detecta los cilindros y calcula\nla confianza de la detección
+w -> w: detecta los cilindros\n(solo los primeros 300 s del video)
 
-alt confianza de detección >= 0.70 (RN-11)
-  w -> db: guarda la confianza obtenida
-
+alt se hallaron los tubos
   w -> db: actualiza la etapa a "seguimiento"
   w -> w: rastrea a los especímenes\ncuadro a cuadro
 
   w -> db: actualiza la etapa a "clasificación"
-  w -> w: clasifica la conducta de cada especímen\n(según el nivel del modelo activo: preciso o agrupado, D-17)
+  w -> w: clasifica la conducta de cada espécimen, segundo a segundo\n(nado, inmovilidad, escalamiento o conducta activa)
 
   loop por cada especímen detectado en el video
     w -> db: guarda su observación de este video
-    w -> db: guarda sus 5 intervalos, con los segundos\npor conducta de cada uno
+    w -> db: guarda una etiqueta por cada segundo analizado (SEGUNDO)
+    w -> db: guarda sus 5 intervalos, con los segundos\npor conducta de cada uno (PRESENTA)
   end
 
-  w -> db: marca el análisis como "completado",\ncon su nivel de clasificación
+  w -> db: marca el análisis como "completado",\ncon su nivel de clasificación y fechaAnalisis
   w -> db: programa la eliminación del video\n30 días después (RNF-08)
   w -> db: crea la notificación de análisis terminado
-else confianza de detección < 0.70 (RN-11)
-  w -> db: guarda la confianza obtenida
+else no se pudo abrir el video o no se hallaron los tubos (RN-11)
   w -> w: genera el reporte de diagnóstico PDF (ver CU-08)
-  w -> db: marca el análisis como "error"\n(el investigador no puede reiniciarlo, RN-04)
+  w -> fs: guarda el PDF de diagnóstico
+  w -> db: guarda la ruta del PDF (rutaDiagnostico)
+  w -> db: marca el análisis como "error" y fija fechaAnalisis\n(el investigador no puede reiniciarlo, RN-04)
   w -> db: crea la notificación de error en el análisis
 end
 

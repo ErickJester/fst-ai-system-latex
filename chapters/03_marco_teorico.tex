@@ -73,7 +73,7 @@ evaluado. Un sistema que solo detecta si el espécimen se mueve o no pierde esa 
 En el laboratorio de la ENMyH los especímenes se colocan individualmente en cilindros
 transparentes con agua. Hay dos sesiones: 20 minutos el día 1 (línea base) y 5 minutos
 el día 2 (después del tratamiento), con 24 horas de diferencia. Los videos se graban
-desde una vista lateral con cámara de celular, capturando los cuatro cilindros al mismo
+desde una vista lateral con cámara web, capturando de dos a cuatro cilindros al mismo
 tiempo. La iluminación y el nivel del agua varían entre experimentos, y con especímenes
 de pelaje claro el contraste contra el cilindro puede ser bajo. El sistema debe funcionar
 bajo esas condiciones; los requisitos mínimos de calidad de video se definirán durante
@@ -329,7 +329,8 @@ petición-respuesta HTTP bloquearía al servidor e impediría atender a otros us
 La solución es el procesamiento asíncrono: cuando el investigador sube un video, el
 backend encola la tarea y devuelve inmediatamente una respuesta con el identificador
 del análisis. Un proceso worker independiente toma la tarea de la cola, ejecuta el
-pipeline de IA y escribe los resultados en la base de datos. El frontend consulta
+pipeline de análisis de video (detección con YOLOv8, seguimiento con ByteTrack y
+clasificación con ResNet-18) y escribe los resultados en la base de datos. El frontend consulta
 periódicamente el estado del análisis y actualiza la barra de progreso.
 
 \subsection{Contenedorización con Docker}
