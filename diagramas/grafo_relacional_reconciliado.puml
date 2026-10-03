@@ -12,7 +12,11 @@
 '  modelado como subtipo -- si el usuario no aparece aqui, es
 '  investigador simple.
 '
-'  16 relaciones - 74 atributos - 17 llaves foraneas.
+'  17 relaciones - 79 atributos - 20 llaves foraneas.
+'  (D-35, 3-oct: se agrego SEGUNDO, con 5 atributos y 3 llaves
+'   foraneas: idObservacion, clase y propuesta. Su clave es
+'   (idObservacion, segundo) y los otros tres atributos dependen
+'   solo de ella, asi que queda en BCNF.)
 '  (D-25, 15-sep: se agrego USUARIO.cambioRequerido, sube de 73 a 74)
 '  Validado relacion por relacion: las cuatro de la reconciliacion
 '  y ADMINISTRADOR quedan en BCNF.
@@ -186,6 +190,15 @@ class PRESENTA {
   segundos
 }
 
+class SEGUNDO {
+  <u>idObservacion</u>   [FK]
+  <u>segundo</u>
+  --
+  clase   [FK] (nulo)
+  propuesta   [FK]
+  origen
+}
+
 class ADMINISTRADOR {
   <u>idInstitucional</u>   [FK]
 }
@@ -240,17 +253,19 @@ class NOTIFICACION {
 
 USUARIO        "1" --o "0..*" EXPERIMENTO
 EXPERIMENTO    "1" --o "3..*" GRUPO
-GRUPO          "1" --o "2..*" TANDA
-TANDA          "1" --o "3..4" ESPECIMEN
+GRUPO          "1" --o "1..*" TANDA
+TANDA          "1" --o "2..4" ESPECIMEN
 TANDA          "1" --o "1..2" VIDEO
 VIDEO          "1" --o "1"    ANALISIS
 CONFIGURACION  "1" --o "0..*" ANALISIS
 MODELO         "1" --o "0..*" CONFIGURACION
 ESPECIMEN      "1" --o "1..2" OBSERVACION
-VIDEO          "1" --o "3..4" OBSERVACION
+VIDEO          "1" --o "2..4" OBSERVACION
 OBSERVACION    "1" --o "5"    INTERVALO
-INTERVALO      "1" --o "2..3" PRESENTA
+INTERVALO      "1" --o "2..4" PRESENTA
 CONDUCTA       "1" --o "0..*" PRESENTA
+OBSERVACION    "1" --o "1..300" SEGUNDO
+CONDUCTA       "0..1" --o "0..*" SEGUNDO
 EXPERIMENTO    "1" --o "0..*" REPORTE
 USUARIO        "1" --o "0..*" NOTIFICACION
 EXPERIMENTO    "1" --o "0..*" NOTIFICACION

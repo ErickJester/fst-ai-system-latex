@@ -54,9 +54,10 @@ RF-01 & Autenticación
       & Alta & Investigador / Admin \\
 \hline
 RF-02 & Autenticación
-      & El sistema debe cerrar la sesión del usuario de forma segura, invalidando
-        el token JWT activo. La opción de cierre de sesión debe ser accesible desde
-        el menú de usuario en todas las pantallas.
+      & El sistema debe cerrar la sesión del usuario descartando el token JWT activo
+        en el navegador; el servidor no mantiene una lista de tokens cancelados y el
+        token tiene una vigencia larga y configurable. La opción de cierre de sesión
+        debe ser accesible desde el menú de usuario en todas las pantallas.
       & Alta & Investigador / Admin \\
 \hline
 RF-03 & Autenticación
@@ -94,17 +95,18 @@ RF-07 & Gestión de usuarios
 
 % ── Carga de video ─────────────────────────────────────────
 RF-08 & Carga de video
-      & El sistema debe aceptar únicamente archivos en formato \texttt{.mp4}.
-        Cualquier otro formato debe ser rechazado con un mensaje de error específico
-        antes de intentar subirlo al servidor.
+      & El sistema debe aceptar únicamente archivos en formato \texttt{.mp4} o
+        \texttt{.mov}. Cualquier otro formato debe ser rechazado con un mensaje de
+        error específico antes de intentar subirlo al servidor.
       & Alta & Sistema \\
 \hline
 RF-09 & Carga de video
       & El sistema debe permitir subir uno o dos videos por tanda: Día~1
         (sesión de estrés, 20~min) y Día~2 (sesión post-tratamiento, 5~min). Ambos
-        son opcionales individualmente. El pipeline analiza el video de Día~2
-        completo; del video de Día~1 analiza únicamente los primeros 5~minutos y
-        solo cuando la tanda pertenece al grupo control (ver RN-03). Al subir el
+        son opcionales individualmente. El pipeline analiza los primeros 300~segundos
+        del video de Día~2 (el resto se descarta); del video de Día~1 analiza
+        únicamente los primeros 5~minutos y solo cuando la tanda pertenece al grupo
+        control (ver RN-03). Al subir el
         primer video de una tanda nueva, el investigador indica el grupo y el
         tratamiento; si el nombre coincide con un grupo ya registrado en el mismo
         experimento, el sistema sugiere la siguiente tanda y pide confirmación
@@ -112,16 +114,17 @@ RF-09 & Carga de video
       & Alta & Investigador \\
 \hline
 RF-10 & Carga de video
-      & El sistema debe validar que el archivo subido sea un video reproducible antes
-        de encolarlo. Si la validación falla, lo rechaza con código de error y
-        mensaje claro.
+      & El sistema debe validar que el archivo subido sea un video reproducible y que
+        esté en horizontal (ancho mayor que alto) antes de encolarlo. Un video grabado
+        con la cámara girada (en vertical) no se puede procesar. Si la validación
+        falla, lo rechaza con código de error y mensaje claro.
       & Alta & Sistema \\
 \hline
 RF-11 & Carga de video
       & Al crear un experimento el investigador debe registrar: nombre único del
         experimento, fecha y notas adicionales opcionales. El grupo (control,
         referencia o tratamiento), el tratamiento o condición experimental y el
-        número de especímenes de cada tanda (entre~3 y~4) se capturan después,
+        número de especímenes de cada tanda (entre~2 y~4) se capturan después,
         por grupo, al subir el primer video de cada uno (ver RF-09).
       & Alta & Investigador \\
 \hline
@@ -141,9 +144,9 @@ RF-13 & Análisis conductual
       & Alta & Sistema \\
 \hline
 RF-14 & Análisis conductual
-      & El sistema debe detectar automáticamente la posición de los cuatro cilindros
-        en el encuadre con una confianza mínima de 0.70. Si no se alcanza ese umbral,
-        el pipeline se detiene y genera un reporte de diagnóstico.
+      & El sistema debe detectar automáticamente la posición de los cilindros (de dos
+        a cuatro) en el encuadre. Si no los encuentra, el pipeline se detiene y
+        genera un reporte de diagnóstico.
       & Alta & Sistema \\
 \hline
 RF-15 & Análisis conductual
@@ -161,8 +164,11 @@ RF-16 & Análisis conductual
 \hline
 RF-17 & Análisis conductual
       & El sistema debe clasificar cuadro a cuadro la conducta de cada espécimen: nado
-        activo, inmovilidad o escalamiento \cite{armario2021}. El buceo se clasifica
-        como nado activo. Las conductas son mutuamente excluyentes (ver RN-07).
+        activo, inmovilidad o escalamiento \cite{armario2021}. Cuando sabe que el
+        espécimen no está inmóvil pero no decide entre nado y escalamiento, lo registra
+        como \textit{conducta activa}, una cuarta conducta (ver RN-13). El buceo se
+        clasifica como nado activo. Las conductas son mutuamente excluyentes (ver
+        RN-07).
       & Alta & Sistema \\
       \hline
 RF-18 & Análisis conductual
@@ -194,7 +200,8 @@ RF-22 & Resultados
       & El investigador debe poder descargar los datos de resultados en formato CSV
         y XLSX desde la pantalla de resultados y desde el dashboard. El archivo debe
         contener las columnas: \texttt{Tiempo (min:seg)}, \texttt{Nado},
-        \texttt{Escalamiento} e \texttt{Inmovilidad}, con una fila por minuto
+        \texttt{Escalamiento}, \texttt{Inmovilidad} y \texttt{Conducta activa}, con
+        una fila por minuto
         analizado. El reporte de diagnóstico y el resumen ejecutivo se descargan
         por separado en PDF.
       & Alta & Investigador \\
@@ -266,6 +273,16 @@ RF-31 & Resultados
         especímenes de ese grupo, agregando todas sus tandas. Estas estadísticas
         deben incluirse en el reporte descargable (CSV/XLSX) junto con los datos
         individuales por espécimen.
+      & Media & Investigador \\
+\hline
+RF-32 & Resultados
+      & Cuando un análisis está completado, el sistema debe ofrecer una pantalla de
+        revisión segundo a segundo: el video con una línea de tiempo por espécimen,
+        coloreada por conducta, donde cada segundo muestra la etiqueta propuesta por
+        el sistema y el usuario puede corregirla. Cada etiqueta guarda su origen
+        (propuesta del sistema, confirmada, corregida o dudosa) y la propuesta
+        original no se pierde. Al guardar las correcciones, el sistema recalcula los
+        totales por minuto (ver RN-14).
       & Media & Investigador \\
 \hline
 
@@ -383,7 +400,7 @@ RNF-11 & Escalabilidad
 \hline
 RNF-12 & Mantenibilidad
        & El código debe estar documentado y separado en módulos independientes
-         (backend, pipeline de IA, frontend), siguiendo PEP~8 en Python y ESLint
+         (backend, pipeline de análisis de video, frontend), siguiendo PEP~8 en Python y ESLint
          en JavaScript.
        & Revisión de calidad de código en cada cierre de bloque de
          implementación. \\
@@ -412,21 +429,12 @@ A continuación se documenta el origen de cada uno para que puedan auditarse y
 ajustarse en la fase de validación (TT2).
 
 \begin{itemize}
-  \item \textbf{Confianza de detección de cilindros: $\geq 0.70$.}
-        En modelos de detección basados en YOLO, la confianza es un hiperparámetro
-        que controla el equilibrio entre precisión y \textit{recall}: valores más
-        altos aumentan la precisión pero reducen el número de detecciones válidas;
-        valores más bajos capturan más objetos a costa de más falsos positivos.
-        No existe un valor universal: la metodología estándar en estudios de
-        análisis conductual automatizado consiste en trazar la curva
-        precisión-\textit{recall} sobre un conjunto de validación específico del
-        experimento y seleccionar el umbral que maximiza el F1 en ese dominio
-        concreto \cite{stadler2024_yolov8,chan2025_yolo,della_valle2025}. El valor
-        $0.70$ es provisional: se obtuvo de las pruebas preliminares de detección
-        realizadas con los videos del laboratorio (véase la
-        sección~\ref{sec:fact_tecnologica}) y será calibrado formalmente mediante
-        ese análisis de curva precisión-\textit{recall} sobre el conjunto de
-        validación real durante la fase de implementación en TT2.
+  \item \textbf{Confianza de detección de cilindros: ya no se usa.}
+        Una versión anterior del diseño detenía el análisis cuando la confianza de
+        detección de los cilindros era menor a $0.70$. La detección actual de los
+        tubos es mucho mejor que la que existía al plantear ese criterio y no
+        produce un valor de confianza, por lo que el umbral se eliminó. Los casos
+        de error se describen ahora en RN-11.
 
   \item \textbf{F1 mínimo por conducta: $\geq 85$\,\%.}
         En la investigación conductual con roedores, la práctica estándar para
@@ -448,7 +456,7 @@ ajustarse en la fase de validación (TT2).
         Criterio declarado por el investigador colaborador en la entrevista de
         levantamiento. En el análisis manual, una conducta se contabiliza únicamente
         si se mantiene de forma continua alrededor de 3 a 5 segundos; el sistema
-        adopta el límite inferior como umbral conservador (ver RF-30).
+        adopta el límite inferior como umbral conservador (ver RF-18).
 
   \item \textbf{Período de retención de videos: 30~días.}
         Confirmado por el investigador colaborador en la entrevista de levantamiento
@@ -518,51 +526,59 @@ RN-05 & Los videos se borran automáticamente 30~días después de que el análi
 \hline
 RN-06 & Los resultados y reportes (PDF y CSV) se conservan indefinidamente aunque
         el video original ya haya sido borrado.
-      & Los datos de investigación tienen valor a largo plazo. Ver RF-25. \\
+      & Los datos de investigación tienen valor a largo plazo. Ver RF-26. \\
 \hline
 RN-07 & En cada cuadro del video, a cada espécimen se le asigna exactamente una
-        conducta: nado activo, inmovilidad o escalamiento. No pueden coexistir dos
-        conductas al mismo tiempo para el mismo espécimen.
+        conducta: nado activo, inmovilidad, escalamiento o conducta activa. No pueden
+        coexistir dos conductas al mismo tiempo para el mismo espécimen.
       & El FST define estas conductas como mutuamente excluyentes
         \cite{armario2021,cryan2005}. Ver RF-17, RF-18. \\
 \hline
 RN-08 & Todos los investigadores con cuenta activa pueden consultar los experimentos
         y resultados de cualquier otro investigador del laboratorio. El Administrador
         puede además modificar y desactivar cuentas.
-      & Definido en entrevista de levantamiento. Ver RF-04, RNF-04, RF-29. \\
+      & Definido en entrevista de levantamiento. Ver RF-04, RNF-04, RF-30. \\
 \hline
 RN-09 & Borrar un experimento es permanente e irreversible: se eliminan el video,
         los resultados y los reportes. El sistema requiere confirmación explícita
         antes de ejecutarlo.
-      & Previene borrados accidentales. Ver RF-26. \\
+      & Previene borrados accidentales. Ver RF-27. \\
 \hline
-RN-10 & El sistema rechaza cualquier archivo que no sea \texttt{.mp4} antes de
-        intentar subirlo al servidor. La validación de formato ocurre en el cliente.
-      & Evita consumir recursos con archivos incompatibles. Ver RF-08, RF-10. \\
+RN-10 & El sistema rechaza cualquier archivo que no sea \texttt{.mp4} o
+        \texttt{.mov}, y cualquier video en vertical (grabado con la cámara girada),
+        antes de intentar subirlo al servidor. La validación de formato ocurre en el
+        cliente. Un video girado no se puede procesar.
+      & Evita consumir recursos con archivos incompatibles. Los videos reales del
+        laboratorio son \texttt{.mov}. Ver RF-08, RF-10. \\
 \hline
-RN-11 & Si la confianza de detección de los cuatro cilindros no alcanza $0.70$,
-        el pipeline se detiene y el sistema genera automáticamente un reporte de
-        diagnóstico descargable que indica el motivo del fallo. Los videos que
-        superen ese umbral continúan el análisis de forma normal.
+RN-11 & Si el video no se puede abrir o el pipeline no encuentra los cilindros, se
+        detiene y el sistema genera automáticamente un reporte de diagnóstico
+        descargable que indica el motivo del fallo. Los videos en que sí se
+        encuentran continúan el análisis de forma normal. Ya no existe un umbral de
+        confianza de detección.
       & Evita que el sistema produzca resultados incorrectos sin advertir al
-        investigador. Véase la justificación del valor en la
-        sección~\ref{sec:umbrales}. Ver RF-14, RF-16. \\
+        investigador. Véase la sección~\ref{sec:umbrales}. Ver RF-14, RF-16. \\
 \hline
 RN-12 & La comparación Día~1 vs.\ Día~2 solo se genera si ambos videos de la
         misma tanda fueron procesados exitosamente.
-      & No tiene sentido comparar con datos incompletos. Ver RF-20. \\
+      & No tiene sentido comparar con datos incompletos. Ver RF-21. \\
 \hline
-RN-13 & Si el clasificador no alcanza F1 $\geq 85$\,\% distinguiendo
-        las tres conductas por separado, el nado activo y el escalamiento
-        se reportan juntos como \textit{conducta activa}. El reporte
-        generado indica explícitamente qué nivel de clasificación se
-        aplicó, de modo que el investigador pueda interpretar los
+RN-13 & Cuando el clasificador sabe que el espécimen no está inmóvil pero no
+        decide entre nado activo y escalamiento, esos segundos se registran como
+        \textit{conducta activa}, una cuarta conducta. Un mismo análisis puede
+        mezclar las cuatro conductas, y los reportes muestran la conducta activa
+        como una columna más, de modo que el investigador pueda interpretar los
         resultados en consecuencia.
-      & Contemplado en el alcance (cap.~1) y en el riesgo R-08.
-        Complementa RN-11 para el caso en que el pipeline completa
-        la detección pero el clasificador no alcanza el F1 objetivo.
-        Véase la justificación del valor en la sección~\ref{sec:umbrales}.
-        Ver RF-17, RF-18. \\
+      & Contemplado en el alcance (cap.~1) y en el riesgo R-08. Corresponde al
+        nivel de Porsolt (inmóvil o no inmóvil) cuando no se separa lo activo en
+        nado y escalamiento. Ver RF-17, RF-18. \\
+\hline
+RN-14 & Solo se puede revisar un análisis completado. Al revisar, el usuario corrige
+        las etiquetas segundo a segundo; cada etiqueta guarda su origen y la
+        propuesta original del sistema nunca se pierde. Al guardar, el sistema
+        recalcula los totales por minuto de los especímenes corregidos y los
+        reportes guardados del experimento se regeneran con los datos nuevos.
+      & La revisión humana corrige al clasificador sin sustituirlo. Ver RF-32. \\
 \hline
 
 \end{longtable}
@@ -703,7 +719,7 @@ BORIS \cite{friard2016}
 Flask (Python) \cite{grinberg2018}
     & Microframework ligero para APIs REST. Extensiones para JWT
       (Flask-JWT-Extended), ORM (SQLAlchemy) y tareas asíncronas.
-    & Suficiente para el tamaño del prototipo. Integra el pipeline de IA sin
+    & Suficiente para el tamaño del prototipo. Integra el pipeline de análisis de video sin
       necesitar un framework más pesado. \\
 \hline
 React.js + Vite
@@ -754,12 +770,12 @@ Para cada riesgo se documenta una acción concreta de mitigación.
 % ---- NIVEL ALTO (rojo) ----
 R-01 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
      & Videos con reflejos, iluminación variable o especímenes de pelaje claro que
-       hacen fallar el pipeline (confianza de detección $< 0.70$, ver RN-11).
+       hacen fallar el pipeline (no se encuentran los cilindros, ver RN-11).
      & Definir con el laboratorio los requisitos mínimos de calidad de video.
        El sistema aplica corrección CLAHE (\textit{Contrast Limited Adaptive
        Histogram Equalization}) \cite{bradski2000} como primer intento automático
-       de mejora de contraste; si la confianza sigue por debajo de 0.70 tras CLAHE,
-       se genera el reporte de diagnóstico (ver RN-11). \\
+       de mejora de contraste; si aun así no se encuentran los cilindros, se genera
+       el reporte de diagnóstico (ver RN-11). \\
 \hline
 R-02 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
      & El dataset de cuadros etiquetados no alcanza para entrenar un clasificador
@@ -767,8 +783,8 @@ R-02 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
      & Ampliar el dataset anotando más cuadros con BORIS
        (\textit{Behavioral Observation Research Interactive Software}) y aplicar
        \textit{data augmentation}. Si el escalamiento no se distingue del nado
-       con la precisión objetivo, ambas conductas se reportan juntas como
-       ``conducta activa'' (ver alcance, cap.~1). \\
+       con la precisión objetivo, los segundos en que no se distinguen se registran
+       como ``conducta activa'' (ver RN-13). \\
 \hline
 
 % ---- NIVEL MEDIO (amarillo) ----
@@ -804,8 +820,8 @@ R-08 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf
        que el modelo no los distingue con suficiente precisión.
      & Usar en el entrenamiento únicamente clips inequívocos de escalamiento
        (movimiento de patas delanteras hacia las paredes del cilindro). Si no se
-       alcanza la precisión objetivo, reportar ambas conductas juntas como
-       ``conducta activa'' (ver alcance, cap.~1). \\
+       alcanza la precisión objetivo, registrar como ``conducta activa'' los
+       segundos en que no se distinguen (ver RN-13). \\
 \hline
 
 % ---- NIVEL BAJO (verde) ----
@@ -813,7 +829,7 @@ R-06 & \cellcolor{green!12}\textcolor{green!55!black}{\Large$\bullet$}~\textbf{B
      & El disco del servidor se llena por acumulación de videos durante el período
        de retención de 30~días.
      & El sistema genera alertas al 80\,\% de uso de disco y ejecuta limpieza
-       automática al 90\,\% (ver RF-28, RNF-09). \\
+       automática al 90\,\% (ver RF-25, RF-29, RNF-09). \\
 \hline
 
 \end{longtable}
@@ -855,8 +871,8 @@ elimina dependencias de hardware específico en el laboratorio.
 Antes de la implementación completa del sistema, se realizaron pruebas preliminares de
 detección de objetos con YOLOv8 usando un dataset inicial de los videos del laboratorio.
 Los resultados de esa prueba confirman que el enfoque es viable con las condiciones de
-grabación reales del laboratorio: vista lateral, cuatro cilindros simultáneos, cámara de
-celular \cite{stadler2024_yolov8}. Esa prueba reduce el riesgo técnico de la etapa de
+grabación reales del laboratorio: vista lateral, de dos a cuatro cilindros simultáneos,
+cámara web \cite{stadler2024_yolov8}. Esa prueba reduce el riesgo técnico de la etapa de
 detección antes de comprometer recursos en el desarrollo completo.
 
 Para el clasificador de conducta, estudios previos reportan precisiones superiores al
@@ -866,8 +882,8 @@ etapa con el dataset disponible.
 
 \subsubsection{Evaluación de compatibilidad e integración}
 
-El prototipo tiene una arquitectura modular que separa el pipeline de IA (Python,
-OpenCV, PyTorch) de la plataforma web (Flask, React, PostgreSQL) mediante una
+El prototipo tiene una arquitectura modular que separa el pipeline de análisis de video
+(Python, OpenCV, PyTorch, con YOLOv8, ByteTrack y ResNet-18) de la plataforma web (Flask, React, PostgreSQL) mediante una
 cola de tareas asíncrona. Esa separación permite desarrollar y probar cada módulo de
 forma independiente y facilita la integración progresiva conforme avanza el desarrollo.
 
@@ -893,12 +909,12 @@ desarrollador de software, lo que impone una restricción de diseño clara: la i
 debe requerir cero configuración técnica del lado del usuario. Cargar un video,
 asignar grupos y descargar el reporte deben ser las únicas acciones necesarias.
 
-El laboratorio realiza entre 3 y 5 experimentos de nado forzado (FST) por semestre,
-cada uno con tres grupos (control, referencia y tratamiento experimental) de entre
-6 y 8 especímenes cada uno. Cada experimento genera aproximadamente entre 12 y 16
-videos de 5~min en el segundo día del protocolo (dos tandas por grupo, un video de
-Día~2 por tanda). El análisis de esos videos es el cuello de botella actual:
-anotarlos manualmente ocupa entre 1.5 y 2~h cada uno, lo que convierte el análisis en
+El laboratorio realiza experimentos de nado forzado (FST) sin un calendario fijo; en
+un semestre de actividad regular son del orden de 3 a 5, cada uno con tres grupos (control, referencia y tratamiento experimental) de entre
+6 y 8 especímenes cada uno. Cada experimento genera entre 6 y 9 videos de 5~min en
+el segundo día del protocolo (uno por tanda, con dos o tres tandas por grupo). El análisis de esos videos es el cuello de botella actual:
+anotarlos manualmente ocupa entre 1.5 y 2~h cada uno (con sus dos a cuatro
+especímenes), lo que convierte el análisis en
 una actividad que compite con el tiempo de investigación del laboratorio.
 
 \subsubsection{Integración con el protocolo experimental}
@@ -912,7 +928,7 @@ y PDF para el reporte diagnóstico de calidad del video.
 
 Esta ausencia de cambio en el protocolo de grabación es una ventaja operativa
 importante: el laboratorio no necesita adaptar su metodología ni adquirir equipo nuevo.
-Los videos grabados con el teléfono o cámara actual son suficientes, siempre que el
+Los videos grabados con la cámara web actual son suficientes, siempre que el
 cilindro sea visible en su totalidad desde la vista lateral.
 
 \subsubsection{Criterios de aceptación operativa}
@@ -925,12 +941,13 @@ proyecto, los criterios que determinan si el sistema es operativamente aceptable
         que tomaría anotarlo manualmente (entre 1.5 y 2~h). Cualquier resultado en
         ese rango o por debajo ya representa una ganancia operativa.
   \item El reporte generado debe incluir, al menos, la duración acumulada por conducta
-        (nado activo, inmovilidad y escalamiento) desglosada por minuto, de modo que
-        sea directamente comparable con la tabla que el investigador construye hoy a
-        mano.
-  \item Cuando la calidad del video impida una detección confiable (umbral de confianza
-        por debajo de 0.70 según RN-11), el sistema debe notificarlo explícitamente en
-        el reporte en lugar de entregar un resultado silencioso potencialmente erróneo.
+        (nado activo, inmovilidad, escalamiento y conducta activa) desglosada por
+        minuto, de modo que sea directamente comparable con la tabla que el
+        investigador construye hoy a mano.
+  \item Cuando el video no se pueda procesar (no se abre o no se encuentran los
+        cilindros, según RN-11), el sistema debe notificarlo explícitamente en el
+        reporte de diagnóstico en lugar de entregar un resultado silencioso
+        potencialmente erróneo.
 \end{itemize}
 
 Estos tres criterios se verificarán durante la etapa de validación en TT-II con los
@@ -1062,8 +1079,8 @@ humano (\$40{,}000), que refleja el esfuerzo real de desarrollo en un contexto
 académico. El resto de la inversión corresponde a servicios de cómputo en la nube para
 el entrenamiento del clasificador, conectividad, documentación e insumos menores. El
 retorno es inmediato para el laboratorio: anotar manualmente un video de 5~min toma
-entre 1.5 y 2~h; con más de 32~videos por semestre, el sistema elimina más de
-200~horas-persona de trabajo manual por ciclo. Al no requerir compra de hardware
+entre 1.5 y 2~h; con alrededor de 32 a 40~videos en un semestre de actividad regular,
+el sistema evita decenas de horas-persona de trabajo manual por ciclo. Al no requerir compra de hardware
 especializado ni licencias de software comercial, el proyecto es económicamente viable
 con los recursos del equipo académico.
 
@@ -1090,7 +1107,7 @@ del Laboratorio de Bioquímica Estructural de la ENMyH-IPN. El equipo de desarro
 recibe únicamente los archivos de video ya grabados y no participa en ningún procedimiento
 con los especímenes. El laboratorio opera en apego a la NOM-062-ZOO-1999
 \cite{nom062}, norma que define los criterios técnicos, sanitarios y éticos para el
-manejo de animales en investigación biomédica.
+manejo de especímenes de laboratorio en investigación biomédica.
 
 \subsubsection{Licencias de software y propiedad del código}
 

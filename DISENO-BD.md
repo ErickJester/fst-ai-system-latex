@@ -217,7 +217,7 @@ de actualizar el existente.
 Usuario ──registra──> Experimento
                           └── Grupo     (fuerte · etiqueta)   tipo ∈ {control, referencia, tratamiento}
                                                                 tratamiento NUNCA nulo (el control recibe placebo)
-                                └── Tanda    (fuerte · ordinal)    nCilindros ∈ {3,4}
+                                └── Tanda    (fuerte · ordinal)    nCilindros ∈ {2,3,4}  (D-28)
                                       ├── Espécimen  (fuerte · numeroRata, relativo al grupo, sin tope de grupo)
                                       └── Video      (fuerte · sesión ∈ {Día 1, Día 2}, Día 1 opcional)
                                                 └── Análisis  (1,N — un video se puede reanalizar · pendiente P-08/D-03)
@@ -260,6 +260,28 @@ en el esquema lógico definitivo.
 ---
 
 ## 5. Estado actual
+
+### Cambios del 3-oct-2026 (D-28 a D-35) — leer antes que lo de abajo
+
+Estas decisiones cambian el modelo y **mandan sobre las cifras de esta página** (que
+dicen 16 relaciones, `nCilindros ∈ {3,4}`, etc.). Detalle de cada una en
+`errores/preguntas-doctor.md` §6.
+
+| Decisión | Cambio al modelo |
+|---|---|
+| **D-28** | Cardinalidades: `TANDA`–`ESPECIMEN` (2,4); `GRUPO`–`TANDA` (1,N); `GRUPO`–`ESPECIMEN` (2,N); `VIDEO`–`OBSERVACION` (2,4). Un grupo puede tener una sola tanda. |
+| **D-29** | `CONDUCTA` pasa a **cuatro** valores (se agrega «conducta activa»). `INTERVALO`–`PRESENTA` pasa de (2,3) a **(2,4)**; en la práctica `PRESENTA` guarda una fila por cada conducta, incluso con 0 s. |
+| **D-30, D-31, D-33** | No tocan la base de datos: formatos `.mp4` y `.mov`; se analizan solo los primeros 300 s; un video girado (vertical) se rechaza. |
+| **D-32** | Se elimina la confianza de detección (0.70) como criterio de error. La columna `ANALISIS.confianza` sigue en el esquema; **pendiente decidir si se quita**. |
+| **D-34** | No hay vista en vivo; al terminar el análisis el usuario ve una pantalla de revisión segundo a segundo. |
+| **D-35** | **Tabla nueva `SEGUNDO`** (`idObservacion`, `segundo` como clave; `clase`, `propuesta` y `origen`). Total: **17 relaciones**, 20 llaves foráneas lógicas (21 con la física de D-04). `PRESENTA` pasa a ser un resumen que se recalcula desde `SEGUNDO`. |
+
+Aplicado en: `esquema_fisico.puml`, `esquema_conceptual.tex`, `clases.puml`,
+`grafo_relacional_reconciliado.puml`, capítulos 1, 4 y 5. **No actualizados:** los
+artifacts y los PDF de `artifacts pdf/` (siguen en 16 relaciones), y el diccionario de
+datos de los anexos. Decisiones aún abiertas que afectan al modelo: significado de
+`ANALISIS.nivelClasif`, quién puede corregir etiquetas y qué pasa con
+`ANALISIS.confianza`.
 
 **Las dos etapas están cerradas.** Conceptual: 8 de 8 actividades. Lógica: 7 de 7.
 Resultado: **16 relaciones** en BCNF (11 del dominio experimental + 4 de soporte del

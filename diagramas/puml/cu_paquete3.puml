@@ -25,6 +25,6 @@ UC30 ..> UC31 : <<include>>
 UC30 ..> UC32 : <<include>>
 UC30 ..> UC33 : <<include>>
 UC30 ..> UC34 : <<include>>
-UC36 ..> UC32 : <<extend>>\n[confianza < 0.70]
+UC36 ..> UC32 : <<extend>>\n[no se hallaron los tubos]
 UC36 ..> UC33 : <<extend>>\n[error de tracking]
 @enduml

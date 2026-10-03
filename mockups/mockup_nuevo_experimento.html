@@ -462,7 +462,7 @@
 
     /* ── Success overlay ──────────────────────────────────────────── */
     .success-panel {
-      display: none;
+      display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
@@ -647,19 +647,19 @@
             </div>
           </div>
 
-          <!-- N animales RF11 -->
+          <!-- N especímenes RF11 -->
           <div class="form-group">
-            <label class="form-label" for="expAnimales">Número esperado de animales <span class="req">*</span></label>
+            <label class="form-label" for="expAnimales">Especímenes de la primera tanda (2 a 4) <span class="req">*</span></label>
             <div class="input-wrap">
               <span class="input-icon">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="5" cy="5" r="2" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 12.5c0-2.2 1.6-3.5 3.5-3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="10" cy="5" r="2" stroke="currentColor" stroke-width="1.2"/><path d="M12.5 12.5c0-2.2-1.6-3.5-3.5-3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
               </span>
-              <input id="expAnimales" class="form-input form-input-plain" type="number" min="1" max="8" placeholder="4" style="padding-left:34px" />
+              <input id="expAnimales" class="form-input form-input-plain" type="number" min="2" max="4" placeholder="4" style="padding-left:34px" />
             </div>
-            <div class="form-hint">Típicamente 4 por cilindro visible en el video (RF11).</div>
+            <div class="form-hint">Entre 2 y 4, uno por cada cilindro visible en el video (RF11).</div>
             <div class="field-error" id="errAnimales" style="display:none">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.1"/><path d="M6 4v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="6" cy="8.5" r=".6" fill="currentColor"/></svg>
-              Ingresa un número entre 1 y 8.
+              Ingresa un número entre 2 y 4.
             </div>
           </div>
 
@@ -722,7 +722,7 @@
                 </div>
                 <div class="upload-label-day">Día 1</div>
                 <div class="upload-title">Sesión basal (20 min)</div>
-                <div class="upload-sub">Arrastra o haz clic para seleccionar<br>Solo <span class="format-chip">.mp4</span> (RF08)</div>
+                <div class="upload-sub">Arrastra o haz clic para seleccionar<br><span class="format-chip">.mp4</span> o <span class="format-chip">.mov</span> (RF08)</div>
                 <div class="upload-cta" onclick="fakePick('zone1','dia1_baseline_20min.mp4','312 MB')">Seleccionar archivo</div>
               </div>
 
@@ -749,7 +749,7 @@
               <div class="file-error-msg" id="z1err">
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="#fca5a5" stroke-width="1.5" fill="#fef2f2"/><path d="M9 9l10 10M19 9L9 19" stroke="#ef4444" stroke-width="1.8" stroke-linecap="round"/></svg>
                 <div class="file-error-title">Formato no válido</div>
-                <div class="file-error-detail" id="z1errmsg">Solo se aceptan archivos <strong>.mp4</strong> (RF08).<br>El archivo seleccionado no es compatible.</div>
+                <div class="file-error-detail" id="z1errmsg">Solo se aceptan archivos <strong>.mp4</strong> o <strong>.mov</strong> (RF08).<br>El archivo seleccionado no es compatible.</div>
                 <button class="file-retry" onclick="removeFile('zone1')">Intentar con otro archivo</button>
               </div>
             </div>
@@ -758,7 +758,7 @@
           <!-- ── DÍA 2 ─────────────────────────── -->
           <div>
             <div class="upload-zone" id="zone2" ondragover="handleDrag(event,'zone2')" ondragleave="clearDrag('zone2')" ondrop="handleDrop(event,'zone2')">
-              <span class="upload-req-tag">Requerido</span>
+              <span class="upload-req-tag">Opcional</span>
 
               <!-- idle -->
               <div id="z2idle">
@@ -771,7 +771,7 @@
                 </div>
                 <div class="upload-label-day">Día 2</div>
                 <div class="upload-title">Sesión post-tratamiento (5 min)</div>
-                <div class="upload-sub">Arrastra o haz clic para seleccionar<br>Solo <span class="format-chip">.mp4</span> (RF08)</div>
+                <div class="upload-sub">Arrastra o haz clic para seleccionar<br><span class="format-chip">.mp4</span> o <span class="format-chip">.mov</span> (RF08)</div>
                 <div class="upload-cta" onclick="fakePick('zone2','dia2_posttreatment_5min.mp4','78 MB')">Seleccionar archivo</div>
               </div>
 
@@ -798,7 +798,7 @@
               <div class="file-error-msg" id="z2err">
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="#fca5a5" stroke-width="1.5" fill="#fef2f2"/><path d="M9 9l10 10M19 9L9 19" stroke="#ef4444" stroke-width="1.8" stroke-linecap="round"/></svg>
                 <div class="file-error-title">Formato no válido</div>
-                <div class="file-error-detail" id="z2errmsg">Solo se aceptan archivos <strong>.mp4</strong> (RF08).<br>El archivo seleccionado no es compatible.</div>
+                <div class="file-error-detail" id="z2errmsg">Solo se aceptan archivos <strong>.mp4</strong> o <strong>.mov</strong> (RF08).<br>El archivo seleccionado no es compatible.</div>
                 <button class="file-retry" onclick="removeFile('zone2')">Intentar con otro archivo</button>
               </div>
             </div>
@@ -809,7 +809,7 @@
         <!-- RF08 note -->
         <div class="format-note">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="8" cy="8" r="6.5" stroke="#3b6fb6" stroke-width="1.2"/><path d="M8 7v4" stroke="#3b6fb6" stroke-width="1.3" stroke-linecap="round"/><circle cx="8" cy="5.5" r=".7" fill="#3b6fb6"/></svg>
-          <span><strong>Solo se aceptan archivos .mp4</strong> (RF08). Si tu video está en otro formato, conviértelo antes de subirlo. El sistema validará el formato antes de iniciar la carga.</span>
+          <span><strong>Solo se aceptan archivos .mp4 o .mov en horizontal</strong> (RF08, RF10). Si tu video está en otro formato o en vertical, conviértelo antes de subirlo. El sistema validará el formato antes de iniciar la carga.</span>
         </div>
 
       </div>
@@ -883,6 +883,7 @@
       document.getElementById('errAnimales').style.display = 'flex';
       document.getElementById('errTrat').style.display     = 'flex';
       document.getElementById('expName').classList.add('error');
+      document.getElementById('expAnimales').value = '7';
       document.getElementById('expAnimales').classList.add('error');
       document.getElementById('expTrat').classList.add('error');
     }
@@ -943,7 +944,7 @@
       const err = document.getElementById(`z${n}err`);
       err.style.display = 'flex';
       err.style.flexDirection = 'column';
-      document.getElementById(`z${n}errmsg`).innerHTML = `El archivo <strong>${fname}</strong> no es un .mp4 válido (RF08).<br>Convierte el video antes de subirlo.`;
+      document.getElementById(`z${n}errmsg`).innerHTML = `El archivo <strong>${fname}</strong> no es un .mp4 ni .mov válido (RF08).<br>Convierte el video antes de subirlo.`;
     }
   }
 
@@ -976,7 +977,7 @@
     clearDrag(zid);
     const f = e.dataTransfer.files[0];
     if (f) {
-      if (!f.name.toLowerCase().endsWith('.mp4')) {
+      if (!/.(mp4|mov)$/i.test(f.name)) {
         setZoneState(zid, 'error', f.name, '');
       } else {
         fakePick(zid, f.name, (f.size/1024/1024).toFixed(0)+' MB');
@@ -994,6 +995,7 @@
     }
     if (!document.getElementById('expAnimales').value) {
       document.getElementById('errAnimales').style.display = 'flex';
+      document.getElementById('expAnimales').value = '7';
       document.getElementById('expAnimales').classList.add('error');
       ok = false;
     }

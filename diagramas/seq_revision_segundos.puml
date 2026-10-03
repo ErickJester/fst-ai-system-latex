@@ -1,0 +1,65 @@
+@startuml seq_revision_segundos
+' ================================================================
+'  Secuencia - Revision segundo a segundo
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Cubre la pantalla de revision que el usuario abre cuando el
+'  analisis termina (D-34, 3-oct). El usuario ve el video con una
+'  linea de tiempo por especimen, coloreada por conducta, y corrige
+'  la etiqueta de cada segundo. Las correcciones se guardan en
+'  SEGUNDO (D-35) y los totales por minuto (PRESENTA) se recalculan.
+'
+'  Quien puede corregir queda pendiente (PREGUNTAS.md).
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/seq_revision_segundos.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
+
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant "Archivos" as fs
+
+u -> ui: en Progreso o en Resultados elige\n"Revisar segundo a segundo"
+ui -> api: pide los datos de la revisión del análisis
+api -> db: ¿el análisis está "completado"?
+db --> api: sí / no
+
+alt el análisis no está completado
+  api --> ui: rechaza la petición
+  ui --> u: muestra el motivo
+else el análisis está completado
+  api -> db: consulta los especímenes y la etiqueta\nde cada segundo (SEGUNDO)
+  db --> api: etiquetas por espécimen y por segundo
+  api -> fs: lee los recuadros de los tubos
+  fs --> api: recuadros
+  api --> ui: duración, especímenes, etiquetas y recuadros
+  ui -> api: pide el video
+  api -> fs: lee la copia del video para reproducir
+  api --> ui: video, por partes (para adelantar y retroceder)
+
+  loop el usuario revisa un espécimen a la vez
+    u -> ui: pulsa una conducta, pausa\no mueve la línea de tiempo
+    ui -> ui: guarda un borrador en el navegador
+  end
+
+  u -> ui: elige "Guardar"
+  ui -> api: envía las correcciones\n(espécimen, segundo, conducta, origen)
+  api -> db: actualiza SEGUNDO\n(la propuesta de la máquina no se modifica)
+  api -> db: recalcula los 5 intervalos y los segundos\npor conducta de los especímenes tocados (PRESENTA)
+  api -> db: borra los reportes guardados del experimento\npara que se regeneren con los datos nuevos
+  api -> fs: borra los archivos de esos reportes
+  db --> api: confirma
+  api --> ui: guardado
+  ui --> u: confirma que se guardó
+end
+@enduml

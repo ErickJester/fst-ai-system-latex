@@ -16,8 +16,8 @@ neurociencia preclínica para evaluar el efecto de antidepresivos en especímene
 mayor afecta a más de 280 millones de personas y es una de las principales causas de
 discapacidad según la OMS \cite{who_depression_2025}. Para probar nuevas moléculas
 antes de pasar a ensayos clínicos en humanos, los investigadores necesitan modelos
-modelos preclínicos con roedores que reproduzcan aspectos observables del trastorno. El más citado es la prueba
-de nado forzado (Forced Swim Test, FST), propuesta por Porsolt et al.\ en 1977
+preclínicos con roedores que reproduzcan aspectos observables del trastorno. El más
+citado es la prueba de nado forzado (Forced Swim Test, FST), propuesta por Porsolt et al.\ en 1977
 \cite{porsolt1977}; desde el año 2000 hay más de 8{,}000 artículos que lo reportan
 \cite{della_valle2025}.
 
@@ -92,16 +92,17 @@ Tratamiento experimental
 \section{Planteamiento del problema}
 
 El laboratorio realiza experimentos de nado forzado de forma periódica para evaluar el
-efecto de distintas moléculas en grupos de especímenes. Cada experimento graba cuatro
-especímenes al mismo tiempo desde una vista lateral, en dos sesiones: 20 minutos el primer día y
+efecto de distintas moléculas en grupos de especímenes. Cada video graba de dos a
+cuatro especímenes al mismo tiempo desde una vista lateral, en dos sesiones: 20 minutos el primer día y
 5 minutos el segundo.
 
-El análisis de esos videos se hace completamente a mano. Anotar el video de 5 minutos
-de un espécimen ---cronómetro en mano, observando la grabación cuadro a cuadro---
-lleva entre una hora y media y dos horas. Si el protocolo incluye que dos evaluadores
-anotan de forma independiente para verificar consistencia, ese tiempo se multiplica.
-Por semestre, el laboratorio puede acumular entre 32 y 40 videos de ese tipo; en el
-peor caso, eso representa más de 200 horas-persona dedicadas solo a anotación manual.
+El análisis de esos videos se hace completamente a mano. Anotar un video de 5 minutos
+con sus dos a cuatro especímenes ---cronómetro en mano, observando la grabación cuadro
+a cuadro--- lleva entre una hora y media y dos horas. Si el protocolo incluye que dos
+evaluadores anotan de forma independiente para verificar consistencia, ese tiempo se
+multiplica. En un semestre de actividad regular el laboratorio puede juntar alrededor de
+32 a 40 videos, aunque no tiene un calendario fijo, lo que suma decenas de horas-persona
+de anotación manual.
 
 Los problemas que genera ese proceso son los siguientes:
 
@@ -114,12 +115,8 @@ Los problemas que genera ese proceso son los siguientes:
         distintos para el mismo espécimen en el mismo video. Cuando eso ocurre, el
         investigador debe decidir qué número incluir en el reporte; esa decisión no
         tiene criterio formal y afecta la reproducibilidad de los resultados
-        \cite{armario2021}. La norma ISO/IEC (International Organization for
-        Standardization / International Electrotechnical Commission)~25010:2023
-        \cite{iso25010} define la
-        consistencia entre evaluaciones como un atributo de calidad funcional
-        (\textit{correctness}) que un sistema automatizado puede garantizar donde el
-        proceso manual no puede.
+        \cite{armario2021}. Un sistema automatizado aplica los mismos criterios a todos los
+        videos, sin depender del evaluador.
   \item \textbf{Sin registro centralizado:} los resultados quedan dispersos en hojas
         de cálculo y notas sueltas, sin forma directa de comparar sesiones o grupos
         entre sí.
@@ -145,8 +142,9 @@ reemplazar la anotación manual de videos experimentales.
 
 La propuesta es un prototipo de sistema web con visión por computadora y aprendizaje
 supervisado que analice automáticamente los videos del FST del laboratorio. El desarrollo sigue el ciclo de
-vida de software de la norma ISO/IEC/IEEE (Institute of Electrical and Electronics
-Engineers)~12207:2017 \cite{iso12207}, que organiza el proceso en fases de definición
+vida de software de la norma ISO/IEC/IEEE (International Organization for
+Standardization / International Electrotechnical Commission / Institute of Electrical
+and Electronics Engineers)~12207:2017 \cite{iso12207}, que organiza el proceso en fases de definición
 de requerimientos, diseño, implementación y verificación.
 La adaptación concreta de ese ciclo al proyecto se describe en la sección de
 metodología.
@@ -165,8 +163,8 @@ El sistema tiene dos partes:
         comparar experimentos.
 \end{itemize}
 
-El sistema asume calidad mínima de entrada: vista lateral con los cuatro cilindros
-visibles, contraste suficiente entre el espécimen y el fondo, y cámara estable. Los videos
+El sistema asume calidad mínima de entrada: vista lateral con todos los cilindros
+visibles (de dos a cuatro), contraste suficiente entre el espécimen y el fondo, y cámara estable. Los videos
 disponibles hasta ahora tienen variaciones de iluminación y contraste que pueden afectar
 el desempeño; durante el desarrollo se evaluará la robustez de los algoritmos y se
 documentarán los requisitos mínimos de calidad conforme al atributo \textit{performance
@@ -208,12 +206,12 @@ atributos de calidad de la norma ISO/IEC~25010:2023 \cite{iso25010}.
 
 \section{Justificación}
 
-En un semestre con entre 32 y 40 videos que anotar, el laboratorio puede acumular más
-de 200 horas-persona dedicadas exclusivamente a reproducir grabaciones con cronómetro.
-Con el método manual, anotar el video de 5~minutos de un espécimen lleva entre una
-hora y media a dos horas; si dos evaluadores lo hacen de forma independiente para
-verificar consistencia, ese tiempo se duplica. Son horas que los investigadores no
-están usando para diseñar experimentos, analizar resultados ni escribir publicaciones.
+Un semestre de actividad regular puede traer alrededor de 32 a 40 videos que anotar,
+aunque el laboratorio no tiene un calendario fijo. Con el método manual, anotar un
+video de 5~minutos con sus dos a cuatro especímenes lleva entre una hora y media y dos
+horas; si dos evaluadores lo hacen de forma independiente para verificar consistencia,
+ese tiempo se duplica. Son decenas de horas que los investigadores no están usando para
+diseñar experimentos, analizar resultados ni escribir publicaciones.
 
 El impacto en reproducibilidad importa igual para la ciencia. Cuando dos evaluadores
 obtienen tiempos distintos para el mismo espécimen ---algo habitual en las transiciones entre
@@ -221,8 +219,7 @@ conductas--- el investigador debe decidir qué número reportar. Esa decisión n
 criterio formal: depende del evaluador, y distintos laboratorios pueden resolverla de
 forma diferente. El resultado es que el mismo experimento puede producir datos distintos
 en manos distintas, lo que complica comparar publicaciones entre grupos de investigación.
-Un sistema automatizado produce siempre el mismo resultado para el mismo video. Si hay
-error, es el mismo error en todos los casos: documentable y corregible, no aleatorio.
+Además, el error del sistema se puede medir con métricas de clasificación.
 
 Las herramientas existentes no cubren las necesidades del laboratorio. EthoVision XT y
 ANY-maze tienen costos de licencia fuera del alcance académico del IPN. ezTrack y
@@ -247,10 +244,11 @@ de la validación final.
 \subsection*{Incluido en el alcance}
 \begin{itemize}
   \item \textbf{Videos a analizar:} grabaciones del FST del laboratorio ENMyH-IPN en
-        formato MP4, tomadas con vista lateral, con los cuatro cilindros visibles
-        simultáneamente en el encuadre y cámara estacionaria. El video principal que
+        formato MP4 o MOV, tomadas con vista lateral y en horizontal (un video grabado con
+        la cámara girada no se puede procesar), con todos los cilindros (de dos a cuatro)
+        visibles simultáneamente en el encuadre y cámara estacionaria. El video principal que
         el sistema procesa es el del día~2 (5~min) para cada espécimen de todos los
-        grupos experimentales. Los primeros 5~min del día~1 del grupo control pueden
+        grupos experimentales; de cada video se analizan solo los primeros 300~segundos. Los primeros 5~min del día~1 del grupo control pueden
         cargarse opcionalmente como referencia basal.
 
   \item \textbf{Detección y seguimiento de especímenes:} identificación automática de
@@ -262,9 +260,10 @@ de la validación final.
   \item \textbf{Clasificación de conductas:} el sistema clasifica de forma continua
         las tres conductas del FST: nado activo, inmovilidad e intentos de escape
         (escalamiento). El buceo se clasifica como nado activo. Para contabilizarse,
-        un episodio debe tener una duración mínima de tres segundos consecutivos. Si
-        el clasificador no logra distinguir con precisión suficiente nado activo de
-        escalamiento, ambas conductas se reportan juntas como conducta activa.
+        un episodio debe tener una duración mínima de tres segundos consecutivos.
+        Cuando el clasificador sabe que el espécimen no está inmóvil pero no decide
+        entre nado activo y escalamiento, ese segundo se registra como conducta
+        activa, una cuarta conducta.
 
   \item \textbf{Métricas y comparación por grupo:} tiempo total de cada conducta en
         los 5~min del día~2, desglose por minuto como funcionalidad opcional, y
@@ -277,8 +276,14 @@ de la validación final.
   \item \textbf{Reportes y exportaciones:} reporte de diagnóstico en PDF con
         indicadores de calidad del análisis (nivel de confianza del clasificador por
         espécimen y sesión); exportación de datos en CSV y en XLSX con columnas
-        Tiempo (min:seg), Nado activo, Escalamiento e Inmovilidad, desglosadas por
-        espécimen y por minuto.
+        Tiempo (min:seg), Nado activo, Escalamiento, Inmovilidad y Conducta activa,
+        desglosadas por espécimen y por minuto.
+
+  \item \textbf{Revisión segundo a segundo:} cuando el análisis termina, el usuario
+        puede abrir una pantalla con el video y una línea de tiempo por espécimen,
+        coloreada por conducta, y corregir la etiqueta de cada segundo. La propuesta
+        original del sistema se conserva y los totales por minuto se recalculan al
+        guardar las correcciones.
 
   \item \textbf{Plataforma web:} interfaz accesible desde el navegador con creación
         de cuenta de usuario por parte del administrador, carga de videos, cola de
@@ -308,9 +313,8 @@ de la validación final.
 
   \item \textbf{Corrección automática de calidad de video:} si el análisis detecta
         condiciones desfavorables (reflejos, pelaje claro, contraste insuficiente), el
-        sistema genera un reporte de diagnóstico con el nivel de confianza obtenido,
-        pero no corrige ni preprocesa el video de forma automática. El umbral mínimo
-        de confianza para que el análisis se considere válido es de 0.70.
+        sistema genera un reporte de diagnóstico, pero no corrige ni preprocesa el
+        video de forma automática.
 
   \item \textbf{Reentrenamiento del clasificador:} el sistema no actualiza el modelo
         de clasificación a partir de nuevas anotaciones del usuario. Cualquier
@@ -348,15 +352,16 @@ desde el inicio sin saber cómo va a quedar el módulo de seguimiento hasta prob
 Scrum permite ajustar decisiones al cierre de cada bloque, con base en lo que funcionó.
 
 Cada iteración termina con un entregable revisable con los directores en sesiones
-quincenales. Las actividades se organizan según los procesos de implementación y
+mensuales. Las actividades se organizan según los procesos de implementación y
 verificación de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}: criterios de aceptación
 definidos antes de codificar, revisión del producto al cierre de cada bloque, y
 registro de ajustes para el siguiente ciclo.
 
 La responsabilidad de cada integrante está delimitada por frente técnico:
 Ángel Ali es responsable del sistema web e infraestructura (backend, base de datos,
-frontend, despliegue); Vanesa es responsable del pipeline de IA (preprocesamiento de
-video, clasificador de conducta, evaluación del desempeño por clase).
+frontend, despliegue); Vanesa es responsable del pipeline de análisis de video (preprocesamiento,
+detección con YOLOv8, seguimiento con ByteTrack, clasificación de conducta con
+ResNet-18 y evaluación del desempeño por clase).
 
 Las Tablas~\ref{tab:cronograma_angel} y~\ref{tab:cronograma_vanesa} muestran el
 cronograma mes a mes de cada integrante. La columna TT1 abarca febrero--junio
@@ -366,7 +371,7 @@ cronograma mes a mes de cada integrante. La columna TT1 abarca febrero--junio
 % ── Cronograma Ángel Ali ─────────────────────────────────────────────────────
 \begin{sidewaystable}
 \centering
-\caption{Cronograma de actividades --- Frausto Robles Ángel Ali.}
+\caption{Cronograma de actividades --- Frausto Robles Ángel Alí.}
 \label{tab:cronograma_angel}
 \small
 \setlength{\tabcolsep}{4pt}
@@ -408,7 +413,7 @@ Integración frontend--backend y módulo de gestión de sesiones
 Visualización de resultados y generación de reportes PDF
   & & & & & & & & & $\bullet$ & & & \\
 \hline
-Integración IA con backend $+$ pruebas unitarias y de sistema
+Integración del pipeline de video con backend $+$ pruebas unitarias y de sistema
   & & & & & & & & & $\bullet$ & $\bullet$ & & \\
 \hline
 Corrección de defectos y ajustes de rendimiento
@@ -442,7 +447,7 @@ Caps.~1--2: antecedentes FST, técnicas de visión y modelos ML/DL
 Cap.~4 Análisis: conductas, métricas y protocolo de anotación
   & & & $\bullet$ & $\bullet$ & & & & & & & & \\
 \hline
-Cap.~5 Diseño del pipeline de IA: preprocesamiento y clasificador
+Cap.~5 Diseño del pipeline de análisis de video: preprocesamiento y clasificador
   & & & & $\bullet$ & $\bullet$ & & & & & & & \\
 \hline
 Revisiones mensuales con directores e investigador del laboratorio

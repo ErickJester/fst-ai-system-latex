@@ -424,7 +424,7 @@
       </div>
       <div class="meta-item">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="4.5" cy="4" r="2" stroke="#9ca3af" stroke-width="1.1"/><circle cx="9" cy="4" r="2" stroke="#9ca3af" stroke-width="1.1"/><path d="M1 10c0-2 1.5-3 3.5-3m4-.001c2 0 3.5 1 3.5 3" stroke="#9ca3af" stroke-width="1.1" stroke-linecap="round"/></svg>
-        <span class="meta-label">Animales:</span>
+        <span class="meta-label">Especímenes:</span>
         <span class="meta-value">4</span>
       </div>
     </div>
@@ -523,7 +523,7 @@
           <div class="log-line"><span class="log-ts">09:14:05</span><span class="log-ok">  [OK]    Preprocesamiento completado — dimensiones: 1280×720</span></div>
           <div class="log-line"><span class="log-ts">09:14:06</span><span class="log-warn">[WARN]  Contraste bajo detectado en 38% de los frames (umbral: 25%)</span></div>
           <div class="log-line"><span class="log-ts">09:14:08</span><span class="log-info">[INFO]  Aplicando CLAHE para mejorar contraste…</span></div>
-          <div class="log-line"><span class="log-ts">09:14:11</span><span class="log-err"> [ERR]   Detección de cilindros fallida — confianza máxima: 0.31 (mín. requerido: 0.70)</span></div>
+          <div class="log-line"><span class="log-ts">09:14:11</span><span class="log-err"> [ERR]   Detección de cilindros fallida — no se encontraron los tubos</span></div>
           <div class="log-line"><span class="log-ts">09:14:11</span><span class="log-err"> [ERR]   Abortando pipeline — ERR-FST-003</span></div>
           <div class="log-line"><span class="log-ts">09:14:11</span><span class="log-info">[INFO]  Reporte de diagnóstico generado → diagnostico_EXP-036.pdf</span></div>
         </div>
@@ -559,10 +559,10 @@
   /* ─── Stage definitions ───────────────────────────── */
   const STAGES = [
     { id:'pre',  icon:'⚙',  name: 'Preprocesamiento del video',          desc: 'Decodificación, normalización de frames y corrección de contraste.' },
-    { id:'det',  icon:'🔍', name: 'Detección de cilindros',               desc: 'Localización de los 4 cilindros en el encuadre usando detección de contornos.' },
-    { id:'trk',  icon:'📍', name: 'Seguimiento de animales (tracking)',   desc: 'Asignación de cada rata a su cilindro y seguimiento frame a frame.' },
-    { id:'cls',  icon:'🧠', name: 'Clasificación de conductas',           desc: 'Clasificación cuadro a cuadro: nado activo, inmovilidad, intentos de escape.' },
-    { id:'rep',  icon:'📄', name: 'Generación de resultados',             desc: 'Cálculo de métricas por animal y por sesión. Exportación de reportes.' },
+    { id:'det',  icon:'🔍', name: 'Detección de cilindros',               desc: 'Localización de los cilindros en el encuadre usando detección de contornos.' },
+    { id:'trk',  icon:'📍', name: 'Seguimiento de especímenes (tracking)',   desc: 'Asignación de cada espécimen a su cilindro y seguimiento frame a frame.' },
+    { id:'cls',  icon:'🧠', name: 'Clasificación de conductas',           desc: 'Clasificación segundo a segundo: nado activo, inmovilidad, escalamiento o conducta activa.' },
+    { id:'rep',  icon:'📄', name: 'Generación de resultados',             desc: 'Cálculo de métricas por espécimen y por sesión. Exportación de reportes.' },
   ];
 
   const iconSvg = {
@@ -622,7 +622,7 @@
       stages: ['done','done','active','wait','wait'],
       pcts:   [100,100,62,0,0],
       overall: 52,
-      overallSub: 'Seguimiento de animales frame a frame…',
+      overallSub: 'Seguimiento de especímenes frame a frame…',
       headerPill: 'pill-proc', headerTxt: 'En proceso',
       subtitle: 'El análisis del Día 1 está en curso. Puedes cerrar esta pestaña; el proceso continuará en segundo plano.',
       showErr: false, showSuccess: false,
@@ -664,9 +664,9 @@
       showErr: true,
       errTitle: 'Calidad de video insuficiente',
       errCode:  'ERR-FST-003',
-      errMsg:   'El sistema no pudo detectar los cilindros en el video del Día 2 con la confianza mínima requerida. Esto ocurre cuando el contraste entre el animal y el fondo es demasiado bajo o cuando la imagen presenta reflejos excesivos.',
+      errMsg:   'El sistema no pudo detectar los cilindros en el video del Día 2. Esto ocurre cuando el contraste entre el espécimen y el fondo es demasiado bajo o cuando la imagen presenta reflejos excesivos.',
       errDetails: [
-        'Contraste promedio detectado: 0.31 — umbral mínimo requerido: 0.70',
+        'Contraste promedio detectado: 0.31 (demasiado bajo para distinguir al espécimen del fondo)',
         'Se aplicó corrección CLAHE sin resultados suficientes (38% de frames afectados)',
         'El video fue grabado con iluminación lateral directa que genera reflejos en el agua',
         'Recomendación: repetir la grabación con iluminación difusa y fondo oscuro',
@@ -686,13 +686,13 @@
       showErr: true,
       errTitle: 'No se detectaron cilindros',
       errCode:  'ERR-FST-007',
-      errMsg:   'El modelo de detección no encontró ningún cilindro en el video con suficiente confianza. El encuadre del video puede no corresponder a la configuración esperada (vista superior con 4 cilindros visibles).',
+      errMsg:   'El modelo de detección no encontró ningún cilindro en el video con suficiente confianza. El encuadre del video puede no corresponder a la configuración esperada (vista lateral con 2 a 4 cilindros visibles).',
       errDetails: [
-        'Cilindros detectados: 0 de 4 esperados',
-        'Confianza máxima del detector: 0.18 (umbral: 0.70)',
-        'Posible causa: video grabado desde un ángulo lateral, no vista superior',
+        'Cilindros detectados: 0 de los esperados',
+        'Ningún cilindro encontrado en el video',
+        'Posible causa: video grabado desde un ángulo distinto a la vista lateral',
         'Posible causa: cilindros fuera de cuadro o parcialmente visibles',
-        'Recomendación: verificar que el video muestre los 4 cilindros desde arriba',
+        'Recomendación: verificar que el video muestre todos los cilindros en vista lateral',
       ],
       showSuccess: false,
     },

@@ -63,10 +63,10 @@ else no hay ningun grupo con ese nombre en este experimento
   end note
 end
 
-inv -> ui: elige la sesion (Día 1 o Día 2) y selecciona el archivo .mp4
+inv -> ui: elige la sesion (Día 1 o Día 2) y selecciona el archivo .mp4 o .mov
 ui -> api: envía el video del experimento
 
-api -> api: valida formato y reproducibilidad del archivo
+api -> api: valida formato (.mp4 o .mov), reproducibilidad\ny que el video esté en horizontal
 
 alt el archivo no es válido
   api --> ui: reporta el error de validación

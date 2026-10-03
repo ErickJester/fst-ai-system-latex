@@ -84,7 +84,7 @@ end
 alt algún análisis llegó a "completado"
   ui -> inv: habilita el acceso a los resultados\n(ver seq_consulta_resultados.puml)
 else algún análisis llegó a "error"
-  ui -> inv: muestra el código y la descripción del error,\ny habilita la descarga del reporte de diagnóstico
+  ui -> inv: muestra el mensaje del error armado con la etapa,\ny habilita la descarga del reporte de diagnóstico
 
   inv -> ui: selecciona la descarga del reporte de diagnóstico
   ui -> api: pide el PDF de diagnóstico de este análisis

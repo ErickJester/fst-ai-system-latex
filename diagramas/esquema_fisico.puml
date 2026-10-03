@@ -5,7 +5,10 @@
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
 '  Figura 5.5 de chapters/05_diseno.tex
-'  Gestor: PostgreSQL (D-11) - 16 tablas, 18 llaves foraneas
+'  Gestor: PostgreSQL (D-11) - 17 tablas, 21 llaves foraneas
+'  (3-oct: D-35 agrega SEGUNDO, una fila por especimen y por segundo,
+'   y D-29 agrega la conducta "conducta activa", asi que PRESENTA pasa
+'   de (2,3) a (2,4) conductas por intervalo)
 '
 '  Este diagrama REEMPLAZA POR COMPLETO al esquema fisico anterior
 '  (12 tablas: USUARIOS, EXPERIMENTOS, SUJETOS, VIDEOS, ROIS,
@@ -27,13 +30,13 @@
 '
 '  ---- Que agrega esta etapa sobre el grafo logico ----
 '  1. Tipos concretos de PostgreSQL por dominio (ver tabla abajo).
-'  2. Siete dominios cerrados via CREATE DOMAIN + CHECK (D-14 a D-17
+'  2. Ocho dominios cerrados via CREATE DOMAIN + CHECK (D-14 a D-17
 '     mas los tres ya cerrados en la etapa logica).
 '  3. D-04: columna ESPECIMEN.idGrupo, redundante a proposito -
 '     SOLO existe aqui, en el fisico. El grafo logico se queda en
 '     BCNF estricta, sin idGrupo en ESPECIMEN. Esto agrega una FK
 '     mas (GRUPO -> ESPECIMEN) que no esta en el logico: por eso
-'     el fisico tiene 18 llaves foraneas y el logico 17.
+'     el fisico tiene 21 llaves foraneas y el logico 20.
 '  4. D-24 (15-sep, esta sesion): ANALISIS.idVideo se declara UNIQUE
 '     para forzar estructuralmente la cardinalidad (1,1) de D-03.
 '     Kendall & Kendall p.425 respalda la "clave unica" como
@@ -61,7 +64,7 @@
 '  Booleano          -> boolean
 '  Hash del modelo   -> char(64)                              [D-14]
 '
-'  ---- Los siete dominios cerrados (CREATE DOMAIN ... CHECK) ----
+'  ---- Los ocho dominios cerrados (CREATE DOMAIN ... CHECK) ----
 '  tipo_grupo             varchar(24) IN ('control','referencia',
 '                          'tratamiento experimental')
 '  sesion_video            varchar(6) IN ('Dia 1','Dia 2')
@@ -74,6 +77,9 @@
 '                          'deteccion','seguimiento',
 '                          'clasificacion')                     [D-16]
 '  nivel_clasif_analisis   varchar(8) IN ('preciso','agrupado')  [D-17]
+'  origen_segundo         varchar(16) IN ('maquina','humano_confirma',
+'                          'humano_corrige','humano_duda','sin_revisar',
+'                          'humano_ciego')                      [D-35]
 '  (CONFIGURACION.umbralConfianza no es lista, es rango: CHECK
 '  BETWEEN 0 AND 1, sobre la columna directamente)
 '
@@ -258,6 +264,28 @@ entity PRESENTA {
   --
   segundos : numeric(p,s)
 }
+note bottom of PRESENTA
+  Resumen por minuto: una fila por cada una de las
+  cuatro conductas, incluso con 0 segundos. Se recalcula
+  desde SEGUNDO cuando el usuario guarda correcciones.
+end note
+
+entity SEGUNDO {
+  * idObservacion : integer <<PK>> <<FK>>
+  * segundo : smallint <<PK>>
+  --
+  clase : varchar(n) <<FK>> (nulo = "no se ve")
+  propuesta : varchar(n) <<FK>>
+  origen : origen_segundo
+  ..
+  CK segundo BETWEEN 1 AND 300
+}
+note bottom of SEGUNDO
+  D-35: una fila por especimen y por segundo analizado.
+  Es lo que el usuario revisa y corrige al terminar el
+  analisis. propuesta guarda lo que dijo la maquina y
+  nunca se modifica.
+end note
 
 entity ADMINISTRADOR {
   * idInstitucional : varchar(10) <<PK>> <<FK>>
@@ -323,7 +351,7 @@ entity NOTIFICACION {
 }
 
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-'  RELACIONES - 18 FK (17 del grafo logico + 1 fisica: D-04)
+'  RELACIONES - 21 FK (20 del grafo logico + 1 fisica: D-04)
 '  Todas ON UPDATE NO ACTION ON DELETE NO ACTION
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -335,14 +363,14 @@ EXPERIMENTO    "1" --o "3..*" GRUPO                     : idExperimento
 EXPERIMENTO    "1" --o "0..*" REPORTE                   : idExperimento
 EXPERIMENTO    "1" --o "0..*" NOTIFICACION               : idExperimento
 
-GRUPO          "1" --o "2..*" TANDA                     : idGrupo
-GRUPO          "1" --o "6..*" ESPECIMEN                 : idGrupo <color:#8A5A0B>· D-04</color>
+GRUPO          "1" --o "1..*" TANDA                     : idGrupo
+GRUPO          "1" --o "2..*" ESPECIMEN                 : idGrupo <color:#8A5A0B>· D-04</color>
 
-TANDA          "1" --o "3..4" ESPECIMEN                 : idTanda
+TANDA          "1" --o "2..4" ESPECIMEN                 : idTanda
 TANDA          "1" --o "1..2" VIDEO                     : idTanda
 
 VIDEO          "1" --o "1"    ANALISIS                  : idVideo <color:#8A5A0B>· UK, D-24</color>
-VIDEO          "1" --o "3..4" OBSERVACION                : idVideo
+VIDEO          "1" --o "2..4" OBSERVACION                : idVideo
 
 CONFIGURACION  "1" --o "0..*" ANALISIS                  : idConfig
 MODELO         "1" --o "0..*" CONFIGURACION              : hashModelo
@@ -350,7 +378,10 @@ MODELO         "1" --o "0..*" CONFIGURACION              : hashModelo
 ESPECIMEN      "1" --o "1..2" OBSERVACION                : idEspecimen
 
 OBSERVACION    "1" --o "5"    INTERVALO                 : idObservacion
-INTERVALO      "1" --o "2..3" PRESENTA                  : idIntervalo
+INTERVALO      "1" --o "2..4" PRESENTA                  : idIntervalo
 CONDUCTA       "1" --o "0..*" PRESENTA                  : conducta
+
+OBSERVACION    "1" --o "1..300" SEGUNDO                 : idObservacion
+CONDUCTA       "0..1" --o "0..*" SEGUNDO                : clase, propuesta
 
 @enduml

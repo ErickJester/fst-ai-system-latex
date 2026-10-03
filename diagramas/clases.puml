@@ -86,7 +86,6 @@ package P3_Pipeline_de_analisis_conductual {
   }
 
   class PipelineAnalisis <<control>> {
-    -UMBRAL_CONFIANZA : Float = 0.70
     +preprocesarVideo(video) : void
     +detectarCilindros() : List<ROI>
     +rastrearEspecimenes(rois) : void
@@ -146,6 +145,13 @@ package P4_Resultados_y_reportes {
   class PRESENTA {
     -segundos : Float
   }
+  class Segundo {
+    -segundo : Integer
+    -clase : String
+    -propuesta : String
+    -origen : String
+    +corregir(clase, origen) : void
+  }
 
   class Reporte {
     -id : Integer
@@ -175,8 +181,8 @@ Usuario "1" --> "0..*" Experimento  : registra
 Usuario "1" --> "0..*" Notificacion : recibe
 
 Experimento "1" *--> "3..*" Grupo     : compone
-Grupo       "1" *--> "2..*" Tanda     : "se graba en"
-Tanda       "1" *--> "3..4" Especimen : aloja
+Grupo       "1" *--> "1..*" Tanda     : "se graba en"
+Tanda       "1" *--> "2..4" Especimen : aloja
 Tanda       "1" *--> "1..2" Video     : produce
 
 Analisis "1" --> "1" Video            : procesa
@@ -194,10 +200,11 @@ PipelineAnalisis ..> Observacion : origina
 PipelineAnalisis ..> PRESENTA    : genera
 
 Especimen   "1" --> "1..2" Observacion : "aparece en"
-Video       "1" --> "3..4" Observacion : contiene
+Video       "1" --> "2..4" Observacion : contiene
 Observacion "1" *--> "5"   Intervalo   : "se divide en"
 
-Intervalo "2..3" -- "0..*" Conducta : presenta
+Observacion "1" *--> "1..300" Segundo : "se etiqueta en"
+Intervalo "2..4" -- "0..*" Conducta : presenta
 (Intervalo, Conducta) .. PRESENTA
 
 Experimento "1"    --> "0..*" Reporte      : origina
