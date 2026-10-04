@@ -2517,142 +2517,176 @@ catálogo \textbf{Conducta} y los segundos que ocupó cada una.
 \section{Diseño de la interfaz web}
 % -----------------------------------------------------------
 
-La interfaz tiene siete pantallas principales, diseñadas para que un investigador sin
+La interfaz tiene once pantallas, diseñadas para que un investigador sin
 experiencia en programación pueda completar el flujo completo ---crear experimento,
 esperar el análisis, consultar y descargar resultados--- sin necesitar asistencia
-técnica (ver RNF-06).
+técnica (ver RNF-06). Las capturas de esta sección corresponden a la segunda versión
+de los mockups (v2), construida con datos de ejemplo y sin conexión al servidor.
 
 \subsection{Pantalla de inicio de sesión}
 
 Formulario con campos de correo institucional y contraseña. Las credenciales
 incorrectas muestran un mensaje de error genérico sin revelar cuál campo falló
-(ver RN-01). Incluye enlace de recuperación de contraseña (RF-03).
+(ver RN-01). Incluye enlace de recuperación de contraseña (RF-03). Antes de enviar
+las credenciales, la pantalla comprueba que el correo sea del dominio institucional.
 
 \begin{figure}[H]
 \centering
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_login_normal}
+    \includegraphics[width=\textwidth]{figures/mockups/v2/login}
     \caption{Estado normal.}
     \label{fig:ui_login_normal}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_login_error}
-    \caption{Credenciales incorrectas (RN-01).}
+    \includegraphics[width=\textwidth]{figures/mockups/v2/estados/login_error}
+    \caption{Correo fuera del dominio institucional.}
     \label{fig:ui_login_error}
   \end{subfigure}
 \caption{Pantalla de inicio de sesión [autoría propia].}
 \label{fig:ui_login}
 \end{figure}
 
-\subsection{Dashboard del investigador}
+\subsection{Primer acceso y perfil}
 
-Lista de experimentos del laboratorio con nombre, fecha, número de grupos, sesión,
-estado y accesos directos a resultados y descarga (ver RN-08). Muestra avisos cuando
-un video está a menos de 7~días de ser eliminado automáticamente (RF-24). Incluye
-filtros por estado y paginación.
+Una cuenta creada por el Administrador entra con una contraseña temporal y, mientras
+no la cambie, no tiene acceso a ninguna otra pantalla (RF-05, RF-07). Después, el
+investigador puede consultar sus datos y cambiar su contraseña desde la pantalla de
+perfil; el identificador institucional es de solo lectura.
 
 \begin{figure}[H]
 \centering
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_dashboard_normal}
-    \caption{Vista con experimentos activos.}
+    \includegraphics[width=\textwidth]{figures/mockups/v2/primer-acceso}
+    \caption{Cambio obligatorio de la contraseña temporal.}
+    \label{fig:ui_primer_acceso}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/v2/perfil}
+    \caption{Perfil del usuario.}
+    \label{fig:ui_perfil}
+  \end{subfigure}
+\caption{Primer acceso y perfil [autoría propia].}
+\label{fig:ui_perfil_acceso}
+\end{figure}
+
+\subsection{Lista de experimentos}
+
+Lista de experimentos del laboratorio con grupos, especímenes, videos del Día~2,
+estado, responsable, retención y acceso al reporte (ver RN-08). Muestra un aviso
+cuando un video está a menos de 7~días de ser eliminado automáticamente (RF-24).
+Incluye filtros por estado y búsqueda por nombre o tratamiento. La eliminación de un
+experimento no está en esta lista sino en su detalle.
+
+\begin{figure}[H]
+\centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/v2/experimentos}
+    \caption{Lista con experimentos y aviso de vencimiento (RF-24).}
     \label{fig:ui_dashboard_normal}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_dashboard_vacio}
-    \caption{Sin experimentos (estado vacío).}
+    \includegraphics[width=\textwidth]{figures/mockups/v2/estados/experimentos_vacio}
+    \caption{Búsqueda sin coincidencias.}
     \label{fig:ui_dashboard_vacio}
   \end{subfigure}
-
-  \vspace{8pt}
-  \begin{subfigure}[t]{0.70\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_dashboard_alerta}
-    \caption{Aviso de vencimiento próximo de video (RF-24).}
-    \label{fig:ui_dashboard_alerta}
-  \end{subfigure}
-\caption{Dashboard del investigador [autoría propia].}
+\caption{Lista de experimentos del investigador [autoría propia].}
 \label{fig:ui_dashboard}
 \end{figure}
 
-\subsection{Creación de experimento}
+\subsection{Detalle de experimento y de grupo}
 
-Formulario en tres pasos: metadatos del experimento (nombre, fecha y notas, ver
-CU-04); grupo, tratamiento y video de la tanda correspondiente, con la tanda
-sugerida por el sistema y sujeta a confirmación (ver CU-05, D-19); y confirmación
-final. Solo acepta archivos \texttt{.mp4} o \texttt{.mov} en horizontal; el rechazo de formato ocurre en el
-cliente antes de iniciar la subida. Una vez completada la carga válida, el
-análisis inicia automáticamente (RF-12). El segundo paso se repite cada vez que
-se agrega una nueva tanda al experimento, no ocurre una sola vez.
-
-La división en pasos se eligió sobre un formulario único porque la carga de video
-puede tardar varios minutos según el tamaño del archivo: separar los metadatos
-del experimento de la carga de cada tanda permite que el investigador corrija un
-nombre o fecha sin necesidad de volver a subir un video, y permite agregar tandas
-nuevas más adelante sin repetir los metadatos del experimento.
+El detalle de un experimento reúne sus grupos y el estado de cada tanda. Solo quien
+creó el experimento o un administrador puede eliminarlo, y la acción pide escribir el
+nombre del experimento y la contraseña (RF-27, RN-09). El detalle de un grupo muestra
+sus tandas, los especímenes de cada una con el cilindro que ocuparon y los videos de
+Día~1 y Día~2 con su estado.
 
 \begin{figure}[H]
 \centering
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_nuevo_vacio}
-    \caption{Formulario vacío (paso 1).}
+    \includegraphics[width=\textwidth]{figures/mockups/v2/experimento}
+    \caption{Detalle de un experimento.}
+    \label{fig:ui_experimento}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/v2/grupo}
+    \caption{Detalle de un grupo.}
+    \label{fig:ui_grupo}
+  \end{subfigure}
+\caption{Detalle de experimento y de grupo [autoría propia].}
+\label{fig:ui_detalle}
+\end{figure}
+
+\subsection{Creación de experimento y carga de video}
+
+Formulario en dos pasos: datos generales del experimento (nombre, fecha y notas, ver
+CU-04); y carga del video de una tanda, donde se indica el grupo o tratamiento, la
+tanda sugerida por el sistema y sujeta a confirmación (ver CU-05, D-19), de dos a
+cuatro cilindros en el cuadro, la sesión (Día~1 o Día~2) y el archivo. Solo acepta
+archivos \texttt{.mp4} o \texttt{.mov} en horizontal; el rechazo de formato ocurre en
+el cliente antes de iniciar la subida. Una vez completada la carga válida, el
+análisis inicia automáticamente (RF-12). El segundo paso se repite cada vez que
+se agrega una nueva tanda al experimento, no ocurre una sola vez.
+
+La división en pasos se eligió sobre un formulario único porque la carga de video
+puede tardar varios minutos según el tamaño del archivo: separar los datos
+del experimento de la carga de cada tanda permite que el investigador corrija un
+nombre o fecha sin necesidad de volver a subir un video, y permite agregar tandas
+nuevas más adelante sin repetir los datos del experimento.
+
+\begin{figure}[H]
+\centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/v2/cargar-video}
+    \caption{Formulario vacío (paso 2).}
     \label{fig:ui_nuevo_vacio}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_nuevo_lleno}
-    \caption{Metadatos completados (paso 1).}
+    \includegraphics[width=\textwidth]{figures/mockups/v2/estados/cargar_lleno}
+    \caption{Grupo, tanda confirmada y archivo seleccionado.}
     \label{fig:ui_nuevo_lleno}
   \end{subfigure}
 
   \vspace{8pt}
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_nuevo_subiendo}
-    \caption{Subida de video en progreso (RF-09).}
-    \label{fig:ui_nuevo_subiendo}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_nuevo_error}
-    \caption{Error de formato de archivo (RF-10).}
+    \includegraphics[width=\textwidth]{figures/mockups/v2/estados/cargar_error_formato}
+    \caption{Archivo rechazado por formato (RF-08).}
     \label{fig:ui_nuevo_error}
   \end{subfigure}
-
-  \vspace{8pt}
-  \begin{subfigure}[t]{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_nuevo_validacion}
-    \caption{Errores de validación en campos.}
-    \label{fig:ui_nuevo_validacion}
-  \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_nuevo_exito}
+    \includegraphics[width=\textwidth]{figures/mockups/v2/estados/cargar_exito}
     \caption{Carga exitosa, análisis en cola (RF-12).}
     \label{fig:ui_nuevo_exito}
   \end{subfigure}
-\caption{Pantalla de creación de experimento [autoría propia].}
+\caption{Pantalla de carga de video por tanda [autoría propia].}
 \label{fig:ui_nuevo}
 \end{figure}
 
 \subsection{Progreso del análisis}
 
 Muestra el estado actual del pipeline con las cuatro etapas (preprocesamiento,
-detección de cilindros, seguimiento y clasificación), una barra de progreso en
-porcentaje y el log de ejecución expandible. Si ocurre un error, muestra el código,
-la descripción y el botón de descarga del reporte de diagnóstico (RF-16). El análisis
-continúa aunque el investigador cierre la pestaña (RF-15).
+detección de cilindros, seguimiento y clasificación) y una barra de progreso en
+porcentaje. Si ocurre un error, muestra el código, la descripción y el botón de
+descarga del reporte de diagnóstico (RF-16). Debajo lista la cola de trabajos. El
+análisis continúa aunque el investigador cierre la pestaña (RF-15).
 
 No hay botón de cancelar visible durante el análisis. La decisión fue deliberada: el
 laboratorio no tiene casos de uso donde cancele un análisis a mitad de camino, y
@@ -2663,68 +2697,22 @@ soportar cancelación.
 
 \begin{figure}[H]
 \centering
-  \begin{subfigure}[t]{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_progreso_analizando}
-    \caption{Análisis en curso (RF-15).}
-    \label{fig:ui_progreso_analizando}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_progreso_completado}
-    \caption{Análisis completado.}
-    \label{fig:ui_progreso_completado}
-  \end{subfigure}
-
-  \vspace{8pt}
-  \begin{subfigure}[t]{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_progreso_err_calidad}
-    \caption{Error por calidad de video insuficiente (RF-16).}
-    \label{fig:ui_progreso_err_calidad}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_progreso_err_deteccion}
-    \caption{Error por fallo en detección de cilindros (RF-16).}
-    \label{fig:ui_progreso_err_deteccion}
-  \end{subfigure}
-\caption{Pantalla de progreso del análisis [autoría propia].}
+\includegraphics[width=0.75\textwidth]{figures/mockups/v2/progreso}
+\caption{Pantalla de progreso del análisis: un análisis en curso, otro detenido por error de detección de cilindros (RF-16) y la cola de trabajos [autoría propia].}
 \label{fig:ui_progreso}
 \end{figure}
 
 \subsection{Resultados del experimento}
 
-Cuatro pestañas: resumen por sesión con totales en segundos y porcentaje por conducta,
-tabla detallada por espécimen (RF-19), desglose por minuto (RF-20) y comparación
-Día~1 vs.\ Día~2 (RF-21, disponible solo si ambos videos de la tanda fueron
-procesados). Incluye botones de descarga en PDF y CSV.
+Cuatro pestañas: resultados por espécimen, comparación entre grupos, línea de tiempo
+por minuto (RF-20) y episodios, esta última aún sin habilitar. La vista por espécimen
+muestra el tiempo por conducta con media, desviación estándar y varianza (RF-19), el
+nivel de clasificación del análisis y la leyenda de conductas; en el panel lateral
+se compara la inmovilidad entre los grupos. Incluye botones de descarga en PDF, CSV y XLSX.
 
 \begin{figure}[H]
 \centering
-  \begin{subfigure}[t]{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_resultados_dia2}
-    \caption{Resumen de un solo día (Día~2).}
-    \label{fig:ui_resultados_dia2}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_resultados_comparacion}
-    \caption{Comparación Día~1 vs.\ Día~2 (RF-21).}
-    \label{fig:ui_resultados_comparacion}
-  \end{subfigure}
-
-  \vspace{8pt}
-  \begin{subfigure}[t]{0.70\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_resultados_minutos}
-    \caption{Desglose por minuto expandido (RF-20).}
-    \label{fig:ui_resultados_minutos}
-  \end{subfigure}
+\includegraphics[width=0.85\textwidth]{figures/mockups/v2/resultados}
 \caption{Pantalla de resultados del experimento [autoría propia].}
 \label{fig:ui_resultados}
 \end{figure}
@@ -2753,48 +2741,26 @@ propuesta original y recalcula los totales por minuto (CU-25 a CU-27).
 \subsection{Panel de administración}
 
 Vista exclusiva para quienes pertenecen a \texttt{ADMINISTRADOR} (ver CU-15).
-Muestra métricas del sistema (uso de disco, cola de procesamiento, análisis
-activos), lista de usuarios con filtros por administrador/investigador y
-estado, y la lista de experimentos de todos los investigadores. Incluye modales
-para crear y editar cuentas (RF-05, RF-28).
+Muestra la lista de cuentas con correo, rol y estado, y permite desactivarlas sin
+borrarlas; la cola de trabajos; el uso de almacenamiento, con un aviso al llegar
+al 80\,\% de disco y el borrado de los videos más antiguos al llegar al 90\,\% (RF-29,
+RNF-09); y las conductas y el modelo del clasificador en uso. Para crear una cuenta, el
+Administrador captura identificador institucional, nombre, apellidos y correo (RF-05).
 
 \begin{figure}[H]
 \centering
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_admin_normal}
-    \caption{Vista de métricas del sistema.}
+    \includegraphics[width=\textwidth]{figures/mockups/v2/admin}
+    \caption{Cuentas, cola y almacenamiento.}
     \label{fig:ui_admin_normal}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_admin_disco}
-    \caption{Alerta de uso de disco elevado (RF-29).}
-    \label{fig:ui_admin_disco}
-  \end{subfigure}
-
-  \vspace{8pt}
-  \begin{subfigure}[t]{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_admin_cola}
-    \caption{Cola de análisis activa (RF-29).}
-    \label{fig:ui_admin_cola}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_admin_modal_nuevo}
-    \caption{Modal de creación de usuario (RF-05).}
-    \label{fig:ui_admin_modal_nuevo}
-  \end{subfigure}
-
-  \vspace{8pt}
-  \begin{subfigure}[t]{0.70\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mockups/ui_admin_modal_editar}
-    \caption{Modal de edición de usuario (RF-05).}
-    \label{fig:ui_admin_modal_editar}
+    \includegraphics[width=\textwidth]{figures/mockups/v2/estados/admin_crear_cuenta}
+    \caption{Formulario de creación de cuenta (RF-05).}
+    \label{fig:ui_admin_crear}
   \end{subfigure}
 \caption{Panel de administración [autoría propia].}
 \label{fig:ui_admin}
