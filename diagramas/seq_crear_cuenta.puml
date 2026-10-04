@@ -61,7 +61,7 @@ note right of ui
 end note
 
 admin -> ui: selecciona "Crear cuenta"
-ui -> admin: muestra el formulario\n(identificador institucional, nombre,\napellidos, correo institucional)
+ui -> admin: muestra el formulario\n(identificador institucional, nombre,\napellidos, correo electrónico)
 
 admin -> ui: completa los datos y confirma
 ui -> api: envía identificador, nombre, apellidos y correo\ncon la sesión activa del Administrador
@@ -84,8 +84,13 @@ else sí está en ADMINISTRADOR
     api -> db: crea USUARIO\n(idInstitucional, nombre, apellidos, correo,\ncontrasenaHash, activo = sí, cambioRequerido = sí)
     db --> api: confirma la creación
     api -> api: envía correo al nuevo investigador\ncon sus credenciales de acceso inicial
-    api --> ui: 201 Created
-    ui --> admin: confirma la cuenta creada\ny que se notificó al investigador
+    note right of api
+      si el envío falla, la cuenta queda
+      creada igual (D-45): la contraseña
+      temporal se muestra en el paso siguiente
+    end note
+    api --> ui: cuenta creada, con la contraseña temporal
+    ui --> admin: confirma la cuenta creada y muestra\nla contraseña temporal una sola vez
   end
 end
 

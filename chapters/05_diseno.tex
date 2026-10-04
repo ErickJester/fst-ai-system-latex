@@ -373,7 +373,7 @@ Las tablas están organizadas en cuatro grupos funcionales:
 
   \item \textbf{ANALISIS}: ejecución del pipeline sobre un video con una
         configuración específica. Registra estado, etapa actual, nivel de
-        confianza obtenido y, cuando falla, la ruta al reporte de
+        clasificación (preciso o agrupado) y, cuando falla, la ruta al reporte de
         diagnóstico (ver D-23).
 \end{itemize}
 
@@ -814,7 +814,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión iniciada; JWT emitido y almacenado en el cliente; usuario redirigido al \textit{dashboard}.} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al usuario autenticarse en el sistema mediante correo institucional y contraseña.} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al usuario autenticarse en el sistema mediante correo electrónico y contraseña.} \\
 \hline
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El usuario introduce sus credenciales; el sistema las valida, emite un JWT y redirige al \textit{dashboard}. Si las credenciales son incorrectas, se muestra un mensaje de error sin revelar cuál campo falló.} \\
 \hline
@@ -831,7 +831,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 2 & Sistema & Muestra la pantalla de inicio de sesión con campos de correo y contraseña. \\
 \hline
-3 & Inv. / Admin. & Introduce correo institucional (\texttt{@ipn.mx}) y contraseña. \\
+3 & Inv. / Admin. & Introduce su correo electrónico y contraseña. \\
 \hline
 4 & Sistema & Valida las credenciales contra la base de datos. \\
 \hline
@@ -922,7 +922,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-03} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El usuario tiene cuenta registrada con correo institucional activo.} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El usuario tiene una cuenta activa con correo electrónico registrado.} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Enlace de restablecimiento enviado al correo; nueva contraseña establecida y sesión disponible.} \\
 \hline
@@ -943,7 +943,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 2 & Sistema & Solicita el correo electrónico registrado. \\
 \hline
-3 & Inv. / Admin. & Introduce su correo institucional. \\
+3 & Inv. / Admin. & Introduce su correo electrónico. \\
 \hline
 4 & Sistema & Envía un enlace de restablecimiento con validez de tiempo limitado al correo indicado. \\
 \hline
@@ -1154,7 +1154,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Datos del perfil actualizados en la base de datos.} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador actualizar su nombre, correo institucional y contraseña desde la pantalla de perfil.} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador actualizar su nombre, correo electrónico y contraseña desde la pantalla de perfil.} \\
 \hline
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador accede a su perfil, modifica los campos deseados y confirma los cambios. El sistema valida los datos y actualiza el registro en la base de datos.} \\
 \hline
@@ -1173,7 +1173,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 3 & Investigador & Modifica los campos deseados y confirma los cambios. \\
 \hline
-4 & Sistema & Valida que el correo tenga formato \texttt{@ipn.mx} y que no esté en uso por otra cuenta. \\
+4 & Sistema & Valida que el correo tenga un formato válido y que no esté en uso por otra cuenta. \\
 \hline
 5 & Sistema & Actualiza los datos en la base de datos y muestra confirmación. \\
 \hline
@@ -1534,7 +1534,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
-3 & Estado «error»: el sistema muestra el código y descripción del error, y habilita el acceso al reporte de diagnóstico si está disponible (ver CU-08). \\
+3 & Estado «error»: el sistema muestra la descripción del error según la etapa en que se detuvo, y habilita el acceso al reporte de diagnóstico si está disponible (ver CU-08). \\
 \hline
 \end{tabular}
 
@@ -1637,7 +1637,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
 \hline
-1 & Sistema & Muestra en la pantalla de progreso el error de calidad con código y descripción. \\
+1 & Sistema & Muestra en la pantalla de progreso la descripción del error: el video no se pudo abrir o no se encontraron los cilindros. \\
 \hline
 2 & Sistema & Habilita el botón de descarga del reporte de diagnóstico en PDF. \\
 \hline
@@ -2005,15 +2005,15 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-05, RF-07. Relacionado: CU-11 (Gestionar cuenta de investigador).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-05, RF-07, RF-33. Relacionado: CU-11 (Gestionar cuenta de investigador).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-15). No existe formulario público de registro (ver RF-07).} \\
 \hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Cuenta creada en la base de datos con contraseña temporal; investigador notificado por correo con sus credenciales de acceso inicial.} \\
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Cuenta creada en la base de datos con contraseña temporal; investigador notificado por correo con sus credenciales de acceso inicial; la contraseña temporal se mostró una sola vez al Administrador como respaldo.} \\
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al Administrador dar de alta una nueva cuenta de investigador. El único mecanismo de ingreso al sistema es que el Administrador cree la cuenta; no existe autoregistro.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El Administrador introduce los datos del nuevo usuario (identificador institucional, nombre, apellidos y correo \texttt{@ipn.mx}) y el sistema genera una contraseña temporal. En el primer acceso, el sistema obliga al investigador a cambiar la contraseña.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El Administrador introduce los datos del nuevo usuario (identificador institucional, nombre, apellidos y correo electrónico) y el sistema genera una contraseña temporal. En el primer acceso, el sistema obliga al investigador a cambiar la contraseña.} \\
 \hline
 \end{tabular}
 
@@ -2026,7 +2026,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 1 & Administrador & Accede al panel de administración y selecciona «Crear cuenta». \\
 \hline
-2 & Sistema & Muestra el formulario de alta con campos: identificador institucional, nombre, apellidos y correo institucional (\texttt{@ipn.mx}). \\
+2 & Sistema & Muestra el formulario de alta con campos: identificador institucional, nombre, apellidos y correo electrónico. \\
 \hline
 3 & Administrador & Completa los datos y confirma la creación. \\
 \hline
@@ -2035,6 +2035,8 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 5 & Sistema & Crea la cuenta con contraseña temporal generada automáticamente y la marca como «cambio obligatorio al primer ingreso». \\
 \hline
 6 & Sistema & Notifica al investigador por correo con sus credenciales de acceso inicial. \\
+\hline
+7 & Sistema & Muestra la contraseña temporal una sola vez al Administrador, como respaldo por si el correo no llega. \\
 \hline
 \end{tabular}
 
@@ -2045,7 +2047,9 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
-4 & El correo ya está registrado en el sistema: el sistema informa el conflicto y no crea el registro duplicado. El Administrador puede verificar el estado de la cuenta existente. \\
+4 & El identificador institucional o el correo ya están registrados: el sistema informa el conflicto y no crea el registro duplicado. El Administrador puede verificar el estado de la cuenta existente. \\
+\hline
+6 & El envío del correo falla: la cuenta queda creada de todos modos y el Administrador entrega la contraseña temporal que el sistema le muestra en el paso 7. \\
 \hline
 \end{tabular}
 
@@ -2392,7 +2396,7 @@ quien pertenece a \texttt{ADMINISTRADOR} (ver CU-15): permite crear cuentas
 nuevas con contraseña temporal y desactivar cuentas existentes sin eliminarlas
 (ver RF-05, RF-07). La configuración de perfil
 (Figura~\ref{fig:seq_perfil}) está disponible para cualquier usuario con sesión
-activa y permite actualizar nombre y correo institucional.
+activa y permite actualizar nombre y correo electrónico.
 
 \begin{figure}[H]
 \centering
@@ -2535,10 +2539,10 @@ de los mockups (v2), construida con datos de ejemplo y sin conexión al servidor
 
 \subsection{Pantalla de inicio de sesión}
 
-Formulario con campos de correo institucional y contraseña. Las credenciales
+Formulario con campos de correo electrónico y contraseña. Las credenciales
 incorrectas muestran un mensaje de error genérico sin revelar cuál campo falló
 (ver RN-01). Incluye enlace de recuperación de contraseña (RF-03). Antes de enviar
-las credenciales, la pantalla comprueba que el correo sea del dominio institucional.
+las credenciales, la pantalla comprueba que el correo tenga un formato válido.
 
 \begin{figure}[H]
 \centering
@@ -2552,7 +2556,7 @@ las credenciales, la pantalla comprueba que el correo sea del dominio institucio
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/mockups/v2/estados/login_error}
-    \caption{Correo fuera del dominio institucional.}
+    \caption{Credenciales incorrectas (RN-01).}
     \label{fig:ui_login_error}
   \end{subfigure}
 \caption{Pantalla de inicio de sesión [autoría propia].}
@@ -2694,9 +2698,11 @@ nuevas más adelante sin repetir los datos del experimento.
 
 Muestra el estado actual del pipeline con las cuatro etapas (preprocesamiento,
 detección de cilindros, seguimiento y clasificación) y una barra de progreso en
-porcentaje. Si ocurre un error, muestra el código, la descripción y el botón de
-descarga del reporte de diagnóstico (RF-16). Debajo lista la cola de trabajos. El
-análisis continúa aunque el investigador cierre la pestaña (RF-15).
+porcentaje. Si ocurre un error, muestra la descripción, según la etapa en que se
+detuvo, y el botón de descarga del reporte de diagnóstico (RF-16). Los errores definidos son dos: el video
+no se pudo abrir o no se encontraron los cilindros. Cuando un análisis se completa,
+la pantalla habilita «Ver resultados» y «Revisar segundo a segundo». Debajo lista la
+cola de trabajos. El análisis continúa aunque el investigador cierre la pestaña (RF-15).
 
 No hay botón de cancelar visible durante el análisis. La decisión fue deliberada: el
 laboratorio no tiene casos de uso donde cancele un análisis a mitad de camino, y
@@ -2708,7 +2714,7 @@ soportar cancelación.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.75\textwidth]{figures/mockups/v2/progreso}
-\caption{Pantalla de progreso del análisis: un análisis en curso, otro detenido por error de detección de cilindros (RF-16) y la cola de trabajos [autoría propia].}
+\caption{Pantalla de progreso del análisis: un análisis en curso, uno completado con acceso a resultados y a la revisión, dos detenidos por error ---cilindros no detectados y video que no se pudo abrir--- (RF-16) y la cola de trabajos [autoría propia].}
 \label{fig:ui_progreso}
 \end{figure}
 
@@ -2726,14 +2732,14 @@ descarga en PDF, CSV y XLSX.
 
 \begin{figure}[H]
 \centering
-  \begin{subfigure}[t]{0.598\textwidth}
+  \begin{subfigure}[t]{0.609\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/mockups/v2/resultados}
     \caption{Resultados por espécimen.}
     \label{fig:ui_resultados_especimen}
   \end{subfigure}
   \hfill
-  \begin{subfigure}[t]{0.362\textwidth}
+  \begin{subfigure}[t]{0.351\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/mockups/v2/estados/resultados_comparacion}
     \caption{Comparación entre grupos en el Día~2 (RF-21).}
@@ -2778,22 +2784,35 @@ Muestra la lista de cuentas con correo, rol y estado, y permite desactivarlas si
 borrarlas; la cola de trabajos; el uso de almacenamiento, con un aviso al llegar
 al 80\,\% de disco y el borrado de los videos más antiguos al llegar al 90\,\% (RF-29,
 RNF-09); y las conductas y el modelo del clasificador en uso. Para crear una cuenta, el
-Administrador captura identificador institucional, nombre, apellidos y correo (RF-05).
+Administrador captura identificador institucional, nombre, apellidos y correo (RF-05);
+el sistema envía la contraseña temporal por correo y además se la muestra una sola vez
+al Administrador, como respaldo.
+Al editar una cuenta puede cambiar el nombre, los apellidos, el correo y el estado
+(activa o inactiva); el identificador institucional es de solo lectura, y el sistema
+impide dejar sin ningún Administrador activo.
 
 \begin{figure}[H]
 \centering
-  \begin{subfigure}[t]{0.535\textwidth}
+  \begin{subfigure}[t]{0.533\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/mockups/v2/admin}
     \caption{Cuentas, cola y almacenamiento.}
     \label{fig:ui_admin_normal}
   \end{subfigure}
   \hfill
-  \begin{subfigure}[t]{0.425\textwidth}
+  \begin{subfigure}[t]{0.427\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/mockups/v2/estados/admin_crear_cuenta}
     \caption{Formulario de creación de cuenta (RF-05).}
     \label{fig:ui_admin_crear}
+  \end{subfigure}
+
+  \vspace{8pt}
+  \begin{subfigure}[t]{0.80\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/v2/estados/admin_editar_cuenta}
+    \caption{Edición de una cuenta (RF-05).}
+    \label{fig:ui_admin_editar}
   \end{subfigure}
 \caption{Panel de administración [autoría propia].}
 \label{fig:ui_admin}

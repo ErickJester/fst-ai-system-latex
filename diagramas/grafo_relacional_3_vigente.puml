@@ -13,7 +13,9 @@
 '  modelado como subtipo -- si el usuario no aparece aqui, es
 '  investigador simple.
 '
-'  17 relaciones - 79 atributos - 20 llaves foraneas.
+'  17 relaciones - 78 atributos - 20 llaves foraneas.
+'  (D-47, 4-oct: se quito ANALISIS.confianza -- el detector actual
+'   no produce ningun valor de confianza -- y baja de 79 a 78)
 '  (D-35, 3-oct: se agrego SEGUNDO, con 5 atributos y 3 llaves
 '   foraneas: idObservacion, clase y propuesta. Su clave es
 '   (idObservacion, segundo) y los otros tres atributos dependen
@@ -161,7 +163,6 @@ class ANALISIS {
   idConfig   [FK]
   estado
   etapa
-  confianza
   nivelClasif
   fechaAnalisis
 }

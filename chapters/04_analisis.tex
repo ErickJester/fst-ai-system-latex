@@ -48,8 +48,8 @@ de los prototipos de interfaz diseñados \cite{pressman2014,sommerville2011}.
 
 % ── Autenticación ──────────────────────────────────────────
 RF-01 & Autenticación
-      & El sistema debe permitir iniciar sesión con correo electrónico institucional
-        (\texttt{@ipn.mx}) y contraseña. Las credenciales incorrectas muestran
+      & El sistema debe permitir iniciar sesión con correo electrónico y
+        contraseña. Las credenciales incorrectas muestran
         un mensaje de error sin revelar cuál campo falló.
       & Alta & Investigador / Admin \\
 \hline
@@ -77,7 +77,8 @@ RF-04 & Autenticación
 RF-05 & Gestión de usuarios
       & El Administrador debe poder crear, modificar y desactivar cuentas de usuario
         desde el panel de administración. La creación requiere identificador institucional,
-        nombre, apellidos, correo y contraseña temporal; el usuario la cambia al primer ingreso.
+        nombre, apellidos y correo; el sistema genera una contraseña temporal que el
+        usuario cambia al primer ingreso.
       & Alta & Admin \\
 \hline
 RF-06 & Gestión de usuarios
@@ -88,8 +89,8 @@ RF-06 & Gestión de usuarios
 RF-07 & Gestión de usuarios
       & Solo el Administrador puede crear cuentas de usuario. No existe formulario
         público de autoregistro. El Administrador asigna identificador institucional,
-        nombre, apellidos, correo institucional y contraseña temporal; el sistema obliga al usuario a cambiarla en el primer
-        ingreso.
+        nombre, apellidos y correo; el sistema genera una contraseña temporal y obliga
+        al usuario a cambiarla en el primer ingreso.
       & Alta & Admin \\
 \hline
 
@@ -156,10 +157,10 @@ RF-15 & Análisis conductual
       & Alta & Investigador \\
 \hline
 RF-16 & Análisis conductual
-      & Si el análisis falla, el sistema debe mostrar el código de error, la
-        descripción del problema y un botón para descargar el reporte de diagnóstico
-        en PDF. El investigador no puede reiniciar el análisis desde esta pantalla
-        (ver RN-04).
+      & Si el análisis falla, el sistema debe mostrar la descripción del problema,
+        según la etapa en que se detuvo, y un botón para descargar el reporte de
+        diagnóstico en PDF. El investigador no puede reiniciar el análisis desde esta
+        pantalla (ver RN-04).
       & Alta & Investigador \\
 \hline
 RF-17 & Análisis conductual
@@ -285,6 +286,15 @@ RF-32 & Resultados
         original no se pierde. Al guardar las correcciones, el sistema recalcula los
         totales por minuto (ver RN-14).
       & Media & Investigador \\
+\hline
+RF-33 & Notificaciones
+      & El sistema debe avisar al usuario correspondiente, en el panel de
+        notificaciones de la barra superior y también por correo electrónico, cuando
+        un análisis termina, cuando un análisis se detiene por error y, al
+        Administrador, cuando el almacenamiento rebasa el 80\,\% (ver RF-29). Los
+        correos se envían desde una cuenta de correo configurable en el servidor; si
+        el envío falla, el aviso permanece en el panel de notificaciones.
+      & Media & Investigador / Admin \\
 \hline
 
 \end{longtable}

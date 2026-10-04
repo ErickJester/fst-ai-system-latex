@@ -272,7 +272,8 @@ dicen 16 relaciones, `nCilindros ∈ {3,4}`, etc.). Detalle de cada una en
 | **D-28** | Cardinalidades: `TANDA`–`ESPECIMEN` (2,4); `GRUPO`–`TANDA` (1,N); `GRUPO`–`ESPECIMEN` (2,N); `VIDEO`–`OBSERVACION` (2,4). Un grupo puede tener una sola tanda. |
 | **D-29** | `CONDUCTA` pasa a **cuatro** valores (se agrega «conducta activa»). `INTERVALO`–`PRESENTA` pasa de (2,3) a **(2,4)**; en la práctica `PRESENTA` guarda una fila por cada conducta, incluso con 0 s. |
 | **D-30, D-31, D-33** | No tocan la base de datos: formatos `.mp4` y `.mov`; se analizan solo los primeros 300 s; un video girado (vertical) se rechaza. |
-| **D-32** | Se elimina la confianza de detección (0.70) como criterio de error. La columna `ANALISIS.confianza` sigue en el esquema; **pendiente decidir si se quita**. |
+| **D-32** | Se elimina la confianza de detección (0.70) como criterio de error. |
+| **D-47** | **Se quita la columna `ANALISIS.confianza`**: el detector actual no produce ningún valor de confianza. RF-16 deja de mostrar un código de error; el mensaje se arma con la etapa donde se detuvo el análisis. Sin columnas nuevas. |
 | **D-34** | No hay vista en vivo; al terminar el análisis el usuario ve una pantalla de revisión segundo a segundo. |
 | **D-35** | **Tabla nueva `SEGUNDO`** (`idObservacion`, `segundo` como clave; `clase`, `propuesta` y `origen`). Total: **17 relaciones**, 20 llaves foráneas lógicas (21 con la física de D-04). `PRESENTA` pasa a ser un resumen que se recalcula desde `SEGUNDO`. |
 
@@ -280,8 +281,8 @@ Aplicado en: `esquema_fisico.puml`, `esquema_conceptual.tex`, `clases.puml`,
 `grafo_relacional_3_vigente.puml`, capítulos 1, 4 y 5. **No actualizados:** los
 artifacts y los PDF de `artifacts pdf/` (siguen en 16 relaciones), y el diccionario de
 datos de los anexos. Decisiones aún abiertas que afectan al modelo: significado de
-`ANALISIS.nivelClasif`, quién puede corregir etiquetas y qué pasa con
-`ANALISIS.confianza`.
+`ANALISIS.nivelClasif` (resuelto después en D-41) y quién puede corregir etiquetas.
+`ANALISIS.confianza` se quitó en D-47.
 
 **Las dos etapas están cerradas.** Conceptual: 8 de 8 actividades. Lógica: 7 de 7.
 Resultado: **16 relaciones** en BCNF (11 del dominio experimental + 4 de soporte del

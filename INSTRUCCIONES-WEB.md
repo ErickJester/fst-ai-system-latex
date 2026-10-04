@@ -261,7 +261,6 @@ erDiagram
              int idConfig FK
              estado_analisis estado
              etapa_analisis etapa
-             numeric confianza
              nivel_clasif nivelClasif
              timestamptz fechaAnalisis
              text rutaDiagnostico }
@@ -461,7 +460,7 @@ Otras decisiones tomadas:
   es un resumen ejecutivo, distinto del PDF de diagnóstico.
 - **Cuentas:** no existe autoregistro ni formulario público. Solo el administrador crea
   cuentas con identificador institucional (propuesta, sección 11 punto 12), nombre,
-  apellidos y correo institucional `@ipn.mx`; el sistema genera la contraseña temporal. Se pone
+  apellidos y correo (de cualquier dominio, D-46); el sistema genera la contraseña temporal. Se pone
   `cambioRequerido = true` y el sistema obliga a cambiarla en el primer ingreso.
 - **Recuperación de contraseña:** el enlace lleva su vencimiento **firmado dentro**
   (JWT). No se agregan columnas a `USUARIO`.
@@ -500,8 +499,8 @@ Estados: normal; error genérico de credenciales. Incluye enlace "Recuperar cont
 +----------------------------------+
 |   Sistema de análisis FST        |
 |                                  |
-|  Correo institucional            |
-|  [ nombre@ipn.mx             ]   |
+|  Correo electrónico              |
+|  [ nombre@ejemplo.com        ]   |
 |  Contraseña                      |
 |  [ ••••••••                  ]   |
 |  (!) Credenciales incorrectas    |  <- solo en el estado de error
@@ -641,13 +640,13 @@ crear usuario; modal de editar usuario.
 |-------------------------------------------------------------|
 | Experimentos de todos los investigadores (lista y gestión)    |
 +-------------------------------------------------------------+
-Modal "Crear cuenta":  Identificador institucional*, Nombre*, Apellidos*, Correo institucional*  [Crear]
+Modal "Crear cuenta":  Identificador institucional*, Nombre*, Apellidos*, Correo*  [Crear]
    (el identificador institucional en el formulario quedó decidido, sección 11, punto 12)
 Modal "Editar cuenta": datos editables + interruptor Activo/Inactivo [Guardar]
 ```
 
-**[PROPUESTA]** Al crear una cuenta, el modal muestra la contraseña temporal una sola vez
-(sección 11, punto 2).
+Al crear una cuenta, el sistema envía la contraseña temporal por correo y **además** la
+muestra una sola vez en pantalla al administrador, como respaldo (D-45, sección 11, punto 2).
 
 ### 9.7 Revisión segundo a segundo
 Se abre **solo cuando el análisis está `completado`**, desde Progreso o Resultados
@@ -827,13 +826,23 @@ sequenceDiagram
    tokens de vida corta**. El JWT dura mucho y es configurable (variable
    `JWT_EXPIRES_HOURS`, valor por defecto 168 h, una semana). "Cerrar sesión" borra el
    token en el navegador. **No se agrega ninguna tabla ni lista de bloqueo.**
-2. **[ABIERTO] Envío de correo** (contraseña temporal y recuperación): **sin definir**. No
-   se sabe qué servidor de correo habrá. Déjalo configurable por variables de entorno
-   (servidor, puerto, usuario, contraseña, remitente). **[PROPUESTA]** En desarrollo usa
-   un contenedor de correo falso (MailHog) para ver los mensajes sin enviar nada. También
-   **[PROPUESTA]**: como el administrador crea las cuentas, muestra la contraseña temporal
-   **una sola vez en pantalla** al administrador, para que el sistema sea usable aunque el
-   correo no esté configurado. Ninguna de las dos está aprobada todavía por el usuario.
+2. ~~Envío de correo~~ **Resuelto (usuario, 4-oct-2026, D-45).** El sistema **sí envía
+   correos**, desde una **cuenta de correo normal** (por ejemplo, Gmail con contraseña de
+   aplicación); no depende de un servidor del IPN. Se configura con las variables `SMTP_*`
+   (servidor, puerto, usuario, contraseña, remitente). Se envían:
+   - **Notificaciones:** cada `NOTIFICACION` que el sistema crea (`analisis completado`,
+     `error del pipeline`, `alerta de disco`) se manda también por correo a su
+     destinatario, como copia del aviso. La campanita no cambia. No se agregan tablas ni
+     columnas: el correo sale de `USUARIO.correo`.
+   - **Contraseña temporal:** al crear una cuenta se envía por correo **y** se muestra una
+     sola vez en pantalla al administrador, como respaldo.
+   - **Recuperación de contraseña:** el enlace firmado (`/auth/recover`) se envía por correo.
+
+   Si el envío falla, la operación **no** se detiene: el aviso queda en la campanita y la
+   contraseña temporal ya se mostró en pantalla. En desarrollo usa MailHog para ver los
+   mensajes sin enviar nada. El correo de una cuenta puede ser de **cualquier dominio**
+   (D-46). **[ABIERTO]** Qué otras notificaciones agregar: el usuario las definirá después;
+   no implementes otras por tu cuenta.
 3. ~~Quién crea las filas de `MODELO` y `CONFIGURACION`~~ **Resuelto como semilla simple
    [PROPUESTA].** `ANALISIS` exige apuntar a una `CONFIGURACION`, y esa a un `MODELO`. El
    script de `db/init/` inserta **un `MODELO` y una `CONFIGURACION` de ejemplo** (hash de
@@ -1272,7 +1281,6 @@ entity ANALISIS {
   idConfig : integer <<FK>>
   estado : estado_analisis
   etapa : etapa_analisis
-  confianza : numeric(p,s)
   nivelClasif : nivel_clasif_analisis
   fechaAnalisis : timestamptz
   rutaDiagnostico : text (nulo salvo error)
@@ -1518,7 +1526,6 @@ package P3_Pipeline_de_analisis_conductual {
     -id : Integer
     -estado : String
     -etapa : String
-    -confianza : Float
     -nivelClasif : String
     -fechaAnalisis : DateTime
   }
@@ -2014,7 +2021,7 @@ note right of ui
   interfaz no evita por sí sola el siguiente paso.
 end note
 admin -> ui: selecciona "Crear cuenta"
-ui -> admin: muestra el formulario\n(identificador institucional, nombre, apellidos, correo institucional)
+ui -> admin: muestra el formulario\n(identificador institucional, nombre, apellidos, correo electrónico)
 admin -> ui: completa los datos y confirma
 ui -> api: POST /admin/users {idInstitucional, nombre, apellidos, correo}\ncon la sesión activa del Administrador
 api -> db: ¿el idInstitucional de la sesión está en ADMINISTRADOR?
@@ -2104,8 +2111,8 @@ database "Base de datos" as db
 
 u -> ui: abre su perfil y cambia nombre, apellidos o correo
 ui -> api: PATCH /users/me {nombre, apellidos, correo}\ncon el JWT del usuario
-alt el correo nuevo no termina en @ipn.mx
-  api --> ui: 400, "Usa tu correo institucional"
+alt el correo nuevo no tiene un formato válido
+  api --> ui: 400, "Escribe un correo válido"
 else el correo es válido
   api -> db: ¿otro usuario ya usa ese correo?
   db --> api: sí / no
@@ -2753,7 +2760,6 @@ CREATE TABLE analisis (
     REFERENCES configuracion (idconfig) ON UPDATE NO ACTION ON DELETE NO ACTION,
   estado           estado_analisis       NOT NULL DEFAULT 'en cola',
   etapa            etapa_analisis,                     -- nula mientras esta en cola [PROPUESTA]
-  confianza        numeric(4,3) CHECK (confianza BETWEEN 0 AND 1),   -- ya no se usa como criterio de error; opcional
   nivelclasif      nivel_clasif_analisis,
   fechaanalisis    timestamptz,                        -- la fija el worker al terminar
   rutadiagnostico  text,
@@ -2871,7 +2877,7 @@ VALUES (repeat('0', 64), 'dev', 0.800, 0, 0, 0, 0, 0);   -- 0.800 = umbral de de
 -- No lo insertes con una contrasena inventada. Crea el hash con bcrypt desde Python
 -- (por ejemplo, con un comando `flask crear-admin`) y descomenta:
 -- INSERT INTO usuario (idinstitucional, nombre, apellidos, correo, contrasenahash, cambiorequerido)
--- VALUES ('XXXXXXXXXX', 'Nombre', 'Apellidos', 'correo@ipn.mx', '<hash bcrypt>', true);
+-- VALUES ('XXXXXXXXXX', 'Nombre', 'Apellidos', 'correo@ejemplo.com', '<hash bcrypt>', true);
 -- INSERT INTO administrador (idinstitucional) VALUES ('XXXXXXXXXX');
 
 COMMIT;

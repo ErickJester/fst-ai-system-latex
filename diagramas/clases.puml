@@ -106,7 +106,6 @@ package P3_Pipeline_de_analisis_conductual {
     -id : Integer
     -estado : String
     -etapa : String
-    -confianza : Float
     -nivelClasif : String
     -fechaAnalisis : DateTime
   }
