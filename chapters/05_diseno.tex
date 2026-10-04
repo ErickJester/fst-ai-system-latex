@@ -1847,7 +1847,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
 \hline
-1 & Inv. / Admin. & Pulsa la conducta correcta (nado, inmovilidad, escalamiento, conducta activa o «no se ve»). \\
+1 & Inv. / Admin. & Pulsa la conducta correcta (nado, inmovilidad, escalamiento, conducta activa o «dudosa», que deja el segundo sin conducta). \\
 \hline
 2 & Sistema & Aplica el cambio a los segundos correspondientes en un borrador y marca su origen como «corregida». \\
 \hline
@@ -1959,9 +1959,9 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 1 & Administrador & Accede al panel de administración. \\
 \hline
-2 & Sistema & Muestra la lista de investigadores con nombre, correo, si es administrador o investigador, estado y fecha de último acceso. \\
+2 & Sistema & Muestra la lista de investigadores con nombre, correo, si es administrador o investigador, y estado. \\
 \hline
-3 & Administrador & Selecciona la acción: (a) crear cuenta nueva con nombre, correo y contraseña temporal; (b) editar datos de cuenta existente; o (c) desactivar cuenta. \\
+3 & Administrador & Selecciona la acción: (a) crear cuenta nueva con identificador institucional, nombre, apellidos, correo y contraseña temporal; (b) editar datos de cuenta existente; o (c) desactivar cuenta. \\
 \hline
 4 & Sistema & Aplica el cambio en la base de datos y muestra confirmación de la operación. \\
 \hline
@@ -2003,7 +2003,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al Administrador dar de alta una nueva cuenta de investigador. El único mecanismo de ingreso al sistema es que el Administrador cree la cuenta; no existe autoregistro.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El Administrador introduce los datos del nuevo usuario (nombre y correo \texttt{@ipn.mx}) y el sistema genera una contraseña temporal. En el primer acceso, el sistema obliga al investigador a cambiar la contraseña.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El Administrador introduce los datos del nuevo usuario (identificador institucional, nombre, apellidos y correo \texttt{@ipn.mx}) y el sistema genera una contraseña temporal. En el primer acceso, el sistema obliga al investigador a cambiar la contraseña.} \\
 \hline
 \end{tabular}
 
@@ -2016,11 +2016,11 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 1 & Administrador & Accede al panel de administración y selecciona «Crear cuenta». \\
 \hline
-2 & Sistema & Muestra el formulario de alta con campos: nombre completo y correo institucional (\texttt{@ipn.mx}). \\
+2 & Sistema & Muestra el formulario de alta con campos: identificador institucional, nombre, apellidos y correo institucional (\texttt{@ipn.mx}). \\
 \hline
 3 & Administrador & Completa los datos y confirma la creación. \\
 \hline
-4 & Sistema & Valida que el correo no esté registrado previamente. \\
+4 & Sistema & Valida que ni el identificador institucional ni el correo estén registrados previamente. \\
 \hline
 5 & Sistema & Crea la cuenta con contraseña temporal generada automáticamente y la marca como «cambio obligatorio al primer ingreso». \\
 \hline
@@ -2158,13 +2158,13 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Caso de Uso} & Eliminar experimento & \textbf{Identificador:} CU-23 \\
 \hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Investigador} \\
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Investigador / Administrador} \\
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-27, RN-09} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; experimento existente a nombre del investigador.} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; experimento existente a nombre del investigador, o sesión de Administrador.} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Experimento y todos sus datos eliminados de forma permanente e irreversible de la base de datos (ver RN-09).} \\
 \hline

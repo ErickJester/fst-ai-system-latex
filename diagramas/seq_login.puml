@@ -1,0 +1,49 @@
+@startuml seq_login
+' ================================================================
+'  Secuencia - Inicio de sesion
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Cubre CU-01 "Iniciar sesion" (RF-01, RF-04, RN-01). Mismo
+'  diagrama para Investigador y Administrador: el rol no se guarda
+'  en USUARIO, se deduce de si el usuario figura en ADMINISTRADOR.
+'
+'  Decision D-37 (3-oct): no se registra el ultimo acceso, asi que
+'  el inicio de sesion no escribe nada en la base de datos.
+'  Decision D-36 (3-oct): el token dura mucho y es configurable.
+'
+'  Reemplaza a figures/mermaid/seq_login.png (que registraba una
+'  "ultima conexion" sin columna que la respalde).
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/seq_login.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+u -> ui: escribe su correo institucional y su contraseña
+ui -> api: envía el correo y la contraseña
+api -> db: busca la cuenta con ese correo
+db --> api: la cuenta (contraseña cifrada, activa o no), si existe
+
+alt la cuenta existe, está activa y la contraseña coincide
+  api -> db: ¿el usuario figura como administrador?
+  db --> api: sí / no
+  api -> api: genera el token JWT\n(vigencia larga y configurable)
+  api --> ui: token y rol del usuario
+  ui -> ui: guarda el token en el navegador
+  ui --> u: muestra el panel principal
+else el correo no existe, la cuenta está desactivada\no la contraseña no coincide
+  api --> ui: error de credenciales\n(no dice cuál dato falló, RN-01)
+  ui --> u: muestra "correo o contraseña incorrectos"
+end
+@enduml
