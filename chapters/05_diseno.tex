@@ -74,6 +74,16 @@ Las responsabilidades de cada componente son:
         Al correr en un proceso separado, el servidor web sigue respondiendo a
         otras peticiones mientras el video se procesa.
 
+        La cola de tareas no es un servicio aparte: es la propia tabla
+        \texttt{ANALISIS}. Cuando se sube un video válido, el backend crea un
+        registro con estado «en cola». El worker obtiene las tareas mediante
+        \textit{polling} (consulta periódica): cada cierto tiempo consulta esa tabla,
+        toma un análisis en cola, lo pasa a «procesando» y, al terminar, a
+        «completado» o «error». Se eligió este enfoque en lugar de un sistema de
+        colas de mensajes dedicado (como Celery con RabbitMQ o Redis) porque evita
+        un contenedor y una dependencia más; con el volumen del laboratorio, de
+        hasta cuatro análisis en un mismo período, la base de datos basta como cola.
+
   \item \textbf{Base de datos (PostgreSQL):} almacena usuarios, experimentos,
         sesiones de video, resultados por espécimen y conducta, y reportes generados.
         Los archivos de video se guardan en el sistema de archivos del servidor, no
@@ -2747,9 +2757,16 @@ el avance se guarda como borrador en el navegador hasta que el usuario elige
 «Guardar», momento en que el sistema registra las correcciones, conserva la
 propuesta original y recalcula los totales por minuto (CU-25 a CU-27).
 
+El panel lateral muestra la conducta del segundo actual y si es la propuesta del
+sistema o una corrección, el avance de revisión del espécimen, los segundos por
+conducta antes y después de corregir, y el nivel de clasificación que tendrá el
+análisis al guardar: si algún segundo queda como conducta activa, el análisis pasa a
+nivel agrupado (RN-13). A esta pantalla se llega con el botón «Revisar segundo a
+segundo» de la pantalla de resultados.
+
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{figures/mockups/ui_revision}
+\includegraphics[width=\textwidth]{figures/mockups/v2/revision}
 \caption{Pantalla de revisión segundo a segundo [autoría propia].}
 \label{fig:ui_revision}
 \end{figure}
