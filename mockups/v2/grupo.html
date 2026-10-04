@@ -53,7 +53,7 @@
     'Completado': { nota: 'Video principal del sistema. Analizado completo.', analisis: 'Análisis vigente: 24 feb 2026' },
     'En cola': { nota: 'En espera de turno en la cola: un trabajo a la vez.', analisis: 'Sin análisis todavía' },
     'Procesando': { nota: 'Seguimiento de especímenes · en curso · 75 %', analisis: 'Sin análisis todavía' },
-    'Error': { nota: 'E-DET-070 · Confianza de detección 0.54, menor a 0.70: no se detectaron los cuatro cilindros.', analisis: 'Sin análisis todavía' }
+    'Error': { nota: 'No se encontraron los cilindros en el video; el análisis se detuvo en la detección.', analisis: 'Sin análisis todavía' }
   };
   // Día 1 solo existe en la Tanda A del grupo control (mockup 2d).
   const conD1 = (grupo, t) => grupo.id === 'G-01' && t.letra === 'A';

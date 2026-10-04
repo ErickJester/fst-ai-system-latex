@@ -56,7 +56,7 @@ state "Motor de Análisis  (Worker Asíncrono)" as Procesamiento <<procesamiento
 
   Encolado      --> Preproc       : worker toma el trabajo
   Preproc       --> ROIs          : CLAHE aplicado
-  ROIs          --> Tracking      : cilindros detectados\n(confianza ≥ 0.70)
+  ROIs          --> Tracking      : cilindros detectados
   Tracking      --> Clasificacion : tracks y coordenadas\nlistas
 }
 

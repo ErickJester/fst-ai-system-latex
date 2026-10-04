@@ -222,7 +222,6 @@ entity ANALISIS {
   idConfig : integer <<FK>>
   estado : estado_analisis
   etapa : etapa_analisis
-  confianza : numeric(p,s)
   nivelClasif : nivel_clasif_analisis
   fechaAnalisis : timestamptz
   rutaDiagnostico : text (nulo salvo error) · D-23
@@ -234,6 +233,8 @@ note bottom of ANALISIS
   D-23: rutaDiagnostico solo se llena si estado='error',
   mismo patron que VIDEO.archivo. Aplicado aqui por
   primera vez a peticion del usuario (15-sep).
+  D-47 (4-oct): sin columna confianza; el detector
+  actual no produce ningun valor de confianza.
 end note
 
 entity OBSERVACION {
