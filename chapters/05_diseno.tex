@@ -167,52 +167,67 @@ Dentro de cada ROI, el seguimiento combina detección y asociación temporal:
 
 \subsection{Módulo 4: Clasificación de conducta}
 
-El clasificador recibe el recorte de imagen alrededor del espécimen, normalizado
-a $224 \times 224$ píxeles, y produce tres probabilidades: nado activo,
-inmovilidad y escalamiento.
-Opera en tres niveles según la confianza de la predicción (el umbral exacto
-se definirá durante la fase de validación en TT-II):
+La clasificación trabaja sobre el cilindro de cada espécimen y se basa en
+aprendizaje supervisado. Se construye en dos partes: un clasificador sobre rasgos
+medidos, que ya funciona y que además sirve para etiquetar el conjunto de
+entrenamiento, y una red neuronal convolucional que se compara contra él y que
+sigue en desarrollo.
 
-Los tres niveles operan en cascada: solo se pasa al siguiente si el anterior no
-alcanza el umbral de confianza mínimo.
+\paragraph{Rasgos del espécimen.} Sobre la imagen estabilizada y con el espécimen
+separado del fondo, el sistema mide quince rasgos que describen su movimiento (la
+energía de movimiento medida solo dentro del cuerpo, para que el oleaje del agua no
+la sature), su postura (verticalidad, alargamiento y área) y su trayectoria
+(recorrido, amplitud y cuadrantes del cilindro que cruza). Las distancias se
+expresan en largos de cuerpo y los tiempos en segundos: así, dos videos grabados
+con encuadres distintos producen números comparables y el clasificador aprende la
+conducta y no el encuadre.
+
+\paragraph{Clasificador sobre rasgos.} Un bosque aleatorio (\textit{Random
+Forest}) \cite{breiman2001}, implementado con scikit-learn \cite{pedregosa2011},
+recibe los quince rasgos y estima la probabilidad de nado activo, inmovilidad y
+escalamiento. La conducta se decide con una regla de tres pasos:
 
 \begin{enumerate}
-  \item \textbf{ResNet-18} preentrenada en ImageNet con \textit{transfer learning}
-        \cite{he2016,pan2010}: clasificador principal. Si la confianza de la
-        predicción supera el umbral, la conducta se acepta directamente y no se
-        consultan los niveles siguientes.
-  \item \textbf{ResNet-50} (\textit{fallback} de primer nivel): si ResNet-18 no
-        alcanza la confianza mínima, se consulta ResNet-50, una arquitectura más
-        profunda con mayor capacidad de discriminación para cuadros ambiguos. Si
-        ResNet-50 supera el umbral, su predicción se acepta.
-  \item \textbf{Heurística \textit{motion} + \textit{aspect ratio}} (\textit{fallback}
-        de último recurso): si ambas redes quedan por debajo del umbral, se aplica
-        una regla geométrica que combina dos señales. El \textbf{desplazamiento}
-        (\textit{motion}) mide cuánto se movió el centro del \textit{bounding box}
-        entre el cuadro anterior y el actual: poco desplazamiento indica inmovilidad,
-        mucho desplazamiento indica nado. La \textbf{relación de aspecto}
-        (\textit{aspect ratio}) del \textit{bounding box} complementa esa señal:
-        una caja más ancha que alta corresponde al espécimen horizontal (nado),
-        una caja más alta que ancha corresponde al espécimen vertical flotando
-        (inmovilidad), y una caja alta y estrecha corresponde al espécimen erguido
-        contra la pared (escalamiento). La combinación de ambas señales permite
-        distinguir los tres estados sin necesidad de un modelo entrenado.
+  \item Si una conducta supera el umbral de confianza, se asigna esa conducta.
+  \item Si ninguna lo supera, pero la suma de nado activo y escalamiento sí, se
+        asigna \textit{conducta activa}: el espécimen no está inmóvil, pero el
+        clasificador no decide entre las dos conductas activas (ver RN-13).
+  \item Si tampoco, se asigna la conducta más probable y el resultado se marca
+        como dudoso para que la revisión humana lo atienda primero.
 \end{enumerate}
 
-Las predicciones individuales de cada cuadro se consolidan mediante \textbf{voto
-mayoritario} en una ventana deslizante de un segundo. El objetivo es suavizar
-clasificaciones ruidosas: un espécimen que está nadando puede aparecer clasificado
-como ``inmóvil'' en dos o tres cuadros aislados por un reflejo, una oclusión breve
-o ruido en la imagen. Sin suavizado, eso generaría episodios falsos de fracciones
-de segundo. Con la ventana de un segundo, se cuentan los votos de todos los cuadros
-dentro de la ventana y la conducta con más votos se asigna como resultado de ese
-intervalo. A 30 fps, por ejemplo, si 24 cuadros clasifican nado, 4 inmovilidad y
-2 escalamiento, el resultado es nado. La granularidad de un segundo es coherente
-con la duración mínima de episodio definida en RN (ver sec.~\ref{sec:umbrales}).
+\paragraph{Decisión segundo a segundo.} Para decidir el segundo $k$, el sistema
+mide los rasgos en una ventana de 4~s centrada en él (desde 1.5~s antes hasta
+2.5~s después) y aplica el clasificador. La ventana avanza un segundo a la vez,
+así que cada segundo tiene su propia decisión y aparecen conductas breves, de unos
+2~s, que una decisión por bloques de 5~s esconde. Una ventana más corta vería
+conductas más breves, pero mediría con muy pocos datos; 4~s es el punto de
+equilibrio. El segundo es la unidad con la que el sistema registra las conductas;
+no se aplica una duración mínima de episodio (ver RF-18 y
+sec.~\ref{sec:umbrales}). Al agrupar los segundos de cada bloque de 5~s y tomar la
+conducta mayoritaria, el resultado se compara directamente con el análisis manual
+por bloques.
 
-Cuando el clasificador sabe que el espécimen no está inmóvil pero no decide entre
-nado activo y escalamiento, ese segundo se registra como \textit{conducta activa},
-una cuarta conducta, y los reportes la muestran como una columna más (ver RN-13).
+\paragraph{Conjunto de entrenamiento.} El clasificador se entrena con bloques de
+5~s etiquetados por el equipo, sin usar las anotaciones del laboratorio. El
+etiquetado crece en bola de nieve: se etiqueta a mano un primer video, el
+clasificador propone las etiquetas del siguiente, el equipo revisa solo las
+marcadas como dudosas y se vuelve a entrenar con ambos videos. La validación agrupa
+por video, no por bloque, porque dos bloques seguidos del mismo espécimen son casi
+iguales y medirlos por separado inflaría el resultado.
+
+\paragraph{Red neuronal convolucional (en desarrollo).} Se compara contra el
+clasificador sobre rasgos una red convolucional espacio-temporal R(2+1)D-18
+\cite{tran2018}, preentrenada con videos de acciones humanas e implementada con
+PyTorch \cite{paszke2019}. Recibe clips de 16 fotogramas del cilindro de cada
+espécimen; su versión más reciente fusiona la red con una rama de medidas: los
+quince rasgos y siete reglas de observación del pataleo bajo el agua y de los
+cambios sobre la línea de agua. Por ahora decide por bloques de 5~s; llevarla al
+nivel de segundo y elegir entre ella y el clasificador sobre rasgos se hará en
+TT-II, con precisión, \textit{recall} y F1 por conducta (ver OE-5 y RNF-02).
+
+Cuando el sistema registra un segundo como \textit{conducta activa}, los reportes
+la muestran como una cuarta columna (ver RN-13).
 
 \subsection{Módulo 5: Resultados}
 
@@ -848,7 +863,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
-4 & Credenciales incorrectas: el sistema muestra mensaje de error sin indicar cuál campo falló. Tras cinco intentos consecutivos, el sistema aplica un bloqueo temporal de acceso. \\
+4 & Credenciales incorrectas: el sistema muestra mensaje de error sin indicar cuál campo falló (ver RN-01). \\
 \hline
 \end{tabular}
 
@@ -2721,7 +2736,9 @@ soportar cancelación.
 \subsection{Resultados del experimento}
 
 Cuatro pestañas: resultados por espécimen, comparación entre grupos, línea de tiempo
-por minuto (RF-20) y episodios, esta última aún sin habilitar. La vista por espécimen
+por minuto (RF-20) y bloques de 5~s (RF-18), donde cada bloque muestra la conducta con
+más segundos y, dentro, los cinco segundos que lo componen, para notar las conductas
+breves y comparar con el análisis manual. La vista por espécimen
 muestra el tiempo por conducta con media, desviación estándar y varianza (RF-19), el
 nivel de clasificación del análisis y la leyenda de conductas; en el panel lateral
 se compara la inmovilidad entre los grupos con los videos del Día~2 (RF-21). Esa
@@ -2732,18 +2749,26 @@ descarga en PDF, CSV y XLSX.
 
 \begin{figure}[H]
 \centering
-  \begin{subfigure}[t]{0.609\textwidth}
+  \begin{subfigure}[t]{0.508\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/mockups/v2/resultados}
     \caption{Resultados por espécimen.}
     \label{fig:ui_resultados_especimen}
   \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.351\textwidth}
+  \hspace{0.03\textwidth}
+  \begin{subfigure}[t]{0.293\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/mockups/v2/estados/resultados_comparacion}
     \caption{Comparación entre grupos en el Día~2 (RF-21).}
     \label{fig:ui_resultados_comparacion}
+  \end{subfigure}
+
+  \vspace{8pt}
+  \begin{subfigure}[t]{0.75\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/v2/estados/resultados_bloques}
+    \caption{Bloques de 5~s con sus segundos (RF-18).}
+    \label{fig:ui_resultados_bloques}
   \end{subfigure}
 \caption{Pantalla de resultados del experimento [autoría propia].}
 \label{fig:ui_resultados}

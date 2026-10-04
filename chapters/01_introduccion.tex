@@ -259,8 +259,10 @@ de la validación final.
 
   \item \textbf{Clasificación de conductas:} el sistema clasifica de forma continua
         las tres conductas del FST: nado activo, inmovilidad e intentos de escape
-        (escalamiento). El buceo se clasifica como nado activo. Para contabilizarse,
-        un episodio debe tener una duración mínima de tres segundos consecutivos.
+        (escalamiento). El buceo se clasifica como nado activo. Cada segundo recibe
+        una conducta, sin duración mínima, lo que permite registrar conductas breves
+        de unos dos segundos; los resultados también se agrupan en bloques de cinco
+        segundos, como en el análisis manual.
         Cuando el clasificador sabe que el espécimen no está inmóvil pero no decide
         entre nado activo y escalamiento, ese segundo se registra como conducta
         activa, una cuarta conducta.
