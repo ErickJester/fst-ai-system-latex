@@ -1671,7 +1671,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador visualizar los resultados del análisis conductual: tiempos por conducta por espécimen y desglose por minuto.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El sistema recupera los resultados de la base de datos y los presenta en tablas por espécimen y desglose minuto a minuto. Si hay dos videos del mismo experimento, muestra la comparación Día~1 vs.\ Día~2.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El sistema recupera los resultados de la base de datos y los presenta en tablas por espécimen y desglose minuto a minuto. Además muestra la comparación entre los grupos del experimento con los videos del Día~2.} \\
 \hline
 \end{tabular}
 
@@ -1690,7 +1690,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 4 & Sistema & Muestra el desglose de conductas por minuto para cada espécimen. \\
 \hline
-5 & Sistema & Si el experimento tiene Día~1 y Día~2 analizados, muestra la comparación de distribución entre sesiones. \\
+5 & Sistema & Muestra la comparación entre grupos: el tiempo promedio por conducta de los especímenes de cada grupo en el Día~2, con los especímenes sin analizar señalados como faltantes. \\
 \hline
 \end{tabular}
 
@@ -2708,11 +2708,27 @@ Cuatro pestañas: resultados por espécimen, comparación entre grupos, línea d
 por minuto (RF-20) y episodios, esta última aún sin habilitar. La vista por espécimen
 muestra el tiempo por conducta con media, desviación estándar y varianza (RF-19), el
 nivel de clasificación del análisis y la leyenda de conductas; en el panel lateral
-se compara la inmovilidad entre los grupos. Incluye botones de descarga en PDF, CSV y XLSX.
+se compara la inmovilidad entre los grupos con los videos del Día~2 (RF-21). Esa
+comparación promedia los segundos por espécimen de cada grupo y señala los especímenes
+cuyo video aún no está analizado, que no entran al promedio (RN-12). Si un grupo mezcla
+análisis en nivel preciso y agrupado, los muestra por separado. Incluye botones de
+descarga en PDF, CSV y XLSX.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{figures/mockups/v2/resultados}
+  \begin{subfigure}[t]{0.598\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/v2/resultados}
+    \caption{Resultados por espécimen.}
+    \label{fig:ui_resultados_especimen}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.362\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mockups/v2/estados/resultados_comparacion}
+    \caption{Comparación entre grupos en el Día~2 (RF-21).}
+    \label{fig:ui_resultados_comparacion}
+  \end{subfigure}
 \caption{Pantalla de resultados del experimento [autoría propia].}
 \label{fig:ui_resultados}
 \end{figure}
@@ -2749,14 +2765,14 @@ Administrador captura identificador institucional, nombre, apellidos y correo (R
 
 \begin{figure}[H]
 \centering
-  \begin{subfigure}[t]{0.48\textwidth}
+  \begin{subfigure}[t]{0.535\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/mockups/v2/admin}
     \caption{Cuentas, cola y almacenamiento.}
     \label{fig:ui_admin_normal}
   \end{subfigure}
   \hfill
-  \begin{subfigure}[t]{0.48\textwidth}
+  \begin{subfigure}[t]{0.425\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/mockups/v2/estados/admin_crear_cuenta}
     \caption{Formulario de creación de cuenta (RF-05).}

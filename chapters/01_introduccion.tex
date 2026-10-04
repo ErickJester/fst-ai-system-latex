@@ -118,8 +118,8 @@ Los problemas que genera ese proceso son los siguientes:
         \cite{armario2021}. Un sistema automatizado aplica los mismos criterios a todos los
         videos, sin depender del evaluador.
   \item \textbf{Sin registro centralizado:} los resultados quedan dispersos en hojas
-        de cálculo y notas sueltas, sin forma directa de comparar sesiones o grupos
-        entre sí.
+        de cálculo y notas sueltas, sin forma directa de comparar grupos o
+        experimentos entre sí.
   \item \textbf{Análisis temporal limitado:} un desglose minuto a minuto sería útil
         para ver la dinámica del efecto farmacológico a lo largo de la sesión, pero
         producirlo a mano es inviable en la práctica.
@@ -289,14 +289,14 @@ de la validación final.
         de cuenta de usuario por parte del administrador, carga de videos, cola de
         procesamiento secuencial para hasta cuatro análisis en un mismo período,
         consulta de resultados por espécimen y sesión, y descarga de reportes. Los
-        datos se almacenan en base de datos para permitir comparar sesiones y
+        datos se almacenan en base de datos para permitir comparar grupos y
         experimentos posteriores.
 
-  \item \textbf{Comparación entre sesiones:} los resultados del día~1 (5~min del
-        grupo control) y del día~2 quedan disponibles en la misma vista para el
-        mismo espécimen, de modo que el investigador puede contrastar el perfil
-        conductual antes y después del período de estrés sin necesidad de exportar
-        y combinar archivos manualmente.
+  \item \textbf{Comparación entre grupos:} los resultados del día~2 de todos los
+        grupos de un experimento quedan disponibles en la misma vista, de modo que
+        el investigador puede contrastar el perfil conductual del grupo control
+        con el de los grupos tratados sin necesidad de exportar y combinar
+        archivos manualmente.
 \end{itemize}
 
 \subsection*{Fuera del alcance}

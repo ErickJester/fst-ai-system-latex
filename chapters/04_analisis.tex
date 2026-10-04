@@ -191,9 +191,9 @@ RF-20 & Resultados
       & Media & Investigador \\
 \hline
 RF-21 & Resultados
-      & Cuando ambos videos de la misma tanda estén procesados, el sistema debe
-        mostrar una comparación Día~1 vs.\ Día~2 con barras de distribución por
-        espécimen.
+      & El sistema debe mostrar una comparación entre los grupos de un experimento
+        con el tiempo promedio por conducta de los especímenes de cada grupo,
+        calculado con los videos del Día~2.
       & Alta & Investigador \\
 \hline
 RF-22 & Resultados
@@ -564,9 +564,11 @@ RN-11 & Si el video no se puede abrir o el pipeline no encuentra los cilindros, 
       & Evita que el sistema produzca resultados incorrectos sin advertir al
         investigador. Véase la sección~\ref{sec:umbrales}. Ver RF-14, RF-16. \\
 \hline
-RN-12 & La comparación Día~1 vs.\ Día~2 solo se genera si ambos videos de la
-        misma tanda fueron procesados exitosamente.
-      & No tiene sentido comparar con datos incompletos. Ver RF-21. \\
+RN-12 & La comparación entre grupos usa solo los videos del Día~2. Los
+        especímenes cuyo video del Día~2 aún no está analizado se señalan como
+        faltantes.
+      & El Día~1 solo verifica que los especímenes lleguen con el mismo nivel de
+        estrés; el efecto del tratamiento se mide en el Día~2. Ver RF-21. \\
 \hline
 RN-13 & Cuando el clasificador sabe que el espécimen no está inmóvil pero no
         decide entre nado activo y escalamiento, esos segundos se registran como
