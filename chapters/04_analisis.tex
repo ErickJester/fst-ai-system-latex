@@ -76,8 +76,8 @@ RF-04 & Autenticación
 % ── Gestión de usuarios ────────────────────────────────────
 RF-05 & Gestión de usuarios
       & El Administrador debe poder crear, modificar y desactivar cuentas de usuario
-        desde el panel de administración. La creación requiere nombre, correo y
-        contraseña temporal; el usuario la cambia al primer ingreso.
+        desde el panel de administración. La creación requiere identificador institucional,
+        nombre, apellidos, correo y contraseña temporal; el usuario la cambia al primer ingreso.
       & Alta & Admin \\
 \hline
 RF-06 & Gestión de usuarios
@@ -87,8 +87,8 @@ RF-06 & Gestión de usuarios
 \hline
 RF-07 & Gestión de usuarios
       & Solo el Administrador puede crear cuentas de usuario. No existe formulario
-        público de autoregistro. El Administrador asigna nombre, correo institucional
-        y contraseña temporal; el sistema obliga al usuario a cambiarla en el primer
+        público de autoregistro. El Administrador asigna identificador institucional,
+        nombre, apellidos, correo institucional y contraseña temporal; el sistema obliga al usuario a cambiarla en el primer
         ingreso.
       & Alta & Admin \\
 \hline
@@ -231,7 +231,8 @@ RF-24 & Dashboard
 RF-25 & Dashboard
       & El sistema debe borrar automáticamente los archivos de video 30~días después
         de que el análisis termine exitosamente, notificando al investigador con un
-        aviso en la interfaz antes de que ocurra (ver RN-05).
+        aviso en la interfaz antes de que ocurra (ver RN-05). Si el disco supera el
+        90\,\%, el borrado se adelanta a los videos más antiguos (ver RNF-09).
       & Media & Sistema \\
 \hline
 RF-26 & Dashboard
@@ -240,17 +241,17 @@ RF-26 & Dashboard
       & Alta & Sistema \\
 \hline
 RF-27 & Dashboard
-      & El investigador debe poder eliminar un experimento desde el dashboard. La
-        acción es permanente e irreversible y requiere confirmación explícita (ver
-        RN-09).
-      & Media & Investigador \\
+      & El investigador debe poder eliminar un experimento propio desde el
+        dashboard; el Administrador puede eliminar cualquiera. La acción es
+        permanente e irreversible y requiere confirmación explícita (ver RN-09).
+      & Media & Investigador / Admin \\
 \hline
 
 % ── Administración ─────────────────────────────────────────
 RF-28 & Administración
       & El Administrador debe poder ver la lista de todos los usuarios con correo,
-        si es administrador o investigador, estado (activo/inactivo), último
-        acceso y número de experimentos. La lista es filtrable por
+        si es administrador o investigador, estado (activo/inactivo)
+        y número de experimentos. La lista es filtrable por
         administrador/investigador y estado.
       & Media & Admin \\
 \hline
@@ -521,7 +522,10 @@ RN-04 & El análisis lo inicia el sistema automáticamente al terminar la carga.
 \hline
 RN-05 & Los videos se borran automáticamente 30~días después de que el análisis
         termina exitosamente. La acción es irreversible. El sistema avisa con al
-        menos 7~días de anticipación.
+        menos 7~días de anticipación. Excepción: si el disco supera el 90\,\%, se
+        adelanta el borrado de los videos más antiguos aunque no hayan cumplido
+        los 30~días y se notifica al investigador de cada experimento afectado
+        (ver RNF-09).
       & Control de almacenamiento. Ver RF-24, RF-23, RNF-08. \\
 \hline
 RN-06 & Los resultados y reportes (PDF y CSV) se conservan indefinidamente aunque
@@ -535,8 +539,9 @@ RN-07 & En cada cuadro del video, a cada espécimen se le asigna exactamente una
         \cite{armario2021,cryan2005}. Ver RF-17, RF-18. \\
 \hline
 RN-08 & Todos los investigadores con cuenta activa pueden consultar los experimentos
-        y resultados de cualquier otro investigador del laboratorio. El Administrador
-        puede además modificar y desactivar cuentas.
+        y resultados de cualquier otro investigador del laboratorio, pero solo pueden
+        eliminar los propios. El Administrador puede además eliminar cualquier
+        experimento, y modificar y desactivar cuentas.
       & Definido en entrevista de levantamiento. Ver RF-04, RNF-04, RF-30. \\
 \hline
 RN-09 & Borrar un experimento es permanente e irreversible: se eliminan el video,

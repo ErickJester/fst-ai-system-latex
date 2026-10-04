@@ -85,6 +85,9 @@ alt se hallaron los tubos
     w -> db: guarda sus 5 intervalos, con los segundos\npor conducta de cada uno (PRESENTA)
   end
 
+  w -> fs: guarda los recuadros de los tubos\n(archivo de recuadros del análisis)
+  w -> fs: guarda una copia del video, de los primeros 300 s,\nen un formato que el navegador puede reproducir
+
   w -> db: marca el análisis como "completado",\ncon su nivel de clasificación y fechaAnalisis
   w -> db: programa la eliminación del video\n30 días después (RNF-08)
   w -> db: crea la notificación de análisis terminado

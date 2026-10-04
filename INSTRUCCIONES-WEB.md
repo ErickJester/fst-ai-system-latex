@@ -187,10 +187,11 @@ stateDiagram-v2
   sin_videos --> en_cola: se subió el primer video
   en_cola --> procesando: el worker empezó alguna tanda
   procesando --> completado: todas las tandas terminaron sin error
-  procesando --> con_error: alguna tanda terminó en error
-  completado --> procesando: se agregó una tanda nueva
-  con_error --> procesando: se agregó una tanda nueva
+  procesando --> error: alguna tanda terminó en error
+  completado --> en_cola: se agregó una tanda nueva
 ```
+
+Mientras alguna tanda siga en error, el experimento sigue en `error`.
 
 ## 5. Modelo de datos (PostgreSQL)
 
@@ -342,7 +343,8 @@ observación). Es la fuente de la pantalla de revisión; `PRESENTA` es su resume
 y se recalcula cada vez que el usuario guarda correcciones. Valores de `origen`:
 `maquina`, `humano_confirma`, `humano_corrige`, `humano_duda` (el usuario dejó el segundo
 vacío a propósito), `sin_revisar` y `humano_ciego` (revisión "desde cero", que oculta lo
-que propuso la máquina). `clase` nula significa "no se ve".
+que propuso la máquina). `clase` nula significa que el segundo no tiene conducta: la
+máquina no pudo decidir, o el usuario lo marcó "dudosa" (`humano_duda`).
 
 ### Restricciones que la base debe hacer cumplir
 - `ANALISIS.idVideo` es `UNIQUE`: un video, un análisis. Reanalizar **reemplaza** el
@@ -640,7 +642,7 @@ crear usuario; modal de editar usuario.
 | Experimentos de todos los investigadores (lista y gestión)    |
 +-------------------------------------------------------------+
 Modal "Crear cuenta":  Identificador institucional*, Nombre*, Apellidos*, Correo institucional*  [Crear]
-   (el identificador institucional en el formulario es [PROPUESTA], sección 11, punto 12)
+   (el identificador institucional en el formulario quedó decidido, sección 11, punto 12)
 Modal "Editar cuenta": datos editables + interruptor Activo/Inactivo [Guardar]
 ```
 
@@ -668,7 +670,7 @@ pantalla completa. Se revisa **un espécimen a la vez**, con el video corriendo.
 |  Lupa (40 s)  ▓▓▓▓▓░░░░▓▓▓▓▓▓▓▓░░░▓▓▓▓      <- colores por conducta       |
 |  Tubo 1 (300 s)  ▓▓▓▓▓▓▓▓░░░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓      |
 |-------------------------------------------------------------------------|
-| [1 Nado][2 Inmovilidad][3 Escalamiento][4 Activa][0 No se ve]            |
+| [1 Nado][2 Inmovilidad][3 Escalamiento][4 Activa][0 Dudosa]              |
 | Velocidad: 0.5x 0.75x [1x] 1.5x 2x                                       |
 | Espacio pausa · ← → 1 s · Shift+flecha 5 s · R vuelve 3 s · Tab sig. tubo|
 | Ctrl+Z deshacer · Ctrl+S guardar · clic en la línea = ir a ese segundo   |
@@ -696,8 +698,10 @@ Cómo funciona:
   se manda al servidor (`PUT .../segundos`), que actualiza `SEGUNDO` y recalcula los
   totales por minuto.
 - **Resumen:** una tabla con los segundos por conducta de cada espécimen antes de guardar.
-- Nombres en pantalla: "Nado", "Inmovilidad", "Escalamiento", "Activa", "No se ve". En la
-  base: `nado activo`, `inmovilidad`, `escalamiento`, `conducta activa` y nulo.
+- Nombres en pantalla: "Nado", "Inmovilidad", "Escalamiento", "Activa", "Dudosa". En la
+  base: `nado activo`, `inmovilidad`, `escalamiento`, `conducta activa` y nulo. "Dudosa"
+  guarda `clase` nula con `origen = 'humano_duda'`; no existe un botón aparte de "No se
+  ve".
 - En la base los reportes dicen si el análisis tuvo revisión humana (algún `origen` que
   empiece con `humano`).
 
@@ -849,23 +853,19 @@ sequenceDiagram
    3 segundos seguidos o más. El laboratorio ahora pidió contar todo segundo a segundo, sin
    mínimo. Es asunto del worker; avisa si el formato de `INTERVALO` o `PRESENTA` tiene que
    cambiar.
-9. **[ABIERTO] "Último acceso" de cada usuario.** Se quería mostrar en la lista de
-   administración, pero `USUARIO` no tiene esa columna y no se debe inventar. Por ahora la
-   interfaz **no lo muestra**. Si el usuario lo quiere, hay que decidir con el equipo
-   agregar una columna.
+9. ~~"Último acceso" de cada usuario~~ **Resuelto (usuario, 3-oct-2026).** Se quita:
+   la lista de administración no muestra último acceso y `USUARIO` no lleva esa columna.
 10. **[ABIERTO] Log de ejecución del análisis.** Se quería un registro expandible en la
     pantalla de progreso, pero ninguna tabla guarda mensajes del worker. Por ahora la
     interfaz solo muestra la etapa actual. Lo mismo aplica a un código de error: se arma
     a partir de `etapa`.
-11. **[ABIERTO] Quién puede eliminar un experimento y cuándo.** **[PROPUESTA]** Solo quien
-    lo creó o un administrador, y se rechaza con 409 si algún análisis del experimento está
-    `procesando`.
-12. **[ABIERTO] De dónde sale el identificador institucional de una cuenta nueva.** Es la
-    llave primaria de `USUARIO` (hasta 10 caracteres), pero el formulario de crear cuenta
-    solo pedía nombre y correo. **[PROPUESTA]** El administrador lo escribe en el
-    formulario junto con nombre, apellidos y correo. Confirmar con el usuario si es un
-    número que ya existe (por ejemplo, el de empleado o boleta) o si debe derivarse del
-    correo.
+11. ~~Quién puede eliminar un experimento~~ **Resuelto (usuario, 3-oct-2026).** Solo quien
+    lo creó o un administrador; cualquier otro investigador recibe 403. Se rechaza con 409
+    si algún análisis del experimento está `procesando` (esta parte sigue como propuesta).
+12. ~~De dónde sale el identificador institucional de una cuenta nueva~~ **Resuelto
+    (usuario, 3-oct-2026).** El administrador lo escribe en el formulario de crear cuenta,
+    junto con nombre, apellidos, correo y contraseña temporal (hasta 10 caracteres). El
+    backend rechaza el alta si el identificador o el correo ya existen.
 13. **[ABIERTO] Qué pasa con `VIDEO.archivo` cuando el video se borra a los 30 días.**
     **[PROPUESTA]** No se modifica la columna (no hay otra donde marcar el borrado). La
     interfaz sabe que el video ya no existe porque pasaron 30 días desde
@@ -879,17 +879,18 @@ sequenceDiagram
     (sección 9.7) y puede corregir las etiquetas. Quedan **diferidas** y **no debes
     implementar**: la vista en tiempo real, detener el análisis cuando se pierde el tubo,
     y el recuadro manipulable.
-15. **[ABIERTO] Significado de `ANALISIS.nivelClasif`.** Con la conducta activa como cuarta
-    conducta, un mismo análisis puede mezclar todas. **[PROPUESTA]** `agrupado` si algún
-    segundo quedó como conducta activa; `preciso` si ninguno. La interfaz solo lo usa para
-    avisar. El usuario no lo ha confirmado.
-16. **[ABIERTO] Video para reproducir en el navegador.** Los `.mov` del iPhone suelen venir
-    en un códec (HEVC) que Chrome y Firefox no reproducen. **[PROPUESTA]** Al terminar el
+15. ~~Significado de `ANALISIS.nivelClasif`~~ **Resuelto (usuario, 3-oct-2026).** Se
+    queda. `agrupado` si algún segundo quedó como conducta activa; `preciso` si ninguno. La
+    interfaz solo lo usa para avisar.
+16. **Video para reproducir en el navegador. Resuelto (usuario, 3-oct-2026):** se queda
+    la propuesta. Los `.mov` del iPhone suelen venir
+    en un códec (HEVC) que Chrome y Firefox no reproducen. Al terminar el
     análisis, el worker genera con `ffmpeg` una copia en H.264 de los primeros 300 s
     (`analisis_{idAnalisis}_web.mp4`, en el volumen `videos_reportes`) y la pantalla de
     revisión reproduce esa copia. En `worker_fake`, simplemente copia o enlaza el original.
     Esa copia también se borra con el video a los 30 días.
-17. **[PROPUESTA] Dónde se guardan los recuadros de los tubos.** La pantalla de revisión
+17. **Dónde se guardan los recuadros de los tubos. Resuelto (usuario, 3-oct-2026):** se
+    queda la propuesta. La pantalla de revisión
     dibuja un recuadro sobre el video para destacar el tubo del espécimen que se revisa.
     Esos datos no tienen tabla. El worker los escribe en un archivo del volumen
     (`analisis_{idAnalisis}_cajas.json`) y el backend lo entrega a la pantalla. No se
@@ -1644,9 +1645,8 @@ skinparam shadowing false
 sin_videos --> en_cola : se subió y encoló\nel primer video
 en_cola --> procesando : el Worker empezó a\nprocesar alguna tanda
 procesando --> completado : todas las tandas\nterminaron sin error
-procesando --> con_error : alguna tanda\nterminó en error
-completado --> procesando : se agregó una tanda\nnueva
-con_error --> procesando : se agregó una tanda\nnueva
+procesando --> error : alguna tanda\nterminó en error
+completado --> en_cola : se agregó una tanda\nnueva
 @enduml
 ```
 
