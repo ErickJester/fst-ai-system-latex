@@ -1,4 +1,4 @@
-@startuml grafo_relacional_reconciliado
+@startuml grafo_relacional_3_vigente
 ' ================================================================
 '  Grafo Relacional RECONCILIADO - definitivo, validado en BCNF
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
@@ -56,7 +56,7 @@
 '
 
 '  Generar:
-'      java -jar plantuml.jar -tpng diagramas/grafo_relacional_reconciliado.puml
+'      java -jar plantuml.jar -tpng diagramas/grafo_relacional_3_vigente.puml
 ' ================================================================
 
 !theme plain

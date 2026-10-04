@@ -326,7 +326,7 @@ Hasta que ocurran esas dos revisiones, en los términos del método lo que exist
 es un `Investigador` con permisos extra (una misma persona puede ser los dos, como el Dr.
 Sandino). Se modela como subtipo/generalización: nueva relación
 `ADMINISTRADOR(idInstitucional*)` en (1,1)–(0,1) con `USUARIO`. **Ya aplicado** en
-`diagramas/grafo_relacional_reconciliado.puml` y en `diagramas/clases.puml` — el esquema
+`diagramas/grafo_relacional_3_vigente.puml` y en `diagramas/clases.puml` — el esquema
 reconciliado sube de 15 a 16 relaciones, 16 a 17 llaves foráneas.
 
 ### El trabajo grande que falta en el documento
@@ -415,7 +415,7 @@ atributo nulable del dominio experimental (`NOTIFICACION.idExperimento`, de las 
 soporte del sistema, es el otro nulo del esquema completo — ver D-06/reconciliación).
 
 Ya aplicado en el artifact lógico (revisión 3-sep) y en
-[`diagramas/grafo_relacional_final.puml`](diagramas/grafo_relacional_final.puml). Esta
+[`diagramas/grafo_relacional_2_laboratorio.puml`](diagramas/grafo_relacional_2_laboratorio.puml). Esta
 sección quedó marcada como «pendiente» en una versión anterior de este archivo por error
 de sincronización — ya no lo está.
 

@@ -17,7 +17,7 @@
 '  relacional vigente.
 '
 '  ---- Fuentes ----
-'  Estructura  : diagramas/grafo_relacional_reconciliado.puml
+'  Estructura  : diagramas/grafo_relacional_3_vigente.puml
 '                (16 relaciones, 74 atributos, 17 FK, BCNF)
 '                74 = 73 + USUARIO.cambioRequerido (D-25, 15-sep)
 '  Tipos y DDL : artifact "Diseno Fisico FST" (13-sep) - actividades

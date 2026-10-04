@@ -150,7 +150,8 @@ posición.
 - **Nunca reciclar un atributo o método de un diagrama viejo sin verificar que el grafo
   relacional vigente lo respalde.** Que algo existiera en el modelo viejo no es
   suficiente — hay que comprobar que la columna/atributo sigue existiendo en
-  `grafo_relacional_final.puml` / `grafo_relacional_reconciliado.puml` antes de copiarlo.
+  `grafo_relacional_3_vigente.puml` antes de copiarlo (el `_2_laboratorio` es un paso
+  intermedio del método y no trae las tablas ni columnas del sistema).
   Si no está: no inventarlo ni copiarlo. Se quita del diagrama y se registra como hueco
   nuevo (`D-XX` en `errores/preguntas-doctor.md` §6), igual que D-08/D-09/D-10. Pasó dos
   veces en esta migración por copiar del diagrama de clases viejo sin este chequeo.

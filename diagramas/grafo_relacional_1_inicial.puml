@@ -1,6 +1,6 @@
-@startuml grafo_relacional_inicial
+@startuml grafo_relacional_1_inicial
 ' ================================================================
-'  Grafo Relacional INICIAL - Esquema Logico Preliminar
+'  Grafo Relacional PASO 1 de 3 - INICIAL, esquema logico preliminar
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
@@ -14,7 +14,7 @@
 '  11 relaciones - 46 atributos - 12 llaves foraneas.
 '  ESPECIMEN es la unica relacion con dos padres.
 '
-'  Diferencias contra grafo_relacional_final.puml (5):
+'  Diferencias contra grafo_relacional_2_laboratorio.puml (5):
 '    1FN    USUARIO.nombre sin separar de apellidos
 '    3FN    ESPECIMEN.idGrupo, derivable por la tanda
 '    3FN    VIDEO.duracion = duracion nominal de la sesion
@@ -22,7 +22,7 @@
 '    3-sep  GRUPO.tratamiento admite nulo
 '
 '  Generar:
-'      java -jar plantuml.jar -tpng diagramas/grafo_relacional_inicial.puml
+'      java -jar plantuml.jar -tpng diagramas/grafo_relacional_1_inicial.puml
 ' ================================================================
 
 !theme plain

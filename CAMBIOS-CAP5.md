@@ -38,9 +38,9 @@ Los cuatro compilan y su render está verificado.
 | Archivo | Qué es | Sustituye a |
 |---------|--------|-------------|
 | [`diagramas/esquema_conceptual.tex`](diagramas/esquema_conceptual.tex) | ER conceptual, TikZ, notación Chen con cardinalidades (mín,máx) | `figures/mermaid/entidadRelacion.png` |
-| [`diagramas/grafo_relacional_inicial.puml`](diagramas/grafo_relacional_inicial.puml) | Esquema Lógico Preliminar · 11 rel · 46 attr · 12 FK | — (no existía) |
-| [`diagramas/grafo_relacional_final.puml`](diagramas/grafo_relacional_final.puml) | Esquema Lógico Definitivo · 11 rel · 46 attr · 11 FK · BCNF | `diagramas/relacional.puml` |
-| [`diagramas/grafo_relacional_reconciliado.puml`](diagramas/grafo_relacional_reconciliado.puml) | Esquema reconciliado con las tablas de sistema · 15 rel · 71 attr · 16 FK · BCNF | base para `esquema_fisico.puml` |
+| [`diagramas/grafo_relacional_1_inicial.puml`](diagramas/grafo_relacional_1_inicial.puml) | Esquema Lógico Preliminar · 11 rel · 46 attr · 12 FK | — (no existía) |
+| [`diagramas/grafo_relacional_2_laboratorio.puml`](diagramas/grafo_relacional_2_laboratorio.puml) | Esquema Lógico Definitivo · 11 rel · 46 attr · 11 FK · BCNF | `diagramas/relacional.puml` |
+| [`diagramas/grafo_relacional_3_vigente.puml`](diagramas/grafo_relacional_3_vigente.puml) | Esquema reconciliado con las tablas de sistema · 15 rel · 71 attr · 16 FK · BCNF | base para `esquema_fisico.puml` |
 
 ### Por qué el par inicial/final y no solo el final
 
@@ -103,7 +103,7 @@ Falta: sustituirla por `esquema_conceptual.pdf` y reescribir el pie.
 **Ubicación:** `:267`–`:272` · **Estado:** Bloqueado (ver C-02 y C-03)
 
 `figures/mermaid/er2.png` viene de `diagramas/esquema_fisico.puml`, con las 12 tablas
-viejas. El punto de partida para rehacerlo es `grafo_relacional_reconciliado.puml`, más los
+viejas. El punto de partida para rehacerlo es `grafo_relacional_3_vigente.puml`, más los
 tipos PostgreSQL y las columnas de auditoría, que son de la etapa física.
 
 ### C5-04 — Insertar el par de grafos relacionales 🔴
@@ -178,7 +178,7 @@ queda la revisión de la directora, y no bloquea empezar a escribir.
 
 | ID | Decisión | Bloqueaba | Estado |
 |----|----------|---------|--------------|
-| ~~**P-08**~~ | ¿El reanálisis reemplaza al anterior, o se conserva historial? | C5-03, C5-04 | **Cerrada como D-03 (equipo, 13-sep):** reemplaza, no se conserva historial. `VIDEO—ANALISIS` baja de (1,N) a (1,1) — ya aplicado en `grafo_relacional_reconciliado.puml` y en `clases.puml` |
+| ~~**P-08**~~ | ¿El reanálisis reemplaza al anterior, o se conserva historial? | C5-03, C5-04 | **Cerrada como D-03 (equipo, 13-sep):** reemplaza, no se conserva historial. `VIDEO—ANALISIS` baja de (1,N) a (1,1) — ya aplicado en `grafo_relacional_3_vigente.puml` y en `clases.puml` |
 | ~~**D-04**~~ | Disparador vs. reintroducir `ESPECIMEN.idGrupo` como redundancia controlada | C5-03 | **Cerrada (equipo, 13-sep):** redundancia controlada — `idGrupo` reingresa a `ESPECIMEN` como columna redundante con `UNIQUE (idGrupo, numeroRata)`. Solo en el esquema físico |
 | ~~**Q-08**~~ | ¿Autoregistro con aprobación, o solo el administrador crea cuentas? | C5-08, atributos de `USUARIO` | **Cerrada como D-01 (equipo, 13-sep):** solo el administrador crea cuentas. El cap. 1 queda mal, hay que corregirlo al RF-07 |
 | **Rev. 2** | Revisión de notación con la **Dra. Martha Rosa Cordero** | Convenciones del bloque A, si cambian | **En curso** (2026-09-15) — directora del TT, sin cambios grandes esperados |
@@ -233,7 +233,7 @@ después.
 | `ESPECIMEN(idEspecimen, idLaboratorio, numeroCilindro, idTanda*)` | `numeroRata` en vez de `idLaboratorio` — ya no es clave global, es relativa al grupo |
 | `Grupo → agrupa (6,8 / 1,1) → Espécimen` | `(6,N)` — sin tope, el laboratorio lo pidió explícitamente |
 | «`UNIQUE idLaboratorio` (alcance por confirmar, P-03)» | P-03 ya está cerrada — marca de plumón, numerada 1–8 dentro del grupo |
-| `ANALISIS(..., etapaActiva, ..., nivelClasificacion, ...)` | Reconciliar nombres contra `grafo_relacional_final.puml`, que usa `etapa` y `nivelClasif` |
+| `ANALISIS(..., etapaActiva, ..., nivelClasificacion, ...)` | Reconciliar nombres contra `grafo_relacional_2_laboratorio.puml`, que usa `etapa` y `nivelClasif` |
 
 **Cómo se descubrió:** al leer el diff completo del commit `8b26dd6` tras el `git pull`
 de esta sesión (regla nueva en `CLAUDE.md` — leer commits completos, no solo el

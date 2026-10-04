@@ -461,7 +461,7 @@ Otras decisiones tomadas:
   es un resumen ejecutivo, distinto del PDF de diagnóstico.
 - **Cuentas:** no existe autoregistro ni formulario público. Solo el administrador crea
   cuentas con identificador institucional (propuesta, sección 11 punto 12), nombre,
-  apellidos, correo institucional `@ipn.mx` y contraseña temporal. Se pone
+  apellidos y correo institucional `@ipn.mx`; el sistema genera la contraseña temporal. Se pone
   `cambioRequerido = true` y el sistema obliga a cambiarla en el primer ingreso.
 - **Recuperación de contraseña:** el enlace lleva su vencimiento **firmado dentro**
   (JWT). No se agregan columnas a `USUARIO`.
@@ -864,8 +864,9 @@ sequenceDiagram
     si algún análisis del experimento está `procesando` (esta parte sigue como propuesta).
 12. ~~De dónde sale el identificador institucional de una cuenta nueva~~ **Resuelto
     (usuario, 3-oct-2026).** El administrador lo escribe en el formulario de crear cuenta,
-    junto con nombre, apellidos, correo y contraseña temporal (hasta 10 caracteres). El
-    backend rechaza el alta si el identificador o el correo ya existen.
+    junto con nombre, apellidos y correo. La contraseña temporal la genera el sistema
+    (corregido por el usuario, 4-oct-2026). El backend rechaza el alta si el
+    identificador o el correo ya existen.
 13. **[ABIERTO] Qué pasa con `VIDEO.archivo` cuando el video se borra a los 30 días.**
     **[PROPUESTA]** No se modifica la columna (no hay otra donde marcar el borrado). La
     interfaz sabe que el video ya no existe porque pasaron 30 días desde

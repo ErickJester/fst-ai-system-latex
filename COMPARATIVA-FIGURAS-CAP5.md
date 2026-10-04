@@ -2,7 +2,7 @@
 
 > Las 31 figuras que trae `main.pdf` (compilado 2026-09-02, antes de la revisión del
 > 3-sep) contra las fuentes nuevas que ya reflejan el modelo de BD vigente (artifacts
-> v4/v5, `grafo_relacional_reconciliado.puml`, `clases.puml`, decisiones D-01 a D-19).
+> v4/v5, `grafo_relacional_3_vigente.puml`, `clases.puml`, decisiones D-01 a D-19).
 > Mapeo verificado contra los `\includegraphics` de `chapters/05_diseno.tex` y los
 > comentarios "Reemplaza a…" de cada `.puml` nuevo.
 
