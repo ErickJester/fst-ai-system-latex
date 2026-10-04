@@ -246,7 +246,7 @@ en el esquema lógico definitivo.
 2. **El espécimen no tiene identidad propia.** Ninguna fuente le da arete, número ni
    peso. Su única identidad es **geométrica**: la posición del cilindro en el encuadre.
    Eso funciona solo porque el laboratorio garantiza que la cámara y los cilindros no se
-   mueven entre el Día 1 y el Día 2. Toda la comparación entre sesiones descansa ahí.
+   mueven entre el Día 1 y el Día 2. La continuidad del espécimen entre las dos sesiones descansa ahí.
 3. **Observación es una agregación, no una relación ternaria.** Una ternaria entre
    Espécimen, Video y Conducta permitiría emparejar un espécimen con el video de otra
    tanda. Es el error que el libro documenta en §2.5.3 con el ejemplo de las audiciones
