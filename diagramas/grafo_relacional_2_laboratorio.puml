@@ -1,12 +1,14 @@
-@startuml grafo_relacional_final
+@startuml grafo_relacional_2_laboratorio
 ' ================================================================
-'  Grafo Relacional FINAL - Esquema Logico Definitivo
+'  Grafo Relacional PASO 2 de 3 - LABORATORIO, solo los datos del
+'  laboratorio, ya normalizado. NO es el modelo vigente: el vigente es
+'  grafo_relacional_3_vigente.puml (este mas las tablas del sistema)
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
 '  Salida de la actividad 6 (validacion) de la etapa de diseno
 '  logico, ya normalizado. Es el SEGUNDO de los dos entregables
-'  que pide el metodo: el primero es grafo_relacional_inicial.puml,
+'  que pide el metodo: el primero es grafo_relacional_1_inicial.puml,
 '  y los dos deben presentarse juntos --- publicar solo el final
 '  deja sin evidencia el paso de validacion.
 '
@@ -20,7 +22,7 @@
 '  anterior (sin los niveles Grupo y Tanda).
 '
 '  Generar:
-'      java -jar plantuml.jar -tpng diagramas/grafo_relacional_final.puml
+'      java -jar plantuml.jar -tpng diagramas/grafo_relacional_2_laboratorio.puml
 ' ================================================================
 
 !theme plain

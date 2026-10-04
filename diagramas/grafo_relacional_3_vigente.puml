@@ -1,6 +1,7 @@
-@startuml grafo_relacional_reconciliado
+@startuml grafo_relacional_3_vigente
 ' ================================================================
-'  Grafo Relacional RECONCILIADO - definitivo, validado en BCNF
+'  Grafo Relacional PASO 3 de 3 - VIGENTE, el modelo que vale.
+'  Antes llamado "reconciliado"; validado en BCNF
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
@@ -60,7 +61,7 @@
 '
 
 '  Generar:
-'      java -jar plantuml.jar -tpng diagramas/grafo_relacional_reconciliado.puml
+'      java -jar plantuml.jar -tpng diagramas/grafo_relacional_3_vigente.puml
 ' ================================================================
 
 !theme plain

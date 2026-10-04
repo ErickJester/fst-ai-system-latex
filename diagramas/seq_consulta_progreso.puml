@@ -51,7 +51,7 @@
 '    del PDF (agregada aquí). D-23 (13-sep) agrega la columna
 '    ANALISIS.rutaDiagnostico (nula salvo con estado = "error"),
 '    porque ni ANALISIS ni REPORTE tenían dónde guardar esa ruta --
-'    pendiente de aplicar en grafo_relacional_reconciliado.puml.
+'    pendiente de aplicar en grafo_relacional_3_vigente.puml.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_consulta_progreso.puml

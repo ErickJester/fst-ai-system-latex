@@ -20,7 +20,7 @@ el checklist, y solo entonces dibuja. Marca el estado en la bitácora del §5.
 
 ## 0. El modelo nuevo, de un vistazo
 
-Fuente: [`diagramas/grafo_relacional_reconciliado.puml`](diagramas/grafo_relacional_reconciliado.puml)
+Fuente: [`diagramas/grafo_relacional_3_vigente.puml`](diagramas/grafo_relacional_3_vigente.puml)
 — las 11 relaciones del esquema lógico definitivo más las 4 de soporte del sistema, ya
 con la corrección de la reunión del 3-sep (`GRUPO.tratamiento` nunca nulo), más
 `ADMINISTRADOR` (D-08, 13-sep): **16 relaciones en total**, no 15.
@@ -64,7 +64,7 @@ con la corrección de la reunión del 3-sep (`GRUPO.tratamiento` nunca nulo), m�
 > D-21 (caché y regeneración de `REPORTE`), D-22 (porcentaje de avance aproximado por
 > etapa) y D-23 (columna nueva `ANALISIS.rutaDiagnostico`). Detalle completo en
 > `errores/preguntas-doctor.md` §6. **D-23 es la única que toca este `.puml`** — está
-> **pendiente de aplicar** en `grafo_relacional_reconciliado.puml`, no se toca hasta que
+> **pendiente de aplicar** en `grafo_relacional_3_vigente.puml`, no se toca hasta que
 > se pida explícitamente (ver §3.2).
 
 ```
@@ -117,8 +117,8 @@ las comparaciones entre grupos se **derivan en consulta**, no se almacenan.
 > identificador institucional único** (`idInstitucional`), que acepta boleta
 > (estudiantes) o número de empleado (personal), con una regla de formato/tipo pendiente
 > de afinar para distinguir cuál es cuál — detalle menor, no bloquea. Ya renombrado en
-> `diagramas/clases.puml`, `grafo_relacional_final.puml`, `grafo_relacional_reconciliado.puml`
-> y `grafo_relacional_inicial.puml` — los cuatro compilan.
+> `diagramas/clases.puml`, `grafo_relacional_2_laboratorio.puml`, `grafo_relacional_3_vigente.puml`
+> y `grafo_relacional_1_inicial.puml` — los cuatro compilan.
 
 ---
 
@@ -219,9 +219,9 @@ Checklist de verificación (no de construcción, ya existe):
 
 **Estado:** 🟡 insumo listo, falta compilar e insertar el par de evidencia.
 
-Fuente: `diagramas/grafo_relacional_inicial.puml` (preliminar, con los 3 defectos
-marcados) + `diagramas/grafo_relacional_final.puml` (validado, BCNF) +
-`diagramas/grafo_relacional_reconciliado.puml` (+ 4 tablas de sistema + `ADMINISTRADOR`,
+Fuente: `diagramas/grafo_relacional_1_inicial.puml` (preliminar, con los 3 defectos
+marcados) + `diagramas/grafo_relacional_2_laboratorio.puml` (validado, BCNF) +
+`diagramas/grafo_relacional_3_vigente.puml` (+ 4 tablas de sistema + `ADMINISTRADOR`,
 16 relaciones en total — este es el que de verdad sustituye a `fig:er`).
 
 Antes de maquetar:
@@ -237,7 +237,7 @@ Antes de maquetar:
       declara solo en el DDL, nunca aquí
 - [x] **P-08 / D-03 resuelto (equipo, 2026-09-13):** se reemplaza, no se conserva
       historial de reanálisis. `VIDEO—ANALISIS` baja de (1,N) a (1,1) — ya aplicado en
-      `grafo_relacional_reconciliado.puml`, compila. `OBSERVACION` no necesita cambiar:
+      `grafo_relacional_3_vigente.puml`, compila. `OBSERVACION` no necesita cambiar:
       sigue referenciando `idVideo` directo, porque con reemplazo nunca hay ambigüedad de
       cuál análisis corresponde a un video
 - [x] **D-06 resuelto (equipo, 2026-09-13):** no cambia, se queda en 1:N. Lo que importa
@@ -246,7 +246,7 @@ Antes de maquetar:
 - [x] **D-02 ejecutado (2026-09-13):** `idInstitucional` ya es la PK de `USUARIO` en los
       tres grafos (ver §0)
 - [x] **D-08 ejecutado (2026-09-13):** `ADMINISTRADOR(idInstitucional* [FK])` agregado a
-      `grafo_relacional_reconciliado.puml` en relación (1,1)-(0,1) con `USUARIO` — pasa de
+      `grafo_relacional_3_vigente.puml` en relación (1,1)-(0,1) con `USUARIO` — pasa de
       15 a 16 relaciones, 16 a 17 llaves foráneas. Compila
 - [ ] **D-23 pendiente de aplicar (13-sep):** columna nueva `ANALISIS.rutaDiagnostico`
       (nula salvo `estado = 'error'`), que salió de construir
@@ -262,7 +262,7 @@ con permisos extra — `Investigador` se fusionó con `Usuario` (ya no abstracta
 `Administrador` hereda de `Usuario`. El progreso del análisis vive solo en memoria de
 `PipelineAnalisis`/`Worker`, no toca `Analisis`. `USUARIO` ganó `activo : Boolean`
 (justificado con Kendall & Kendall p. 425-426 y Cardona Apéndice A p. 117-118) — ya
-aplicado también en `grafo_relacional_final.puml` y `grafo_relacional_reconciliado.puml`.
+aplicado también en `grafo_relacional_2_laboratorio.puml` y `grafo_relacional_3_vigente.puml`.
 Solo falta pulir el layout (`Observacion` se encima con el borde de P4 — cosmético) antes
 de generar el PNG final para el capítulo.
 
@@ -310,7 +310,7 @@ que cuelga de una `Tanda`, usa `Configuracion` (que a su vez referencia `Modelo`
 
 Checklist antes de dibujar:
 - [ ] Cada clase de dominio nueva tiene exactamente los atributos de su relación en
-      `grafo_relacional_final.puml` — no atributos inventados para que “se vea completo”
+      `grafo_relacional_2_laboratorio.puml` — no atributos inventados para que “se vea completo”
 - [ ] Las multiplicidades coinciden con las del conceptual (§3.1), no con las que “se ven
       bien” en el diagrama
 - [ ] Si después de editar sigue apareciendo `Sujeto` o `Animal` en cualquier paquete, es

@@ -25,6 +25,12 @@
 '      describe (el hueco que marcaba COMPARATIVA-FIGURAS-CAP5.md
 '      para esta figura).
 '
+'  D-38 (3-oct, corregido 4-oct): el formulario pide identificador
+'  institucional, nombre, apellidos y correo; el backend rechaza el
+'  alta si el identificador o el correo ya existen. La contraseña
+'  temporal la genera el sistema (no la escribe el Administrador),
+'  igual que en CU-12 y en el mockup v2 de administracion.
+'
 '  D-25 (15-sep): la cuenta se crea con cambioRequerido = true, asi
 '  el login (fuera de este diagrama) sabe que debe forzar el
 '  cambio de contraseña en el primer ingreso.
@@ -55,10 +61,10 @@ note right of ui
 end note
 
 admin -> ui: selecciona "Crear cuenta"
-ui -> admin: muestra el formulario\n(nombre completo, correo institucional)
+ui -> admin: muestra el formulario\n(identificador institucional, nombre,\napellidos, correo institucional)
 
 admin -> ui: completa los datos y confirma
-ui -> api: POST /admin/usuarios {nombre, correo}\ncon la sesión activa del Administrador
+ui -> api: envía identificador, nombre, apellidos y correo\ncon la sesión activa del Administrador
 
 api -> db: ¿el idInstitucional de la sesión está en ADMINISTRADOR?
 db --> api: sí / no
@@ -67,15 +73,15 @@ alt no está en ADMINISTRADOR
   api --> ui: 403, no autorizado
   ui --> admin: muestra el error, no crea la cuenta
 else sí está en ADMINISTRADOR
-  api -> db: ¿el correo ya está registrado?
+  api -> db: ¿el identificador institucional o el correo\nya están registrados?
   db --> api: sí / no
 
-  alt el correo ya está registrado
+  alt el identificador o el correo ya están registrados
     api --> ui: informa el conflicto
     ui --> admin: muestra el error, no crea el duplicado
-  else el correo está disponible
+  else ambos están disponibles
     api -> api: genera contraseña temporal
-    api -> db: crea USUARIO\n(nombre, correo, contrasenaHash,\nactivo=true, cambioRequerido=true)
+    api -> db: crea USUARIO\n(idInstitucional, nombre, apellidos, correo,\ncontrasenaHash, activo = sí, cambioRequerido = sí)
     db --> api: confirma la creación
     api -> api: envía correo al nuevo investigador\ncon sus credenciales de acceso inicial
     api --> ui: 201 Created

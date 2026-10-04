@@ -28,6 +28,11 @@
 '    comparar sus segundos por conducta sin avisar mezclaria
 '    categorias que no significan lo mismo -- CU-09 nunca contemplo
 '    esto porque D-15/D-16/D-17 son posteriores.
+'  - D-41 (3-oct): el nivel se guarda en ANALISIS.nivelClasif --
+'    "agrupado" si algun segundo del analisis quedo como conducta
+'    activa, "preciso" si ninguno. La interfaz solo lo usa para
+'    avisar en los resultados; el diagrama lo lee junto con los
+'    segundos de cada especimen.
 '
 '  ---- Provisional, pendiente de confirmar con el laboratorio ----
 '  Q-E  Se promedia por especimen, no se suma por grupo, para que el
@@ -65,8 +70,8 @@ loop por cada grupo
   api -> db: para cada espécimen, busca su observación\ndel video con sesión "Día 2"
 
   alt el espécimen ya tiene su Día 2 analizado
-    api -> db: suma los segundos por conducta\nde los 5 intervalos de esa observación
-    db --> api: segundos de nado activo, inmovilidad y escalamiento
+    api -> db: suma los segundos por conducta\nde los 5 intervalos de esa observación\ny lee el nivel de clasificación de su análisis
+    db --> api: segundos de nado activo, inmovilidad y escalamiento,\ny el nivel ("preciso" o "agrupado")
   else el Día 2 de ese espécimen no tiene resultado\n(análisis en cola, procesando, con error, o sin subir)
     api -> api: marca al espécimen como dato faltante\npara este grupo
   end
@@ -77,11 +82,18 @@ api -> api: promedia los segundos por conducta\nentre los especímenes analizado
 alt los especímenes de un grupo no coinciden en el nivel de clasificación\n("preciso" y "agrupado" mezclados)
   api -> api: separa el resultado por nivel de clasificación\nen vez de sumarlos juntos
   api --> ui: comparación entre grupos, con aviso de nivel mixto
-else todos los especímenes analizados coinciden en su nivel
-  api --> ui: comparación entre grupos, un solo nivel
+else todos los especímenes analizados están en "agrupado"
+  api --> ui: comparación entre grupos en dos conductas,\ncon aviso de nivel "agrupado"
+else todos los especímenes analizados están en "preciso"
+  api --> ui: comparación entre grupos en tres conductas
 end
 
-ui -> inv: muestra la comparación de los tres grupos\n(solo Día 2), con los especímenes faltantes señalados
+ui -> inv: muestra la comparación de los tres grupos\n(solo Día 2), con los especímenes faltantes señalados\ny el nivel de clasificación de los resultados
+note right of ui
+  El nivel solo sirve para avisar (D-41):
+  "agrupado" significa que nado activo y
+  escalamiento se juntan en "conducta activa"
+end note
 inv -> ui: puede pedir el reporte descargable (ver CU-10)
 
 @enduml
