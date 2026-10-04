@@ -250,4 +250,31 @@ su última actualización es del 2026-09-02 y el artifact se republicó después
 
 ---
 
+## H. El clasificador del cap. 5 no es el que se construyó — encontrado el 2026-10-04 🔴
+
+Las secciones del clasificador (`05_diseno.tex`, alrededor de las líneas 170-212, y la
+mención «ResNet» de la arquitectura, línea ~46) describen una cascada ResNet-18 →
+ResNet-50 y un suavizado por voto mayoritario de cuadros en ventanas de **1 s**. El
+etiquetador real (`C:\Users\Samsung\Desktop\Videos\fst_auto`) hace otra cosa:
+
+- Mide **15 rasgos** por fotograma y decide con el **modelo de bloques**
+  (`modelo_fst.joblib`), entrenado con bloques de 5 s; además hay una CNN 3D fusionada con
+  rasgos y reglas (commit `ee7c9a8`, 26-sep).
+- **Segundo a segundo** (`segundos.py`, commit `4eb1f46`, 30-sep): para el segundo *k* mide
+  los rasgos en una **ventana deslizante de 4 s** centrada en *k*; detecta conductas de unos
+  **2 s**. Regla de tres pasos que da «conducta activa» cuando no decide.
+- Valida juntando los segundos de cada bloque de 5 s por mayoría contra los bloques hechos
+  a mano.
+
+| ID | Qué | Estado |
+|----|-----|--------|
+| **CLA-01** | Reescribir la descripción del clasificador del cap. 5 según el etiquetador real (rasgos, modelo de bloques, CNN, ventana deslizante de 4 s) | ✅ Hecho (4-oct): Módulo 4 reescrito (rasgos, Random Forest con regla de tres pasos, ventana deslizante de 4 s, entrenamiento en bola de nieve, CNN R(2+1)D en desarrollo). Sin cifras de desempeño: la evaluación queda para TT-II con precisión, recall y F1. Bibliografía: `breiman2001`, `tran2018` |
+| **CLA-02** | Revisar la arquitectura (línea ~46: «YOLOv8, ByteTrack, ResNet»), el Módulo 3 (seguimiento con YOLOv8 + ByteTrack) y los modelos que monta el worker (`rat.pt`, `resnet18_fst.pt`, `resnet50_fst.pt`) contra lo real | ⏸ En espera (usuario, 4-oct): el clasificador aún no se termina y no se sabe si se usará eso |
+| **CLA-03** | ResNet-18/50 como clasificador del proyecto sigue en otros capítulos: cap. 1 (líneas ~366, 466, 488), cap. 2 (~272-289), cap. 3 (sección «ResNet y conexiones residuales», ~261-281, y ~333), cap. 4 (tabla de tecnologías ~693-708, viabilidad ~882-886 y ~909), glosario (~62, 81, 190, 261, 287-290, 315) y abreviaturas | ⏸ En espera (usuario, 4-oct): se hace junto con CLA-02, cuando el clasificador esté terminado |
+
+**Fuente:** el código y los commits de `fst_auto` (rango 1, el equipo). D-49 solo quita la
+liga del suavizado con la duración mínima de episodio; la reescritura completa es CLA-01.
+
+---
+
 *Creado: 2026-09-06*

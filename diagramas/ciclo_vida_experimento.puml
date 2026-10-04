@@ -60,11 +60,11 @@ state "Motor de Análisis  (Worker Asíncrono)" as Procesamiento <<procesamiento
   Tracking      --> Clasificacion : tracks y coordenadas\nlistas
 }
 
-' ========= FALLO Y REINTENTO ===============================================
-state "FalloAnálisis\n(video corrupto, error modelo,\nfalta de RAM)" as FalloAnalisis <<error>>
+' ========= FALLO ===========================================================
+' Sin reintento: el investigador no puede reiniciar un analisis (RN-04).
+state "FalloAnálisis\n(el video no se pudo abrir o\nno se encontraron los cilindros)" as FalloAnalisis <<error>>
 
 Procesamiento --> FalloAnalisis : error durante\nel pipeline
-FalloAnalisis --> Encolado      : Investigador solicita\nreintento
 
 ' ========= COMPOSITE: COMPLETADO ===========================================
 Procesamiento --> Completado : pipeline finaliza\ncon éxito  (100 %)

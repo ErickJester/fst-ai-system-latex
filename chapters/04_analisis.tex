@@ -173,10 +173,12 @@ RF-17 & Análisis conductual
       & Alta & Sistema \\
       \hline
 RF-18 & Análisis conductual
-      & El sistema debe contabilizar una conducta como episodio válido únicamente si
-        se mantiene de forma continua durante al menos 3~segundos consecutivos. Las
-        conductas con duración inferior a ese umbral deben ignorarse. Este criterio
-        reproduce el estándar del laboratorio en el análisis manual.
+      & El sistema debe asignar una conducta a cada segundo del análisis, sin
+        descartar ninguna por su duración, de modo que registre conductas breves (de
+        unos 2~segundos) que el análisis manual por bloques de 5~segundos no
+        distingue. Para compararse con ese método, los resultados también se
+        presentan en bloques de 5~segundos: cada bloque toma la conducta con más
+        segundos y muestra dentro los segundos que lo componen.
       & Alta & Sistema \\
 \hline
 
@@ -463,11 +465,15 @@ ajustarse en la fase de validación (TT2).
         El F1 por conducta se evaluará sobre el conjunto de prueba de la fase de
         validación en TT2.
 
-  \item \textbf{Duración mínima de episodio: 3~segundos.}
-        Criterio declarado por el investigador colaborador en la entrevista de
-        levantamiento. En el análisis manual, una conducta se contabiliza únicamente
-        si se mantiene de forma continua alrededor de 3 a 5 segundos; el sistema
-        adopta el límite inferior como umbral conservador (ver RF-18).
+  \item \textbf{Sin duración mínima de episodio; bloques de 5~segundos como referencia.}
+        En la entrevista de levantamiento, el investigador colaborador indicó que en
+        el análisis manual una conducta se contabiliza si se mantiene alrededor de 3
+        a 5~segundos. El sistema no adopta ese mínimo: asigna una conducta a cada
+        segundo y detecta conductas breves de unos 2~segundos, que es justo lo que el
+        análisis a ojo no alcanza a registrar. El criterio manual se conserva como
+        referencia: los resultados también se agrupan en bloques de 5~segundos, con la
+        conducta que más segundos ocupó en cada bloque, para compararlos con el
+        análisis manual (ver RF-18).
 
   \item \textbf{Período de retención de videos: 30~días.}
         Confirmado por el investigador colaborador en la entrevista de levantamiento
