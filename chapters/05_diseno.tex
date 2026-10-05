@@ -182,9 +182,11 @@ expresan en largos de cuerpo y los tiempos en segundos: así, dos videos grabado
 con encuadres distintos producen números comparables y el clasificador aprende la
 conducta y no el encuadre.
 
-\paragraph{Clasificador sobre rasgos.} Un bosque aleatorio (\textit{Random
-Forest}) \cite{breiman2001}, implementado con scikit-learn \cite{pedregosa2011},
-recibe los quince rasgos y estima la probabilidad de nado activo, inmovilidad y
+\paragraph{Clasificador sobre rasgos.} Un clasificador de \textit{gradient
+boosting} (potenciación del gradiente) sobre árboles de decisión
+\cite{friedman2001}, en la variante por histogramas que implementa scikit-learn
+como \texttt{HistGradientBoostingClassifier} \cite{pedregosa2011,ke2017}, recibe
+los quince rasgos y estima la probabilidad de nado activo, inmovilidad y
 escalamiento. La conducta se decide con una regla de tres pasos:
 
 \begin{enumerate}
