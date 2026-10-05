@@ -135,7 +135,9 @@ de las llaves subrogadas, mejor que cualquiera de los que ya estaban.
 
 ### C5-06 — Diccionario de datos 🟢
 
-**Ubicación:** `:342`–`:343` · **Estado:** Material listo, falta trasladarlo al `.tex` ·
+**Ubicación:** `:342`–`:343` · **Estado:** ✅ Hecho (5-oct): `back/apendice_D.tex`, armado
+desde `esquema_fisico.puml` (17 tablas, con D-29, D-35 y D-47) y no desde los artifacts,
+que siguen en 16 relaciones · 
 **Cruza con DOC-01 de `CORRECCIONES.md`**
 
 La prosa promete «El diccionario de datos completo con tipos, restricciones y descripciones

@@ -1,0 +1,297 @@
+% ============================================================
+%  Apéndice D — Diccionario de datos
+%  TT 2026-B066 | ESCOM-IPN
+%  Fuente: diagramas/esquema_fisico.puml (modelo vigente)
+% ============================================================
+
+\chapter{Diccionario de datos}
+\label{ap:diccionario}
+
+Este apéndice describe cada columna de las 17 tablas del esquema físico
+(Figura~\ref{fig:er}), implementado en PostgreSQL. Para cada columna se indica su
+tipo, si admite nulo, las restricciones que hace cumplir la base de datos y qué
+guarda.
+
+En la columna «Restricción», PK es la llave primaria y FK una llave foránea, seguida
+de la tabla a la que apunta. UK marca un valor único; cuando aparece con otras
+columnas entre paréntesis, lo único es la combinación. CK es una condición de
+verificación. Todas las llaves foráneas se declaran con \texttt{ON DELETE NO ACTION}
+y \texttt{ON UPDATE NO ACTION}: la base rechaza borrar una fila que otra tabla
+referencia, en vez de borrar en cascada. Por eso un usuario se da de baja con la
+columna \texttt{activo} y no se elimina.
+
+Los identificadores subrogados son \texttt{integer GENERATED ALWAYS AS IDENTITY}.
+Los umbrales y las duraciones usan \texttt{numeric} y no tipos de punto flotante,
+porque la unicidad de \texttt{CONFIGURACION} compara esos valores por igualdad. En
+\texttt{varchar(n)} y \texttt{numeric(p,s)}, la longitud y la precisión se fijan al
+escribir el DDL.
+
+\section*{Dominios cerrados}
+
+Ocho columnas toman sus valores de una lista fija, declarada como dominio
+(\texttt{CREATE DOMAIN} con una condición \texttt{CHECK}). La Tabla~\ref{tab:dominios}
+los reúne. \texttt{CONDUCTA} no es un dominio sino una tabla, para que las demás
+tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
+\texttt{nado activo}, \texttt{inmovilidad}, \texttt{escalamiento} y
+\texttt{conducta activa}.
+
+{\footnotesize\singlespacing
+\begin{longtable}{|>{\raggedright}p{3.4cm}|>{\raggedright}p{2.2cm}|>{\raggedright\arraybackslash}p{7.8cm}|}
+\caption{Dominios cerrados del esquema físico.
+\label{tab:dominios}}\\
+\hline
+\textbf{Dominio} & \textbf{Tipo base} & \textbf{Valores} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Dominio} & \textbf{Tipo base} & \textbf{Valores} \\
+\hline
+\endhead
+\texttt{tipo\_\allowbreak{}grupo} & \texttt{varchar(24)} & \texttt{control}, \texttt{referencia}, \texttt{tratamiento experimental} \\
+\hline
+\texttt{sesion\_\allowbreak{}video} & \texttt{varchar(6)} & \texttt{Dia 1}, \texttt{Dia 2} \\
+\hline
+\texttt{formato\_\allowbreak{}reporte} & \texttt{varchar(4)} & \texttt{CSV}, \texttt{XLSX}, \texttt{PDF} \\
+\hline
+\texttt{tipo\_\allowbreak{}notificacion} & \texttt{varchar(32)} & \texttt{analisis completado}, \texttt{error del pipeline}, \texttt{alerta de disco} \\
+\hline
+\texttt{estado\_\allowbreak{}analisis} & \texttt{varchar(10)} & \texttt{en cola}, \texttt{procesando}, \texttt{completado}, \texttt{error} \\
+\hline
+\texttt{etapa\_\allowbreak{}analisis} & \texttt{varchar(16)} & \texttt{preprocesamiento}, \texttt{deteccion}, \texttt{seguimiento}, \texttt{clasificacion} \\
+\hline
+\texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & \texttt{varchar(8)} & \texttt{preciso} si ningún segundo del análisis quedó como conducta activa; \texttt{agrupado} si al menos uno quedó así \\
+\hline
+\texttt{origen\_\allowbreak{}segundo} & \texttt{varchar(16)} & \texttt{maquina}: etiqueta propuesta por el sistema, sin revisar. \texttt{humano\_\allowbreak{}confirma}: el usuario vio el segundo y dejó la propuesta. \texttt{humano\_\allowbreak{}corrige}: el usuario vio el segundo y la cambió. \texttt{humano\_\allowbreak{}duda}: el usuario lo marcó como dudoso y quedó sin conducta. \texttt{sin\_\allowbreak{}revisar}: el usuario lo etiquetó sin llegar a verlo en el video. \texttt{humano\_\allowbreak{}ciego}: etiquetado en el modo de revisión que oculta la propuesta del sistema \\
+\hline
+\end{longtable}
+}
+
+\section*{Columnas por tabla}
+
+{\footnotesize\singlespacing
+\begin{longtable}{|>{\raggedright}p{3.7cm}|>{\raggedright}p{2.3cm}|>{\centering}p{0.9cm}|>{\raggedright}p{2.3cm}|>{\raggedright\arraybackslash}p{4.2cm}|}
+\caption{Diccionario de datos del esquema físico.
+\label{tab:diccionario}}\\
+\hline
+\textbf{Columna} & \textbf{Tipo} & \textbf{Nulo} & \textbf{Restricción} & \textbf{Descripción} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Columna} & \textbf{Tipo} & \textbf{Nulo} & \textbf{Restricción} & \textbf{Descripción} \\
+\hline
+\endhead
+% ---------------- USUARIO ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{USUARIO}: cuentas de quienes usan el sistema} \\
+\hline
+\texttt{idInstitucional} & \texttt{varchar(10)} & No & PK & Boleta o número de empleado del IPN. Un solo campo acepta los dos \\
+\hline
+\texttt{nombre} & \texttt{varchar(n)} & No & & Nombre o nombres \\
+\hline
+\texttt{apellidos} & \texttt{varchar(n)} & No & & Apellidos, separados del nombre para que ningún campo guarde un valor compuesto \\
+\hline
+\texttt{correo} & \texttt{varchar(n)} & No & UK & Correo con el que el usuario inicia sesión y al que llegan los avisos. Acepta cualquier dominio \\
+\hline
+\texttt{contrasenaHash} & \texttt{varchar(n)} & No & & Contraseña cifrada con bcrypt y sal. La contraseña en claro nunca se guarda \\
+\hline
+\texttt{activo} & \texttt{boolean} & No & & Falso cuando el administrador da de baja la cuenta. La fila se conserva porque sus experimentos la referencian \\
+\hline
+\texttt{cambioRequerido} & \texttt{boolean} & No & & Verdadero mientras el usuario no cambie la contraseña temporal que generó el sistema al crear la cuenta \\
+\hline
+% ---------------- ADMINISTRADOR ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{ADMINISTRADOR}: usuarios con permisos de administración} \\
+\hline
+\texttt{idInstitucional} & \texttt{varchar(10)} & No & PK, FK $\to$ USUARIO & Usuario que además administra el sistema. Quien no aparece aquí es investigador \\
+\hline
+% ---------------- EXPERIMENTO ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{EXPERIMENTO}: un estudio completo, con todos sus grupos} \\
+\hline
+\texttt{idExperimento} & \texttt{integer} & No & PK & Identificador subrogado \\
+\hline
+\texttt{idInstitucional} & \texttt{varchar(10)} & No & FK $\to$ USUARIO & Usuario que registró el experimento. Solo él o un administrador pueden eliminarlo \\
+\hline
+\texttt{nombre} & \texttt{varchar(n)} & No & & Nombre que el investigador le da al estudio \\
+\hline
+\texttt{fecha} & \texttt{date} & No & & Fecha del experimento \\
+\hline
+\texttt{notas} & \texttt{text} & Sí & & Observaciones libres del investigador \\
+\hline
+% ---------------- GRUPO ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{GRUPO}: cada grupo experimental dentro de un experimento} \\
+\hline
+\texttt{idGrupo} & \texttt{integer} & No & PK & Identificador subrogado \\
+\hline
+\texttt{idExperimento} & \texttt{integer} & No & FK $\to$ EXPERIMENTO; UK (idExperimento, etiqueta) & Experimento al que pertenece el grupo \\
+\hline
+\texttt{etiqueta} & \texttt{varchar(n)} & No & UK (idExperimento, etiqueta) & Nombre del grupo, único dentro de su experimento \\
+\hline
+\texttt{tipo} & \texttt{tipo\_\allowbreak{}grupo} & No & Dominio & Control, referencia o tratamiento experimental \\
+\hline
+\texttt{tratamiento} & \texttt{text} & No & & Sustancia o condición que recibió el grupo. El grupo control registra el placebo, así que nunca queda vacío \\
+\hline
+% ---------------- TANDA ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{TANDA}: cada sesión de grabación de un grupo} \\
+\hline
+\texttt{idTanda} & \texttt{integer} & No & PK & Identificador subrogado \\
+\hline
+\texttt{idGrupo} & \texttt{integer} & No & FK $\to$ GRUPO; UK (idGrupo, ordinal) & Grupo que se grabó en esta tanda. Una tanda nunca mezcla grupos \\
+\hline
+\texttt{ordinal} & \texttt{smallint} & No & UK (idGrupo, ordinal) & Orden de la tanda dentro del grupo: 1 para la tanda A, 2 para la B, y así sucesivamente \\
+\hline
+\texttt{nCilindros} & \texttt{smallint} & No & & Cilindros que aparecen en el video: de 2 a 4 \\
+\hline
+% ---------------- ESPECIMEN ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{ESPECIMEN}: cada espécimen evaluado} \\
+\hline
+\texttt{idEspecimen} & \texttt{integer} & No & PK & Identificador subrogado \\
+\hline
+\texttt{idTanda} & \texttt{integer} & No & FK $\to$ TANDA; UK (idTanda, numeroCilindro) & Tanda en la que se grabó el espécimen \\
+\hline
+\texttt{idGrupo} & \texttt{integer} & No & FK $\to$ GRUPO; UK (idGrupo, numeroRata) & Copia del grupo de su tanda, redundante a propósito para declarar la unicidad del número dentro del grupo. Un disparador la mantiene igual al grupo de la tanda \\
+\hline
+\texttt{numeroRata} & \texttt{smallint} & No & UK (idGrupo, numeroRata); CK $\geq 1$ & Número con el que el laboratorio marca al espécimen, único dentro de su grupo \\
+\hline
+\texttt{numeroCilindro} & \texttt{smallint} & No & UK (idTanda, numeroCilindro) & Posición del cilindro en el encuadre, de 1 al número de cilindros de la tanda \\
+\hline
+% ---------------- VIDEO ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{VIDEO}: cada grabación cargada al sistema} \\
+\hline
+\texttt{idVideo} & \texttt{integer} & No & PK & Identificador subrogado \\
+\hline
+\texttt{idTanda} & \texttt{integer} & No & FK $\to$ TANDA; UK (idTanda, sesion) & Tanda grabada en el video \\
+\hline
+\texttt{sesion} & \texttt{sesion\_\allowbreak{}video} & No & Dominio; UK (idTanda, sesion) & Día 1 o Día 2. Una tanda tiene como máximo un video por día, y el Día 1 es opcional \\
+\hline
+\texttt{archivo} & \texttt{text} & No & & Ruta del archivo de video (\texttt{.mp4} o \texttt{.mov}) en el servidor \\
+\hline
+\texttt{duracion} & \texttt{numeric(p,s)} & No & & Duración real del archivo cargado, en segundos \\
+\hline
+\texttt{fechaCarga} & \texttt{timestamptz} & No & & Momento en que terminó la carga \\
+\hline
+% ---------------- ANALISIS ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{ANALISIS}: la ejecución del pipeline sobre un video} \\
+\hline
+\texttt{idAnalisis} & \texttt{integer} & No & PK & Identificador subrogado \\
+\hline
+\texttt{idVideo} & \texttt{integer} & No & FK $\to$ VIDEO; UK & Video analizado. Es único: un video tiene un solo análisis vigente y un análisis nuevo reemplaza al anterior \\
+\hline
+\texttt{idConfig} & \texttt{integer} & No & FK $\to$ CONFIGURACION & Parámetros y modelo con que se corrió, para poder reproducir el resultado \\
+\hline
+\texttt{estado} & \texttt{estado\_\allowbreak{}analisis} & No & Dominio & En cola, procesando, completado o error. El \textit{worker} toma de la cola los análisis en estado \texttt{en cola} \\
+\hline
+\texttt{etapa} & \texttt{etapa\_\allowbreak{}analisis} & No & Dominio & Etapa del pipeline en curso o, si hubo error, la etapa donde se detuvo. Con ella se arma el mensaje de error \\
+\hline
+\texttt{nivelClasif} & \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & No & Dominio & Preciso o agrupado. La interfaz lo usa para avisar en los resultados \\
+\hline
+\texttt{fechaAnalisis} & \texttt{timestamptz} & No & & Momento del análisis \\
+\hline
+\texttt{rutaDiagnostico} & \texttt{text} & Sí & & Ruta del reporte de diagnóstico en PDF. Solo tiene valor cuando el estado es \texttt{error} \\
+\hline
+% ---------------- OBSERVACION ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{OBSERVACION}: un espécimen dentro de un video} \\
+\hline
+\texttt{idObservacion} & \texttt{integer} & No & PK & Identificador subrogado \\
+\hline
+\texttt{idEspecimen} & \texttt{integer} & No & FK $\to$ ESPECIMEN; UK (idEspecimen, idVideo) & Espécimen observado \\
+\hline
+\texttt{idVideo} & \texttt{integer} & No & FK $\to$ VIDEO; UK (idEspecimen, idVideo) & Video en que se le observó. Cada video tiene de 2 a 4 observaciones, una por espécimen \\
+\hline
+% ---------------- INTERVALO ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{INTERVALO}: cada minuto de una observación} \\
+\hline
+\texttt{idIntervalo} & \texttt{integer} & No & PK & Identificador subrogado \\
+\hline
+\texttt{idObservacion} & \texttt{integer} & No & FK $\to$ OBSERVACION; UK (idObservacion, minuto) & Observación a la que pertenece el minuto \\
+\hline
+\texttt{minuto} & \texttt{smallint} & No & UK (idObservacion, minuto) & Minuto del análisis, de 1 a 5 \\
+\hline
+% ---------------- CONDUCTA ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{CONDUCTA}: catálogo de conductas} \\
+\hline
+\texttt{nombre} & \texttt{varchar(n)} & No & PK & Nado activo, inmovilidad, escalamiento o conducta activa. La última se usa cuando el clasificador no distingue entre nado y escalamiento \\
+\hline
+% ---------------- SEGUNDO ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{SEGUNDO}: la conducta de un espécimen en cada segundo analizado} \\
+\hline
+\texttt{idObservacion} & \texttt{integer} & No & PK, FK $\to$ OBSERVACION & Espécimen y video al que pertenece el segundo \\
+\hline
+\texttt{segundo} & \texttt{smallint} & No & PK; CK entre 1 y 300 & Segundo del video. Solo se analizan los primeros 300 \\
+\hline
+\texttt{clase} & \texttt{varchar(n)} & Sí & FK $\to$ CONDUCTA & Conducta vigente del segundo, que el usuario puede corregir en la revisión. Queda nula si el sistema no pudo decidir o si el usuario lo marcó como dudoso \\
+\hline
+\texttt{propuesta} & \texttt{varchar(n)} & No & FK $\to$ CONDUCTA & Conducta que propuso el sistema. No cambia aunque el usuario corrija \texttt{clase} \\
+\hline
+\texttt{origen} & \texttt{origen\_\allowbreak{}segundo} & No & Dominio & Quién puso la etiqueta vigente y cómo (Tabla~\ref{tab:dominios}) \\
+\hline
+% ---------------- PRESENTA ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{PRESENTA}: segundos de cada conducta en cada minuto} \\
+\hline
+\texttt{idIntervalo} & \texttt{integer} & No & PK, FK $\to$ INTERVALO & Minuto resumido \\
+\hline
+\texttt{conducta} & \texttt{varchar(n)} & No & PK, FK $\to$ CONDUCTA & Conducta contada \\
+\hline
+\texttt{segundos} & \texttt{numeric(p,s)} & No & & Segundos que el espécimen pasó en esa conducta dentro del minuto. Hay una fila por conducta aunque valga 0. Se recalcula desde \texttt{SEGUNDO} cada vez que el usuario guarda correcciones, y de aquí salen los totales y el desglose por minuto \\
+\hline
+% ---------------- MODELO ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{MODELO}: cada versión entrenada del clasificador} \\
+\hline
+\texttt{hashModelo} & \texttt{char(64)} & No & PK & Hash SHA-256 del archivo del modelo. Dos archivos distintos nunca comparten hash \\
+\hline
+\texttt{nombreModelo} & \texttt{varchar(n)} & No & & Nombre del archivo del modelo \\
+\hline
+% ---------------- CONFIGURACION ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{CONFIGURACION}: parámetros con que se corre el pipeline} \\
+\hline
+\texttt{idConfig} & \texttt{integer} & No & PK & Identificador subrogado \\
+\hline
+\texttt{hashModelo} & \texttt{char(64)} & No & FK $\to$ MODELO; UK\textsuperscript{a} & Modelo que usa esta configuración \\
+\hline
+\texttt{versionPipeline} & \texttt{varchar(n)} & No & UK\textsuperscript{a} & Versión del código del pipeline \\
+\hline
+\texttt{umbralConfianza} & \texttt{numeric(p,s)} & No & UK\textsuperscript{a}; CK entre 0 y 1 & Umbral de confianza del pipeline \\
+\hline
+\texttt{segundosOmitir} & \texttt{numeric(p,s)} & No & UK\textsuperscript{a} & Segundos que el pipeline omite \\
+\hline
+\texttt{umbralInmovil} & \texttt{numeric(p,s)} & No & UK\textsuperscript{a} & Umbral de inmovilidad \\
+\hline
+\texttt{umbralDesplazamiento} & \texttt{numeric(p,s)} & No & UK\textsuperscript{a} & Umbral de desplazamiento \\
+\hline
+\texttt{umbralStdPosicion} & \texttt{numeric(p,s)} & No & UK\textsuperscript{a} & Umbral de desviación estándar de la posición \\
+\hline
+\texttt{umbralAspectoTrepada} & \texttt{numeric(p,s)} & No & UK\textsuperscript{a} & Umbral de la relación de aspecto para el escalamiento \\
+\hline
+\texttt{fechaCreacion} & \texttt{timestamptz} & No & & Momento en que se registró la configuración \\
+\hline
+\multicolumn{5}{|p{14.4cm}|}{\textsuperscript{a}\,Las ocho columnas marcadas forman juntas una sola restricción UK: dos configuraciones no pueden tener el mismo modelo, la misma versión y los mismos seis valores. Así, dos análisis con la misma \texttt{idConfig} corrieron en condiciones idénticas.} \\
+\hline
+% ---------------- REPORTE ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{REPORTE}: archivos exportados de un experimento} \\
+\hline
+\texttt{idReporte} & \texttt{integer} & No & PK & Identificador subrogado \\
+\hline
+\texttt{idExperimento} & \texttt{integer} & No & FK $\to$ EXPERIMENTO & Experimento del que sale el reporte \\
+\hline
+\texttt{formato} & \texttt{formato\_\allowbreak{}reporte} & No & Dominio & CSV, XLSX o PDF \\
+\hline
+\texttt{ruta} & \texttt{text} & No & UK & Ruta del archivo generado. Se conserva aunque el video original ya se haya borrado \\
+\hline
+\texttt{fechaGeneracion} & \texttt{timestamptz} & No & & Momento en que se generó \\
+\hline
+% ---------------- NOTIFICACION ----------------
+\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{NOTIFICACION}: avisos del sistema a un usuario} \\
+\hline
+\texttt{idNotificacion} & \texttt{integer} & No & PK & Identificador subrogado \\
+\hline
+\texttt{idInstitucional} & \texttt{varchar(10)} & No & FK $\to$ USUARIO & Usuario que recibe el aviso \\
+\hline
+\texttt{idExperimento} & \texttt{integer} & Sí & FK $\to$ EXPERIMENTO & Experimento del que trata el aviso. Es nulo en la alerta de disco, que no viene de ningún experimento \\
+\hline
+\texttt{tipo} & \texttt{tipo\_\allowbreak{}notificacion} & No & Dominio & Análisis completado, error del pipeline o alerta de disco. Cada aviso también se envía por correo (RF-33) \\
+\hline
+\texttt{mensaje} & \texttt{text} & No & & Texto del aviso, con el detalle del caso \\
+\hline
+\texttt{leido} & \texttt{boolean} & No & & Verdadero cuando el usuario ya lo abrió en el panel \\
+\hline
+\texttt{fechaCreacion} & \texttt{timestamptz} & No & & Momento en que se creó el aviso \\
+\hline
+\end{longtable}
+}
