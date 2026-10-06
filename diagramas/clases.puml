@@ -105,7 +105,6 @@ package P3_Pipeline_de_analisis_conductual {
     -id : Integer
     -estado : String
     -etapa : String
-    -progreso : Integer
     -nivelClasif : String
     -fechaAnalisis : DateTime
     -rutaRecuadros : String

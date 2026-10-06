@@ -13,13 +13,13 @@
 '  modelado como subtipo -- si el usuario no aparece aqui, es
 '  investigador simple.
 '
-'  15 relaciones - 67 atributos - 18 llaves foraneas.
+'  15 relaciones - 66 atributos - 18 llaves foraneas.
 '  (D-51, 5-oct: se quitaron MODELO y CONFIGURACION y la columna
 '   ANALISIS.idConfig -- ningun RF permite cambiar el modelo ni el
 '   umbral, son constantes del pipeline. Se agregaron
-'   ANALISIS.rutaRecuadros y ANALISIS.progreso; SEGUNDO.propuesta y
+'   ANALISIS.rutaRecuadros; SEGUNDO.propuesta y
 '   VIDEO.archivo pasan a admitir nulo; EXPERIMENTO.nombre pasa a
-'   ser clave alterna. Baja de 17 a 15 relaciones, de 78 a 67
+'   ser clave alterna. Baja de 17 a 15 relaciones, de 78 a 66
 '   atributos y de 20 a 18 llaves foraneas)
 '  (D-47, 4-oct: se quito ANALISIS.confianza -- el detector actual
 '   no produce ningun valor de confianza -- y baja de 79 a 78)
@@ -165,7 +165,6 @@ class ANALISIS {
   idVideo   [FK]
   estado
   etapa
-  progreso
   nivelClasif
   fechaAnalisis
   rutaRecuadros   (nulo)

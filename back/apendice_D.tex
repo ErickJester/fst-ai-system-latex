@@ -179,8 +179,6 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{etapa} & \texttt{etapa\_\allowbreak{}analisis} & No & Dominio & Etapa del pipeline en curso o, si hubo error, la etapa donde se detuvo. Con ella se arma el mensaje de error \\
 \hline
-\texttt{progreso} & \texttt{smallint} & No & CK entre 0 y 100 & Porcentaje de avance que escribe el \textit{worker} y que consulta la pantalla de progreso (RF-15) \\
-\hline
 \texttt{nivelClasif} & \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & No & Dominio & Preciso o agrupado. La interfaz lo usa para avisar en los resultados \\
 \hline
 \texttt{fechaAnalisis} & \texttt{timestamptz} & No & & Momento del análisis \\

@@ -7,7 +7,7 @@
 '  Figura 5.5 de chapters/05_diseno.tex
 '  Gestor: PostgreSQL (D-11) - 15 tablas, 19 llaves foraneas
 '  (5-oct: D-51 quita MODELO, CONFIGURACION y ANALISIS.idConfig;
-'   agrega ANALISIS.rutaRecuadros y ANALISIS.progreso; propuesta y
+'   agrega ANALISIS.rutaRecuadros; propuesta y
 '   VIDEO.archivo admiten nulo; EXPERIMENTO.nombre es UNIQUE;
 '   tipo_notificacion gana 'video borrado')
 '  (3-oct: D-35 agrega SEGUNDO, una fila por especimen y por segundo,
@@ -82,8 +82,6 @@
 '  origen_segundo         varchar(16) IN ('maquina','humano_confirma',
 '                          'humano_corrige','humano_duda','sin_revisar',
 '                          'humano_ciego')                      [D-35]
-'  (ANALISIS.progreso no es lista, es rango: CHECK BETWEEN 0 AND
-'  100, sobre la columna directamente)
 '
 '  ---- Todas las FK: ON UPDATE NO ACTION ON DELETE NO ACTION ----
 '  La base de datos rechaza el borrado en vez de propagarlo - por
@@ -223,13 +221,10 @@ entity ANALISIS {
   idVideo : integer <<FK>> <<UK>> (D-24)
   estado : estado_analisis
   etapa : etapa_analisis
-  progreso : smallint · D-51
   nivelClasif : nivel_clasif_analisis
   fechaAnalisis : timestamptz
   rutaDiagnostico : text (nulo salvo error) · D-23
   rutaRecuadros : text (nulo) · D-51
-  ..
-  CK progreso BETWEEN 0 AND 100
 }
 note bottom of ANALISIS
   D-24 (15-sep): idVideo UNIQUE fuerza la cardinalidad
@@ -243,8 +238,6 @@ note bottom of ANALISIS
   D-51 (5-oct): sin idConfig; el modelo y el umbral
   son constantes del pipeline. rutaRecuadros apunta
   al archivo de recuadros de los tubos (D-42).
-  progreso lo escribe el worker y lo lee /status
-  (RF-15); reemplaza el calculo por etapa de D-22.
 end note
 
 entity OBSERVACION {
