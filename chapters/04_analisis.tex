@@ -104,7 +104,7 @@ RF-08 & Carga de video
 RF-09 & Carga de video
       & El sistema debe permitir subir uno o dos videos por tanda: Día~1
         (sesión de estrés, 20~min) y Día~2 (sesión post-tratamiento, 5~min). Ambos
-        son opcionales individualmente. El pipeline analiza los primeros 300~segundos
+        son opcionales individualmente. El pipeline analiza los últimos 300~segundos
         del video de Día~2 (el resto se descarta); del video de Día~1 analiza
         únicamente los primeros 5~minutos y solo cuando la tanda pertenece al grupo
         control (ver RN-03). Al subir el
@@ -178,7 +178,9 @@ RF-18 & Análisis conductual
         unos 2~segundos) que el análisis manual por bloques de 5~segundos no
         distingue. Para compararse con ese método, los resultados también se
         presentan en bloques de 5~segundos: cada bloque toma la conducta con más
-        segundos y muestra dentro los segundos que lo componen.
+        segundos (si nado activo y escalamiento empatan, es conducta activa) y muestra
+        dentro los segundos que lo componen. Los fragmentos en que el espécimen no se
+        ve se marcan en el PDF final.
       & Alta & Sistema \\
 \hline
 
@@ -282,10 +284,9 @@ RF-31 & Resultados
 RF-32 & Resultados
       & Cuando un análisis está completado, el sistema debe ofrecer una pantalla de
         revisión segundo a segundo: el video con una línea de tiempo por espécimen,
-        coloreada por conducta, donde cada segundo muestra la etiqueta propuesta por
-        el sistema y el usuario puede corregirla. Cada etiqueta guarda su origen
-        (propuesta del sistema, confirmada, corregida o dudosa) y la propuesta
-        original no se pierde. Al guardar las correcciones, el sistema recalcula los
+        coloreada por conducta, donde cada segundo muestra la conducta que puso el
+        sistema y el usuario puede corregirla. Cada conducta guarda su origen
+        (del sistema, confirmada, corregida o dudosa). Al guardar las correcciones, el sistema recalcula los
         totales por minuto (ver RN-14).
       & Media & Investigador \\
 \hline
@@ -597,8 +598,7 @@ RN-13 & Cuando el clasificador sabe que el espécimen no está inmóvil pero no
         nado y escalamiento. Ver RF-17, RF-18. \\
 \hline
 RN-14 & Solo se puede revisar un análisis completado. Al revisar, el usuario corrige
-        las etiquetas segundo a segundo; cada etiqueta guarda su origen y la
-        propuesta original del sistema nunca se pierde. Al guardar, el sistema
+        las etiquetas segundo a segundo; cada etiqueta guarda su origen. Al guardar, el sistema
         recalcula los totales por minuto de los especímenes corregidos y los
         reportes guardados del experimento se regeneran con los datos nuevos.
       & La revisión humana corrige al clasificador sin sustituirlo. Ver RF-32. \\

@@ -30,7 +30,7 @@ skinparam ActivityBackgroundColor #FFFEF2
 skinparam PartitionBackgroundColor #FBFBF4
 
 start
-:Video subido por el usuario\n(solo los primeros 300 s);
+:Video subido por el usuario\n(solo los últimos 300 s);
 
 partition "1. Preprocesamiento" {
   if (¿Se pudo abrir el video?) then (sí)

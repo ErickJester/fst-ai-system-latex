@@ -62,7 +62,6 @@ package P2_Experimentos_y_carga_de_video {
 
   class Especimen {
     -id : Integer
-    -numeroRata : Integer
     -numeroCilindro : Integer
   }
 
@@ -128,10 +127,9 @@ package P4_Resultados_y_reportes {
   }
   class Segundo {
     -segundo : Integer
-    -clase : String
-    -propuesta : String
+    -conducta : String
     -origen : String
-    +corregir(clase, origen) : void
+    +corregir(conducta, origen) : void
   }
 
   class Reporte {
