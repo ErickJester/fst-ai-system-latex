@@ -52,15 +52,14 @@ En el FST se distinguen tres conductas mutuamente excluyentes \cite{armario2021,
           que más se reporta en publicaciones especializadas.
 
     \item \textbf{Nado activo}: movimientos de paladas que desplazan al espécimen
-          horizontalmente. Se asocia al sistema serotoninérgico; los antidepresivos tipo
-          antidepresivos como la fluoxetina (antidepresivo de referencia) aumentan
+          horizontalmente. Se asocia al sistema serotoninérgico; la fluoxetina (antidepresivo de referencia) aumenta
           esta conducta específicamente.
 
     \item \textbf{Escalamiento}: movimientos rápidos hacia las paredes del cilindro,
           con las patas delanteras tocando o rompiendo la superficie del agua. Se asocia
-          al sistema noradrenérgico; la desipramina lo incrementa. Desde la vista
-          cenital, el escalamiento produce movimiento concentrado en el borde del
-          cilindro, lo que lo distingue visualmente del nado.
+          al sistema noradrenérgico; la desipramina lo incrementa. Desde la vista lateral, el escalamiento produce movimiento en la mitad superior del
+          cilindro, mientras que el nado se distribuye en toda la superficie del agua, lo que
+          lo distingue visualmente.
 \end{itemize}
 
 Distinguir las tres conductas importa porque cada una refleja la activación de un sistema
@@ -74,10 +73,20 @@ En el laboratorio de la ENMyH los especímenes se colocan individualmente en cil
 transparentes con agua. Hay dos sesiones: 20 minutos el día 1 (línea base) y 5 minutos
 el día 2 (después del tratamiento), con 24 horas de diferencia. Los videos se graban
 desde una vista lateral con cámara web, capturando de dos a cuatro cilindros al mismo
-tiempo. La iluminación y el nivel del agua varían entre experimentos, y con especímenes
+tiempo. El laboratorio procura mantener una iluminación de referencia de aproximadamente 2,500
+lúmenes, aunque no la garantiza formalmente entre sesiones; en la práctica, la iluminación
+y el nivel del agua varían entre experimentos, y con especímenes
 de pelaje claro el contraste contra el cilindro puede ser bajo. El sistema debe funcionar
 bajo esas condiciones; los requisitos mínimos de calidad de video se definirán durante
 las pruebas de validación.
+
+Un experimento compara tres o más grupos de especímenes, en promedio cuatro. Hay tres
+tipos de grupo ---control, referencia (fluoxetina) y tratamiento experimental--- y un tipo
+puede repetirse, por ejemplo con varias moléculas o dosis. Lo habitual es que cada grupo
+tenga de 6 a 8 especímenes, aunque no es una regla del protocolo. Como en una grabación
+caben de dos a cuatro cilindros, cada grupo se graba en una o más tandas de dos a cuatro
+especímenes. El laboratorio realiza de tres a cuatro experimentos por semestre y cada uno
+genera alrededor de ocho videos.
 
 % ============================================================
 \section{Procesamiento de video para localizar al espécimen}
@@ -87,7 +96,7 @@ las pruebas de validación.
 
 Un video se trata como una secuencia de matrices de números. Cada cuadro
 (\textit{frame}) es una imagen BGR de tres canales (azul, verde, rojo), que es la
-convención de OpenCV \cite{bradski2000}. Un video de 5 minutos a 30 FPS equivale a
+convención de OpenCV \cite{bradski2000}. Un video de 5 minutos a 30 cuadros por segundo (FPS, \textit{frames per second}) equivale a
 9{,}000 cuadros. Cada píxel tiene un valor entero entre 0 y 255 por canal; la
 representación completa de un cuadro de resolución $W \times H$ ocupa $W \times H
 \times 3$ bytes.
@@ -282,8 +291,8 @@ sistema se comporta igual en cualquier equipo que tenga Docker instalado.
 PostgreSQL es un sistema de gestión de bases de datos relacionales de código abierto
 con soporte para transacciones ACID (\textit{Atomicity, Consistency, Isolation,
 Durability}), que garantizan que las operaciones de escritura son seguras incluso ante
-fallos del sistema. El esquema de datos incluye tablas para usuarios, experimentos,
-sesiones de video y resultados por espécimen y conducta. Las consultas se abstraen con
+fallos del sistema. En una base de datos relacional, la información se organiza en tablas
+relacionadas entre sí mediante llaves. Las consultas se abstraen con
 SQLAlchemy como ORM (\textit{Object-Relational Mapper}), lo que permite cambiar el
 motor de base de datos sin modificar el código de la aplicación.
 

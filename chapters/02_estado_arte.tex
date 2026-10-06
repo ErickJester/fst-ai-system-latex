@@ -61,10 +61,10 @@ capturar patrones de movimiento que no son visibles en un solo cuadro, como la d
 y velocidad del desplazamiento. La validación fue en condiciones controladas de
 laboratorio.
 
-\subsection{DLC como clasificador de conducta en el FST}
+\subsection{DeepLabCut como clasificador de conducta en el FST}
 
 Sturman et al.\ \cite{sturman2020_dlc} mostraron que un clasificador entrenado sobre
-la representación esquelética producida por DeepLabCut puede eliminar la variabilidad
+la representación esquelética producida por DeepLabCut \cite{mathis2018_dlc} puede eliminar la variabilidad
 entre evaluadores humanos en el FST. El enfoque consiste en extraer coordenadas de
 puntos corporales (nariz, patas, cola) en cada cuadro y usar esas coordenadas como
 descriptores para un clasificador supervisado. La ventaja es que el clasificador opera
@@ -72,7 +72,9 @@ sobre una representación compacta del movimiento, no sobre la imagen cruda.
 
 El costo es el esfuerzo de anotación: hay que marcar manualmente los puntos clave en
 decenas de cuadros antes de entrenar DeepLabCut, lo que implica un trabajo previo
-considerable.
+considerable. La pregunta que queda abierta es si esa inversión inicial se justifica frente a
+enfoques que operan directamente sobre el recorte del espécimen, sin necesidad de estimar
+la pose.
 
 \subsection{YOLO-Behaviour: detección y clasificación en dos etapas}
 
@@ -186,22 +188,12 @@ Este proyecto no usa YOLO. Con un espécimen por cilindro y el aparato siempre e
 mismo lugar del encuadre, la sustracción de fondo basta para separar al espécimen, sin
 etiquetar imágenes para entrenar un detector.
 
-\subsection{DeepLabCut}
-
-Sturman et al.\ \cite{sturman2020_dlc} mostraron que un clasificador entrenado sobre
-la representación esquelética producida por DeepLabCut \cite{mathis2018_dlc} puede
-eliminar la variabilidad entre evaluadores humanos en el FST. El resultado fue
-sólido, pero el enfoque requiere marcar manualmente los puntos clave del cuerpo en
-decenas de cuadros antes de empezar ---nariz, patas, cola--- lo que implica un trabajo
-de anotación previo considerable. La pregunta que queda abierta es si esa inversión
-inicial se justifica frente a enfoques que operan directamente sobre el recorte del
-espécimen, sin necesidad de estimar la pose.
-
 % -----------------------------------------------------------
 \section{Modelos de clasificación supervisada aplicables al FST}
 % -----------------------------------------------------------
 
-Esta sección revisa los enfoques de machine learning y deep learning que son viables
+Esta sección revisa los enfoques de \textit{machine learning} (aprendizaje automático, ML) y \textit{deep learning}
+(aprendizaje profundo, DL) que son viables
 para clasificar las tres conductas del FST (nado, inmovilidad, escalamiento) dado el
 tamaño de dataset disponible y las condiciones de grabación del laboratorio.
 
@@ -272,6 +264,11 @@ sus objetivos. Para este proyecto, los atributos relevantes son:
         poder operar el sistema sin ayuda técnica. Se evalúa con una prueba de
         usabilidad con al menos un usuario real del laboratorio.
 \end{itemize}
+
+Además de esos tres atributos, el laboratorio fijó un criterio propio: la repetibilidad.
+El mismo video analizado varias veces debe producir el mismo resultado, con una
+variabilidad máxima de entre 5 y 10\,\%. Es el criterio que el laboratorio considera
+principal, por encima del tiempo de análisis.
 
 % -----------------------------------------------------------
 \section{Tabla comparativa}
