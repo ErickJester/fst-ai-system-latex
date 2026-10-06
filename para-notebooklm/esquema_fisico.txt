@@ -8,10 +8,9 @@
 '  Gestor: PostgreSQL (D-11) - 15 tablas, 17 llaves foraneas
 '  (6-oct: D-55 quita ESPECIMEN.numeroRata y, con ella, el idGrupo
 '   redundante y su disparador (D-04 queda sin objeto). D-53 renombra
-'   SEGUNDO.clase como conducta y quita SEGUNDO.propuesta)
+'   SEGUNDO.clase como conducta)
 '  (5-oct: D-51 quita MODELO, CONFIGURACION y ANALISIS.idConfig;
-'   propuesta y
-'   VIDEO.archivo admiten nulo; EXPERIMENTO.nombre es UNIQUE;
+'   VIDEO.archivo admite nulo; EXPERIMENTO.nombre es UNIQUE;
 '   tipo_notificacion gana 'video borrado')
 '  (3-oct: D-35 agrega SEGUNDO, una fila por especimen y por segundo,
 '   y D-29 agrega la conducta "conducta activa", asi que PRESENTA pasa
@@ -70,6 +69,8 @@
 '  tipo_grupo             varchar(24) IN ('control','referencia',
 '                          'tratamiento experimental')
 '  sesion_video            varchar(6) IN ('Dia 1','Dia 2')
+'                          (el Dia 1 solo confirma que existe el video de
+'                          habituacion; no se analiza, D-54)
 '  formato_reporte         varchar(4) IN ('CSV','XLSX','PDF')
 '  tipo_notificacion      varchar(32) IN ('analisis completado',
 '                          'error del pipeline','alerta de disco',
@@ -280,7 +281,9 @@ note bottom of SEGUNDO
   Es lo que el usuario revisa y corrige al terminar el
   analisis. origen dice si la conducta la puso la maquina
   o la reviso el usuario. conducta es nula si el sistema
-  no clasifico el segundo (D-53).
+  no clasifico el segundo (D-53). Hay hasta 300 segundos por
+  observacion, los ultimos 300 del video; si el video dura
+  menos, se guardan todos (D-54: maximo, sin minimo).
 end note
 
 entity ADMINISTRADOR {

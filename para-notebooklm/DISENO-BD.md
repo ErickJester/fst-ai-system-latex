@@ -272,7 +272,6 @@ mejorarla. Detalle en `errores/preguntas-doctor.md` §6.
 | Cambio | Detalle |
 |---|---|
 | **`SEGUNDO.clase` pasa a llamarse `SEGUNDO.conducta`** | Clase y conducta se usaban como sinónimos (D-53). En el CSV del etiquetador la columna sigue llamándose `clase` |
-| **Se quita `SEGUNDO.propuesta`** | Era el único dato que solo servía para mejorar la CNN. La conducta del sistema se reemplaza al corregir |
 | **Se queda `SEGUNDO.origen`** | Dice si la conducta es del sistema o la revisó el usuario; la función principal es que el usuario tenga cada segundo bien clasificado |
 | **Se quita `ESPECIMEN.numeroRata`** | D-55: ya no hay comparación Día 1 contra Día 2 por espécimen (D-44), así que el número del laboratorio no sostiene nada. Se van también el `idGrupo` redundante del físico, su `UNIQUE` y el disparador: **D-04 queda sin objeto**. «Espécimen N» se repite entre tandas, así que la interfaz y los reportes muestran «Tanda A · Espécimen 2». Cambia la premisa de P-01: el espécimen sigue teniendo identificador, pero no el número del laboratorio |
 | **Bloques de 5 s sin la CNN** | La CNN solo clasifica segundos; el bloque se calcula por mayoría de sus cinco segundos. Si nado activo y escalamiento empatan, es conducta activa; con 2 de inmovilidad y 2 de nado decide el quinto segundo (escalamiento o «no se ve» dan conducta activa). Un bloque de «no se ve» se muestra como conducta activa con un matiz, y el PDF final marca esos fragmentos. No cambia el modelo |
@@ -302,7 +301,6 @@ D-51 sustituye a D-50 (que nunca se aplicó). Detalle en `errores/preguntas-doct
 |---|---|
 | **Se eliminan `MODELO` y `CONFIGURACION`** | Ningún RF permite cambiar el modelo ni el umbral. El modelo final y el umbral de 0.80 son **constantes del pipeline** y se documentan en el cap. 6. Deja sin objeto D-05, D-06 y D-14 |
 | **Se quita `ANALISIS.idConfig`** | Con ella se van las dos llaves foráneas `CONFIGURACION → ANALISIS` y `MODELO → CONFIGURACION` |
-| ~~`SEGUNDO.propuesta` admite nulo~~ | **Retirada el 6-oct (D-53):** la columna se quitó |
 | ~~Nueva `SEGUNDO.confianza`~~ | **Retirada el mismo día:** ningún RF la pide |
 | ~~Nueva `ANALISIS.rutaRecuadros`~~ | **Retirada el mismo día:** el punto 17 de `INSTRUCCIONES-WEB.md` ya lo resolvía con `analisis_{idAnalisis}_cajas.json`, cuyo nombre se deriva del id. D-42 sigue como estaba |
 | **`VIDEO.archivo` admite nulo** | Nulo = el video ya se borró (RF-25, RN-05). La fila se conserva porque los resultados la referencian |
@@ -341,7 +339,7 @@ dicen 16 relaciones, `nCilindros ∈ {3,4}`, etc.). Detalle de cada una en
 | **D-32** | Se elimina la confianza de detección (0.70) como criterio de error. |
 | **D-47** | **Se quita la columna `ANALISIS.confianza`**: el detector actual no produce ningún valor de confianza. RF-16 deja de mostrar un código de error; el mensaje se arma con la etapa donde se detuvo el análisis. Sin columnas nuevas. |
 | **D-34** | No hay vista en vivo; al terminar el análisis el usuario ve una pantalla de revisión segundo a segundo. |
-| **D-35** | **Tabla nueva `SEGUNDO`** (`idObservacion`, `segundo` como clave; `clase`, `propuesta` y `origen`; D-53 renombra `clase` a `conducta` y quita `propuesta`). Total: **17 relaciones**, 20 llaves foráneas lógicas (21 con la física de D-04). `PRESENTA` pasa a ser un resumen que se recalcula desde `SEGUNDO`. |
+| **D-35** | **Tabla nueva `SEGUNDO`** (`idObservacion`, `segundo` como clave; `clase` y `origen`; D-53 renombra `clase` a `conducta`). Total: **17 relaciones**, 20 llaves foráneas lógicas (21 con la física de D-04). `PRESENTA` pasa a ser un resumen que se recalcula desde `SEGUNDO`. |
 
 Aplicado en: `esquema_fisico.puml`, `esquema_conceptual.tex`, `clases.puml`,
 `grafo_relacional_3_vigente.puml`, capítulos 1, 4 y 5. **No actualizados:** los
@@ -517,13 +515,12 @@ la actual. Si alguien externo va a abrirlos, hay que mover el anclaje de compart
 
 ---
 
-*Última actualización: 2026-10-06 — D-53: `SEGUNDO.clase` pasa a `conducta` y se quita
-`propuesta`; D-54: se analizan los últimos 300 s; D-55: fuera `ESPECIMEN.numeroRata` (63
+*Última actualización: 2026-10-06 — D-53: `SEGUNDO.clase` pasa a `conducta`; D-54: se analizan los últimos 300 s; D-55: fuera `ESPECIMEN.numeroRata` (63
 atributos, 17 llaves foráneas). Ver §5.*
 
 *Actualización anterior: 2026-10-05 — D-51: fuera `MODELO`, `CONFIGURACION` y
 `ANALISIS.idConfig`;
-`SEGUNDO.propuesta` y `VIDEO.archivo` admiten nulo; `EXPERIMENTO.nombre` UNIQUE;
+`VIDEO.archivo` admite nulo; `EXPERIMENTO.nombre` UNIQUE;
 `video borrado` en `tipo_notificacion` (17 → 15 relaciones). Ver §5.*
 
 *Actualización anterior: 2026-09-13 — `ADMINISTRADOR` (D-08) aplicado en el grafo

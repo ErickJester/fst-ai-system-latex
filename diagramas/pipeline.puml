@@ -30,7 +30,7 @@ skinparam ActivityBackgroundColor #FFFEF2
 skinparam PartitionBackgroundColor #FBFBF4
 
 start
-:Video subido por el usuario\n(solo los últimos 300 s);
+:Video subido por el usuario\n(se analiza completo);
 
 partition "1. Preprocesamiento" {
   if (¿Se pudo abrir el video?) then (sí)
@@ -75,6 +75,7 @@ partition "3. Clasificación de conducta" {
 }
 
 partition "4. Resultados" {
+  :Se queda con los últimos 300 s del video\n(como máximo; si dura menos, todo)\ny renumera sus segundos de 1 a 300;
   :Guarda la conducta de cada segundo,\nlos segundos por conducta de cada minuto,\nel video anotado y las medidas por cuadro;
 }
 stop
