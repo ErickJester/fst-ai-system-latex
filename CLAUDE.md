@@ -166,6 +166,7 @@ quedarse solo con reglas vigentes, no con una foto que se vuelve vieja en días.
 | Necesitas | Abre |
 |-----------|------|
 | Trabajar en la base de datos, o ver el estado real del diseño | `DISENO-BD.md` — punto de partida obligatorio, siempre actualizado |
+| **Qué falta para cerrar los caps. 1–5** (lista vigente, verificada contra el LaTeX) | `PENDIENTES.md` |
 | Qué falta cambiar en el capítulo 5 y qué tan avanzado va | `CAMBIOS-CAP5.md` |
 | Contradicciones detectadas en el LaTeX | `errores/README.md` y `errores/<capítulo>/` |
 | Preguntas para el laboratorio y decisiones internas del equipo | `errores/preguntas-doctor.md` |

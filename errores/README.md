@@ -1,5 +1,7 @@
 # Catálogo de errores e inconsistencias — TT 2026-B066
 
+> **Desactualizado como lista de trabajo (5-oct-2026).** Lo vigente, verificado contra el LaTeX, está en [`PENDIENTES.md`](../PENDIENTES.md). Este archivo queda como evidencia (fuentes y motivos de cada ítem).
+
 Registro de contradicciones, imprecisiones y omisiones detectadas en el documento
 LaTeX al contrastarlo contra las fuentes primarias del laboratorio.
 

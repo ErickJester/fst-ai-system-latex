@@ -1,5 +1,7 @@
 # Correcciones pendientes — TT 2026-B066
 
+> **Desactualizado como lista de trabajo (5-oct-2026).** Lo vigente, verificado contra el LaTeX, está en [`PENDIENTES.md`](PENDIENTES.md). Este archivo queda como evidencia (fuentes y motivos de cada ítem).
+
 **Documento de control.** Cada ítem tiene ID, evidencia con archivo y línea, y acción concreta.
 Marcar `[x]` conforme se apliquen. Actualizar la tabla de avance al cierre de cada sesión.
 

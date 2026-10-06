@@ -1,5 +1,7 @@
 # Revisión con agentes — 3-oct-2026
 
+> **Desactualizado como lista de trabajo (5-oct-2026).** Lo vigente, verificado contra el LaTeX, está en [`PENDIENTES.md`](../PENDIENTES.md). Este archivo queda como evidencia (fuentes y motivos de cada ítem).
+
 Trece agentes de solo lectura revisaron la tesis: uno por capítulo (1 a 5), uno para los
 capítulos 6 a 8, uno para `front/` y la bibliografía, y seis para los diagramas (base de
 datos, casos de uso, secuencias, estados y flujo, clases, mockups). **No se editó nada.**

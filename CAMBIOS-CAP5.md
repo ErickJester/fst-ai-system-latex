@@ -1,5 +1,7 @@
 # Cambios al capítulo 5 — Diseño
 
+> **Desactualizado como lista de trabajo (5-oct-2026).** Lo vigente, verificado contra el LaTeX, está en [`PENDIENTES.md`](PENDIENTES.md). Este archivo queda como evidencia (fuentes y motivos de cada ítem).
+
 **Documento de control.** Qué se le tiene que cambiar a `chapters/05_diseno.tex` para
 que refleje el diseño de base de datos rehecho, qué está ya hecho y qué falta.
 
