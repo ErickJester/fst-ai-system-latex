@@ -5,6 +5,8 @@ trabajo a `CORRECCIONES.md` (25-ago), `errores/0X/errores.md` (2-sep),
 `errores/REVISION-AGENTES-2026-10-03.md` y los bloques B–D de `CAMBIOS-CAP5.md`. Esos
 archivos se conservan como evidencia (citas de la entrevista y motivos).
 
+**Pendiente del 6-oct:** el LaTeX (cap. 1, 4 y 5 y apéndice D) todavía dice que se analizan los últimos 300 s sin aclarar que es un máximo sin mínimo, que la CNN analiza el video completo y que el worker recorta y renumera después, ni que el Día 1 solo confirma el video de habituación (D-54, resuelto del todo).
+
 El trabajo está repartido en dos listas:
 
 | Lista | Quién | Ítems |
@@ -71,7 +73,7 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
 - Laboratorio: **Laboratorio de Bioquímica Estructural, Sección de Posgrado, ENMyH-IPN**.
 
 **El video**
-- Formatos **`.mp4` y `.mov`** (D-30). Se analizan **solo los primeros 300 s** (D-31). Un
+- Formatos **`.mp4` y `.mov`** (D-30). Se analizan **como máximo los últimos 300 s**, sin mínimo (D-31, D-54; la CNN analiza el video completo y el worker recorta y renumera). Un
   video vertical (cámara girada) **se rechaza** al subirlo (D-33). **Cámara web**, **vista
   lateral**.
 

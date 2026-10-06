@@ -130,7 +130,7 @@ datos y del volumen**.
 1. Cada cierto tiempo busca un `ANALISIS` con `estado = 'en cola'`.
 2. Lo pasa a `procesando` y va actualizando `etapa` en este orden:
    `preprocesamiento`, `cilindros`, `clasificacion`.
-3. Analiza **solo los últimos 300 segundos** del video (de final a inicio); si dura más, descarta el principio, donde a veces aparecen personas (D-54).
+3. La CNN analiza el **video completo**; después el worker se queda con los **últimos 300 segundos** de cada espécimen (de final a inicio) y descarta el principio, donde a veces aparecen personas. Es un máximo, sin mínimo: si el video dura menos, se quedan todos los segundos. Renumera las filas de 1 a 300 antes de guardarlas (D-54).
    Ya no existe un umbral de confianza de detección. Si no puede abrir el video o no
    encuentra los tubos: genera el PDF de diagnóstico, llena `rutaDiagnostico`, pasa a
    `error` y crea una `NOTIFICACION` de tipo `error del pipeline`. No hay reintento ni
@@ -155,7 +155,7 @@ datos, no se configura desde la interfaz y el backend no la conoce. Lo mismo pas
 archivo del modelo entrenado. Antes existían las tablas `MODELO` y `CONFIGURACION` para
 guardarlos; **ya no existen** (ningún requisito permite cambiar el modelo ni el umbral).
 
-**De dónde salen los segundos.** La CNN por segundo deja `X_cnnseg.csv`, con las mismas columnas que el `X_segundos.csv` del etiquetador: `especimen` (1 a 4, la posición en el cuadro), `segundo`, `inicio_s`, `tiempo`, `clase`, `confianza`, `p_escalamiento`, `p_inmovilidad`, `p_nado` y `ventana_s`; la columna `clase` del CSV es la conducta. Y `X_cnnseg_resumen.csv`, con los segundos por conducta de cada minuto (`especimen`, `minuto`, `nado`, `inmovilidad`, `escalamiento`, `activa`, `sin_decidir`). El worker lo convierte en filas de `SEGUNDO` (solo `conducta`; la base no guarda `confianza` ni las `p_*`) y de `PRESENTA`. La conducta vale `nado`, `inmovilidad`, `escalamiento`, `activa` o vacío si no decidió; el worker traduce `nado` a `nado activo` y `activa` a `conducta activa`, y el vacío queda como `conducta` nula. `especimen` se enlaza con `ESPECIMEN.numeroCilindro`. Las hojas manuales `X_seg.csv` solo entrenan la CNN y no entran a la base (D-53).
+**De dónde salen los segundos.** La CNN por segundo deja `X_cnnseg.csv`, con las mismas columnas que el `X_segundos.csv` del etiquetador: `especimen` (1 a 4, la posición en el cuadro), `segundo`, `inicio_s`, `tiempo`, `clase`, `confianza`, `p_escalamiento`, `p_inmovilidad`, `p_nado` y `ventana_s`; la columna `clase` del CSV es la conducta. Y `X_cnnseg_resumen.csv`, con los segundos por conducta de cada minuto (`especimen`, `minuto`, `nado`, `inmovilidad`, `escalamiento`, `activa`, `sin_decidir`). El worker lo convierte en filas de `SEGUNDO` (solo `conducta`; la base no guarda `confianza` ni las `p_*`) y de `PRESENTA`. La conducta vale `nado`, `inmovilidad`, `escalamiento`, `activa` o vacío si no decidió; el worker traduce `nado` a `nado activo` y `activa` a `conducta activa`, y el vacío queda como `conducta` nula. `especimen` se enlaza con `ESPECIMEN.numeroCilindro`. El CSV trae un segundo por cada segundo del video completo: el worker toma las **últimas 300 filas** de cada espécimen (todas, si hay menos) y las renumera de 1 a 300 para que coincidan con el video recortado que ve el usuario (D-54). Las hojas manuales `X_seg.csv` solo entrenan la CNN y no entran a la base (D-53).
 
 En cada instante un espécimen está en exactamente una conducta: nado activo, inmovilidad,
 escalamiento o conducta activa (no inmóvil, sin decidir entre nado y escalamiento). Por
@@ -431,7 +431,7 @@ Estos nombres los propone este documento; confírmalos con el usuario:
 | R-10 | **Eliminada.** Ya no hay umbral de confianza de detección de cilindros, y nada la sustituye en esta versión (sección 11, punto 14). |
 | R-11 | **Eliminada (D-44).** No hay comparación Día 1 vs Día 2. Se comparan los grupos entre sí con el Día 2; el Día 1 solo sirve para verificar que los especímenes llegaron igual de estresados. |
 | R-12 | Cuando el clasificador sabe que el espécimen no está inmóvil pero no decide entre nado y escalamiento, esos segundos se guardan como "conducta activa", una cuarta conducta. Un mismo análisis puede mezclar las cuatro. Los reportes deben mostrarla como una columna más. En los bloques de 5 s también resuelve el empate entre nado activo y escalamiento (sección 9.5). |
-| R-13 | Solo se analizan los **últimos 300 s** de cada video (de final a inicio). El principio se descarta porque a veces aparecen personas (D-54). |
+| R-13 | De cada video se guardan y se muestran como máximo los **últimos 300 s** (de final a inicio), sin mínimo. La CNN analiza el video completo y el worker descarta el principio, donde a veces aparecen personas, y renumera de 1 a 300 (D-54). |
 | R-14 | Solo se puede revisar un análisis en estado `completado`. Al revisar, el usuario corrige las etiquetas segundo a segundo; cada corrección queda en `SEGUNDO` con `origen` `humano_confirma`, `humano_corrige` o `humano_duda`, y al guardar el backend **recalcula `INTERVALO` y `PRESENTA`** de esos especímenes dentro de la misma transacción. La conducta que puso el sistema se reemplaza al corregir; `origen` conserva que el segundo fue revisado. |
 
 Otras decisiones tomadas:
@@ -891,7 +891,7 @@ sequenceDiagram
 16. **Video para reproducir en el navegador. Resuelto (usuario, 3-oct-2026):** se queda
     la propuesta. Los `.mov` del iPhone suelen venir
     en un códec (HEVC) que Chrome y Firefox no reproducen. Al terminar el
-    análisis, el worker genera con `ffmpeg` una copia en H.264 de los últimos 300 s
+    análisis, el worker genera con `ffmpeg`, recortando con recodificación para que el corte sea exacto, una copia en H.264 de los últimos 300 s (todo el video si dura menos)
     (`analisis_{idAnalisis}_web.mp4`, en el volumen `videos_reportes`) y la pantalla de
     revisión reproduce esa copia. En `worker_fake`, simplemente copia o enlaza el original.
     Esa copia también se borra con el video a los 30 días.
@@ -2180,7 +2180,7 @@ w -> db: actualiza la etapa a "preprocesamiento"
 w -> w: alinea la cámara y construye el modelo de fondo
 
 w -> db: actualiza la etapa a "cilindros"
-w -> w: localiza los cilindros y la línea de agua (solo los últimos 300 s del video)
+w -> w: localiza los cilindros y la línea de agua (sobre el video completo)
 
 alt se hallaron los tubos
   w -> db: actualiza la etapa a "clasificación"

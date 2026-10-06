@@ -275,7 +275,7 @@ mejorarla. Detalle en `errores/preguntas-doctor.md` §6.
 | **Se queda `SEGUNDO.origen`** | Dice si la conducta es del sistema o la revisó el usuario; la función principal es que el usuario tenga cada segundo bien clasificado |
 | **Se quita `ESPECIMEN.numeroRata`** | D-55: ya no hay comparación Día 1 contra Día 2 por espécimen (D-44), así que el número del laboratorio no sostiene nada. Se van también el `idGrupo` redundante del físico, su `UNIQUE` y el disparador: **D-04 queda sin objeto**. «Espécimen N» se repite entre tandas, así que la interfaz y los reportes muestran «Tanda A · Espécimen 2». Cambia la premisa de P-01: el espécimen sigue teniendo identificador, pero no el número del laboratorio |
 | **Bloques de 5 s sin la CNN** | La CNN solo clasifica segundos; el bloque se calcula por mayoría de sus cinco segundos. Si nado activo y escalamiento empatan, es conducta activa; con 2 de inmovilidad y 2 de nado decide el quinto segundo (escalamiento o «no se ve» dan conducta activa). Un bloque de «no se ve» se muestra como conducta activa con un matiz, y el PDF final marca esos fragmentos. No cambia el modelo |
-| **Últimos 300 s, no los primeros** | D-54: al inicio de algunos videos aparecen personas. `INTERVALO` y `SEGUNDO` no cambian |
+| **Últimos 300 s, no los primeros** | D-54: al inicio de algunos videos aparecen personas. Es un **máximo, sin mínimo**: si el video dura menos, se analiza todo. La CNN analiza el video completo; el worker conserva las últimas 300 filas de cada espécimen, las renumera de 1 a 300 y recorta el video a esos mismos segundos (el segundo N cae en el instante N − 1 del video recortado, que es el que ve el usuario). El Día 1 solo confirma que existe el video de habituación y no se analiza. `INTERVALO` y `SEGUNDO` no cambian |
 | **Se mantiene `ANALISIS.rutaDiagnostico`** | Se había propuesto quitarla y se revirtió el mismo día (D-23, D-42) |
 | **Contrato del CSV de la CNN** | El worker convierte `X_cnnseg.csv` en filas de `SEGUNDO` (solo `conducta`; no guarda `confianza` ni `p_*`) y `X_cnnseg_resumen.csv` en `PRESENTA`. `especimen` (1 a 4) se enlaza con `numeroCilindro`. Las hojas manuales `X_seg.csv` solo entrenan la CNN y no entran a la base |
 
@@ -288,8 +288,11 @@ las mismas del lógico. Las cifras de las secciones de abajo son anteriores.
 y `pipeline.puml`, con sus PNG; cap. 1, 4 y 5 (RF-18, RF-32, RN-14, casos de uso de la revisión,
 resultados, formas normales); apéndice D; mockups v2 de resultados y revisión, con sus capturas;
 y los tres artifacts (Conceptual, Lógico y Físico, con D-28 a D-55; URLs en §4).
-**Sin decidir:** qué pasa con un video de menos de 300 s y cómo se traduce `SEGUNDO.segundo` a un
-instante del video (D-54); si el Día 1 conserva su recorte de 5 min; D-52. **Sin aplicar:** el
+**D-54 quedó resuelto del todo (6-oct, más tarde):** máximo de 300 s sin mínimo; la CNN sobre el video
+completo, con recorte y renumeración posteriores; el Día 1 solo confirma el video de habituación. Está
+aplicado en los tres artifacts, `pipeline.puml`, `seq_analisis_automatico.puml` y `esquema_fisico.puml`.
+**Sin decidir:** D-52. **Falta actualizar el LaTeX** (cap. 1, 4 y 5 y apéndice D) con esta última
+resolución de D-54. **Sin aplicar:** el
 comentario de `seq_analisis_automatico.puml` sobre `idConfig` y el cap. 6 (comentado en
 `main.tex`).
 
