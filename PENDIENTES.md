@@ -139,5 +139,5 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
 ## Fuera de «hasta el cap. 5»
 
 - **DOC-02:** no hay capítulo de conclusiones (caps. 6–8 comentados en `main.tex`).
-- **D-51 sin aplicar:** `INSTRUCCIONES-WEB.md` (DDL y semilla), comentario de `seq_analisis_automatico.puml`, artifacts y cap. 6.
+- **D-51 sin aplicar:** comentario de `seq_analisis_automatico.puml` y cap. 6. (Artifacts e `INSTRUCCIONES-WEB.md` ya se actualizaron el 5-oct.)
 - Archivos huérfanos con el modelo viejo que no entran al documento (`ciclo_vida_experimento.puml`, `seq_analisis.png`, `seq_registro.png`, `figures/mermaid/clases.png`, `casos_uso.png`, `cu_*.png` de `diagramas/`).

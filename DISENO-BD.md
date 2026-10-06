@@ -186,6 +186,7 @@ conceptual estaba prohibido.
 ## 4. Dónde está el trabajo hecho
 
 Tres artifacts publicados. **Son la fuente de verdad del diseño**, por encima del LaTeX.
+**Actualizados el 2026-10-05** con las decisiones de octubre (D-28 a D-51): Conceptual https://claude.ai/artifact/Y7uJ7Mje7CyDxppJYzzXkh · Lógico https://claude.ai/artifact/FJtL6wbw4K7wYYWJTYmrLP · Físico https://claude.ai/artifact/972fCkz4K4U7fQrPRR3qyH. Las celdas de «Estado» de la tabla de abajo son de septiembre.
 
 | Artifact | URL | Cubre | Estado |
 |----------|-----|-------|--------|
@@ -289,7 +290,7 @@ tabla de normalización, diagrama de clases, CU de creación del análisis); ap�
 `grafo_relacional_3_vigente.puml`, `esquema_fisico.puml` y `clases.puml`, con
 `figures/mermaid/esquema_fisico.png` y `diagramas/clases.png`.
 **Sin aplicar:** `INSTRUCCIONES-WEB.md` (DDL, semilla y diagramas incrustados), el
-comentario de `seq_analisis_automatico.puml` sobre `idConfig`, los artifacts y el cap. 6
+comentario de `seq_analisis_automatico.puml` sobre `idConfig` y el cap. 6. **Artifacts actualizados el 5-oct** (los tres, con D-28 a D-51; URLs abajo)
 (comentado en `main.tex`). **Hueco previo detectado:** `ANALISIS.rutaDiagnostico` (D-23)
 sigue sin estar en `grafo_relacional_3_vigente.puml` ni en `clases.puml`, aunque sí en
 el esquema físico y el apéndice D.

@@ -160,10 +160,12 @@ referencia. Los píxeles con diferencia mayor a un umbral se clasifican como pri
 El modelo de mezcla gaussiana (Gaussian Mixture Model, GMM) \cite{zivkovic2004} es
 la versión adaptativa más usada: mantiene un modelo estadístico del fondo que se
 actualiza con cada cuadro, lo que le permite adaptarse a cambios lentos de iluminación.
-Para el caso de cámara fija que tiene el laboratorio, una alternativa más simple y
-predecible es calcular la mediana píxel a píxel de los primeros $N$ cuadros. Usar la
-mediana en vez del promedio evita que un espécimen inmóvil al inicio del video contamine
-el modelo de fondo \cite{piccardi2004}.
+Para cámara fija, una alternativa más simple y predecible es calcular un estadístico
+de cada píxel sobre varios cuadros; la opción habitual es la mediana, que evita que un
+objeto que solo cruza la escena contamine el modelo de fondo \cite{piccardi2004}. En el
+FST, sin embargo, el espécimen puede pasar inmóvil buena parte del video, y la mediana
+lo conserva como parte del fondo. Por eso este proyecto usa un percentil bajo en lugar
+de la mediana (ver el Capítulo~3).
 
 \subsection{YOLO (You Only Look Once)}
 
