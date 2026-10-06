@@ -389,7 +389,7 @@ Reglas generales:
 | GET | `/experiments/{id}/status` | Progreso de los análisis en porcentaje | Investigador |
 | GET | `/experiments/{id}/results` | Resultados por espécimen y conducta | Investigador |
 | GET | `/experiments/{id}/results/byminute` | Desglose por minuto | Investigador |
-| GET | `/experiments/{id}/groups/{grupo}/tandas/{tanda}/comparison` | Comparación Día 1 vs Día 2 de esa tanda | Investigador |
+| GET | `/experiments/{id}/results/groups` | Comparación entre grupos con el Día 2: promedio por espécimen de cada grupo (RF-21) **[PROPUESTA]** | Investigador |
 | GET | `/experiments/{id}/report/pdf` | Descarga reporte PDF | Investigador |
 | GET | `/experiments/{id}/report/csv` | Descarga CSV | Investigador |
 | GET | `/experiments/{id}/report/xlsx` | Descarga XLSX | Investigador |
@@ -432,7 +432,7 @@ Estos nombres los propone este documento; confírmalos con el usuario:
 | R-08 | Borrar un experimento es permanente (se van video, resultados y reportes). Pide confirmación explícita. |
 | R-09 | Solo se aceptan archivos `.mp4` y `.mov`. La validación de formato ocurre **en el cliente** antes de subir, y el backend la repite. También valida que el video sea reproducible y que esté **en horizontal** (ancho mayor que alto): un video girado (vertical) **no se puede procesar** y se rechaza con un mensaje claro. No hay opción de rotar. |
 | R-10 | **Eliminada.** Ya no hay umbral de confianza de detección de cilindros, y nada la sustituye en esta versión (sección 11, punto 14). |
-| R-11 | La comparación Día 1 vs Día 2 solo existe si **ambos** videos de la tanda se procesaron con éxito. |
+| R-11 | **Eliminada (D-44).** No hay comparación Día 1 vs Día 2. Se comparan los grupos entre sí con el Día 2; el Día 1 solo sirve para verificar que los especímenes llegaron igual de estresados. |
 | R-12 | Cuando el clasificador sabe que el espécimen no está inmóvil pero no decide entre nado y escalamiento, esos segundos se guardan como "conducta activa", una cuarta conducta. Un mismo análisis puede mezclar las cuatro. Los reportes deben mostrarla como una columna más. |
 | R-13 | Solo se analizan los primeros 300 s de cada video. El resto se descarta. |
 | R-14 | Solo se puede revisar un análisis en estado `completado`. Al revisar, el usuario corrige las etiquetas segundo a segundo; cada corrección queda en `SEGUNDO` con `origen` `humano_confirma`, `humano_corrige` o `humano_duda`, y al guardar el backend **recalcula `INTERVALO` y `PRESENTA`** de esos especímenes dentro de la misma transacción. La etiqueta original de la máquina nunca se pierde: queda en `propuesta`. |
@@ -592,12 +592,13 @@ pantalla ni intervención humana, así que la pantalla se queda como está.
 - Al completarse, habilita "Ver resultados" y "Revisar segundo a segundo" (sección 9.7).
 
 ### 9.5 Resultados
-Cuatro pestañas. Estados: resumen de un solo día; comparación Día 1 vs Día 2; desglose por
-minuto expandido.
+Cuatro pestañas: por espécimen, comparación entre grupos (Día 2), línea de tiempo por
+minuto y bloques de 5 s. En la de bloques, cada bloque muestra la conducta con más segundos
+y, al abrirlo, sus cinco segundos, para notar las conductas breves.
 
 ```
 +-------------------------------------------------------------+
-| Exp. A    [Resumen][Por espécimen][Por minuto][Día 1 vs Día 2]|
+| Exp. A  [Por espécimen][Entre grupos][Por minuto][Bloques]  |
 |                         [PDF] [CSV] [XLSX]                    |
 |-------------------------------------------------------------|
 | Resumen (Día 2)                                              |
@@ -606,8 +607,8 @@ minuto expandido.
 | 2         | ...                                               |
 |-------------------------------------------------------------|
 | Por minuto: minuto 1..5 por espécimen y conducta             |
-| Día 1 vs Día 2: barras por espécimen (solo si ambos videos   |
-|   de la tanda se procesaron con éxito, R-11)                 |
+| Entre grupos: promedio por conducta de cada grupo (Día 2)   |
+| Bloques de 5 s: conducta mayoritaria y sus cinco segundos   |
 +-------------------------------------------------------------+
 ```
 
@@ -921,7 +922,7 @@ Cada paso termina con algo que se puede probar.
 6. **`worker_fake`:** simula el contrato de la sección 4, con un caso exitoso y uno de
    error (por ejemplo, un archivo cuyo nombre contenga la palabra `falla`).
 7. **Progreso y resultados:** endpoint de estado con porcentaje, resultados por espécimen,
-   desglose por minuto, comparación Día 1 vs Día 2, comparación entre grupos.
+   desglose por minuto, comparación entre grupos (Día 2) y bloques de 5 s.
 8. **Reportes:** CSV, XLSX, PDF con regeneración por vigencia, y PDF de diagnóstico.
    **Revisión segundo a segundo:** las tres rutas de la sección 6, el recálculo de
    `PRESENTA` y la pantalla 9.7 (después de tener resultados y reportes funcionando).
