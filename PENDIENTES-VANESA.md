@@ -119,4 +119,8 @@ commit.
 
 ## Para Erick (entradas de glosario, abreviaturas o dudas)
 
-*(vacío)*
+- **CU-21 ya no existe** (se fusionó en CU-22, 5-oct). En `chapters/05_diseno.tex:262` queda «(ver CU-21, RF-23)»: cámbialo a «(ver CU-22, RF-23)». Es tu zona, no la mía.
+- **Siglas y términos que no toqué porque están en párrafos tuyos:** ROI (`03_marco_teorico.tex`, subsección de la línea de agua), SVM (`02_estado_arte.tex`, clasificadores clásicos), TT-II (`02_estado_arte.tex`, redes 3D), «transfer learning» en el título de la subsección de redes convolucionales del cap. 2 (`02_estado_arte.tex`) y BORIS en la tabla de cronograma del cap. 1 (`01_introduccion.tex`).
+- **M-8 pendiente entre los dos:** el cap. 3 atribuye la portabilidad a la ISO/IEC/IEEE 12207, y los caps. 4 y 5 repiten esa atribución (`04_analisis.tex` ~734, `05_diseno.tex` ~93). Creo que la ISO/IEC 25010:2023 ya no usa «portabilidad» sino «flexibilidad»; hay que verificarlo en la norma antes de cambiar nada.
+- **Casos de uso sin ficha propia** (su contenido está dentro de otra ficha): «Ejecutar pipeline de análisis» y «Reportar error de pipeline» (CU-07), «Desglosar por minuto» y «Comparar grupos en Día 2» (CU-09), «Generar archivo de reporte» (CU-10).
+- **CU-06 «Consultar historial de experimentos»** repite lo que hace CU-22 (dashboard), y CU-24 «Gestionar experimentos globales» se solapa con ambos (todos ven todos los experimentos, RN-08). Queda como decisión abierta.
