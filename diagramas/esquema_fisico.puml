@@ -5,7 +5,11 @@
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
 '  Figura 5.5 de chapters/05_diseno.tex
-'  Gestor: PostgreSQL (D-11) - 17 tablas, 21 llaves foraneas
+'  Gestor: PostgreSQL (D-11) - 15 tablas, 19 llaves foraneas
+'  (5-oct: D-51 quita MODELO, CONFIGURACION y ANALISIS.idConfig;
+'   agrega ANALISIS.rutaRecuadros y ANALISIS.progreso; propuesta y
+'   VIDEO.archivo admiten nulo; EXPERIMENTO.nombre es UNIQUE;
+'   tipo_notificacion gana 'video borrado')
 '  (3-oct: D-35 agrega SEGUNDO, una fila por especimen y por segundo,
 '   y D-29 agrega la conducta "conducta activa", asi que PRESENTA pasa
 '   de (2,3) a (2,4) conductas por intervalo)
@@ -36,7 +40,7 @@
 '     SOLO existe aqui, en el fisico. El grafo logico se queda en
 '     BCNF estricta, sin idGrupo en ESPECIMEN. Esto agrega una FK
 '     mas (GRUPO -> ESPECIMEN) que no esta en el logico: por eso
-'     el fisico tiene 21 llaves foraneas y el logico 20.
+'     el fisico tiene 19 llaves foraneas y el logico 18.
 '  4. D-24 (15-sep, esta sesion): ANALISIS.idVideo se declara UNIQUE
 '     para forzar estructuralmente la cardinalidad (1,1) de D-03.
 '     Kendall & Kendall p.425 respalda la "clave unica" como
@@ -56,13 +60,11 @@
 '  Texto libre/rutas -> text
 '  Fecha sin hora    -> date
 '  Marca de tiempo   -> timestamptz
-'  Umbrales/segundos -> numeric(p,s)   (nunca real/double: la AK de
-'                       CONFIGURACION compara ocho umbrales por
-'                       igualdad, y la igualdad entre flotantes no
-'                       es fiable)
+'  Duraciones/segundos -> numeric(p,s)   (nunca
+'                       real/double: numeric guarda el decimal
+'                       exacto y los totales no acumulan redondeo)
 '  Contadores cortos -> smallint
 '  Booleano          -> boolean
-'  Hash del modelo   -> char(64)                              [D-14]
 '
 '  ---- Los ocho dominios cerrados (CREATE DOMAIN ... CHECK) ----
 '  tipo_grupo             varchar(24) IN ('control','referencia',
@@ -70,18 +72,18 @@
 '  sesion_video            varchar(6) IN ('Dia 1','Dia 2')
 '  formato_reporte         varchar(4) IN ('CSV','XLSX','PDF')
 '  tipo_notificacion      varchar(32) IN ('analisis completado',
-'                          'error del pipeline','alerta de disco')
+'                          'error del pipeline','alerta de disco',
+'                          'video borrado')                     [D-51]
 '  estado_analisis        varchar(10) IN ('en cola','procesando',
 '                          'completado','error')                [D-15]
 '  etapa_analisis         varchar(16) IN ('preprocesamiento',
-'                          'deteccion','seguimiento',
-'                          'clasificacion')                     [D-16]
+'                          'cilindros','clasificacion')         [D-16]
 '  nivel_clasif_analisis   varchar(8) IN ('preciso','agrupado')  [D-17]
 '  origen_segundo         varchar(16) IN ('maquina','humano_confirma',
 '                          'humano_corrige','humano_duda','sin_revisar',
 '                          'humano_ciego')                      [D-35]
-'  (CONFIGURACION.umbralConfianza no es lista, es rango: CHECK
-'  BETWEEN 0 AND 1, sobre la columna directamente)
+'  (ANALISIS.progreso no es lista, es rango: CHECK BETWEEN 0 AND
+'  100, sobre la columna directamente)
 '
 '  ---- Todas las FK: ON UPDATE NO ACTION ON DELETE NO ACTION ----
 '  La base de datos rechaza el borrado en vez de propagarlo - por
@@ -154,7 +156,7 @@ entity EXPERIMENTO {
   * idExperimento : integer <<PK>>
   --
   idInstitucional : varchar(10) <<FK>>
-  nombre : varchar(n)
+  nombre : varchar(n) <<UK>>
   fecha : date
   notas : text (nulo)
 }
@@ -208,7 +210,7 @@ entity VIDEO {
   --
   idTanda : integer <<FK>>
   sesion : sesion_video
-  archivo : text
+  archivo : text (nulo = video borrado)
   duracion : numeric(p,s)
   fechaCarga : timestamptz
   ..
@@ -219,12 +221,15 @@ entity ANALISIS {
   * idAnalisis : integer <<PK>>
   --
   idVideo : integer <<FK>> <<UK>> (D-24)
-  idConfig : integer <<FK>>
   estado : estado_analisis
   etapa : etapa_analisis
+  progreso : smallint · D-51
   nivelClasif : nivel_clasif_analisis
   fechaAnalisis : timestamptz
   rutaDiagnostico : text (nulo salvo error) · D-23
+  rutaRecuadros : text (nulo) · D-51
+  ..
+  CK progreso BETWEEN 0 AND 100
 }
 note bottom of ANALISIS
   D-24 (15-sep): idVideo UNIQUE fuerza la cardinalidad
@@ -235,6 +240,11 @@ note bottom of ANALISIS
   primera vez a peticion del usuario (15-sep).
   D-47 (4-oct): sin columna confianza; el detector
   actual no produce ningun valor de confianza.
+  D-51 (5-oct): sin idConfig; el modelo y el umbral
+  son constantes del pipeline. rutaRecuadros apunta
+  al archivo de recuadros de los tubos (D-42).
+  progreso lo escribe el worker y lo lee /status
+  (RF-15); reemplaza el calculo por etapa de D-22.
 end note
 
 entity OBSERVACION {
@@ -276,7 +286,7 @@ entity SEGUNDO {
   * segundo : smallint <<PK>>
   --
   clase : varchar(n) <<FK>> (nulo = "no se ve")
-  propuesta : varchar(n) <<FK>>
+  propuesta : varchar(n) <<FK>> (nulo)
   origen : origen_segundo
   ..
   CK segundo BETWEEN 1 AND 300
@@ -285,7 +295,8 @@ note bottom of SEGUNDO
   D-35: una fila por especimen y por segundo analizado.
   Es lo que el usuario revisa y corrige al terminar el
   analisis. propuesta guarda lo que dijo la maquina y
-  nunca se modifica.
+  nunca se modifica; es nula si el sistema no
+  clasifico el segundo (D-51).
 end note
 
 entity ADMINISTRADOR {
@@ -300,36 +311,6 @@ end note
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 '  SOPORTE DEL SISTEMA
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-entity MODELO {
-  * hashModelo : char(64) <<PK>>
-  --
-  nombreModelo : varchar(n)
-}
-note bottom of MODELO
-  D-14: hashModelo = SHA-256 del archivo del modelo
-  (hashlib.sha256(archivo).hexdigest()). 64 es la
-  longitud fija de su salida.
-end note
-
-entity CONFIGURACION {
-  * idConfig : integer <<PK>>
-  --
-  hashModelo : char(64) <<FK>>
-  versionPipeline : varchar(n)
-  umbralConfianza : numeric(p,s)
-  segundosOmitir : numeric(p,s)
-  umbralInmovil : numeric(p,s)
-  umbralDesplazamiento : numeric(p,s)
-  umbralStdPosicion : numeric(p,s)
-  umbralAspectoTrepada : numeric(p,s)
-  fechaCreacion : timestamptz
-  ..
-  UK (hashModelo, versionPipeline, umbralConfianza,
-      segundosOmitir, umbralInmovil, umbralDesplazamiento,
-      umbralStdPosicion, umbralAspectoTrepada)
-  CK umbralConfianza BETWEEN 0 AND 1
-}
 
 entity REPORTE {
   * idReporte : integer <<PK>>
@@ -352,7 +333,7 @@ entity NOTIFICACION {
 }
 
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-'  RELACIONES - 21 FK (20 del grafo logico + 1 fisica: D-04)
+'  RELACIONES - 19 FK (18 del grafo logico + 1 fisica: D-04)
 '  Todas ON UPDATE NO ACTION ON DELETE NO ACTION
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -372,9 +353,6 @@ TANDA          "1" --o "1..2" VIDEO                     : idTanda
 
 VIDEO          "1" --o "1"    ANALISIS                  : idVideo <color:#8A5A0B>· UK, D-24</color>
 VIDEO          "1" --o "2..4" OBSERVACION                : idVideo
-
-CONFIGURACION  "1" --o "0..*" ANALISIS                  : idConfig
-MODELO         "1" --o "0..*" CONFIGURACION              : hashModelo
 
 ESPECIMEN      "1" --o "1..2" OBSERVACION                : idEspecimen
 

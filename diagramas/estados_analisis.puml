@@ -8,14 +8,13 @@ skinparam shadowing false
 
 state procesando {
   [*] --> preprocesamiento
-  preprocesamiento --> deteccion
-  deteccion --> seguimiento : [se hallaron los tubos]
-  seguimiento --> clasificacion
+  preprocesamiento --> cilindros
+  cilindros --> clasificacion : [se hallaron los tubos]
 }
 
 en_cola --> procesando : el Worker tomó la tarea\n(polling, CU-07)
-deteccion --> error : [no se pudo abrir el video\no no se hallaron los tubos] (RN-11)\nse generó el reporte de\ndiagnostico (D-23)
-clasificacion --> completado : se completaron las\ncuatro etapas
+cilindros --> error : [no se pudo abrir el video\no no se hallaron los tubos] (RN-11)\nse generó el reporte de\ndiagnostico (D-23)
+clasificacion --> completado : se completaron las\ntres etapas
 
 completado --> [*]
 error --> [*]

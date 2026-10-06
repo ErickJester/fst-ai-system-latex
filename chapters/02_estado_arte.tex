@@ -4,7 +4,7 @@ Antes de definir cómo va a funcionar el sistema, se revisan qué herramientas y
 existen para el análisis automatizado del FST. La búsqueda se organizó en cuatro áreas:
 trabajos similares directamente relacionados con el problema, software comercial y de
 código abierto para análisis conductual por video, técnicas de visión por computadora y
-aprendizaje profundo aplicadas al seguimiento de roedores, y enfoques de clasificación
+aprendizaje profundo aplicadas a localizar roedores en video, y enfoques de clasificación
 de conducta con modelos supervisados.
 
 % -----------------------------------------------------------
@@ -83,8 +83,9 @@ ese recorte. Separar las dos tareas tiene una ventaja práctica: el clasificador
 trabaja sobre una imagen más limpia, sin el fondo ni los otros especímenes como
 distracción.
 
-Ese enfoque de dos etapas ---detección por YOLO seguida de clasificación sobre el
-recorte--- es la arquitectura que adopta este proyecto.
+Este proyecto conserva la separación entre localizar al espécimen y clasificar su
+conducta, pero no usa un detector entrenado: localiza cada cilindro por sustracción
+de fondo, porque cada cilindro contiene un solo espécimen.
 
 % -----------------------------------------------------------
 \section{Herramientas comerciales de análisis conductual por video}
@@ -145,7 +146,7 @@ web. La dependencia de MATLAB además implica una licencia que no siempre está
 disponible en el contexto académico.
 
 % -----------------------------------------------------------
-\section{Técnicas de visión por computadora para seguimiento de roedores}
+\section{Técnicas de visión por computadora para localizar roedores en video}
 % -----------------------------------------------------------
 
 \subsection{Sustracción de fondo}
@@ -181,10 +182,9 @@ fondos consistentes, lo cual es relevante dado el tamaño de dataset disponible 
 proyecto. El modelo no generaliza bien cuando el fondo cambia mucho entre condiciones,
 lo que hay que considerar durante el entrenamiento.
 
-La separación entre detección y clasificación tiene una ventaja práctica concreta: el
-clasificador trabaja sobre un recorte limpio del espécimen, sin el fondo ni los otros
-cilindros como fuente de error. El cap.~4 detalla por qué ese trade-off es conveniente
-dado el tamaño del dataset disponible.
+Este proyecto no usa YOLO. Con un espécimen por cilindro y el aparato siempre en el
+mismo lugar del encuadre, la sustracción de fondo basta para separar al espécimen, sin
+etiquetar imágenes para entrenar un detector.
 
 \subsection{DeepLabCut}
 
@@ -196,46 +196,6 @@ decenas de cuadros antes de empezar ---nariz, patas, cola--- lo que implica un t
 de anotación previo considerable. La pregunta que queda abierta es si esa inversión
 inicial se justifica frente a enfoques que operan directamente sobre el recorte del
 espécimen, sin necesidad de estimar la pose.
-
-\subsection{Tracker de correlación: CSRT}
-
-Los trackers de correlación aprenden a reconocer cómo se ve el objeto que siguen y en
-cada cuadro buscan la región más parecida. Son distintos a los detectores: no necesitan
-saber qué es el objeto, solo cómo se veía en el cuadro anterior. CSRT
-(\textit{Discriminative Correlation Filter with Channel and Spatial Reliability})
-\cite{lukezic2017} mantiene un mapa de confiabilidad espacial que pondera las regiones
-más discriminativas del objeto, lo que lo hace más robusto ante oclusión parcial.
-
-En el sistema propuesto, el tracker CSRT opera como respaldo clásico cuando
-ByteTrack no está disponible: si YOLO no detecta al espécimen en un cuadro y el modo track
-está desactivado, CSRT mantiene la estimación de posición hasta que el
-detector vuelve a encontrarla.
-
-\subsection{ByteTrack: asociación por detección completa}
-
-ByteTrack \cite{zhang2022_bytetrack} es un algoritmo de seguimiento multi-objeto
-(\textit{multi-object tracking}, MOT) propuesto por Zhang et al.\ en ECCV 2022. Su
-contribución principal es asociar \emph{todas} las cajas producidas por el detector
----incluyendo las de baja confianza--- en lugar de descartarlas.
-
-El algoritmo opera en dos pasos por cuadro. En el primero asocia las detecciones de
-alta confianza con las trayectorias activas mediante la métrica IoU y el filtro de
-Kalman para predecir la posición esperada de cada trayectoria. En el segundo paso
-intenta recuperar trayectorias sin coincidencia usando las detecciones de baja
-confianza, que de otro modo serían descartadas. Esta segunda pasada es la que da nombre
-al algoritmo: aprovechar hasta el último \textit{byte} de información disponible.
-
-Frente a SORT \cite{bewley2016_sort} ---que descarta las detecciones de baja
-confianza--- ByteTrack mantiene mejor continuidad en situaciones de oclusión parcial.
-Frente a DeepSORT \cite{wojke2017_deepsort} ---que añade un descriptor de apariencia
-por red neuronal para reidentificación--- ByteTrack logra resultados comparables sin
-requerir un modelo de \textit{embedding} adicional, lo que reduce la latencia.
-
-En el FST, con exactamente un espécimen por cilindro, la ausencia de ambigüedad de
-identidad hace que la reidentificación de DeepSORT sea innecesaria. ByteTrack cubre
-el caso de uso con menor complejidad: solo IoU y Kalman. La integración se realiza a
-través del modo \texttt{.track()} de Ultralytics YOLOv8 con la configuración
-\texttt{bytetrack.yaml} que el paquete incluye.
 
 % -----------------------------------------------------------
 \section{Modelos de clasificación supervisada aplicables al FST}
@@ -257,7 +217,9 @@ características discriminan mejor las conductas.
 Para el FST, un descriptor útil es la relación entre el área de movimiento y la posición
 vertical del centroide: el escalamiento produce movimiento en la mitad superior del
 cilindro mientras que el nado se distribuye en toda la superficie del agua. Esa
-diferencia es capturable con descriptores simples \cite{armario2021}.
+diferencia es capturable con descriptores simples \cite{armario2021}. Este proyecto
+sigue ese camino con un clasificador de \textit{gradient boosting} (potenciación del
+gradiente) sobre quince rasgos del espécimen (cap.~5).
 
 \subsection{Redes convolucionales con transfer learning}
 
@@ -269,12 +231,11 @@ de imágenes de 1{,}000 clases) y se reemplaza solo la última capa de clasifica
 una nueva con 3 salidas, una por conducta. Las capas anteriores ya saben detectar bordes,
 texturas y formas generales, y eso se aprovecha directamente.
 
-ResNet-18 \cite{he2016} es la arquitectura candidata principal para el clasificador de
-este proyecto. Tiene 18 capas con conexiones residuales (\textit{skip connections}) que
-facilitan el entrenamiento en redes profundas al permitir que el gradiente fluya sin
-desvanecerse. Es ligera (ocupa menos de 50~MB) entrena rápido con datasets pequeños
-y tiene un buen balance entre precisión y velocidad de inferencia. Si ResNet-18 no
-alcanza el F1 objetivo en las tres conductas, se prueba ResNet-50 como alternativa más profunda.
+ResNet \cite{he2016} es una de las arquitecturas más usadas para ese fin. Sus
+conexiones residuales (\textit{skip connections}) facilitan el entrenamiento de redes
+profundas al permitir que el gradiente fluya sin desvanecerse. Su versión de 18 capas,
+ResNet-18, es ligera y entrena rápido con datasets pequeños, y es la base de la red
+para video que evalúa este proyecto (sección siguiente).
 
 \subsection{Redes 3D para información temporal}
 
@@ -286,9 +247,10 @@ Valle et al.\ \cite{della_valle2025} usan este enfoque y logran la clasificació
 tres conductas. El costo es computacional: las redes 3D requieren más memoria y tiempo
 de inferencia que las 2D, lo que puede ser una limitación en hardware sin GPU.
 
-Para este proyecto, la primera opción es ResNet-18 en 2D sobre el recorte del espécimen
-(más simple, menor costo computacional). Las redes 3D quedan como alternativa si el
-clasificador 2D no alcanza la precisión necesaria.
+Este proyecto evalúa la R(2+1)D-18 \cite{tran2018}, una ResNet-18 para video que
+separa cada convolución 3D en una espacial y una temporal, preentrenada con videos de
+acciones humanas. Se compara contra el clasificador sobre rasgos, y cuál de los dos usa
+el sistema se decide en TT-II con F1 por conducta (cap.~5).
 
 % -----------------------------------------------------------
 \section{Criterios de calidad para la evaluación del sistema}
@@ -326,20 +288,20 @@ proyecto.
 \caption{Comparativa de herramientas y trabajos relacionados con el análisis del FST.}
 \label{tab:comparativa_herramientas}
 {\setlength{\tabcolsep}{4pt}\footnotesize
-\begin{tabular}{p{2.4cm}p{1.1cm}p{1.0cm}p{0.6cm}p{0.6cm}p{1.0cm}p{1.7cm}p{3.2cm}}
+\begin{tabular}{p{2.6cm}p{1.2cm}p{1.1cm}p{0.7cm}p{0.7cm}p{1.1cm}p{4.2cm}}
 \hline
-\textbf{Sistema} & \textbf{Espec. FST} & \textbf{3 cond.} & \textbf{DL} & \textbf{Web} & \textbf{Abierto} & \textbf{Tracker MOT} & \textbf{Métricas reportadas} \\
+\textbf{Sistema} & \textbf{Espec. FST} & \textbf{3 cond.} & \textbf{DL} & \textbf{Web} & \textbf{Abierto} & \textbf{Métricas reportadas} \\
 \hline
-EthoVision XT  & Parc. & No    & No  & No  & No  & No          & Posición, velocidad \\
-ANY-maze       & Parc. & No    & No  & No  & No  & No          & Posición, velocidad \\
-ezTrack        & Parc. & No    & No  & No  & Sí  & No          & \% movimiento \\
-DBscorer       & Sí    & No    & No  & No  & Sí  & No          & Tiempo inmóvil \\
-DSAAN          & Sí    & No    & Sí  & No  & No  & No          & Precisión 88.7\,\% \\
-3D-RCNN        & Sí    & Sí    & Sí  & No  & No  & No          & F1 por conducta \\
-DeepLabCut+clf & Parc. & Parc. & Sí  & No  & Sí  & No          & Concordancia con experto \\
-YOLO-Behaviour & No    & ---   & Sí  & No  & Sí  & No          & Precisión, recall \\
+EthoVision XT  & Parc. & No    & No  & No  & No  & Posición, velocidad \\
+ANY-maze       & Parc. & No    & No  & No  & No  & Posición, velocidad \\
+ezTrack        & Parc. & No    & No  & No  & Sí  & \% movimiento \\
+DBscorer       & Sí    & No    & No  & No  & Sí  & Tiempo inmóvil \\
+DSAAN          & Sí    & No    & Sí  & No  & No  & Precisión 88.7\,\% \\
+3D-RCNN        & Sí    & Sí    & Sí  & No  & No  & F1 por conducta \\
+DeepLabCut+clf & Parc. & Parc. & Sí  & No  & Sí  & Concordancia con experto \\
+YOLO-Behaviour & No    & ---   & Sí  & No  & Sí  & Precisión, recall \\
 \hline
-\textbf{Propuesta} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{ByteTrack} & F1 por conducta, tiempo \\
+\textbf{Propuesta} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & F1 por conducta, tiempo \\
 \hline
 \end{tabular}}
 \end{table}

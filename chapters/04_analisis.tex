@@ -137,11 +137,10 @@ RF-12 & Carga de video
 
 % ── Análisis conductual ────────────────────────────────────
 RF-13 & Análisis conductual
-      & El pipeline de análisis debe ejecutar cuatro etapas secuenciales:
+      & El pipeline de análisis debe ejecutar tres etapas secuenciales:
         preprocesamiento del video (decodificación y corrección de contraste),
-        detección de cilindros, seguimiento de especímenes (\textit{tracking}) y
-        clasificación de conductas. Cada etapa debe tener un indicador de estado
-        visible en la pantalla de progreso.
+        localización de los cilindros y clasificación de conductas. Cada etapa
+        debe tener un indicador de estado visible en la pantalla de progreso.
       & Alta & Sistema \\
 \hline
 RF-14 & Análisis conductual
@@ -614,10 +613,10 @@ La elección del \textit{stack} tecnológico se hizo evaluando madurez, compatib
 disponibilidad de documentación y experiencia previa del equipo. Las herramientas se
 agrupan en cuatro áreas.
 
-\subsection{Detección de objetos y seguimiento}
+\subsection{Visión por computadora}
 
 \begin{longtable}{|p{2.7cm}|p{4.4cm}|p{4.8cm}|p{1.3cm}|}
-\caption{Técnicas de detección de objetos y seguimiento.
+\caption{Técnicas de visión por computadora.
 \label{tab:herr_cv}}\\
 \hline
 \textbf{Herramienta} & \textbf{Características principales} & \textbf{Por qué se eligió} & \textbf{GPU req.} \\
@@ -632,18 +631,10 @@ agrupan en cuatro áreas.
 
 OpenCV 4.x \cite{bradski2000}
     & Biblioteca estándar para procesamiento de imágenes y video en Python. Incluye
-      sustracción de fondo, umbralización de Otsu, morfología, contornos y el
-      tracker de correlación CSRT (respaldo clásico frente a ByteTrack).
+      sustracción de fondo, umbralización de Otsu, morfología y contornos.
     & Es la herramienta de referencia para este tipo de trabajo y es compatible con
-      YOLOv8 y PyTorch sin configuración extra.
+      PyTorch sin configuración extra.
     & No \\
-\hline
-Ultralytics YOLOv8 \cite{jocher2023}
-    & Detector de objetos estado del arte. Con 100--350 imágenes etiquetadas logra
-      detección casi perfecta en fondos consistentes \cite{stadler2024_yolov8}.
-    & Se entrenará con imágenes del laboratorio; su viabilidad técnica para
-      fondos consistentes está respaldada por estudios previos \cite{stadler2024_yolov8}.
-    & Sí \\
 \hline
 Sustracción de fondo por mediana \cite{piccardi2004}
     & El fondo se estima como la mediana píxel a píxel de los primeros $N$ cuadros,
@@ -653,26 +644,8 @@ Sustracción de fondo por mediana \cite{piccardi2004}
       la sensibilidad a variaciones de iluminación entre sesiones.
     & No \\
 \hline
-ByteTrack \cite{zhang2022_bytetrack}
-    & Algoritmo MOT basado en filtro de Kalman y asociación por IoU. Asocia
-      detecciones de alta y baja confianza en dos pasadas para mantener trayectorias
-      durante oclusiones. No requiere descriptor de reidentificación por apariencia.
-    & Tracker principal del pipeline. Con un espécimen por ROI no se necesita
-      reidentificación, por lo que la simplicidad de ByteTrack es una ventaja sobre
-      DeepSORT. 
-    & Sí\textsuperscript{*} \\
-\hline
-Tracker de correlación CSRT \cite{lukezic2017}
-    & Tracker de correlación discriminativo que mantiene un mapa de confiabilidad
-      espacial ponderando las regiones más discriminativas del objeto.
-    & Respaldo clásico para cuadros donde ByteTrack no está disponible (sin GPU o
-      sin modelo cargado). Si CSRT falla, se congela la última posición conocida.
-    & No \\
-\hline
 
 \end{longtable}
-{\footnotesize\textsuperscript{*}GPU recomendada para inferencia en tiempo real;
-el modo CPU es funcional pero más lento.}
 
 \subsection{Aprendizaje profundo para clasificación de conductas}
 
@@ -690,28 +663,28 @@ el modo CPU es funcional pero más lento.}
 \hline
 \endfoot
 
-ResNet-18 \cite{he2016}
-    & Red con 18~capas y conexiones residuales, preentrenada en ImageNet. Ligera
-      ($< 50$~MB) y rápida de entrenar con datasets pequeños via transfer learning
-      \cite{pan2010}.
-    & Primera opción para el clasificador de conducta. Su viabilidad se
-      confirmará durante la fase de implementación del clasificador. \\
-\hline
-ResNet-50 \cite{he2016}
-    & Versión más profunda (50~capas). Mayor capacidad que ResNet-18 a costa de más
-      tiempo de entrenamiento e inferencia.
-    & Se usará si ResNet-18 no alcanza el F1 objetivo en las tres conductas. \\
+R(2+1)D-18 \cite{tran2018}
+    & Red convolucional espacio-temporal de 18~capas con conexiones residuales
+      \cite{he2016}: una ResNet-18 para video. Recibe clips de 16 fotogramas y se
+      preentrena con Kinetics-400 (videos de acciones humanas) para aplicar
+      transfer learning \cite{pan2010}.
+    & Candidata para el clasificador de conducta. Se compara contra el
+      clasificador sobre rasgos; la elección se hace en TT-II con F1 por
+      conducta. \\
 \hline
 PyTorch \cite{paszke2019}
     & Framework de aprendizaje profundo para entrenamiento e inferencia de redes
-      neuronales. Backbone nativo de Ultralytics YOLOv8 y compatible con transfer
-      learning de ResNet-18.
-    & Es el framework nativo de YOLOv8 (Ultralytics) y el ecosistema de referencia
-      para visión por computadora en Python. Compatible con Docker para el despliegue. \\
+      neuronales. Su biblioteca torchvision incluye la R(2+1)D-18 preentrenada.
+    & Es el ecosistema de referencia para visión por computadora en Python.
+      Compatible con Docker para el despliegue. \\
 \hline
 scikit-learn \cite{pedregosa2011}
-    & Biblioteca de ML para métricas y validación cruzada.
-    & Se usa para calcular métricas de clasificación (F1, precisión y \textit{recall} por conducta) y validación cruzada. \\
+    & Biblioteca de ML con clasificadores de \textit{gradient boosting}, métricas y
+      validación cruzada.
+    & Implementa el clasificador sobre rasgos (\texttt{HistGradientBoostingClassifier}),
+      la otra candidata para el clasificador de conducta, y calcula las métricas de
+      clasificación (F1, precisión y \textit{recall} por conducta) y la validación
+      cruzada. \\
 \hline
 BORIS \cite{friard2016}
     & Software de anotación conductual cuadro a cuadro. Exporta en formatos
@@ -879,11 +852,12 @@ documentadas y tienen comunidades activas que reducen el riesgo de incompatibili
 La brecha tecnológica más relevante identificada es el dataset de cuadros etiquetados
 para entrenar el clasificador de conducta. Con el número de videos disponibles actualmente
 en el laboratorio, ese dataset requiere un esfuerzo de anotación manual con BORIS que
-es viable pero no trivial. La estrategia de transfer learning con ResNet-18 reduce ese
-requerimiento a unos pocos cientos de cuadros por clase, lo que está dentro del alcance
-del proyecto \cite{pan2010,meng2024_dsaan}. Para el entrenamiento del modelo, si el
-laboratorio no dispone de GPU, Google Colab ofrece hasta 12~horas de GPU por sesión de
-forma gratuita, lo que es suficiente para el fine-tuning de ResNet-18.
+es viable pero no trivial. La estrategia de transfer learning con una red preentrenada
+reduce ese requerimiento a unos pocos cientos de ejemplos por clase, lo que está dentro
+del alcance del proyecto \cite{pan2010,meng2024_dsaan}. El clasificador sobre rasgos
+corre en procesador, sin GPU. Para entrenar la red convolucional, si el laboratorio no
+dispone de GPU, Google Colab ofrece hasta 12~horas de GPU por sesión de forma gratuita,
+lo que es suficiente para su ajuste fino.
 
 En cuanto al hardware para el despliegue, el sistema no requiere infraestructura
 especializada: cualquier equipo con Docker instalado puede correr el prototipo, lo que
@@ -891,12 +865,11 @@ elimina dependencias de hardware específico en el laboratorio.
 
 \subsubsection{Simulación, modelado y pruebas}
 
-Antes de la implementación completa del sistema, se realizaron pruebas preliminares de
-detección de objetos con YOLOv8 usando un dataset inicial de los videos del laboratorio.
-Los resultados de esa prueba confirman que el enfoque es viable con las condiciones de
-grabación reales del laboratorio: vista lateral, de dos a cuatro cilindros simultáneos,
-cámara web \cite{stadler2024_yolov8}. Esa prueba reduce el riesgo técnico de la etapa de
-detección antes de comprometer recursos en el desarrollo completo.
+Antes de la implementación completa del sistema, el pipeline de análisis se probó con
+videos del laboratorio: localiza de forma automática los cilindros y la línea de agua
+en grabaciones de distintos días y encuadres, con vista lateral y de dos a cuatro
+cilindros simultáneos. Esa prueba reduce el riesgo técnico de la etapa de localización
+de los cilindros antes de comprometer recursos en el desarrollo completo.
 
 Para el clasificador de conducta, estudios previos reportan precisiones superiores al
 88\,\% con datasets de menos de 100 imágenes cuando se usa transfer learning desde
@@ -906,7 +879,7 @@ etapa con el dataset disponible.
 \subsubsection{Evaluación de compatibilidad e integración}
 
 El prototipo tiene una arquitectura modular que separa el pipeline de análisis de video
-(Python, OpenCV, PyTorch, con YOLOv8, ByteTrack y ResNet-18) de la plataforma web (Flask, React, PostgreSQL) mediante una
+(Python, OpenCV, scikit-learn y PyTorch) de la plataforma web (Flask, React, PostgreSQL) mediante una
 cola de tareas asíncrona. Esa separación permite desarrollar y probar cada módulo de
 forma independiente y facilita la integración progresiva conforme avanza el desarrollo.
 
@@ -1022,7 +995,7 @@ Conectividad e infraestructura (internet y electricidad durante el desarrollo,
     & \$4{,}500 \\
 \hline
 Herramientas de desarrollo (Python, Flask, React, PostgreSQL, Docker, OpenCV,
-      YOLOv8, BORIS)
+      scikit-learn, PyTorch, BORIS)
     & \$0 --- distribución bajo licencias de código abierto sin costo para uso
       académico. \\
 \hline
@@ -1117,7 +1090,7 @@ aprobados por el IPN.
 \subsubsection{Privacidad y manejo de información}
 
 El sistema no registra ni procesa datos personales de seres humanos. Los únicos datos
-que almacena son coordenadas de seguimiento, duraciones de conducta y metadatos del
+que almacena son la conducta de cada segundo, duraciones de conducta y metadatos del
 experimento (grupo, fecha, tratamiento). Las credenciales de los investigadores
 registrados en la plataforma se manejan bajo las directrices de la Ley Federal de
 Protección de Datos Personales en Posesión de los Particulares (LFPDPPP), empleando
@@ -1136,8 +1109,8 @@ manejo de especímenes de laboratorio en investigación biomédica.
 
 Cada herramienta del \textit{stack} tecnológico se distribuye bajo una licencia que
 permite su uso, modificación y distribución en contextos académicos sin costo:
-PSF (Python), BSD-3-Clause (Flask), MIT (React), PostgreSQL License (PostgreSQL),
-Apache~2.0 (Docker y OpenCV), AGPL-3.0 sin fines de lucro (YOLOv8) y GNU GPL~v3
+PSF (Python), BSD-3-Clause (Flask, scikit-learn y PyTorch), MIT (React), PostgreSQL
+License (PostgreSQL), Apache~2.0 (Docker y OpenCV) y GNU GPL~v3
 (BORIS \cite{friard2016}). El código fuente, los modelos entrenados y la documentación
 producidos durante el TT son obra intelectual del equipo desarrollador y quedan
 amparados por la Ley Federal del Derecho de Autor (LFDA).
@@ -1182,5 +1155,5 @@ el caso para el que fue construido.
 El sistema se entrega como prototipo funcional. Para mantenerlo hace falta conocimiento
 básico de Python y Docker. La documentación técnica de este documento y el
 \texttt{README} del repositorio están diseñados para que cualquiera que retome el
-proyecto pueda entenderlo sin el equipo original. Las herramientas principales (YOLOv8,
-Flask, React, PostgreSQL) tienen desarrollo activo y comunidades grandes.
+proyecto pueda entenderlo sin el equipo original. Las herramientas principales (OpenCV,
+PyTorch, Flask, React, PostgreSQL) tienen desarrollo activo y comunidades grandes.

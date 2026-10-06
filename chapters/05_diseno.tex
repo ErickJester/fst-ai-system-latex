@@ -43,10 +43,10 @@ bloquear al servidor web mientras procesa los videos.
 La Figura~\ref{fig:arquitectura_software} muestra qué tecnología reside en cada
 contenedor y cómo se comunican entre sí. Se distinguen cuatro grupos: la capa de
 presentación (React.js + Vite), la lógica de negocio (Flask + SQLAlchemy), el
-procesamiento asíncrono (OpenCV, YOLOv8, ByteTrack, ResNet) y la capa de datos
-(PostgreSQL, sistema de archivos y volumen de modelos entrenados). Los modelos
-\texttt{rat.pt}, \texttt{resnet18\_fst.pt} y \texttt{resnet50\_fst.pt} residen en
-un volumen Docker dedicado que el worker monta al arrancar el contenedor.
+procesamiento asíncrono (OpenCV, scikit-learn y PyTorch) y la capa de datos
+(PostgreSQL, sistema de archivos y volumen de modelos entrenados). El archivo del
+clasificador de conducta reside en un volumen Docker dedicado que el worker monta al
+arrancar el contenedor.
 
 \begin{figure}[H]
 \centering
@@ -69,8 +69,8 @@ Las responsabilidades de cada componente son:
         PostgreSQL.
 
   \item \textbf{Worker (Python):} proceso independiente que consume tareas de la
-        cola, ejecuta el pipeline completo de análisis (preprocesamiento, detección,
-        seguimiento y clasificación) y escribe los resultados en la base de datos.
+        cola, ejecuta el pipeline completo de análisis (preprocesamiento, localización
+        de los cilindros y clasificación) y escribe los resultados en la base de datos.
         Al correr en un proceso separado, el servidor web sigue respondiendo a
         otras peticiones mientras el video se procesa.
 
@@ -116,13 +116,13 @@ El pipeline recibe un video del FST, analiza solo sus primeros 300 segundos y pr
 como salida los tiempos totales de cada conducta por espécimen y el desglose por minuto. Sigue el patrón arquitectónico de
 tubería y filtro (\textit{pipe and filter}) \cite{sommerville2011}: cada módulo es
 un filtro discreto que transforma los datos y los pasa al siguiente. Está organizado
-en cinco módulos secuenciales: preprocesamiento, detección de ROIs, seguimiento,
+en cuatro módulos secuenciales: preprocesamiento, localización de los cilindros,
 clasificación de conducta y generación de resultados. La Figura~\ref{fig:pipeline}
 muestra el flujo completo con las tecnologías de cada módulo.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{figures/mermaid/pipeline}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/mermaid/pipeline}
 \caption{Diagrama de flujo del pipeline de análisis conductual [autoría propia].}
 \label{fig:pipeline}
 \end{figure}
@@ -130,42 +130,28 @@ muestra el flujo completo con las tecnologías de cada módulo.
 \subsection{Módulo 1: Preprocesamiento}
 
 El preprocesamiento usa \textbf{OpenCV VideoCapture} para decodificar el video
-cuadro a cuadro. Si el contraste promedio cae por debajo del umbral mínimo, se
+cuadro a cuadro. Primero alinea cada cuadro contra uno de referencia
+(\textbf{registro de cámara}), para que un movimiento de la cámara no se confunda
+con movimiento del espécimen. Después construye un \textbf{modelo de fondo}: la
+imagen del aparato sin especímenes. Si el contraste promedio cae por debajo del umbral mínimo, se
 aplica \textbf{CLAHE} (\textit{Contrast Limited Adaptive Histogram Equalization})
 \cite{bradski2000} para normalizarlo. Si tras la corrección no se logran encontrar
 los cilindros, el pipeline se detiene y genera un reporte de diagnóstico (ver RN-11).
 
-\subsection{Módulo 2: Detección de ROIs}
+\subsection{Módulo 2: Localización de los cilindros}
 
-El sistema detecta los cilindros en el encuadre usando contornos sobre los primeros
-cuadros del video tras construir un modelo de fondo. Para cada cilindro calcula una
+Sobre el modelo de fondo, el sistema localiza los bordes del recipiente, la
+\textbf{línea de agua} y el suelo, y separa los cilindros midiendo dónde hay
+movimiento dentro de la franja de agua. Para cada cilindro calcula una
 \textbf{región de interés} (ROI) que delimita el área de análisis de cada espécimen.
-La \textbf{línea de agua} de cada cilindro se estima y estabiliza con un filtro de
-\textbf{media móvil exponencial} (EMA) para reducir el efecto de reflejos y
-variaciones de iluminación entre cuadros.
+Ninguna medida se escribe a mano: el sistema las deduce de cada video, así que
+funciona con grabaciones de distintos días, encuadres y resoluciones.
 
-\subsection{Módulo 3: Seguimiento}
+Cada cilindro contiene un solo espécimen, así que no hace falta seguirlo de un
+cuadro a otro con un algoritmo de seguimiento: lo que se mueve dentro de un
+cilindro es su espécimen.
 
-Dentro de cada ROI, el seguimiento combina detección y asociación temporal:
-
-\begin{enumerate}
-  \item \textbf{YOLOv8 + ByteTrack} \cite{zhang2022_bytetrack}: el detector
-        YOLOv8 localiza al espécimen en cada cuadro usando el modelo
-        \texttt{rat.pt}; ByteTrack asocia las detecciones entre cuadros
-        consecutivos mediante IoU con filtro de Kalman, manteniendo la
-        trayectoria durante oclusiones breves.
-  \item \textbf{Asignación a ROIs por IoU máximo}: cada trayectoria activa
-        se asigna a la ROI con la que tiene mayor solapamiento, separando
-        espacialmente los especímenes aunque sus trayectorias se crucen.
-  \item \textbf{Validación de consistencia}: comprueba que las posiciones
-        predichas sean coherentes con el cuadro anterior (sin saltos abruptos
-        o cambios anómalos), descartando detecciones inconsistentes.
-  \item \textbf{Manejo de oclusiones}: cuando un espécimen desaparece
-        temporalmente de la cámara, conserva su identidad y posición estimada
-        hasta que vuelve a ser detectado dentro de su ROI.
-\end{enumerate}
-
-\subsection{Módulo 4: Clasificación de conducta}
+\subsection{Módulo 3: Clasificación de conducta}
 
 La clasificación trabaja sobre el cilindro de cada espécimen y se basa en
 aprendizaje supervisado. Se construye en dos partes: un clasificador sobre rasgos
@@ -231,9 +217,9 @@ TT-II, con precisión, \textit{recall} y F1 por conducta (ver OE-5 y RNF-02).
 Cuando el sistema registra un segundo como \textit{conducta activa}, los reportes
 la muestran como una cuarta columna (ver RN-13).
 
-\subsection{Módulo 5: Resultados}
+\subsection{Módulo 4: Resultados}
 
-Al finalizar el análisis, el pipeline produce tres salidas:
+Al finalizar el análisis, el pipeline produce cuatro salidas:
 
 \begin{itemize}
   \item \textbf{Tiempos por conducta}: segundos de nado activo, inmovilidad,
@@ -245,11 +231,10 @@ Al finalizar el análisis, el pipeline produce tres salidas:
         analizado, almacenada en \texttt{SEGUNDO}. Es la fuente de la pantalla de
         revisión y de \texttt{PRESENTA}.
   \item \textbf{Video anotado}: video original con
-        las cajas de seguimiento y etiqueta de conducta superpuestas,
+        el recuadro de cada cilindro y la etiqueta de conducta superpuestos,
         disponible para revisión visual del investigador.
-  \item \textbf{Datos de seguimiento}: trayectorias
-        y confianzas cuadro a cuadro, útiles para depuración y auditoría del
-        análisis.
+  \item \textbf{Medidas por cuadro}: las medidas del espécimen en cada
+        cuadro, útiles para depuración y auditoría del análisis.
 \end{itemize}
 
 \subsection{Ciclo de vida del análisis}
@@ -257,10 +242,10 @@ Al finalizar el análisis, el pipeline produce tres salidas:
 Cada análisis individual pasa por un conjunto fijo de estados (D-15),
 representado en el diagrama de estados de la Figura~\ref{fig:estados_analisis}.
 Al encolarse, el análisis inicia en \texttt{en cola}; cuando el Worker lo toma,
-pasa a \texttt{procesando} y avanza por las cuatro etapas del pipeline (D-16:
-preprocesamiento, detección, seguimiento, clasificación). Si no se puede abrir
+pasa a \texttt{procesando} y avanza por las tres etapas del pipeline (D-16:
+preprocesamiento, cilindros, clasificación). Si no se puede abrir
 el video o no se encuentran los cilindros (RN-11), el análisis termina en
-\texttt{error} y se genera el reporte de diagnóstico (D-23); si las cuatro
+\texttt{error} y se genera el reporte de diagnóstico (D-23); si las tres
 etapas terminan con éxito, termina en \texttt{completado}. No existe
 transición de regreso: el investigador no puede reiniciar ni cancelar un
 análisis en curso (RN-04).
@@ -315,9 +300,7 @@ cada video se procesa mediante un análisis que produce observaciones de conduct
 por espécimen (\textbf{OBSERVACION}, \textbf{SEGUNDO}, \textbf{INTERVALO},
 \textbf{PRESENTA}, \textbf{CONDUCTA}). Un usuario puede además ser \textbf{ADMINISTRADOR}, modelado
 como subtipo con permisos adicionales. Las entidades \textbf{REPORTE} y
-\textbf{NOTIFICACION} se derivan también del experimento, y
-\textbf{CONFIGURACION} agrupa los parámetros del pipeline que usa cada análisis,
-referenciando el \textbf{MODELO} entrenado que lo generó.
+\textbf{NOTIFICACION} se derivan también del experimento.
 
 \begin{sidewaysfigure}
 \centering
@@ -359,8 +342,8 @@ Las tablas están organizadas en cuatro grupos funcionales:
 
 \textbf{Experimentos y material de video.}
 \begin{itemize}
-  \item \textbf{EXPERIMENTO}: nombre, fecha y notas opcionales, con
-        referencia al usuario propietario. Todos los investigadores pueden
+  \item \textbf{EXPERIMENTO}: nombre único, fecha y notas opcionales, con
+        referencia al usuario propietario (ver RF-11). Todos los investigadores pueden
         consultar cualquier experimento del laboratorio (ver RN-08).
 
   \item \textbf{GRUPO}: cada grupo experimental (control, referencia o
@@ -375,24 +358,23 @@ Las tablas están organizadas en cuatro grupos funcionales:
         cilindro dentro de la tanda.
 
   \item \textbf{VIDEO}: uno o dos videos por tanda (Día~1 y/o Día~2), con
-        ruta de almacenamiento, duración y fecha de carga.
+        ruta de almacenamiento, duración y fecha de carga. La ruta queda vacía
+        cuando el archivo ya se borró (ver RF-25, RN-05); la fila se conserva
+        porque los resultados la referencian.
 \end{itemize}
 
 \textbf{Análisis.}
 \begin{itemize}
-  \item \textbf{MODELO}: identifica cada versión entrenada del clasificador
-        por su hash SHA-256 (ver D-14) y su nombre.
-
-  \item \textbf{CONFIGURACION}: parámetros del pipeline usados en una corrida
-        (versión, umbrales de confianza, inmovilidad, desplazamiento y
-        aspecto de trepada), referenciando el modelo con el que se generó.
-        Permite reproducir o comparar resultados entre versiones.
-
-  \item \textbf{ANALISIS}: ejecución del pipeline sobre un video con una
-        configuración específica. Registra estado, etapa actual, nivel de
-        clasificación (preciso o agrupado) y, cuando falla, la ruta al reporte de
-        diagnóstico (ver D-23).
+  \item \textbf{ANALISIS}: ejecución del pipeline sobre un video. Registra
+        estado, etapa actual, porcentaje de avance (que consulta la pantalla de
+        progreso, RF-15), nivel de clasificación (preciso o agrupado), la
+        ruta al archivo con los recuadros de los tubos que usa la pantalla de
+        revisión y, cuando falla, la ruta al reporte de diagnóstico (ver D-23).
 \end{itemize}
+
+El modelo del clasificador y el umbral de confianza (0.80) no se guardan en la
+base de datos: ningún requisito permite cambiarlos, así que son constantes del
+pipeline y se documentan en el Capítulo~6.
 
 \textbf{Resultados, reportes y notificaciones.}
 \begin{itemize}
@@ -449,9 +431,9 @@ estuviese copiado en las tablas de videos y de resultados, una actualización pa
 produciría registros con datos contradictorios. Normalizar también hace que el
 esquema sea más fácil de mantener cuando el sistema evolucione durante TT-II.
 
-Las diecisiete relaciones del sistema son: \texttt{USUARIO}, \texttt{ADMINISTRADOR},
+Las quince relaciones del sistema son: \texttt{USUARIO}, \texttt{ADMINISTRADOR},
 \texttt{EXPERIMENTO}, \texttt{GRUPO}, \texttt{TANDA}, \texttt{ESPECIMEN},
-\texttt{VIDEO}, \texttt{MODELO}, \texttt{CONFIGURACION}, \texttt{ANALISIS},
+\texttt{VIDEO}, \texttt{ANALISIS},
 \texttt{OBSERVACION}, \texttt{SEGUNDO}, \texttt{INTERVALO}, \texttt{CONDUCTA},
 \texttt{PRESENTA}, \texttt{REPORTE} y \texttt{NOTIFICACION}. Las subsecciones siguientes explican
 cómo se aplicó cada forma normal sobre este conjunto.
@@ -462,17 +444,15 @@ La 1FN exige que cada columna almacene un único valor atómico ---sin listas,
 conjuntos ni estructuras anidadas--- y que cada tabla tenga una clave primaria que
 identifique cada fila de forma única \cite{codd1970}.
 
-En el diseño inicial, los parámetros del pipeline podrían haberse guardado como un
-campo JSON dentro de \texttt{ANALISIS}: un solo campo \texttt{parametros} con el
-nombre del modelo, los umbrales y la versión del pipeline. Eso viola la 1FN porque
-un campo único contendría múltiples valores heterogéneos. Esos parámetros se
-extrajeron a \texttt{CONFIGURACION}, donde cada uno ocupa su propia columna:
-\texttt{versionPipeline}, \texttt{umbralConfianza}, \texttt{segundosOmitir},
-\texttt{umbralInmovil}, \texttt{umbralDesplazamiento}, \texttt{umbralStdPosicion}
-y \texttt{umbralAspectoTrepada}. Así es posible filtrar o comparar ejecuciones
-por umbral o por versión sin parsear texto.
+En el diseño inicial, las etiquetas de un espécimen podrían haberse guardado como
+una lista dentro de \texttt{OBSERVACION}: un solo campo con las 300 conductas del
+video, una por segundo. Eso viola la 1FN porque un campo único contendría cientos
+de valores. Esas etiquetas se extrajeron a \texttt{SEGUNDO}, donde cada segundo
+ocupa su propia fila con su conducta, su propuesta y su origen. Así
+es posible consultar o corregir un segundo en la revisión sin reescribir la lista
+completa ni parsear texto.
 
-Los resultados de conducta siguen el mismo principio, pero evitando además una
+Los totales por minuto siguen el mismo principio, pero evitando además una
 columna por conducta: en vez de columnas fijas para nado, inmovilidad y
 escalamiento, cada combinación de intervalo y conducta es una fila en
 \texttt{PRESENTA}, con su propia columna \texttt{segundos}. Esto evitó tener que
@@ -510,19 +490,21 @@ partes.
 Una tabla en 3FN cumple la 2FN y no tiene dependencias transitivas: ninguna columna
 no clave depende de otra columna no clave \cite{elmasri2015}.
 
-El caso principal está en \texttt{CONFIGURACION}. En una versión temprana del
-diseño, esta tabla guardaba directamente \texttt{hashModelo} y
-\texttt{nombreModelo} junto con los umbrales del pipeline. Eso genera una
-dependencia transitiva: \texttt{nombreModelo} depende de \texttt{hashModelo}, no
-de \texttt{idConfig}, y \texttt{hashModelo} no es clave candidata de
-\texttt{CONFIGURACION}, porque el mismo modelo entrenado se reutiliza en varias
-configuraciones con distintos umbrales. Actualizar el nombre de un modelo sin
-tocar cada configuración que lo usa dejaría copias desactualizadas.
+El caso principal está en la cadena \texttt{GRUPO}--\texttt{TANDA}--\texttt{ESPECIMEN}.
+Un diseño con una fila por espécimen, como una hoja de cálculo, guardaría en
+\texttt{ESPECIMEN} el tipo y el tratamiento de su grupo junto con su tanda. Eso
+genera una dependencia transitiva: \texttt{tipo} y \texttt{tratamiento} dependen
+de \texttt{idTanda} (a través del grupo de esa tanda), no de
+\texttt{idEspecimen}, y \texttt{idTanda} no es clave candidata de
+\texttt{ESPECIMEN}, porque en una tanda hay de dos a cuatro especímenes. Corregir
+el tratamiento de un grupo obligaría a tocar cada uno de sus especímenes, y uno que
+se quedara sin corregir dejaría al grupo con dos tratamientos a la vez.
 
-La solución fue extraer \texttt{MODELO} (\texttt{hashModelo}, \texttt{nombreModelo})
-como tabla propia. \texttt{CONFIGURACION} referencia el modelo por la clave
-foránea \texttt{hashModelo}, sin repetir su nombre. Si el modelo cambia, la
-configuración simplemente apunta a otro hash; el nombre vive en un solo lugar.
+La solución fue que cada dato viva en la tabla de la que depende:
+\texttt{tipo} y \texttt{tratamiento} en \texttt{GRUPO}, el grupo en
+\texttt{TANDA} (\texttt{idGrupo}) y la tanda en \texttt{ESPECIMEN}
+(\texttt{idTanda}). El tratamiento de un espécimen se obtiene siguiendo las
+llaves foráneas y se guarda en un solo lugar.
 
 Un segundo caso es \texttt{USUARIO}. El correo identifica al usuario en la
 práctica, pero la clave primaria es \texttt{idInstitucional} (boleta o número de
@@ -541,18 +523,19 @@ clave completa \cite{elmasri2015}. Una tabla puede cumplir 3FN y aun así violar
 FNBC cuando tiene más de una clave candidata y alguno de sus determinantes no
 coincide con ninguna de ellas.
 
-La misma separación de \texttt{MODELO} que resolvió la dependencia transitiva de
-la 3FN también aseguraba la FNBC: \texttt{hashModelo} era un determinante de
-\texttt{CONFIGURACION} que no era clave candidata de esa tabla. Al extraerlo,
-\texttt{CONFIGURACION} se queda solo con determinantes que sí son claves
-candidatas: su clave primaria \texttt{idConfig} y su clave alterna, la
-combinación de las ocho columnas de configuración.
+La misma separación que resolvió la dependencia transitiva de la 3FN también
+asegura la FNBC: con el tratamiento dentro de \texttt{ESPECIMEN},
+\texttt{idTanda} sería un determinante de esa tabla que no es clave candidata. Al
+llevar el tipo y el tratamiento a \texttt{GRUPO}, a \texttt{ESPECIMEN} solo le
+quedan determinantes que sí son claves candidatas: su clave primaria
+\texttt{idEspecimen} y su clave alterna (\texttt{idTanda},
+\texttt{numeroCilindro}).
 
 El resto de las relaciones se revisó una por una: en cada una, los únicos
 determinantes son su clave primaria y, cuando la tiene, su clave alterna. Por
 ejemplo, \texttt{GRUPO} tiene como determinantes \texttt{idGrupo} (primaria) y la
 combinación (\texttt{idExperimento}, \texttt{etiqueta}) (alterna). Con eso, las
-diecisiete relaciones del esquema lógico cumplen FNBC.
+quince relaciones del esquema lógico cumplen FNBC.
 
 Hay una excepción deliberada en el esquema físico: la tabla \texttt{ESPECIMEN}
 repite la columna \texttt{idGrupo}, que ya se obtiene a través de \texttt{TANDA}
@@ -581,13 +564,13 @@ las tablas afectadas y la decisión de diseño concreta en cada caso.
 \hline
 1FN &
   Valores atómicos; sin campos JSON ni listas en el esquema &
-  \texttt{CONFIGURACION}, \texttt{PRESENTA} &
-  Cada parámetro del pipeline y cada conducta por intervalo ocupa su propia
-  columna/fila \\
+  \texttt{SEGUNDO}, \texttt{PRESENTA} &
+  Cada segundo de un espécimen y cada conducta por intervalo ocupa su propia
+  fila \\
 \hline
 1FN &
   Clave primaria que identifica cada fila de forma única &
-  Las 17 relaciones &
+  Las 15 relaciones &
   Clave subrogada autogenerada, salvo \texttt{USUARIO}/\texttt{ADMINISTRADOR}
   (\texttt{idInstitucional}), \texttt{CONDUCTA} (\texttt{nombre}) y
   \texttt{SEGUNDO} (clave compuesta \texttt{idObservacion}, \texttt{segundo}) \\
@@ -602,9 +585,9 @@ las tablas afectadas y la decisión de diseño concreta en cada caso.
 \hline
 3FN &
   Eliminación de dependencias transitivas entre columnas no clave &
-  \texttt{CONFIGURACION}, \texttt{MODELO} &
-  \texttt{nombreModelo} se extrae a \texttt{MODELO}; \texttt{CONFIGURACION}
-  solo referencia \texttt{hashModelo} \\
+  \texttt{GRUPO}, \texttt{TANDA}, \texttt{ESPECIMEN} &
+  \texttt{tipo} y \texttt{tratamiento} viven en \texttt{GRUPO};
+  \texttt{ESPECIMEN} solo referencia su tanda \\
 \hline
 3FN &
   Clave sustituta en lugar de dato de negocio como clave primaria &
@@ -614,9 +597,9 @@ las tablas afectadas y la decisión de diseño concreta en cada caso.
 \hline
 FNBC &
   Todo determinante es clave candidata &
-  Las 17 relaciones &
-  Verificado relación por relación; \texttt{MODELO}/\texttt{CONFIGURACION} era
-  el único caso que requería corrección \\
+  Las 15 relaciones &
+  Verificado relación por relación; en el esquema físico, \texttt{ESPECIMEN}
+  repite \texttt{idGrupo} a propósito (D-04) \\
 \hline
 \end{tabular}
 \end{table}
@@ -1415,7 +1398,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El sistema registra automáticamente un análisis en cola al completar la carga y validación del video, sin intervención del investigador (ver RN-04).} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Una vez almacenado el video, el sistema crea un registro en la tabla \texttt{ANALISIS} con estado «en cola», el identificador del video y la configuración del pipeline a usar. El \textit{Worker} tomará la tarea en su siguiente ciclo de \textit{polling}.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Una vez almacenado el video, el sistema crea un registro en la tabla \texttt{ANALISIS} con estado «en cola», y el identificador del video. El \textit{Worker} tomará la tarea en su siguiente ciclo de \textit{polling}.} \\
 \hline
 \end{tabular}
 
@@ -1428,7 +1411,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 1 & Sistema & Confirma que el video ha sido almacenado exitosamente en el volumen compartido. \\
 \hline
-2 & Sistema & Crea un registro en la tabla \texttt{ANALISIS} con: identificador del video, configuración del pipeline, estado «en cola» y marca de tiempo. \\
+2 & Sistema & Crea un registro en la tabla \texttt{ANALISIS} con: identificador del video, estado «en cola» y marca de tiempo. \\
 \hline
 3 & Sistema & El estado «en cola» queda disponible para que el \textit{dashboard} lo muestre agregado por experimento (ver RF-23). El experimento no tiene una columna de estado propia: se calcula a partir de los análisis de sus tandas. \\
 \hline
@@ -1576,7 +1559,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pipeline ejecutado por el \textit{Worker}; estado visible en pantalla del investigador; al completarse exitosamente, acceso a resultados habilitado; ante error, descarga de reporte de diagnóstico habilitada.} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} ejecuta el pipeline de análisis conductual de forma autónoma en cuatro etapas secuenciales. El investigador observa el progreso en tiempo real sin poder intervenir en la ejecución (ver RN-04).} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} ejecuta el pipeline de análisis conductual de forma autónoma en tres etapas secuenciales. El investigador observa el progreso en tiempo real sin poder intervenir en la ejecución (ver RN-04).} \\
 \hline
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} toma la tarea de la cola y ejecuta el pipeline completo. El frontend consulta periódicamente el estado y muestra la etapa activa y el porcentaje de avance. Al completarse, el \textit{Worker} registra los resultados y el sistema habilita el acceso a la pantalla de resultados. Si el pipeline falla, el \textit{Worker} genera el reporte de diagnóstico PDF.} \\
 \hline
@@ -1593,19 +1576,17 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 2 & \textit{Worker} & Recupera la tarea de la cola de análisis mediante \textit{polling} a la tabla \texttt{ANALISIS}. \\
 \hline
-3 & \textit{Worker} & Ejecuta la 1.ª etapa: preprocesamiento del video (normalización de fotogramas). \\
+3 & \textit{Worker} & Ejecuta la 1.ª etapa: preprocesamiento del video (alineación de la cámara y modelo de fondo). \\
 \hline
-4 & \textit{Worker} & Ejecuta la 2.ª etapa: detección de los cilindros. \\
+4 & \textit{Worker} & Ejecuta la 2.ª etapa: localización de los cilindros. \\
 \hline
-5 & \textit{Worker} & Ejecuta la 3.ª etapa: rastreo de especímenes cuadro a cuadro. \\
+5 & \textit{Worker} & Ejecuta la 3.ª etapa: clasificación de conductas (nado activo, inmovilidad, escalamiento). \\
 \hline
-6 & \textit{Worker} & Ejecuta la 4.ª etapa: clasificación de conductas (nado activo, inmovilidad, escalamiento). \\
+6 & Sistema & Actualiza en tiempo real la barra de porcentaje y la etapa activa en la pantalla del investigador. \\
 \hline
-7 & Sistema & Actualiza en tiempo real la barra de porcentaje y la etapa activa en la pantalla del investigador. \\
+7 & \textit{Worker} & Registra los resultados en la base de datos al completar el pipeline. \\
 \hline
-8 & \textit{Worker} & Registra los resultados en la base de datos al completar el pipeline. \\
-\hline
-9 & Sistema & Notifica al investigador y habilita el acceso a la pantalla de resultados. \\
+8 & Sistema & Notifica al investigador y habilita el acceso a la pantalla de resultados. \\
 \hline
 \end{tabular}
 
@@ -2526,12 +2507,10 @@ permisos adicionales para gestionar cuentas y monitorear el sistema.
 
 El pipeline de análisis se modela con dos clases de control: \textbf{Worker}, que
 procesa la cola y elimina videos expirados, y \textbf{PipelineAnalisis}, que
-ejecuta las cuatro etapas del análisis (preprocesamiento, detección, seguimiento
-y clasificación) sobre cada \textbf{Video} y actualiza el \textbf{Analisis}
-correspondiente. Cada análisis referencia una \textbf{Configuracion}, que a su
-vez referencia el \textbf{Modelo} entrenado usado en esa corrida, de modo que los
-resultados sean reproducibles aunque el modelo o los umbrales cambien en
-versiones futuras.
+ejecuta las tres etapas del análisis (preprocesamiento, localización de los
+cilindros y clasificación) sobre cada \textbf{Video} y actualiza el \textbf{Analisis}
+correspondiente. El modelo del clasificador y el umbral de confianza no son
+clases del diagrama: son constantes del pipeline y no se registran por análisis.
 
 Los resultados de conducta se modelan con \textbf{Observacion} (un espécimen
 dentro de un video), \textbf{Intervalo} (cada minuto analizado) y la clase
@@ -2713,8 +2692,8 @@ nuevas más adelante sin repetir los datos del experimento.
 
 \subsection{Progreso del análisis}
 
-Muestra el estado actual del pipeline con las cuatro etapas (preprocesamiento,
-detección de cilindros, seguimiento y clasificación) y una barra de progreso en
+Muestra el estado actual del pipeline con las tres etapas (preprocesamiento,
+localización de los cilindros y clasificación) y una barra de progreso en
 porcentaje. Si ocurre un error, muestra la descripción, según la etapa en que se
 detuvo, y el botón de descarga del reporte de diagnóstico (RF-16). Los errores definidos son dos: el video
 no se pudo abrir o no se encontraron los cilindros. Cuando un análisis se completa,

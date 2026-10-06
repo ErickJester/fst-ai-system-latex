@@ -50,14 +50,12 @@ ListoParaEjecucion --> Encolado : Investigador presiona\n"Iniciar Análisis"
 state "Motor de Análisis  (Worker Asíncrono)" as Procesamiento <<procesamiento>> {
   state Encolado
   state "Preprocesamiento"              as Preproc
-  state "Detección de ROIs"             as ROIs
-  state "Rastreo  (YOLOv8 + ByteTrack)" as Tracking
+  state "Localización de los cilindros" as Cilindros
   state "Clasificación de Conducta"     as Clasificacion
 
   Encolado      --> Preproc       : worker toma el trabajo
-  Preproc       --> ROIs          : CLAHE aplicado
-  ROIs          --> Tracking      : cilindros detectados
-  Tracking      --> Clasificacion : tracks y coordenadas\nlistas
+  Preproc       --> Cilindros     : cámara alineada y\nmodelo de fondo listo
+  Cilindros     --> Clasificacion : cilindros localizados
 }
 
 ' ========= FALLO ===========================================================

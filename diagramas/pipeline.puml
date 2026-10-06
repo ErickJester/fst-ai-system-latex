@@ -1,0 +1,77 @@
+@startuml pipeline
+' ================================================================
+'  Pipeline de analisis conductual — FST
+'  TT 2026-B066 | ESCOM-IPN
+' ----------------------------------------------------------------
+'  Reemplaza a figures/mermaid/pipeline.png (Mermaid sin fuente en
+'  el repo), que mostraba cinco modulos con YOLOv8 + ByteTrack y
+'  ResNet-18/50 con respaldo por geometria. Se rehace desde el texto
+'  vigente del cap. 5 (Modulos 1-4) y el etiquetador real (fst_auto):
+'
+'  - Sin modulo de seguimiento (CLA-02, 5-oct): un especimen por
+'    cilindro, asi que no hay tracker. Las etapas son las de D-16
+'    revisado: preprocesamiento, cilindros, clasificacion.
+'  - Clasificacion: rasgos + gradient boosting con la regla de tres
+'    pasos y la ventana deslizante de 4 s. La R(2+1)D-18 aparece
+'    como candidata en evaluacion; cual queda se decide en TT-II.
+'  - CLAHE se conserva porque el cap. 5 aun lo describe (pendiente
+'    de confirmar contra fst_auto, CLA-04).
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/pipeline.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam dpi 200
+skinparam ActivityBackgroundColor #FFFEF2
+skinparam PartitionBackgroundColor #FBFBF4
+
+start
+:Video subido por el usuario\n(solo los primeros 300 s);
+
+partition "1. Preprocesamiento" {
+  :Lee los cuadros del video;
+  :Alinea cada cuadro contra uno de referencia\n(registro de cámara);
+  :Construye el modelo de fondo\n(el aparato sin especímenes);
+  :Corrige el contraste si hace falta (CLAHE);
+}
+
+partition "2. Localización de los cilindros" {
+  :Localiza los bordes del recipiente,\nla línea de agua y el suelo;
+  if (¿Se hallaron los cilindros?) then (sí)
+    :Calcula la región de interés\nde cada cilindro;
+  else (no)
+    :Genera el reporte de diagnóstico\ny marca el análisis con error;
+    stop
+  endif
+}
+
+partition "3. Clasificación de conducta" {
+  :Separa al espécimen del fondo\ndentro de su cilindro;
+  :Mide quince rasgos de movimiento,\npostura y trayectoria;
+  :Para cada segundo, toma una ventana de 4 s\ncentrada en él y estima la probabilidad\nde cada conducta;
+  note right
+    Candidata en evaluación: red
+    R(2+1)D-18 sobre clips de
+    16 cuadros. La elección entre
+    ambas se hace en TT-II con F1
+    por conducta.
+  end note
+  if (¿Una conducta supera el umbral de confianza?) then (sí)
+    :Asigna esa conducta;
+  elseif (¿Nado y escalamiento juntos lo superan?) then (sí)
+    :Asigna conducta activa;
+  else (no)
+    :Asigna la más probable\ny la marca como dudosa;
+  endif
+}
+
+partition "4. Resultados" {
+  :Guarda la conducta de cada segundo,\nlos segundos por conducta de cada minuto,\nel video anotado y las medidas por cuadro;
+}
+stop
+
+@enduml

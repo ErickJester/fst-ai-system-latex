@@ -129,7 +129,7 @@ datos y del volumen**.
 **Lo que hace el worker (tú lo simulas con `worker_fake`):**
 1. Cada cierto tiempo busca un `ANALISIS` con `estado = 'en cola'`.
 2. Lo pasa a `procesando` y va actualizando `etapa` en este orden:
-   `preprocesamiento`, `deteccion`, `seguimiento`, `clasificacion`.
+   `preprocesamiento`, `cilindros`, `clasificacion`.
 3. Analiza **solo los primeros 300 segundos** del video; si dura más, descarta el resto.
    Ya no existe un umbral de confianza de detección. Si no puede abrir el video o no
    encuentra los tubos: genera el PDF de diagnóstico, llena `rutaDiagnostico`, pasa a
@@ -167,11 +167,10 @@ stateDiagram-v2
   en_cola --> procesando: el worker toma la tarea
   state procesando {
     [*] --> preprocesamiento
-    preprocesamiento --> deteccion
-    deteccion --> seguimiento
-    seguimiento --> clasificacion
+    preprocesamiento --> cilindros
+    cilindros --> clasificacion
   }
-  deteccion --> error: no se pudo abrir el video o no se hallaron los tubos
+  cilindros --> error: no se pudo abrir el video o no se hallaron los tubos
   clasificacion --> completado
   completado --> [*]
   error --> [*]
@@ -328,7 +327,7 @@ nunca se muestra ese nombre: se muestra "Espécimen N".
 | `formato_reporte` | `CSV`, `XLSX`, `PDF` |
 | `tipo_notificacion` | `analisis completado`, `error del pipeline`, `alerta de disco` |
 | `estado_analisis` | `en cola`, `procesando`, `completado`, `error` |
-| `etapa_analisis` | `preprocesamiento`, `deteccion`, `seguimiento`, `clasificacion` |
+| `etapa_analisis` | `preprocesamiento`, `cilindros`, `clasificacion` |
 | `nivel_clasif_analisis` | `preciso`, `agrupado` |
 | `origen_segundo` | `maquina`, `humano_confirma`, `humano_corrige`, `humano_duda`, `sin_revisar`, `humano_ciego` |
 
@@ -444,8 +443,8 @@ Estos nombres los propone este documento; confírmalos con el usuario:
 | R-14 | Solo se puede revisar un análisis en estado `completado`. Al revisar, el usuario corrige las etiquetas segundo a segundo; cada corrección queda en `SEGUNDO` con `origen` `humano_confirma`, `humano_corrige` o `humano_duda`, y al guardar el backend **recalcula `INTERVALO` y `PRESENTA`** de esos especímenes dentro de la misma transacción. La etiqueta original de la máquina nunca se pierde: queda en `propuesta`. |
 
 Otras decisiones tomadas:
-- **Progreso:** el backend calcula el porcentaje por análisis como **25 % fijo por
-  etapa**. Es un cálculo del backend, no un dato guardado.
+- **Progreso:** el backend calcula el porcentaje por análisis como **un tercio fijo por
+  etapa** (33 %, 67 %, 100 %). Es un cálculo del backend, no un dato guardado.
 - **Comparación entre grupos (solo Día 2):** se **promedia** por grupo (no se suma), para
   que el tamaño del grupo no distorsione. Los especímenes sin resultado se marcan como
   dato faltante. Si un grupo mezcla niveles `preciso` y `agrupado`, se separan los
@@ -575,9 +574,9 @@ intervención humana (sección 11, punto 14).
 ```
 +-------------------------------------------------------------+
 | Experimento A / Control / Tanda A / Día 2                    |
-| Etapas:  [x] Preprocesamiento  [x] Detección                 |
-|          [>] Seguimiento       [ ] Clasificación             |
-| [==============>              ] 50 %                          |
+| Etapas:  [x] Preprocesamiento  [>] Cilindros                 |
+|          [ ] Clasificación                                   |
+| [===================>         ] 67 %                          |
 |-------------------------------------------------------------|
 | (si hay error)                                                |
 | No se pudieron encontrar los tubos en el video                |
@@ -586,7 +585,7 @@ intervención humana (sección 11, punto 14).
 ```
 
 - Consulta el backend cada **3 a 5 segundos** mientras haya análisis en cola o procesando.
-- Una barra por video. Cada etapa vale 25 %.
+- Una barra por video. Cada etapa vale un tercio.
 - **Sin botón de cancelar ni de reiniciar** (R-04). El análisis sigue aunque se cierre la
   pestaña.
 - En error: el mensaje se **arma a partir de `etapa`** del análisis (no hay columna de
@@ -755,7 +754,7 @@ sequenceDiagram
     UI->>API: estado de los análisis del experimento
     API->>DB: análisis vía grupos, tandas y videos
     DB-->>API: estado y etapa de cada uno
-    API->>API: porcentaje = 25 % fijo por etapa
+    API->>API: porcentaje = un tercio fijo por etapa
     API-->>UI: estado, etapa y porcentaje
     UI-->>I: actualiza barras
   end
@@ -1104,7 +1103,7 @@ package "Servicios" as SERV {
   [UserService\ncuentas, perfil, desactivar] as s_user
   [ExperimentService\nexperimentos, grupos, tandas, videos] as s_exp
   [StorageService\nguardar, leer y borrar archivos] as s_sto
-  [ProgressService\nporcentaje por etapa (25 %)] as s_prog
+  [ProgressService\nporcentaje por etapa (un tercio)] as s_prog
   [ResultService\ntotales, desglose, comparaciones] as s_res
   [ReportService\nCSV, XLSX, PDF y vigencia] as s_rep
   [NotificationService] as s_not
@@ -1190,7 +1189,7 @@ skinparam arrow {
 '   formato_reporte        IN ('CSV','XLSX','PDF')
 '   tipo_notificacion      IN ('analisis completado','error del pipeline','alerta de disco')
 '   estado_analisis        IN ('en cola','procesando','completado','error')
-'   etapa_analisis         IN ('preprocesamiento','deteccion','seguimiento','clasificacion')
+'   etapa_analisis         IN ('preprocesamiento','cilindros','clasificacion')
 '   nivel_clasif_analisis  IN ('preciso','agrupado')
 '   origen_segundo         IN ('maquina','humano_confirma','humano_corrige','humano_duda','sin_revisar','humano_ciego')
 ' Todas las llaves foraneas: ON UPDATE NO ACTION ON DELETE NO ACTION.
@@ -1510,7 +1509,6 @@ package P3_Pipeline_de_analisis_conductual {
     -UMBRAL_DECISION : Float = 0.80
     +preprocesarVideo(video) : void
     +detectarCilindros() : List<ROI>
-    +rastrearEspecimenes(rois) : void
     +clasificarConducta(especimen, frame) : String
     +generarReporte(experimento, tipo) : Reporte
     +actualizarProgreso(idAnalisis, pct, etapa) : void
@@ -1630,13 +1628,12 @@ skinparam shadowing false
 [*] --> en_cola : se validó y almacenó\nel video
 state procesando {
   [*] --> preprocesamiento
-  preprocesamiento --> deteccion
-  deteccion --> seguimiento
-  seguimiento --> clasificacion
+  preprocesamiento --> cilindros
+  cilindros --> clasificacion
 }
 en_cola --> procesando : el Worker tomó la tarea\n(polling)
-deteccion --> error : [no se pudo abrir el video\no no se hallaron los tubos]\nse generó el reporte de\ndiagnostico
-clasificacion --> completado : se completaron las\ncuatro etapas
+cilindros --> error : [no se pudo abrir el video\no no se hallaron los tubos]\nse generó el reporte de\ndiagnostico
+clasificacion --> completado : se completaron las\ntres etapas
 completado --> [*]
 error --> [*]
 @enduml
@@ -1783,8 +1780,7 @@ actor ":Worker:\n<<system>>" as WRK #LightYellow
 rectangle "Plataforma Web FST - Paquete 3" {
   usecase "Ejecutar pipeline de analisis" as UC30
   usecase "Preprocesar video" as UC31
-  usecase "Detectar cilindros" as UC32
-  usecase "Rastrear especimenes" as UC33
+  usecase "Localizar cilindros" as UC32
   usecase "Clasificar conducta" as UC34
   usecase "Monitorear progreso" as UC35
   usecase "Reportar error de pipeline" as UC36
@@ -1793,10 +1789,8 @@ WRK --> UC30
 INV --> UC35
 UC30 ..> UC31 : <<include>>
 UC30 ..> UC32 : <<include>>
-UC30 ..> UC33 : <<include>>
 UC30 ..> UC34 : <<include>>
 UC36 ..> UC32 : <<extend>>\n[no se hallaron los tubos]
-UC36 ..> UC33 : <<extend>>\n[error de seguimiento]
 @enduml
 ```
 
@@ -2246,15 +2240,12 @@ w -> fs: lee el archivo de video de la tanda
 fs --> w: video listo para procesar
 
 w -> db: actualiza la etapa a "preprocesamiento"
-w -> w: mejora la calidad de imagen
+w -> w: alinea la cámara y construye el modelo de fondo
 
-w -> db: actualiza la etapa a "detección"
-w -> w: detecta los cilindros (solo los primeros 300 s del video)
+w -> db: actualiza la etapa a "cilindros"
+w -> w: localiza los cilindros y la línea de agua (solo los primeros 300 s del video)
 
 alt se hallaron los tubos
-  w -> db: actualiza la etapa a "seguimiento"
-  w -> w: rastrea a los especímenes\ncuadro a cuadro
-
   w -> db: actualiza la etapa a "clasificación"
   w -> w: clasifica la conducta de cada espécimen, segundo a segundo\n(nado, inmovilidad, escalamiento o conducta activa)
 
@@ -2295,7 +2286,7 @@ loop cada 3 a 5 segundos, mientras haya análisis en cola o procesando
   ui -> api: GET /experiments/{id}/status
   api -> db: busca los análisis de este experimento\n(vía sus grupos, tandas y videos)
   db --> api: cada análisis, con su estado y su etapa
-  api -> api: calcula el porcentaje de avance de cada uno\nsegún su etapa: 25 % fijo por etapa
+  api -> api: calcula el porcentaje de avance de cada uno\nsegún su etapa: un tercio fijo por etapa
   api --> ui: estado, etapa y porcentaje de cada análisis
   ui -> inv: actualiza la barra de progreso de cada video
 end
@@ -2631,7 +2622,7 @@ CREATE DOMAIN estado_analisis AS varchar(10)
   CHECK (VALUE IN ('en cola', 'procesando', 'completado', 'error'));
 
 CREATE DOMAIN etapa_analisis AS varchar(16)
-  CHECK (VALUE IN ('preprocesamiento', 'deteccion', 'seguimiento', 'clasificacion'));
+  CHECK (VALUE IN ('preprocesamiento', 'cilindros', 'clasificacion'));
 
 CREATE DOMAIN nivel_clasif_analisis AS varchar(8)
   CHECK (VALUE IN ('preciso', 'agrupado'));
@@ -3071,7 +3062,7 @@ CMD ["python", "worker_fake.py"]
 ```
 
 `worker_fake.py` implementa el contrato de la sección 4: cada pocos segundos toma un
-análisis `en cola` (con `FOR UPDATE SKIP LOCKED`), recorre las cuatro etapas con una pausa
+análisis `en cola` (con `FOR UPDATE SKIP LOCKED`), recorre las tres etapas con una pausa
 entre cada una, y termina en `completado` (escribiendo observaciones, intervalos y
 segundos inventados) o en `error` si el nombre del archivo contiene la palabra `falla`
 (para probar el camino de error).

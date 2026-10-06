@@ -88,7 +88,6 @@ package P3_Pipeline_de_analisis_conductual {
   class PipelineAnalisis <<control>> {
     +preprocesarVideo(video) : void
     +detectarCilindros() : List<ROI>
-    +rastrearEspecimenes(rois) : void
     +clasificarConducta(especimen, frame) : String
     +generarReporte(experimento, tipo) : Reporte
     +actualizarProgreso(idAnalisis, pct, etapa) : void
@@ -106,25 +105,10 @@ package P3_Pipeline_de_analisis_conductual {
     -id : Integer
     -estado : String
     -etapa : String
+    -progreso : Integer
     -nivelClasif : String
     -fechaAnalisis : DateTime
-  }
-
-  class Modelo {
-    -hashModelo : String
-    -nombreModelo : String
-  }
-
-  class Configuracion {
-    -id : Integer
-    -versionPipeline : Integer
-    -umbralConfianza : Float
-    -segundosOmitir : Float
-    -umbralInmovil : Float
-    -umbralDesplazamiento : Float
-    -umbralStdPosicion : Float
-    -umbralAspectoTrepada : Float
-    -fechaCreacion : DateTime
+    -rutaRecuadros : String
   }
 }
 
@@ -185,8 +169,6 @@ Tanda       "1" *--> "2..4" Especimen : aloja
 Tanda       "1" *--> "1..2" Video     : produce
 
 Analisis "1" --> "1" Video            : procesa
-Analisis "0..*" --> "1" Configuracion : usa
-Configuracion "0..*" --> "1" Modelo   : configura
 
 Worker ..> PipelineAnalisis : invoca
 Worker ..> Analisis         : procesa

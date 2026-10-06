@@ -13,10 +13,10 @@
 '
 '  Que cambia respecto del diagrama viejo, con fuente:
 '  - Participante "Pipeline IA" eliminado. El pipeline no es un
-'    componente aparte, es el propio Worker ejecutando sus cuatro
+'    componente aparte, es el propio Worker ejecutando sus tres
 '    etapas (CU-07, paso 2: "el Worker ejecuta el pipeline completo").
 '    Ademas evita el termino prohibido "IA" (CLAUDE.md, terminologia):
-'    las etapas de deteccion/seguimiento son vision por computadora,
+'    las etapas de preprocesamiento/cilindros son vision por computadora,
 '    la de clasificacion es aprendizaje supervisado.
 '  - "Rastrea a los animales" -> "rastrea a los especimenes"
 '    (terminologia obligatoria, CLAUDE.md).
@@ -38,8 +38,10 @@
 '    la capacidad del modelo activo (RN-13, F1 >= 85% por conducta) --
 '    esto no se calcula por video, es una propiedad conocida del
 '    modelo/configuracion en uso (idConfig), no una decision en vivo.
-'  - Los cuatro nombres de etapa vienen de D-16 (13-sep): preprocesa-
-'    miento, deteccion, seguimiento, clasificacion.
+'  - Los nombres de etapa vienen de D-16, revisado el 5-oct: preproce-
+'    samiento, cilindros, clasificacion. La etapa de seguimiento se
+'    quito porque el pipeline real no usa tracker (un especimen por
+'    cilindro).
 '  - Se agrega la eliminacion programada del video (RNF-08, 30 dias
 '    tras terminar el analisis) -- ya estaba en el diagrama viejo, se
 '    conserva igual porque sigue vigente.
@@ -67,15 +69,12 @@ w -> fs: lee el archivo de video de la tanda
 fs --> w: video listo para procesar
 
 w -> db: actualiza la etapa a "preprocesamiento"
-w -> w: mejora la calidad de imagen\n(normalización de fotogramas)
+w -> w: alinea la cámara y construye el modelo de fondo
 
-w -> db: actualiza la etapa a "detección"
-w -> w: detecta los cilindros\n(solo los primeros 300 s del video)
+w -> db: actualiza la etapa a "cilindros"
+w -> w: localiza los cilindros y la línea de agua\n(solo los primeros 300 s del video)
 
 alt se hallaron los tubos
-  w -> db: actualiza la etapa a "seguimiento"
-  w -> w: rastrea a los especímenes\ncuadro a cuadro
-
   w -> db: actualiza la etapa a "clasificación"
   w -> w: clasifica la conducta de cada espécimen, segundo a segundo\n(nado, inmovilidad, escalamiento o conducta activa)
 

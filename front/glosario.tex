@@ -59,13 +59,8 @@
 
   \textbf{Bounding box}
   & (Caja delimitadora.) Rectángulo mínimo que encierra a un objeto detectado
-    en una imagen. El clasificador ResNet recibe el recorte de imagen definido
-    por el bounding box de la rata, normalizado a $224\times224$ píxeles. \\[5pt]
-
-  \textbf{ByteTrack}
-  & Algoritmo de seguimiento multi-objeto que asocia detecciones entre fotogramas
-    usando IoU y un filtro de Kalman. Se utiliza junto con YOLOv8 para mantener
-    la identidad de cada rata a lo largo del video. \\[5pt]
+    en una imagen. En el sistema se obtiene del contorno del espécimen dentro de
+    su cilindro. \\[5pt]
 
   % ── C ──────────────────────────────────────────────────────────────
   \textbf{CLAHE}
@@ -78,7 +73,8 @@
   & (\textit{Convolutional Neural Network} / Red Neuronal Convolucional.)
     Arquitectura de red profunda que aplica filtros convolucionales para extraer
     características espaciales jerárquicas de las imágenes. El clasificador de
-    conductas del sistema es una CNN (ResNet-18) reentrenada con datos del FST. \\[5pt]
+    candidatas para el clasificador de conductas es una CNN espacio-temporal
+    (R(2+1)D-18) reentrenada con clips del FST. \\[5pt]
 
   \textbf{Cola de tareas}
   & Estructura de datos FIFO que desacopla la recepción de solicitudes de análisis
@@ -107,11 +103,6 @@
     en respuesta al estrés. Sus niveles plasmáticos se elevan significativamente
     durante el FST y constituyen un biomarcador del eje hipotálamo-hipófisis-adrenal. \\[5pt]
 
-  \textbf{CSRT}
-  & (\textit{Channel and Spatial Reliability Tracker}.) Algoritmo de seguimiento
-    por filtro de correlación discriminativo que pondera las regiones de la imagen
-    con mayor fiabilidad espacial. Se utiliza como respaldo cuando la segmentación
-    por sustracción de fondo falla en un fotograma. \\[5pt]
 
   % ── D ──────────────────────────────────────────────────────────────
   \textbf{Data augmentation}
@@ -122,8 +113,9 @@
 
   \textbf{Detección de objetos}
   & Tarea de visión por computadora que consiste en localizar y clasificar
-    simultáneamente múltiples instancias de objetos en una imagen. En el proyecto
-    se emplea YOLOv8 para detectar las ratas dentro de sus respectivas ROIs. \\[5pt]
+    simultáneamente múltiples instancias de objetos en una imagen. El sistema no
+    usa un detector entrenado: localiza al espécimen por sustracción de fondo
+    dentro de cada cilindro. \\[5pt]
 
   \textbf{Docker}
   & Plataforma de contenedorización que empaqueta una aplicación junto con todas
@@ -187,9 +179,9 @@
   % ── I ──────────────────────────────────────────────────────────────
   \textbf{ImageNet}
   & Base de datos de más de 14 millones de imágenes anotadas en más de 21{,}000
-    categorías. Los pesos del modelo ResNet-18 preentrenados en ImageNet se usan
-    como punto de partida para el transfer learning, aprovechando características
-    visuales generales antes de la especialización en fotogramas del FST. \\[5pt]
+    categorías. Es el conjunto de referencia para preentrenar redes de
+    clasificación de imágenes antes de aplicar transfer learning; para video, el
+    equivalente es Kinetics-400, con el que se preentrena la R(2+1)D-18. \\[5pt]
 
   \textbf{Inmovilidad}
   & (\textit{Immobility}.) Conducta en el FST caracterizada por la ausencia de
@@ -198,12 +190,6 @@
     conductual y el indicador de referencia para cuantificar el efecto
     antidepresivo. \\[5pt]
 
-  \textbf{IoU}
-  & (\textit{Intersection over Union}.) Métrica de solapamiento entre dos
-    rectángulos (generalmente una detección y su verdad de referencia):
-    $\text{IoU} = \frac{|A \cap B|}{|A \cup B|}$. En el sistema se usa para
-    validar la consistencia entre detecciones consecutivas durante el seguimiento
-    de las ratas. \\[5pt]
 
   \textbf{ISRS}
   & (Inhibidor Selectivo de la Recaptación de Serotonina.) Clase farmacológica
@@ -257,8 +243,8 @@
   \textbf{Pipeline de análisis}
   & Secuencia de etapas de procesamiento encadenadas en las que la salida de
     cada etapa es la entrada de la siguiente. En el sistema, el pipeline comprende:
-    preprocesamiento, detección de ROIs, seguimiento con YOLO, y clasificación
-    con ResNet, ejecutado por el worker de forma asíncrona. \\[5pt]
+    preprocesamiento, localización de los cilindros y clasificación de conducta,
+    ejecutado por el worker de forma asíncrona. \\[5pt]
 
   \textbf{PostgreSQL}
   & Sistema de gestión de bases de datos relacional de código abierto con soporte
@@ -287,8 +273,8 @@
   \textbf{ResNet}
   & (\textit{Residual Network}.) Familia de redes neuronales convolucionales con
     conexiones residuales (atajos) que permiten entrenar arquitecturas muy
-    profundas sin degradación del gradiente. Se usa ResNet-18 como clasificador
-    de conductas por su balance entre capacidad expresiva y tiempo de inferencia. \\[5pt]
+    profundas sin degradación del gradiente. La R(2+1)D-18, candidata para el
+    clasificador de conductas, es una ResNet-18 adaptada a video. \\[5pt]
 
   \textbf{ROI}
   & (\textit{Region of Interest} / Región de interés.) Subregión rectangular del
@@ -312,21 +298,16 @@
   \textbf{Softmax}
   & Función de activación que transforma un vector de puntuaciones en una
     distribución de probabilidad: $\sigma(z)_i = e^{z_i}/\sum_j e^{z_j}$.
-    La capa final del clasificador ResNet aplica softmax para obtener la
+    La capa final de la red convolucional aplica softmax para obtener la
     probabilidad de cada conducta (inmovilidad, nado activo, escalamiento). \\[5pt]
 
   \textbf{Sustracción de fondo}
   & (\textit{Background subtraction}.) Técnica de segmentación que identifica
     los píxeles que cambian respecto al modelo de fondo estático. Es el método
-    primario del pipeline para detectar la presencia y posición de la rata
+    primario del pipeline para detectar la presencia y posición del espécimen
     en cada cuadro del video. \\[5pt]
 
   % ── T ──────────────────────────────────────────────────────────────
-  \textbf{Tracker}
-  & (Rastreador.) Algoritmo que mantiene la identidad de un objeto entre
-    fotogramas consecutivos de un video sin necesidad de re-detectarlo en cada
-    cuadro. En el sistema se utiliza CSRT como respaldo cuando la segmentación
-    por sustracción de fondo falla. \\[5pt]
 
   \textbf{Transfer learning}
   & (Aprendizaje por transferencia.) Técnica que reutiliza los pesos de un
@@ -345,7 +326,7 @@
   \textbf{YOLO}
   & (\textit{You Only Look Once}.) Familia de detectores de objetos en tiempo
     real basados en una sola pasada por la red para predecir bounding boxes y
-    clases simultáneamente. En el sistema se emplea YOLOv8 para detectar y
-    localizar las ratas dentro de las ROIs de cada cilindro. \\[5pt]
+    clases simultáneamente. Se revisa en el estado del arte; el sistema no lo
+    usa porque localiza al espécimen por sustracción de fondo. \\[5pt]
 
 \end{longtable}

@@ -251,7 +251,7 @@ de la validación final.
         grupos experimentales; de cada video se analizan solo los primeros 300~segundos. Los primeros 5~min del día~1 del grupo control pueden
         cargarse opcionalmente como referencia basal.
 
-  \item \textbf{Detección y seguimiento de especímenes:} identificación automática de
+  \item \textbf{Localización de los especímenes:} identificación automática de
         hasta cuatro especímenes dentro de la grabación, distinguiéndolos por su posición
         en el encuadre. Los cilindros son fijos y no cambian de posición entre sesiones,
         lo que permite asignar cada región a un espécimen de forma estable a lo largo
@@ -350,7 +350,7 @@ El proyecto usa una metodología ágil basada en Scrum, adaptada a un equipo de 
 personas con entregas en dos etapas académicas (TT1 y TT2). El motivo de elegir este
 enfoque es directo: el proyecto tiene partes muy distintas ---el módulo de video, el
 clasificador, la plataforma web, la base de datos--- y no tiene sentido diseñar todo
-desde el inicio sin saber cómo va a quedar el módulo de seguimiento hasta probarlo.
+desde el inicio sin saber cómo va a quedar el módulo de video hasta probarlo.
 Scrum permite ajustar decisiones al cierre de cada bloque, con base en lo que funcionó.
 
 Cada iteración termina con un entregable revisable con los directores en sesiones
@@ -362,8 +362,8 @@ registro de ajustes para el siguiente ciclo.
 La responsabilidad de cada integrante está delimitada por frente técnico:
 Ángel Ali es responsable del sistema web e infraestructura (backend, base de datos,
 frontend, despliegue); Vanesa es responsable del pipeline de análisis de video (preprocesamiento,
-detección con YOLOv8, seguimiento con ByteTrack, clasificación de conducta con
-ResNet-18 y evaluación del desempeño por clase).
+localización de los cilindros, clasificación de conducta y evaluación del desempeño
+por clase).
 
 Las Tablas~\ref{tab:cronograma_angel} y~\ref{tab:cronograma_vanesa} muestran el
 cronograma mes a mes de cada integrante. La columna TT1 abarca febrero--junio
@@ -463,7 +463,7 @@ Baseline: sustracción de fondo, flujo óptico y curación de videos
 Anotación de conductas con BORIS y extracción de descriptores
   & & & & & & $\bullet$ & $\bullet$ & & & & & \\
 \hline
-Entrenamiento del clasificador ResNet-18 (nado\,/\,inmovilidad\,/\,escape)
+Entrenamiento del clasificador de conducta (nado\,/\,inmovilidad\,/\,escalamiento)
   & & & & & & & $\bullet$ & $\bullet$ & & & & \\
 \hline
 Ajuste de hiperparámetros y evaluación del clasificador
@@ -485,7 +485,7 @@ Redacción de caps.\ resultados, manuales y material de defensa
 \end{sidewaystable}
 
 El stack técnico cubre los dos frentes del proyecto: Python con Flask, OpenCV,
-PyTorch (YOLOv8, ResNet-18) y PostgreSQL para el pipeline y el backend; React.js
+scikit-learn, PyTorch y PostgreSQL para el pipeline y el backend; React.js
 para el frontend; BORIS (Behavioral Observation Research Interactive Software) para
 anotar el dataset de conductas; Git con Docker para control
 de versiones y despliegue.

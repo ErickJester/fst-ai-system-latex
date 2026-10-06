@@ -228,6 +228,7 @@ Usuario ──registra──> Experimento
 
      + 4 relaciones de soporte del sistema, añadidas en la reconciliación del 6-sep
        (no las nombra el laboratorio): Modelo, Configuración, Reporte, Notificación
+       → desde D-51 (5-oct) solo quedan Reporte y Notificación
 
      + Administrador (13-sep, D-08): subtipo de Usuario con permisos extra,
        (1,1)–(0,1) — no es un tipo de usuario aparte
@@ -261,7 +262,40 @@ en el esquema lógico definitivo.
 
 ## 5. Estado actual
 
-### Cambios del 3-oct-2026 (D-28 a D-35) — leer antes que lo de abajo
+### Cambios del 5-oct-2026 (D-51) — leer antes que todo lo de abajo
+
+D-51 sustituye a D-50 (que nunca se aplicó). Detalle en `errores/preguntas-doctor.md` §6.
+
+| Cambio | Detalle |
+|---|---|
+| **Se eliminan `MODELO` y `CONFIGURACION`** | Ningún RF permite cambiar el modelo ni el umbral. El modelo final y el umbral de 0.80 son **constantes del pipeline** y se documentan en el cap. 6. Deja sin objeto D-05, D-06 y D-14 |
+| **Se quita `ANALISIS.idConfig`** | Con ella se van las dos llaves foráneas `CONFIGURACION → ANALISIS` y `MODELO → CONFIGURACION` |
+| **`SEGUNDO.propuesta` admite nulo** | Queda vacía cuando el sistema no clasificó el segundo |
+| ~~Nueva `SEGUNDO.confianza`~~ | **Retirada el mismo día:** ningún RF la pide |
+| **Nueva `ANALISIS.rutaRecuadros`** | `text`, nula hasta que el análisis se completa: ruta de `analisis_{id}_cajas.json` (revisa D-42, que solo guardaba la ruta del PDF) |
+| **`VIDEO.archivo` admite nulo** | Nulo = el video ya se borró (RF-25, RN-05). La fila se conserva porque los resultados la referencian |
+| **Dominio `tipo_notificacion` + `video borrado`** | RN-05 pide notificar el borrado adelantado. Siguen siendo **ocho dominios** |
+| **`EXPERIMENTO.nombre` UNIQUE** | RF-11 y el CU de crear experimento dicen «nombre único» |
+| **Nueva `ANALISIS.progreso`** | `smallint`, no nula, `CHECK` entre 0 y 100. La escribe el *worker* y la lee `/status` (RF-15). **Revierte D-09** (progreso solo en memoria) **y el cálculo por etapa de D-22** |
+| **Ejemplos de normalización del cap. 5** | 1FN: las 300 etiquetas como lista en `OBSERVACION` → `SEGUNDO`. 3FN y FNBC: `tipo` y `tratamiento` dentro de `ESPECIMEN` (transitiva vía `idTanda`) → viven en `GRUPO` |
+
+**Cifras vigentes:** **15 relaciones**; esquema lógico con **67 atributos y 18 llaves
+foráneas**; esquema físico con **19 llaves foráneas** (las 18 + la de D-04). Las cifras
+de las secciones de abajo (16 o 17 relaciones) son anteriores.
+
+**Aplicado (5-oct)** en cap. 5 (entidades, descripción de tablas, 1FN, 2FN, 3FN, FNBC,
+tabla de normalización, diagrama de clases, CU de creación del análisis); apéndice D
+(tablas, nota de unicidad, frase del tipo `numeric`, conteo 17 → 15);
+`grafo_relacional_3_vigente.puml`, `esquema_fisico.puml` y `clases.puml`, con
+`figures/mermaid/esquema_fisico.png` y `diagramas/clases.png`.
+**Sin aplicar:** `INSTRUCCIONES-WEB.md` (DDL, semilla y diagramas incrustados), el
+comentario de `seq_analisis_automatico.puml` sobre `idConfig`, `seq_consulta_progreso.puml`
+y el mockup `progreso.html` (siguen con el porcentaje por etapa de D-22), los artifacts y el cap. 6
+(comentado en `main.tex`). **Hueco previo detectado:** `ANALISIS.rutaDiagnostico` (D-23)
+sigue sin estar en `grafo_relacional_3_vigente.puml` ni en `clases.puml`, aunque sí en
+el esquema físico y el apéndice D.
+
+### Cambios del 3-oct-2026 (D-28 a D-35)
 
 Estas decisiones cambian el modelo y **mandan sobre las cifras de esta página** (que
 dicen 16 relaciones, `nCilindros ∈ {3,4}`, etc.). Detalle de cada una en
@@ -313,7 +347,7 @@ con las cuatro tablas de soporte del sistema (6-sep):
 | 1FN | `USUARIO` | `nombre` era dominio compuesto → se partió en `nombre` y `apellidos` |
 | 3FN | `ESPECIMEN` | `idGrupo` era derivable de la tanda → columna eliminada |
 | 3FN | `VIDEO` | `duracion` dependía de la sesión → ahora es la duración real del archivo |
-| 3FN | `CONFIGURACION` | `hashModelo → nombreModelo` es transitiva → se separa `MODELO(hashModelo, nombreModelo)` |
+| 3FN | `CONFIGURACION` | `hashModelo → nombreModelo` es transitiva → se separa `MODELO(hashModelo, nombreModelo)`. **Sin objeto desde D-51 (5-oct):** las dos tablas se eliminaron |
 
 ### Lo que falta
 
@@ -337,8 +371,8 @@ Hasta que ocurran esas dos revisiones, en los términos del método lo que exist
 | P-05 | ¿Cómo llama el laboratorio a la «tanda»? | **Cerrada (3-sep):** el laboratorio no tiene palabra propia; llama «sesión» a cada grabación |
 | P-08 / D-03 | Al reanalizar un video, ¿se conservan ambos resultados o se reemplaza? | Ver la errata estructural de la sección 8. El laboratorio dijo que se queda con el último; falta cerrarlo formalmente |
 | D-04 | ~~¿Cómo se garantiza que `numeroRata` no se repita dentro de su **grupo**, si `idGrupo` ya no vive en `ESPECIMEN`?~~ **Cerrada (equipo, 2026-09-13):** redundancia controlada — `idGrupo` reingresa a `ESPECIMEN` como columna redundante, con `UNIQUE (idGrupo, numeroRata)`. Solo en el esquema físico, no toca el grafo lógico | Falta decidir cómo mantener `idGrupo` sincronizado si una rata cambia de tanda (caso raro) |
-| D-05 | ¿El sistema permite correr dos veces la misma `CONFIGURACION` sobre el mismo video? | Si `(idVideo, idConfig)` es clave alterna de `ANALISIS`. Se cruza con P-08/D-03 |
-| D-06 | El pipeline usa más de un modelo (YOLOv8 + ResNet-18/50), pero `CONFIGURACION` solo guarda un `hashModelo` | Puede requerir que `MODELO`↔`CONFIGURACION` sea N:M en vez de 1:N |
+| D-05 | ~~¿El sistema permite correr dos veces la misma `CONFIGURACION` sobre el mismo video?~~ | **Sin objeto:** se disolvió con D-03 y, desde D-51, `CONFIGURACION` ya no existe |
+| D-06 | ~~El pipeline usa más de un modelo, pero `CONFIGURACION` solo guarda un `hashModelo`~~ | **Sin objeto desde D-51:** `MODELO` y `CONFIGURACION` se eliminaron |
 | Q-08 / D-01 | ~~¿Autoregistro con aprobación (cap. 1) o solo el Admin (cap. 4, RF-07)?~~ **Cerrada (equipo, 2026-09-13):** solo el Admin crea cuentas | El cap. 1 queda mal, hay que corregirlo al RF-07 |
 | Q-09 | ¿`NOTIFICACION.mensaje` lleva detalle por instancia o es plantilla por tipo? | Si fuera plantilla, `tipo → mensaje` sería transitiva y haría falta catálogo `TIPO_NOTIFICACION` |
 
@@ -451,7 +485,12 @@ la actual. Si alguien externo va a abrirlos, hay que mover el anclaje de compart
 
 ---
 
-*Última actualización: 2026-09-13 — `ADMINISTRADOR` (D-08) aplicado en el grafo
+*Última actualización: 2026-10-05 — D-51: fuera `MODELO`, `CONFIGURACION` y
+`ANALISIS.idConfig`; nuevas `ANALISIS.rutaRecuadros` y `ANALISIS.progreso`;
+`SEGUNDO.propuesta` y `VIDEO.archivo` admiten nulo; `EXPERIMENTO.nombre` UNIQUE;
+`video borrado` en `tipo_notificacion` (17 → 15 relaciones). Ver §5.*
+
+*Actualización anterior: 2026-09-13 — `ADMINISTRADOR` (D-08) aplicado en el grafo
 reconciliado y sincronizado en los tres artifacts (15→16 relaciones, 16→17 llaves
 foráneas); `contrasena` renombrada a `contrasenaHash` en los tres `grafo_relacional_*`
 para que coincida con `clases.puml`; agregado el artifact de Diseño Físico a la tabla de

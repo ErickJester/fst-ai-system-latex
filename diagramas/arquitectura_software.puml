@@ -17,11 +17,17 @@
 '    siguiente ciclo de polling -- sin cola de mensajes aparte.
 '
 '  - Agrega el volumen de modelos entrenados, que el diagrama viejo
-'    no tenia: "los modelos rat.pt, resnet18_fst.pt y resnet50_fst.pt
-'    residen en un volumen Docker dedicado que el worker monta al
-'    arrancar el contenedor" (05_diseno.tex:47-49) -- distinto del
-'    volumen compartido de videos/reportes, y de solo lectura para
-'    el Worker.
+'    no tenia: "el archivo del clasificador de conducta reside en un
+'    volumen Docker dedicado que el worker monta al arrancar el
+'    contenedor" (05_diseno.tex:45-48) -- distinto del volumen
+'    compartido de videos/reportes, y de solo lectura para el Worker.
+'
+'  - 5-oct: el worker ya no usa YOLOv8, ByteTrack ni ResNet-18/50
+'    (CLA-02/CLA-03). El pipeline real (fst_auto) localiza los
+'    cilindros por sustraccion de fondo y clasifica con un modelo
+'    sobre rasgos (scikit-learn) o la R(2+1)D-18 (PyTorch); cual de
+'    los dos queda se decide en TT-II, por eso el volumen no nombra
+'    un archivo concreto.
 '
 '  - Quita la lista de las 12 tablas viejas (USUARIOS, EXPERIMENTOS,
 '    TRABAJOS, ANIMALES, SUJETOS, ROIS...) del contenedor de base de
@@ -78,7 +84,7 @@ rectangle "Docker: backend" as C_BE #E8F8F5 {
 ' ═══════════════════════════════════════════════════════════
 
 rectangle "Docker: worker" as C_WK #FEF9E7 {
-  rectangle "Pipeline de analisis conductual\n\nOpenCV       Preprocesamiento y correccion CLAHE\nYOLOv8       Deteccion de especimenes por ROI\nByteTrack    Seguimiento cuadro a cuadro\nResNet-18 / ResNet-50   Clasificador de conducta\n(PyTorch  +  Transfer Learning desde ImageNet)" as WK #FFFEF2
+  rectangle "Pipeline de analisis conductual\n\nOpenCV         Preprocesamiento y correccion CLAHE\nOpenCV         Localizacion de los cilindros\nscikit-learn   Clasificador sobre rasgos\nPyTorch        R(2+1)D-18 (en evaluacion)" as WK #FFFEF2
 }
 
 ' ═══════════════════════════════════════════════════════════
@@ -96,7 +102,7 @@ rectangle "Capa de datos" as DATOS #F4F6F7 {
   }
 
   rectangle "Volumen de modelos" as C_MD #F5EEF8 {
-    folder "Modelos entrenados (solo lectura)\n\nrat.pt\nresnet18_fst.pt\nresnet50_fst.pt" as MD
+    folder "Modelos entrenados (solo lectura)\n\nArchivo del clasificador\nde conducta" as MD
   }
 
 }
