@@ -3,25 +3,25 @@
 \section{Antecedentes}
 
 En el Laboratorio de Bioquímica Estructural de la Escuela Nacional de Medicina y
-Homeopatía, analizar un experimento de nado forzado funciona así: el investigador abre
+Homeopatía, analizar un video de nado forzado funciona así: el investigador abre
 el video en la computadora, pone en marcha un cronómetro y observa. Cada vez que el
 espécimen cambia de conducta (empieza a nadar, se queda inmóvil, intenta escalar las
 paredes del cilindro) registra la hora a mano. Al terminar los cinco minutos, tiene
 una tabla con los tiempos de cada conducta para un solo espécimen. Luego repite el proceso
-con la siguiente. Si el protocolo requiere que dos evaluadores hagan la anotación de
-forma independiente para verificar consistencia, el mismo video se revisa dos veces más.
+con la siguiente. Si el protocolo requiere que tres analistas hagan la anotación de
+forma independiente para verificar consistencia, el mismo video se revisa tres veces.
 
 Ese proceso existe porque el nado forzado es el modelo conductual más usado en
 neurociencia preclínica para evaluar el efecto de antidepresivos en especímenes. La depresión
 mayor afecta a más de 280 millones de personas y es una de las principales causas de
-discapacidad según la OMS \cite{who_depression_2025}. Para probar nuevas moléculas
+discapacidad según la Organización Mundial de la Salud (OMS) \cite{who_depression_2025}. Para probar nuevas moléculas
 antes de pasar a ensayos clínicos en humanos, los investigadores necesitan modelos
 preclínicos con roedores que reproduzcan aspectos observables del trastorno. El más
-citado es la prueba de nado forzado (Forced Swim Test, FST), propuesta por Porsolt et al.\ en 1977
+citado es la prueba de nado forzado (\textit{Forced Swim Test}, FST), propuesta por Porsolt et al.\ en 1977
 \cite{porsolt1977}; desde el año 2000 hay más de 8{,}000 artículos que lo reportan
 \cite{della_valle2025}.
 
-El experimento consiste en colocar al espécimen en un cilindro con agua del que no puede
+La prueba consiste en colocar al espécimen en un cilindro con agua del que no puede
 salir y registrar cómo responde. Al principio intenta escapar activamente; después de
 un rato empieza a flotar con movimientos mínimos. Esa conducta pasiva ---llamada
 \textit{desesperanza conductual} o \textit{behavioral despair}--- se asocia con la
@@ -51,23 +51,26 @@ pero no se distribuyen como sistemas que un laboratorio sin infraestructura espe
 pueda desplegar.
 
 El Laboratorio de Bioquímica Estructural, Sección de Posgrado, de la Escuela Nacional
-de Medicina y Homeopatía (ENMyH-IPN), a cargo del Dr.\ César Augusto Sandino Reyes
+de Medicina y Homeopatía (ENMyH) del Instituto Politécnico Nacional (IPN), a cargo del Dr.\ César Augusto Sandino Reyes
 López, investigador del posgrado de esa institución, corre experimentos de FST
 regularmente y tiene un acervo de videos que hoy se analizan a mano. Esa es la
 necesidad que origina este Trabajo Terminal.
 
-En un experimento de FST típico, los especímenes se dividen en tres grupos de entre 6 y 8
-especímenes cada uno. Cada grupo cumple un papel distinto en la evaluación, como se
-muestra en la Tabla~\ref{tab:grupos_experimentales}.
+Un experimento de FST es un estudio completo que compara varios grupos de especímenes
+entre sí. Hay tres tipos de grupo, y cada tipo cumple un papel distinto en la evaluación,
+como se muestra en la Tabla~\ref{tab:grupos_experimentales}. Un experimento tiene tres o
+más grupos, en promedio cuatro, porque un mismo tipo puede repetirse: por ejemplo, varias
+moléculas o varias dosis evaluadas como tratamientos experimentales distintos. Lo habitual
+es que cada grupo tenga de 6 a 8 especímenes, aunque no es una regla del protocolo.
 
 \begin{table}[H]
 \centering
-\caption{Grupos experimentales en un protocolo estándar de FST.}
+\caption{Tipos de grupo en un protocolo estándar de FST.}
 \label{tab:grupos_experimentales}
 \small
 \begin{tabular}{|p{3.2cm}|p{10.5cm}|}
 \hline
-\textbf{Grupo} & \textbf{Intervención} \\
+\textbf{Tipo de grupo} & \textbf{Intervención} \\
 \hline
 Control
   & Sin tratamiento farmacológico. Los especímenes solo son sometidos al protocolo de nado
@@ -96,11 +99,16 @@ efecto de distintas moléculas en grupos de especímenes. Cada video graba de do
 cuatro especímenes al mismo tiempo desde una vista lateral, en dos sesiones: 20 minutos el primer día y
 5 minutos el segundo.
 
+Al conjunto de especímenes de un mismo grupo que se graba junto, de dos a cuatro a la vez,
+se le llama \textbf{tanda}. Un grupo se graba en una o más tandas, y cada tanda produce
+hasta dos videos, uno por sesión. En este documento, la palabra \textit{experimento}
+designa siempre el estudio completo, con todos sus grupos y tandas.
+
 El análisis de esos videos se hace completamente a mano. Anotar un video de 5 minutos
 con sus dos a cuatro especímenes ---cronómetro en mano, observando la grabación cuadro
-a cuadro--- lleva entre una hora y media y dos horas. Si el protocolo incluye que dos
-evaluadores anotan de forma independiente para verificar consistencia, ese tiempo se
-multiplica. En un semestre de actividad regular el laboratorio puede juntar alrededor de
+a cuadro--- lleva entre una hora y media y dos horas. Si el protocolo incluye que tres
+analistas anotan de forma independiente para verificar consistencia, ese tiempo se
+triplica. En un semestre de actividad regular el laboratorio puede juntar alrededor de
 32 a 40 videos, aunque no tiene un calendario fijo, lo que suma decenas de horas-persona
 de anotación manual.
 
@@ -111,7 +119,7 @@ Los problemas que genera ese proceso son los siguientes:
         experimentos puede procesar el laboratorio en un período.
   \item \textbf{Variabilidad entre evaluadores:} las transiciones entre conductas
         ---el momento exacto en que el espécimen pasa de nadar a quedarse inmóvil, por
-        ejemplo--- no siempre son nítidas. Dos evaluadores pueden registrar tiempos
+        ejemplo--- no siempre son nítidas. Dos analistas pueden registrar tiempos
         distintos para el mismo espécimen en el mismo video. Cuando eso ocurre, el
         investigador debe decidir qué número incluir en el reporte; esa decisión no
         tiene criterio formal y afecta la reproducibilidad de los resultados
@@ -142,9 +150,9 @@ reemplazar la anotación manual de videos experimentales.
 
 La propuesta es un prototipo de sistema web con visión por computadora y aprendizaje
 supervisado que analice automáticamente los videos del FST del laboratorio. El desarrollo sigue el ciclo de
-vida de software de la norma ISO/IEC/IEEE (International Organization for
-Standardization / International Electrotechnical Commission / Institute of Electrical
-and Electronics Engineers)~12207:2017 \cite{iso12207}, que organiza el proceso en fases de definición
+vida de software de la norma ISO/IEC/IEEE (Organización Internacional de Normalización /
+Comisión Electrotécnica Internacional / Instituto de Ingenieros Eléctricos y
+Electrónicos)~12207:2017 \cite{iso12207}, que organiza el proceso en fases de definición
 de requerimientos, diseño, implementación y verificación.
 La adaptación concreta de ese ciclo al proyecto se describe en la sección de
 metodología.
@@ -154,9 +162,8 @@ El sistema tiene dos partes:
 \begin{itemize}
   \item \textbf{Pipeline de análisis de video:} recibe el video, identifica a cada
         espécimen dentro de su cilindro y clasifica cuadro a cuadro la conducta que realiza
-        (nado, inmovilidad o escalamiento) con un modelo de aprendizaje supervisado. La
-        salida es el tiempo total por conducta y espécimen y, como funcionalidad opcional, el
-        desglose por minuto.
+        (nado, inmovilidad, escalamiento o, cuando no distingue entre nado y escalamiento, conducta activa) con un modelo de aprendizaje supervisado. La
+        salida es el tiempo total por conducta y espécimen y el desglose por minuto.
   \item \textbf{Plataforma web:} interfaz desde el navegador donde el investigador sube
         los videos, consulta el estado del análisis, revisa resultados por espécimen y
         sesión, y descarga reportes. Los datos se almacenan en base de datos para
@@ -168,7 +175,7 @@ visibles (de dos a cuatro), contraste suficiente entre el espécimen y el fondo,
 disponibles hasta ahora tienen variaciones de iluminación y contraste que pueden afectar
 el desempeño; durante el desarrollo se evaluará la robustez de los algoritmos y se
 documentarán los requisitos mínimos de calidad conforme al atributo \textit{performance
-efficiency} (eficiencia de desempeño) de la ISO/IEC~25010:2023 \cite{iso25010}.
+efficiency} (eficiencia de desempeño) de la norma ISO/IEC~25010:2023 \cite{iso25010}, que define un modelo de calidad para sistemas y software.
 
 El desempeño del clasificador se evalúa con métricas de clasificación estándar
 (precisión, \textit{recall} y F1 por clase) sobre un conjunto de prueba independiente.
@@ -177,8 +184,7 @@ El desempeño del clasificador se evalúa con métricas de clasificación están
 
 Diseñar, desarrollar y validar un prototipo de sistema web con visión por computadora
 y aprendizaje supervisado que automatice la detección y cuantificación de las conductas
-de la prueba de nado forzado en especímenes ---nado activo, inmovilidad e intentos de
-escape--- con
+de la prueba de nado forzado en especímenes ---nado activo, inmovilidad, intentos de escape y conducta activa--- con
 desempeño validado mediante métricas de clasificación estándar y cumpliendo los
 atributos de calidad de la norma ISO/IEC~25010:2023 \cite{iso25010}.
 
@@ -195,7 +201,7 @@ atributos de calidad de la norma ISO/IEC~25010:2023 \cite{iso25010}.
         de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}, definiendo los módulos de carga
         de videos, pipeline de análisis, base de datos y visualización de resultados.
   \item Implementar el módulo de análisis conductual con visión por computadora y un
-        clasificador supervisado para las tres conductas del FST.
+        clasificador supervisado para las tres conductas del FST y la conducta activa.
   \item Evaluar el desempeño del clasificador de conductas con métricas de
         clasificación estándar (precisión, \textit{recall} y F1 por clase) sobre un
         conjunto de prueba independiente.
@@ -209,17 +215,23 @@ atributos de calidad de la norma ISO/IEC~25010:2023 \cite{iso25010}.
 Un semestre de actividad regular puede traer alrededor de 32 a 40 videos que anotar,
 aunque el laboratorio no tiene un calendario fijo. Con el método manual, anotar un
 video de 5~minutos con sus dos a cuatro especímenes lleva entre una hora y media y dos
-horas; si dos evaluadores lo hacen de forma independiente para verificar consistencia,
-ese tiempo se duplica. Son decenas de horas que los investigadores no están usando para
+horas; si tres analistas lo hacen de forma independiente para verificar consistencia,
+ese tiempo se triplica. Son decenas de horas que los investigadores no están usando para
 diseñar experimentos, analizar resultados ni escribir publicaciones.
 
-El impacto en reproducibilidad importa igual para la ciencia. Cuando dos evaluadores
+El impacto en reproducibilidad importa igual para la ciencia. Cuando dos analistas
 obtienen tiempos distintos para el mismo espécimen ---algo habitual en las transiciones entre
 conductas--- el investigador debe decidir qué número reportar. Esa decisión no tiene
 criterio formal: depende del evaluador, y distintos laboratorios pueden resolverla de
 forma diferente. El resultado es que el mismo experimento puede producir datos distintos
 en manos distintas, lo que complica comparar publicaciones entre grupos de investigación.
 Además, el error del sistema se puede medir con métricas de clasificación.
+
+El laboratorio señaló que su criterio principal no es la velocidad del análisis sino la
+repetibilidad: que el mismo video analizado varias veces produzca siempre el mismo
+resultado, con una variabilidad máxima de entre 5 y 10\,\%. La anotación manual depende
+de quién anota y de cómo interpreta cada transición entre conductas; un sistema
+automatizado aplica los mismos criterios en cada corrida.
 
 Las herramientas existentes no cubren las necesidades del laboratorio. EthoVision XT y
 ANY-maze tienen costos de licencia fuera del alcance académico del IPN. ezTrack y
@@ -268,7 +280,7 @@ de la validación final.
         activa, una cuarta conducta.
 
   \item \textbf{Métricas y comparación por grupo:} tiempo total de cada conducta en
-        los 5~min del día~2, desglose por minuto como funcionalidad opcional, y
+        los 5~min del día~2, desglose por minuto, y
         estadísticos de grupo (media, desviación estándar y varianza por conducta)
         para caracterizar el perfil conductual del conjunto de especímenes de cada
         grupo experimental. El sistema también compara automáticamente los tres
@@ -308,7 +320,7 @@ de la validación final.
         inferir diagnósticos de depresión u otros trastornos, ni en especímenes ni en
         humanos.
 
-  \item \textbf{Video completo del día~1:} el experimento del día~1 dura 20~minutos;
+  \item \textbf{Video completo del día~1:} la sesión del día~1 dura 20~minutos;
         el sistema no procesa ese video completo. Solo acepta, de forma opcional, los
         primeros 5~minutos del grupo control como referencia basal. El análisis de los
         20~min completos queda fuera del alcance de este prototipo.
@@ -321,6 +333,10 @@ de la validación final.
   \item \textbf{Reentrenamiento del clasificador:} el sistema no actualiza el modelo
         de clasificación a partir de nuevas anotaciones del usuario. Cualquier
         modificación del clasificador requiere intervención técnica externa al sistema.
+
+  \item \textbf{Acervo histórico de videos:} el laboratorio conserva de 80 a 100 videos de
+        los últimos 10 a 12 años, todos ya analizados a mano. Esos videos no se cargan al
+        sistema como experimentos.
 
   \item \textbf{Análisis en tiempo real:} el sistema procesa videos ya grabados. No
         admite transmisiones de video en vivo ni análisis mientras el experimento está
@@ -347,7 +363,7 @@ de la validación final.
 \section{Metodología}
 
 El proyecto usa una metodología ágil basada en Scrum, adaptada a un equipo de dos
-personas con entregas en dos etapas académicas (TT1 y TT2). El motivo de elegir este
+personas con entregas en dos etapas académicas (Trabajo Terminal 1 y 2, abreviados TT1 y TT2). El motivo de elegir este
 enfoque es directo: el proyecto tiene partes muy distintas ---el módulo de video, el
 clasificador, la plataforma web, la base de datos--- y no tiene sentido diseñar todo
 desde el inicio sin saber cómo va a quedar el módulo de video hasta probarlo.
@@ -389,10 +405,10 @@ cronograma mes a mes de cada integrante. La columna TT1 abarca febrero--junio
 Caps.~1--2: introducción, planteamiento y estado del arte
   & $\bullet$ & $\bullet$ & $\bullet$ & & & & & & & & & \\
 \hline
-Cap.~4 Análisis: RF, RNF, casos de uso y criterios de aceptación
+Cap.~4 Análisis: requisitos funcionales y no funcionales, casos de uso y criterios de aceptación
   & & & $\bullet$ & $\bullet$ & & & & & & & & \\
 \hline
-Cap.~5 Diseño: arquitectura, BD, API REST, UML y wireframes
+Cap.~5 Diseño: arquitectura, base de datos, API REST, UML y wireframes
   & & & & $\bullet$ & $\bullet$ & & & & & & & \\
 \hline
 Revisiones mensuales con directores e investigador del laboratorio
@@ -443,7 +459,7 @@ Docker Compose, manuales, despliegue ESCOM y material de defensa
 \hline
 \multicolumn{13}{|l|}{\textbf{TT1 --- Documentación, análisis y diseño (febrero--junio)}} \\
 \hline
-Caps.~1--2: antecedentes FST, técnicas de visión y modelos ML/DL
+Caps.~1--2: antecedentes FST, técnicas de visión y modelos de aprendizaje automático y profundo
   & $\bullet$ & $\bullet$ & $\bullet$ & & & & & & & & & \\
 \hline
 Cap.~4 Análisis: conductas, métricas y protocolo de anotación
