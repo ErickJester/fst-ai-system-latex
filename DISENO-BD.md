@@ -276,10 +276,10 @@ D-51 sustituye a D-50 (que nunca se aplicó). Detalle en `errores/preguntas-doct
 | **`VIDEO.archivo` admite nulo** | Nulo = el video ya se borró (RF-25, RN-05). La fila se conserva porque los resultados la referencian |
 | **Dominio `tipo_notificacion` + `video borrado`** | RN-05 pide notificar el borrado adelantado. Siguen siendo **ocho dominios** |
 | **`EXPERIMENTO.nombre` UNIQUE** | RF-11 y el CU de crear experimento dicen «nombre único» |
-| **Nueva `ANALISIS.progreso`** | `smallint`, no nula, `CHECK` entre 0 y 100. La escribe el *worker* y la lee `/status` (RF-15). **Revierte D-09** (progreso solo en memoria) **y el cálculo por etapa de D-22** |
+| ~~Nueva `ANALISIS.progreso`~~ | **Retirada el mismo día:** el porcentaje ya es derivable de `ANALISIS.etapa` (33/67/100, D-22). D-09 y D-22 siguen vigentes |
 | **Ejemplos de normalización del cap. 5** | 1FN: las 300 etiquetas como lista en `OBSERVACION` → `SEGUNDO`. 3FN y FNBC: `tipo` y `tratamiento` dentro de `ESPECIMEN` (transitiva vía `idTanda`) → viven en `GRUPO` |
 
-**Cifras vigentes:** **15 relaciones**; esquema lógico con **67 atributos y 18 llaves
+**Cifras vigentes:** **15 relaciones**; esquema lógico con **66 atributos y 18 llaves
 foráneas**; esquema físico con **19 llaves foráneas** (las 18 + la de D-04). Las cifras
 de las secciones de abajo (16 o 17 relaciones) son anteriores.
 
@@ -289,8 +289,7 @@ tabla de normalización, diagrama de clases, CU de creación del análisis); ap�
 `grafo_relacional_3_vigente.puml`, `esquema_fisico.puml` y `clases.puml`, con
 `figures/mermaid/esquema_fisico.png` y `diagramas/clases.png`.
 **Sin aplicar:** `INSTRUCCIONES-WEB.md` (DDL, semilla y diagramas incrustados), el
-comentario de `seq_analisis_automatico.puml` sobre `idConfig`, `seq_consulta_progreso.puml`
-y el mockup `progreso.html` (siguen con el porcentaje por etapa de D-22), los artifacts y el cap. 6
+comentario de `seq_analisis_automatico.puml` sobre `idConfig`, los artifacts y el cap. 6
 (comentado en `main.tex`). **Hueco previo detectado:** `ANALISIS.rutaDiagnostico` (D-23)
 sigue sin estar en `grafo_relacional_3_vigente.puml` ni en `clases.puml`, aunque sí en
 el esquema físico y el apéndice D.
@@ -486,7 +485,7 @@ la actual. Si alguien externo va a abrirlos, hay que mover el anclaje de compart
 ---
 
 *Última actualización: 2026-10-05 — D-51: fuera `MODELO`, `CONFIGURACION` y
-`ANALISIS.idConfig`; nuevas `ANALISIS.rutaRecuadros` y `ANALISIS.progreso`;
+`ANALISIS.idConfig`; nueva `ANALISIS.rutaRecuadros`;
 `SEGUNDO.propuesta` y `VIDEO.archivo` admiten nulo; `EXPERIMENTO.nombre` UNIQUE;
 `video borrado` en `tipo_notificacion` (17 → 15 relaciones). Ver §5.*
 
