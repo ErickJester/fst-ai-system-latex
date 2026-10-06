@@ -179,7 +179,7 @@ const PAT = { activa: rayas(C.ink, C.n400, 3), nove: rayas('#c9cacc', C.bg, 2.5)
 const fillDe = (ctx, c) => c === 'nado' ? C.ink : c === 'inmov' ? C.acc : c === 'escal' ? C.n400 : c === 'activa' ? ctx.createPattern(PAT.activa, 'repeat') : ctx.createPattern(PAT.nove, 'repeat');
 
 // ── conducta del sistema (datos del mockup; nivel preciso: sin conducta activa) ──
-function propuesta(e) {
+function conductaSistema(e) {
   const base = {
     1: [['nado', 58], ['escal', 7], ['nado', 20], ['inmov', 9], ['nado', 18], ['escal', 12], ['nado', 24], ['inmov', 14], ['nado', 20], ['inmov', 17], ['nado', 22], ['escal', 6], ['nado', 13], ['inmov', 22], ['nado', 10], ['inmov', 26], ['escal', 16], ['', 6]],
     2: [['nado', 40], ['inmov', 12], ['nado', 26], ['escal', 9], ['inmov', 20], ['nado', 30], ['inmov', 24], ['nado', 18], ['escal', 11], ['inmov', 28], ['nado', 22], ['inmov', 20], ['nado', 15], ['escal', 8], ['inmov', 17]],
@@ -193,7 +193,7 @@ function propuesta(e) {
 
 // ── estado ──────────────────────────────────────────────────────────────────
 const S = { L: {}, tubo: 1, t: 0, play: false, rate: 1, hist: [], ultimo: -1, raf: 0, last: 0, guardado: false };
-ESPECIMENES.forEach(e => { const p = propuesta(e); S.L[e] = { p, c: p.slice(), v: new Uint8Array(N) }; });
+ESPECIMENES.forEach(e => { const p = conductaSistema(e); S.L[e] = { p, c: p.slice(), v: new Uint8Array(N) }; });
 
 // borrador en el navegador hasta que se elige «Guardar»
 const BORR = 'revision.CSR-14.ref.tandaA.dia2';

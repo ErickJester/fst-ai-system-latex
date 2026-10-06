@@ -180,6 +180,8 @@ Especimen   "1" --> "1..2" Observacion : "aparece en"
 Video       "1" --> "2..4" Observacion : contiene
 Observacion "1" *--> "5"   Intervalo   : "se divide en"
 
+' D-54: 300 es un maximo, sin minimo (los ultimos 300 s del video;
+' si dura menos, se guardan todos sus segundos).
 Observacion "1" *--> "1..300" Segundo : "se etiqueta en"
 Intervalo "2..4" -- "0..*" Conducta : presenta
 (Intervalo, Conducta) .. PRESENTA
