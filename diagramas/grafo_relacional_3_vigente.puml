@@ -13,7 +13,13 @@
 '  modelado como subtipo -- si el usuario no aparece aqui, es
 '  investigador simple.
 '
-'  15 relaciones - 65 atributos - 18 llaves foraneas.
+'  15 relaciones - 63 atributos - 17 llaves foraneas.
+'  (D-55, 6-oct: se quito ESPECIMEN.numeroRata -- el sistema no
+'   necesita identificar a cada rata por su numero del laboratorio;
+'   el espécimen se distingue por su posicion, numeroCilindro.
+'   D-53, 6-oct: SEGUNDO.clase pasa a llamarse conducta y se quita
+'   SEGUNDO.propuesta. Baja de 65 a 63 atributos y de 18 a 17
+'   llaves foraneas)
 '  (D-51, 5-oct: se quitaron MODELO y CONFIGURACION y la columna
 '   ANALISIS.idConfig -- ningun RF permite cambiar el modelo ni el
 '   umbral, son constantes del pipeline. SEGUNDO.propuesta y
@@ -144,7 +150,6 @@ class ESPECIMEN {
   <u>idEspecimen</u>
   --
   idTanda   [FK] [AK]
-  numeroRata   [AK]
   numeroCilindro   [AK]
 }
 
@@ -197,8 +202,7 @@ class SEGUNDO {
   <u>idObservacion</u>   [FK]
   <u>segundo</u>
   --
-  clase   [FK] (nulo)
-  propuesta   [FK] (nulo)
+  conducta   [FK] (nulo)
   origen
 }
 

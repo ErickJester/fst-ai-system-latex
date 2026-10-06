@@ -54,7 +54,7 @@ else el análisis está completado
 
   u -> ui: elige "Guardar"
   ui -> api: envía las correcciones\n(espécimen, segundo, conducta, origen)
-  api -> db: actualiza SEGUNDO\n(la propuesta de la máquina no se modifica)
+  api -> db: actualiza SEGUNDO\n(conducta y origen de cada segundo)
   api -> db: recalcula los 5 intervalos y los segundos\npor conducta de los especímenes tocados (PRESENTA)
   api -> db: borra los reportes guardados del experimento\npara que se regeneren con los datos nuevos
   api -> fs: borra los archivos de esos reportes

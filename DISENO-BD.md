@@ -186,7 +186,7 @@ conceptual estaba prohibido.
 ## 4. Dónde está el trabajo hecho
 
 Tres artifacts publicados. **Son la fuente de verdad del diseño**, por encima del LaTeX.
-**Actualizados el 2026-10-05** con las decisiones de octubre (D-28 a D-51): Conceptual https://claude.ai/artifact/Y7uJ7Mje7CyDxppJYzzXkh · Lógico https://claude.ai/artifact/FJtL6wbw4K7wYYWJTYmrLP · Físico https://claude.ai/artifact/972fCkz4K4U7fQrPRR3qyH. Las celdas de «Estado» de la tabla de abajo son de septiembre.
+**Actualizados el 2026-10-06** con las decisiones de octubre (D-28 a D-55): Conceptual https://claude.ai/artifact/Y7uJ7Mje7CyDxppJYzzXkh · Lógico https://claude.ai/artifact/FJtL6wbw4K7wYYWJTYmrLP · Físico https://claude.ai/artifact/972fCkz4K4U7fQrPRR3qyH. Las celdas de «Estado» de la tabla de abajo son de septiembre.
 
 | Artifact | URL | Cubre | Estado |
 |----------|-----|-------|--------|
@@ -219,7 +219,7 @@ Usuario ──registra──> Experimento
                           └── Grupo     (fuerte · etiqueta)   tipo ∈ {control, referencia, tratamiento}
                                                                 tratamiento NUNCA nulo (el control recibe placebo)
                                 └── Tanda    (fuerte · ordinal)    nCilindros ∈ {2,3,4}  (D-28)
-                                      ├── Espécimen  (fuerte · numeroRata, relativo al grupo, sin tope de grupo)
+                                      ├── Espécimen  (fuerte · numeroCilindro dentro de la tanda; sin número de rata, D-55)
                                       └── Video      (fuerte · sesión ∈ {Día 1, Día 2}, Día 1 opcional)
                                                 └── Análisis  (1,N — un video se puede reanalizar · pendiente P-08/D-03)
 
@@ -263,7 +263,38 @@ en el esquema lógico definitivo.
 
 ## 5. Estado actual
 
-### Cambios del 5-oct-2026 (D-51) — leer antes que todo lo de abajo
+### Cambios del 6-oct-2026 (D-53, D-54, D-55) — leer antes que todo lo de abajo
+
+Principio del usuario: **la base de datos es para el usuario final.** La red neuronal (CNN) debe
+estar terminada antes de salir a producción, así que no se guarda nada cuyo único uso sea
+mejorarla. Detalle en `errores/preguntas-doctor.md` §6.
+
+| Cambio | Detalle |
+|---|---|
+| **`SEGUNDO.clase` pasa a llamarse `SEGUNDO.conducta`** | Clase y conducta se usaban como sinónimos (D-53). En el CSV del etiquetador la columna sigue llamándose `clase` |
+| **Se quita `SEGUNDO.propuesta`** | Era el único dato que solo servía para mejorar la CNN. La conducta del sistema se reemplaza al corregir |
+| **Se queda `SEGUNDO.origen`** | Dice si la conducta es del sistema o la revisó el usuario; la función principal es que el usuario tenga cada segundo bien clasificado |
+| **Se quita `ESPECIMEN.numeroRata`** | D-55: ya no hay comparación Día 1 contra Día 2 por espécimen (D-44), así que el número del laboratorio no sostiene nada. Se van también el `idGrupo` redundante del físico, su `UNIQUE` y el disparador: **D-04 queda sin objeto**. «Espécimen N» se repite entre tandas, así que la interfaz y los reportes muestran «Tanda A · Espécimen 2». Cambia la premisa de P-01: el espécimen sigue teniendo identificador, pero no el número del laboratorio |
+| **Bloques de 5 s sin la CNN** | La CNN solo clasifica segundos; el bloque se calcula por mayoría de sus cinco segundos. Si nado activo y escalamiento empatan, es conducta activa; con 2 de inmovilidad y 2 de nado decide el quinto segundo (escalamiento o «no se ve» dan conducta activa). Un bloque de «no se ve» se muestra como conducta activa con un matiz, y el PDF final marca esos fragmentos. No cambia el modelo |
+| **Últimos 300 s, no los primeros** | D-54: al inicio de algunos videos aparecen personas. `INTERVALO` y `SEGUNDO` no cambian |
+| **Se mantiene `ANALISIS.rutaDiagnostico`** | Se había propuesto quitarla y se revirtió el mismo día (D-23, D-42) |
+| **Contrato del CSV de la CNN** | El worker convierte `X_cnnseg.csv` en filas de `SEGUNDO` (solo `conducta`; no guarda `confianza` ni `p_*`) y `X_cnnseg_resumen.csv` en `PRESENTA`. `especimen` (1 a 4) se enlaza con `numeroCilindro`. Las hojas manuales `X_seg.csv` solo entrenan la CNN y no entran a la base |
+
+**Cifras vigentes (6-oct):** **15 relaciones**; esquema lógico con **63 atributos y 17 llaves
+foráneas**; esquema físico con **64 atributos** (más `rutaDiagnostico`) y **17 llaves foráneas**:
+las mismas del lógico. Las cifras de las secciones de abajo son anteriores.
+
+**Aplicado (6-oct):** `INSTRUCCIONES-WEB.md`; `grafo_relacional_3_vigente.puml`,
+`esquema_fisico.puml`, `clases.puml`, `seq_revision_segundos.puml`, `seq_analisis_automatico.puml`
+y `pipeline.puml`, con sus PNG; cap. 1, 4 y 5 (RF-18, RF-32, RN-14, casos de uso de la revisión,
+resultados, formas normales); apéndice D; mockups v2 de resultados y revisión, con sus capturas;
+y los tres artifacts (Conceptual, Lógico y Físico, con D-28 a D-55; URLs en §4).
+**Sin decidir:** qué pasa con un video de menos de 300 s y cómo se traduce `SEGUNDO.segundo` a un
+instante del video (D-54); si el Día 1 conserva su recorte de 5 min; D-52. **Sin aplicar:** el
+comentario de `seq_analisis_automatico.puml` sobre `idConfig` y el cap. 6 (comentado en
+`main.tex`).
+
+### Cambios del 5-oct-2026 (D-51)
 
 D-51 sustituye a D-50 (que nunca se aplicó). Detalle en `errores/preguntas-doctor.md` §6.
 
@@ -271,7 +302,7 @@ D-51 sustituye a D-50 (que nunca se aplicó). Detalle en `errores/preguntas-doct
 |---|---|
 | **Se eliminan `MODELO` y `CONFIGURACION`** | Ningún RF permite cambiar el modelo ni el umbral. El modelo final y el umbral de 0.80 son **constantes del pipeline** y se documentan en el cap. 6. Deja sin objeto D-05, D-06 y D-14 |
 | **Se quita `ANALISIS.idConfig`** | Con ella se van las dos llaves foráneas `CONFIGURACION → ANALISIS` y `MODELO → CONFIGURACION` |
-| **`SEGUNDO.propuesta` admite nulo** | Queda vacía cuando el sistema no clasificó el segundo |
+| ~~`SEGUNDO.propuesta` admite nulo~~ | **Retirada el 6-oct (D-53):** la columna se quitó |
 | ~~Nueva `SEGUNDO.confianza`~~ | **Retirada el mismo día:** ningún RF la pide |
 | ~~Nueva `ANALISIS.rutaRecuadros`~~ | **Retirada el mismo día:** el punto 17 de `INSTRUCCIONES-WEB.md` ya lo resolvía con `analisis_{idAnalisis}_cajas.json`, cuyo nombre se deriva del id. D-42 sigue como estaba |
 | **`VIDEO.archivo` admite nulo** | Nulo = el video ya se borró (RF-25, RN-05). La fila se conserva porque los resultados la referencian |
@@ -280,7 +311,7 @@ D-51 sustituye a D-50 (que nunca se aplicó). Detalle en `errores/preguntas-doct
 | ~~Nueva `ANALISIS.progreso`~~ | **Retirada el mismo día:** el porcentaje ya es derivable de `ANALISIS.etapa` (33/67/100, D-22). D-09 y D-22 siguen vigentes |
 | **Ejemplos de normalización del cap. 5** | 1FN: las 300 etiquetas como lista en `OBSERVACION` → `SEGUNDO`. 3FN y FNBC: `tipo` y `tratamiento` dentro de `ESPECIMEN` (transitiva vía `idTanda`) → viven en `GRUPO` |
 
-**Cifras vigentes:** **15 relaciones**; esquema lógico con **65 atributos y 18 llaves
+**Cifras del 5-oct (las vigentes están arriba, en los cambios del 6-oct):** **15 relaciones**; esquema lógico con **65 atributos y 18 llaves
 foráneas**; esquema físico con **19 llaves foráneas** (las 18 + la de D-04). Las cifras
 de las secciones de abajo (16 o 17 relaciones) son anteriores.
 
@@ -306,11 +337,11 @@ dicen 16 relaciones, `nCilindros ∈ {3,4}`, etc.). Detalle de cada una en
 |---|---|
 | **D-28** | Cardinalidades: `TANDA`–`ESPECIMEN` (2,4); `GRUPO`–`TANDA` (1,N); `GRUPO`–`ESPECIMEN` (2,N); `VIDEO`–`OBSERVACION` (2,4). Un grupo puede tener una sola tanda. |
 | **D-29** | `CONDUCTA` pasa a **cuatro** valores (se agrega «conducta activa»). `INTERVALO`–`PRESENTA` pasa de (2,3) a **(2,4)**; en la práctica `PRESENTA` guarda una fila por cada conducta, incluso con 0 s. |
-| **D-30, D-31, D-33** | No tocan la base de datos: formatos `.mp4` y `.mov`; se analizan solo los primeros 300 s; un video girado (vertical) se rechaza. |
+| **D-30, D-31, D-33** | No tocan la base de datos: formatos `.mp4` y `.mov`; se analizan solo los últimos 300 s (D-54 cambió «primeros» por «últimos»); un video girado (vertical) se rechaza. |
 | **D-32** | Se elimina la confianza de detección (0.70) como criterio de error. |
 | **D-47** | **Se quita la columna `ANALISIS.confianza`**: el detector actual no produce ningún valor de confianza. RF-16 deja de mostrar un código de error; el mensaje se arma con la etapa donde se detuvo el análisis. Sin columnas nuevas. |
 | **D-34** | No hay vista en vivo; al terminar el análisis el usuario ve una pantalla de revisión segundo a segundo. |
-| **D-35** | **Tabla nueva `SEGUNDO`** (`idObservacion`, `segundo` como clave; `clase`, `propuesta` y `origen`). Total: **17 relaciones**, 20 llaves foráneas lógicas (21 con la física de D-04). `PRESENTA` pasa a ser un resumen que se recalcula desde `SEGUNDO`. |
+| **D-35** | **Tabla nueva `SEGUNDO`** (`idObservacion`, `segundo` como clave; `clase`, `propuesta` y `origen`; D-53 renombra `clase` a `conducta` y quita `propuesta`). Total: **17 relaciones**, 20 llaves foráneas lógicas (21 con la física de D-04). `PRESENTA` pasa a ser un resumen que se recalcula desde `SEGUNDO`. |
 
 Aplicado en: `esquema_fisico.puml`, `esquema_conceptual.tex`, `clases.puml`,
 `grafo_relacional_3_vigente.puml`, capítulos 1, 4 y 5. **No actualizados:** los
@@ -366,12 +397,12 @@ Hasta que ocurran esas dos revisiones, en los términos del método lo que exist
 
 | ID | Pregunta | Qué decide |
 |----|----------|-----------|
-| P-03 | ¿Con qué se identifica físicamente a la rata: arete, jaula, código? | **Cerrada (3-sep):** marca de plumón indeleble en la cola, numerada 1–8 dentro de su grupo. Ver `numeroRata` |
+| P-03 | ¿Con qué se identifica físicamente a la rata: arete, jaula, código? | **Cerrada (3-sep):** marca de plumón indeleble en la cola, numerada 1–8 dentro de su grupo. Ver `numeroRata`. **Actualizado (D-55, 6-oct):** el sistema ya no guarda ese número |
 | P-04 | ¿Una grabación puede mezclar ratas de dos grupos? | **Cerrada (3-sep):** no, siempre del mismo grupo |
 | P-02 | ¿La rata usa el mismo cilindro los dos días? | Si `numeroCilindro` vive en `ESPECIMEN` o en `OBSERVACION` |
 | P-05 | ¿Cómo llama el laboratorio a la «tanda»? | **Cerrada (3-sep):** el laboratorio no tiene palabra propia; llama «sesión» a cada grabación |
 | P-08 / D-03 | Al reanalizar un video, ¿se conservan ambos resultados o se reemplaza? | Ver la errata estructural de la sección 8. El laboratorio dijo que se queda con el último; falta cerrarlo formalmente |
-| D-04 | ~~¿Cómo se garantiza que `numeroRata` no se repita dentro de su **grupo**, si `idGrupo` ya no vive en `ESPECIMEN`?~~ **Cerrada (equipo, 2026-09-13):** redundancia controlada — `idGrupo` reingresa a `ESPECIMEN` como columna redundante, con `UNIQUE (idGrupo, numeroRata)`. Solo en el esquema físico, no toca el grafo lógico | Falta decidir cómo mantener `idGrupo` sincronizado si una rata cambia de tanda (caso raro) |
+| D-04 | ~~¿Cómo se garantiza que `numeroRata` no se repita dentro de su **grupo**, si `idGrupo` ya no vive en `ESPECIMEN`?~~ **Cerrada (equipo, 2026-09-13):** redundancia controlada — `idGrupo` reingresa a `ESPECIMEN` como columna redundante, con `UNIQUE (idGrupo, numeroRata)`. Solo en el esquema físico, no toca el grafo lógico. **Sin objeto desde D-55 (6-oct):** se quitó `numeroRata` y con ella esta redundancia | Falta decidir cómo mantener `idGrupo` sincronizado si una rata cambia de tanda (caso raro) |
 | D-05 | ~~¿El sistema permite correr dos veces la misma `CONFIGURACION` sobre el mismo video?~~ | **Sin objeto:** se disolvió con D-03 y, desde D-51, `CONFIGURACION` ya no existe |
 | D-06 | ~~El pipeline usa más de un modelo, pero `CONFIGURACION` solo guarda un `hashModelo`~~ | **Sin objeto desde D-51:** `MODELO` y `CONFIGURACION` se eliminaron |
 | Q-08 / D-01 | ~~¿Autoregistro con aprobación (cap. 1) o solo el Admin (cap. 4, RF-07)?~~ **Cerrada (equipo, 2026-09-13):** solo el Admin crea cuentas | El cap. 1 queda mal, hay que corregirlo al RF-07 |
@@ -486,7 +517,11 @@ la actual. Si alguien externo va a abrirlos, hay que mover el anclaje de compart
 
 ---
 
-*Última actualización: 2026-10-05 — D-51: fuera `MODELO`, `CONFIGURACION` y
+*Última actualización: 2026-10-06 — D-53: `SEGUNDO.clase` pasa a `conducta` y se quita
+`propuesta`; D-54: se analizan los últimos 300 s; D-55: fuera `ESPECIMEN.numeroRata` (63
+atributos, 17 llaves foráneas). Ver §5.*
+
+*Actualización anterior: 2026-10-05 — D-51: fuera `MODELO`, `CONFIGURACION` y
 `ANALISIS.idConfig`;
 `SEGUNDO.propuesta` y `VIDEO.archivo` admiten nulo; `EXPERIMENTO.nombre` UNIQUE;
 `video borrado` en `tipo_notificacion` (17 → 15 relaciones). Ver §5.*

@@ -72,7 +72,7 @@ w -> db: actualiza la etapa a "preprocesamiento"
 w -> w: alinea la cámara y construye el modelo de fondo
 
 w -> db: actualiza la etapa a "cilindros"
-w -> w: localiza los cilindros y la línea de agua\n(solo los primeros 300 s del video)
+w -> w: localiza los cilindros y la línea de agua\n(solo los últimos 300 s del video)
 
 alt se hallaron los tubos
   w -> db: actualiza la etapa a "clasificación"
@@ -85,7 +85,7 @@ alt se hallaron los tubos
   end
 
   w -> fs: guarda los recuadros de los tubos\n(archivo de recuadros del análisis)
-  w -> fs: guarda una copia del video, de los primeros 300 s,\nen un formato que el navegador puede reproducir
+  w -> fs: guarda una copia del video, de los últimos 300 s,\nen un formato que el navegador puede reproducir
 
   w -> db: marca el análisis como "completado",\ncon su nivel de clasificación y fechaAnalisis
   w -> db: programa la eliminación del video\n30 días después (RNF-08)

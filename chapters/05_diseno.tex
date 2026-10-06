@@ -112,7 +112,7 @@ al clasificador de conducta.
 \section{Diseño del pipeline de análisis conductual}
 % -----------------------------------------------------------
 
-El pipeline recibe un video del FST, analiza solo sus primeros 300 segundos y produce
+El pipeline recibe un video del FST, analiza solo sus últimos 300 segundos y produce
 como salida los tiempos totales de cada conducta por espécimen y el desglose por minuto. Sigue el patrón arquitectónico de
 tubería y filtro (\textit{pipe and filter}) \cite{sommerville2011}: cada módulo es
 un filtro discreto que transforma los datos y los pasa al siguiente. Está organizado
@@ -405,8 +405,8 @@ Las tablas están organizadas en cuatro grupos funcionales:
         dentro de un grupo, numerada por orden (A, B, C...).
 
   \item \textbf{ESPECIMEN}: un registro por espécimen dentro de su tanda,
-        identificado por su número dentro del grupo y su posición de
-        cilindro dentro de la tanda.
+        identificado por su posición de cilindro dentro de la tanda. El sistema
+        no guarda el número de rata del laboratorio (D-55).
 
   \item \textbf{VIDEO}: uno o dos videos por tanda (Día~1 y/o Día~2), con
         ruta de almacenamiento, duración y fecha de carga. La ruta queda vacía
@@ -437,9 +437,8 @@ pipeline y se documentan en el Capítulo~6.
         cuando el clasificador no decide entre nado y escalamiento; ver RN-13).
 
   \item \textbf{SEGUNDO}: una fila por espécimen y por segundo analizado, con
-        la conducta asignada (o ninguna, si el espécimen no se ve), la
-        propuesta original del sistema y el origen de la etiqueta (propuesta del
-        sistema, confirmada, corregida o dudosa). Es lo que el usuario revisa y
+        la conducta asignada (o ninguna, si el espécimen no se ve) y el origen
+        de esa conducta (del sistema, confirmada, corregida o dudosa). Es lo que el usuario revisa y
         corrige al terminar el análisis (ver RF-32).
 
   \item \textbf{PRESENTA}: segundos de cada conducta dentro de cada
@@ -497,7 +496,7 @@ En el diseño inicial, las etiquetas de un espécimen podrían haberse guardado 
 una lista dentro de \texttt{OBSERVACION}: un solo campo con las 300 conductas del
 video, una por segundo. Eso viola la 1FN porque un campo único contendría cientos
 de valores. Esas etiquetas se extrajeron a \texttt{SEGUNDO}, donde cada segundo
-ocupa su propia fila con su conducta, su propuesta y su origen. Así
+ocupa su propia fila con su conducta y su origen. Así
 es posible consultar o corregir un segundo en la revisión sin reescribir la lista
 completa ni parsear texto.
 
@@ -529,8 +528,8 @@ guardado una descripción de la conducta, esa columna dependería solo de
 la conducta viven ahí, no repetidos en cada fila de \texttt{PRESENTA}.
 
 \texttt{SEGUNDO} también tiene clave compuesta (\texttt{idObservacion},
-\texttt{segundo}). Sus columnas no clave ---la conducta asignada, la propuesta
-original y el origen de la etiqueta--- describen ese segundo específico de esa
+\texttt{segundo}). Sus columnas no clave ---la conducta asignada y el origen
+de esa conducta--- describen ese segundo específico de esa
 observación específica, así que dependen de la clave completa y no de una de sus
 partes.
 
@@ -586,16 +585,10 @@ ejemplo, \texttt{GRUPO} tiene como determinantes \texttt{idGrupo} (primaria) y l
 combinación (\texttt{idExperimento}, \texttt{etiqueta}) (alterna). Con eso, las
 quince relaciones del esquema lógico cumplen FNBC.
 
-Hay una excepción deliberada en el esquema físico: la tabla \texttt{ESPECIMEN}
-repite la columna \texttt{idGrupo}, que ya se obtiene a través de \texttt{TANDA}
-(de \texttt{idTanda} se deduce \texttt{idGrupo}, y \texttt{idTanda} no es clave de
-\texttt{ESPECIMEN}). Por eso, en el esquema físico, esa tabla deja de cumplir FNBC.
-Se aceptó como redundancia controlada (D-04) por dos razones: permite declarar en la
-propia base de datos que el número de espécimen es único dentro de su grupo, y evita
-pasar por \texttt{TANDA} cada vez que un reporte compara grupos. La aplicación no
-envía esa columna: la calcula un disparador a partir de la tanda, así que no puede
-quedar desactualizada. El esquema lógico no incluye la columna y por eso conserva la
-FNBC.
+El esquema físico tiene las mismas columnas que el lógico, sin columnas repetidas, así
+que también cumple FNBC. La versión anterior aceptaba una excepción (D-04): repetir
+\texttt{idGrupo} en \texttt{ESPECIMEN} para declarar único el número de rata dentro del
+grupo. Al dejar de guardar ese número (D-55), la columna dejó de hacer falta y se quitó.
 
 \subsection{Resumen de formas normales aplicadas}
 
@@ -647,8 +640,7 @@ las tablas afectadas y la decisión de diseño concreta en cada caso.
 FNBC &
   Todo determinante es clave candidata &
   Las 15 relaciones &
-  Verificado relación por relación; en el esquema físico, \texttt{ESPECIMEN}
-  repite \texttt{idGrupo} a propósito (D-04) \\
+  Verificado relación por relación; el esquema físico no repite columnas \\
 \hline
 \end{tabular}
 \end{table}
@@ -1836,7 +1828,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite revisar, con el video, la conducta que el sistema asignó a cada espécimen en cada segundo.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Cuando el análisis termina, el usuario abre una pantalla con el video y una línea de tiempo por espécimen, coloreada por conducta. Revisa un espécimen a la vez, con el video corriendo; cada segundo ya trae la etiqueta propuesta por el sistema.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Cuando el análisis termina, el usuario abre una pantalla con el video y una línea de tiempo por espécimen, coloreada por conducta. Revisa un espécimen a la vez, con el video corriendo; cada segundo ya trae la conducta que puso el sistema.} \\
 \hline
 \end{tabular}
 
@@ -1851,7 +1843,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 2 & Sistema & Comprueba que el análisis esté completado y consulta la etiqueta de cada segundo de cada espécimen. \\
 \hline
-3 & Sistema & Muestra el video, la línea de tiempo de cada espécimen y la etiqueta propuesta para cada segundo. \\
+3 & Sistema & Muestra el video, la línea de tiempo de cada espécimen y la conducta que puso el sistema en cada segundo. \\
 \hline
 4 & Inv. / Admin. & Revisa un espécimen a la vez con el video corriendo, y corrige las etiquetas que no coincidan con lo que observa (ver CU-26). \\
 \hline
@@ -1887,9 +1879,9 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-32, RN-14. Incluye: CU-27 (Recalcular totales por minuto).} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pantalla de revisión abierta (CU-25); la etiqueta propuesta no coincide con lo que el usuario observa.} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pantalla de revisión abierta (CU-25); la conducta del sistema no coincide con lo que el usuario observa.} \\
 \hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{La etiqueta corregida queda guardada con su origen; la propuesta original del sistema se conserva.} \\
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{La conducta corregida queda guardada con su origen y reemplaza a la del sistema.} \\
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite cambiar la conducta asignada a uno o varios segundos de un espécimen.} \\
 \hline
@@ -1910,7 +1902,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 3 & Inv. / Admin. & Elige «Guardar». \\
 \hline
-4 & Sistema & Guarda las etiquetas de cada segundo conservando la propuesta original, y recalcula los totales por minuto (CU-27). \\
+4 & Sistema & Guarda la conducta de cada segundo con su origen, y recalcula los totales por minuto (CU-27). \\
 \hline
 \end{tabular}
 
@@ -1923,7 +1915,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 1 & El usuario deja un segundo sin conducta a propósito: queda marcado como «dudosa». \\
 \hline
-1 & La etiqueta que el usuario elige coincide con la propuesta: queda marcada como «confirmada». \\
+1 & La conducta que el usuario elige coincide con la del sistema: queda marcada como «confirmada». \\
 \hline
 4 & No se puede guardar: el borrador se conserva en el navegador y el sistema informa el error. \\
 \hline
@@ -2768,7 +2760,11 @@ soportar cancelación.
 Cuatro pestañas: resultados por espécimen, comparación entre grupos, línea de tiempo
 por minuto (RF-20) y bloques de 5~s (RF-18), donde cada bloque muestra la conducta con
 más segundos y, dentro, los cinco segundos que lo componen, para notar las conductas
-breves y comparar con el análisis manual. La vista por espécimen
+breves y comparar con el análisis manual. El bloque se calcula por mayoría de sus cinco
+segundos, sin volver a usar el clasificador. Si nado activo y escalamiento empatan, el
+bloque es conducta activa; con dos segundos de inmovilidad y dos de nado activo decide
+el quinto, y tanto escalamiento como «no se ve» dan conducta activa. Los fragmentos «no se ve»
+se marcan en pantalla y en el PDF final. La vista por espécimen
 muestra el tiempo por conducta con media, desviación estándar y varianza (RF-19), el
 nivel de clasificación del análisis y la leyenda de conductas; en el panel lateral
 se compara la inmovilidad entre los grupos con los videos del Día~2 (RF-21). Esa
@@ -2810,15 +2806,15 @@ Se abre solo cuando el análisis está completado, desde la pantalla de progreso
 desde la de resultados (RF-32, RN-14). Muestra el video, con el tubo del espécimen
 que se revisa destacado, y una línea de tiempo por espécimen coloreada por
 conducta: una vista ampliada de 40~s alrededor del segundo actual y otra de los
-300~s completos. Cada segundo ya trae la etiqueta propuesta por el sistema; cuando
+300~s completos. Cada segundo ya trae la conducta que puso el sistema; cuando
 no coincide con lo que el usuario observa, pulsa la conducta correcta. Con el video
 corriendo, el cambio se aplica desde 0.4~s antes del clic hasta el siguiente cambio
 de color; en pausa, cambia solo el segundo actual. Se revisa un espécimen a la vez y
 el avance se guarda como borrador en el navegador hasta que el usuario elige
-«Guardar», momento en que el sistema registra las correcciones, conserva la
-propuesta original y recalcula los totales por minuto (CU-25 a CU-27).
+«Guardar», momento en que el sistema registra las correcciones, reemplaza la
+conducta del sistema y recalcula los totales por minuto (CU-25 a CU-27).
 
-El panel lateral muestra la conducta del segundo actual y si es la propuesta del
+El panel lateral muestra la conducta del segundo actual y si es la del
 sistema o una corrección, el avance de revisión del espécimen, los segundos por
 conducta antes y después de corregir, y el nivel de clasificación que tendrá el
 análisis al guardar: si algún segundo queda como conducta activa, el análisis pasa a
