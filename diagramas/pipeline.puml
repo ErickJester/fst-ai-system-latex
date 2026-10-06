@@ -14,8 +14,8 @@
 '  - Clasificacion: rasgos + gradient boosting con la regla de tres
 '    pasos y la ventana deslizante de 4 s. La R(2+1)D-18 aparece
 '    como candidata en evaluacion; cual queda se decide en TT-II.
-'  - CLAHE se conserva porque el cap. 5 aun lo describe (pendiente
-'    de confirmar contra fst_auto, CLA-04).
+'  - Preprocesamiento segun fst_auto (CLA-04, 5-oct): sin correccion
+'    de contraste; fondo por percentil 10, no por mediana.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/pipeline.puml
@@ -33,14 +33,19 @@ start
 :Video subido por el usuario\n(solo los primeros 300 s);
 
 partition "1. Preprocesamiento" {
-  :Lee los cuadros del video;
+  if (¿Se pudo abrir el video?) then (sí)
+    :Lee los cuadros del video;
+  else (no)
+    :Genera el reporte de diagnóstico\ny marca el análisis con error;
+    stop
+  endif
   :Alinea cada cuadro contra uno de referencia\n(registro de cámara);
-  :Construye el modelo de fondo\n(el aparato sin especímenes);
-  :Corrige el contraste si hace falta (CLAHE);
+  :Construye el modelo de fondo\n(percentil 10 de cada píxel)\ny el mapa de ocupación;
 }
 
 partition "2. Localización de los cilindros" {
-  :Localiza los bordes del recipiente,\nla línea de agua y el suelo;
+  :Localiza los rebordes del recipiente:\nlínea de agua y suelo;
+  :Separa los cilindros por dónde\nhubo movimiento dentro del agua;
   if (¿Se hallaron los cilindros?) then (sí)
     :Calcula la región de interés\nde cada cilindro;
   else (no)
@@ -50,7 +55,7 @@ partition "2. Localización de los cilindros" {
 }
 
 partition "3. Clasificación de conducta" {
-  :Separa al espécimen del fondo\ndentro de su cilindro;
+  :Separa al espécimen del fondo\ndentro de su cilindro\n(diferencia y brillo, región más grande);
   :Mide quince rasgos de movimiento,\npostura y trayectoria;
   :Para cada segundo, toma una ventana de 4 s\ncentrada en él y estima la probabilidad\nde cada conducta;
   note right

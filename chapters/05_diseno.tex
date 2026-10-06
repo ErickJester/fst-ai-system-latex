@@ -129,23 +129,63 @@ muestra el flujo completo con las tecnologías de cada módulo.
 
 \subsection{Módulo 1: Preprocesamiento}
 
-El preprocesamiento usa \textbf{OpenCV VideoCapture} para decodificar el video
-cuadro a cuadro. Primero alinea cada cuadro contra uno de referencia
-(\textbf{registro de cámara}), para que un movimiento de la cámara no se confunda
-con movimiento del espécimen. Después construye un \textbf{modelo de fondo}: la
-imagen del aparato sin especímenes. Si el contraste promedio cae por debajo del umbral mínimo, se
-aplica \textbf{CLAHE} (\textit{Contrast Limited Adaptive Histogram Equalization})
-\cite{bradski2000} para normalizarlo. Si tras la corrección no se logran encontrar
-los cilindros, el pipeline se detiene y genera un reporte de diagnóstico (ver RN-11).
+El preprocesamiento usa OpenCV \cite{bradski2000} para decodificar el video cuadro
+a cuadro; si el archivo no se puede abrir, el pipeline se detiene y genera el reporte
+de diagnóstico (ver RN-11). Después hace dos cosas, sin ningún parámetro escrito a
+mano para un video en particular:
+
+\begin{itemize}
+  \item \textbf{Registro de cámara.} Alinea cada cuadro contra uno de referencia,
+        tomado a la mitad del video, para que un movimiento de la cámara no se
+        confunda con movimiento del espécimen. La alineación admite traslación,
+        rotación y escala (una transformación de similitud), porque en el montaje
+        del laboratorio la cámara llega a variar alrededor de un 5\,\% de escala, y
+        con solo traslación el modelo de fondo sale borroso. Los puntos de
+        correspondencia entre cuadros se obtienen con el detector ORB y la
+        transformación se estima con RANSAC, que descarta las correspondencias
+        erróneas.
+
+  \item \textbf{Modelo de fondo.} Construye la imagen del aparato sin especímenes
+        como el \textbf{percentil 10} de cada píxel a lo largo del video, tomando
+        alrededor de un cuadro por segundo. Como el espécimen es claro y el agua
+        oscura, un percentil bajo lo borra. La mediana, que es la opción habitual
+        \cite{piccardi2004}, no sirve en este caso: un espécimen que pasa mucho
+        tiempo inmóvil queda incrustado en el fondo y después no se puede separar
+        de él. Con los mismos cuadros calcula un \textbf{mapa de ocupación}, que
+        indica en qué zonas de la imagen hubo movimiento a lo largo del video.
+\end{itemize}
+
+El sistema no aplica ninguna corrección de contraste ni de iluminación: si un video
+no permite encontrar los cilindros, el análisis se detiene en la etapa siguiente con
+su reporte de diagnóstico.
 
 \subsection{Módulo 2: Localización de los cilindros}
 
-Sobre el modelo de fondo, el sistema localiza los bordes del recipiente, la
-\textbf{línea de agua} y el suelo, y separa los cilindros midiendo dónde hay
-movimiento dentro de la franja de agua. Para cada cilindro calcula una
-\textbf{región de interés} (ROI) que delimita el área de análisis de cada espécimen.
-Ninguna medida se escribe a mano: el sistema las deduce de cada video, así que
-funciona con grabaciones de distintos días, encuadres y resoluciones.
+Sobre el modelo de fondo, el sistema deduce la geometría del aparato en tres pasos:
+
+\begin{enumerate}
+  \item \textbf{Filas.} Los dos bordes horizontales más marcados del aparato vacío
+        son los rebordes del recipiente; de ellos salen la \textbf{línea de agua} y
+        el suelo. Se miden una sola vez por video, sobre el modelo de fondo, y no
+        cuadro a cuadro.
+  \item \textbf{Columnas.} Dentro de la franja de agua, cada racha de columnas con
+        ocupación es un cilindro. Se descartan las rachas pegadas al borde del
+        encuadre, porque lo que se mueve ahí es el laboratorio (personas, puertas),
+        no un espécimen.
+  \item \textbf{Ajuste fino.} La línea de agua y el suelo se vuelven a medir solo
+        dentro de los cilindros encontrados, lo que da una posición más precisa
+        que la del encuadre completo.
+\end{enumerate}
+
+Los cilindros se numeran de izquierda a derecha y cada uno recibe una
+\textbf{región de interés} (ROI) que delimita el área de análisis de su espécimen.
+Las regiones de los cilindros de los extremos se ensanchan, porque el espécimen que
+escala lo hace pegado a la pared exterior. La geometría sale del mapa de ocupación y
+no de un umbral sobre la imagen, porque objetos del laboratorio con el mismo tono que
+el aparato engañan a un umbral. Ninguna medida se escribe a mano: el sistema las
+deduce de cada video, así que funciona con grabaciones de distintos días, encuadres
+y resoluciones. Si no encuentra los cilindros, el pipeline se detiene y genera el
+reporte de diagnóstico (ver RN-11).
 
 Cada cilindro contiene un solo espécimen, así que no hace falta seguirlo de un
 cuadro a otro con un algoritmo de seguimiento: lo que se mueve dentro de un
@@ -159,12 +199,23 @@ medidos, que ya funciona y que además sirve para etiquetar el conjunto de
 entrenamiento, y una red neuronal convolucional que se compara contra él y que
 sigue en desarrollo.
 
-\paragraph{Rasgos del espécimen.} Sobre la imagen estabilizada y con el espécimen
-separado del fondo, el sistema mide quince rasgos que describen su movimiento (la
+\paragraph{Separación del espécimen.} En cada cuadro alineado y dentro de la
+región de interés de cada cilindro, un píxel pertenece al espécimen si difiere del
+fondo en al menos 45 niveles de gris y, además, tiene un brillo de al menos 80, porque
+el espécimen es claro sobre agua oscura. De los píxeles que cumplen las dos
+condiciones se conserva la región conexa más grande, que es el espécimen
+\cite{bradski2000}. Antes de medir la postura se borra la cola con una erosión
+morfológica; sin ese paso, las medidas de forma describirían la cola y no la
+verticalidad del cuerpo. La posición del espécimen es el centroide de esa región,
+suavizado con una mediana móvil de cinco mediciones, porque el centroide sin
+suavizar salta varios píxeles de un cuadro a otro solo por ruido.
+
+\paragraph{Rasgos del espécimen.} Sobre esa región, el sistema mide quince rasgos que describen su movimiento (la
 energía de movimiento medida solo dentro del cuerpo, para que el oleaje del agua no
 la sature), su postura (verticalidad, alargamiento y área) y su trayectoria
 (recorrido, amplitud y cuadrantes del cilindro que cruza). Las distancias se
-expresan en largos de cuerpo y los tiempos en segundos: así, dos videos grabados
+expresan en largos de cuerpo ---el largo típico del espécimen, tomado como la
+mediana de todo el video--- y los tiempos en segundos: así, dos videos grabados
 con encuadres distintos producen números comparables y el clasificador aprende la
 conducta y no el encuadre.
 
@@ -366,9 +417,8 @@ Las tablas están organizadas en cuatro grupos funcionales:
 \textbf{Análisis.}
 \begin{itemize}
   \item \textbf{ANALISIS}: ejecución del pipeline sobre un video. Registra
-        estado, etapa actual, nivel de clasificación (preciso o agrupado), la
-        ruta al archivo con los recuadros de los tubos que usa la pantalla de
-        revisión y, cuando falla, la ruta al reporte de diagnóstico (ver D-23).
+        estado, etapa actual, nivel de clasificación (preciso o agrupado) y,
+        cuando falla, la ruta al reporte de diagnóstico (ver D-23).
 \end{itemize}
 
 El modelo del clasificador y el umbral de confianza (0.80) no se guardan en la

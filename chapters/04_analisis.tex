@@ -138,7 +138,8 @@ RF-12 & Carga de video
 % ── Análisis conductual ────────────────────────────────────
 RF-13 & Análisis conductual
       & El pipeline de análisis debe ejecutar tres etapas secuenciales:
-        preprocesamiento del video (decodificación y corrección de contraste),
+        preprocesamiento del video (decodificación, alineación de la cámara y
+        modelo de fondo),
         localización de los cilindros y clasificación de conductas. Cada etapa
         debe tener un indicador de estado visible en la pantalla de progreso.
       & Alta & Sistema \\
@@ -631,17 +632,19 @@ agrupan en cuatro áreas.
 
 OpenCV 4.x \cite{bradski2000}
     & Biblioteca estándar para procesamiento de imágenes y video en Python. Incluye
-      sustracción de fondo, umbralización de Otsu, morfología y contornos.
+      detección de puntos característicos, alineación de imágenes, sustracción de
+      fondo, morfología y regiones conexas.
     & Es la herramienta de referencia para este tipo de trabajo y es compatible con
       PyTorch sin configuración extra.
     & No \\
 \hline
-Sustracción de fondo por mediana \cite{piccardi2004}
-    & El fondo se estima como la mediana píxel a píxel de los primeros $N$ cuadros,
-      evitando que un espécimen inmóvil al inicio contamine el modelo.
+Sustracción de fondo por percentil \cite{piccardi2004}
+    & El fondo se estima como el percentil 10 de cada píxel a lo largo del video,
+      con los cuadros ya alineados. Como el espécimen es claro sobre agua oscura,
+      un percentil bajo lo borra del fondo.
     & Más simple y predecible que el GMM \cite{zivkovic2004} para el caso de cámara
-      fija. No requiere parámetros de color ni modelos adaptativos, lo que reduce
-      la sensibilidad a variaciones de iluminación entre sesiones.
+      fija. Se prefirió a la mediana porque esta deja incrustado en el fondo a un
+      espécimen que pasa mucho tiempo inmóvil, y luego no se le puede separar.
     & No \\
 \hline
 
@@ -768,10 +771,9 @@ R-01 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
      & Videos con reflejos, iluminación variable o especímenes de pelaje claro que
        hacen fallar el pipeline (no se encuentran los cilindros, ver RN-11).
      & Definir con el laboratorio los requisitos mínimos de calidad de video.
-       El sistema aplica corrección CLAHE (\textit{Contrast Limited Adaptive
-       Histogram Equalization}) \cite{bradski2000} como primer intento automático
-       de mejora de contraste; si aun así no se encuentran los cilindros, se genera
-       el reporte de diagnóstico (ver RN-11). \\
+       El sistema deduce el fondo y la posición de los cilindros de cada video, sin
+       parámetros fijados a mano para un encuadre; si aun así no se encuentran los
+       cilindros, se genera el reporte de diagnóstico (ver RN-11). \\
 \hline
 R-02 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
      & El dataset de cuadros etiquetados no alcanza para entrenar un clasificador

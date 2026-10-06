@@ -92,69 +92,85 @@ convención de OpenCV \cite{bradski2000}. Un video de 5 minutos a 30 FPS equival
 representación completa de un cuadro de resolución $W \times H$ ocupa $W \times H
 \times 3$ bytes.
 
-\subsection{Modelo de fondo y sustracción}
+\subsection{Alineación de los cuadros}
 
-El primer paso del pipeline es construir un modelo del fondo: una imagen de referencia
-del cilindro sin el espécimen. Se calcula como la mediana píxel a píxel de los primeros
-$N$ cuadros del video:
+Aunque la cámara está fija, entre un cuadro y otro puede moverse ligeramente: en el
+montaje del laboratorio se ha medido un cambio de escala de alrededor de 5\,\%. Si no se
+corrige, cualquier medida en coordenadas fijas seguiría a la cámara y no al espécimen.
+Por eso, antes de cualquier otro paso, cada cuadro se alinea contra uno de referencia
+(\textit{image registration}, registro de imágenes). Primero se buscan puntos
+característicos en los dos cuadros con el detector ORB (\textit{Oriented FAST and
+Rotated BRIEF}) y se emparejan. Después se estima la transformación que lleva un cuadro
+sobre el otro con el método RANSAC (\textit{Random Sample Consensus}), que descarta los
+emparejamientos erróneos. La transformación es de similitud: admite traslación,
+rotación y escala uniforme,
 
 \begin{equation}
-    B(x,y) = \text{mediana}\bigl\{ I_1(x,y),\, I_2(x,y),\, \ldots,\, I_N(x,y) \bigr\}
+    \begin{pmatrix} x' \\ y' \end{pmatrix} =
+    s \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}
+    \begin{pmatrix} x \\ y \end{pmatrix} +
+    \begin{pmatrix} t_x \\ t_y \end{pmatrix}
+    \label{eq:similitud}
+\end{equation}
+
+donde $s$ es la escala, $\theta$ el ángulo de rotación y $(t_x, t_y)$ la traslación. Una
+traslación sola no basta: con el cambio de escala del montaje, el modelo de fondo sale
+borroso.
+
+\subsection{Modelo de fondo y sustracción}
+
+Con los cuadros ya alineados se construye un modelo del fondo: una imagen de referencia
+del aparato sin especímenes. Se calcula como el percentil 10 de cada píxel sobre cuadros
+tomados a lo largo de todo el video, alrededor de uno por segundo:
+
+\begin{equation}
+    B(x,y) = P_{10}\bigl\{ I_1(x,y),\, I_2(x,y),\, \ldots,\, I_N(x,y) \bigr\}
     \label{eq:fondo}
 \end{equation}
 
-Usar la mediana en vez del promedio evita que un espécimen inmóvil al inicio contamine
-el modelo. Una vez que se tiene el fondo, en cada cuadro se calcula la diferencia
-absoluta: los píxeles con diferencia mayor a un umbral son el primer plano (el
-espécimen). Este enfoque
+donde $P_{10}$ es el percentil 10 de los $N$ valores. El espécimen es claro y el agua
+oscura, así que en cada píxel el espécimen aporta los valores altos y un percentil bajo
+lo descarta. La mediana, que es la opción usual para cámara fija \cite{piccardi2004},
+no sirve aquí: si el espécimen pasa inmóvil buena parte del video en un mismo lugar, la
+mediana lo conserva como parte del fondo y después no se le puede separar. Este enfoque
 es más predecible que el modelo de mezcla gaussiana (GMM) \cite{zivkovic2004} para el
 caso de cámara fija \cite{piccardi2004}.
 
-\subsection{Umbralización de Otsu}
+Con los mismos cuadros se calcula un mapa de ocupación, que indica en qué zonas de la
+imagen hubo movimiento a lo largo del video. Sirve para localizar los cilindros.
 
-La imagen de diferencias se convierte a binario con el método de Otsu \cite{otsu1979}.
-Este método calcula automáticamente el umbral óptimo $T^*$ que minimiza la varianza
-intra-clase entre píxeles de fondo y primer plano:
+\subsection{Separación del espécimen}
 
-\begin{equation}
-    T^* = \arg\min_{T} \bigl[ \omega_0(T)\,\sigma_0^2(T) + \omega_1(T)\,\sigma_1^2(T) \bigr]
-    \label{eq:otsu}
-\end{equation}
+En cada cuadro alineado, un píxel se considera parte del espécimen si cumple dos
+condiciones: su diferencia con el fondo es de al menos 45 niveles de gris y su brillo es
+de al menos 80. La primera detecta lo que cambió respecto al aparato vacío; la segunda
+aprovecha que el espécimen es claro sobre agua oscura. Los dos umbrales son fijos, no se
+recalculan en cada cuadro.
 
-donde $\omega_0$ y $\omega_1$ son las proporciones de píxeles en cada clase y $\sigma_0^2$,
-$\sigma_1^2$ sus varianzas. La ventaja de Otsu es que adapta el umbral a cada cuadro
-sin parámetros fijos, lo que es útil cuando la iluminación varía entre sesiones.
+De los píxeles que cumplen ambas condiciones se conserva, dentro de cada cilindro, la
+región conexa más grande \cite{bradski2000}. Como cada cilindro contiene un solo
+espécimen, esa región es el espécimen: no hace falta asociar detecciones entre cuadros
+para saber a quién pertenece cada una.
 
-Después de la umbralización se aplica una apertura morfológica (erosión seguida de
-dilatación) para eliminar ruido pequeño y rellenar huecos en la región detectada.
+Antes de medir la postura, la región se erosiona con un elemento estructurante elíptico,
+lo que borra la cola; sin ese paso, las medidas de forma describirían la cola y no la
+verticalidad del cuerpo. La posición del espécimen es el centroide de la región. Como el
+centroide salta varios píxeles de un cuadro a otro solo por ruido de la segmentación, se
+suaviza con una mediana móvil de cinco mediciones antes de calcular trayectorias.
 
-\subsection{Detección de contornos}
+\subsection{Localización de los cilindros y de la línea de agua}
 
-Sobre la imagen binaria se extraen los contornos con el algoritmo de Suzuki y Abe
-\cite{suzuki1985}. De cada contorno se obtiene el área, el rectángulo envolvente
-(\textit{bounding box}) y el centroide. Como cada cilindro contiene un solo
-espécimen, el contorno principal dentro de un cilindro es ese espécimen: no hace falta
-asociar detecciones entre cuadros para saber a quién pertenece cada una.
+La geometría del aparato se deduce de cada video, sin medidas escritas a mano. Las filas
+salen del modelo de fondo: los dos bordes horizontales más marcados del aparato vacío son
+los rebordes del recipiente, y de ellos se obtienen la línea de agua y el suelo. Las
+columnas salen del mapa de ocupación, medido solo dentro de la franja de agua: cada racha
+de columnas con movimiento es un cilindro, y se descartan las que tocan el borde del
+encuadre, porque lo que se mueve ahí es el laboratorio. Con los cilindros ya ubicados, la
+línea de agua y el suelo se vuelven a medir solo dentro de ellos, lo que da una posición
+más precisa.
 
-\subsection{Estimación de la línea de agua}
-
-La superficie del agua puede generar reflejos que hacen que el espécimen aparezca duplicado
-desde la vista lateral. Para mitigar ese efecto, el sistema estima la posición vertical
-de la línea del agua analizando el perfil de intensidad por filas dentro de cada ROI e
-identificando la fila con el cambio más brusco. Como esa estimación oscila por ruido
-entre cuadros, se estabiliza con un promedio móvil exponencial (EMA):
-
-\begin{equation}
-    \hat{y}_t = \alpha \cdot \tilde{y}_t + (1 - \alpha) \cdot \hat{y}_{t-1}
-    \label{eq:ema}
-\end{equation}
-
-donde $\tilde{y}_t$ es la estimación del cuadro actual, $\hat{y}_{t-1}$ el valor
-suavizado anterior y $\alpha \in (0,1)$ controla la velocidad de respuesta. Un $\alpha$
-alto responde rápido a cambios reales pero amplifica el ruido; un $\alpha$ bajo es más
-estable pero tarda en adaptarse. 
-%Esta lógica está encapsulada en la clase
-%\texttt{WaterlineSmoother} del módulo \texttt{tracker.py}.
+Como la línea de agua se mide una sola vez, sobre el modelo de fondo y no cuadro a
+cuadro, no oscila entre cuadros y no necesita suavizado.
 
 % ============================================================
 \section{Redes neuronales y aprendizaje profundo}
