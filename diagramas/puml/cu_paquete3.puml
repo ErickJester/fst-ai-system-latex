@@ -12,16 +12,13 @@ actor "Investigador\n(solo observa)" as INV
 actor ":Worker:\n<<system>>" as WRK #LightYellow
 rectangle "Plataforma Web FST - Paquete 3" {
   usecase "Ejecutar pipeline de analisis" as UC30
-  usecase "Preprocesar video" as UC31
-  usecase "Localizar cilindros" as UC32
-  usecase "Clasificar conducta" as UC34
-  usecase "Monitorear progreso" as UC35
   usecase "Reportar error de pipeline" as UC36
+  usecase "CU-07\nMonitorear progreso del analisis" as CU07
+  usecase "CU-08\nDescargar reporte de diagnostico" as CU08
 }
 WRK --> UC30
-INV --> UC35
-UC30 ..> UC31 : <<include>>
-UC30 ..> UC32 : <<include>>
-UC30 ..> UC34 : <<include>>
-UC36 ..> UC32 : <<extend>>\n[no se hallaron los tubos]
+INV --> CU07
+INV --> CU08
+UC36 ..> UC30 : <<extend>>\n[no se pudo abrir el video\no no se hallaron los cilindros]
+CU08 ..> CU07 : <<extend>>\n[el analisis termino\nen error]
 @enduml

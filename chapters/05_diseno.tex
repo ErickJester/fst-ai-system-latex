@@ -720,7 +720,9 @@ sus relaciones de alto nivel; las figuras siguientes detallan cada paquete.
 Agrupa los flujos de acceso al sistema: inicio de sesión con correo y contraseña,
 cierre de sesión y recuperación o cambio de contraseña. El flujo es idéntico para
 Investigador y Administrador; la diferencia de permisos se resuelve dentro del
-sistema una vez autenticados.
+sistema una vez autenticados. Incluye además la gestión de cuentas a cargo del
+Administrador (crear y desactivar), el cambio obligatorio de contraseña en el primer
+acceso y la actualización del perfil propio.
 
 \begin{figure}[H]
 \centering
@@ -731,8 +733,9 @@ sistema una vez autenticados.
 
 \subsection{Paquete 2: Gestión de experimentos y carga de video}
 
-Cubre el ciclo de vida de un experimento: registrar metadatos (nombre, fecha,
-tratamiento, número de especímenes), subir uno o dos videos en formato MP4 o MOV y
+Cubre el ciclo de vida de un experimento: registrar sus datos (nombre, fecha y notas),
+subir uno o dos videos por tanda en formato MP4 o MOV (al subir el primer video de cada
+grupo se capturan su tipo, su tratamiento y el número de especímenes de la tanda) y
 consultar el historial de experimentos del laboratorio (ver RN-08).
 
 \begin{figure}[H]
@@ -744,9 +747,10 @@ consultar el historial de experimentos del laboratorio (ver RN-08).
 
 \subsection{Paquete 3: Análisis conductual}
 
-Describe la interacción del investigador con el pipeline: monitorear el progreso
-del análisis en tiempo real, consultar el estado de la cola y descargar el reporte
-de diagnóstico cuando el video no se puede procesar (ver RN-11).
+Describe la interacción del investigador con el pipeline: monitorear el avance
+del análisis por etapas y descargar el reporte de diagnóstico cuando el análisis termina
+en error (ver RN-11). El pipeline lo ejecuta el \textit{Worker} de forma autónoma;
+el investigador solo observa.
 
 \begin{figure}[H]
 \centering
@@ -758,9 +762,8 @@ de diagnóstico cuando el video no se puede procesar (ver RN-11).
 \subsection{Paquete 4: Resultados y reportes}
 
 Cubre la consulta de resultados una vez finalizado el análisis: tiempos por
-espécimen y conducta, desglose por minuto, comparación Día~1 vs.\ Día~2 (cuando
-ambos videos están disponibles), descarga de reportes en PDF y CSV/XLSX y, cuando
-el análisis termina, revisión y corrección de las etiquetas segundo a segundo (ver
+espécimen y conducta, desglose por minuto, comparación entre los grupos del experimento con el Día~2,
+descarga de reportes en PDF, CSV y XLSX y, cuando el análisis termina, revisión y corrección de las etiquetas segundo a segundo (ver
 RF-32 y RN-14).
 
 \begin{figure}[H]
@@ -772,9 +775,11 @@ RF-32 y RN-14).
 
 \subsection{Paquete 5: Dashboard, notificaciones y administración}
 
-Exclusivo del Administrador: gestión de cuentas de investigadores (crear, modificar,
-desactivar), creación de cuentas y monitoreo del estado del sistema
-(uso de disco, cola de tareas, alertas de capacidad).
+Reúne lo que el investigador ve al entrar (el \textit{dashboard} con la lista de
+experimentos, sus filtros y los avisos de expiración de video), la eliminación de
+experimentos, el borrado automático de videos y, para el Administrador, el listado de
+usuarios, el monitoreo del estado del sistema (uso de disco, cola de análisis y alertas
+de capacidad) y la gestión de los experimentos de todo el laboratorio.
 
 \begin{figure}[H]
 \centering
@@ -791,6 +796,11 @@ desactivar), creación de cuentas y monitoreo del estado del sistema
 Para cada caso de uso identificado en los diagramas anteriores se presenta una ficha
 completa que describe la interacción del actor con el sistema, los datos de entrada,
 la información que el sistema devuelve y los eventos inesperados que pueden ocurrir.
+Los casos de uso con identificador CU-xx son los mismos de las fichas; los que no lo
+tienen en los diagramas son pasos o condiciones que cada ficha describe dentro de su
+curso normal o alterno. La ficha CU-15 describe una regla de control de acceso que el
+sistema aplica antes de las acciones de administración, por lo que no se dibuja como
+caso de uso.
 
 \renewcommand{\arraystretch}{1.35}
 
@@ -807,7 +817,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-01, RF-04} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-01, RF-04. Extendido por: CU-16 (Cambiar contraseña al primer acceso).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El usuario tiene una cuenta creada por el Administrador.} \\
 \hline
@@ -978,15 +988,15 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sistema} \\
 \hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<include>>} de CU-11, CU-12, CU-13 y CU-17)} \\
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Regla de control de acceso (se aplica antes de CU-11, CU-12, CU-13 y CU-17)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-04, D-12} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-04} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa (JWT válido).} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Se confirma o rechaza que el usuario pertenece a \texttt{ADMINISTRADOR}; la acción de administración solicitada continúa o se rechaza con error 403.} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Antes de ejecutar cualquier acción de administración (crear cuenta, desactivar cuenta, listar usuarios o monitorear el sistema), el sistema verifica si el usuario autenticado pertenece a la tabla \texttt{ADMINISTRADOR}, sin importar si la interfaz ya ocultó la opción (ver D-12).} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Antes de ejecutar cualquier acción de administración (crear cuenta, desactivar cuenta, listar usuarios o monitorear el sistema), el sistema verifica si el usuario autenticado pertenece a la tabla \texttt{ADMINISTRADOR}, sin importar si la interfaz ya ocultó la opción.} \\
 \hline
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Al invocar cualquiera de las cuatro acciones de administración, el sistema consulta si el \texttt{idInstitucional} del usuario autenticado tiene una fila en \texttt{ADMINISTRADOR}. Si no la tiene, rechaza la solicitud con error 403, incluso si la petición no pasó por la interfaz (por ejemplo, una llamada directa a la API).} \\
 \hline
@@ -1031,9 +1041,9 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Investigador / Administrador} \\
 \hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<include>>} de CU-12 Crear cuenta de usuario)} \\
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<extend>>} de CU-01 Iniciar sesión, condición: la cuenta tiene contraseña temporal)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-05} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-05. Extiende: CU-01 (Iniciar sesión).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Usuario autenticado con contraseña temporal asignada por el Administrador; primer ingreso al sistema.} \\
 \hline
@@ -1088,9 +1098,9 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Administrador} \\
 \hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<include>>} de CU-11 Gestionar cuenta de investigador)} \\
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<extend>>} de CU-11 Gestionar cuenta de usuario, condición: el Administrador desactiva la cuenta)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-05} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-05. Extiende: CU-11 (Gestionar cuenta de usuario).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-15); cuenta objetivo en estado activo.} \\
 \hline
@@ -1204,7 +1214,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-09, RF-11. Incluye: CU-05 (Subir video).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-09, RF-11.} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa.} \\
 \hline
@@ -1263,7 +1273,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-08, RF-09, RF-10, RF-12. Extendido por: CU-04. Incluye: CU-07 (Monitorear progreso).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-08, RF-09, RF-10, RF-12. Incluye: CU-19 (Encolar análisis automático). Extendido por: CU-20 (Notificar rechazo de video) y CU-07 (Monitorear progreso del análisis).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Experimento registrado (CU-04 completado); sesión activa; archivo a subir en formato \texttt{.mp4} o \texttt{.mov}.} \\
 \hline
@@ -1271,7 +1281,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador subir el archivo de video del experimento para su análisis automático.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador escribe el nombre del grupo o tratamiento; si coincide con un grupo ya usado en el mismo experimento, el sistema sugiere la siguiente tanda y pide confirmación explícita (D-19). Elige la sesión (Día 1 o Día 2) y el archivo MP4 o MOV; el sistema valida formato, reproducibilidad y orientación (horizontal), lo almacena y encola la tarea de análisis de forma automática.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador escribe el nombre del grupo o tratamiento; si coincide con un grupo ya usado en el mismo experimento, el sistema sugiere la siguiente tanda y pide confirmación explícita. Elige la sesión (Día 1 o Día 2) y el archivo MP4 o MOV; el sistema valida formato, reproducibilidad y orientación (horizontal), lo almacena y encola la tarea de análisis de forma automática.} \\
 \hline
 \end{tabular}
 
@@ -1389,11 +1399,11 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<include>>} de CU-05 Subir video)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-12, RN-04} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-12, RN-04. Incluido en: CU-05 (Subir video).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Video validado en formato \texttt{.mp4} o \texttt{.mov}, reproducible y en horizontal; almacenado en el volumen compartido.} \\
 \hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Registro de análisis creado en estado «en cola» (ver D-15); \textit{Worker} disponible para procesarlo en la siguiente iteración.} \\
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Registro de análisis creado en estado «en cola»; \textit{Worker} disponible para procesarlo en la siguiente iteración.} \\
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El sistema registra automáticamente un análisis en cola al completar la carga y validación del video, sin intervención del investigador (ver RN-04).} \\
 \hline
@@ -1442,7 +1452,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<extend>>} de CU-05, condición: formato inválido o video no reproducible)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-08, RF-10, RN-10} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-08, RF-10, RN-10. Extiende: CU-05 (Subir video).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Video rechazado por no cumplir la validación de formato (\texttt{.mp4} o \texttt{.mov}), de orientación (horizontal) o de reproducibilidad en el servidor.} \\
 \hline
@@ -1450,7 +1460,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El sistema informa al investigador del motivo exacto del rechazo, permitiéndole corregir el problema y subir un archivo válido.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Cuando la validación de CU-05 falla, el sistema muestra el código de error (formato incorrecto o video no reproducible) y la tanda permanece sin ese video para que el investigador pueda intentarlo nuevamente.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Cuando la validación de CU-05 falla, el sistema muestra un mensaje que indica el motivo (formato incorrecto o video no reproducible) y la tanda permanece sin ese video para que el investigador pueda intentarlo nuevamente.} \\
 \hline
 \end{tabular}
 
@@ -1465,7 +1475,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 2 & Sistema & Descarta el archivo sin almacenarlo. \\
 \hline
-3 & Sistema & Muestra mensaje de error con código y descripción del problema (ver RF-08, RF-10). \\
+3 & Sistema & Muestra un mensaje de error con la descripción del problema (ver RF-08, RF-10). \\
 \hline
 4 & Sistema & Mantiene la tanda sin ese video y habilita la opción de subir un nuevo archivo. \\
 \hline
@@ -1486,59 +1496,6 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 
 \noindent\rule{\linewidth}{0.4pt}
 
-\noindent\textbf{Consultar estado de experimento}
-
-\noindent\small
-\begin{tabular}{|p{2.8cm}|p{7.9cm}|p{4.0cm}|}
-\hline
-\textbf{Caso de Uso} & Consultar estado de experimento & \textbf{Identificador:} CU-21 \\
-\hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Investigador} \\
-\hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
-\hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-23} \\
-\hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; al menos un experimento registrado.} \\
-\hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Estado actual del experimento seleccionado visible en pantalla.} \\
-\hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador conocer el estado de procesamiento de un experimento específico sin necesidad de acceder a la pantalla de progreso completa.} \\
-\hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Desde el \textit{dashboard} o la lista de experimentos, el investigador selecciona un experimento para ver un estado agregado, calculado a partir de los análisis de sus tandas: sin videos cargados / en cola / procesando / completado / error.} \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
-\hline
-\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
-\hline
-\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
-\hline
-1 & Investigador & Selecciona un experimento desde el \textit{dashboard} o la lista de experimentos. \\
-\hline
-2 & Sistema & Calcula el estado agregado del experimento a partir del estado de los análisis de sus tandas. \\
-\hline
-3 & Sistema & Muestra el estado con su etiqueta: sin videos cargados / en cola / procesando / completado / error. \\
-\hline
-4 & Investigador & Si el estado es «procesando», puede acceder a la pantalla de progreso detallado (ver CU-07). \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
-\hline
-\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
-\hline
-\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
-\hline
-3 & Estado «error»: el sistema muestra la descripción del error según la etapa en que se detuvo, y habilita el acceso al reporte de diagnóstico si está disponible (ver CU-08). \\
-\hline
-\end{tabular}
-
-\normalsize\bigskip
-
 \subsubsection*{Paquete 3: Análisis conductual}
 
 \noindent\textbf{Monitorear progreso del análisis}
@@ -1552,13 +1509,13 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-13, RF-14, RF-15, RF-16. Extendido por: CU-05. Extiende: CU-08 (Descargar reporte de diagnóstico).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-13, RF-14, RF-15, RF-16. Extiende: CU-05 (Subir video). Extendido por: CU-08 (Descargar reporte de diagnóstico).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Tarea de análisis encolada; \textit{Worker} disponible para procesar; sesión activa del investigador.} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pipeline ejecutado por el \textit{Worker}; estado visible en pantalla del investigador; al completarse exitosamente, acceso a resultados habilitado; ante error, descarga de reporte de diagnóstico habilitada.} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} ejecuta el pipeline de análisis conductual de forma autónoma en tres etapas secuenciales. El investigador observa el progreso en tiempo real sin poder intervenir en la ejecución (ver RN-04).} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} ejecuta el pipeline de análisis conductual de forma autónoma en tres etapas secuenciales. El investigador consulta el avance por etapas sin poder intervenir en la ejecución (ver RN-04).} \\
 \hline
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} toma la tarea de la cola y ejecuta el pipeline completo. El frontend consulta periódicamente el estado y muestra la etapa activa y el porcentaje de avance. Al completarse, el \textit{Worker} registra los resultados y el sistema habilita el acceso a la pantalla de resultados. Si el pipeline falla, el \textit{Worker} genera el reporte de diagnóstico PDF.} \\
 \hline
@@ -1579,9 +1536,9 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 4 & \textit{Worker} & Ejecuta la 2.ª etapa: localización de los cilindros. \\
 \hline
-5 & \textit{Worker} & Ejecuta la 3.ª etapa: clasificación de conductas (nado activo, inmovilidad, escalamiento). \\
+5 & \textit{Worker} & Ejecuta la 3.ª etapa: clasificación de conductas (nado activo, inmovilidad, escalamiento y conducta activa). \\
 \hline
-6 & Sistema & Actualiza en tiempo real la barra de porcentaje y la etapa activa en la pantalla del investigador. \\
+6 & Sistema & Actualiza periódicamente la barra de porcentaje y la etapa activa en la pantalla del investigador. \\
 \hline
 7 & \textit{Worker} & Registra los resultados en la base de datos al completar el pipeline. \\
 \hline
@@ -1596,7 +1553,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
-4 & El \textit{Worker} no puede abrir el video o no encuentra los cilindros (ver RN-11): detiene el pipeline, genera el reporte de diagnóstico PDF (ver CU-08) y actualiza el estado de la tarea a «error». El sistema muestra alerta con código y descripción del error. El investigador no puede reiniciar el análisis (ver RN-04). \\
+4 & El \textit{Worker} no puede abrir el video o no encuentra los cilindros (ver RN-11): detiene el pipeline, genera el reporte de diagnóstico PDF (ver CU-08) y actualiza el estado de la tarea a «error». El sistema muestra alerta con la descripción del error. El investigador no puede reiniciar el análisis (ver RN-04). \\
 \hline
 \end{tabular}
 
@@ -1613,9 +1570,9 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Investigador / \textit{Worker} \textsf{<<system>>} (genera el PDF)} \\
 \hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario} \\
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<extend>>} de CU-07, condición: el análisis terminó en error)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-14, RF-16. Extendido por: CU-07 (Monitorear progreso).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-14, RF-16. Extiende: CU-07 (Monitorear progreso del análisis).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pipeline detenido por error (no se pudo abrir el video o no se encontraron los cilindros, ver RN-11); reporte PDF generado por el \textit{Worker}; sesión activa.} \\
 \hline
@@ -1670,7 +1627,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-19, RF-20, RF-21, RF-31. Incluye: CU-10 (Descargar reporte).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-19, RF-20, RF-21, RF-31. Extendido por: CU-10 (Descargar reporte).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Análisis completado exitosamente; sesión activa.} \\
 \hline
@@ -1708,7 +1665,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
-5 & Solo hay un video analizado: la comparación Día~1 vs.\ Día~2 no está disponible. El sistema muestra únicamente los datos del video procesado. \\
+5 & A un espécimen le falta su video del Día~2 analizado (en cola, procesando, con error o sin subir): el sistema lo señala como dato faltante y calcula el promedio del grupo con los demás. \\
 \hline
 \end{tabular}
 
@@ -1727,7 +1684,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-22, RF-31. Extendido por: CU-09 (Consultar resultados).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-22, RF-31. Extiende: CU-09 (Consultar resultados del análisis).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Resultados del análisis disponibles en la base de datos; sesión activa.} \\
 \hline
@@ -1835,7 +1792,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<extend>>} de CU-25 Revisar segundo a segundo)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-32, RN-14. Incluye: CU-27 (Recalcular totales por minuto).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-32, RN-14. Extiende: CU-25 (Revisar segundo a segundo). Incluye: CU-27 (Recalcular totales por minuto).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pantalla de revisión abierta (CU-25); la etiqueta propuesta no coincide con lo que el usuario observa.} \\
 \hline
@@ -1892,7 +1849,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<include>>} de CU-26 Corregir etiqueta de un segundo)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-32, RN-14} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-32, RN-14. Incluido en: CU-26 (Corregir etiqueta de un segundo).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El usuario guardó correcciones en al menos un espécimen.} \\
 \hline
@@ -1934,18 +1891,18 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 
 \subsubsection*{Paquete 5: Dashboard, notificaciones y administración}
 
-\noindent\textbf{Gestionar cuenta de investigador}
+\noindent\textbf{Gestionar cuenta de usuario}
 
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.9cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Gestionar cuenta de investigador & \textbf{Identificador:} CU-11 \\
+\textbf{Caso de Uso} & Gestionar cuenta de usuario & \textbf{Identificador:} CU-11 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Administrador} \\
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-05, RF-06, RF-07. Relacionado: CU-12 (Crear cuenta de usuario).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-05, RF-06, RF-07. Relacionado: CU-12 (Crear cuenta de usuario). Extendido por: CU-17 (Desactivar cuenta de usuario).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-15).} \\
 \hline
@@ -2002,7 +1959,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-05, RF-07, RF-33. Relacionado: CU-11 (Gestionar cuenta de investigador).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-05, RF-07, RF-33. Relacionado: CU-11 (Gestionar cuenta de usuario).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-15). No existe formulario público de registro (ver RF-07).} \\
 \hline
@@ -2124,7 +2081,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pantalla principal del investigador. Muestra todos los experimentos del laboratorio con nombre, fecha, número de grupos, sesión, estado y accesos directos a resultados o progreso (ver RN-08). Incluye avisos cuando algún video expira en menos de 7 días.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Al acceder al \textit{dashboard}, el sistema recupera la lista de experimentos del laboratorio (ver RN-08) y muestra cualquier aviso de expiración próxima. El investigador puede filtrar la lista o acceder directamente a un experimento.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Al acceder al \textit{dashboard}, el sistema recupera la lista de experimentos del laboratorio (ver RN-08) y muestra cualquier aviso de expiración próxima. El investigador puede filtrar la lista o acceder directamente a un experimento. El estado de cada experimento se calcula a partir de los análisis de sus tandas: sin videos cargados, en cola, procesando, completado o error.} \\
 \hline
 \end{tabular}
 
@@ -2137,11 +2094,11 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 1 & Investigador & Accede al \textit{dashboard} principal de la aplicación tras iniciar sesión. \\
 \hline
-2 & Sistema & Recupera la lista de experimentos del laboratorio con nombre, fecha, número de grupos, sesión y estado (ver RN-08). \\
+2 & Sistema & Recupera la lista de experimentos del laboratorio con nombre, fecha, número de grupos, sesión y estado (ver RN-08). El estado de cada experimento se calcula a partir de los análisis de sus tandas: sin videos cargados, en cola, procesando, completado o error. \\
 \hline
 3 & Sistema & Verifica si algún video expira en menos de 7 días y muestra aviso con nombre del experimento y fecha exacta de eliminación (ver RF-24). \\
 \hline
-4 & Investigador & Selecciona un experimento para ver su detalle, progreso o resultados, o aplica filtros para acotar la lista. \\
+4 & Investigador & Selecciona un experimento para ver su detalle, progreso o resultados, o aplica filtros para acotar la lista. Si el estado es «procesando», puede abrir la pantalla de progreso detallado (ver CU-07). \\
 \hline
 \end{tabular}
 
@@ -2153,6 +2110,8 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
 2 & No hay experimentos registrados: el sistema muestra una vista vacía con instrucción para crear el primero. \\
+\hline
+4 & Estado «error»: el sistema muestra la descripción del error según la etapa en que se detuvo y habilita el acceso al reporte de diagnóstico si está disponible (ver CU-08). \\
 \hline
 4 & El investigador aplica un filtro (por estado, fecha o tratamiento): el sistema actualiza la lista mostrando solo los experimentos que coinciden con el criterio seleccionado; el filtro por tratamiento considera los experimentos con al menos un grupo de ese tratamiento (ver RF-23). \\
 \hline
