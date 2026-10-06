@@ -5,15 +5,22 @@
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Las 11 relaciones del esquema logico definitivo mas las cuatro
+'  Las 11 relaciones del esquema logico definitivo mas las dos
 '  que el sistema necesita y que el universo del discurso del
-'  laboratorio no contenia: MODELO, CONFIGURACION, REPORTE y
-'  NOTIFICACION. Mas ADMINISTRADOR (D-08, 13-sep): no es un tipo
+'  laboratorio no contenia: REPORTE y NOTIFICACION. Mas
+'  ADMINISTRADOR (D-08, 13-sep): no es un tipo
 '  de usuario aparte, es un investigador con permisos extra,
 '  modelado como subtipo -- si el usuario no aparece aqui, es
 '  investigador simple.
 '
-'  17 relaciones - 78 atributos - 20 llaves foraneas.
+'  15 relaciones - 67 atributos - 18 llaves foraneas.
+'  (D-51, 5-oct: se quitaron MODELO y CONFIGURACION y la columna
+'   ANALISIS.idConfig -- ningun RF permite cambiar el modelo ni el
+'   umbral, son constantes del pipeline. Se agregaron
+'   ANALISIS.rutaRecuadros y ANALISIS.progreso; SEGUNDO.propuesta y
+'   VIDEO.archivo pasan a admitir nulo; EXPERIMENTO.nombre pasa a
+'   ser clave alterna. Baja de 17 a 15 relaciones, de 78 a 67
+'   atributos y de 20 a 18 llaves foraneas)
 '  (D-47, 4-oct: se quito ANALISIS.confianza -- el detector actual
 '   no produce ningun valor de confianza -- y baja de 79 a 78)
 '  (D-35, 3-oct: se agrego SEGUNDO, con 5 atributos y 3 llaves
@@ -21,17 +28,13 @@
 '   (idObservacion, segundo) y los otros tres atributos dependen
 '   solo de ella, asi que queda en BCNF.)
 '  (D-25, 15-sep: se agrego USUARIO.cambioRequerido, sube de 73 a 74)
-'  Validado relacion por relacion: las cuatro de la reconciliacion
+'  Validado relacion por relacion: las dos de la reconciliacion
 '  y ADMINISTRADOR quedan en BCNF.
 '
 '  ---- Que cambio respecto de la version de 14 ----
-'  Se separo MODELO (hashModelo, nombreModelo). En la version de 14,
-'  CONFIGURACION guardaba las dos columnas y eso rompia la 3FN:
-'  hashModelo -> nombreModelo es una dependencia real (un hash
-'  identifica el archivo, y el archivo tiene nombre), y hashModelo
-'  NO es clave candidata de CONFIGURACION, porque el mismo modelo
-'  aparece varias veces con umbrales distintos. Determinante que no
-'  es clave + atributo no primo = transitiva.
+'  Se separo MODELO de CONFIGURACION para quitar la transitiva
+'  hashModelo -> nombreModelo. Ya no aplica: D-51 (5-oct) quito
+'  las dos tablas.
 '
 '  ---- Que NO entra, y por que ----
 '  ROIS   El pipeline calcula el recuadro en cada corrida (modulo 2)
@@ -54,7 +57,7 @@
 '                         asi que no viola BCNF.
 '  estado -> etapa        en ANALISIS. Ya descartado en la etapa
 '                         logica: un analisis en proceso puede estar
-'                         en cualquiera de las cuatro etapas.
+'                         en cualquiera de las tres etapas.
 '
 '  ---- D-03 resuelto (equipo, 13-sep) ----
 '  Se reemplaza: un video tiene como mucho un analisis vigente. Al
@@ -116,7 +119,7 @@ class EXPERIMENTO {
   <u>idExperimento</u>
   --
   idInstitucional   [FK]
-  nombre
+  nombre   [AK]
   fecha
   notas   (nulo)
 }
@@ -151,7 +154,7 @@ class VIDEO {
   --
   idTanda   [FK] [AK]
   sesion   [AK]
-  archivo
+  archivo   (nulo)
   duracion
   fechaCarga
 }
@@ -160,11 +163,12 @@ class ANALISIS {
   <u>idAnalisis</u>
   --
   idVideo   [FK]
-  idConfig   [FK]
   estado
   etapa
+  progreso
   nivelClasif
   fechaAnalisis
+  rutaRecuadros   (nulo)
 }
 
 class OBSERVACION {
@@ -197,7 +201,7 @@ class SEGUNDO {
   <u>segundo</u>
   --
   clase   [FK] (nulo)
-  propuesta   [FK]
+  propuesta   [FK] (nulo)
   origen
 }
 
@@ -206,28 +210,8 @@ class ADMINISTRADOR {
 }
 
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-'  SOPORTE DEL SISTEMA  -  las cuatro que el laboratorio no nombra
+'  SOPORTE DEL SISTEMA  -  las dos que el laboratorio no nombra
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-class MODELO {
-  <u>hashModelo</u>
-  --
-  nombreModelo
-}
-
-class CONFIGURACION {
-  <u>idConfig</u>
-  --
-  hashModelo   [FK] [AK]
-  versionPipeline   [AK]
-  umbralConfianza   [AK]
-  segundosOmitir   [AK]
-  umbralInmovil   [AK]
-  umbralDesplazamiento   [AK]
-  umbralStdPosicion   [AK]
-  umbralAspectoTrepada   [AK]
-  fechaCreacion
-}
 
 class REPORTE {
   <u>idReporte</u>
@@ -259,8 +243,6 @@ GRUPO          "1" --o "1..*" TANDA
 TANDA          "1" --o "2..4" ESPECIMEN
 TANDA          "1" --o "1..2" VIDEO
 VIDEO          "1" --o "1"    ANALISIS
-CONFIGURACION  "1" --o "0..*" ANALISIS
-MODELO         "1" --o "0..*" CONFIGURACION
 ESPECIMEN      "1" --o "1..2" OBSERVACION
 VIDEO          "1" --o "2..4" OBSERVACION
 OBSERVACION    "1" --o "5"    INTERVALO

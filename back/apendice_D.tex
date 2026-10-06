@@ -7,7 +7,7 @@
 \chapter{Diccionario de datos}
 \label{ap:diccionario}
 
-Este apéndice describe cada columna de las 17 tablas del esquema físico
+Este apéndice describe cada columna de las 15 tablas del esquema físico
 (Figura~\ref{fig:er}), implementado en PostgreSQL. Para cada columna se indica su
 tipo, si admite nulo, las restricciones que hace cumplir la base de datos y qué
 guarda.
@@ -21,8 +21,9 @@ referencia, en vez de borrar en cascada. Por eso un usuario se da de baja con la
 columna \texttt{activo} y no se elimina.
 
 Los identificadores subrogados son \texttt{integer GENERATED ALWAYS AS IDENTITY}.
-Los umbrales y las duraciones usan \texttt{numeric} y no tipos de punto flotante,
-porque la unicidad de \texttt{CONFIGURACION} compara esos valores por igualdad. En
+Las duraciones y los segundos usan \texttt{numeric} y no tipos de
+punto flotante, porque \texttt{numeric} guarda el valor decimal exacto y los
+totales que se calculan con él no acumulan errores de redondeo. En
 \texttt{varchar(n)} y \texttt{numeric(p,s)}, la longitud y la precisión se fijan al
 escribir el DDL.
 
@@ -53,11 +54,11 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{formato\_\allowbreak{}reporte} & \texttt{varchar(4)} & \texttt{CSV}, \texttt{XLSX}, \texttt{PDF} \\
 \hline
-\texttt{tipo\_\allowbreak{}notificacion} & \texttt{varchar(32)} & \texttt{analisis completado}, \texttt{error del pipeline}, \texttt{alerta de disco} \\
+\texttt{tipo\_\allowbreak{}notificacion} & \texttt{varchar(32)} & \texttt{analisis completado}, \texttt{error del pipeline}, \texttt{alerta de disco}, \texttt{video borrado} \\
 \hline
 \texttt{estado\_\allowbreak{}analisis} & \texttt{varchar(10)} & \texttt{en cola}, \texttt{procesando}, \texttt{completado}, \texttt{error} \\
 \hline
-\texttt{etapa\_\allowbreak{}analisis} & \texttt{varchar(16)} & \texttt{preprocesamiento}, \texttt{deteccion}, \texttt{seguimiento}, \texttt{clasificacion} \\
+\texttt{etapa\_\allowbreak{}analisis} & \texttt{varchar(16)} & \texttt{preprocesamiento}, \texttt{cilindros}, \texttt{clasificacion} \\
 \hline
 \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & \texttt{varchar(8)} & \texttt{preciso} si ningún segundo del análisis quedó como conducta activa; \texttt{agrupado} si al menos uno quedó así \\
 \hline
@@ -109,7 +110,7 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{idInstitucional} & \texttt{varchar(10)} & No & FK $\to$ USUARIO & Usuario que registró el experimento. Solo él o un administrador pueden eliminarlo \\
 \hline
-\texttt{nombre} & \texttt{varchar(n)} & No & & Nombre que el investigador le da al estudio \\
+\texttt{nombre} & \texttt{varchar(n)} & No & UK & Nombre que el investigador le da al estudio. Es único en todo el sistema (RF-11) \\
 \hline
 \texttt{fecha} & \texttt{date} & No & & Fecha del experimento \\
 \hline
@@ -161,7 +162,7 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{sesion} & \texttt{sesion\_\allowbreak{}video} & No & Dominio; UK (idTanda, sesion) & Día 1 o Día 2. Una tanda tiene como máximo un video por día, y el Día 1 es opcional \\
 \hline
-\texttt{archivo} & \texttt{text} & No & & Ruta del archivo de video (\texttt{.mp4} o \texttt{.mov}) en el servidor \\
+\texttt{archivo} & \texttt{text} & Sí & & Ruta del archivo de video (\texttt{.mp4} o \texttt{.mov}) en el servidor. Es nula cuando el video ya se borró (RF-25, RN-05); la fila se conserva porque los resultados la referencian \\
 \hline
 \texttt{duracion} & \texttt{numeric(p,s)} & No & & Duración real del archivo cargado, en segundos \\
 \hline
@@ -174,17 +175,19 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{idVideo} & \texttt{integer} & No & FK $\to$ VIDEO; UK & Video analizado. Es único: un video tiene un solo análisis vigente y un análisis nuevo reemplaza al anterior \\
 \hline
-\texttt{idConfig} & \texttt{integer} & No & FK $\to$ CONFIGURACION & Parámetros y modelo con que se corrió, para poder reproducir el resultado \\
-\hline
 \texttt{estado} & \texttt{estado\_\allowbreak{}analisis} & No & Dominio & En cola, procesando, completado o error. El \textit{worker} toma de la cola los análisis en estado \texttt{en cola} \\
 \hline
 \texttt{etapa} & \texttt{etapa\_\allowbreak{}analisis} & No & Dominio & Etapa del pipeline en curso o, si hubo error, la etapa donde se detuvo. Con ella se arma el mensaje de error \\
+\hline
+\texttt{progreso} & \texttt{smallint} & No & CK entre 0 y 100 & Porcentaje de avance que escribe el \textit{worker} y que consulta la pantalla de progreso (RF-15) \\
 \hline
 \texttt{nivelClasif} & \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & No & Dominio & Preciso o agrupado. La interfaz lo usa para avisar en los resultados \\
 \hline
 \texttt{fechaAnalisis} & \texttt{timestamptz} & No & & Momento del análisis \\
 \hline
 \texttt{rutaDiagnostico} & \texttt{text} & Sí & & Ruta del reporte de diagnóstico en PDF. Solo tiene valor cuando el estado es \texttt{error} \\
+\hline
+\texttt{rutaRecuadros} & \texttt{text} & Sí & & Ruta del archivo con los recuadros de los tubos, que la pantalla de revisión dibuja sobre el video. Es nula hasta que el análisis se completa \\
 \hline
 % ---------------- OBSERVACION ----------------
 \multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{OBSERVACION}: un espécimen dentro de un video} \\
@@ -218,7 +221,7 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{clase} & \texttt{varchar(n)} & Sí & FK $\to$ CONDUCTA & Conducta vigente del segundo, que el usuario puede corregir en la revisión. Queda nula si el sistema no pudo decidir o si el usuario lo marcó como dudoso \\
 \hline
-\texttt{propuesta} & \texttt{varchar(n)} & No & FK $\to$ CONDUCTA & Conducta que propuso el sistema. No cambia aunque el usuario corrija \texttt{clase} \\
+\texttt{propuesta} & \texttt{varchar(n)} & Sí & FK $\to$ CONDUCTA & Conducta que propuso el sistema. Queda nula si el sistema no clasificó el segundo. No cambia aunque el usuario corrija \texttt{clase} \\
 \hline
 \texttt{origen} & \texttt{origen\_\allowbreak{}segundo} & No & Dominio & Quién puso la etiqueta vigente y cómo (Tabla~\ref{tab:dominios}) \\
 \hline
@@ -230,38 +233,6 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \texttt{conducta} & \texttt{varchar(n)} & No & PK, FK $\to$ CONDUCTA & Conducta contada \\
 \hline
 \texttt{segundos} & \texttt{numeric(p,s)} & No & & Segundos que el espécimen pasó en esa conducta dentro del minuto. Hay una fila por conducta aunque valga 0. Se recalcula desde \texttt{SEGUNDO} cada vez que el usuario guarda correcciones, y de aquí salen los totales y el desglose por minuto \\
-\hline
-% ---------------- MODELO ----------------
-\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{MODELO}: cada versión entrenada del clasificador} \\
-\hline
-\texttt{hashModelo} & \texttt{char(64)} & No & PK & Hash SHA-256 del archivo del modelo. Dos archivos distintos nunca comparten hash \\
-\hline
-\texttt{nombreModelo} & \texttt{varchar(n)} & No & & Nombre del archivo del modelo \\
-\hline
-% ---------------- CONFIGURACION ----------------
-\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{CONFIGURACION}: parámetros con que se corre el pipeline} \\
-\hline
-\texttt{idConfig} & \texttt{integer} & No & PK & Identificador subrogado \\
-\hline
-\texttt{hashModelo} & \texttt{char(64)} & No & FK $\to$ MODELO; UK\textsuperscript{a} & Modelo que usa esta configuración \\
-\hline
-\texttt{versionPipeline} & \texttt{varchar(n)} & No & UK\textsuperscript{a} & Versión del código del pipeline \\
-\hline
-\texttt{umbralConfianza} & \texttt{numeric(p,s)} & No & UK\textsuperscript{a}; CK entre 0 y 1 & Umbral de confianza del pipeline \\
-\hline
-\texttt{segundosOmitir} & \texttt{numeric(p,s)} & No & UK\textsuperscript{a} & Segundos que el pipeline omite \\
-\hline
-\texttt{umbralInmovil} & \texttt{numeric(p,s)} & No & UK\textsuperscript{a} & Umbral de inmovilidad \\
-\hline
-\texttt{umbralDesplazamiento} & \texttt{numeric(p,s)} & No & UK\textsuperscript{a} & Umbral de desplazamiento \\
-\hline
-\texttt{umbralStdPosicion} & \texttt{numeric(p,s)} & No & UK\textsuperscript{a} & Umbral de desviación estándar de la posición \\
-\hline
-\texttt{umbralAspectoTrepada} & \texttt{numeric(p,s)} & No & UK\textsuperscript{a} & Umbral de la relación de aspecto para el escalamiento \\
-\hline
-\texttt{fechaCreacion} & \texttt{timestamptz} & No & & Momento en que se registró la configuración \\
-\hline
-\multicolumn{5}{|p{14.4cm}|}{\textsuperscript{a}\,Las ocho columnas marcadas forman juntas una sola restricción UK: dos configuraciones no pueden tener el mismo modelo, la misma versión y los mismos seis valores. Así, dos análisis con la misma \texttt{idConfig} corrieron en condiciones idénticas.} \\
 \hline
 % ---------------- REPORTE ----------------
 \multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{REPORTE}: archivos exportados de un experimento} \\
@@ -285,7 +256,7 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{idExperimento} & \texttt{integer} & Sí & FK $\to$ EXPERIMENTO & Experimento del que trata el aviso. Es nulo en la alerta de disco, que no viene de ningún experimento \\
 \hline
-\texttt{tipo} & \texttt{tipo\_\allowbreak{}notificacion} & No & Dominio & Análisis completado, error del pipeline o alerta de disco. Cada aviso también se envía por correo (RF-33) \\
+\texttt{tipo} & \texttt{tipo\_\allowbreak{}notificacion} & No & Dominio & Análisis completado, error del pipeline, alerta de disco o video borrado (el borrado adelantado de RN-05). Cada aviso también se envía por correo (RF-33) \\
 \hline
 \texttt{mensaje} & \texttt{text} & No & & Texto del aviso, con el detalle del caso \\
 \hline

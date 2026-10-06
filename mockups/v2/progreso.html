@@ -28,7 +28,7 @@
         </div>
         <div class="num" style="font-size:12px;margin-top:4px;color:color-mix(in srgb,var(--color-text) 60%,transparent)">Día 2 · 5 min · 4 especímenes</div>
         <div style="display:flex;align-items:center;gap:14px;margin-top:14px">
-          <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:2px" id="barra"></div>
+          <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:2px" id="barra"></div>
           <span class="num nd" style="font-size:15px;white-space:nowrap" id="pctTotal"></span>
         </div>
       </div>
@@ -44,15 +44,15 @@
         </div>
         <div class="num" style="font-size:12px;margin-top:4px;color:color-mix(in srgb,var(--color-text) 60%,transparent)">Día 2 · 5 min · 4 especímenes · terminado hoy, 15:02</div>
         <div style="display:flex;align-items:center;gap:14px;margin-top:14px">
-          <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:2px">
-            <div style="height:10px;background:var(--color-text)"></div><div style="height:10px;background:var(--color-text)"></div><div style="height:10px;background:var(--color-text)"></div><div style="height:10px;background:var(--color-text)"></div>
+          <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:2px">
+            <div style="height:10px;background:var(--color-text)"></div><div style="height:10px;background:var(--color-text)"></div><div style="height:10px;background:var(--color-text)"></div>
           </div>
           <span class="num nd" style="font-size:15px;white-space:nowrap">100 %</span>
         </div>
         <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:16px">
           <a class="btn btn-primary" href="resultados.html">Ver resultados</a>
           <a class="btn btn-secondary" href="revision.html">Revisar segundo a segundo</a>
-          <span class="hint">Las cuatro etapas terminaron; los resultados ya están disponibles.</span>
+          <span class="hint">Las tres etapas terminaron; los resultados ya están disponibles.</span>
         </div>
       </div>
     </div>
@@ -64,10 +64,10 @@
           <div style="flex:1"></div>
           <span class="tag tag-accent" style="white-space:nowrap;background:var(--color-accent-800);color:var(--color-bg)">Error</span>
         </div>
-        <div class="num" style="font-size:12px;margin-top:4px;color:color-mix(in srgb,var(--color-text) 60%,transparent)">Día 2 · 5 min · detenido en Detección de cilindros (50 %)</div>
+        <div class="num" style="font-size:12px;margin-top:4px;color:color-mix(in srgb,var(--color-text) 60%,transparent)">Día 2 · 5 min · detenido en Localización de los cilindros (67 %)</div>
       </div>
       <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px">
-        <div style="font-size:13px;line-height:1.55">No se encontraron los cilindros en el video: el análisis se detuvo en la detección y no llegó al seguimiento.</div>
+        <div style="font-size:13px;line-height:1.55">No se encontraron los cilindros en el video: el análisis se detuvo en la localización de los cilindros y no llegó a la clasificación.</div>
         <div style="display:flex;align-items:center;flex-wrap:wrap;gap:14px">
           <button type="button" class="btn btn-primary" id="btnDiag" style="justify-content:flex-start">Descargar reporte de diagnóstico (PDF)</button>
           <span class="hint">El investigador no puede reiniciar el análisis.</span>
@@ -103,10 +103,9 @@
   const $ = id => document.getElementById(id);
   const INK = 'var(--color-text)', ACC = 'var(--color-accent)', MUT = 'var(--muted)';
   const etapas = [
-    { nombre: 'Preprocesamiento', detalle: 'CLAHE (realce local de contraste)', icono: '✓', dotBg: INK, dotFg: 'var(--color-bg)', titleFg: INK, estado: 'hecha', pct: '25 %' },
-    { nombre: 'Detección de cilindros', detalle: '4 cilindros detectados', icono: '✓', dotBg: INK, dotFg: 'var(--color-bg)', titleFg: INK, estado: 'hecha', pct: '50 %' },
-    { nombre: 'Seguimiento de especímenes', detalle: 'tracking (seguimiento) de 4 especímenes', icono: '3', dotBg: ACC, dotFg: 'var(--color-bg)', titleFg: INK, estado: 'en curso', pct: '75 %' },
-    { nombre: 'Clasificación de conducta', detalle: 'nado activo, inmovilidad, escalamiento', icono: '4', dotBg: 'transparent', dotFg: MUT, titleFg: MUT, estado: 'pendiente', pct: '100 %' }
+    { nombre: 'Preprocesamiento', detalle: 'alineación de la cámara y modelo de fondo', icono: '✓', dotBg: INK, dotFg: 'var(--color-bg)', titleFg: INK, estado: 'hecha', pct: '33 %' },
+    { nombre: 'Localización de los cilindros', detalle: 'cilindros y línea de agua', icono: '2', dotBg: ACC, dotFg: 'var(--color-bg)', titleFg: INK, estado: 'en curso', pct: '67 %' },
+    { nombre: 'Clasificación de conducta', detalle: 'nado activo, inmovilidad, escalamiento', icono: '3', dotBg: 'transparent', dotFg: MUT, titleFg: MUT, estado: 'pendiente', pct: '100 %' }
   ];
   const cola = [
     { n: '1', nombre: 'Compuesto CSR-14 · Experimental A · Tanda B', dia: 'Día 2', estado: 'Procesando', tagClass: 'tag-accent' },
@@ -157,7 +156,7 @@
       '<script>onload=()=>print()<\/script></body></html>');
     w.document.close();
   }
-  $('btnDiag').onclick = () => diagnostico('cilindros no encontrados', 'Compuesto CSR-14 · Experimental B · Tanda B', 'Día 2 · 5 min · detenido en Detección de cilindros (50 %)',
+  $('btnDiag').onclick = () => diagnostico('cilindros no encontrados', 'Compuesto CSR-14 · Experimental B · Tanda B', 'Día 2 · 5 min · detenido en Localización de los cilindros (67 %)',
     'No se encontraron los cilindros en el video.');
   $('btnDiag2').onclick = () => diagnostico('video no legible', 'Compuesto CSR-14 · Control · Tanda A', 'Día 1 · referencia basal · detenido en Preprocesamiento (0 %)',
     'No se pudo abrir el video: el archivo está dañado o no se puede leer.');
