@@ -9,24 +9,16 @@ skinparam usecase {
   BorderColor DarkSlateGray
 }
 actor "Investigador" as INV
-actor ":Sistema:\n<<system>>" as SYS #LightYellow
 rectangle "Plataforma Web FST - Paquete 2" {
-  usecase "Crear experimento" as UC21
-  usecase "Subir video" as UC22
-  usecase "Validar formato" as UC23
-  usecase "Validar video reproducible" as UC24
-  usecase "Encolar analisis automatico" as UC25
-  usecase "Notificar rechazo de video" as UC26
-  usecase "Consultar estado de experimento" as UC27
+  usecase "CU-04\nRegistrar experimento" as CU04
+  usecase "CU-05\nSubir video" as CU05
+  usecase "CU-19\nEncolar analisis automatico" as CU19
+  usecase "CU-20\nNotificar rechazo de video" as CU20
+  usecase "CU-07\nMonitorear progreso del analisis\n(Paquete 3)" as CU07
 }
-INV --> UC21
-INV --> UC22
-INV --> UC27
-SYS --> UC25
-SYS --> UC26
-UC22 ..> UC23 : <<include>>
-UC23 ..> UC24 : <<include>>
-UC24 ..> UC25 : <<include>>
-UC26 ..> UC24 : <<extend>>\n[no reproducible]
-UC26 ..> UC24 : <<extend>>\n[formato invalido]
+INV --> CU04
+INV --> CU05
+CU05 ..> CU19 : <<include>>
+CU20 ..> CU05 : <<extend>>\n[formato invalido o\nvideo no reproducible]
+CU07 ..> CU05 : <<extend>>\n[el investigador consulta\nel avance]
 @enduml

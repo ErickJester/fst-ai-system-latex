@@ -10,21 +10,22 @@ skinparam usecase {
 }
 actor "Investigador" as INV
 rectangle "Plataforma Web FST - Paquete 4" {
-  usecase "Consultar resultados por especimen" as UC41
+  usecase "CU-09\nConsultar resultados del analisis" as CU09
   usecase "Desglosar por minuto" as UC42
   usecase "Comparar grupos en Dia 2" as UC43
-  usecase "Descargar reporte PDF" as UC45
+  usecase "CU-10\nDescargar reporte\n(PDF, CSV o XLSX)" as CU10
   usecase "Generar archivo de reporte" as UC46
-  usecase "Revisar segundo a segundo" as UC47
-  usecase "Corregir etiqueta de un segundo" as UC48
-  usecase "Recalcular totales por minuto" as UC49
+  usecase "CU-25\nRevisar segundo a segundo" as CU25
+  usecase "CU-26\nCorregir etiqueta de un segundo" as CU26
+  usecase "CU-27\nRecalcular totales por minuto" as CU27
 }
-INV --> UC41
+INV --> CU09
 INV --> UC43
-INV --> UC45
-UC42 ..> UC41 : <<extend>>\n[solicita desglose]
-UC45 ..> UC46 : <<include>>
-INV --> UC47
-UC48 ..> UC47 : <<extend>>\n[la etiqueta no coincide\ncon la propuesta]
-UC48 ..> UC49 : <<include>>
+INV --> CU10
+INV --> CU25
+UC42 ..> CU09 : <<extend>>\n[solicita desglose]
+CU10 ..> CU09 : <<extend>>\n[solicita un reporte]
+CU10 ..> UC46 : <<include>>
+CU26 ..> CU25 : <<extend>>\n[la etiqueta no coincide\ncon la propuesta]
+CU26 ..> CU27 : <<include>>
 @enduml
