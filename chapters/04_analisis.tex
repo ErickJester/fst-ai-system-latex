@@ -15,7 +15,7 @@ desde cuatro ángulos: tecnológico, operativo, económico y legal.
 
 Los requerimientos funcionales se organizan por módulo de la interfaz. Los tiempos de
 respuesta y criterios de rendimiento se derivan de los atributos de calidad definidos
-en la norma ISO/IEC~25010:2023 \cite{iso25010}: \textit{time behaviour},
+en la norma ISO/IEC~25010:2011 \cite{iso25010}: \textit{time behaviour},
 \textit{functional correctness} y \textit{usability}. El ciclo de levantamiento sigue
 los procesos de definición de requerimientos de la norma ISO/IEC/IEEE~12207:2017
 \cite{iso12207}.
@@ -228,7 +228,7 @@ RF-24 & Dashboard
         y la fecha de vencimiento exacta. El período de 7~días da tiempo suficiente
         para descargar reportes antes del borrado, conforme al atributo
         \textit{user error protection} (protección contra errores del usuario) de
-        la ISO/IEC~25010:2023 \cite{iso25010}, que establece que el sistema debe
+        la ISO/IEC~25010:2011 \cite{iso25010}, que establece que el sistema debe
         proteger al usuario de consecuencias no intencionadas de sus acciones u
         omisiones.
       & Media & Sistema \\
@@ -307,7 +307,7 @@ RF-33 & Notificaciones
 % -----------------------------------------------------------
 
 Los tiempos de respuesta se derivan del atributo \textit{time behaviour} de la norma
-ISO/IEC~25010:2023 \cite{iso25010}, que establece que un sistema debe responder dentro
+ISO/IEC~25010:2011 \cite{iso25010}, que establece que un sistema debe responder dentro
 de los tiempos que el usuario percibe como aceptables para cada tipo de operación. Para
 operaciones interactivas cortas (navegación, filtros, consultas) el umbral estándar es
 de 1 a 3 segundos; para operaciones de procesamiento intensivo (análisis de video) el
@@ -330,7 +330,7 @@ tiempo aceptable se determina con el usuario durante las pruebas \cite{iso25010}
 RNF-01 & Rendimiento
        & Las operaciones de navegación e interacción con la interfaz (cargar el
          dashboard, filtrar experimentos, abrir resultados) deben responder en menos
-         de 3~s. Derivado del atributo \textit{time behaviour} de la ISO/IEC~25010:2023
+         de 3~s. Derivado del atributo \textit{time behaviour} de la ISO/IEC~25010:2011
          \cite{iso25010}.
        & Tiempo de respuesta $\leq 3$~s en el 95\,\% de las solicitudes en condiciones
          normales de red. \\
@@ -370,7 +370,7 @@ RNF-06 & Usabilidad
        & Un investigador sin experiencia en programación debe poder crear un
          experimento, subir un video, esperar el análisis y descargar el reporte
          sin necesitar ayuda técnica. Derivado del atributo \textit{usability} de
-         la ISO/IEC~25010:2023 \cite{iso25010}.
+         la ISO/IEC~25010:2011 \cite{iso25010}.
        & Prueba con al menos un usuario real del laboratorio durante la fase de
          validación y robustez. Tasa de completación de tarea $\geq$ 90\% sin
          asistencia. \\
@@ -734,8 +734,8 @@ PostgreSQL
 Docker + Docker Compose \cite{merkel2014}
     & Empaqueta todos los servicios (backend, frontend, base de datos, worker) en
       contenedores y los levanta con un solo comando.
-    & Cumple el atributo de portabilidad de la ISO/IEC/IEEE~12207:2017
-      \cite{iso12207}. El laboratorio no instala nada más allá de Docker. \\
+    & Cumple el atributo de portabilidad de la ISO/IEC~25010:2011
+      \cite{iso25010}. El laboratorio no instala nada más allá de Docker. \\
 \hline
 
 \end{longtable}

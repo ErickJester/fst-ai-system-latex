@@ -298,9 +298,11 @@ periódicamente el estado del análisis y actualiza la barra de progreso.
 Docker permite empaquetar una aplicación con todas sus dependencias en una imagen
 reproducible \cite{merkel2014}. Docker Compose orquesta múltiples contenedores
 (backend, frontend, base de datos, worker) con un solo comando. La norma
-ISO/IEC/IEEE~12207:2017 \cite{iso12207} define la portabilidad como un atributo del
-proceso de despliegue; el uso de Docker satisface ese atributo al garantizar que el
-sistema se comporta igual en cualquier equipo que tenga Docker instalado.
+ISO/IEC~25010:2011 \cite{iso25010} define la \textit{portability} (portabilidad) como el
+grado de eficacia y eficiencia con que un sistema puede transferirse de un entorno de
+hardware, software u operación a otro; el uso de Docker satisface ese atributo al
+garantizar que el sistema se comporta igual en cualquier equipo que tenga Docker
+instalado.
 
 \subsection{Persistencia de datos con PostgreSQL}
 
@@ -317,7 +319,7 @@ motor de base de datos sin modificar el código de la aplicación.
 % ============================================================
 
 La evaluación del sistema se basa en métricas que cubren los atributos de calidad
-definidos en la norma ISO/IEC~25010:2023 \cite{iso25010}: \textit{functional
+definidos en la norma ISO/IEC~25010:2011 \cite{iso25010}: \textit{functional
 correctness} (precisión de las predicciones), \textit{time behaviour} (tiempo de
 procesamiento) y \textit{usability} (facilidad de uso para el investigador).
 
@@ -346,4 +348,4 @@ primeros experimentos.
 El tiempo de procesamiento de un video de 5 minutos se mide en minutos de cómputo y
 se reporta como relación minuto de video / minuto de procesamiento. El umbral
 aceptable se define con el laboratorio durante el Sprint~6, conforme al atributo de
-\textit{time behaviour} de la ISO/IEC~25010:2023 \cite{iso25010}.
+\textit{time behaviour} de la ISO/IEC~25010:2011 \cite{iso25010}.
