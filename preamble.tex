@@ -55,6 +55,9 @@
 \usepackage{csquotes}
 \usepackage[backend=biber,style=ieee,sorting=none]{biblatex}
 \addbibresource{bib/referencias.bib}
+% Siempre «et al.» (nunca «y col.») cuando la bibliografía abrevia la lista de autores,
+% sin importar la versión de biblatex que tenga quien compile.
+\DefineBibliographyStrings{spanish}{andothers={et~al\adddot}}
 
 \usepackage{enumitem}
 \usepackage{multirow}
