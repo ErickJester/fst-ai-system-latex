@@ -19,6 +19,8 @@ rectangle "Plataforma Web FST - Paquete 3" {
 WRK --> UC30
 INV --> CU07
 INV --> CU08
+WRK --> CU07
+WRK --> CU08
 UC36 ..> UC30 : <<extend>>\n[no se pudo abrir el video\no no se hallaron los cilindros]
 CU08 ..> CU07 : <<extend>>\n[el analisis termino\nen error]
 @enduml
