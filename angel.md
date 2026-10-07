@@ -80,6 +80,17 @@ antes de dar por buenos los cambios. Va en orden de importancia: primero lo que 
 - **CU-15** («Verificar pertenencia a Administrador») **se queda como ficha de regla de acceso**, fuera del dibujo.
 - **CU-21 se fusionó en CU-22**: el dashboard ahora explica el estado agregado del experimento.
 - Se actualizó la fila «Referencias» de 18 fichas, en las dos puntas de cada relación, y se quitaron las 4 citas internas «D-XX».
+- **Revisión V-3 y V-4 (coherencia entre las fichas y los diagramas).** Se comprobó con un script y leyendo las 25 fichas: las relaciones `include` y `extend`, los títulos y los identificadores coinciden entre diagrama y ficha. Se corrigió:
+  - CU-03 y CU-13 figuraban como «Secundario» y en el diagrama son casos primarios.
+  - CU-15, CU-19, CU-20 y CU-27 tenían como actor al «Sistema» (ya no es actor); ahora figura quien los dispara.
+  - CU-04, CU-18 y CU-22 ahora incluyen al Administrador, que hereda del Investigador.
+  - CU-15 ahora cubre también CU-24 (antes solo cuatro casos de uso).
+  - CU-01 ahora incluye la cuenta inactiva; CU-18 incluye apellidos; CU-11 ya no repite el alta (remite a CU-12) ni dice «investigador».
+  - CU-20 y su diagrama ahora incluyen el video vertical, que CU-05 ya rechazaba.
+  - CU-09 mostraba tres conductas; ahora cuatro (con la conducta activa).
+  - CU-26 y CU-25 se contradecían: el flujo de «confirmada» estaba en CU-26 cuando su precondición era que la conducta no coincidía. Pasó a CU-25.
+  - CU-14 ahora incluye el borrado de emergencia al superar el 90 % del disco.
+  - El diagrama del paquete 3 ahora conecta al *Worker* con CU-07 y CU-08, como dicen sus fichas.
 - `gen_pngs.sh` ya no usa rutas absolutas de otra computadora.
 
 ### Otras correcciones en las fichas (no estaban en la lista de pendientes)
@@ -100,7 +111,7 @@ Se llenó la sección «Para Erick» con los puntos 1, 4, 5 de la tabla de arrib
 6. **Secuencias** (`seq_*.puml`): revisar si mencionan CU-21, CU-15 o el viejo «Gestionar cuenta de investigador» (ahora «Gestionar cuenta de usuario»).
 7. **Diagramas**: abrir `figures/mermaid/cu_*.png` y confirmar que se leen bien. Se generaron con PlantUML 1.2026.8 y `!pragma layout smetana`.
 8. **Casos de uso sin ficha propia** (su contenido está dentro de otra ficha): «Ejecutar pipeline de análisis» y «Reportar error de pipeline» (CU-07), «Desglosar por minuto» y «Comparar grupos en Día 2» (CU-09), «Generar archivo de reporte» (CU-10). Decidir si basta o si cada uno necesita ficha.
-9. **Decisión abierta:** CU-06 «Consultar historial de experimentos» repite lo que hace CU-22, y CU-24 «Gestionar experimentos globales» se solapa con los dos, porque todos ven todos los experimentos (RN-08). No se tocaron.
+9. **CU-06 se fusionó en CU-22** (igual que CU-21): era la misma lista de experimentos con su estado. Se eliminó su ficha y CU-22 pasó a tener como actores «Investigador / Administrador». **CU-24** («Gestionar experimentos globales») se conservó porque agrega la columna de investigador y el filtro por investigador, pero se solapa con CU-22 y CU-23; conviene que Ángel decida si basta con una sola.
 10. **`bib/referencias.bib`**: compilar y confirmar que no aparece ninguna cita rota. Si algún capítulo comentado se reactiva, revisar las 6 entradas eliminadas.
 
 ---
