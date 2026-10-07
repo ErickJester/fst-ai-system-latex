@@ -26,6 +26,6 @@ INV --> CU25
 UC42 ..> CU09 : <<extend>>\n[solicita desglose]
 CU10 ..> CU09 : <<extend>>\n[solicita un reporte]
 CU10 ..> UC46 : <<include>>
-CU26 ..> CU25 : <<extend>>\n[la etiqueta no coincide\ncon la propuesta]
+CU26 ..> CU25 : <<extend>>\n[la conducta del sistema\nno es la correcta]
 CU26 ..> CU27 : <<include>>
 @enduml

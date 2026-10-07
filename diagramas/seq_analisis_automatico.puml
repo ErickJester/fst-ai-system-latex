@@ -72,11 +72,12 @@ w -> db: actualiza la etapa a "preprocesamiento"
 w -> w: alinea la cámara y construye el modelo de fondo
 
 w -> db: actualiza la etapa a "cilindros"
-w -> w: localiza los cilindros y la línea de agua\n(solo los primeros 300 s del video)
+w -> w: localiza los cilindros y la línea de agua\n(sobre el video completo)
 
 alt se hallaron los tubos
   w -> db: actualiza la etapa a "clasificación"
   w -> w: clasifica la conducta de cada espécimen, segundo a segundo\n(nado, inmovilidad, escalamiento o conducta activa)
+  w -> w: se queda con los últimos 300 segundos de cada espécimen\n(como máximo; si el video dura menos, todos)\ny los renumera de 1 a 300
 
   loop por cada especímen detectado en el video
     w -> db: guarda su observación de este video
@@ -85,7 +86,7 @@ alt se hallaron los tubos
   end
 
   w -> fs: guarda los recuadros de los tubos\n(archivo de recuadros del análisis)
-  w -> fs: guarda una copia del video, de los primeros 300 s,\nen un formato que el navegador puede reproducir
+  w -> fs: recorta el video a esos mismos últimos 300 s y guarda la copia\nen un formato que el navegador puede reproducir\n(es el video que ve el usuario)
 
   w -> db: marca el análisis como "completado",\ncon su nivel de clasificación y fechaAnalisis
   w -> db: programa la eliminación del video\n30 días después (RNF-08)

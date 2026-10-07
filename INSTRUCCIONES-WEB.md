@@ -130,7 +130,7 @@ datos y del volumen**.
 1. Cada cierto tiempo busca un `ANALISIS` con `estado = 'en cola'`.
 2. Lo pasa a `procesando` y va actualizando `etapa` en este orden:
    `preprocesamiento`, `cilindros`, `clasificacion`.
-3. Analiza **solo los primeros 300 segundos** del video; si dura más, descarta el resto.
+3. La CNN analiza el **video completo**; después el worker se queda con los **últimos 300 segundos** de cada espécimen (de final a inicio) y descarta el principio, donde a veces aparecen personas. Es un máximo, sin mínimo: si el video dura menos, se quedan todos los segundos. Renumera las filas de 1 a 300 antes de guardarlas (D-54).
    Ya no existe un umbral de confianza de detección. Si no puede abrir el video o no
    encuentra los tubos: genera el PDF de diagnóstico, llena `rutaDiagnostico`, pasa a
    `error` y crea una `NOTIFICACION` de tipo `error del pipeline`. No hay reintento ni
@@ -138,8 +138,7 @@ datos y del volumen**.
 4. Si todo sale bien, por cada espécimen:
    - escribe una `OBSERVACION` del video;
    - escribe **una fila en `SEGUNDO` por cada segundo analizado** (hasta 300), con
-     `clase` (la conducta, o nula si "no se ve"), `propuesta` igual a `clase` y
-     `origen = 'maquina'`;
+     `conducta` (nula si el worker no decidió ese segundo o "no se ve") y `origen = 'maquina'`;
    - escribe los 5 `INTERVALO` (minutos 1 a 5) y, en `PRESENTA`, **una fila por cada
      una de las cuatro conductas**, incluso con 0 segundos, con el conteo de segundos de
      ese minuto. Un mismo análisis puede mezclar las cuatro conductas.
@@ -149,6 +148,14 @@ datos y del volumen**.
    tipo `analisis completado`.
 5. Al pasar a `completado` o a `error`, fija `fechaAnalisis = ahora`. Sin esa fecha el
    borrado a los 30 días nunca se dispara, y la base rechaza un `completado` sin ella.
+
+**Umbral de decisión.** El worker acepta una conducta para un segundo cuando su
+probabilidad llega a **0.80**. Es una **constante del worker**: no se guarda en la base de
+datos, no se configura desde la interfaz y el backend no la conoce. Lo mismo pasa con el
+archivo del modelo entrenado. Antes existían las tablas `MODELO` y `CONFIGURACION` para
+guardarlos; **ya no existen** (ningún requisito permite cambiar el modelo ni el umbral).
+
+**De dónde salen los segundos.** La CNN por segundo deja `X_cnnseg.csv`, con las mismas columnas que el `X_segundos.csv` del etiquetador: `especimen` (1 a 4, la posición en el cuadro), `segundo`, `inicio_s`, `tiempo`, `clase`, `confianza`, `p_escalamiento`, `p_inmovilidad`, `p_nado` y `ventana_s`; la columna `clase` del CSV es la conducta. Y `X_cnnseg_resumen.csv`, con los segundos por conducta de cada minuto (`especimen`, `minuto`, `nado`, `inmovilidad`, `escalamiento`, `activa`, `sin_decidir`). El worker lo convierte en filas de `SEGUNDO` (solo `conducta`; la base no guarda `confianza` ni las `p_*`) y de `PRESENTA`. La conducta vale `nado`, `inmovilidad`, `escalamiento`, `activa` o vacío si no decidió; el worker traduce `nado` a `nado activo` y `activa` a `conducta activa`, y el vacío queda como `conducta` nula. `especimen` se enlaza con `ESPECIMEN.numeroCilindro`. El CSV trae un segundo por cada segundo del video completo: el worker toma las **últimas 300 filas** de cada espécimen (todas, si hay menos) y las renumera de 1 a 300 para que coincidan con el video recortado que ve el usuario (D-54). Las hojas manuales `X_seg.csv` solo entrenan la CNN y no entran a la base (D-53).
 
 En cada instante un espécimen está en exactamente una conducta: nado activo, inmovilidad,
 escalamiento o conducta activa (no inmóvil, sin decidir entre nado y escalamiento). Por
@@ -194,7 +201,7 @@ Mientras alguna tanda siga en error, el experimento sigue en `error`.
 
 ## 5. Modelo de datos (PostgreSQL)
 
-17 tablas. Esta es la única versión vigente.
+15 tablas. Esta es la única versión vigente.
 
 **Jerarquía:** un experimento tiene grupos; un grupo tiene tandas; una tanda tiene
 especímenes y hasta dos videos (Día 1 y Día 2); un video tiene un análisis y, por cada
@@ -209,7 +216,6 @@ erDiagram
   EXPERIMENTO ||--o{ REPORTE : genera
   EXPERIMENTO ||--o{ NOTIFICACION : origina
   GRUPO ||--|{ TANDA : tiene
-  GRUPO ||--o{ ESPECIMEN : "idGrupo redundante"
   TANDA ||--|{ ESPECIMEN : tiene
   TANDA ||--|{ VIDEO : "1 o 2"
   VIDEO ||--|| ANALISIS : "idVideo UNIQUE"
@@ -219,9 +225,7 @@ erDiagram
   INTERVALO ||--|{ PRESENTA : tiene
   CONDUCTA ||--o{ PRESENTA : "se presenta"
   OBSERVACION ||--|{ SEGUNDO : "un renglón por segundo"
-  CONDUCTA ||--o{ SEGUNDO : "clase y propuesta"
-  CONFIGURACION ||--o{ ANALISIS : usa
-  MODELO ||--o{ CONFIGURACION : respalda
+  CONDUCTA ||--o{ SEGUNDO : "conducta"
 
   USUARIO { varchar10 idInstitucional PK
             varchar nombre
@@ -232,7 +236,7 @@ erDiagram
             boolean cambioRequerido }
   EXPERIMENTO { int idExperimento PK
                 varchar10 idInstitucional FK
-                varchar nombre
+                varchar nombre UK
                 date fecha
                 text notas }
   GRUPO { int idGrupo PK
@@ -246,8 +250,6 @@ erDiagram
           smallint nCilindros }
   ESPECIMEN { int idEspecimen PK
               int idTanda FK
-              int idGrupo FK
-              smallint numeroRata
               smallint numeroCilindro }
   VIDEO { int idVideo PK
           int idTanda FK
@@ -257,7 +259,6 @@ erDiagram
           timestamptz fechaCarga }
   ANALISIS { int idAnalisis PK
              int idVideo FK
-             int idConfig FK
              estado_analisis estado
              etapa_analisis etapa
              nivel_clasif nivelClasif
@@ -275,17 +276,9 @@ erDiagram
              numeric segundos }
   SEGUNDO { int idObservacion PK
             smallint segundo PK
-            varchar clase FK
-            varchar propuesta FK
+            varchar conducta FK
             origen_segundo origen }
   ADMINISTRADOR { varchar10 idInstitucional PK }
-  MODELO { char64 hashModelo PK
-           varchar nombreModelo }
-  CONFIGURACION { int idConfig PK
-                  char64 hashModelo FK
-                  varchar versionPipeline
-                  numeric umbralConfianza
-                  timestamptz fechaCreacion }
   REPORTE { int idReporte PK
             int idExperimento FK
             formato_reporte formato
@@ -300,18 +293,19 @@ erDiagram
                  timestamptz fechaCreacion }
 ```
 
-`CONFIGURACION` tiene además siete columnas `numeric` de umbrales (`segundosOmitir`,
-`umbralInmovil`, `umbralDesplazamiento`, `umbralStdPosicion`,
-`umbralAspectoTrepada`, entre otras) que pertenecen al worker. El backend no las toca.
+`VIDEO.archivo` admite nulo: queda vacío cuando el video ya se borró (a los 30 días o
+antes, si el disco pasa del 90 %). La fila de `VIDEO` se conserva porque los resultados la
+referencian. `SEGUNDO.conducta` también admite nulo: el worker no decidió ese segundo o el espécimen no se ve.
 
-La columna `ESPECIMEN.numeroRata` se llama así en la base y no se renombra. En la interfaz
-nunca se muestra ese nombre: se muestra "Espécimen N".
+No se guarda el número de rata del laboratorio (D-55): un espécimen se distingue por su
+posición en el cuadro, `ESPECIMEN.numeroCilindro`. Como ese número se repite en cada tanda de
+un grupo, la interfaz, los resultados y los reportes lo muestran junto con la tanda, por
+ejemplo «Tanda A · Espécimen 2».
 
 ### Tipos y convenciones
 - Id sustituto: `integer GENERATED ALWAYS AS IDENTITY`.
 - `USUARIO.idInstitucional`: `varchar(10)`, es la llave primaria (identificador institucional).
-- Fechas sin hora: `date`. Marcas de tiempo: `timestamptz`. Umbrales y segundos: `numeric`, nunca `float`.
-- `hashModelo`: `char(64)`, SHA-256 del archivo del modelo.
+- Fechas sin hora: `date`. Marcas de tiempo: `timestamptz`. Duraciones y segundos: `numeric`, nunca `float`.
 - **Todas** las llaves foráneas son `ON UPDATE NO ACTION ON DELETE NO ACTION`. La base
   rechaza el borrado en vez de propagarlo. Por eso `USUARIO.activo` existe: dar de baja
   sin borrar. Para borrar un experimento, la aplicación debe borrar de las hojas hacia
@@ -325,7 +319,7 @@ nunca se muestra ese nombre: se muestra "Espécimen N".
 | `tipo_grupo` | `control`, `referencia`, `tratamiento experimental` |
 | `sesion_video` | `Dia 1`, `Dia 2` |
 | `formato_reporte` | `CSV`, `XLSX`, `PDF` |
-| `tipo_notificacion` | `analisis completado`, `error del pipeline`, `alerta de disco` |
+| `tipo_notificacion` | `analisis completado`, `error del pipeline`, `alerta de disco`, `video borrado` |
 | `estado_analisis` | `en cola`, `procesando`, `completado`, `error` |
 | `etapa_analisis` | `preprocesamiento`, `cilindros`, `clasificacion` |
 | `nivel_clasif_analisis` | `preciso`, `agrupado` |
@@ -336,13 +330,14 @@ nunca se muestra ese nombre: se muestra "Espécimen N".
 fila por cada una de las cuatro conductas, **incluso con 0 segundos** (en el diseño la
 cardinalidad se declara 2..4, pero en la práctica son siempre 4).
 
-`SEGUNDO` guarda la etiqueta de cada espécimen en cada segundo analizado (hasta 300 por
+`SEGUNDO` guarda la conducta de cada espécimen en cada segundo analizado (hasta 300 por
 observación). Es la fuente de la pantalla de revisión; `PRESENTA` es su resumen por minuto
 y se recalcula cada vez que el usuario guarda correcciones. Valores de `origen`:
 `maquina`, `humano_confirma`, `humano_corrige`, `humano_duda` (el usuario dejó el segundo
-vacío a propósito), `sin_revisar` y `humano_ciego` (revisión "desde cero", que oculta lo
-que propuso la máquina). `clase` nula significa que el segundo no tiene conducta: la
-máquina no pudo decidir, o el usuario lo marcó "dudosa" (`humano_duda`).
+vacío a propósito), `sin_revisar` y `humano_ciego` (revisión "desde cero", que no muestra la
+conducta del sistema). `conducta` nula significa que el segundo no tiene conducta: la
+máquina no pudo decidir, o el usuario lo marcó "dudosa" (`humano_duda`). La conducta del
+sistema no se conserva aparte: al corregir se reemplaza, y `origen` dice que el segundo fue revisado.
 
 ### Restricciones que la base debe hacer cumplir
 - `ANALISIS.idVideo` es `UNIQUE`: un video, un análisis. Reanalizar **reemplaza** el
@@ -350,11 +345,8 @@ máquina no pudo decidir, o el usuario lo marcó "dudosa" (`humano_duda`).
 - `GRUPO`: `UNIQUE (idExperimento, etiqueta)`. `TANDA`: `UNIQUE (idGrupo, ordinal)`.
 - `VIDEO`: `UNIQUE (idTanda, sesion)`. `OBSERVACION`: `UNIQUE (idEspecimen, idVideo)`.
 - `INTERVALO`: `UNIQUE (idObservacion, minuto)`.
-- `ESPECIMEN`: `UNIQUE (idTanda, numeroCilindro)` y `UNIQUE (idGrupo, numeroRata)`,
-  con `numeroRata >= 1`. `idGrupo` en `ESPECIMEN` es redundante a propósito: lo mantiene
-  un disparador `BEFORE INSERT OR UPDATE OF idTanda` que copia el `idGrupo` de la tanda,
-  así la aplicación no necesita mandarlo.
-- `CONFIGURACION.umbralConfianza` entre 0 y 1.
+- `ESPECIMEN`: `UNIQUE (idTanda, numeroCilindro)`.
+- `EXPERIMENTO.nombre` es `UNIQUE` en todo el sistema.
 - `ANALISIS.rutaDiagnostico` solo se llena cuando `estado = 'error'`.
 - `ADMINISTRADOR` es subtipo: su llave primaria es la misma llave foránea a `USUARIO`.
 
@@ -394,7 +386,7 @@ Reglas generales:
 | GET | `/experiments/{id}/status` | Progreso de los análisis en porcentaje | Investigador |
 | GET | `/experiments/{id}/results` | Resultados por espécimen y conducta | Investigador |
 | GET | `/experiments/{id}/results/byminute` | Desglose por minuto | Investigador |
-| GET | `/experiments/{id}/groups/{grupo}/tandas/{tanda}/comparison` | Comparación Día 1 vs Día 2 de esa tanda | Investigador |
+| GET | `/experiments/{id}/results/groups` | Comparación entre grupos con el Día 2: promedio por espécimen de cada grupo (RF-21) **[PROPUESTA]** | Investigador |
 | GET | `/experiments/{id}/report/pdf` | Descarga reporte PDF | Investigador |
 | GET | `/experiments/{id}/report/csv` | Descarga CSV | Investigador |
 | GET | `/experiments/{id}/report/xlsx` | Descarga XLSX | Investigador |
@@ -437,10 +429,10 @@ Estos nombres los propone este documento; confírmalos con el usuario:
 | R-08 | Borrar un experimento es permanente (se van video, resultados y reportes). Pide confirmación explícita. |
 | R-09 | Solo se aceptan archivos `.mp4` y `.mov`. La validación de formato ocurre **en el cliente** antes de subir, y el backend la repite. También valida que el video sea reproducible y que esté **en horizontal** (ancho mayor que alto): un video girado (vertical) **no se puede procesar** y se rechaza con un mensaje claro. No hay opción de rotar. |
 | R-10 | **Eliminada.** Ya no hay umbral de confianza de detección de cilindros, y nada la sustituye en esta versión (sección 11, punto 14). |
-| R-11 | La comparación Día 1 vs Día 2 solo existe si **ambos** videos de la tanda se procesaron con éxito. |
-| R-12 | Cuando el clasificador sabe que el espécimen no está inmóvil pero no decide entre nado y escalamiento, esos segundos se guardan como "conducta activa", una cuarta conducta. Un mismo análisis puede mezclar las cuatro. Los reportes deben mostrarla como una columna más. |
-| R-13 | Solo se analizan los primeros 300 s de cada video. El resto se descarta. |
-| R-14 | Solo se puede revisar un análisis en estado `completado`. Al revisar, el usuario corrige las etiquetas segundo a segundo; cada corrección queda en `SEGUNDO` con `origen` `humano_confirma`, `humano_corrige` o `humano_duda`, y al guardar el backend **recalcula `INTERVALO` y `PRESENTA`** de esos especímenes dentro de la misma transacción. La etiqueta original de la máquina nunca se pierde: queda en `propuesta`. |
+| R-11 | **Eliminada (D-44).** No hay comparación Día 1 vs Día 2. Se comparan los grupos entre sí con el Día 2; el Día 1 solo sirve para verificar que los especímenes llegaron igual de estresados. |
+| R-12 | Cuando el clasificador sabe que el espécimen no está inmóvil pero no decide entre nado y escalamiento, esos segundos se guardan como "conducta activa", una cuarta conducta. Un mismo análisis puede mezclar las cuatro. Los reportes deben mostrarla como una columna más. En los bloques de 5 s también resuelve el empate entre nado activo y escalamiento (sección 9.5). |
+| R-13 | De cada video se guardan y se muestran como máximo los **últimos 300 s** (de final a inicio), sin mínimo. La CNN analiza el video completo y el worker descarta el principio, donde a veces aparecen personas, y renumera de 1 a 300 (D-54). |
+| R-14 | Solo se puede revisar un análisis en estado `completado`. Al revisar, el usuario corrige las etiquetas segundo a segundo; cada corrección queda en `SEGUNDO` con `origen` `humano_confirma`, `humano_corrige` o `humano_duda`, y al guardar el backend **recalcula `INTERVALO` y `PRESENTA`** de esos especímenes dentro de la misma transacción. La conducta que puso el sistema se reemplaza al corregir; `origen` conserva que el segundo fue revisado. |
 
 Otras decisiones tomadas:
 - **Progreso:** el backend calcula el porcentaje por análisis como **un tercio fijo por
@@ -473,9 +465,9 @@ Otras decisiones tomadas:
 
 | Tarea | Frecuencia | Qué hace |
 |---|---|---|
-| Borrar videos vencidos | Diaria | Elimina el archivo del video 30 días después de `ANALISIS.fechaAnalisis` si `estado = completado`. La fila de `VIDEO` se conserva. |
+| Borrar videos vencidos | Diaria | Elimina el archivo del video 30 días después de `ANALISIS.fechaAnalisis` si `estado = completado`. La fila de `VIDEO` se conserva y su `archivo` queda en nulo. |
 | Aviso de vencimiento | Diaria | Marca los videos a menos de 7 días del borrado para que el dashboard los muestre con nombre del experimento y fecha exacta. |
-| Vigilar disco | Periódica | Al superar **80 %**, crea `NOTIFICACION` tipo `alerta de disco` para el administrador. Al superar **90 %**, borra los videos más antiguos y notifica al investigador de cada experimento afectado. |
+| Vigilar disco | Periódica | Al superar **80 %**, crea `NOTIFICACION` tipo `alerta de disco` para el administrador. Al superar **90 %**, borra los videos más antiguos (deja `VIDEO.archivo` en nulo) y crea una `NOTIFICACION` tipo `video borrado` para el investigador de cada experimento afectado. |
 
 La fecha de borrado se **deriva** (`fechaAnalisis + 30 días`). No hay columna para ella y
 no se debe crear.
@@ -568,8 +560,9 @@ Reglas del paso 2:
 
 ### 9.4 Progreso del análisis
 Estados: analizando; completado; error (no se pudo abrir el video o no se hallaron los
-tubos). **[ABIERTO]** Esta pantalla cambiará si se adopta el análisis en pantalla con
-intervención humana (sección 11, punto 14).
+tubos). ~~Esta pantalla cambiará si se adopta el análisis en pantalla con intervención
+humana~~ **Resuelto por la sección 11, punto 14:** en esta versión no hay análisis en
+pantalla ni intervención humana, así que la pantalla se queda como está.
 
 ```
 +-------------------------------------------------------------+
@@ -596,22 +589,29 @@ intervención humana (sección 11, punto 14).
 - Al completarse, habilita "Ver resultados" y "Revisar segundo a segundo" (sección 9.7).
 
 ### 9.5 Resultados
-Cuatro pestañas. Estados: resumen de un solo día; comparación Día 1 vs Día 2; desglose por
-minuto expandido.
+Cuatro pestañas: por espécimen, comparación entre grupos (Día 2), línea de tiempo por
+minuto y bloques de 5 s. En la de bloques, cada bloque muestra la conducta con más segundos
+y, al abrirlo, sus cinco segundos, para notar las conductas breves.
+
+Los bloques **no usan la CNN**: la CNN solo clasifica cada segundo, y el bloque se calcula por mayoría sobre esos cinco segundos (3 de nado activo y 2 de inmovilidad dan nado activo). Reglas del bloque (D-53):
+- Gana la conducta con más segundos. Si nado activo y escalamiento empatan (por ejemplo 2 y 2), el bloque es **conducta activa**.
+- Con 2 de inmovilidad y 2 de nado activo, decide el quinto segundo: si es escalamiento, el bloque es conducta activa; si es "no se ve", también es conducta activa, con el matiz de abajo.
+- Un bloque cuyos cinco segundos son "no se ve" se muestra como **conducta activa con un matiz** que avisa que el modelo no pudo ver bien esa parte del video.
+- Los fragmentos "no se ve" también se marcan en el PDF final que se entrega al cliente.
 
 ```
 +-------------------------------------------------------------+
-| Exp. A    [Resumen][Por espécimen][Por minuto][Día 1 vs Día 2]|
+| Exp. A  [Por espécimen][Entre grupos][Por minuto][Bloques]  |
 |                         [PDF] [CSV] [XLSX]                    |
 |-------------------------------------------------------------|
 | Resumen (Día 2)                                              |
-| Espécimen | Nado activo | Inmovilidad | Escalamiento           |
-| 1         | 60 s (20 %) | 180 s (60 %)| 60 s (20 %)            |
-| 2         | ...                                               |
+| Tanda · Espécimen | Nado activo | Inmovilidad | Escalamiento    |
+| A · 1             | 60 s (20 %) | 180 s (60 %)| 60 s (20 %)     |
+| A · 2             | ...                                           |
 |-------------------------------------------------------------|
 | Por minuto: minuto 1..5 por espécimen y conducta             |
-| Día 1 vs Día 2: barras por espécimen (solo si ambos videos   |
-|   de la tanda se procesaron con éxito, R-11)                 |
+| Entre grupos: promedio por conducta de cada grupo (Día 2)   |
+| Bloques de 5 s: conducta mayoritaria y sus cinco segundos   |
 +-------------------------------------------------------------+
 ```
 
@@ -662,7 +662,7 @@ pantalla completa. Se revisa **un espécimen a la vez**, con el video corriendo.
 |   +-----------------------------------------------------------------+   |
 |   |  video, oscurecido salvo un recuadro alrededor del tubo actual  |   |
 |   |  [0:42]                                          Ahora: NADO    |   |
-|   |                                           (propuesta de máquina)|   |
+|   |                                        (conducta del sistema)|   |
 |   |  (si está en pausa) En pausa: una tecla cambia solo este segundo|   |
 |   +-----------------------------------------------------------------+   |
 |  Lupa (40 s)  ▓▓▓▓▓░░░░▓▓▓▓▓▓▓▓░░░▓▓▓▓      <- colores por conducta       |
@@ -676,7 +676,7 @@ pantalla completa. Se revisa **un espécimen a la vez**, con el video corriendo.
 ```
 
 Cómo funciona:
-- **Cada segundo ya trae una etiqueta propuesta** (la de la máquina). Cuando lo que ves no
+- **Cada segundo ya trae la conducta que puso el sistema.** Cuando lo que ves no
   coincide con el cartel "Ahora", pulsas la conducta correcta.
 - **Con el video corriendo**, la tecla cambia la etiqueta **desde 0.4 s antes** (lo que
   tarda una persona en reaccionar) hasta el siguiente cambio de color. **En pausa**, la
@@ -685,10 +685,10 @@ Cómo funciona:
   ve". `Espacio` pausa. `←` `→` un segundo, `Shift` + flecha cinco. `R` vuelve 3 s.
   `Tab` cambia de tubo. `Ctrl+Z` deshace. `Ctrl+S` guarda.
 - **"Visto"** son los segundos que el cabezal ya dejó atrás a velocidad 2x o menos. Solo lo
-  visto se guarda como `humano_confirma` (coincide con la propuesta) o `humano_corrige`
+  visto se guarda como `humano_confirma` (coincide con la conducta del sistema) o `humano_corrige`
   (la cambiaste). Lo pintado hacia adelante sin verlo queda `sin_revisar`. Un segundo que
   dejas vacío a propósito queda `humano_duda`.
-- **Modo "desde cero"** (opcional): oculta lo que propuso la máquina (cartel, colores de la
+- **Modo "desde cero"** (opcional): oculta la conducta del sistema (cartel, colores de la
   línea de tiempo y contadores); lo que marques queda `humano_ciego`.
 - **Recuadro del tubo:** viene del archivo `analisis_{idAnalisis}_cajas.json` (sección 11,
   punto 17). Es solo para destacar visualmente al espécimen; no se puede mover.
@@ -698,7 +698,7 @@ Cómo funciona:
 - **Resumen:** una tabla con los segundos por conducta de cada espécimen antes de guardar.
 - Nombres en pantalla: "Nado", "Inmovilidad", "Escalamiento", "Activa", "Dudosa". En la
   base: `nado activo`, `inmovilidad`, `escalamiento`, `conducta activa` y nulo. "Dudosa"
-  guarda `clase` nula con `origen = 'humano_duda'`; no existe un botón aparte de "No se
+  guarda `conducta` nula con `origen = 'humano_duda'`; no existe un botón aparte de "No se
   ve".
 - En la base los reportes dicen si el análisis tuvo revisión humana (algún `origen` que
   empiece con `humano`).
@@ -830,7 +830,7 @@ sequenceDiagram
    aplicación); no depende de un servidor del IPN. Se configura con las variables `SMTP_*`
    (servidor, puerto, usuario, contraseña, remitente). Se envían:
    - **Notificaciones:** cada `NOTIFICACION` que el sistema crea (`analisis completado`,
-     `error del pipeline`, `alerta de disco`) se manda también por correo a su
+     `error del pipeline`, `alerta de disco`, `video borrado`) se manda también por correo a su
      destinatario, como copia del aviso. La campanita no cambia. No se agregan tablas ni
      columnas: el correo sale de `USUARIO.correo`.
    - **Contraseña temporal:** al crear una cuenta se envía por correo **y** se muestra una
@@ -842,13 +842,11 @@ sequenceDiagram
    mensajes sin enviar nada. El correo de una cuenta puede ser de **cualquier dominio**
    (D-46). **[ABIERTO]** Qué otras notificaciones agregar: el usuario las definirá después;
    no implementes otras por tu cuenta.
-3. ~~Quién crea las filas de `MODELO` y `CONFIGURACION`~~ **Resuelto como semilla simple
-   [PROPUESTA].** `ANALISIS` exige apuntar a una `CONFIGURACION`, y esa a un `MODELO`. El
-   script de `db/init/` inserta **un `MODELO` y una `CONFIGURACION` de ejemplo** (hash de
-   64 ceros, versión `dev`, umbral de decisión de clase 0.80). El backend, al encolar, usa la
-   `CONFIGURACION` más reciente por `fechaCreacion`. Cuando exista el worker real, él
-   insertará las suyas y el backend usará esas automáticamente. No hace falta coordinar
-   nada más.
+3. ~~Quién crea las filas de `MODELO` y `CONFIGURACION`~~ **Sin objeto (usuario,
+   5-oct-2026).** Las dos tablas y la columna `ANALISIS.idConfig` se eliminaron: ningún
+   requisito permite cambiar el modelo ni el umbral. El modelo entrenado y el umbral de
+   decisión (0.80) son constantes del worker (sección 4). Al encolar, el backend solo
+   necesita el `idVideo`.
 4. **Valor de `etapa` mientras el análisis está `en cola`: [PROPUESTA]** es nulo. Así
    está en el SQL del Anexo B. El usuario no lo ha confirmado.
 5. **[ABIERTO] Tamaño máximo de video.** No está definido. Dejar el límite configurable
@@ -857,10 +855,9 @@ sequenceDiagram
    por grupo, 1 o más tandas por grupo.
 7. **[ABIERTO] Usuario administrador inicial:** hace falta una semilla en la base, porque
    no hay autoregistro. Pregunta al usuario qué nombre y correo usar.
-8. **[ABIERTO] Conteo de conductas.** Antes se pensaba que una conducta solo cuenta si dura
-   3 segundos seguidos o más. El laboratorio ahora pidió contar todo segundo a segundo, sin
-   mínimo. Es asunto del worker; avisa si el formato de `INTERVALO` o `PRESENTA` tiene que
-   cambiar.
+8. ~~Conteo de conductas~~ **Resuelto (RF-18).** No hay duración mínima: cada segundo
+   recibe una conducta y ninguna se descarta por durar poco. `INTERVALO` y `PRESENTA` no
+   cambian: `PRESENTA` cuenta los segundos de cada conducta en cada minuto.
 9. ~~"Último acceso" de cada usuario~~ **Resuelto (usuario, 3-oct-2026).** Se quita:
    la lista de administración no muestra último acceso y `USUARIO` no lleva esa columna.
 10. **[ABIERTO] Log de ejecución del análisis.** Se quería un registro expandible en la
@@ -875,10 +872,10 @@ sequenceDiagram
     junto con nombre, apellidos y correo. La contraseña temporal la genera el sistema
     (corregido por el usuario, 4-oct-2026). El backend rechaza el alta si el
     identificador o el correo ya existen.
-13. **[ABIERTO] Qué pasa con `VIDEO.archivo` cuando el video se borra a los 30 días.**
-    **[PROPUESTA]** No se modifica la columna (no hay otra donde marcar el borrado). La
-    interfaz sabe que el video ya no existe porque pasaron 30 días desde
-    `ANALISIS.fechaAnalisis` o porque el archivo ya no está en disco.
+13. ~~Qué pasa con `VIDEO.archivo` cuando el video se borra~~ **Resuelto (usuario,
+    5-oct-2026).** `VIDEO.archivo` admite nulo: al borrar el video, la tarea programada lo
+    deja en nulo. Nulo significa "el video ya se borró"; la interfaz lo usa para saber que
+    ya no se puede reproducir. La fila de `VIDEO` se conserva.
 14. ~~Análisis en pantalla con intervención humana~~ **Resuelto para esta versión (usuario,
     3-oct-2026).** **No hay vista en vivo, ni procesamiento a la velocidad del video, ni
     intervención mientras corre el análisis.** El análisis corre en segundo plano a su
@@ -894,7 +891,7 @@ sequenceDiagram
 16. **Video para reproducir en el navegador. Resuelto (usuario, 3-oct-2026):** se queda
     la propuesta. Los `.mov` del iPhone suelen venir
     en un códec (HEVC) que Chrome y Firefox no reproducen. Al terminar el
-    análisis, el worker genera con `ffmpeg` una copia en H.264 de los primeros 300 s
+    análisis, el worker genera con `ffmpeg`, recortando con recodificación para que el corte sea exacto, una copia en H.264 de los últimos 300 s (todo el video si dura menos)
     (`analisis_{idAnalisis}_web.mp4`, en el volumen `videos_reportes`) y la pantalla de
     revisión reproduce esa copia. En `worker_fake`, simplemente copia o enlaza el original.
     Esa copia también se borra con el video a los 30 días.
@@ -915,9 +912,9 @@ Cada paso termina con algo que se puede probar.
 
 1. **Docker Compose con `db` y `backend`** que arrancan (parte del Anexo C). Prueba:
    `docker compose up` y un endpoint de salud responde.
-2. **Base de datos:** usa el SQL del Anexo B (dominios, 17 tablas, restricciones,
-   disparador de `ESPECIMEN.idGrupo` y datos semilla: `CONDUCTA` y un `MODELO` con su
-   `CONFIGURACION` de ejemplo). Falta el administrador inicial (sección 11, punto 7).
+2. **Base de datos:** usa el SQL del Anexo B (dominios, 15 tablas, restricciones,
+   disparador de `ESPECIMEN.idGrupo` y datos semilla de `CONDUCTA`). Falta el administrador
+   inicial (sección 11, punto 7).
    Pruébalo contra un PostgreSQL real y corrige lo que falle.
 3. **Autenticación:** login, logout, cambio de contraseña, cambio obligatorio en el primer
    ingreso, recuperación. Bcrypt. JWT de larga duración y configurable (sección 11,
@@ -928,7 +925,7 @@ Cada paso termina con algo que se puede probar.
 6. **`worker_fake`:** simula el contrato de la sección 4, con un caso exitoso y uno de
    error (por ejemplo, un archivo cuyo nombre contenga la palabra `falla`).
 7. **Progreso y resultados:** endpoint de estado con porcentaje, resultados por espécimen,
-   desglose por minuto, comparación Día 1 vs Día 2, comparación entre grupos.
+   desglose por minuto, comparación entre grupos (Día 2) y bloques de 5 s.
 8. **Reportes:** CSV, XLSX, PDF con regeneración por vigencia, y PDF de diagnóstico.
    **Revisión segundo a segundo:** las tres rutas de la sección 6, el recálculo de
    `PRESENTA` y la pantalla 9.7 (después de tener resultados y reportes funcionando).
@@ -1013,7 +1010,7 @@ rectangle "Docker: worker\n(lo desarrolla otra persona)" as C_WK #FEF9E7 {
 
 rectangle "Capa de datos" as DATOS #F4F6F7 {
   rectangle "Docker: db" as C_DB #EBF5FB {
-    database "PostgreSQL\n\nEsquema relacional\n(17 tablas)" as DB
+    database "PostgreSQL\n\nEsquema relacional\n(15 tablas)" as DB
   }
   rectangle "Volumen videos_reportes\n(compartido)" as C_FS #EAEDED {
     folder "Videos .mp4 / .mov originales\nVideos anotados\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF" as FS
@@ -1112,7 +1109,7 @@ package "Servicios" as SERV {
 }
 
 package "Acceso a datos" {
-  [Modelos SQLAlchemy\n17 tablas] as m
+  [Modelos SQLAlchemy\n15 tablas] as m
 }
 
 database "PostgreSQL" as db
@@ -1187,7 +1184,7 @@ skinparam arrow {
 '   tipo_grupo             IN ('control','referencia','tratamiento experimental')
 '   sesion_video           IN ('Dia 1','Dia 2')
 '   formato_reporte        IN ('CSV','XLSX','PDF')
-'   tipo_notificacion      IN ('analisis completado','error del pipeline','alerta de disco')
+'   tipo_notificacion      IN ('analisis completado','error del pipeline','alerta de disco','video borrado')
 '   estado_analisis        IN ('en cola','procesando','completado','error')
 '   etapa_analisis         IN ('preprocesamiento','cilindros','clasificacion')
 '   nivel_clasif_analisis  IN ('preciso','agrupado')
@@ -1215,7 +1212,7 @@ entity EXPERIMENTO {
   * idExperimento : integer <<PK>>
   --
   idInstitucional : varchar(10) <<FK>>
-  nombre : varchar(n)
+  nombre : varchar(n) <<UK>>
   fecha : date
   notas : text (nulo)
 }
@@ -1245,20 +1242,14 @@ entity ESPECIMEN {
   * idEspecimen : integer <<PK>>
   --
   idTanda : integer <<FK>>
-  idGrupo : integer <<FK>> (redundante)
-  numeroRata : smallint
   numeroCilindro : smallint
   ..
   UK (idTanda, numeroCilindro)
-  UK (idGrupo, numeroRata)
-  CK numeroRata >= 1
 }
 note bottom of ESPECIMEN
-  idGrupo es redundante a proposito: permite declarar
-  "numeroRata unico por grupo" en la base y consultar
-  todos los especimenes de un grupo sin pasar por TANDA.
-  Lo sincroniza un disparador BEFORE INSERT OR UPDATE
-  OF idTanda que copia el idGrupo de la tanda.
+  D-55: el especimen se distingue por su posicion en el
+  cuadro (numeroCilindro). No se guarda el numero de rata
+  del laboratorio.
 end note
 
 entity VIDEO {
@@ -1266,7 +1257,7 @@ entity VIDEO {
   --
   idTanda : integer <<FK>>
   sesion : sesion_video
-  archivo : text
+  archivo : text (nulo = video borrado)
   duracion : numeric(p,s)
   fechaCarga : timestamptz
   ..
@@ -1277,7 +1268,6 @@ entity ANALISIS {
   * idAnalisis : integer <<PK>>
   --
   idVideo : integer <<FK>> <<UK>>
-  idConfig : integer <<FK>>
   estado : estado_analisis
   etapa : etapa_analisis
   nivelClasif : nivel_clasif_analisis
@@ -1328,8 +1318,7 @@ entity SEGUNDO {
   * idObservacion : integer <<PK>> <<FK>>
   * segundo : smallint <<PK>>
   --
-  clase : varchar(n) <<FK>> (nulo = "no se ve")
-  propuesta : varchar(n) <<FK>>
+  conducta : varchar(n) <<FK>> (nulo = "no se ve")
   origen : origen_segundo
   ..
   CK segundo BETWEEN 1 AND 300
@@ -1342,35 +1331,6 @@ note bottom of ADMINISTRADOR
   No es un tipo de usuario aparte: es subtipo de USUARIO.
   Su PK es la misma FK, asi que PostgreSQL la indexa sola.
 end note
-
-entity MODELO {
-  * hashModelo : char(64) <<PK>>
-  --
-  nombreModelo : varchar(n)
-}
-note bottom of MODELO
-  hashModelo = SHA-256 del archivo del modelo.
-  64 es la longitud fija de su salida.
-end note
-
-entity CONFIGURACION {
-  * idConfig : integer <<PK>>
-  --
-  hashModelo : char(64) <<FK>>
-  versionPipeline : varchar(n)
-  umbralConfianza : numeric(p,s)
-  segundosOmitir : numeric(p,s)
-  umbralInmovil : numeric(p,s)
-  umbralDesplazamiento : numeric(p,s)
-  umbralStdPosicion : numeric(p,s)
-  umbralAspectoTrepada : numeric(p,s)
-  fechaCreacion : timestamptz
-  ..
-  UK (hashModelo, versionPipeline, umbralConfianza,
-      segundosOmitir, umbralInmovil, umbralDesplazamiento,
-      umbralStdPosicion, umbralAspectoTrepada)
-  CK umbralConfianza BETWEEN 0 AND 1
-}
 
 entity REPORTE {
   * idReporte : integer <<PK>>
@@ -1401,7 +1361,6 @@ EXPERIMENTO    "1" --o "0..*" REPORTE                   : idExperimento
 EXPERIMENTO    "1" --o "0..*" NOTIFICACION               : idExperimento
 
 GRUPO          "1" --o "1..*" TANDA                     : idGrupo
-GRUPO          "1" --o "2..*" ESPECIMEN                 : idGrupo
 
 TANDA          "1" --o "2..4" ESPECIMEN                 : idTanda
 TANDA          "1" --o "1..2" VIDEO                     : idTanda
@@ -1409,16 +1368,13 @@ TANDA          "1" --o "1..2" VIDEO                     : idTanda
 VIDEO          "1" --o "1"    ANALISIS                  : idVideo (UK)
 VIDEO          "1" --o "2..4" OBSERVACION                : idVideo
 
-CONFIGURACION  "1" --o "0..*" ANALISIS                  : idConfig
-MODELO         "1" --o "0..*" CONFIGURACION              : hashModelo
-
 ESPECIMEN      "1" --o "1..2" OBSERVACION                : idEspecimen
 
 OBSERVACION    "1" --o "5"    INTERVALO                 : idObservacion
 INTERVALO      "1" --o "2..4" PRESENTA                  : idIntervalo
 CONDUCTA       "1" --o "0..*" PRESENTA                  : conducta
 OBSERVACION    "1" --o "1..300" SEGUNDO                 : idObservacion
-CONDUCTA       "0..1" --o "0..*" SEGUNDO                : clase, propuesta
+CONDUCTA       "0..1" --o "0..*" SEGUNDO                : conducta
 @enduml
 ```
 
@@ -1485,7 +1441,6 @@ package P2_Experimentos_y_carga_de_video {
   }
   class Especimen {
     -id : Integer
-    -numeroRata : Integer
     -numeroCilindro : Integer
   }
   class Video {
@@ -1527,21 +1482,6 @@ package P3_Pipeline_de_analisis_conductual {
     -nivelClasif : String
     -fechaAnalisis : DateTime
   }
-  class Modelo {
-    -hashModelo : String
-    -nombreModelo : String
-  }
-  class Configuracion {
-    -id : Integer
-    -versionPipeline : Integer
-    -umbralConfianza : Float
-    -segundosOmitir : Float
-    -umbralInmovil : Float
-    -umbralDesplazamiento : Float
-    -umbralStdPosicion : Float
-    -umbralAspectoTrepada : Float
-    -fechaCreacion : DateTime
-  }
 }
 
 package P4_Resultados_y_reportes {
@@ -1558,10 +1498,9 @@ package P4_Resultados_y_reportes {
   }
   class Segundo {
     -segundo : Integer
-    -clase : String
-    -propuesta : String
+    -conducta : String
     -origen : String
-    +corregir(clase, origen) : void
+    +corregir(conducta, origen) : void
   }
   class Reporte {
     -id : Integer
@@ -1594,8 +1533,6 @@ Tanda       "1" *--> "2..4" Especimen : aloja
 Tanda       "1" *--> "1..2" Video     : produce
 
 Analisis "1" --> "1" Video            : procesa
-Analisis "0..*" --> "1" Configuracion : usa
-Configuracion "0..*" --> "1" Modelo   : configura
 
 Worker ..> PipelineAnalisis : invoca
 Worker ..> Analisis         : procesa
@@ -2243,7 +2180,7 @@ w -> db: actualiza la etapa a "preprocesamiento"
 w -> w: alinea la cámara y construye el modelo de fondo
 
 w -> db: actualiza la etapa a "cilindros"
-w -> w: localiza los cilindros y la línea de agua (solo los primeros 300 s del video)
+w -> w: localiza los cilindros y la línea de agua (sobre el video completo)
 
 alt se hallaron los tubos
   w -> db: actualiza la etapa a "clasificación"
@@ -2386,8 +2323,8 @@ else se puede revisar
     ui -> ui: guarda un borrador en el navegador
   end
   u -> ui: Guardar (Ctrl+S)
-  ui -> api: PUT .../segundos\n{cambios: [{numeroCilindro, segundo, clase, origen}]}
-  api -> db: [transacción] actualiza SEGUNDO\n(clase y origen; propuesta no cambia)
+  ui -> api: PUT .../segundos\n{cambios: [{numeroCilindro, segundo, conducta, origen}]}
+  api -> db: [transacción] actualiza SEGUNDO\n(conducta y origen)
   api -> db: [transacción] recalcula INTERVALO y PRESENTA\nde los especímenes tocados (4 filas por intervalo)
   api -> db: [transacción] actualiza nivelClasif\n(agrupado si queda algún segundo como conducta activa)
   api -> db: borra los reportes guardados del experimento\npara que se regeneren con los datos nuevos
@@ -2616,7 +2553,8 @@ CREATE DOMAIN formato_reporte AS varchar(4)
   CHECK (VALUE IN ('CSV', 'XLSX', 'PDF'));
 
 CREATE DOMAIN tipo_notificacion AS varchar(32)
-  CHECK (VALUE IN ('analisis completado', 'error del pipeline', 'alerta de disco'));
+  CHECK (VALUE IN ('analisis completado', 'error del pipeline', 'alerta de disco',
+                   'video borrado'));
 
 CREATE DOMAIN estado_analisis AS varchar(10)
   CHECK (VALUE IN ('en cola', 'procesando', 'completado', 'error'));
@@ -2660,7 +2598,7 @@ CREATE TABLE experimento (
   nombre           varchar(150) NOT NULL,
   fecha            date         NOT NULL,
   notas            text,
-  CONSTRAINT uq_experimento_nombre UNIQUE (nombre)   -- [PROPUESTA] nombre unico en todo el sistema
+  CONSTRAINT uq_experimento_nombre UNIQUE (nombre)   -- nombre unico en todo el sistema (RF-11)
 );
 
 CREATE TABLE grupo (
@@ -2686,69 +2624,28 @@ CREATE TABLE especimen (
   idespecimen     integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   idtanda         integer  NOT NULL
     REFERENCES tanda (idtanda) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  idgrupo         integer  NOT NULL                              -- redundante a proposito
-    REFERENCES grupo (idgrupo) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  numerorata      smallint NOT NULL CHECK (numerorata >= 1),     -- en la interfaz: "Especimen N"
   numerocilindro  smallint NOT NULL CHECK (numerocilindro BETWEEN 1 AND 4),
-  CONSTRAINT uq_especimen_cilindro UNIQUE (idtanda, numerocilindro),
-  CONSTRAINT uq_especimen_numero   UNIQUE (idgrupo, numerorata)
+  CONSTRAINT uq_especimen_cilindro UNIQUE (idtanda, numerocilindro)
 );
 
--- idgrupo se copia de la tanda: la aplicacion no necesita mandarlo.
--- Un trigger BEFORE corre antes de validar NOT NULL, asi que el INSERT sin idgrupo es valido.
-CREATE FUNCTION fn_sincronizar_grupo_especimen() RETURNS trigger AS $$
-BEGIN
-  SELECT t.idgrupo INTO NEW.idgrupo FROM tanda t WHERE t.idtanda = NEW.idtanda;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_especimen_sincroniza_grupo
-  BEFORE INSERT OR UPDATE OF idtanda ON especimen
-  FOR EACH ROW EXECUTE FUNCTION fn_sincronizar_grupo_especimen();
-
 -- ------------------------------------------------------------
---  Video y configuración del análisis
+--  Video y análisis
 -- ------------------------------------------------------------
 CREATE TABLE video (
   idvideo     integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   idtanda     integer      NOT NULL
     REFERENCES tanda (idtanda) ON UPDATE NO ACTION ON DELETE NO ACTION,
   sesion      sesion_video NOT NULL,
-  archivo     text         NOT NULL,        -- ruta dentro del volumen; no se modifica al borrar el video
+  archivo     text,                         -- ruta dentro del volumen; nula cuando el video ya se borro
   duracion    numeric(8,2) NOT NULL CHECK (duracion > 0),    -- segundos
   fechacarga  timestamptz  NOT NULL DEFAULT now(),
   CONSTRAINT uq_video_sesion UNIQUE (idtanda, sesion)
-);
-
-CREATE TABLE modelo (
-  hashmodelo    char(64)     PRIMARY KEY,   -- SHA-256 del archivo del modelo
-  nombremodelo  varchar(100) NOT NULL
-);
-
-CREATE TABLE configuracion (
-  idconfig              integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  hashmodelo            char(64)     NOT NULL
-    REFERENCES modelo (hashmodelo) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  versionpipeline       varchar(50)  NOT NULL,
-  umbralconfianza       numeric(4,3) NOT NULL CHECK (umbralconfianza BETWEEN 0 AND 1),
-  segundosomitir        numeric(6,2) NOT NULL,
-  umbralinmovil         numeric(8,4) NOT NULL,
-  umbraldesplazamiento  numeric(8,4) NOT NULL,
-  umbralstdposicion     numeric(8,4) NOT NULL,
-  umbralaspectotrepada  numeric(8,4) NOT NULL,
-  fechacreacion         timestamptz  NOT NULL DEFAULT now(),
-  CONSTRAINT uq_configuracion UNIQUE (
-    hashmodelo, versionpipeline, umbralconfianza, segundosomitir, umbralinmovil,
-    umbraldesplazamiento, umbralstdposicion, umbralaspectotrepada)
 );
 
 CREATE TABLE analisis (
   idanalisis       integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   idvideo          integer NOT NULL
     REFERENCES video (idvideo) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  idconfig         integer NOT NULL
-    REFERENCES configuracion (idconfig) ON UPDATE NO ACTION ON DELETE NO ACTION,
   estado           estado_analisis       NOT NULL DEFAULT 'en cola',
   etapa            etapa_analisis,                     -- nula mientras esta en cola [PROPUESTA]
   nivelclasif      nivel_clasif_analisis,
@@ -2801,9 +2698,7 @@ CREATE TABLE segundo (
   idobservacion  integer        NOT NULL
     REFERENCES observacion (idobservacion) ON UPDATE NO ACTION ON DELETE NO ACTION,
   segundo        smallint       NOT NULL CHECK (segundo BETWEEN 1 AND 300),
-  clase          varchar(30)                              -- nula = "no se ve"
-    REFERENCES conducta (nombre) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  propuesta      varchar(30)                              -- lo que propuso la máquina; no se pierde
+  conducta       varchar(30)                              -- nula = no decidio o "no se ve"
     REFERENCES conducta (nombre) ON UPDATE NO ACTION ON DELETE NO ACTION,
   origen         origen_segundo NOT NULL DEFAULT 'maquina',
   PRIMARY KEY (idobservacion, segundo)
@@ -2841,28 +2736,17 @@ CREATE TABLE notificacion (
 -- ------------------------------------------------------------
 CREATE INDEX ix_experimento_usuario   ON experimento (idinstitucional);
 CREATE INDEX ix_analisis_estado       ON analisis (estado);       -- el worker hace polling por aqui
-CREATE INDEX ix_analisis_config       ON analisis (idconfig);
 CREATE INDEX ix_observacion_video     ON observacion (idvideo);
 CREATE INDEX ix_presenta_conducta     ON presenta (conducta);
 CREATE INDEX ix_notificacion_usuario  ON notificacion (idinstitucional, leido);
 CREATE INDEX ix_notificacion_experim  ON notificacion (idexperimento);
-CREATE INDEX ix_configuracion_modelo  ON configuracion (hashmodelo);
+CREATE INDEX ix_segundo_conducta      ON segundo (conducta);
 
 -- ------------------------------------------------------------
 --  Datos semilla
 -- ------------------------------------------------------------
 INSERT INTO conducta (nombre) VALUES
   ('nado activo'), ('inmovilidad'), ('escalamiento'), ('conducta activa');
-
--- Modelo y configuracion de ejemplo, para que el backend pueda encolar antes de que
--- exista el worker real. El worker real insertara los suyos.
-INSERT INTO modelo (hashmodelo, nombremodelo)
-VALUES (repeat('0', 64), 'modelo de ejemplo');
-
-INSERT INTO configuracion (hashmodelo, versionpipeline, umbralconfianza, segundosomitir,
-                           umbralinmovil, umbraldesplazamiento, umbralstdposicion,
-                           umbralaspectotrepada)
-VALUES (repeat('0', 64), 'dev', 0.800, 0, 0, 0, 0, 0);   -- 0.800 = umbral de decision de clase
 
 -- Administrador inicial: [ABIERTO] nombre, correo e identificador institucional.
 -- No lo insertes con una contrasena inventada. Crea el hash con bcrypt desde Python
@@ -3098,5 +2982,5 @@ DISK_CLEANUP_PERCENT=90
 
 ---
 
-Última actualización: 3 de octubre de 2026. Si algo de este archivo parece contradictorio
+Última actualización: 5 de octubre de 2026. Si algo de este archivo parece contradictorio
 o incompleto, pregunta al usuario antes de decidir.

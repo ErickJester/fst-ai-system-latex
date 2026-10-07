@@ -13,20 +13,23 @@
 '  modelado como subtipo -- si el usuario no aparece aqui, es
 '  investigador simple.
 '
-'  15 relaciones - 66 atributos - 18 llaves foraneas.
+'  15 relaciones - 63 atributos - 17 llaves foraneas.
+'  (D-55, 6-oct: se quito ESPECIMEN.numeroRata -- el sistema no
+'   necesita identificar a cada rata por su numero del laboratorio;
+'   el espécimen se distingue por su posicion, numeroCilindro.
+'   D-53, 6-oct: SEGUNDO.clase pasa a llamarse conducta. Baja de 65
+'   a 63 atributos y de 18 a 17 llaves foraneas)
 '  (D-51, 5-oct: se quitaron MODELO y CONFIGURACION y la columna
 '   ANALISIS.idConfig -- ningun RF permite cambiar el modelo ni el
-'   umbral, son constantes del pipeline. Se agregaron
-'   ANALISIS.rutaRecuadros; SEGUNDO.propuesta y
-'   VIDEO.archivo pasan a admitir nulo; EXPERIMENTO.nombre pasa a
-'   ser clave alterna. Baja de 17 a 15 relaciones, de 78 a 66
+'   umbral, son constantes del pipeline. VIDEO.archivo pasa a
+'   admitir nulo; EXPERIMENTO.nombre pasa a
+'   ser clave alterna. Baja de 17 a 15 relaciones, de 78 a 65
 '   atributos y de 20 a 18 llaves foraneas)
 '  (D-47, 4-oct: se quito ANALISIS.confianza -- el detector actual
 '   no produce ningun valor de confianza -- y baja de 79 a 78)
-'  (D-35, 3-oct: se agrego SEGUNDO, con 5 atributos y 3 llaves
-'   foraneas: idObservacion, clase y propuesta. Su clave es
-'   (idObservacion, segundo) y los otros tres atributos dependen
-'   solo de ella, asi que queda en BCNF.)
+'  (D-35, 3-oct: se agrego SEGUNDO. Su clave es (idObservacion,
+'   segundo) y sus demas atributos dependen solo de ella, asi que
+'   queda en BCNF.)
 '  (D-25, 15-sep: se agrego USUARIO.cambioRequerido, sube de 73 a 74)
 '  Validado relacion por relacion: las dos de la reconciliacion
 '  y ADMINISTRADOR quedan en BCNF.
@@ -145,7 +148,6 @@ class ESPECIMEN {
   <u>idEspecimen</u>
   --
   idTanda   [FK] [AK]
-  numeroRata   [AK]
   numeroCilindro   [AK]
 }
 
@@ -167,7 +169,6 @@ class ANALISIS {
   etapa
   nivelClasif
   fechaAnalisis
-  rutaRecuadros   (nulo)
 }
 
 class OBSERVACION {
@@ -199,8 +200,7 @@ class SEGUNDO {
   <u>idObservacion</u>   [FK]
   <u>segundo</u>
   --
-  clase   [FK] (nulo)
-  propuesta   [FK] (nulo)
+  conducta   [FK] (nulo)
   origen
 }
 
@@ -247,6 +247,7 @@ VIDEO          "1" --o "2..4" OBSERVACION
 OBSERVACION    "1" --o "5"    INTERVALO
 INTERVALO      "1" --o "2..4" PRESENTA
 CONDUCTA       "1" --o "0..*" PRESENTA
+' D-54: 300 es un maximo, sin minimo (los ultimos 300 s del video)
 OBSERVACION    "1" --o "1..300" SEGUNDO
 CONDUCTA       "0..1" --o "0..*" SEGUNDO
 EXPERIMENTO    "1" --o "0..*" REPORTE

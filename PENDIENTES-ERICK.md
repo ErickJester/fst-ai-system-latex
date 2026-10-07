@@ -93,5 +93,5 @@ abreviaturas y dudas.
 
 - **Cuando resuelvas una decisión que toque el texto**, actualiza «Lo que ya está decidido» de `PENDIENTES.md` en el mismo commit: es lo que Vanesa usa para no contradecir nada.
 - Cerrar en los trackers viejos los ítems ya resueltos (lista en `PENDIENTES.md` §Resueltos).
-- **D-51 sin aplicar** (fuera de los caps. 1–5): `INSTRUCCIONES-WEB.md`, comentario de
-  `seq_analisis_automatico.puml`, artifacts y cap. 6.
+- **D-51 sin aplicar** (fuera de los caps. 1–5): comentario de
+  `seq_analisis_automatico.puml` y cap. 6. (Artifacts e `INSTRUCCIONES-WEB.md`: ✅ actualizados el 5-oct.)

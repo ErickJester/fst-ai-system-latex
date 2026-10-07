@@ -13,9 +13,9 @@
 '    no existen. La comparacion real que pide el protocolo es OTRA:
 '    "Los 5 minutos del Dia 2, entre los tres grupos" (Reunion 3-sep,
 '    ver errores/preguntas-doctor.md SS5 "Ya respondido").
-'  - El Dia 1 no mide el efecto del tratamiento, solo verifica que
-'    las ratas lleguen igual de estresadas (mismo SS5). No entra en
-'    esta comparacion.
+'  - El Dia 1 no mide el efecto del tratamiento: solo confirma que
+'    existe el video de habituacion de la prueba de Porsolt (D-54).
+'    No se analiza ni entra en esta comparacion.
 '  - Camino de datos real: GRUPO -> TANDA -> ESPECIMEN -> OBSERVACION
 '    (del video con sesion = "Dia 2") -> INTERVALO -> PRESENTA
 '    (segundos por conducta). Se suma por especimen y se agrega por
