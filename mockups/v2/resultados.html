@@ -77,7 +77,7 @@
         <div style="border:1px solid var(--color-divider);padding:16px 18px">
           <div id="bloques" style="display:flex;flex-direction:column;gap:10px"></div>
         </div>
-        <p class="hint" style="margin:10px 0 0">Cada bloque toma la conducta que más segundos ocupó (arriba) y muestra debajo sus 5 segundos. Así se ven las conductas breves, de unos 2 s, que el análisis a ojo por bloques no distingue, y el resultado se compara directo con el manual.</p>
+        <p class="hint" style="margin:10px 0 0">Cada bloque toma la conducta que más segundos ocupó (arriba) y muestra debajo sus 5 segundos. Así se ven las conductas breves, de unos 2 s, que el análisis a ojo por bloques no distingue, y el resultado se compara directo con el manual. El bloque sale por mayoría de sus 5 segundos; si nado activo y escalamiento empatan, es conducta activa. Los bloques rayados tienen segundos «no se ve»: el modelo no vio bien esa parte del video, y el PDF final también los marca.</p>
       </div>
 
       <div style="background:var(--color-bg);padding-left:26px;display:flex;flex-direction:column;gap:24px">
@@ -187,17 +187,34 @@
 
   // ── bloques de 5 s (RF-18): la conducta con más segundos y, debajo, sus 5 segundos ──
   const porSegundo = patron.flatMap(segs => segs.flatMap(([c, d]) => Array(d).fill(c)));
-  const EMPATE = 'repeating-linear-gradient(135deg,color-mix(in srgb,var(--color-text) 30%,transparent) 0 3px,transparent 3px 6px)';
+  // «No se ve» y «conducta activa con matiz» (D-53) se dibujan rayados.
+  const RAYADO = 'repeating-linear-gradient(135deg,color-mix(in srgb,var(--color-text) 30%,transparent) 0 3px,transparent 3px 6px)';
+  cmap.activa = 'var(--color-accent-300)'; lbl.activa = 'Conducta activa';
+  cmap.nove = RAYADO; lbl.nove = 'No se ve';
+  // El bloque se calcula por mayoría de sus 5 segundos, sin la CNN (D-53):
+  // gana la conducta con más segundos; si nado y escalamiento empatan, o si decide el
+  // quinto segundo (2 de inmovilidad y 2 de nado), el bloque es conducta activa; un bloque
+  // con «no se ve» que no se resuelve por mayoría también es conducta activa, con matiz.
   function bloque(segs5) {
-    const n = {}; segs5.forEach(c => { n[c] = (n[c] || 0) + 1; });
-    const max = Math.max(...Object.values(n));
-    const top = Object.keys(n).filter(c => n[c] === max);
-    // Desempate aún por definir (D-49): el bloque se marca como empate.
-    const titulo = top.length > 1 ? 'Empate: ' + top.map(c => lbl[c]).join(' / ') : lbl[top[0]] + ' · ' + max + ' de 5 s';
+    const n = { nado: 0, inmov: 0, escal: 0, nove: 0 }; segs5.forEach(c => { n[c] = (n[c] || 0) + 1; });
+    const vistos = ['nado', 'inmov', 'escal'];
+    const max = Math.max(...vistos.map(c => n[c]));
+    const top = vistos.filter(c => n[c] === max);
+    let c, matiz = false, titulo;
+    if (max === 0) { c = 'activa'; matiz = true; }
+    else if (top.length === 1) { c = top[0]; }
+    else if (top.includes('nado') && top.includes('escal') && !top.includes('inmov')) { c = 'activa'; }
+    else if (n.nado + n.escal > n.inmov) { c = 'activa'; }
+    else { c = 'activa'; matiz = true; }
+    if (c !== 'activa' && n.nove) matiz = false;
+    titulo = c === 'activa'
+      ? 'Conducta activa' + (matiz ? ' · el modelo no vio bien parte de este bloque' : ' · desempate del bloque')
+      : lbl[c] + ' · ' + n[c] + ' de 5 s';
+    const fondo = matiz ? RAYADO : cmap[c];
     return '<div title="' + titulo + '" style="flex:1;display:flex;flex-direction:column;gap:2px">' +
-      '<div style="height:14px;background:' + (top.length > 1 ? EMPATE : cmap[top[0]]) + ';border:1px solid var(--color-divider)"></div>' +
+      '<div style="height:14px;background:' + fondo + ';border:1px solid var(--color-divider)"></div>' +
       '<div style="display:flex;gap:1px;height:7px">' +
-        segs5.map(c => '<div style="flex:1;background:' + cmap[c] + '"></div>').join('') +
+        segs5.map(s => '<div style="flex:1;background:' + cmap[s] + '"></div>').join('') +
       '</div>' +
     '</div>';
   }

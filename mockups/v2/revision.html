@@ -178,8 +178,8 @@ function rayas(a, b, paso) {
 const PAT = { activa: rayas(C.ink, C.n400, 3), nove: rayas('#c9cacc', C.bg, 2.5) };
 const fillDe = (ctx, c) => c === 'nado' ? C.ink : c === 'inmov' ? C.acc : c === 'escal' ? C.n400 : c === 'activa' ? ctx.createPattern(PAT.activa, 'repeat') : ctx.createPattern(PAT.nove, 'repeat');
 
-// ── propuesta del sistema (datos del mockup; nivel preciso: sin conducta activa) ──
-function propuesta(e) {
+// ── conducta del sistema (datos del mockup; nivel preciso: sin conducta activa) ──
+function conductaSistema(e) {
   const base = {
     1: [['nado', 58], ['escal', 7], ['nado', 20], ['inmov', 9], ['nado', 18], ['escal', 12], ['nado', 24], ['inmov', 14], ['nado', 20], ['inmov', 17], ['nado', 22], ['escal', 6], ['nado', 13], ['inmov', 22], ['nado', 10], ['inmov', 26], ['escal', 16], ['', 6]],
     2: [['nado', 40], ['inmov', 12], ['nado', 26], ['escal', 9], ['inmov', 20], ['nado', 30], ['inmov', 24], ['nado', 18], ['escal', 11], ['inmov', 28], ['nado', 22], ['inmov', 20], ['nado', 15], ['escal', 8], ['inmov', 17]],
@@ -193,7 +193,7 @@ function propuesta(e) {
 
 // ── estado ──────────────────────────────────────────────────────────────────
 const S = { L: {}, tubo: 1, t: 0, play: false, rate: 1, hist: [], ultimo: -1, raf: 0, last: 0, guardado: false };
-ESPECIMENES.forEach(e => { const p = propuesta(e); S.L[e] = { p, c: p.slice(), v: new Uint8Array(N) }; });
+ESPECIMENES.forEach(e => { const p = conductaSistema(e); S.L[e] = { p, c: p.slice(), v: new Uint8Array(N) }; });
 
 // borrador en el navegador hasta que se elige «Guardar»
 const BORR = 'revision.CSR-14.ref.tandaA.dia2';
@@ -342,7 +342,7 @@ function pintar() {
   $('pausa').classList.toggle('hidden', S.play);
   $('btnPlay').textContent = S.play ? 'Pausar' : 'Reproducir';
   $('ahoraVal').innerHTML = sw(c) + '<span' + (c === '' ? ' style="color:var(--muted)"' : '') + '>' + NOMBRE[c] + '</span>';
-  $('ahoraSrc').textContent = c !== L.p[s] ? 'Corregido · el sistema propuso ' + NOMBRE[L.p[s]].toLowerCase() : 'Propuesta del sistema';
+  $('ahoraSrc').textContent = c !== L.p[s] ? 'Corregido · el sistema puso ' + NOMBRE[L.p[s]].toLowerCase() : 'Conducta del sistema';
   document.querySelectorAll('.cls').forEach(b => b.classList.toggle('ahora', b.dataset.c === c));
   const vis = L.v.reduce((a, b) => a + b, 0);
   $('meter').style.width = (100 * vis / N) + '%'; $('pctVisto').textContent = Math.round(100 * vis / N) + ' %';
@@ -361,10 +361,10 @@ function pintar() {
     : 'Ningún segundo está como conducta activa. Si marcas alguno, al guardar el análisis pasa a nivel <strong>agrupado</strong>.';
   const n = totalCorr(), conCorr = ESPECIMENES.filter(e => corregidos(e)).length;
   $('estado').innerHTML = S.guardado
-    ? '<div class="ok-bar"><strong>Correcciones guardadas.</strong> Se recalcularon los totales por minuto de los especímenes corregidos y se conservó la propuesta original del sistema. Los reportes del experimento se regeneran con los datos nuevos.</div>'
+    ? '<div class="ok-bar"><strong>Correcciones guardadas.</strong> Se recalcularon los totales por minuto de los especímenes corregidos y quedó registrado el origen de cada segundo. Los reportes del experimento se regeneran con los datos nuevos.</div>'
     : n || recuperado
       ? '<div class="note-bar" style="display:flex;align-items:center;gap:14px"><span style="flex:1"><strong>Borrador sin guardar</strong> · ' + n + (n === 1 ? ' segundo corregido' : ' segundos corregidos') + ' en ' + conCorr + (conCorr === 1 ? ' espécimen' : ' especímenes') + '. El avance vive en este navegador hasta que elijas «Guardar correcciones».</span><button type="button" class="linkbtn" id="btnDescartar" style="font-size:12px">Descartar borrador</button></div>'
-      : '<div class="hint">Cada segundo ya trae la etiqueta propuesta por el sistema. Se revisa un espécimen a la vez; las correcciones se guardan al elegir «Guardar correcciones».</div>';
+      : '<div class="hint">Cada segundo ya trae la conducta que puso el sistema. Se revisa un espécimen a la vez; las correcciones se guardan al elegir «Guardar correcciones».</div>';
   escena(); lineas();
 }
 
@@ -378,7 +378,7 @@ $('cvMain').addEventListener('click', e => clicLinea(e, false));
 $('cvZoom').addEventListener('click', e => clicLinea(e, true));
 $('btnGuardar').addEventListener('click', () => {
   if (S.play) pausar();
-  // en el sistema real: el backend registra las correcciones y conserva la propuesta original
+  // en el sistema real: el backend registra las correcciones y reemplaza la conducta del sistema y guarda el origen
   store.set(BORR, null); recuperado = false; S.guardado = true; S.hist = [];
   ESPECIMENES.forEach(e => { S.L[e].p = S.L[e].c.slice(); });
   pintar();

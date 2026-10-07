@@ -112,7 +112,7 @@ al clasificador de conducta.
 \section{Diseño del pipeline de análisis conductual}
 % -----------------------------------------------------------
 
-El pipeline recibe un video del FST, analiza solo sus primeros 300 segundos y produce
+El pipeline recibe un video del FST, analiza solo sus últimos 300 segundos y produce
 como salida los tiempos totales de cada conducta por espécimen y el desglose por minuto. Sigue el patrón arquitectónico de
 tubería y filtro (\textit{pipe and filter}) \cite{sommerville2011}: cada módulo es
 un filtro discreto que transforma los datos y los pasa al siguiente. Está organizado
@@ -129,23 +129,63 @@ muestra el flujo completo con las tecnologías de cada módulo.
 
 \subsection{Módulo 1: Preprocesamiento}
 
-El preprocesamiento usa \textbf{OpenCV VideoCapture} para decodificar el video
-cuadro a cuadro. Primero alinea cada cuadro contra uno de referencia
-(\textbf{registro de cámara}), para que un movimiento de la cámara no se confunda
-con movimiento del espécimen. Después construye un \textbf{modelo de fondo}: la
-imagen del aparato sin especímenes. Si el contraste promedio cae por debajo del umbral mínimo, se
-aplica \textbf{CLAHE} (\textit{Contrast Limited Adaptive Histogram Equalization})
-\cite{bradski2000} para normalizarlo. Si tras la corrección no se logran encontrar
-los cilindros, el pipeline se detiene y genera un reporte de diagnóstico (ver RN-11).
+El preprocesamiento usa OpenCV \cite{bradski2000} para decodificar el video cuadro
+a cuadro; si el archivo no se puede abrir, el pipeline se detiene y genera el reporte
+de diagnóstico (ver RN-11). Después hace dos cosas, sin ningún parámetro escrito a
+mano para un video en particular:
+
+\begin{itemize}
+  \item \textbf{Registro de cámara.} Alinea cada cuadro contra uno de referencia,
+        tomado a la mitad del video, para que un movimiento de la cámara no se
+        confunda con movimiento del espécimen. La alineación admite traslación,
+        rotación y escala (una transformación de similitud), porque en el montaje
+        del laboratorio la cámara llega a variar alrededor de un 5\,\% de escala, y
+        con solo traslación el modelo de fondo sale borroso. Los puntos de
+        correspondencia entre cuadros se obtienen con el detector ORB y la
+        transformación se estima con RANSAC, que descarta las correspondencias
+        erróneas.
+
+  \item \textbf{Modelo de fondo.} Construye la imagen del aparato sin especímenes
+        como el \textbf{percentil 10} de cada píxel a lo largo del video, tomando
+        alrededor de un cuadro por segundo. Como el espécimen es claro y el agua
+        oscura, un percentil bajo lo borra. La mediana, que es la opción habitual
+        \cite{piccardi2004}, no sirve en este caso: un espécimen que pasa mucho
+        tiempo inmóvil queda incrustado en el fondo y después no se puede separar
+        de él. Con los mismos cuadros calcula un \textbf{mapa de ocupación}, que
+        indica en qué zonas de la imagen hubo movimiento a lo largo del video.
+\end{itemize}
+
+El sistema no aplica ninguna corrección de contraste ni de iluminación: si un video
+no permite encontrar los cilindros, el análisis se detiene en la etapa siguiente con
+su reporte de diagnóstico.
 
 \subsection{Módulo 2: Localización de los cilindros}
 
-Sobre el modelo de fondo, el sistema localiza los bordes del recipiente, la
-\textbf{línea de agua} y el suelo, y separa los cilindros midiendo dónde hay
-movimiento dentro de la franja de agua. Para cada cilindro calcula una
-\textbf{región de interés} (ROI) que delimita el área de análisis de cada espécimen.
-Ninguna medida se escribe a mano: el sistema las deduce de cada video, así que
-funciona con grabaciones de distintos días, encuadres y resoluciones.
+Sobre el modelo de fondo, el sistema deduce la geometría del aparato en tres pasos:
+
+\begin{enumerate}
+  \item \textbf{Filas.} Los dos bordes horizontales más marcados del aparato vacío
+        son los rebordes del recipiente; de ellos salen la \textbf{línea de agua} y
+        el suelo. Se miden una sola vez por video, sobre el modelo de fondo, y no
+        cuadro a cuadro.
+  \item \textbf{Columnas.} Dentro de la franja de agua, cada racha de columnas con
+        ocupación es un cilindro. Se descartan las rachas pegadas al borde del
+        encuadre, porque lo que se mueve ahí es el laboratorio (personas, puertas),
+        no un espécimen.
+  \item \textbf{Ajuste fino.} La línea de agua y el suelo se vuelven a medir solo
+        dentro de los cilindros encontrados, lo que da una posición más precisa
+        que la del encuadre completo.
+\end{enumerate}
+
+Los cilindros se numeran de izquierda a derecha y cada uno recibe una
+\textbf{región de interés} (ROI) que delimita el área de análisis de su espécimen.
+Las regiones de los cilindros de los extremos se ensanchan, porque el espécimen que
+escala lo hace pegado a la pared exterior. La geometría sale del mapa de ocupación y
+no de un umbral sobre la imagen, porque objetos del laboratorio con el mismo tono que
+el aparato engañan a un umbral. Ninguna medida se escribe a mano: el sistema las
+deduce de cada video, así que funciona con grabaciones de distintos días, encuadres
+y resoluciones. Si no encuentra los cilindros, el pipeline se detiene y genera el
+reporte de diagnóstico (ver RN-11).
 
 Cada cilindro contiene un solo espécimen, así que no hace falta seguirlo de un
 cuadro a otro con un algoritmo de seguimiento: lo que se mueve dentro de un
@@ -159,12 +199,23 @@ medidos, que ya funciona y que además sirve para etiquetar el conjunto de
 entrenamiento, y una red neuronal convolucional que se compara contra él y que
 sigue en desarrollo.
 
-\paragraph{Rasgos del espécimen.} Sobre la imagen estabilizada y con el espécimen
-separado del fondo, el sistema mide quince rasgos que describen su movimiento (la
+\paragraph{Separación del espécimen.} En cada cuadro alineado y dentro de la
+región de interés de cada cilindro, un píxel pertenece al espécimen si difiere del
+fondo en al menos 45 niveles de gris y, además, tiene un brillo de al menos 80, porque
+el espécimen es claro sobre agua oscura. De los píxeles que cumplen las dos
+condiciones se conserva la región conexa más grande, que es el espécimen
+\cite{bradski2000}. Antes de medir la postura se borra la cola con una erosión
+morfológica; sin ese paso, las medidas de forma describirían la cola y no la
+verticalidad del cuerpo. La posición del espécimen es el centroide de esa región,
+suavizado con una mediana móvil de cinco mediciones, porque el centroide sin
+suavizar salta varios píxeles de un cuadro a otro solo por ruido.
+
+\paragraph{Rasgos del espécimen.} Sobre esa región, el sistema mide quince rasgos que describen su movimiento (la
 energía de movimiento medida solo dentro del cuerpo, para que el oleaje del agua no
 la sature), su postura (verticalidad, alargamiento y área) y su trayectoria
 (recorrido, amplitud y cuadrantes del cilindro que cruza). Las distancias se
-expresan en largos de cuerpo y los tiempos en segundos: así, dos videos grabados
+expresan en largos de cuerpo ---el largo típico del espécimen, tomado como la
+mediana de todo el video--- y los tiempos en segundos: así, dos videos grabados
 con encuadres distintos producen números comparables y el clasificador aprende la
 conducta y no el encuadre.
 
@@ -354,8 +405,8 @@ Las tablas están organizadas en cuatro grupos funcionales:
         dentro de un grupo, numerada por orden (A, B, C...).
 
   \item \textbf{ESPECIMEN}: un registro por espécimen dentro de su tanda,
-        identificado por su número dentro del grupo y su posición de
-        cilindro dentro de la tanda.
+        identificado por su posición de cilindro dentro de la tanda. El sistema
+        no guarda el número de rata del laboratorio (D-55).
 
   \item \textbf{VIDEO}: uno o dos videos por tanda (Día~1 y/o Día~2), con
         ruta de almacenamiento, duración y fecha de carga. La ruta queda vacía
@@ -366,9 +417,8 @@ Las tablas están organizadas en cuatro grupos funcionales:
 \textbf{Análisis.}
 \begin{itemize}
   \item \textbf{ANALISIS}: ejecución del pipeline sobre un video. Registra
-        estado, etapa actual, nivel de clasificación (preciso o agrupado), la
-        ruta al archivo con los recuadros de los tubos que usa la pantalla de
-        revisión y, cuando falla, la ruta al reporte de diagnóstico (ver D-23).
+        estado, etapa actual, nivel de clasificación (preciso o agrupado) y,
+        cuando falla, la ruta al reporte de diagnóstico (ver D-23).
 \end{itemize}
 
 El modelo del clasificador y el umbral de confianza (0.80) no se guardan en la
@@ -387,9 +437,8 @@ pipeline y se documentan en el Capítulo~6.
         cuando el clasificador no decide entre nado y escalamiento; ver RN-13).
 
   \item \textbf{SEGUNDO}: una fila por espécimen y por segundo analizado, con
-        la conducta asignada (o ninguna, si el espécimen no se ve), la
-        propuesta original del sistema y el origen de la etiqueta (propuesta del
-        sistema, confirmada, corregida o dudosa). Es lo que el usuario revisa y
+        la conducta asignada (o ninguna, si el espécimen no se ve) y el origen
+        de esa conducta (del sistema, confirmada, corregida o dudosa). Es lo que el usuario revisa y
         corrige al terminar el análisis (ver RF-32).
 
   \item \textbf{PRESENTA}: segundos de cada conducta dentro de cada
@@ -447,7 +496,7 @@ En el diseño inicial, las etiquetas de un espécimen podrían haberse guardado 
 una lista dentro de \texttt{OBSERVACION}: un solo campo con las 300 conductas del
 video, una por segundo. Eso viola la 1FN porque un campo único contendría cientos
 de valores. Esas etiquetas se extrajeron a \texttt{SEGUNDO}, donde cada segundo
-ocupa su propia fila con su conducta, su propuesta y su origen. Así
+ocupa su propia fila con su conducta y su origen. Así
 es posible consultar o corregir un segundo en la revisión sin reescribir la lista
 completa ni parsear texto.
 
@@ -479,8 +528,8 @@ guardado una descripción de la conducta, esa columna dependería solo de
 la conducta viven ahí, no repetidos en cada fila de \texttt{PRESENTA}.
 
 \texttt{SEGUNDO} también tiene clave compuesta (\texttt{idObservacion},
-\texttt{segundo}). Sus columnas no clave ---la conducta asignada, la propuesta
-original y el origen de la etiqueta--- describen ese segundo específico de esa
+\texttt{segundo}). Sus columnas no clave ---la conducta asignada y el origen
+de esa conducta--- describen ese segundo específico de esa
 observación específica, así que dependen de la clave completa y no de una de sus
 partes.
 
@@ -536,16 +585,10 @@ ejemplo, \texttt{GRUPO} tiene como determinantes \texttt{idGrupo} (primaria) y l
 combinación (\texttt{idExperimento}, \texttt{etiqueta}) (alterna). Con eso, las
 quince relaciones del esquema lógico cumplen FNBC.
 
-Hay una excepción deliberada en el esquema físico: la tabla \texttt{ESPECIMEN}
-repite la columna \texttt{idGrupo}, que ya se obtiene a través de \texttt{TANDA}
-(de \texttt{idTanda} se deduce \texttt{idGrupo}, y \texttt{idTanda} no es clave de
-\texttt{ESPECIMEN}). Por eso, en el esquema físico, esa tabla deja de cumplir FNBC.
-Se aceptó como redundancia controlada (D-04) por dos razones: permite declarar en la
-propia base de datos que el número de espécimen es único dentro de su grupo, y evita
-pasar por \texttt{TANDA} cada vez que un reporte compara grupos. La aplicación no
-envía esa columna: la calcula un disparador a partir de la tanda, así que no puede
-quedar desactualizada. El esquema lógico no incluye la columna y por eso conserva la
-FNBC.
+El esquema físico tiene las mismas columnas que el lógico, sin columnas repetidas, así
+que también cumple FNBC. La versión anterior aceptaba una excepción (D-04): repetir
+\texttt{idGrupo} en \texttt{ESPECIMEN} para declarar único el número de rata dentro del
+grupo. Al dejar de guardar ese número (D-55), la columna dejó de hacer falta y se quitó.
 
 \subsection{Resumen de formas normales aplicadas}
 
@@ -597,8 +640,7 @@ las tablas afectadas y la decisión de diseño concreta en cada caso.
 FNBC &
   Todo determinante es clave candidata &
   Las 15 relaciones &
-  Verificado relación por relación; en el esquema físico, \texttt{ESPECIMEN}
-  repite \texttt{idGrupo} a propósito (D-04) \\
+  Verificado relación por relación; el esquema físico no repite columnas \\
 \hline
 \end{tabular}
 \end{table}
@@ -658,7 +700,7 @@ GET    & \path{/experiments/{id}/results}          & Devuelve los resultados por
 \hline
 GET    & \path{/experiments/{id}/results/byminute} & Devuelve el desglose temporal por minuto. & Investiga\-dor \\
 \hline
-GET    & \path{/experiments/{id}/groups/{grupo}/tandas/{tanda}/comparison} & Devuelve la comparación Día~1 vs.\ Día~2 de esa tanda. & Investiga\-dor \\
+GET    & \path{/experiments/{id}/results/groups} & Devuelve la comparación entre grupos con el Día~2: el promedio por espécimen de cada grupo (RF-21). & Investiga\-dor \\
 \hline
 
 % --- Reportes ---
@@ -1743,7 +1785,7 @@ caso de uso.
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite revisar, con el video, la conducta que el sistema asignó a cada espécimen en cada segundo.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Cuando el análisis termina, el usuario abre una pantalla con el video y una línea de tiempo por espécimen, coloreada por conducta. Revisa un espécimen a la vez, con el video corriendo; cada segundo ya trae la etiqueta propuesta por el sistema.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Cuando el análisis termina, el usuario abre una pantalla con el video y una línea de tiempo por espécimen, coloreada por conducta. Revisa un espécimen a la vez, con el video corriendo; cada segundo ya trae la conducta que puso el sistema.} \\
 \hline
 \end{tabular}
 
@@ -1758,7 +1800,7 @@ caso de uso.
 \hline
 2 & Sistema & Comprueba que el análisis esté completado y consulta la etiqueta de cada segundo de cada espécimen. \\
 \hline
-3 & Sistema & Muestra el video, la línea de tiempo de cada espécimen y la etiqueta propuesta para cada segundo. \\
+3 & Sistema & Muestra el video, la línea de tiempo de cada espécimen y la conducta que puso el sistema en cada segundo. \\
 \hline
 4 & Inv. / Admin. & Revisa un espécimen a la vez con el video corriendo, y corrige las etiquetas que no coincidan con lo que observa (ver CU-26). \\
 \hline
@@ -1794,9 +1836,9 @@ caso de uso.
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-32, RN-14. Extiende: CU-25 (Revisar segundo a segundo). Incluye: CU-27 (Recalcular totales por minuto).} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pantalla de revisión abierta (CU-25); la etiqueta propuesta no coincide con lo que el usuario observa.} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pantalla de revisión abierta (CU-25); la conducta del sistema no coincide con lo que el usuario observa.} \\
 \hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{La etiqueta corregida queda guardada con su origen; la propuesta original del sistema se conserva.} \\
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{La conducta corregida queda guardada con su origen y reemplaza a la del sistema.} \\
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite cambiar la conducta asignada a uno o varios segundos de un espécimen.} \\
 \hline
@@ -1817,7 +1859,7 @@ caso de uso.
 \hline
 3 & Inv. / Admin. & Elige «Guardar». \\
 \hline
-4 & Sistema & Guarda las etiquetas de cada segundo conservando la propuesta original, y recalcula los totales por minuto (CU-27). \\
+4 & Sistema & Guarda la conducta de cada segundo con su origen, y recalcula los totales por minuto (CU-27). \\
 \hline
 \end{tabular}
 
@@ -1830,7 +1872,7 @@ caso de uso.
 \hline
 1 & El usuario deja un segundo sin conducta a propósito: queda marcado como «dudosa». \\
 \hline
-1 & La etiqueta que el usuario elige coincide con la propuesta: queda marcada como «confirmada». \\
+1 & La conducta que el usuario elige coincide con la del sistema: queda marcada como «confirmada». \\
 \hline
 4 & No se puede guardar: el borrador se conserva en el navegador y el sistema informa el error. \\
 \hline
@@ -2677,7 +2719,11 @@ soportar cancelación.
 Cuatro pestañas: resultados por espécimen, comparación entre grupos, línea de tiempo
 por minuto (RF-20) y bloques de 5~s (RF-18), donde cada bloque muestra la conducta con
 más segundos y, dentro, los cinco segundos que lo componen, para notar las conductas
-breves y comparar con el análisis manual. La vista por espécimen
+breves y comparar con el análisis manual. El bloque se calcula por mayoría de sus cinco
+segundos, sin volver a usar el clasificador. Si nado activo y escalamiento empatan, el
+bloque es conducta activa; con dos segundos de inmovilidad y dos de nado activo decide
+el quinto, y tanto escalamiento como «no se ve» dan conducta activa. Los fragmentos «no se ve»
+se marcan en pantalla y en el PDF final. La vista por espécimen
 muestra el tiempo por conducta con media, desviación estándar y varianza (RF-19), el
 nivel de clasificación del análisis y la leyenda de conductas; en el panel lateral
 se compara la inmovilidad entre los grupos con los videos del Día~2 (RF-21). Esa
@@ -2719,15 +2765,15 @@ Se abre solo cuando el análisis está completado, desde la pantalla de progreso
 desde la de resultados (RF-32, RN-14). Muestra el video, con el tubo del espécimen
 que se revisa destacado, y una línea de tiempo por espécimen coloreada por
 conducta: una vista ampliada de 40~s alrededor del segundo actual y otra de los
-300~s completos. Cada segundo ya trae la etiqueta propuesta por el sistema; cuando
+300~s completos. Cada segundo ya trae la conducta que puso el sistema; cuando
 no coincide con lo que el usuario observa, pulsa la conducta correcta. Con el video
 corriendo, el cambio se aplica desde 0.4~s antes del clic hasta el siguiente cambio
 de color; en pausa, cambia solo el segundo actual. Se revisa un espécimen a la vez y
 el avance se guarda como borrador en el navegador hasta que el usuario elige
-«Guardar», momento en que el sistema registra las correcciones, conserva la
-propuesta original y recalcula los totales por minuto (CU-25 a CU-27).
+«Guardar», momento en que el sistema registra las correcciones, reemplaza la
+conducta del sistema y recalcula los totales por minuto (CU-25 a CU-27).
 
-El panel lateral muestra la conducta del segundo actual y si es la propuesta del
+El panel lateral muestra la conducta del segundo actual y si es la del
 sistema o una corrección, el avance de revisión del espécimen, los segundos por
 conducta antes y después de corregir, y el nivel de clasificación que tendrá el
 análisis al guardar: si algún segundo queda como conducta activa, el análisis pasa a

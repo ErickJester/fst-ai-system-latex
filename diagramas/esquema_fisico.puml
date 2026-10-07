@@ -5,10 +5,12 @@
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
 '  Figura 5.5 de chapters/05_diseno.tex
-'  Gestor: PostgreSQL (D-11) - 15 tablas, 19 llaves foraneas
+'  Gestor: PostgreSQL (D-11) - 15 tablas, 17 llaves foraneas
+'  (6-oct: D-55 quita ESPECIMEN.numeroRata y, con ella, el idGrupo
+'   redundante y su disparador (D-04 queda sin objeto). D-53 renombra
+'   SEGUNDO.clase como conducta)
 '  (5-oct: D-51 quita MODELO, CONFIGURACION y ANALISIS.idConfig;
-'   agrega ANALISIS.rutaRecuadros; propuesta y
-'   VIDEO.archivo admiten nulo; EXPERIMENTO.nombre es UNIQUE;
+'   VIDEO.archivo admite nulo; EXPERIMENTO.nombre es UNIQUE;
 '   tipo_notificacion gana 'video borrado')
 '  (3-oct: D-35 agrega SEGUNDO, una fila por especimen y por segundo,
 '   y D-29 agrega la conducta "conducta activa", asi que PRESENTA pasa
@@ -25,8 +27,7 @@
 '
 '  ---- Fuentes ----
 '  Estructura  : diagramas/grafo_relacional_3_vigente.puml
-'                (16 relaciones, 74 atributos, 17 FK, BCNF)
-'                74 = 73 + USUARIO.cambioRequerido (D-25, 15-sep)
+'                (15 relaciones, 63 atributos, 17 FK, BCNF)
 '  Tipos y DDL : artifact "Diseno Fisico FST" (13-sep) - actividades
 '                1 a 6 de la etapa fisica, todas resueltas
 '  Decisiones  : errores/preguntas-doctor.md - D-02, D-04, D-08,
@@ -36,11 +37,9 @@
 '  1. Tipos concretos de PostgreSQL por dominio (ver tabla abajo).
 '  2. Ocho dominios cerrados via CREATE DOMAIN + CHECK (D-14 a D-17
 '     mas los tres ya cerrados en la etapa logica).
-'  3. D-04: columna ESPECIMEN.idGrupo, redundante a proposito -
-'     SOLO existe aqui, en el fisico. El grafo logico se queda en
-'     BCNF estricta, sin idGrupo en ESPECIMEN. Esto agrega una FK
-'     mas (GRUPO -> ESPECIMEN) que no esta en el logico: por eso
-'     el fisico tiene 19 llaves foraneas y el logico 18.
+'  3. D-04 (13-sep) agregaba ESPECIMEN.idGrupo como redundancia; D-55
+'     (6-oct) la retira junto con numeroRata. El fisico y el logico
+'     tienen las mismas 17 llaves foraneas.
 '  4. D-24 (15-sep, esta sesion): ANALISIS.idVideo se declara UNIQUE
 '     para forzar estructuralmente la cardinalidad (1,1) de D-03.
 '     Kendall & Kendall p.425 respalda la "clave unica" como
@@ -70,6 +69,8 @@
 '  tipo_grupo             varchar(24) IN ('control','referencia',
 '                          'tratamiento experimental')
 '  sesion_video            varchar(6) IN ('Dia 1','Dia 2')
+'                          (el Dia 1 solo confirma que existe el video de
+'                          habituacion; no se analiza, D-54)
 '  formato_reporte         varchar(4) IN ('CSV','XLSX','PDF')
 '  tipo_notificacion      varchar(32) IN ('analisis completado',
 '                          'error del pipeline','alerta de disco',
@@ -184,23 +185,15 @@ entity ESPECIMEN {
   * idEspecimen : integer <<PK>>
   --
   idTanda : integer <<FK>>
-  idGrupo : integer <<FK>> (redundante · D-04)
-  numeroRata : smallint
   numeroCilindro : smallint
   ..
   UK (idTanda, numeroCilindro)
-  UK (idGrupo, numeroRata) · D-04
-  CK numeroRata >= 1
 }
 note bottom of ESPECIMEN
-  D-04: idGrupo NO existe en el grafo logico (3FN lo
-  quita - se alcanza via TANDA). Aqui se repone como
-  redundancia controlada, para declarar "numeroRata
-  unico por grupo" en vez de dejarlo en codigo, y para
-  que los reportes comparen grupos sin pasar por TANDA.
-  Sincronizado por disparador BEFORE INSERT OR UPDATE
-  OF idTanda -> fn_sincronizar_grupo_especimen() (ver
-  artifact "Diseño Físico FST", actividad 5).
+  D-55: el espécimen se distingue por su posicion en el
+  cuadro (numeroCilindro). No se guarda el numero de rata
+  del laboratorio: ya no hay comparacion Dia 1 contra Dia 2
+  por rata (D-44) y el reporte solo necesita tanda y posicion.
 end note
 
 entity VIDEO {
@@ -224,7 +217,6 @@ entity ANALISIS {
   nivelClasif : nivel_clasif_analisis
   fechaAnalisis : timestamptz
   rutaDiagnostico : text (nulo salvo error) · D-23
-  rutaRecuadros : text (nulo) · D-51
 }
 note bottom of ANALISIS
   D-24 (15-sep): idVideo UNIQUE fuerza la cardinalidad
@@ -236,8 +228,9 @@ note bottom of ANALISIS
   D-47 (4-oct): sin columna confianza; el detector
   actual no produce ningun valor de confianza.
   D-51 (5-oct): sin idConfig; el modelo y el umbral
-  son constantes del pipeline. rutaRecuadros apunta
-  al archivo de recuadros de los tubos (D-42).
+  son constantes del pipeline. Los recuadros de los
+  tubos van en un archivo cuyo nombre sale del id del
+  analisis; no se guarda su ruta (D-42).
 end note
 
 entity OBSERVACION {
@@ -278,8 +271,7 @@ entity SEGUNDO {
   * idObservacion : integer <<PK>> <<FK>>
   * segundo : smallint <<PK>>
   --
-  clase : varchar(n) <<FK>> (nulo = "no se ve")
-  propuesta : varchar(n) <<FK>> (nulo)
+  conducta : varchar(n) <<FK>> (nulo = "no se ve")
   origen : origen_segundo
   ..
   CK segundo BETWEEN 1 AND 300
@@ -287,9 +279,11 @@ entity SEGUNDO {
 note bottom of SEGUNDO
   D-35: una fila por especimen y por segundo analizado.
   Es lo que el usuario revisa y corrige al terminar el
-  analisis. propuesta guarda lo que dijo la maquina y
-  nunca se modifica; es nula si el sistema no
-  clasifico el segundo (D-51).
+  analisis. origen dice si la conducta la puso la maquina
+  o la reviso el usuario. conducta es nula si el sistema
+  no clasifico el segundo (D-53). Hay hasta 300 segundos por
+  observacion, los ultimos 300 del video; si el video dura
+  menos, se guardan todos (D-54: maximo, sin minimo).
 end note
 
 entity ADMINISTRADOR {
@@ -326,7 +320,7 @@ entity NOTIFICACION {
 }
 
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-'  RELACIONES - 19 FK (18 del grafo logico + 1 fisica: D-04)
+'  RELACIONES - 17 FK (las del grafo logico)
 '  Todas ON UPDATE NO ACTION ON DELETE NO ACTION
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -339,8 +333,6 @@ EXPERIMENTO    "1" --o "0..*" REPORTE                   : idExperimento
 EXPERIMENTO    "1" --o "0..*" NOTIFICACION               : idExperimento
 
 GRUPO          "1" --o "1..*" TANDA                     : idGrupo
-GRUPO          "1" --o "2..*" ESPECIMEN                 : idGrupo <color:#8A5A0B>· D-04</color>
-
 TANDA          "1" --o "2..4" ESPECIMEN                 : idTanda
 TANDA          "1" --o "1..2" VIDEO                     : idTanda
 
@@ -354,6 +346,6 @@ INTERVALO      "1" --o "2..4" PRESENTA                  : idIntervalo
 CONDUCTA       "1" --o "0..*" PRESENTA                  : conducta
 
 OBSERVACION    "1" --o "1..300" SEGUNDO                 : idObservacion
-CONDUCTA       "0..1" --o "0..*" SEGUNDO                : clase, propuesta
+CONDUCTA       "0..1" --o "0..*" SEGUNDO                : conducta
 
 @enduml

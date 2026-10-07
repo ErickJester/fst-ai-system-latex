@@ -62,7 +62,7 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & \texttt{varchar(8)} & \texttt{preciso} si ningún segundo del análisis quedó como conducta activa; \texttt{agrupado} si al menos uno quedó así \\
 \hline
-\texttt{origen\_\allowbreak{}segundo} & \texttt{varchar(16)} & \texttt{maquina}: etiqueta propuesta por el sistema, sin revisar. \texttt{humano\_\allowbreak{}confirma}: el usuario vio el segundo y dejó la propuesta. \texttt{humano\_\allowbreak{}corrige}: el usuario vio el segundo y la cambió. \texttt{humano\_\allowbreak{}duda}: el usuario lo marcó como dudoso y quedó sin conducta. \texttt{sin\_\allowbreak{}revisar}: el usuario lo etiquetó sin llegar a verlo en el video. \texttt{humano\_\allowbreak{}ciego}: etiquetado en el modo de revisión que oculta la propuesta del sistema \\
+\texttt{origen\_\allowbreak{}segundo} & \texttt{varchar(16)} & \texttt{maquina}: conducta puesta por el sistema, sin revisar. \texttt{humano\_\allowbreak{}confirma}: el usuario vio el segundo y dejó la conducta del sistema. \texttt{humano\_\allowbreak{}corrige}: el usuario vio el segundo y la cambió. \texttt{humano\_\allowbreak{}duda}: el usuario lo marcó como dudoso y quedó sin conducta. \texttt{sin\_\allowbreak{}revisar}: el usuario lo etiquetó sin llegar a verlo en el video. \texttt{humano\_\allowbreak{}ciego}: etiquetado en el modo de revisión que oculta la conducta del sistema \\
 \hline
 \end{longtable}
 }
@@ -147,10 +147,6 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{idTanda} & \texttt{integer} & No & FK $\to$ TANDA; UK (idTanda, numeroCilindro) & Tanda en la que se grabó el espécimen \\
 \hline
-\texttt{idGrupo} & \texttt{integer} & No & FK $\to$ GRUPO; UK (idGrupo, numeroRata) & Copia del grupo de su tanda, redundante a propósito para declarar la unicidad del número dentro del grupo. Un disparador la mantiene igual al grupo de la tanda \\
-\hline
-\texttt{numeroRata} & \texttt{smallint} & No & UK (idGrupo, numeroRata); CK $\geq 1$ & Número con el que el laboratorio marca al espécimen, único dentro de su grupo \\
-\hline
 \texttt{numeroCilindro} & \texttt{smallint} & No & UK (idTanda, numeroCilindro) & Posición del cilindro en el encuadre, de 1 al número de cilindros de la tanda \\
 \hline
 % ---------------- VIDEO ----------------
@@ -185,8 +181,6 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{rutaDiagnostico} & \texttt{text} & Sí & & Ruta del reporte de diagnóstico en PDF. Solo tiene valor cuando el estado es \texttt{error} \\
 \hline
-\texttt{rutaRecuadros} & \texttt{text} & Sí & & Ruta del archivo con los recuadros de los tubos, que la pantalla de revisión dibuja sobre el video. Es nula hasta que el análisis se completa \\
-\hline
 % ---------------- OBSERVACION ----------------
 \multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{OBSERVACION}: un espécimen dentro de un video} \\
 \hline
@@ -215,13 +209,11 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{idObservacion} & \texttt{integer} & No & PK, FK $\to$ OBSERVACION & Espécimen y video al que pertenece el segundo \\
 \hline
-\texttt{segundo} & \texttt{smallint} & No & PK; CK entre 1 y 300 & Segundo del video. Solo se analizan los primeros 300 \\
+\texttt{segundo} & \texttt{smallint} & No & PK; CK entre 1 y 300 & Segundo del video. Solo se analizan los últimos 300 segundos \\
 \hline
-\texttt{clase} & \texttt{varchar(n)} & Sí & FK $\to$ CONDUCTA & Conducta vigente del segundo, que el usuario puede corregir en la revisión. Queda nula si el sistema no pudo decidir o si el usuario lo marcó como dudoso \\
+\texttt{conducta} & \texttt{varchar(n)} & Sí & FK $\to$ CONDUCTA & Conducta vigente del segundo, que el usuario puede corregir en la revisión. Queda nula si el sistema no pudo decidir o si el usuario lo marcó como dudoso \\
 \hline
-\texttt{propuesta} & \texttt{varchar(n)} & Sí & FK $\to$ CONDUCTA & Conducta que propuso el sistema. Queda nula si el sistema no clasificó el segundo. No cambia aunque el usuario corrija \texttt{clase} \\
-\hline
-\texttt{origen} & \texttt{origen\_\allowbreak{}segundo} & No & Dominio & Quién puso la etiqueta vigente y cómo (Tabla~\ref{tab:dominios}) \\
+\texttt{origen} & \texttt{origen\_\allowbreak{}segundo} & No & Dominio & Quién puso la conducta vigente y cómo (Tabla~\ref{tab:dominios}) \\
 \hline
 % ---------------- PRESENTA ----------------
 \multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{PRESENTA}: segundos de cada conducta en cada minuto} \\

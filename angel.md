@@ -1,7 +1,13 @@
 # Para Ángel y su Claude: qué revisar de los cambios de Vanesa
 
-**Rama:** `accesos-login` (sale de `main` en `2fbd456`). **No se ha unido a `main`.**
-**Estado:** el documento compila sin errores ni avisos (176 páginas).
+**Rama:** `accesos-login` (salió de `main` en `2fbd456`). **No se ha unido a `main`.**
+**Estado:** el documento compila sin errores ni avisos.
+
+**Actualización del 6-oct:** se incorporaron a esta rama los 5 commits nuevos de `main`
+(hasta `cd10710`: D-53, D-54, D-55, CLA-04). Hubo un solo conflicto, en el diagrama del
+paquete 4 (`cu_paquete4.puml` y su PNG). Se resolvió quedándose con los cambios de esta rama
+y con la frase de Ángel «[la conducta del sistema no es la correcta]». Los demás cambios se
+unieron solos. Los números de línea de este archivo ya están corregidos para esa versión.
 
 Este archivo dice qué cambió, qué quedó en la zona de Ángel y qué tiene que verificar
 antes de dar por buenos los cambios. Va en orden de importancia: primero lo que hay que
@@ -13,10 +19,10 @@ antes de dar por buenos los cambios. Va en orden de importancia: primero lo que 
 
 | # | Dónde | Qué hacer |
 |---|-------|-----------|
-| 1 | `chapters/05_diseno.tex:262` | Dice «(ver CU-21, RF-23)». **CU-21 ya no existe** (se fusionó en CU-22). Cambiar a «(ver CU-22, RF-23)». |
+| 1 | `chapters/05_diseno.tex:313` | Dice «(ver CU-21, RF-23)». **CU-21 ya no existe** (se fusionó en CU-22). Cambiar a «(ver CU-22, RF-23)». |
 | 2 | `front/glosario.tex` | Faltan dos entradas: **tanda** (de 2 a 4 especímenes de un mismo grupo que se graban juntos; un grupo tiene una o más tandas; cada tanda produce hasta dos videos) y **repetibilidad** (el mismo video analizado varias veces da el mismo resultado, con variabilidad máxima de 5 a 10 %). |
 | 3 | `chapters/04_analisis.tex` | Falta el requisito de **repetibilidad**. Los caps. 1 y 2 ya dicen que es el criterio principal del laboratorio (entrevista P13 y P8). Si el cap. 4 no lo recoge, el documento se contradice. |
-| 4 | `02_estado_arte.tex`, `03_marco_teorico.tex`, `01_introduccion.tex` | Siglas y términos que **no se definieron** porque están en párrafos de Ángel (preprocesamiento y clasificador): **ROI** (cap. 3, subsección de la línea de agua), **SVM** (cap. 2, clasificadores clásicos), **TT-II** (cap. 2, redes 3D), ***transfer learning*** (título de subsección del cap. 2) y **BORIS** (tabla de cronograma del cap. 1). |
+| 4 | `02_estado_arte.tex`, `01_introduccion.tex` | Siglas y términos que **no se definieron** porque están en párrafos de Ángel (clasificador): **SVM** (cap. 2, clasificadores clásicos), **TT-II** (cap. 2, redes 3D), ***transfer learning*** (título de subsección del cap. 2) y **BORIS** (tabla de cronograma del cap. 1). **ROI** ya no hace falta: el cap. 3 se reescribió y desapareció. |
 | 5 | caps. 3, 4 y 5 | **Portabilidad e ISO.** El cap. 3 (`03_marco_teorico.tex`) atribuye la portabilidad a la ISO/IEC/IEEE 12207, y los caps. 4 (~línea 734) y 5 (~línea 93) lo repiten. Vanesa cree que la ISO/IEC 25010:2023 ya no usa «portabilidad» sino «flexibilidad», pero **no está verificado**. Revisar la norma antes de cambiar. No se modificó nada en este punto. |
 | 6 | `chapters/04_analisis.tex:455` | Dice «dos evaluadores humanos». Es una cita de la literatura y se dejó como está, pero conviene leerla por si choca con «tres analistas». |
 
@@ -110,10 +116,12 @@ Estas tres preguntas se contestaron como **recomendación**, a partir de `INSTRU
 
 ## 6. Hallazgos sobre `INSTRUCCIONES-WEB.md` (no se editó)
 
-Archivo de Ángel. Estos puntos salieron de una lectura completa y conviene que su Claude los revise:
+Archivo de Ángel. Estos puntos salieron de una lectura completa hecha **antes** de los
+commits del 5 y 6 de octubre. Después se revisó solo lo marcado abajo; el resto **no se ha
+vuelto a verificar** y conviene que su Claude lo compruebe contra la versión actual.
 
-1. **D-44 no se aplicó ahí.** La comparación Día 1 vs. Día 2 sigue en la regla R-11, en la ruta de comparación por tanda, en la pestaña de resultados y en el paso 7 del orden de construcción.
-2. **¿Se analiza el Día 1?** La regla R-03 dice que solo el del grupo control, pero §4 encola todos los videos.
+1. ~~**D-44 no se aplicó ahí.**~~ **Resuelto en `main`:** R-11 está eliminada y la ruta de comparación ya es entre grupos.
+2. **¿Se analiza el Día 1?** **Sigue abierto.** La regla R-03 todavía dice que el Día 1 «se analiza (sus primeros 5 min) si la tanda es del grupo control», pero D-54 dice que el Día 1 solo confirma el video de habituación y **no se analiza**. Además §4 encola todos los videos. Hay que decidir y dejar los tres textos iguales.
 3. **Errores sin distinguir.** El error solo sale de `deteccion`, y el mensaje se arma con la etapa, así que «no se pudo abrir el video» y «no se hallaron los cilindros» se ven igual. Falta la transición `preprocesamiento → error`.
 4. **El SQL rechazaría el error del worker.** La restricción de `rutadiagnostico` choca con guardar la ruta antes de marcar el error. Debe hacerse en una sola actualización.
 5. **Usuario desactivado:** conserva su token hasta una semana. El backend debe revisar `activo` en cada petición, y exigir `cambioRequerido` también del lado del servidor.
@@ -123,7 +131,22 @@ Archivo de Ángel. Estos puntos salieron de una lectura completa y conviene que 
 
 ---
 
-## 7. Cómo revisar
+## 7. Lo que llegó de `main` el 6-oct y conviene mirar
+
+Al unir `main` con esta rama, la revisión rápida de términos prohibidos encontró texto nuevo en la
+zona de Ángel (no se tocó):
+
+- `chapters/05_diseno.tex:409` y `:590` usan «número de **rata**» en el cuerpo. La regla del
+  proyecto pide «espécimen».
+- `chapters/05_diseno.tex:409`, `:589` y `:591` citan **D-55** y **D-04** dentro del texto. Un lector de
+  la tesis no puede resolver esas citas (es el mismo problema que se corrigió en las fichas de
+  casos de uso).
+- Las fichas CU-25, CU-26 y CU-27 (zona de Vanesa) ya usan «la conducta que puso el sistema» en
+  lugar de «propuesta»; se unieron sin problema con los cambios de esta rama.
+
+---
+
+## 8. Cómo revisar
 
 ```bash
 git fetch origin
