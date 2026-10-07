@@ -76,18 +76,21 @@ considerable. La pregunta que queda abierta es si esa inversión inicial se just
 enfoques que operan directamente sobre el recorte del espécimen, sin necesidad de estimar
 la pose.
 
-\subsection{YOLO-Behaviour: detección y clasificación en dos etapas}
+\subsection{YOLO-Behaviour: detección directa de la conducta}
 
-Chan et al.\ \cite{chan2025_yolo} presentaron un sistema que separa la detección del
-espécimen de la clasificación de su conducta. Primero YOLOv8 detecta y recorta la
-región del espécimen en cada cuadro; luego un clasificador independiente opera sobre
-ese recorte. Separar las dos tareas tiene una ventaja práctica: el clasificador
-trabaja sobre una imagen más limpia, sin el fondo ni los otros especímenes como
-distracción.
+Chan et al.\ \cite{chan2025_yolo} presentaron un marco para cuantificar conductas animales
+en video con YOLOv8. En lugar de detectar primero al animal y clasificarlo después, entrenan
+el detector para que encuentre la conducta misma: quien anota dibuja recuadros alrededor de
+la conducta visible en cuadros sueltos (por ejemplo, un ave que alimenta a sus crías) y el
+modelo los detecta en cada cuadro del video. La ventaja práctica es que necesita pocas
+anotaciones y se ha aplicado a animales y escenarios muy distintos. Su alcance son las
+conductas visualmente distintas en una imagen fija.
 
-Este proyecto conserva la separación entre localizar al espécimen y clasificar su
-conducta, pero no usa un detector entrenado: localiza cada cilindro por sustracción
-de fondo, porque cada cilindro contiene un solo espécimen.
+El FST plantea otro problema: el nado, la inmovilidad y el escalamiento se distinguen sobre
+todo por cómo se mueve el espécimen a lo largo del tiempo, algo que un solo cuadro no
+muestra. Este proyecto sigue otro camino: localiza cada cilindro por sustracción de fondo,
+porque cada cilindro contiene un solo espécimen, y clasifica la conducta de cada espécimen
+segundo a segundo.
 
 % -----------------------------------------------------------
 \section{Herramientas comerciales de análisis conductual por video}
@@ -178,10 +181,10 @@ objetos detectados \cite{jocher2023}. A diferencia de detectores en dos etapas c
 Faster R-CNN, que primero propone regiones candidatas y luego las clasifica, YOLO
 trata la detección como un problema de regresión unificado sobre una cuadrícula.
 
-La versión YOLOv8 (Ultralytics, 2023) reduce el tiempo de inferencia a 13.5~ms por
-cuadro en hardware de gama media y supera en precisión a EfficientDet y RetinaNet en
-benchmarks estándar. Para datasets pequeños, Stadler et al.\ \cite{stadler2024_yolov8}
-encontraron que con 100 a 350 imágenes etiquetadas se logra detección casi perfecta en
+La versión YOLOv8 (Ultralytics, 2023) se ofrece en varios tamaños, desde modelos ligeros
+hasta modelos más precisos, lo que permite elegir entre velocidad y precisión
+\cite{jocher2023}. Para datasets pequeños, Hermens \cite{hermens2024_yolov8}
+encontró que con 100 a 350 imágenes etiquetadas se logra detección casi perfecta en
 fondos consistentes, lo cual es relevante dado el tamaño de dataset disponible en este
 proyecto. El modelo no generaliza bien cuando el fondo cambia mucho entre condiciones,
 lo que hay que considerar durante el entrenamiento.
@@ -218,7 +221,7 @@ gradiente) sobre quince rasgos del espécimen (cap.~5).
 \subsection{Redes convolucionales con transfer learning}
 
 Las CNN \cite{lecun1998} son la arquitectura de referencia para clasificación de
-imágenes. Entrenar una CNN desde cero requiere cientos de miles de imágenes etiquetadas,
+imágenes. Entrenar una CNN desde cero requiere conjuntos de datos etiquetados muy grandes,
 lo cual no es viable con el dataset disponible. La solución es el \textit{transfer
 learning} \cite{pan2010}: se toma una red preentrenada en ImageNet (más de un millón
 de imágenes de 1{,}000 clases) y se reemplaza solo la última capa de clasificación por
