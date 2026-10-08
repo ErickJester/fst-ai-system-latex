@@ -290,13 +290,13 @@ Al finalizar el análisis, el pipeline produce cuatro salidas:
 
 \subsection{Ciclo de vida del análisis}
 
-Cada análisis individual pasa por un conjunto fijo de estados (D-15),
+Cada análisis individual pasa por un conjunto fijo de estados,
 representado en el diagrama de estados de la Figura~\ref{fig:estados_analisis}.
 Al encolarse, el análisis inicia en \texttt{en cola}; cuando el Worker lo toma,
-pasa a \texttt{procesando} y avanza por las tres etapas del pipeline (D-16:
-preprocesamiento, cilindros, clasificación). Si no se puede abrir
+pasa a \texttt{procesando} y avanza por las tres etapas del pipeline (preprocesamiento,
+cilindros, clasificación). Si no se puede abrir
 el video o no se encuentran los cilindros (RN-11), el análisis termina en
-\texttt{error} y se genera el reporte de diagnóstico (D-23); si las tres
+\texttt{error} y se genera el reporte de diagnóstico; si las tres
 etapas terminan con éxito, termina en \texttt{completado}. No existe
 transición de regreso: el investigador no puede reiniciar ni cancelar un
 análisis en curso (RN-04).
@@ -388,7 +388,7 @@ Las tablas están organizadas en cuatro grupos funcionales:
 
   \item \textbf{ADMINISTRADOR}: subtipo de \texttt{USUARIO} (0,1). Un
         usuario aparece aquí solo si tiene permisos de administración; su
-        ausencia significa que es investigador simple (ver D-08).
+        ausencia significa que es investigador simple.
 \end{itemize}
 
 \textbf{Experimentos y material de video.}
@@ -406,7 +406,7 @@ Las tablas están organizadas en cuatro grupos funcionales:
 
   \item \textbf{ESPECIMEN}: un registro por espécimen dentro de su tanda,
         identificado por su posición de cilindro dentro de la tanda. El sistema
-        no guarda el número de rata del laboratorio (D-55).
+        no guarda el número de rata del laboratorio.
 
   \item \textbf{VIDEO}: uno o dos videos por tanda (Día~1 y/o Día~2), con
         ruta de almacenamiento, duración y fecha de carga. La ruta queda vacía
@@ -418,7 +418,7 @@ Las tablas están organizadas en cuatro grupos funcionales:
 \begin{itemize}
   \item \textbf{ANALISIS}: ejecución del pipeline sobre un video. Registra
         estado, etapa actual, nivel de clasificación (preciso o agrupado) y,
-        cuando falla, la ruta al reporte de diagnóstico (ver D-23).
+        cuando falla, la ruta al reporte de diagnóstico (ver RN-11).
 \end{itemize}
 
 El modelo del clasificador y el umbral de confianza (0.80) no se guardan en la
@@ -586,9 +586,7 @@ combinación (\texttt{idExperimento}, \texttt{etiqueta}) (alterna). Con eso, las
 quince relaciones del esquema lógico cumplen FNBC.
 
 El esquema físico tiene las mismas columnas que el lógico, sin columnas repetidas, así
-que también cumple FNBC. La versión anterior aceptaba una excepción (D-04): repetir
-\texttt{idGrupo} en \texttt{ESPECIMEN} para declarar único el número de rata dentro del
-grupo. Al dejar de guardar ese número (D-55), la columna dejó de hacer falta y se quitó.
+que también cumple FNBC.
 
 \subsection{Resumen de formas normales aplicadas}
 
@@ -1022,13 +1020,13 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<include>>} de CU-11, CU-12, CU-13 y CU-17)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-04, D-12} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-04} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa (JWT válido).} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Se confirma o rechaza que el usuario pertenece a \texttt{ADMINISTRADOR}; la acción de administración solicitada continúa o se rechaza con error 403.} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Antes de ejecutar cualquier acción de administración (crear cuenta, desactivar cuenta, listar usuarios o monitorear el sistema), el sistema verifica si el usuario autenticado pertenece a la tabla \texttt{ADMINISTRADOR}, sin importar si la interfaz ya ocultó la opción (ver D-12).} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Antes de ejecutar cualquier acción de administración (crear cuenta, desactivar cuenta, listar usuarios o monitorear el sistema), el sistema verifica si el usuario autenticado pertenece a la tabla \texttt{ADMINISTRADOR}, sin importar si la interfaz ya ocultó la opción.} \\
 \hline
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Al invocar cualquiera de las cuatro acciones de administración, el sistema consulta si el \texttt{idInstitucional} del usuario autenticado tiene una fila en \texttt{ADMINISTRADOR}. Si no la tiene, rechaza la solicitud con error 403, incluso si la petición no pasó por la interfaz (por ejemplo, una llamada directa a la API).} \\
 \hline
@@ -1313,7 +1311,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador subir el archivo de video del experimento para su análisis automático.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador escribe el nombre del grupo o tratamiento; si coincide con un grupo ya usado en el mismo experimento, el sistema sugiere la siguiente tanda y pide confirmación explícita (D-19). Elige la sesión (Día 1 o Día 2) y el archivo MP4 o MOV; el sistema valida formato, reproducibilidad y orientación (horizontal), lo almacena y encola la tarea de análisis de forma automática.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador escribe el nombre del grupo o tratamiento; si coincide con un grupo ya usado en el mismo experimento, el sistema sugiere la siguiente tanda y pide confirmación explícita (RF-09). Elige la sesión (Día 1 o Día 2) y el archivo MP4 o MOV; el sistema valida formato, reproducibilidad y orientación (horizontal), lo almacena y encola la tarea de análisis de forma automática.} \\
 \hline
 \end{tabular}
 
@@ -1435,7 +1433,7 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Video validado en formato \texttt{.mp4} o \texttt{.mov}, reproducible y en horizontal; almacenado en el volumen compartido.} \\
 \hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Registro de análisis creado en estado «en cola» (ver D-15); \textit{Worker} disponible para procesarlo en la siguiente iteración.} \\
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Registro de análisis creado en estado «en cola»; \textit{Worker} disponible para procesarlo en la siguiente iteración.} \\
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El sistema registra automáticamente un análisis en cola al completar la carga y validación del video, sin intervención del investigador (ver RN-04).} \\
 \hline
@@ -2474,7 +2472,7 @@ actualización.
 
 Estos diagramas cubren el flujo central del sistema. La carga de video
 (Figura~\ref{fig:seq_carga}) muestra cómo el investigador indica el grupo y
-tratamiento, confirma la tanda sugerida por el sistema (D-19), sube el archivo y
+tratamiento, confirma la tanda sugerida por el sistema (RF-09), sube el archivo y
 el backend lo valida, lo registra y encola el análisis. El análisis automático
 (Figura~\ref{fig:seq_analisis}) detalla la ejecución del pipeline por parte del
 Worker: lectura del video, procesamiento en el módulo de visión por computadora y
@@ -2543,7 +2541,7 @@ backend. Las clases centrales del dominio experimental son \textbf{Usuario},
 \textbf{Video}: un experimento se compone de varios grupos (control, referencia,
 tratamiento), cada grupo se graba en una o más tandas, cada tanda aloja de dos a
 cuatro especímenes y produce uno o dos videos. \textbf{Administrador} hereda de
-\textbf{Usuario} (D-08): no es un tipo de usuario aparte, sino un usuario con
+\textbf{Usuario}: no es un tipo de usuario aparte, sino un usuario con
 permisos adicionales para gestionar cuentas y monitorear el sistema.
 
 El pipeline de análisis se modela con dos clases de control: \textbf{Worker}, que
@@ -2684,7 +2682,7 @@ Día~1 y Día~2 con su estado.
 
 Formulario en dos pasos: datos generales del experimento (nombre, fecha y notas, ver
 CU-04); y carga del video de una tanda, donde se indica el grupo o tratamiento, la
-tanda sugerida por el sistema y sujeta a confirmación (ver CU-05, D-19), de dos a
+tanda sugerida por el sistema y sujeta a confirmación (ver CU-05), de dos a
 cuatro cilindros en el cuadro, la sesión (Día~1 o Día~2) y el archivo. Solo acepta
 archivos \texttt{.mp4} o \texttt{.mov} en horizontal; el rechazo de formato ocurre en
 el cliente antes de iniciar la subida. Una vez completada la carga válida, el
