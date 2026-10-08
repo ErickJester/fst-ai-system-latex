@@ -443,13 +443,6 @@ A continuación se documenta el origen de cada uno para que puedan auditarse y
 ajustarse en la fase de validación (TT2).
 
 \begin{itemize}
-  \item \textbf{Confianza de detección de cilindros: ya no se usa.}
-        Una versión anterior del diseño detenía el análisis cuando la confianza de
-        detección de los cilindros era menor a $0.70$. La detección actual de los
-        tubos es mucho mejor que la que existía al plantear ese criterio y no
-        produce un valor de confianza, por lo que el umbral se eliminó. Los casos
-        de error se describen ahora en RN-11.
-
   \item \textbf{F1 mínimo por conducta: $\geq 85$\,\%.}
         En la investigación conductual con roedores, la práctica estándar para
         validar un sistema automatizado es comparar su clasificación contra la
@@ -576,8 +569,7 @@ RN-10 & El sistema rechaza cualquier archivo que no sea \texttt{.mp4} o
 RN-11 & Si el video no se puede abrir o el pipeline no encuentra los cilindros, se
         detiene y el sistema genera automáticamente un reporte de diagnóstico
         descargable que indica el motivo del fallo. Los videos en que sí se
-        encuentran continúan el análisis de forma normal. Ya no existe un umbral de
-        confianza de detección.
+        encuentran continúan el análisis de forma normal.
       & Evita que el sistema produzca resultados incorrectos sin advertir al
         investigador. Véase la sección~\ref{sec:umbrales}. Ver RF-14, RF-16. \\
 \hline
