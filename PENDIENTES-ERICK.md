@@ -19,7 +19,7 @@ abreviaturas y dudas.
 | B-1 | **CLA-03:** qué clasificador gana y su F1. Con eso: revisar el 0.80, D-06 (dos archivos de modelo si gana la fusión) y la columna «DL» de la tabla comparativa del cap. 2 (M-33) | Etiquetado y entrenamiento |
 | B-2 | **Métricas sin gold standard** (`CLAUDE.md`). Ligado a E04-06: RNF-02 y la justificación de umbrales (cap. 4, ~336-462) comparan «contra la anotación manual de analistas» | Dr. Sandino |
 | B-4 | **D-52** (`INTERVALO`/`PRESENTA`) y **D-07** (recuadro y línea de agua a mano) | Decisión del equipo |
-| B-5 | **CLA-04, parte BORIS:** caps. 1, 3 y 4 dicen que el laboratorio anota con BORIS (D-26) | Qué son los `*_mano.csv` de `fst_auto/etiquetas` |
+| B-5 | ~~**CLA-04, parte BORIS:** caps. 1, 3 y 4 dicen que el laboratorio anota con BORIS (D-26)~~ **Resuelto (7-oct, D-56):** BORIS se quitó de todo el LaTeX; las etiquetas salen del etiquetador del equipo | — |
 
 > Si una decisión tuya (D-52, CLA-03…) obliga a cambiar una **ficha de caso de uso** o
 > algo de los caps. 1–3, avísale a Vanesa en vez de editarlo: esas zonas son suyas

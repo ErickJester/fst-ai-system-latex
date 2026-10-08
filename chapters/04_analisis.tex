@@ -689,12 +689,13 @@ scikit-learn \cite{pedregosa2011}
       clasificación (F1, precisión y \textit{recall} por conducta) y la validación
       cruzada. \\
 \hline
-BORIS \cite{friard2016}
-    & Software de anotación conductual cuadro a cuadro. Exporta en formatos
-      compatibles con Python.
-    & Los autores del proyecto anotan los cuadros de video con BORIS usando los
-      registros conductuales del laboratorio como referencia, generando el dataset
-      de entrenamiento del clasificador. \\
+Etiquetador del equipo
+    & Herramienta propia que propone la conducta de cada espécimen por bloque y por
+      segundo, y permite revisarla y corregirla en el navegador. Guarda las hojas
+      corregidas en formato CSV, compatible con Python.
+    & Los autores del proyecto revisan y corrigen sus propuestas, sin usar registros
+      conductuales del laboratorio como referencia, y generan así el dataset de
+      entrenamiento del clasificador. \\
 \hline
 
 \end{longtable}
@@ -778,8 +779,7 @@ R-01 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
 R-02 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
      & El dataset de cuadros etiquetados no alcanza para entrenar un clasificador
        con el F1 objetivo.
-     & Ampliar el dataset anotando más cuadros con BORIS
-       (\textit{Behavioral Observation Research Interactive Software}) y aplicar
+     & Ampliar el dataset anotando más cuadros con el etiquetador del equipo y aplicar
        \textit{data augmentation}. Si el escalamiento no se distingue del nado
        con la precisión objetivo, los segundos en que no se distinguen se registran
        como ``conducta activa'' (ver RN-13). \\
@@ -853,7 +853,7 @@ documentadas y tienen comunidades activas que reducen el riesgo de incompatibili
 
 La brecha tecnológica más relevante identificada es el dataset de cuadros etiquetados
 para entrenar el clasificador de conducta. Con el número de videos disponibles actualmente
-en el laboratorio, ese dataset requiere un esfuerzo de anotación manual con BORIS que
+en el laboratorio, ese dataset requiere un esfuerzo de anotación manual con el etiquetador del equipo que
 es viable pero no trivial. La estrategia de transfer learning con una red preentrenada
 reduce ese requerimiento a unos pocos cientos de ejemplos por clase, lo que está dentro
 del alcance del proyecto \cite{pan2010,meng2024_dsaan}. El clasificador sobre rasgos
