@@ -27,9 +27,12 @@ Marca aquí lo que termines (`✅`, fecha). Este archivo es solo tuyo: Erick no 
     `\section{Diseño de casos de uso}` a justo antes de `\section{Diagramas de secuencia}`,
     hoy líneas 693–2333)
 - **No toques** dentro de tus capítulos los párrafos sobre **preprocesamiento** (CLAHE,
-  modelo de fondo por mediana, línea de agua con EMA, BORIS) ni sobre el **clasificador**
+  modelo de fondo por mediana, línea de agua con EMA) ni sobre el **clasificador**
   (ResNet, R(2+1)D, *gradient boosting*). Los reescribe Erick (CLA-03 y CLA-04) con el
   código de `fst_auto`.
+- **BORIS ya no existe en el documento** (D-56, 7-oct). Si en tus capítulos hablas de cómo
+  se etiquetan los videos, la herramienta es el **etiquetador del equipo** (propone la
+  conducta y los autores la revisan y corrigen). No vuelvas a nombrar BORIS.
 - **Glosario y abreviaturas son de Erick.** Si necesitas una entrada nueva, anótala al
   final de este archivo y él la agrega.
 

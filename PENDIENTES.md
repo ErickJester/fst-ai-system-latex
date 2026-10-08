@@ -25,7 +25,7 @@ bibliografía y casos de uso, que ella diseñó). A Erick, lo que necesita ese c
 
 | Archivo o zona | Dueño |
 |----------------|-------|
-| `chapters/01_introduccion.tex`, `02_estado_arte.tex`, `03_marco_teorico.tex` | Vanesa, **salvo** los párrafos de preprocesamiento (CLAHE, fondo por mediana, EMA, BORIS) y del clasificador (ResNet, R(2+1)D, *gradient boosting*), que son de Erick |
+| `chapters/01_introduccion.tex`, `02_estado_arte.tex`, `03_marco_teorico.tex` | Vanesa, **salvo** los párrafos de preprocesamiento (CLAHE, fondo por mediana, EMA) y del clasificador (ResNet, R(2+1)D, *gradient boosting*), que son de Erick. La parte de BORIS ya se resolvió (7-oct, D-56) |
 | `front/resumen.tex`, `portada.tex`, `documento_tecnico.tex` | Vanesa |
 | `front/glosario.tex`, `front/abreviaturas.tex` | Erick (Vanesa le pide entradas en su lista) |
 | `bib/referencias.bib`, configuración de `biblatex` | Vanesa (Erick solo agrega citas al final, si las necesita) |
@@ -95,7 +95,9 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
   errores son dos: el video no se pudo abrir o no se encontraron los cilindros.
 - **Sin vista en vivo.** Al terminar, el usuario revisa y corrige segundo a segundo
   (D-34, D-35). El progreso se muestra por etapa (D-22).
-- **Entrenamiento sin las anotaciones del laboratorio** (D-26, `CLAUDE.md`). Métricas:
+- **Entrenamiento sin las anotaciones del laboratorio** (D-26, `CLAUDE.md`). Las etiquetas
+  las generan los autores con el **etiquetador del equipo** (propone la conducta y ellos la
+  revisan y corrigen); **BORIS ya no aparece** en el documento (D-56, 7-oct). Métricas:
   precisión, *recall* y F1 por clase; **nunca** κ de Cohen, MAE ni «gold standard».
 
 **Los resultados**
