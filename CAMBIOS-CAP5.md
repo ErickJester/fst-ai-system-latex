@@ -268,7 +268,8 @@ etiquetador real (`C:\Users\Samsung\Desktop\proyectos\fst_auto`) hace otra cosa:
   los rasgos en una **ventana deslizante de 4 s** centrada en *k*; detecta conductas de unos
   **2 s**. Regla de tres pasos que da «conducta activa» cuando no decide.
 - Valida juntando los segundos de cada bloque de 5 s por mayoría contra los bloques hechos
-  a mano.
+  a mano (así lo hace el código de `fst_auto`; no es la regla que ve el usuario). El bloque
+  que muestra el sistema toma la conducta de su último segundo (RN-15, 8-oct).
 
 | ID | Qué | Estado |
 |----|-----|--------|
