@@ -41,6 +41,15 @@ Marca aquí lo que termines (`✅`, fecha). Este archivo es solo tuyo: Erick no 
   de video (resumen, ahora con «RF-09») y la postcondición del análisis en cola (sin «ver D-15»).
   **Haz `git pull` antes de seguir editando esa zona** y no vuelvas a escribir códigos `D-xx`
   en el texto.
+- **Erick cambió la regla de los bloques de 5 s** (8-oct, commit `a20d40e`). Ahora la
+  conducta de cada bloque es la de su **último segundo**, como el muestreo cada 5 s de
+  Detke et al. (1995), y ya no la mayoría de los cinco segundos con desempates. La regla
+  completa es la nueva **RN-15** del cap. 4. Tocó RF-18 y la justificación de umbrales
+  (cap. 4) y, en el cap. 5, «Módulo 4», la clasificación segundo a segundo y la pantalla
+  de resultados; ninguno está en tu zona. Agregó `detke1995` **al final de
+  `bib/referencias.bib`** (tu archivo). En tus capítulos y casos de uso no hay nada que
+  cambiar, salvo que algún texto tuyo hable de bloques «por mayoría»: debe decir
+  «conducta del último segundo» y remitir a RN-15. **Haz `git pull`** antes de seguir.
 - **Glosario y abreviaturas son de Erick.** Si necesitas una entrada nueva, anótala al
   final de este archivo y él la agrega.
 
