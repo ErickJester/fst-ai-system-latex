@@ -177,10 +177,9 @@ RF-18 & Análisis conductual
         descartar ninguna por su duración, de modo que registre conductas breves (de
         unos 2~segundos) que el análisis manual por bloques de 5~segundos no
         distingue. Para compararse con ese método, los resultados también se
-        presentan en bloques de 5~segundos: cada bloque toma la conducta con más
-        segundos (si nado activo y escalamiento empatan, es conducta activa) y muestra
-        dentro los segundos que lo componen. Los fragmentos en que el espécimen no se
-        ve se marcan en el PDF final.
+        presentan en bloques de 5~segundos, calculados según RN-15, y cada bloque
+        muestra dentro los segundos que lo componen. Los fragmentos en que el
+        espécimen no se ve se marcan en el PDF final.
       & Alta & Sistema \\
 \hline
 
@@ -466,8 +465,8 @@ ajustarse en la fase de validación (TT2).
         segundo y detecta conductas breves de unos 2~segundos, que es justo lo que el
         análisis a ojo no alcanza a registrar. El criterio manual se conserva como
         referencia: los resultados también se agrupan en bloques de 5~segundos, con la
-        conducta que más segundos ocupó en cada bloque, para compararlos con el
-        análisis manual (ver RF-18).
+        conducta del último segundo de cada bloque, para compararlos con el
+        análisis manual (ver RF-18 y RN-15).
 
   \item \textbf{Período de retención de videos: 30~días.}
         Confirmado por el investigador colaborador en la entrevista de levantamiento
@@ -594,6 +593,21 @@ RN-14 & Solo se puede revisar un análisis completado. Al revisar, el usuario co
         recalcula los totales por minuto de los especímenes corregidos y los
         reportes guardados del experimento se regeneran con los datos nuevos.
       & La revisión humana corrige al clasificador sin sustituirlo. Ver RF-32. \\
+\hline
+RN-15 & Los resultados también se agrupan en bloques de 5~segundos para compararlos
+        con el análisis manual. La conducta de cada bloque es la del último de sus
+        cinco segundos, tomada de la conducta ya asignada a ese segundo; el cálculo
+        no vuelve a usar el clasificador. Si ese segundo es conducta activa, el
+        bloque es conducta activa; si es «no se ve», el bloque se muestra como
+        conducta activa y se marca en pantalla y en el PDF final. Los bloques se
+        calculan al mostrarse y no se guardan; dentro de cada uno se siguen viendo
+        sus cinco segundos.
+      & Registrar la conducta del espécimen al final de cada periodo de 5~segundos es
+        la técnica de muestreo que describen Detke et~al.\ \cite{detke1995} para la
+        prueba de nado forzado en la rata, y el laboratorio la ha usado en parte de
+        sus análisis manuales. Como el clasificador decide cada segundo con una
+        ventana de 4~s a su alrededor, la conducta de ese segundo ya resume su
+        contexto. Ver RF-18, RN-13 y la sección~\ref{sec:umbrales}. \\
 \hline
 
 \end{longtable}

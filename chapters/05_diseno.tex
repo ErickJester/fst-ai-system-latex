@@ -243,9 +243,9 @@ así que cada segundo tiene su propia decisión y aparecen conductas breves, de 
 conductas más breves, pero mediría con muy pocos datos; 4~s es el punto de
 equilibrio. El segundo es la unidad con la que el sistema registra las conductas;
 no se aplica una duración mínima de episodio (ver RF-18 y
-sec.~\ref{sec:umbrales}). Al agrupar los segundos de cada bloque de 5~s y tomar la
-conducta mayoritaria, el resultado se compara directamente con el análisis manual
-por bloques.
+sec.~\ref{sec:umbrales}). Al agrupar los segundos en bloques de 5~s y tomar la
+conducta del último segundo de cada bloque (RN-15), el resultado se compara
+directamente con el análisis manual por bloques.
 
 \paragraph{Conjunto de entrenamiento.} El clasificador se entrena con bloques de
 5~s etiquetados por el equipo, sin usar las anotaciones del laboratorio. El
@@ -287,6 +287,12 @@ Al finalizar el análisis, el pipeline produce cuatro salidas:
   \item \textbf{Medidas por cuadro}: las medidas del espécimen en cada
         cuadro, útiles para depuración y auditoría del análisis.
 \end{itemize}
+
+Además, los resultados se muestran en bloques de 5~segundos para compararlos con el
+análisis manual. Los bloques no son una salida guardada: se calculan al mostrarse, a
+partir de la conducta de cada segundo almacenada en \texttt{SEGUNDO}, y el clasificador
+no interviene. La conducta de cada bloque es la de su último segundo, como en el muestreo
+cada 5~s de Detke et~al.\ \cite{detke1995} (ver RN-15).
 
 \subsection{Ciclo de vida del análisis}
 
@@ -2756,13 +2762,11 @@ soportar cancelación.
 \subsection{Resultados del experimento}
 
 Cuatro pestañas: resultados por espécimen, comparación entre grupos, línea de tiempo
-por minuto (RF-20) y bloques de 5~s (RF-18), donde cada bloque muestra la conducta con
-más segundos y, dentro, los cinco segundos que lo componen, para notar las conductas
-breves y comparar con el análisis manual. El bloque se calcula por mayoría de sus cinco
-segundos, sin volver a usar el clasificador. Si nado activo y escalamiento empatan, el
-bloque es conducta activa; con dos segundos de inmovilidad y dos de nado activo decide
-el quinto, y tanto escalamiento como «no se ve» dan conducta activa. Los fragmentos «no se ve»
-se marcan en pantalla y en el PDF final. La vista por espécimen
+por minuto (RF-20) y bloques de 5~s (RF-18), donde cada bloque muestra la conducta de
+su último segundo y, dentro, los cinco segundos que lo componen, para notar las conductas
+breves y comparar con el análisis manual. La regla con que se decide la conducta de cada
+bloque es RN-15. Los fragmentos «no se ve» se marcan en pantalla y en el PDF final.
+La vista por espécimen
 muestra el tiempo por conducta con media, desviación estándar y varianza (RF-19), el
 nivel de clasificación del análisis y la leyenda de conductas; en el panel lateral
 se compara la inmovilidad entre los grupos con los videos del Día~2 (RF-21). Esa

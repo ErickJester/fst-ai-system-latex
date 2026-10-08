@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arquitectura por capas</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+html,body{height:100%;margin:0;background:#faf9f5}
+body{overflow-x:auto;overflow-y:hidden}
+svg{display:block;height:100vh;width:auto}
+</style></head><body><svg viewBox="0 6 1400 874" role="img" aria-labelledby="ca-title ca-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="ca-title">Arquitectura de software por capas</title>
+<desc id="ca-desc">Cuatro capas: presentación (React), lógica de negocio (Flask), procesamiento asíncrono (worker con OpenCV, scikit-learn y PyTorch) y datos (PostgreSQL y dos volúmenes).</desc>
+<defs><marker id="c-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#1a1a1a" stroke-width="1.2"/></marker></defs>
+<style>
+.a{font:400 9px 'Geist Mono',monospace;fill:#1a1a1a}
+.nm{font:600 12px Geist,sans-serif;fill:#1a1a1a}
+.st{font:400 8px 'Geist Mono',monospace;fill:#6b6b6b;letter-spacing:.06em}
+.r{font:400 8px 'Geist Mono',monospace;fill:#6b6b6b;letter-spacing:.06em}
+.lg text{font:400 9px 'Geist Mono',monospace;fill:#6b6b6b}
+</style>
+<rect x="20" y="104" width="1360" height="136" rx="8" fill="#f4f2ea" stroke="#d8d5cc"/>
+<text x="38" y="128" class="st">CAPA 1</text>
+<text x="38" y="146" class="nm" text-anchor="start">Presentación</text>
+<rect x="20" y="262" width="1360" height="150" rx="8" fill="#efede4" stroke="#d8d5cc"/>
+<text x="38" y="286" class="st">CAPA 2</text>
+<text x="38" y="304" class="nm" text-anchor="start">Lógica de negocio</text>
+<rect x="20" y="434" width="1360" height="186" rx="8" fill="#f4f2ea" stroke="#d8d5cc"/>
+<text x="38" y="458" class="st">CAPA 3</text>
+<text x="38" y="476" class="nm" text-anchor="start">Procesamiento asíncrono</text>
+<rect x="20" y="666" width="1360" height="160" rx="8" fill="#efede4" stroke="#d8d5cc"/>
+<text x="38" y="690" class="st">CAPA 4</text>
+<text x="38" y="708" class="nm" text-anchor="start">Datos</text>
+<rect x="230" y="22" width="300" height="52" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-dasharray="6,4"/>
+<text x="380" y="40" text-anchor="middle" class="st">«actor»</text>
+<text x="380" y="58" text-anchor="middle" class="nm">Investigador (navegador web)</text>
+<rect x="230" y="118" width="300" height="114" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="380.0" y="132" text-anchor="middle" class="st">«contenedor»</text>
+<text x="380.0" y="148" text-anchor="middle" class="nm">frontend</text>
+<line x1="230" y1="158" x2="530" y2="158" stroke="#1a1a1a"/>
+<text x="242" y="176" class="a">React.js + Vite</text>
+<text x="242" y="190" class="a">Formularios de experimento</text>
+<text x="242" y="204" class="a">Visualización de resultados</text>
+<text x="242" y="218" class="a">Descarga de reportes (PDF, CSV, XLSX)</text>
+<rect x="230" y="276" width="420" height="128" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="440.0" y="290" text-anchor="middle" class="st">«contenedor»</text>
+<text x="440.0" y="306" text-anchor="middle" class="nm">backend</text>
+<line x1="230" y1="316" x2="650" y2="316" stroke="#1a1a1a"/>
+<text x="242" y="334" class="a">Flask + SQLAlchemy + Flask-JWT-Extended</text>
+<text x="242" y="348" class="a">API REST (JSON)</text>
+<text x="242" y="362" class="a">Autenticación con JWT</text>
+<text x="242" y="376" class="a">Validación de los archivos de video</text>
+<text x="242" y="390" class="a">Encolado de las tareas de análisis</text>
+<rect x="800" y="456" width="560" height="126" rx="6" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/>
+<text x="1080.0" y="470" text-anchor="middle" class="st">«contenedor»</text>
+<text x="1080.0" y="486" text-anchor="middle" class="nm">worker</text>
+<line x1="800" y1="496" x2="1360" y2="496" stroke="#d9532c"/>
+<text x="814" y="514" class="a" style="font-weight:600">OpenCV</text>
+<text x="930" y="514" class="a">Preprocesamiento y localización de cilindros</text>
+<text x="814" y="532" class="a" style="font-weight:600">scikit-learn</text>
+<text x="930" y="532" class="a">Clasificador sobre rasgos</text>
+<text x="814" y="550" class="a" style="font-weight:600">PyTorch</text>
+<text x="930" y="550" class="a">R(2+1)D-18 (en evaluación)</text>
+<text x="814" y="568" class="a" style="font-weight:600">Python</text>
+<text x="930" y="568" class="a">Consulta la cola · borra videos a los 30 días</text>
+<rect x="230" y="686" width="240" height="100" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="350.0" y="700" text-anchor="middle" class="st">«contenedor»</text>
+<text x="350.0" y="716" text-anchor="middle" class="nm">Base de datos</text>
+<line x1="230" y1="726" x2="470" y2="726" stroke="#1a1a1a"/>
+<text x="242" y="744" class="a">PostgreSQL</text>
+<text x="242" y="758" class="a">Cola de tareas: tabla ANALISIS</text>
+<text x="242" y="772" class="a">Esquema relacional (15 tablas)</text>
+<rect x="830" y="686" width="240" height="100" rx="6" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1"/>
+<text x="950.0" y="700" text-anchor="middle" class="st">«volumen»</text>
+<text x="950.0" y="716" text-anchor="middle" class="nm">Volumen compartido</text>
+<line x1="830" y1="726" x2="1070" y2="726" stroke="#1a1a1a"/>
+<text x="842" y="744" class="a">Videos originales y anotados</text>
+<text x="842" y="758" class="a">Reportes PDF / CSV / XLSX</text>
+<text x="842" y="772" class="a">Reportes de diagnóstico</text>
+<rect x="1110" y="686" width="250" height="100" rx="6" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1235.0" y="700" text-anchor="middle" class="st">«volumen»</text>
+<text x="1235.0" y="716" text-anchor="middle" class="nm">Volumen de modelos</text>
+<line x1="1110" y1="726" x2="1360" y2="726" stroke="#1a1a1a"/>
+<text x="1122" y="744" class="a">Solo lectura para el worker</text>
+<text x="1122" y="758" class="a">Archivo del clasificador</text>
+<text x="1122" y="772" class="a">de conducta</text>
+<path d="M380,74 L380,118" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#c-arr)"/>
+<path d="M380,218 L380,276" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#c-arr)"/>
+<text x="390" y="252" class="r">API REST (JSON + JWT)</text>
+<path d="M350,404 L350,686" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#c-arr)"/>
+<text x="360" y="560" class="r">ENCOLA ANÁLISIS</text>
+<path d="M600,404 L600,650 L880,650 L880,686" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#c-arr)"/>
+<rect x="684" y="635" width="112" height="11" fill="#efede4"/><text x="740" y="644" text-anchor="middle" class="r">LEE Y SIRVE ARCHIVOS</text>
+<path d="M840,582 L840,630 L606,630 A6,6 0 0 0 594,630 L410,630 L410,686" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#c-arr)"/>
+<rect x="650" y="615" width="169" height="11" fill="#efede4"/><text x="735" y="624" text-anchor="middle" class="r">TOMA TAREAS Y GUARDA RESULTADOS</text>
+<path d="M1020,582 L1020,686" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#c-arr)"/>
+<text x="1028" y="637.0" class="r">GUARDA ARCHIVOS</text>
+<path d="M1230,582 L1230,686" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#c-arr)"/>
+<text x="1238" y="637.0" class="r">CARGA AL INICIAR</text>
+<g transform="translate(40,850)" class="lg">
+<rect x="0" y="-8" width="22" height="14" rx="3" fill="#faf9f5" stroke="#1a1a1a"/><text x="30" y="3">CONTENEDOR DOCKER</text>
+<rect x="170" y="-8" width="22" height="14" rx="3" fill="#ece7d8" stroke="#1a1a1a"/><text x="200" y="3">VOLUMEN</text>
+<line x1="290" y1="0" x2="318" y2="0" stroke="#1a1a1a"/><path d="M312,-4 L318,0 L312,4" fill="none" stroke="#1a1a1a"/><text x="328" y="3">COMUNICACIÓN</text>
+<rect x="450" y="-8" width="22" height="14" rx="3" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/><text x="480" y="3">PIEZA CLAVE: WORKER SEPARADO DEL BACKEND</text>
+</g>
+</svg></body></html>

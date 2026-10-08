@@ -87,18 +87,26 @@ package P3_Pipeline_de_analisis_conductual {
   class PipelineAnalisis <<control>> {
     +preprocesarVideo(video) : void
     +detectarCilindros() : List<ROI>
-    +clasificarConducta(especimen, frame) : String
+    +clasificarConducta(especimen, roi, segundo) : String
     +generarReporte(experimento, tipo) : Reporte
     +actualizarProgreso(idAnalisis, pct, etapa) : void
     +marcarError(idAnalisis, mensaje) : void
   }
 
   class ROI {
+    -numeroCilindro : Integer
     -x : Integer
     -y : Integer
     -w : Integer
     -h : Integer
+    -yAgua : Integer
+    -yFondo : Integer
   }
+  note right of ROI
+    Coordenadas del video ya estabilizado.
+    Objeto del pipeline: no se guarda
+    en la base de datos.
+  end note
 
   class Analisis {
     -id : Integer
@@ -112,6 +120,7 @@ package P3_Pipeline_de_analisis_conductual {
 package P4_Resultados_y_reportes {
 
   class Observacion {
+    +calcularBloques() : List<String>
   }
 
   class Intervalo {
@@ -170,7 +179,8 @@ Worker ..> PipelineAnalisis : invoca
 Worker ..> Analisis         : procesa
 Worker ..> Video            : elimina
 
-PipelineAnalisis ..> ROI         : crea
+PipelineAnalisis ..> "2..4" ROI  : crea
+Especimen "1" --> "0..*" ROI     : "se delimita con"
 PipelineAnalisis ..> Video       : procesa
 PipelineAnalisis ..> Analisis    : actualiza
 PipelineAnalisis ..> Observacion : origina

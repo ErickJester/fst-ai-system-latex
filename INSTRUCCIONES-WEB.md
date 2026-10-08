@@ -590,14 +590,15 @@ pantalla ni intervención humana, así que la pantalla se queda como está.
 
 ### 9.5 Resultados
 Cuatro pestañas: por espécimen, comparación entre grupos (Día 2), línea de tiempo por
-minuto y bloques de 5 s. En la de bloques, cada bloque muestra la conducta con más segundos
+minuto y bloques de 5 s. En la de bloques, cada bloque muestra la conducta de su último segundo
 y, al abrirlo, sus cinco segundos, para notar las conductas breves.
 
-Los bloques **no usan la CNN**: la CNN solo clasifica cada segundo, y el bloque se calcula por mayoría sobre esos cinco segundos (3 de nado activo y 2 de inmovilidad dan nado activo). Reglas del bloque (D-53):
-- Gana la conducta con más segundos. Si nado activo y escalamiento empatan (por ejemplo 2 y 2), el bloque es **conducta activa**.
-- Con 2 de inmovilidad y 2 de nado activo, decide el quinto segundo: si es escalamiento, el bloque es conducta activa; si es "no se ve", también es conducta activa, con el matiz de abajo.
-- Un bloque cuyos cinco segundos son "no se ve" se muestra como **conducta activa con un matiz** que avisa que el modelo no pudo ver bien esa parte del video.
+Los bloques **no usan la CNN**: la CNN solo clasifica cada segundo, y el bloque toma la conducta de su **último segundo** (el quinto), como el muestreo cada 5 s de Detke et al. (1995). Reglas del bloque (RN-15, cambio del 8-oct: ya no se usa la mayoría de los cinco segundos):
+- La conducta del bloque es la de su quinto segundo. No hay mayorías ni desempates.
+- Si ese quinto segundo es conducta activa, el bloque es **conducta activa**.
+- Si ese quinto segundo es "no se ve", el bloque se muestra como **conducta activa con un matiz** que avisa que el modelo no pudo ver bien ese instante del video.
 - Los fragmentos "no se ve" también se marcan en el PDF final que se entrega al cliente.
+- Al abrir el bloque se siguen viendo sus cinco segundos.
 
 ```
 +-------------------------------------------------------------+
@@ -611,7 +612,7 @@ Los bloques **no usan la CNN**: la CNN solo clasifica cada segundo, y el bloque 
 |-------------------------------------------------------------|
 | Por minuto: minuto 1..5 por espécimen y conducta             |
 | Entre grupos: promedio por conducta de cada grupo (Día 2)   |
-| Bloques de 5 s: conducta mayoritaria y sus cinco segundos   |
+| Bloques de 5 s: conducta del quinto segundo y sus cinco     |
 +-------------------------------------------------------------+
 ```
 
