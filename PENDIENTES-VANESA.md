@@ -27,9 +27,20 @@ Marca aquí lo que termines (`✅`, fecha). Este archivo es solo tuyo: Erick no 
     `\section{Diseño de casos de uso}` a justo antes de `\section{Diagramas de secuencia}`,
     hoy líneas 693–2333)
 - **No toques** dentro de tus capítulos los párrafos sobre **preprocesamiento** (CLAHE,
-  modelo de fondo por mediana, línea de agua con EMA, BORIS) ni sobre el **clasificador**
+  modelo de fondo por mediana, línea de agua con EMA) ni sobre el **clasificador**
   (ResNet, R(2+1)D, *gradient boosting*). Los reescribe Erick (CLA-03 y CLA-04) con el
   código de `fst_auto`.
+- **BORIS ya no existe en el documento** (D-56, 7-oct). Si en tus capítulos hablas de cómo
+  se etiquetan los videos, la herramienta es el **etiquetador del equipo** (propone la
+  conducta y los autores la revisan y corrigen). No vuelvas a nombrar BORIS.
+- **Erick quitó los códigos `D-xx` del cap. 5** (7-oct, commit `6a2b98a`). Ya no se citan
+  decisiones internas en el documento: donde había una regla que lo respalda quedó
+  RF-09 (tanda sugerida) o RN-11 (reporte de diagnóstico), y en el resto se borró la
+  referencia. Tocó tres fichas de tu zona de casos de uso: la de administración
+  (`Referencias` ahora dice solo «RF-04» y se quitó «ver D-12» de la descripción), la de carga
+  de video (resumen, ahora con «RF-09») y la postcondición del análisis en cola (sin «ver D-15»).
+  **Haz `git pull` antes de seguir editando esa zona** y no vuelvas a escribir códigos `D-xx`
+  en el texto.
 - **Glosario y abreviaturas son de Erick.** Si necesitas una entrada nueva, anótala al
   final de este archivo y él la agrega.
 
