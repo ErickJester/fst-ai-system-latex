@@ -124,7 +124,7 @@ commit.
 | ✅ M-30 (5-oct) | 🟡 | `gen_pngs.sh` | Rutas absolutas a `/home/vane/` y `/tmp/plantuml.jar` (INF-03): usar rutas relativas al repositorio |
 | ✅ V-3 (6-oct) | ❓ | Fichas | Verificar que las fichas no se contradigan entre sí: CU-04/CU-05, CU-05/CU-07, CU-09/CU-10 |
 | ✅ V-4 (6-oct) | ❓ | Diagramas y fichas | Nombres distintos entre diagrama y ficha (p. ej. UC14 «Verificar rol y permisos» contra CU-15 «Verificar pertenencia a Administrador»); CU-06 y CU-08 tienen ficha pero no caso de uso dibujado |
-| B-3 | 🔒 | — | Cuando los casos de uso estén corregidos, agendar la revisión con la Dra. Martha Rosa Cordero López [corr. CU-22] |
+| ✅ B-3 (7-oct) | 🔒 | — | Cuando los casos de uso estén corregidos, agendar la revisión con la Dra. Martha Rosa Cordero López [corr. CU-22] |
 
 ---
 
