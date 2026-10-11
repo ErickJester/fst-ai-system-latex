@@ -25,7 +25,7 @@ salir y registrar cómo responde. Al principio intenta escapar activamente; desp
 un rato empieza a flotar con movimientos mínimos. Esa conducta pasiva ---llamada
 \textit{desesperanza conductual} o \textit{behavioral despair}--- se asocia con la
 pérdida de motivación propia de la depresión \cite{armario2021}. Los antidepresivos
-reducen el tiempo de inmovilidad, y eso es lo que se mide \cite{slattery2012,cryan2005}.
+reducen el tiempo de inmovilidad, y eso es lo que se mide \cite{slattery2012}.
 
 Los especímenes son el modelo biológico estándar para este tipo de estudio. Su fisiología y
 neuroanatomía tienen correspondencia suficiente con la humana, en particular en la
@@ -40,14 +40,14 @@ opera bajo esas disposiciones; este proyecto solo analiza los videos que resulta
 los experimentos, sin intervenir en ningún procedimiento con los especímenes.
 
 Existen herramientas para automatizar parte del análisis. EthoVision XT
-\cite{noldus_ethovision} y ANY-maze son las comerciales más usadas; ezTrack
+\cite{noldus_ethovision} y ANY-maze \cite{stoelting_anymaze} son las comerciales más usadas; ezTrack
 \cite{pennington2019_eztrack} y DBscorer \cite{nandi2021_dbscorer} son las alternativas
 abiertas más específicas para el FST. Todas tienen el mismo problema: no distinguen las
 tres conductas relevantes del FST (nado, inmovilidad y escalamiento) por separado, y
-ninguna tiene interfaz web. Los trabajos más recientes con aprendizaje profundo
-\cite{della_valle2025,meng2024_dsaan} sí alcanzan esa clasificación de tres clases,
-pero no se distribuyen como sistemas que un laboratorio sin infraestructura especializada
-pueda desplegar.
+ninguna tiene interfaz web. El trabajo más reciente con aprendizaje profundo
+\cite{della_valle2025} sí alcanza esa clasificación de tres conductas, pero no se
+distribuye como sistema que un laboratorio sin infraestructura especializada pueda
+instalar.
 
 El Laboratorio de Bioquímica Estructural, Sección de Posgrado, de la Escuela Nacional
 de Medicina y Homeopatía (ENMyH) del Instituto Politécnico Nacional (IPN), a cargo del Dr.\ César Augusto Sandino Reyes
@@ -138,7 +138,7 @@ resultados para compararlos con los de otros grupos de investigación.
 \section{Propuesta de solución}
 
 En términos concretos: el investigador sube el video al sistema desde el navegador, el
-sistema lo analiza y en minutos genera un reporte con los tiempos de nado activo,
+sistema lo analiza y, cuando termina, genera un reporte con los tiempos de nado activo,
 inmovilidad y escalamiento por espécimen y sesión. Lo que hoy lleva horas de
 anotación manual, el sistema lo produce de forma automática y con los mismos criterios
 cada vez.
@@ -173,11 +173,10 @@ El sistema asume calidad mínima de entrada: vista lateral con todos los cilindr
 visibles (de dos a cuatro), contraste suficiente entre el espécimen y el fondo, y cámara estable. Los videos
 disponibles hasta ahora tienen variaciones de iluminación y contraste que pueden afectar
 el desempeño; durante el desarrollo se evaluará la robustez de los algoritmos y se
-documentarán los requisitos mínimos de calidad conforme al atributo \textit{performance
-efficiency} (eficiencia de desempeño) de la norma ISO/IEC~25010:2011 \cite{iso25010}, que define un modelo de calidad para sistemas y software.
+documentarán los requisitos mínimos de calidad de los videos.
 
 El desempeño del clasificador se evalúa con métricas de clasificación estándar
-(precisión, \textit{recall} y F1 por clase) sobre un conjunto de prueba independiente.
+(precisión, \textit{recall} y F1 por conducta) sobre un conjunto de prueba independiente.
 
 \section{Objetivo general (OG)}
 
@@ -202,7 +201,7 @@ atributos de calidad de la norma ISO/IEC~25010:2011 \cite{iso25010}.
   \item Implementar el módulo de análisis conductual con visión por computadora y un
         clasificador supervisado para las tres conductas del FST y la conducta activa.
   \item Evaluar el desempeño del clasificador de conductas con métricas de
-        clasificación estándar (precisión, \textit{recall} y F1 por clase) sobre un
+        clasificación estándar (precisión, \textit{recall} y F1 por conducta) sobre un
         conjunto de prueba independiente.
   \item Cuantificar la reducción de tiempo de análisis respecto al proceso manual, y
         dejar documentado qué tendría que cambiar en el pipeline si el laboratorio
@@ -233,10 +232,10 @@ de quién anota y de cómo interpreta cada transición entre conductas; un siste
 automatizado aplica los mismos criterios en cada corrida.
 
 Las herramientas existentes no cubren las necesidades del laboratorio. EthoVision XT y
-ANY-maze tienen costos de licencia fuera del alcance académico del IPN. ezTrack y
-DBscorer no clasifican las tres conductas del FST por separado. Los trabajos con
-aprendizaje profundo que sí distinguen las tres conductas
-\cite{della_valle2025,meng2024_dsaan} no se distribuyen como sistemas desplegables sin
+ANY-maze \cite{stoelting_anymaze} tienen costos de licencia fuera del alcance académico del IPN. ezTrack y
+DBscorer no clasifican las tres conductas del FST por separado. El trabajo con
+aprendizaje profundo que sí distingue las tres conductas
+\cite{della_valle2025} no se distribuye como sistema instalable sin
 infraestructura especializada. Este prototipo atiende esas tres brechas: clasifica tres
 conductas, sin costo de licencia, con interfaz web accesible desde el navegador.
 
@@ -283,8 +282,8 @@ de la validación final.
         estadísticos de grupo (media, desviación estándar y varianza por conducta)
         para caracterizar el perfil conductual del conjunto de especímenes de cada
         grupo experimental. El sistema también compara automáticamente los
-        grupos del experimento del día~2 mediante gráficas de
-        barras de distribución por conducta.
+        grupos del experimento del día~2, mostrando el tiempo
+        promedio por conducta de los especímenes de cada grupo.
 
   \item \textbf{Reportes y exportaciones:} si el análisis falla, un reporte de
         diagnóstico en PDF indica en qué etapa se detuvo y por qué; exportación de
@@ -349,11 +348,6 @@ de la validación final.
         NOM-062-ZOO-1999 \cite{nom062}; este sistema únicamente analiza los videos
         resultantes.
 
-  \item \textbf{Despliegue institucional definitivo:} el producto entregado es un
-        prototipo funcional validado. El despliegue permanente en la infraestructura
-        del servidor institucional de la Escuela Superior de Cómputo (ESCOM) está fuera del alcance de este Trabajo
-        Terminal, aunque el prototipo está diseñado para ejecutarse en ese entorno.
-
   \item \textbf{Otros paradigmas conductuales:} el sistema está diseñado y entrenado
         específicamente para el FST con especímenes. No se garantiza su funcionamiento con
         otras pruebas conductuales ni con otras especies.
@@ -376,10 +370,10 @@ registro de ajustes para el siguiente ciclo.
 
 La responsabilidad de cada integrante está delimitada por frente técnico:
 Ángel Alí es responsable del sistema web e infraestructura (\textit{backend} (servidor),
-base de datos, \textit{frontend} (interfaz del navegador), despliegue); Vanesa es responsable de la
+base de datos, \textit{frontend} (interfaz del navegador)); Vanesa es responsable de la
 cadena de análisis de video (\textit{pipeline}: preprocesamiento,
 localización de los cilindros, clasificación de conducta y evaluación del desempeño
-por clase).
+por conducta).
 
 Las Tablas~\ref{tab:cronograma_angel} y~\ref{tab:cronograma_vanesa} muestran el
 cronograma mes a mes de cada integrante. La columna TT-I abarca febrero--junio
@@ -414,7 +408,7 @@ Cap.~5 Diseño: arquitectura, base de datos, API REST, casos de uso, UML y \text
 Revisiones mensuales con directores e investigador del laboratorio
   & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & & & & & & & \\
 \hline
-\multicolumn{13}{|l|}{\textbf{TT-II --- Implementación, pruebas y despliegue (julio--enero)}} \\
+\multicolumn{13}{|l|}{\textbf{TT-II --- Implementación y pruebas (julio--enero)}} \\
 \hline
 Entorno Flask\,/\,PostgreSQL\,/\,Docker, esquema BD y API REST
   & & & & & & $\bullet$ & $\bullet$ & & & & & \\
@@ -437,7 +431,7 @@ Integración del pipeline de video con backend $+$ pruebas unitarias y de sistem
 Corrección de defectos y ajustes de rendimiento
   & & & & & & & & & & $\bullet$ & & \\
 \hline
-Docker Compose, manuales, despliegue en la ESCOM y material de defensa
+Empaquetado con Docker Compose, manuales y material de defensa
   & & & & & & & & & & & $\bullet$ & $\bullet$ \\
 \hline
 \end{tabular}
@@ -473,7 +467,7 @@ Revisiones mensuales con directores e investigador del laboratorio
 \hline
 \multicolumn{13}{|l|}{\textbf{TT-II --- Implementación, pruebas y validación (julio--enero)}} \\
 \hline
-\textit{Baseline} (línea base): sustracción de fondo, flujo óptico y curación de videos
+\textit{Baseline} (línea base): sustracción de fondo y curación de videos
   & & & & & & $\bullet$ & & & & & & \\
 \hline
 Anotación de conductas con el etiquetador del equipo y extracción de descriptores
@@ -491,7 +485,7 @@ Generación de métricas por individuo y por sesión
 Pruebas con distintas condiciones $+$ oclusiones y reflejos
   & & & & & & & & & $\bullet$ & $\bullet$ & & \\
 \hline
-Reporte de métricas de clasificación por clase (F1, precisión y \textit{recall})
+Reporte de métricas de clasificación por conducta (F1, precisión y \textit{recall})
   & & & & & & & & & & $\bullet$ & & \\
 \hline
 Redacción de caps.\ resultados, manuales y material de defensa
@@ -504,7 +498,7 @@ El \textit{stack} (conjunto de tecnologías) técnico cubre los dos frentes del 
 scikit-learn, PyTorch y PostgreSQL para el \textit{pipeline} y el \textit{backend}; React.js
 para el \textit{frontend}; un etiquetador propio del equipo, que propone la conducta de cada
 espécimen y permite revisarla y corregirla, para anotar el \textit{dataset} (conjunto de datos) de conductas; Git
-con Docker para control de versiones y despliegue.
+para control de versiones y Docker para empaquetar el sistema.
 
 En la práctica, Ángel y Vanesa trabajan en ramas separadas del repositorio y se
 sincronizan en las revisiones semanales de cada \textit{sprint} (iteración). La integración entre los dos módulos

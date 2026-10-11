@@ -32,7 +32,7 @@ a los del trastorno humano), \textit{validez de cara} (los síntomas observables
 ser similares a los clínicos) y \textit{validez predictiva} (el modelo debe responder a
 los fármacos que funcionan en pacientes). El FST cumple principalmente la validez
 predictiva: prácticamente todos los antidepresivos clínicamente aprobados reducen la
-inmovilidad en este test \cite{cryan2005}.
+inmovilidad en este test \cite{slattery2012}.
 
 \subsection{La prueba de nado forzado (FST)}
 
@@ -45,7 +45,7 @@ conductual--- se asocia con la pérdida de motivación propia de la depresión
 
 \subsection{Conductas que se observan y cómo se interpretan}
 
-En el FST se distinguen tres conductas mutuamente excluyentes \cite{armario2021,cryan2005}:
+En el FST se distinguen tres conductas mutuamente excluyentes \cite{armario2021}:
 
 \begin{itemize}
     \item \textbf{Inmovilidad}: el espécimen flota haciendo solo lo necesario para no
@@ -234,9 +234,9 @@ para imágenes, Kinetics-400 para video) y el de destino (recortes y clips de es
 \subsection{ResNet y conexiones residuales}
 
 ResNet (\textit{Residual Network}) \cite{he2016} resolvió un problema práctico: las
-redes de más de 20 capas entrenadas con retropropagación tendían a empeorar porque el
-gradiente se desvanecía al retroceder por muchas capas consecutivas
-(\textit{vanishing gradient problem}, problema del gradiente que se desvanece).
+redes muy profundas entrenadas con retropropagación tendían a empeorar al agregar capas:
+el error de entrenamiento subía en lugar de bajar (\textit{degradation problem},
+problema de degradación).
 
 La solución fue agregar conexiones directas que ``saltan'' una o más capas
 (\textit{skip connections}). En lugar de que cada bloque aprenda una transformación
@@ -358,14 +358,14 @@ Para cada conducta $c$ se calculan:
     \label{eq:f1}
 \end{equation}
 
-donde $VP_c$, $FP_c$ y $FN_c$ son los verdaderos positivos, falsos positivos y falsos
+donde, para el clasificador, cada conducta es una clase y $VP_c$, $FP_c$ y $FN_c$ son los verdaderos positivos, falsos positivos y falsos
 negativos de la clase $c$ respectivamente. El F1 es útil cuando las clases están
 desbalanceadas, que es esperable en el FST donde la inmovilidad suele dominar en los
 primeros experimentos.
 
 \subsection{Tiempo de análisis}
 
-El tiempo de procesamiento de un video de 5 minutos se mide en minutos de cómputo y
-se reporta como relación minuto de video / minuto de procesamiento. El umbral
-aceptable se define con el laboratorio durante el Sprint~6, conforme al atributo de
+El tiempo de procesamiento de un video de 5 minutos se mide en segundos de cómputo;
+cualquier otra relación con la duración del video es opcional. El umbral
+aceptable se define con el laboratorio durante la fase de pruebas y validación (TT-II), conforme al atributo de
 \textit{time behaviour} de la ISO/IEC~25010:2011 \cite{iso25010}.

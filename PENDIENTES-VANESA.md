@@ -175,3 +175,42 @@ Aplicado el 2026-10-11 en mi zona: capítulos 1 a 3, `front/`, `bib/` y casos de
 **🟢 Pendiente con fuente, zona compartida**
 
 - Anglicismos con cursiva y traducción en los caps. 4 y 5 y en el glosario (TT-08, TT-09), y TT1/TT2 en el cap. 4 (TT-05): es zona de Erick.
+
+### Decisiones del 11-oct y su aplicación
+
+Vanesa respondió las preguntas abiertas de la auditoría. Aplicado en caps. 1 a 3, bibliografía y
+casos de uso:
+
+- ✅ Cap. 1: solo `della_valle2025` como trabajo de aprendizaje profundo que clasifica las tres
+  conductas (DSAAN no); se quitó `cryan2005` del cap. 1 y del cap. 3; se quitó la cláusula de
+  ISO 25010 sobre robustez; se cita ANY-maze (`stoelting_anymaze`, nueva); «cuando termina» en
+  vez de «en minutos» (cap. 1, resumen y documento técnico); sin «gráficas de barras»; sin
+  «flujo óptico».
+- ✅ Despliegue fuera del TT y sin registro: se quitó del cap. 1 el apartado del alcance, el
+  «despliegue» del reparto de responsabilidades, del cronograma y del stack.
+- ✅ «F1 por conducta» en resumen y caps. 1 y 2; en el cap. 3 cada conducta se presenta como
+  una clase del clasificador.
+- ✅ Tiempo de análisis en segundos (cap. 2 y 3); sin «Sprint 6».
+- ✅ Cap. 2: el 3D-RCNN es el único de aprendizaje profundo con tres conductas; el descriptor
+  de `armario2021` se reemplazó por la descripción de los rasgos; YOLO-Behaviour y Sturman ya
+  estaban bien.
+- ✅ Cap. 3: ResNet explicada como problema de degradación.
+- ✅ Casos de uso: CU-23 elimina desde el *dashboard* o el detalle, con aviso de «¿está
+  seguro?» y sin pedir nombre ni contraseña; CU-05 valida la extensión en la interfaz y la
+  orientación/reproducibilidad en el servidor. Las fichas de CU-11 y CU-12 ya concuerdan con
+  los paquetes 1 y 5.
+- ✅ Título de la portada: no se cambia («IA» y «RATA» se quedan, es el título registrado).
+  Los agentes no deben «corregirlo».
+
+**Para Erick (zona suya, no la toqué):**
+
+- **Despliegue fuera del alcance y sin registro:** RNF-10 (cap. 4) y cualquier mención del
+  despliegue en la ESCOM en los caps. 4 y 5.
+- **Eliminar un experimento:** RN-09 y RF-27 pedían confirmación explícita; el texto de la
+  pantalla (`05_diseno.tex`, «nombre del experimento y la contraseña») debe decir solo un aviso
+  de «¿está seguro?», y el mockup v2 también.
+- **Validación del video:** extensión en la interfaz y orientación/reproducibilidad en el
+  servidor; ajustar RF-10, RN-10 y `seq_carga_video.puml`.
+- **`cryan2005`** sigue citado en `04_analisis.tex` (RN, ~548).
+- **F1 «por conducta»:** `CLAUDE.md` todavía dice «por clase» (OE-5, RNF-02).
+- **Anglicismos y TT1/TT2** en los caps. 4 y 5 (TT-08, TT-09, TT-05).

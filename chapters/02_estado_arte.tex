@@ -113,7 +113,7 @@ académico del IPN.
 
 \subsection{ANY-maze}
 
-ANY-maze (Stoelting Co.) tiene uso similar al de EthoVision. Su interfaz es más
+ANY-maze (Stoelting Co.) \cite{stoelting_anymaze} tiene uso similar al de EthoVision. Su interfaz es más
 accesible y su curva de aprendizaje más corta, pero comparte las mismas limitaciones
 de fondo: requiere condiciones visuales controladas y no clasifica las subconductas del
 FST por separado.
@@ -213,7 +213,8 @@ características discriminan mejor las conductas.
 Para el FST, un descriptor útil es la relación entre el área de movimiento y la posición
 vertical del centroide: el escalamiento produce movimiento en la mitad superior del
 cilindro mientras que el nado se distribuye en toda la superficie del agua. Esa
-diferencia es capturable con descriptores simples \cite{armario2021}. Este proyecto
+diferencia es capturable con descriptores simples, como la verticalidad del cuerpo y la
+posición del centroide respecto de la línea de agua. Este proyecto
 desarrolla ese camino como uno de los dos candidatos, con un clasificador de
 \textit{gradient boosting} (potenciación del gradiente) sobre quince rasgos del
 espécimen (cap.~5).
@@ -260,10 +261,10 @@ sus objetivos. Para este proyecto, los atributos relevantes son:
 \begin{itemize}
   \item \textbf{\textit{Functional correctness}:} los resultados del sistema deben clasificar
         correctamente las tres conductas del FST. Se evalúa con métricas de
-        clasificación estándar: precisión, \textit{recall} y F1 por clase.
+        clasificación estándar: precisión, \textit{recall} y F1 por conducta.
   \item \textbf{\textit{Time behaviour}:} el tiempo de análisis de un video de 5~minutos debe
-        ser aceptable para el flujo de trabajo del laboratorio. Se mide en minutos de
-        procesamiento por minuto de video y se define el umbral concreto con el
+        ser aceptable para el flujo de trabajo del laboratorio. Se mide en segundos de
+        procesamiento por video (cualquier otra relación es opcional) y se define el umbral concreto con el
         laboratorio durante la fase de pruebas y validación.
   \item \textbf{\textit{Usability}:} un investigador sin conocimientos de programación debe
         poder operar el sistema sin ayuda técnica. Se evalúa con una prueba de
@@ -316,9 +317,9 @@ Ningún sistema existente cubre los cinco criterios al mismo tiempo. Los comerci
 son abiertos y no clasifican las tres conductas. Los de código abierto específicos
 para el FST (ezTrack y DBscorer) no usan aprendizaje profundo ni tienen interfaz web;
 los abiertos que sí lo usan (DeepLabCut y YOLO-Behaviour) tampoco ofrecen plataforma web
-ni clasifican las tres conductas de forma directa. Los de aprendizaje profundo más recientes
-sí clasifican las tres conductas pero no tienen plataforma web y no reportan métricas
-de tiempo de análisis. El sistema propuesto busca cubrir los cinco criterios y
+ni clasifican las tres conductas de forma directa. De los de aprendizaje profundo,
+solo el 3D-RCNN clasifica las tres conductas, pero no tiene plataforma web ni reporta
+métricas de tiempo de análisis. El sistema propuesto busca cubrir los cinco criterios y
 documentar explícitamente los atributos de calidad de la ISO/IEC~25010:2011
 \cite{iso25010}, con la salvedad de que el desempeño real dependerá de la calidad de
 los videos del laboratorio.
