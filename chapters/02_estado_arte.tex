@@ -79,7 +79,7 @@ la pose.
 \subsection{YOLO-Behaviour: detección directa de la conducta}
 
 Chan et al.\ \cite{chan2025_yolo} presentaron un marco para cuantificar conductas animales
-en video con YOLOv8. En lugar de detectar primero al animal y clasificarlo después, entrenan
+en video con YOLOv8 (\textit{You Only Look Once}, «solo se mira una vez»). En lugar de detectar primero al animal y clasificarlo después, entrenan
 el detector para que encuentre la conducta misma: quien anota dibuja recuadros alrededor de
 la conducta visible en cuadros sueltos (por ejemplo, un ave que alimenta a sus crías) y el
 modelo los detecta en cada cuadro del video. La ventaja práctica es que necesita pocas
@@ -172,13 +172,13 @@ FST, sin embargo, el espécimen puede pasar inmóvil buena parte del video, y la
 lo conserva como parte del fondo. Por eso este proyecto usa un percentil bajo en lugar
 de la mediana (ver el Capítulo~3).
 
-\subsection{YOLO (You Only Look Once)}
+\subsection{YOLO}
 
 YOLO es un detector de objetos que aplica una sola red neuronal convolucional
 directamente sobre la imagen completa, produciendo en un solo paso las cajas
 delimitadoras (\textit{bounding boxes}) y las probabilidades de clase de todos los
-objetos detectados \cite{jocher2023}. A diferencia de detectores en dos etapas como
-Faster R-CNN, que primero propone regiones candidatas y luego las clasifica, YOLO
+objetos detectados \cite{redmon2016}. A diferencia de detectores en dos etapas como
+Faster R-CNN \cite{ren2017}, que primero propone regiones candidatas y luego las clasifica, YOLO
 trata la detección como un problema de regresión unificado sobre una cuadrícula.
 
 La versión YOLOv8 (Ultralytics, 2023) se ofrece en varios tamaños, desde modelos ligeros
@@ -314,8 +314,8 @@ conductas; DL: aprendizaje profundo (\textit{deep learning}); Parc.: parcial; cl
 \end{table}
 
 Ningún sistema existente cubre los cinco criterios al mismo tiempo. Los comerciales no
-son abiertos y no clasifican las tres conductas. Los de código abierto específicos
-para el FST (ezTrack y DBscorer) no usan aprendizaje profundo ni tienen interfaz web;
+son abiertos y no clasifican las tres conductas. Los de código abierto más cercanos
+al FST (ezTrack y DBscorer) no usan aprendizaje profundo ni tienen interfaz web;
 los abiertos que sí lo usan (DeepLabCut y YOLO-Behaviour) tampoco ofrecen plataforma web
 ni clasifican las tres conductas de forma directa. De los de aprendizaje profundo,
 solo el 3D-RCNN clasifica las tres conductas, pero no tiene plataforma web ni reporta
