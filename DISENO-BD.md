@@ -221,7 +221,7 @@ Usuario ──registra──> Experimento
                                 └── Tanda    (fuerte · ordinal)    nCilindros ∈ {2,3,4}  (D-28)
                                       ├── Espécimen  (fuerte · numeroCilindro dentro de la tanda; sin número de rata, D-55)
                                       └── Video      (fuerte · sesión ∈ {Día 1, Día 2}, Día 1 opcional)
-                                                └── Análisis  (1,N — un video se puede reanalizar · pendiente P-08/D-03)
+                                                └── Análisis  (1,1 — un video, un análisis vigente · D-03/D-24)
 
      Observación (fuerte, asociativa) = Espécimen ──aparece en──> Video
            └── Intervalo (fuerte · minuto 1..5)
@@ -402,7 +402,7 @@ Hasta que ocurran esas dos revisiones, en los términos del método lo que exist
 | P-04 | ¿Una grabación puede mezclar ratas de dos grupos? | **Cerrada (3-sep):** no, siempre del mismo grupo |
 | P-02 | ¿La rata usa el mismo cilindro los dos días? | Si `numeroCilindro` vive en `ESPECIMEN` o en `OBSERVACION` |
 | P-05 | ¿Cómo llama el laboratorio a la «tanda»? | **Cerrada (3-sep):** el laboratorio no tiene palabra propia; llama «sesión» a cada grabación |
-| P-08 / D-03 | Al reanalizar un video, ¿se conservan ambos resultados o se reemplaza? | Ver la errata estructural de la sección 8. El laboratorio dijo que se queda con el último; falta cerrarlo formalmente |
+| P-08 / D-03 | Al reanalizar un video, ¿se conservan ambos resultados o se reemplaza? | **Cerrada (equipo, 2026-09-13):** el reanálisis reemplaza el resultado anterior (D-03); `VIDEO — ANALISIS` queda en (1,1) con `UNIQUE (idVideo)` (D-24) |
 | D-04 | ~~¿Cómo se garantiza que `numeroRata` no se repita dentro de su **grupo**, si `idGrupo` ya no vive en `ESPECIMEN`?~~ **Cerrada (equipo, 2026-09-13):** redundancia controlada — `idGrupo` reingresa a `ESPECIMEN` como columna redundante, con `UNIQUE (idGrupo, numeroRata)`. Solo en el esquema físico, no toca el grafo lógico. **Sin objeto desde D-55 (6-oct):** se quitó `numeroRata` y con ella esta redundancia | Falta decidir cómo mantener `idGrupo` sincronizado si una rata cambia de tanda (caso raro) |
 | D-05 | ~~¿El sistema permite correr dos veces la misma `CONFIGURACION` sobre el mismo video?~~ | **Sin objeto:** se disolvió con D-03 y, desde D-51, `CONFIGURACION` ya no existe |
 | D-06 | ~~El pipeline usa más de un modelo, pero `CONFIGURACION` solo guarda un `hashModelo`~~ | **Sin objeto desde D-51:** `MODELO` y `CONFIGURACION` se eliminaron |
@@ -480,21 +480,12 @@ Además de las de `CLAUDE.md`, que aplican siempre:
 
 ## 8. Pendientes conocidos en los artifacts
 
-### Errata estructural — sin resolver (P-08 / D-03)
+### Errata estructural — resuelta (P-08 / D-03)
 
-`OBSERVACION` cuelga de `VIDEO`, pero la cardinalidad Video–Análisis es (1,N): un video
-puede analizarse varias veces. Como `OBSERVACION` es única por el par (espécimen, video),
-**un reanálisis con resultado distinto no tiene dónde escribirse**, y desde una fila de
-`PRESENTA` no se puede saber qué análisis la produjo ni con qué nivel de clasificación.
-
-**Corrección propuesta:** que `OBSERVACION` referencie `idAnalisis` en lugar de `idVideo`,
-con unicidad sobre (espécimen, análisis). El video se alcanza por `ANALISIS → VIDEO`. No
-cambia el número de relaciones ni rompe BCNF.
-
-**No aplicar todavía:** el laboratorio ya dijo informalmente que se queda con el último
-análisis, lo que apuntaría a dejar el esquema como está — pero falta cerrarlo
-formalmente. El artifact lógico llama a este mismo pendiente **D-03**; es una sola
-decisión con dos nombres, no dos pendientes distintos.
+Resuelta por D-03 (equipo, 2026-09-13): al reanalizar un video, el resultado nuevo **reemplaza**
+al anterior. Por eso `VIDEO — ANALISIS` queda en (1,1), reforzado con `UNIQUE (idVideo)` (D-24), y
+`OBSERVACION` sigue colgando de `VIDEO` sin cambios. P-08 y D-03 eran una sola decisión con dos
+nombres. Si D-60 (el usuario puede reiniciar el análisis) se aplica, hay que revisar esta nota.
 
 ### Ya corregido — `GRUPO.tratamiento` sin nulo
 

@@ -143,12 +143,11 @@ entity USUARIO {
   cambioRequerido : boolean
 }
 note bottom of USUARIO
-  D-10: activo evita el DELETE. Contraseña con
-  bcrypt + sal (RNF-05, ya resuelto en el .tex).
-  D-25 (15-sep): cambioRequerido obliga a cambiar la
+  El usuario no se borra: se da de baja con la
+  columna activo. La contraseña se guarda con bcrypt
+  y sal (RNF-05). cambioRequerido obliga a cambiar la
   contraseña temporal en el primer ingreso (RF-05,
-  RF-07, CU-12) - mismo patron que activo, la regla
-  se declara en la BD en vez de vivir solo en la app.
+  RF-07, CU-12).
 end note
 
 entity EXPERIMENTO {
@@ -190,10 +189,11 @@ entity ESPECIMEN {
   UK (idTanda, numeroCilindro)
 }
 note bottom of ESPECIMEN
-  D-55: el espécimen se distingue por su posicion en el
-  cuadro (numeroCilindro). No se guarda el numero de rata
-  del laboratorio: ya no hay comparacion Dia 1 contra Dia 2
-  por rata (D-44) y el reporte solo necesita tanda y posicion.
+  El espécimen se distingue por su posición en el
+  encuadre (numeroCilindro). No se guarda el número con
+  que el laboratorio identifica a cada espécimen: no hay
+  comparación entre el Día 1 y el Día 2 por espécimen, y
+  el reporte solo necesita tanda y posición.
 end note
 
 entity VIDEO {
@@ -211,26 +211,22 @@ entity VIDEO {
 entity ANALISIS {
   * idAnalisis : integer <<PK>>
   --
-  idVideo : integer <<FK>> <<UK>> (D-24)
+  idVideo : integer <<FK>> <<UK>>
   estado : estado_analisis
   etapa : etapa_analisis
   nivelClasif : nivel_clasif_analisis
   fechaAnalisis : timestamptz
-  rutaDiagnostico : text (nulo salvo error) · D-23
+  rutaDiagnostico : text (nulo salvo error)
 }
 note bottom of ANALISIS
-  D-24 (15-sep): idVideo UNIQUE fuerza la cardinalidad
-  (1,1) de D-03 - un video, un analisis vigente, sin
-  depender de que la aplicacion borre antes de insertar.
-  D-23: rutaDiagnostico solo se llena si estado='error',
-  mismo patron que VIDEO.archivo. Aplicado aqui por
-  primera vez a peticion del usuario (15-sep).
-  D-47 (4-oct): sin columna confianza; el detector
-  actual no produce ningun valor de confianza.
-  D-51 (5-oct): sin idConfig; el modelo y el umbral
+  idVideo es único: un video tiene un solo análisis
+  vigente, y el reanálisis reemplaza al anterior.
+  rutaDiagnostico solo se llena si el estado es
+  «error», igual que VIDEO.archivo. No hay columna de
+  confianza ni de configuración: el modelo y el umbral
   son constantes del pipeline. Los recuadros de los
   tubos van en un archivo cuyo nombre sale del id del
-  analisis; no se guarda su ruta (D-42).
+  análisis; no se guarda su ruta.
 end note
 
 entity OBSERVACION {
@@ -274,25 +270,24 @@ entity SEGUNDO {
   conducta : varchar(n) <<FK>> (nulo = "no se ve")
   origen : origen_segundo
   ..
-  CK segundo BETWEEN 1 AND 300
+  CK segundo entre 1 y 300
 }
 note bottom of SEGUNDO
-  D-35: una fila por especimen y por segundo analizado.
+  Una fila por espécimen y por segundo analizado.
   Es lo que el usuario revisa y corrige al terminar el
   analisis. origen dice si la conducta la puso la maquina
   o la reviso el usuario. conducta es nula si el sistema
-  no clasifico el segundo (D-53). Hay hasta 300 segundos por
+  no clasificó el segundo. Hay hasta 300 segundos por
   observacion, los ultimos 300 del video; si el video dura
-  menos, se guardan todos (D-54: maximo, sin minimo).
+  menos, se guardan todos (máximo 300, sin mínimo).
 end note
 
 entity ADMINISTRADOR {
   * idInstitucional : varchar(10) <<PK>> <<FK>>
 }
 note bottom of ADMINISTRADOR
-  D-08: no es un tipo de usuario aparte, es subtipo de
-  USUARIO. Su PK es la misma FK, asi que PostgreSQL la
-  indexa sola al declarar el PRIMARY KEY.
+  No es un tipo de usuario aparte, es subtipo de
+  USUARIO. Su llave primaria es la misma llave foránea.
 end note
 
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -336,7 +331,7 @@ GRUPO          "1" --o "1..*" TANDA                     : idGrupo
 TANDA          "1" --o "2..4" ESPECIMEN                 : idTanda
 TANDA          "1" --o "1..2" VIDEO                     : idTanda
 
-VIDEO          "1" --o "1"    ANALISIS                  : idVideo <color:#8A5A0B>· UK, D-24</color>
+VIDEO          "1" --o "1"    ANALISIS                  : idVideo <color:#8A5A0B>· única</color>
 VIDEO          "1" --o "2..4" OBSERVACION                : idVideo
 
 ESPECIMEN      "1" --o "1..2" OBSERVACION                : idEspecimen

@@ -76,7 +76,7 @@ rectangle "Docker: frontend" as C_FE #E3F2FD {
 ' ═══════════════════════════════════════════════════════════
 
 rectangle "Docker: backend" as C_BE #E8F8F5 {
-  rectangle "Flask + SQLAlchemy + Flask-JWT-Extended\n\nAPI REST (JSON)\nAutenticacion con JWT\nValidacion de archivos .mp4\nEncolado de tareas de analisis" as BE #F0FBF8
+  rectangle "Flask + SQLAlchemy + Flask-JWT-Extended\n\nAPI REST (JSON)\nAutenticacion con JWT\nValidación de archivos .mp4 y .mov\nEncolado de tareas de analisis" as BE #F0FBF8
 }
 
 ' ═══════════════════════════════════════════════════════════
@@ -84,7 +84,7 @@ rectangle "Docker: backend" as C_BE #E8F8F5 {
 ' ═══════════════════════════════════════════════════════════
 
 rectangle "Docker: worker" as C_WK #FEF9E7 {
-  rectangle "Pipeline de analisis conductual\n\nOpenCV         Preprocesamiento y correccion CLAHE\nOpenCV         Localizacion de los cilindros\nscikit-learn   Clasificador sobre rasgos\nPyTorch        R(2+1)D-18 (en evaluacion)" as WK #FFFEF2
+  rectangle "Pipeline de analisis conductual\n\nOpenCV         Preprocesamiento (registro de cámara y modelo de fondo)\nOpenCV         Localizacion de los cilindros\nscikit-learn   Clasificador sobre rasgos\nPyTorch        R(2+1)D-18 (en evaluacion)" as WK #FFFEF2
 }
 
 ' ═══════════════════════════════════════════════════════════
@@ -98,7 +98,7 @@ rectangle "Capa de datos" as DATOS #F4F6F7 {
   }
 
   rectangle "Volumen compartido" as C_FS #EAEDED {
-    folder "Sistema de archivos local\n\nVideos .mp4 originales\nVideos anotados  _tracked.mp4\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF" as FS
+    folder "Sistema de archivos local\n\nVideos originales (.mp4 y .mov)\nVideos anotados\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF" as FS
   }
 
   rectangle "Volumen de modelos" as C_MD #F5EEF8 {
@@ -113,7 +113,7 @@ rectangle "Capa de datos" as DATOS #F4F6F7 {
 
 INV  -down->  FE  : "HTTPS"
 FE   -down->  BE  : "API REST\n(JSON + JWT)"
-BE   -down->  DB  : "encola tarea de analisis\n(INSERT, estado = en cola)"
+BE   -down->  DB  : "encola tarea de analisis\n(estado «en cola»)"
 WK   -->      DB  : "toma la siguiente tarea\n(polling periodico)\ny escribe los resultados"
 WK   -->      FS  : "guarda archivos\ngenerados"
 BE   -->      FS  : "lee y sirve archivos\nal frontend"

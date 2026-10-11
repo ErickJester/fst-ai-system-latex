@@ -76,7 +76,7 @@ loop cada 3 a 5 segundos, mientras haya análisis en cola o procesando
   ui -> api: consulta el estado de los análisis del experimento
   api -> db: busca los análisis de este experimento\n(vía sus grupos, tandas y videos)
   db --> api: cada análisis, con su estado y su etapa
-  api -> api: calcula el porcentaje de avance de cada uno\nsegún su etapa: un tercio por etapa (D-22)
+  api -> api: calcula el porcentaje de avance de cada uno\nsegún su etapa: un tercio por etapa
   api --> ui: estado, etapa y porcentaje de cada análisis
   ui -> inv: actualiza la barra de progreso de cada video
 end
@@ -88,7 +88,7 @@ else algún análisis llegó a "error"
 
   inv -> ui: selecciona la descarga del reporte de diagnóstico
   ui -> api: pide el PDF de diagnóstico de este análisis
-  api -> db: busca la ruta guardada en ANALISIS.rutaDiagnostico (D-23)
+  api -> db: busca la ruta guardada del reporte de diagnóstico
 
   alt el Worker ya guardó la ruta del PDF
     db --> api: ruta del archivo

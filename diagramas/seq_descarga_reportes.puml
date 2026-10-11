@@ -65,7 +65,7 @@ alt no hay un reporte guardado en ese formato
   api -> api: genera el archivo con los datos actuales\n(ver nota)
   api -> fs: guarda el archivo generado
   api -> db: registra el reporte nuevo (ruta, formato, fecha de generación)
-else el reporte guardado es más viejo que el último análisis (D-21)
+else el reporte guardado es más viejo que el último análisis
   api -> api: regenera el archivo con los datos actuales\n(ver nota)
   api -> fs: reemplaza el archivo guardado
   api -> db: actualiza la ruta y la fecha de generación del reporte
@@ -78,7 +78,7 @@ note right of api
   por minuto, RF-19/RF-20/RF-22) más las estadísticas
   de grupo -- media, desviación estándar y varianza por
   conducta, entre los especímenes de cada uno de los
-  tres grupos del experimento (RF-31, adaptado: sin
+  grupos del experimento (RF-31, adaptado: sin
   cruzar experimentos, ver encabezado).
 
   PDF: resumen ejecutivo (RF-22), documento distinto

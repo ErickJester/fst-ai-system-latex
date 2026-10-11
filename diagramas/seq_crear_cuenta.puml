@@ -55,7 +55,7 @@ admin -> ui: entra al panel de administración
 note right of ui
   la sección de administración
   solo aparece si el usuario es
-  Administrador (D-12, ocultamiento
+  Administrador (ocultamiento
   en la interfaz) - no evita por sí
   sola el siguiente paso
 end note
@@ -86,7 +86,7 @@ else sí está en ADMINISTRADOR
     api -> api: envía correo al nuevo investigador\ncon sus credenciales de acceso inicial
     note right of api
       si el envío falla, la cuenta queda
-      creada igual (D-45): la contraseña
+      creada igual: la contraseña
       temporal se muestra en el paso siguiente
     end note
     api --> ui: cuenta creada, con la contraseña temporal

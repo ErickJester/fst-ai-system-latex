@@ -20,14 +20,14 @@ ISO/IEC~19501:2005 \cite{iso19501}, que define la notación y el metamodelo para
 diagramas de casos de uso, secuencias y clases. La estructura arquitectónica del
 sistema se documenta conforme a ISO/IEC/IEEE~42010:2011 \cite{iso42010}, norma que
 establece cómo describir una arquitectura de software mediante múltiples vistas
----estructural, de comportamiento y de despliegue--- que atienden las preocupaciones
+---estructural y de comportamiento--- que atienden las preocupaciones
 de los distintos actores del sistema.
 
 La decisión de diseño más importante fue separar el worker del backend en un proceso
 independiente. La opción más simple habría sido ejecutar el pipeline dentro del mismo
 servidor Flask, pero eso significa bloquear todas las peticiones HTTP mientras un video
 de 20 minutos se procesa. El worker resuelve ese problema a costa de mayor complejidad
-en el despliegue: hace falta una cola de tareas, un proceso adicional y comunicación
+de operación: hace falta una cola de tareas, un proceso adicional y comunicación
 entre procesos. Esa complejidad extra está justificada porque el laboratorio puede
 tener varios análisis en cola al mismo tiempo.
 
@@ -90,15 +90,14 @@ Las responsabilidades de cada componente son:
         en la base de datos.
 \end{itemize}
 
-La separación en contenedores cumple con el atributo de portabilidad de la
-ISO/IEC~25010:2011 \cite{iso25010}: el sistema puede desplegarse en cualquier
-equipo con Docker instalado sin dependencias adicionales. La separación entre worker
+La separación en contenedores empaqueta cada servicio con sus dependencias. La
+separación entre worker
 y backend también satisface el RF-12 y el RF-15 (análisis automático en segundo plano) y permite
 escalar el número de workers de forma independiente si el volumen de análisis aumenta.
 
 La Figura~\ref{fig:flujo_sistema} muestra el flujo funcional del sistema: cómo
 transita el video desde la carga hasta la generación de resultados, y cómo el ciclo
-de entrenamiento del modelo ---anotación experta, dataset y entrenamiento--- alimenta
+de entrenamiento del modelo ---clips etiquetados por el equipo, entrenamiento y evaluación--- alimenta
 al clasificador de conducta.
 
 \begin{figure}[H]
@@ -334,9 +333,9 @@ distintos estados.
 Los cilindros se graban en una sola toma lateral. La asignación de cada ROI a un
 espécimen usa su posición horizontal en el encuadre: se ordena de izquierda a
 derecha, produciendo una numeración consistente entre sesiones mientras el
-encuadre no cambie. Si el número de
-cilindros detectados es menor al esperado, el sistema reporta cuáles especímenes
-pudo procesar y cuáles no, en lugar de abortar el análisis completo.
+encuadre no cambie. Si no se
+encuentran los cilindros esperados de la tanda, el pipeline se detiene y genera el
+reporte de diagnóstico (ver RN-11); no se entregan resultados parciales.
 
 % -----------------------------------------------------------
 \section{Diseño de la base de datos}
@@ -2540,8 +2539,8 @@ perfil; el identificador institucional es de solo lectura.
 Lista de experimentos del laboratorio con grupos, especímenes, videos del Día~2,
 estado, responsable, retención y acceso al reporte (ver RN-08). Muestra un aviso
 cuando un video está a menos de 7~días de ser eliminado automáticamente (RF-24).
-Incluye filtros por estado y búsqueda por nombre o tratamiento. La eliminación de un
-experimento no está en esta lista sino en su detalle.
+Incluye filtros por estado y búsqueda por nombre o tratamiento. Cada experimento
+ofrece la opción de eliminarlo, con un aviso que pregunta si está seguro (ver RN-09).
 
 \begin{figure}[H]
 \centering
@@ -2565,8 +2564,8 @@ experimento no está en esta lista sino en su detalle.
 \subsection{Detalle de experimento y de grupo}
 
 El detalle de un experimento reúne sus grupos y el estado de cada tanda. Solo quien
-creó el experimento o un administrador puede eliminarlo, y la acción pide escribir el
-nombre del experimento y la contraseña (RF-27, RN-09). El detalle de un grupo muestra
+creó el experimento o un administrador puede eliminarlo, y la acción solo pide
+confirmar con un aviso de «¿está seguro?» (RF-27, RN-09), sin nombre ni contraseña. El detalle de un grupo muestra
 sus tandas, los especímenes de cada una con el cilindro que ocuparon y los videos de
 Día~1 y Día~2 con su estado.
 
