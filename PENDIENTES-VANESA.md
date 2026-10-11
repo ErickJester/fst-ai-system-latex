@@ -214,3 +214,9 @@ casos de uso:
 - **`cryan2005`** sigue citado en `04_analisis.tex` (RN, ~548).
 - **F1 «por conducta»:** `CLAUDE.md` todavía dice «por clase» (OE-5, RNF-02).
 - **Anglicismos y TT1/TT2** en los caps. 4 y 5 (TT-08, TT-09, TT-05).
+
+- ✅ **Registro en `errores/preguntas-doctor.md`:** D-57 a D-65 (revisión, copia H.264, intervención
+  humana, reinicio del análisis, Administrador activo, despliegue, eliminar experimento,
+  validación del video, F1/tiempo/título). **D-57 a D-60 no están aplicados** a RN-04, RN-14, RF-32
+  ni al cap. 5: cambian el diseño de la revisión y hay que decidir cómo antes de propagarlos.
+- ✅ RN-16 (Administrador activo) agregada al cap. 4 y referida en CU-11 y CU-17.
