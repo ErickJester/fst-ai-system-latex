@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flujo del sistema</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+html,body{height:100%;margin:0;background:#faf9f5}
+body{overflow-x:auto;overflow-y:hidden}
+svg{display:block;height:100vh;width:auto}
+</style></head><body><svg viewBox="0 10 1700 710" role="img" aria-labelledby="fl-title fl-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="fl-title">Flujo general del sistema</title>
+<desc id="fl-desc">Del video subido por el investigador al análisis en cola, las tres etapas del pipeline, los resultados y los reportes, con el entrenamiento del modelo fuera de línea.</desc>
+<defs><marker id="f-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#444" stroke-width="1.2"/></marker></defs>
+<style>
+.a{font:400 9px 'Geist Mono',monospace;fill:#1a1a1a}
+.nm{font:600 12px Geist,sans-serif;fill:#1a1a1a}
+.st{font:400 8px 'Geist Mono',monospace;fill:#6b6b6b;letter-spacing:.06em}
+.r{font:400 8px 'Geist Mono',monospace;fill:#6b6b6b;letter-spacing:.06em}
+.lg text{font:400 9px 'Geist Mono',monospace;fill:#6b6b6b}
+</style>
+<rect x="500" y="24" width="1160" height="136" rx="8" fill="#f1eee5" stroke="#6b6b6b" stroke-dasharray="6,4"/>
+<text x="514" y="42" class="st">ENTRENAMIENTO Y EVALUACIÓN · FUERA DE LÍNEA, ANTES DE DESPLEGAR · NO ES PARTE DEL FLUJO POR VIDEO</text>
+<rect x="520" y="56" width="170" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="605.0" y="76" text-anchor="middle" class="nm">Videos del laboratorio</text>
+<text x="605.0" y="94" text-anchor="middle" class="a">sin sus anotaciones</text>
+<text x="605.0" y="108" text-anchor="middle" class="a">manuales</text>
+<rect x="730" y="56" width="200" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="830.0" y="76" text-anchor="middle" class="nm">Etiquetado por el equipo</text>
+<text x="830.0" y="94" text-anchor="middle" class="a">el etiquetador propone,</text>
+<text x="830.0" y="108" text-anchor="middle" class="a">el equipo revisa y corrige</text>
+<rect x="970" y="56" width="170" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1055.0" y="76" text-anchor="middle" class="nm">Entrenamiento</text>
+<text x="1055.0" y="94" text-anchor="middle" class="a">con los bloques</text>
+<text x="1055.0" y="108" text-anchor="middle" class="a">etiquetados</text>
+<rect x="1255" y="56" width="150" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1330.0" y="76" text-anchor="middle" class="nm">Modelo entrenado</text>
+<text x="1330.0" y="94" text-anchor="middle" class="a">en el volumen</text>
+<text x="1330.0" y="108" text-anchor="middle" class="a">de modelos</text>
+<rect x="1445" y="56" width="190" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1540.0" y="76" text-anchor="middle" class="nm">Evaluación</text>
+<text x="1540.0" y="94" text-anchor="middle" class="a">precisión, recall y F1</text>
+<text x="1540.0" y="108" text-anchor="middle" class="a">por conducta (provisional)</text>
+<path d="M690,86 L730,86" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
+<path d="M930,86 L970,86" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
+<path d="M1140,86 L1255,86" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
+<path d="M1405,86 L1445,86" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
+<rect x="40" y="282" width="170" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="125.0" y="302" text-anchor="middle" class="nm">Investigador</text>
+<text x="125.0" y="320" text-anchor="middle" class="a">sube el video</text>
+<text x="125.0" y="334" text-anchor="middle" class="a">del experimento</text>
+<rect x="250" y="282" width="190" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="345.0" y="302" text-anchor="middle" class="nm">Backend</text>
+<text x="345.0" y="320" text-anchor="middle" class="a">valida formato y orientación</text>
+<text x="345.0" y="334" text-anchor="middle" class="a">y guarda el video</text>
+<rect x="480" y="282" width="170" height="54" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="565.0" y="302" text-anchor="middle" class="nm">Se encola el análisis</text>
+<text x="565.0" y="320" text-anchor="middle" class="a">estado «en cola»</text>
+<rect x="690" y="282" width="170" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="775.0" y="302" text-anchor="middle" class="nm">Worker</text>
+<text x="775.0" y="320" text-anchor="middle" class="a">toma la tarea</text>
+<text x="775.0" y="334" text-anchor="middle" class="a">(consulta periódica)</text>
+<rect x="900" y="240" width="520" height="150" rx="8" fill="#f1eee5" stroke="#6b6b6b" stroke-dasharray="6,4"/>
+<text x="914" y="258" class="st">PIPELINE DE ANÁLISIS · DENTRO DEL WORKER</text>
+<rect x="915" y="282" width="150" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="990.0" y="302" text-anchor="middle" class="nm">Preprocesamiento</text>
+<text x="990.0" y="320" text-anchor="middle" class="a">registro de cámara</text>
+<text x="990.0" y="334" text-anchor="middle" class="a">y modelo de fondo</text>
+<rect x="1085" y="282" width="150" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1160.0" y="302" text-anchor="middle" class="nm">Cilindros</text>
+<text x="1160.0" y="320" text-anchor="middle" class="a">localiza de 2 a 4</text>
+<text x="1160.0" y="334" text-anchor="middle" class="a">tubos por video</text>
+<rect x="1255" y="282" width="150" height="68" rx="6" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/>
+<text x="1330.0" y="302" text-anchor="middle" class="nm">Clasificación</text>
+<text x="1330.0" y="320" text-anchor="middle" class="a">conducta de cada</text>
+<text x="1330.0" y="334" text-anchor="middle" class="a">segundo, con el modelo</text>
+<path d="M210,326 L250,326" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
+<path d="M440,326 L480,326" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
+<path d="M650,326 L690,326" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
+<path d="M860,326 L915,326" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
+<path d="M1065,326 L1085,326" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
+<path d="M1235,326 L1255,326" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
+<path d="M1330,124 L1330,282" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
+<rect x="1284" y="191" width="91" height="11" fill="#faf9f5"/><text x="1330" y="200" text-anchor="middle" class="r">MODELO ENTRENADO</text>
+<rect x="915" y="440" width="290" height="82" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1060.0" y="460" text-anchor="middle" class="nm">Si falla</text>
+<text x="1060.0" y="478" text-anchor="middle" class="a">el video no se abre o no se encuentran</text>
+<text x="1060.0" y="492" text-anchor="middle" class="a">los cilindros: el análisis pasa a «error»</text>
+<text x="1060.0" y="506" text-anchor="middle" class="a">con reporte de diagnóstico y aviso</text>
+<path d="M1065,390 L1065,440" fill="none" stroke="#6b6b6b" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#f-arr)"/>
+<rect x="1083" y="411" width="34" height="11" fill="#faf9f5"/><text x="1100" y="420" text-anchor="middle" class="r">FALLA</text>
+<rect x="1235" y="440" width="190" height="82" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1330.0" y="460" text-anchor="middle" class="nm">Resultados</text>
+<text x="1330.0" y="478" text-anchor="middle" class="a">conducta de cada segundo,</text>
+<text x="1330.0" y="492" text-anchor="middle" class="a">tiempos por minuto,</text>
+<text x="1330.0" y="506" text-anchor="middle" class="a">video anotado</text>
+<path d="M1330,390 L1330,440" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
+<rect x="1366" y="411" width="34" height="11" fill="#faf9f5"/><text x="1370" y="420" text-anchor="start" class="r">ÉXITO</text>
+<rect x="1235" y="580" width="190" height="82" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1330.0" y="600" text-anchor="middle" class="nm">Investigador</text>
+<text x="1330.0" y="618" text-anchor="middle" class="a">consulta y revisa segundo</text>
+<text x="1330.0" y="632" text-anchor="middle" class="a">a segundo; los totales</text>
+<text x="1330.0" y="646" text-anchor="middle" class="a">por minuto se recalculan</text>
+<path d="M1330,522 L1330,580" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
+<rect x="985" y="580" width="190" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1080.0" y="600" text-anchor="middle" class="nm">Reportes</text>
+<text x="1080.0" y="618" text-anchor="middle" class="a">descarga en PDF,</text>
+<text x="1080.0" y="632" text-anchor="middle" class="a">CSV o XLSX</text>
+<path d="M1235,624 L1175,624" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
+<g transform="translate(40,690)" class="lg">
+<line x1="0" y1="0" x2="28" y2="0" stroke="#1a1a1a"/><path d="M22,-4 L28,0 L22,4" fill="none" stroke="#1a1a1a"/><text x="38" y="3">FLUJO NORMAL</text>
+<line x1="160" y1="0" x2="188" y2="0" stroke="#6b6b6b" stroke-dasharray="4,3"/><path d="M182,-4 L188,0 L182,4" fill="none" stroke="#6b6b6b"/><text x="198" y="3">FLUJO DE FALLA</text>
+<rect x="340" y="-8" width="22" height="14" rx="3" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/><text x="370" y="3">CLASIFICACIÓN: LA ÚNICA ETAPA QUE USA EL MODELO</text>
+</g>
+</svg></body></html>
