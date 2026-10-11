@@ -465,7 +465,7 @@ ajustarse en la fase de validación (TT2).
         segundo y detecta conductas breves de unos 2~segundos, que es justo lo que el
         análisis a ojo no alcanza a registrar. El criterio manual se conserva como
         referencia: los resultados también se agrupan en bloques de 5~segundos, con la
-        conducta del último segundo de cada bloque, para compararlos con el
+        conducta que más segundos ocupó en cada bloque, para compararlos con el
         análisis manual (ver RF-18 y RN-15).
 
   \item \textbf{Período de retención de videos: 30~días.}
@@ -595,19 +595,24 @@ RN-14 & Solo se puede revisar un análisis completado. Al revisar, el usuario co
       & La revisión humana corrige al clasificador sin sustituirlo. Ver RF-32. \\
 \hline
 RN-15 & Los resultados también se agrupan en bloques de 5~segundos para compararlos
-        con el análisis manual. La conducta de cada bloque es la del último de sus
-        cinco segundos, tomada de la conducta ya asignada a ese segundo; el cálculo
-        no vuelve a usar el clasificador. Si ese segundo es conducta activa, el
-        bloque es conducta activa; si es «no se ve», el bloque se muestra como
-        conducta activa y se marca en pantalla y en el PDF final. Los bloques se
-        calculan al mostrarse y no se guardan; dentro de cada uno se siguen viendo
-        sus cinco segundos.
-      & Registrar la conducta del espécimen al final de cada periodo de 5~segundos es
-        la técnica de muestreo que describen Detke et~al.\ \cite{detke1995} para la
-        prueba de nado forzado en la rata, y el laboratorio la ha usado en parte de
-        sus análisis manuales. Como el clasificador decide cada segundo con una
-        ventana de 4~s a su alrededor, la conducta de ese segundo ya resume su
-        contexto. Ver RF-18, RN-13 y la sección~\ref{sec:umbrales}. \\
+        con el análisis manual. La conducta de cada bloque es la que ocupa más de sus
+        cinco segundos, tomada de la conducta ya asignada a cada segundo; el cálculo
+        no vuelve a usar el clasificador. Si nado activo y escalamiento empatan, el
+        bloque es conducta activa; con dos segundos de inmovilidad y dos de nado
+        activo decide el quinto, y tanto escalamiento como «no se ve» dan conducta
+        activa. Un bloque cuyos cinco segundos son «no se ve» se muestra como
+        conducta activa. Los fragmentos «no se ve» se marcan en pantalla y en el PDF
+        final. Los bloques se calculan al mostrarse y no se guardan; dentro de cada
+        uno se siguen viendo sus cinco segundos.
+      & Es la técnica de muestreo por intervalos de Detke et~al.\ \cite{detke1995},
+        tal como la describen Craft et~al.\ \cite{craft2010} para la prueba de nado
+        forzado: la sesión se divide en periodos de 5~s y, al terminar
+        cada uno, se anota la conducta predominante del periodo; el porcentaje de
+        cada conducta es el de periodos en que fue la predominante. El laboratorio
+        la ha usado en parte de sus análisis manuales. Aquí la conducta predominante
+        sale de los segundos ya clasificados, no de la apreciación de un observador.
+        Los desempates son criterios propios del sistema; esos autores no los
+        tratan. Ver RF-18, RN-13 y la sección~\ref{sec:umbrales}. \\
 \hline
 
 \end{longtable}

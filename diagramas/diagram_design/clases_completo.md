@@ -94,8 +94,8 @@ documento no tiene.
 **`Observacion` no tiene atributos, y es correcto:** en el grafo esa tabla solo tiene su
 número y los enlaces al espécimen y al video. Representa «un espécimen en un video». Tiene
 una sola función, `calcularBloques()`, que agrupa sus segundos en bloques de 5 s: la
-conducta del bloque es la de su último segundo, como en el muestreo cada 5 s de Detke
-et al. (1995) (RN-15, RF-18). Los bloques se calculan al mostrarse y no se guardan en la
+conducta del bloque es la que ocupa más de sus cinco segundos, como en el muestreo por
+intervalos de 5 s de Detke et al. (1995), descrito por Craft et al. (2010) (RN-15, RF-18). Los bloques se calculan al mostrarse y no se guardan en la
 base de datos.
 
 Los **métodos** no tienen contraparte en el grafo (es esquema de datos); se copiaron de
