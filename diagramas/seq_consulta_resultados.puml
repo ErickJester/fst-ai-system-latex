@@ -61,7 +61,7 @@ database "Base de datos" as db
 
 inv -> ui: abre resultados del experimento\n(desde el dashboard o la pantalla de progreso)
 ui -> api: pide la comparación entre grupos
-api -> db: busca los tres grupos del experimento
+api -> db: busca los grupos del experimento
 
 db --> api: grupos (control, referencia, tratamiento)
 
@@ -71,28 +71,25 @@ loop por cada grupo
 
   alt el espécimen ya tiene su Día 2 analizado
     api -> db: suma los segundos por conducta\nde los 5 intervalos de esa observación\ny lee el nivel de clasificación de su análisis
-    db --> api: segundos de nado activo, inmovilidad y escalamiento,\ny el nivel ("preciso" o "agrupado")
+    db --> api: segundos de nado activo, inmovilidad, escalamiento y conducta activa,\ny el nivel ("preciso" o "agrupado")
   else el Día 2 de ese espécimen no tiene resultado\n(análisis en cola, procesando, con error, o sin subir)
     api -> api: marca al espécimen como dato faltante\npara este grupo
   end
 end
 
-api -> api: promedia los segundos por conducta\nentre los especímenes analizados de cada grupo\n(no se suman, para que el tamaño del grupo\nno distorsione la comparación -- Q-E)
+api -> api: promedia los segundos por conducta\nentre los especímenes analizados de cada grupo\n(no se suman, para que el tamaño del grupo\nno distorsione la comparación)
 
-alt los especímenes de un grupo no coinciden en el nivel de clasificación\n("preciso" y "agrupado" mezclados)
-  api -> api: separa el resultado por nivel de clasificación\nen vez de sumarlos juntos
-  api --> ui: comparación entre grupos, con aviso de nivel mixto
-else todos los especímenes analizados están en "agrupado"
-  api --> ui: comparación entre grupos en dos conductas,\ncon aviso de nivel "agrupado"
-else todos los especímenes analizados están en "preciso"
-  api --> ui: comparación entre grupos en tres conductas
+alt algún análisis es "agrupado" (parte de sus segundos quedó como conducta activa)
+  api --> ui: comparación entre grupos en las cuatro conductas,\ncon aviso de que parte de los segundos son conducta activa
+else todos los análisis están en "preciso"
+  api --> ui: comparación entre grupos en las cuatro conductas
 end
 
-ui -> inv: muestra la comparación de los tres grupos\n(solo Día 2), con los especímenes faltantes señalados\ny el nivel de clasificación de los resultados
+ui -> inv: muestra la comparación de los grupos\n(solo Día 2), con los especímenes faltantes señalados\ny el nivel de clasificación de los resultados
 note right of ui
-  El nivel solo sirve para avisar (D-41):
-  "agrupado" significa que nado activo y
-  escalamiento se juntan en "conducta activa"
+  El nivel solo sirve para avisar:
+  "agrupado" significa que al menos un segundo
+  del análisis quedó como "conducta activa"
 end note
 inv -> ui: puede pedir el reporte descargable (ver CU-10)
 

@@ -97,11 +97,11 @@ Marca aquí lo que termines (`✅`, fecha). Este archivo es solo tuyo: Erick no 
 
 | # | Prioridad | Dónde | Qué hacer |
 |---|-----------|-------|-----------|
-| ✅ A-14 (5-oct) | 🔴 | `portada.tex:73`, `documento_tecnico.tex:32` | Fecha «Mayo 2026» → la de entrega. Unificar los nombres entre los dos archivos (acentos y orden de apellidos: «Ángel Alí» contra «Angel Ali») |
+| ⏳ A-14 (reabierto 11-oct: los nombres sí se unificaron; la fecha sigue en «Mayo 2026» y falta la fecha de entrega) | 🔴 | `portada.tex:73`, `documento_tecnico.tex:32` | Fecha «Mayo 2026» → la de entrega. Unificar los nombres entre los dos archivos (acentos y orden de apellidos: «Ángel Alí» contra «Angel Ali») |
 | ✅ A-2b (5-oct) | 🔴 | `resumen.tex:7` | Mismo cambio que A-2: tres analistas, se triplica |
 | ✅ M-4 (5-oct) | 🟡 | `resumen.tex:4` | «entre una y dos horas» → «entre una hora y media y dos horas» (como el cap. 1); expandir ISO e IEEE en su primera aparición |
 | ✅ L-4 (5-oct) | 🟢 | `referencias.bib:293` | Quitar el comentario sobrante «INSTRUCCIONES: Pegar estas entradas…» |
-| ✅ L-5 (5-oct) | 🟢 | `referencias.bib` | Quitar las entradas que nadie cita: `abadi2016`, `henriques2015`, `lauer2022_madlc`, `lukezic2017`, `zhang2022_bytetrack`, `bewley2016_sort`, `wojke2017_deepsort`. Antes busca cada clave en `chapters/`, `front/` y `back/` por si alguien la volvió a citar |
+| ✅ L-5 (5-oct; 11-oct: `zhang2022_bytetrack` se queda porque lo cita `chapters/06_desarrollo.tex`, que está fuera de `main.tex`) | 🟢 | `referencias.bib` | Quitar las entradas que nadie cita: `abadi2016`, `henriques2015`, `lauer2022_madlc`, `lukezic2017`, `zhang2022_bytetrack`, `bewley2016_sort`, `wojke2017_deepsort`. Antes busca cada clave en `chapters/`, `front/` y `back/` por si alguien la volvió a citar |
 | ✅ L-7 (6-oct) | 🟢 | `preamble.tex` (`biblatex`) | Que la bibliografía diga siempre lo mismo («et al.» o «y col.») en cualquier compilación |
 
 ## 5. Siglas, términos en inglés y normas (caps. 1–3 y preliminares)
@@ -237,3 +237,19 @@ Aplicado el 2026-10-11, primer bloque (hallazgos con fuente que decide):
 - ⏳ **Para Erick:** RF-09, RN-03 y RF-19 (el Día 1 no se analiza), R-03, RNF-10 y el volumen de la factibilidad
   (cap. 4); la pantalla de eliminar experimento y el apartado «Arquitectura» (cap. 5); la figura de arquitectura;
   `INSTRUCCIONES-WEB.md` R-03; `DISENO-BD.md` P-08; el glosario («colaborador clínico»).
+
+**Segundo bloque (11-oct), zona de Erick incluida por pedido de Vanesa:**
+
+- ✅ **Cap. 4:** RF-09 (el Día 1 no se analiza; 300 s es un máximo), RF-19 («por espécimen»), RF-27 y RN-09 (eliminar
+  desde el *dashboard* o el detalle, solo aviso), RN-10 (extensión en la interfaz; orientación y reproducibilidad en el
+  servidor), RNF-03 y RNF-10 (sin despliegue), R-03 (sin registros del laboratorio), y las menciones de despliegue y el
+  volumen de la factibilidad.
+- ✅ **Cap. 5:** «anotación experta» (línea 101), procesamiento parcial de cilindros (todo o nada), apartado «Arquitectura»
+  y portabilidad (sin despliegue), pantalla de eliminar experimento (sin nombre ni contraseña).
+- ✅ **`INSTRUCCIONES-WEB.md`** (R-03 y ruta de subida) y **`DISENO-BD.md`** (P-08/D-03 cerrada).
+- ✅ **`.puml`** (fuente de las figuras): arquitectura (sin CLAHE, `_tracked`, solo `.mp4` ni SQL), esquema físico (sin
+  `D-xx`, SQL ni «rata»), `estados_analisis`, `seq_consulta_progreso`, `seq_consulta_resultados` (cuatro conductas),
+  `seq_crear_cuenta`, `seq_descarga_reportes` y `flujo_general`.
+- ⏳ **PNG sin regenerar:** las figuras de `figures/mermaid/` y `diagramas/clases.png` siguen mostrando lo anterior hasta
+  regenerarlas con PlantUML (no hay `plantuml.jar` en este equipo).
+- ⏳ **Mockups** `experimento` y `experimentos` (`figures/mockups/v2/`): hay que revisar que no pidan nombre y contraseña.

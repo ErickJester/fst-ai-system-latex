@@ -382,7 +382,7 @@ Reglas generales:
 | GET | `/experiments` | Lista todos los experimentos del laboratorio | Investigador |
 | POST | `/experiments` | Crea experimento (nombre único, fecha, notas opcionales) | Investigador |
 | GET | `/experiments/{id}` | Detalle y estado del experimento | Investigador |
-| POST | `/experiments/{id}/groups/{grupo}/videos` | Sube un video (Día 1 o Día 2) a una tanda del grupo; crea la tanda si no existe y encola el análisis | Investigador |
+| POST | `/experiments/{id}/groups/{grupo}/videos` | Sube un video (Día 1 o Día 2) a una tanda del grupo; crea la tanda si no existe y, si es el Día 2, encola el análisis | Investigador |
 | GET | `/experiments/{id}/status` | Progreso de los análisis en porcentaje | Investigador |
 | GET | `/experiments/{id}/results` | Resultados por espécimen y conducta | Investigador |
 | GET | `/experiments/{id}/results/byminute` | Desglose por minuto | Investigador |
@@ -421,7 +421,7 @@ Estos nombres los propone este documento; confírmalos con el usuario:
 |---|---|
 | R-01 | Credenciales incorrectas: mensaje genérico, sin decir si falló el correo o la contraseña. |
 | R-02 | Un video pertenece a exactamente una tanda. No se reutiliza en otra. |
-| R-03 | Una tanda tiene como máximo 2 videos: Día 1 (20 min) y Día 2 (5 min). Ambos son opcionales individualmente. El Día 1 solo se analiza (sus primeros 5 min) si la tanda es del grupo **control**. |
+| R-03 | Una tanda tiene como máximo 2 videos: Día 1 (20 min) y Día 2 (5 min). Ambos son opcionales individualmente. Solo el Día 2 se analiza; el Día 1 solo confirma que existe el video de habituación (D-54). |
 | R-04 | El análisis lo inicia el sistema solo. El investigador **no puede** iniciar, pausar, cancelar ni reiniciar un análisis. No pongas botón de cancelar ni de reiniciar. Lo que sí puede hacer, **cuando el análisis termina**, es corregir las etiquetas por segundo (R-14). |
 | R-05 | Los videos se borran 30 días después de un análisis exitoso. Irreversible. Aviso con 7 días o más de anticipación. |
 | R-06 | Resultados y reportes se conservan para siempre, aunque el video ya no exista. |

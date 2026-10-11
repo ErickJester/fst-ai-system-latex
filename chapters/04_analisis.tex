@@ -103,11 +103,11 @@ RF-08 & Carga de video
 \hline
 RF-09 & Carga de video
       & El sistema debe permitir subir uno o dos videos por tanda: Día~1
-        (sesión de estrés, 20~min) y Día~2 (sesión post-tratamiento, 5~min). Ambos
-        son opcionales individualmente. El pipeline analiza los últimos 300~segundos
-        del video de Día~2 (el resto se descarta); del video de Día~1 analiza
-        únicamente los primeros 5~minutos y solo cuando la tanda pertenece al grupo
-        control (ver RN-03). Al subir el
+        (sesión de habituación, 20~min) y Día~2 (sesión post-tratamiento, 5~min). Ambos
+        son opcionales individualmente. El pipeline analiza, como máximo, los últimos
+        300~segundos del video de Día~2 (si dura menos, lo analiza completo; el resto
+        se descarta). El video de Día~1 solo confirma que la sesión de habituación
+        existe: no se analiza (ver RN-03). Al subir el
         primer video de una tanda nueva, el investigador indica el grupo y el
         tratamiento; si el nombre coincide con un grupo ya registrado en el mismo
         experimento, el sistema sugiere la siguiente tanda y pide confirmación
@@ -186,7 +186,7 @@ RF-18 & Análisis conductual
 % ── Resultados ─────────────────────────────────────────────
 RF-19 & Resultados
       & La pantalla de resultados debe mostrar el tiempo total en segundos y el
-        porcentaje de cada conducta por espécimen y por sesión, en una tabla
+        porcentaje de cada conducta por espécimen, en una tabla
         descargable.
       & Alta & Investigador \\
 \hline
@@ -246,8 +246,8 @@ RF-26 & Dashboard
 \hline
 RF-27 & Dashboard
       & El investigador debe poder eliminar un experimento propio desde el
-        dashboard; el Administrador puede eliminar cualquiera. La acción es
-        permanente e irreversible y requiere confirmación explícita (ver RN-09).
+        dashboard o desde su detalle; el Administrador puede eliminar cualquiera. La acción es
+        permanente e irreversible y requiere un aviso de confirmación (ver RN-09).
       & Media & Investigador / Admin \\
 \hline
 
@@ -348,7 +348,7 @@ RNF-03 & Disponibilidad
        & El sistema debe estar disponible las 24 horas del día, los 7 días de la
          semana, para permitir que los investigadores dejen análisis corriendo fuera
          del horario laboral.
-       & $\geq 95$\,\% de disponibilidad mensual medida en el entorno de despliegue. \\
+       & $\geq 95$\,\% de disponibilidad mensual medida durante la operación. \\
 \hline
 RNF-04 & Seguridad
        & Solo los usuarios autenticados pueden acceder al sistema. La autenticación
@@ -399,11 +399,10 @@ RNF-09 & Almacenamiento
          por falta de espacio. \\
 \hline
 RNF-10 & Portabilidad
-       & El sistema debe poder levantarse con Docker Compose en el servidor
-         institucional provisto por la ESCOM, sin dependencias adicionales en el
-         sistema anfitrión. Derivado del proceso de despliegue de la
-         ISO/IEC/IEEE~12207:2017 \cite{iso12207}.
-       & Despliegue documentado y verificado en al menos dos entornos distintos. \\
+       & El sistema debe poder empaquetarse con Docker Compose para ejecutarse igual
+         en cualquier equipo con Docker, sin dependencias adicionales en el sistema
+         anfitrión.
+       & Empaquetado verificado en al menos dos equipos distintos. \\
 \hline
 RNF-11 & Escalabilidad
        & El módulo de clasificación debe poder reconfigurarse para soportar
@@ -554,14 +553,14 @@ RN-08 & Todos los investigadores con cuenta activa pueden consultar los experime
       & Definido en entrevista de levantamiento. Ver RF-04, RNF-04, RF-30. \\
 \hline
 RN-09 & Borrar un experimento es permanente e irreversible: se eliminan el video,
-        los resultados y los reportes. El sistema requiere confirmación explícita
-        antes de ejecutarlo.
+        los resultados y los reportes. Antes de ejecutarlo, el sistema muestra un aviso
+        que pregunta si está seguro; no pide nombre ni contraseña.
       & Previene borrados accidentales. Ver RF-27. \\
 \hline
-RN-10 & El sistema rechaza cualquier archivo que no sea \texttt{.mp4} o
-        \texttt{.mov}, y cualquier video en vertical (grabado con la cámara girada),
-        antes de intentar subirlo al servidor. La validación de formato ocurre en el
-        cliente. Un video girado no se puede procesar.
+RN-10 & La interfaz rechaza cualquier archivo que no sea \texttt{.mp4} o
+        \texttt{.mov} antes de intentar subirlo al servidor. El servidor rechaza, al
+        recibirlo, cualquier video en vertical (grabado con la cámara girada) o que no
+        se pueda reproducir. Un video girado no se puede procesar.
       & Evita consumir recursos con archivos incompatibles. Los videos reales del
         laboratorio son \texttt{.mov}. Ver RF-08, RF-10. \\
 \hline
@@ -695,7 +694,7 @@ PyTorch \cite{paszke2019}
     & Framework de aprendizaje profundo para entrenamiento e inferencia de redes
       neuronales. Su biblioteca torchvision incluye la R(2+1)D-18 preentrenada.
     & Es el ecosistema de referencia para visión por computadora en Python.
-      Compatible con Docker para el despliegue. \\
+      Compatible con Docker para el empaquetado. \\
 \hline
 scikit-learn \cite{pedregosa2011}
     & Biblioteca de ML con clasificadores de \textit{gradient boosting}, métricas y
@@ -803,11 +802,12 @@ R-02 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
 
 % ---- NIVEL MEDIO (amarillo) ----
 R-03 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
-     & El laboratorio no proporciona los registros conductuales en el tiempo
-       necesario para el entrenamiento y validación del clasificador.
-     & Acordar un calendario de entrega de registros con el laboratorio al inicio
-       de la fase de implementación y preparar los materiales de anotación con
-       anticipación para aprovechar cada sesión con el Dr.\ Sandino. \\
+     & El laboratorio no confirma a tiempo qué técnica de cuantificación usa en sus
+       análisis manuales, por lo que no hay una referencia externa contra la cual
+       contrastar los bloques de 5~s.
+     & Etiquetar el conjunto de prueba propio con el etiquetador del equipo y
+       acordar con el laboratorio una sesión de contraste de los bloques de 5~s,
+       aprovechando las sesiones con el Dr.\ Sandino. \\
 \hline
 R-04 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
      & El tiempo de análisis de un video de 5~min supera lo que el laboratorio
@@ -877,7 +877,7 @@ corre en procesador, sin GPU. Para entrenar la red convolucional, si el laborato
 dispone de GPU, Google Colab ofrece hasta 12~horas de GPU por sesión de forma gratuita,
 lo que es suficiente para su ajuste fino.
 
-En cuanto al hardware para el despliegue, el sistema no requiere infraestructura
+En cuanto al hardware, el sistema no requiere infraestructura
 especializada: cualquier equipo con Docker instalado puede correr el prototipo, lo que
 elimina dependencias de hardware específico en el laboratorio.
 
@@ -902,8 +902,8 @@ cola de tareas asíncrona. Esa separación permite desarrollar y probar cada mó
 forma independiente y facilita la integración progresiva conforme avanza el desarrollo.
 
 La contenedorización con Docker garantiza que el sistema se comporta igual en el equipo
-de desarrollo, en el laboratorio y en cualquier servidor institucional, lo que elimina
-la clase más común de problemas de compatibilidad en el despliegue \cite{merkel2014}.
+de desarrollo y en el laboratorio, lo que elimina
+la clase más común de problemas de compatibilidad \cite{merkel2014}.
 
 \subsection{Factibilidad operativa}
 
@@ -924,9 +924,9 @@ debe requerir cero configuración técnica del lado del usuario. Cargar un video
 asignar grupos y descargar el reporte deben ser las únicas acciones necesarias.
 
 El laboratorio realiza experimentos de nado forzado (FST) sin un calendario fijo; en
-un semestre de actividad regular son del orden de 3 a 5, cada uno con tres grupos (control, referencia y tratamiento experimental) de entre
-6 y 8 especímenes cada uno. Cada experimento genera entre 6 y 9 videos de 5~min en
-el segundo día del protocolo (uno por tanda, con dos o tres tandas por grupo). El análisis de esos videos es el cuello de botella actual:
+un semestre de actividad regular son del orden de 3 a 4, cada uno con tres o más grupos (en promedio cuatro) de entre
+6 y 8 especímenes cada uno. Cada experimento genera alrededor de 8 videos de 5~min en
+el segundo día del protocolo (uno por tanda). El análisis de esos videos es el cuello de botella actual:
 anotarlos manualmente ocupa entre 1.5 y 2~h cada uno (con sus dos a cuatro
 especímenes), lo que convierte el análisis en
 una actividad que compite con el tiempo de investigación del laboratorio.
@@ -1055,7 +1055,7 @@ Insumos de soporte audiovisual (almacenamiento externo, adaptadores, cables)
     & \$2{,}000 \\
 \hline
 Formación técnica complementaria (acceso a cursos especializados de visión por
-      computadora y despliegue con Docker)
+      computadora y Docker)
     & \$2{,}000 \\
 \hline
 \textbf{Subtotal costos variables} & \textbf{\$5{,}500} \\
