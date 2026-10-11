@@ -317,7 +317,7 @@ análisis en curso (RN-04).
 
 Un experimento agrupa varias tandas, cada una con su propio análisis, así que
 el estado que ve el investigador en el dashboard (Figura~\ref{fig:estados_experimento})
-es un valor calculado, no una columna de \texttt{EXPERIMENTO} (ver CU-21, RF-23):
+es un valor calculado, no una columna de \texttt{EXPERIMENTO} (ver CU-22, RF-23):
 se deriva del conjunto de análisis de todas sus tandas, con precedencia
 error > procesando > en cola > completado cuando coexisten tandas en
 distintos estados.
@@ -1248,6 +1248,126 @@ caso de uso.
 
 \normalsize\bigskip
 
+\noindent\rule{\linewidth}{0.4pt}
+
+\noindent\textbf{Gestionar cuenta de usuario}
+
+\noindent\small
+\begin{tabular}{|p{2.8cm}|p{7.9cm}|p{4.0cm}|}
+\hline
+\textbf{Caso de Uso} & Gestionar cuenta de usuario & \textbf{Identificador:} CU-11 \\
+\hline
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Administrador} \\
+\hline
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
+\hline
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-05, RF-06, RF-07. Relacionado: CU-12 (Crear cuenta de usuario). Extendido por: CU-17 (Desactivar cuenta de usuario).} \\
+\hline
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-15).} \\
+\hline
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Cuenta creada, editada o desactivada; cambio reflejado en la base de datos.} \\
+\hline
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al Administrador crear, editar o desactivar cuentas de usuario desde el panel de administración.} \\
+\hline
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El Administrador accede a la lista de usuarios y ejecuta la acción deseada: alta con contraseña temporal, modificación de datos o desactivación. El sistema aplica el cambio en la base de datos y confirma la operación.} \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
+\hline
+\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
+\hline
+\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
+\hline
+1 & Administrador & Accede al panel de administración. \\
+\hline
+2 & Sistema & Muestra la lista de usuarios con nombre, correo, si es administrador o investigador, y estado. \\
+\hline
+3 & Administrador & Selecciona la acción: (a) crear una cuenta nueva (ver CU-12); (b) editar datos de cuenta existente; o (c) desactivar cuenta. \\
+\hline
+4 & Sistema & Aplica el cambio en la base de datos y muestra confirmación de la operación. \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
+\hline
+\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
+\hline
+4a & Intento de desactivar la última cuenta de Administrador activa: el sistema rechaza la acción y muestra advertencia de que debe existir al menos un Administrador activo en todo momento (ver RN-16). \\
+\hline
+4b & Al crear una cuenta nueva, el identificador institucional o el correo ya están registrados (ver CU-12): el sistema informa el conflicto y no crea el registro duplicado. \\
+\hline
+\end{tabular}
+
+\normalsize\bigskip
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\noindent\textbf{Crear cuenta de usuario}
+
+\noindent\small
+\begin{tabular}{|p{2.8cm}|p{7.9cm}|p{4.0cm}|}
+\hline
+\textbf{Caso de Uso} & Crear cuenta de usuario & \textbf{Identificador:} CU-12 \\
+\hline
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Administrador} \\
+\hline
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
+\hline
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-05, RF-07, RF-33. Relacionado: CU-11 (Gestionar cuenta de usuario).} \\
+\hline
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-15). No existe formulario público de registro (ver RF-07).} \\
+\hline
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Cuenta creada en la base de datos con contraseña temporal; investigador notificado por correo con sus credenciales de acceso inicial; la contraseña temporal se mostró una sola vez al Administrador como respaldo.} \\
+\hline
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al Administrador dar de alta una nueva cuenta de investigador. El único mecanismo de ingreso al sistema es que el Administrador cree la cuenta; no existe autoregistro.} \\
+\hline
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El Administrador introduce los datos del nuevo usuario (identificador institucional, nombre, apellidos y correo electrónico) y el sistema genera una contraseña temporal. En el primer acceso, el sistema obliga al investigador a cambiar la contraseña.} \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
+\hline
+\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
+\hline
+\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
+\hline
+1 & Administrador & Accede al panel de administración y selecciona «Crear cuenta». \\
+\hline
+2 & Sistema & Muestra el formulario de alta con campos: identificador institucional, nombre, apellidos y correo electrónico. \\
+\hline
+3 & Administrador & Completa los datos y confirma la creación. \\
+\hline
+4 & Sistema & Valida que ni el identificador institucional ni el correo estén registrados previamente. \\
+\hline
+5 & Sistema & Crea la cuenta con contraseña temporal generada automáticamente y la marca como «cambio obligatorio al primer ingreso». \\
+\hline
+6 & Sistema & Notifica al investigador por correo con sus credenciales de acceso inicial. \\
+\hline
+7 & Sistema & Muestra la contraseña temporal una sola vez al Administrador, como respaldo por si el correo no llega. \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
+\hline
+\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
+\hline
+4 & El identificador institucional o el correo ya están registrados: el sistema informa el conflicto y no crea el registro duplicado. El Administrador puede verificar el estado de la cuenta existente. \\
+\hline
+6 & El envío del correo falla: la cuenta queda creada de todos modos y el Administrador entrega la contraseña temporal que el sistema le muestra en el paso 7. \\
+\hline
+\end{tabular}
+
+\normalsize\bigskip
+
 \subsubsection*{Paquete 2: Gestión de experimentos y carga de video}
 
 \noindent\textbf{Registrar experimento}
@@ -1880,126 +2000,6 @@ caso de uso.
 \normalsize\bigskip
 
 \subsubsection*{Paquete 5: Dashboard, notificaciones y administración}
-
-\noindent\textbf{Gestionar cuenta de usuario}
-
-\noindent\small
-\begin{tabular}{|p{2.8cm}|p{7.9cm}|p{4.0cm}|}
-\hline
-\textbf{Caso de Uso} & Gestionar cuenta de usuario & \textbf{Identificador:} CU-11 \\
-\hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Administrador} \\
-\hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
-\hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-05, RF-06, RF-07. Relacionado: CU-12 (Crear cuenta de usuario). Extendido por: CU-17 (Desactivar cuenta de usuario).} \\
-\hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-15).} \\
-\hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Cuenta creada, editada o desactivada; cambio reflejado en la base de datos.} \\
-\hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al Administrador crear, editar o desactivar cuentas de usuario desde el panel de administración.} \\
-\hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El Administrador accede a la lista de usuarios y ejecuta la acción deseada: alta con contraseña temporal, modificación de datos o desactivación. El sistema aplica el cambio en la base de datos y confirma la operación.} \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
-\hline
-\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
-\hline
-\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
-\hline
-1 & Administrador & Accede al panel de administración. \\
-\hline
-2 & Sistema & Muestra la lista de usuarios con nombre, correo, si es administrador o investigador, y estado. \\
-\hline
-3 & Administrador & Selecciona la acción: (a) crear una cuenta nueva (ver CU-12); (b) editar datos de cuenta existente; o (c) desactivar cuenta. \\
-\hline
-4 & Sistema & Aplica el cambio en la base de datos y muestra confirmación de la operación. \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
-\hline
-\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
-\hline
-\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
-\hline
-4a & Intento de desactivar la última cuenta de Administrador activa: el sistema rechaza la acción y muestra advertencia de que debe existir al menos un Administrador activo en todo momento (ver RN-16). \\
-\hline
-4b & Al crear una cuenta nueva, el identificador institucional o el correo ya están registrados (ver CU-12): el sistema informa el conflicto y no crea el registro duplicado. \\
-\hline
-\end{tabular}
-
-\normalsize\bigskip
-
-\noindent\rule{\linewidth}{0.4pt}
-
-\noindent\textbf{Crear cuenta de usuario}
-
-\noindent\small
-\begin{tabular}{|p{2.8cm}|p{7.9cm}|p{4.0cm}|}
-\hline
-\textbf{Caso de Uso} & Crear cuenta de usuario & \textbf{Identificador:} CU-12 \\
-\hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Administrador} \\
-\hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
-\hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-05, RF-07, RF-33. Relacionado: CU-11 (Gestionar cuenta de usuario).} \\
-\hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-15). No existe formulario público de registro (ver RF-07).} \\
-\hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Cuenta creada en la base de datos con contraseña temporal; investigador notificado por correo con sus credenciales de acceso inicial; la contraseña temporal se mostró una sola vez al Administrador como respaldo.} \\
-\hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al Administrador dar de alta una nueva cuenta de investigador. El único mecanismo de ingreso al sistema es que el Administrador cree la cuenta; no existe autoregistro.} \\
-\hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El Administrador introduce los datos del nuevo usuario (identificador institucional, nombre, apellidos y correo electrónico) y el sistema genera una contraseña temporal. En el primer acceso, el sistema obliga al investigador a cambiar la contraseña.} \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
-\hline
-\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
-\hline
-\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
-\hline
-1 & Administrador & Accede al panel de administración y selecciona «Crear cuenta». \\
-\hline
-2 & Sistema & Muestra el formulario de alta con campos: identificador institucional, nombre, apellidos y correo electrónico. \\
-\hline
-3 & Administrador & Completa los datos y confirma la creación. \\
-\hline
-4 & Sistema & Valida que ni el identificador institucional ni el correo estén registrados previamente. \\
-\hline
-5 & Sistema & Crea la cuenta con contraseña temporal generada automáticamente y la marca como «cambio obligatorio al primer ingreso». \\
-\hline
-6 & Sistema & Notifica al investigador por correo con sus credenciales de acceso inicial. \\
-\hline
-7 & Sistema & Muestra la contraseña temporal una sola vez al Administrador, como respaldo por si el correo no llega. \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
-\hline
-\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
-\hline
-\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
-\hline
-4 & El identificador institucional o el correo ya están registrados: el sistema informa el conflicto y no crea el registro duplicado. El Administrador puede verificar el estado de la cuenta existente. \\
-\hline
-6 & El envío del correo falla: la cuenta queda creada de todos modos y el Administrador entrega la contraseña temporal que el sistema le muestra en el paso 7. \\
-\hline
-\end{tabular}
-
-\normalsize\bigskip
-
-\noindent\rule{\linewidth}{0.4pt}
 
 \noindent\textbf{Monitorear estado del sistema}
 

@@ -220,3 +220,20 @@ casos de uso:
   validación del video, F1/tiempo/título). **D-57 a D-60 no están aplicados** a RN-04, RN-14, RF-32
   ni al cap. 5: cambian el diseño de la revisión y hay que decidir cómo antes de propagarlos.
 - ✅ RN-16 (Administrador activo) agregada al cap. 4 y referida en CU-11 y CU-17.
+
+### Reauditoría del 11-oct (`hallazgosAgentes11oct-reauditoria/`)
+
+Aplicado el 2026-10-11, primer bloque (hallazgos con fuente que decide):
+
+- ✅ **Cap. 1:** C1-01 y C1-03 (el Día 1 solo es habituación; 300 s es un máximo), C1-02 (el control recibe placebo
+  el Día 2), C1-05, C1-08, C1-10, C1-11, C1-13, C1-14, C1-17, C1-19, C1-22 y TT-13; el resumen ya no dice que el
+  usuario «ejecuta» el análisis (C1-04).
+- ✅ **Cap. 2:** C2-02 (YOLO definido al primer uso), C2-03 (Redmon 2016 y Ren 2017 en `referencias.bib`), C2-07.
+- ✅ **Cap. 3 y abreviaturas:** C3-11 (*worker*, *clips*, *recall*), C3-12 (notación) y siglas ACID, GMM y VP.
+- ✅ **Casos de uso:** DF-12 (fichas CU-11 y CU-12 movidas al Paquete 1) y DF-14 (CU-22 en vez de CU-21).
+- ⏳ **Sin aplicar de ese bloque:** DF-13, DF-16 y DF-19 (`cu_*.puml`: acentos y el `<<extend>>` del desglose) porque
+  hay que regenerar los PNG y este equipo no tiene `plantuml.jar`; C3-09 (renombrar claves del `.bib`) y C3-13
+  (reestructurar la sección del clasificador del cap. 3), que cambian mucho texto sin una fuente que lo exija.
+- ⏳ **Para Erick:** RF-09, RN-03 y RF-19 (el Día 1 no se analiza), R-03, RNF-10 y el volumen de la factibilidad
+  (cap. 4); la pantalla de eliminar experimento y el apartado «Arquitectura» (cap. 5); la figura de arquitectura;
+  `INSTRUCCIONES-WEB.md` R-03; `DISENO-BD.md` P-08; el glosario («colaborador clínico»).

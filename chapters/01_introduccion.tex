@@ -2,8 +2,8 @@
 
 \section{Antecedentes}
 
-En el Laboratorio de Bioquímica Estructural de la Escuela Nacional de Medicina y
-Homeopatía, analizar un video de nado forzado funciona así: el investigador abre
+En el Laboratorio de Bioquímica Estructural, Sección de Posgrado, de la Escuela Nacional de
+Medicina y Homeopatía (ENMyH) del Instituto Politécnico Nacional (IPN), analizar un video de nado forzado funciona así: el investigador abre
 el video en la computadora, pone en marcha un cronómetro y lo repasa una vez por cada
 conducta (nado, inmovilidad, escalamiento) para un solo espécimen, anotando cuánto dura
 cada una. Al terminar, tiene una tabla con los tiempos de cada conducta para ese
@@ -49,8 +49,7 @@ ninguna tiene interfaz web. El trabajo más reciente con aprendizaje profundo
 distribuye como sistema que un laboratorio sin infraestructura especializada pueda
 instalar.
 
-El Laboratorio de Bioquímica Estructural, Sección de Posgrado, de la Escuela Nacional
-de Medicina y Homeopatía (ENMyH) del Instituto Politécnico Nacional (IPN), a cargo del Dr.\ César Augusto Sandino Reyes
+Ese laboratorio, a cargo del Dr.\ César Augusto Sandino Reyes
 López, investigador del posgrado de esa institución, corre experimentos de FST
 regularmente y tiene un acervo de videos que hoy se analizan a mano. Esa es la
 necesidad que origina este Trabajo Terminal.
@@ -72,9 +71,11 @@ es que cada grupo tenga de 6 a 8 especímenes, aunque no es una regla del protoc
 \textbf{Tipo de grupo} & \textbf{Intervención} \\
 \hline
 Control
-  & Sin tratamiento farmacológico. Los especímenes solo son sometidos al protocolo de nado
-    forzado (20~min el día~1, 5~min el día~2). Sus conductas establecen la línea base
-    contra la que se comparan los demás grupos. \\
+  & Recibe placebo (el vehículo, sin principio activo) el día~2; el día~1 nadie recibe
+    nada. Los tres grupos pasan por el mismo protocolo de nado forzado (20~min el día~1,
+    5~min el día~2), y el placebo hace que el estrés de la inyección sea igual en todos,
+    de modo que una diferencia con otro grupo no se atribuya al piquete. Sus conductas
+    establecen la línea base contra la que se comparan los demás grupos. \\
 \hline
 Referencia (fluoxetina)
   & Recibe fluoxetina, un antidepresivo de efecto conocido. Si el fármaco funciona, se
@@ -193,18 +194,18 @@ atributos de calidad de la norma ISO/IEC~25010:2011 \cite{iso25010}.
         supervisada más adecuados al problema.
   \item Documentar el protocolo experimental del laboratorio: qué conductas se anotan,
         cómo se graba, y qué características tienen los videos disponibles. Esto
-        requiere entrevistas con el equipo del Dr.\ Sandino y revisión de los
-        registros conductuales que éste proporcionará.
+        requiere entrevistas con el equipo del Dr.\ Sandino y revisión de la documentación
+        del protocolo y de los videos que el laboratorio proporcione.
   \item Diseñar la arquitectura del sistema conforme al proceso de diseño de software
         de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}, definiendo los módulos de carga
-        de videos, pipeline de análisis, base de datos y visualización de resultados.
+        de videos, \textit{pipeline} de análisis, base de datos y visualización de resultados.
   \item Implementar el módulo de análisis conductual con visión por computadora y un
         clasificador supervisado para las tres conductas del FST y la conducta activa.
   \item Evaluar el desempeño del clasificador de conductas con métricas de
         clasificación estándar (precisión, \textit{recall} y F1 por conducta) sobre un
         conjunto de prueba independiente.
   \item Cuantificar la reducción de tiempo de análisis respecto al proceso manual, y
-        dejar documentado qué tendría que cambiar en el pipeline si el laboratorio
+        dejar documentado qué tendría que cambiar en el \textit{pipeline} si el laboratorio
         quisiera aplicarlo a otro paradigma conductual.
 \end{enumerate}
 
@@ -231,13 +232,13 @@ resultado, con una variabilidad máxima de entre 5 y 10\,\%. La anotación manua
 de quién anota y de cómo interpreta cada transición entre conductas; un sistema
 automatizado aplica los mismos criterios en cada corrida.
 
-Las herramientas existentes no cubren las necesidades del laboratorio. EthoVision XT y
+Las herramientas existentes no cubren las necesidades del laboratorio. EthoVision XT \cite{noldus_ethovision} y
 ANY-maze \cite{stoelting_anymaze} tienen costos de licencia fuera del alcance académico del IPN. ezTrack y
 DBscorer no clasifican las tres conductas del FST por separado. El trabajo con
 aprendizaje profundo que sí distingue las tres conductas
 \cite{della_valle2025} no se distribuye como sistema instalable sin
-infraestructura especializada. Este prototipo atiende esas tres brechas: clasifica tres
-conductas, sin costo de licencia, con interfaz web accesible desde el navegador.
+infraestructura especializada. Este prototipo atiende esas tres brechas: clasifica las tres
+conductas del FST (y la conducta activa cuando no distingue entre nado y escalamiento), sin costo de licencia, con interfaz web accesible desde el navegador.
 
 En cuanto a calidad del software, el sistema se diseña para cumplir atributos concretos
 de la ISO/IEC~25010:2011 \cite{iso25010}: \textit{functional correctness} (corrección
@@ -258,8 +259,10 @@ de la validación final.
         la cámara girada no se puede procesar), con todos los cilindros (de dos a cuatro)
         visibles simultáneamente en el encuadre y cámara estacionaria. El video principal que
         el sistema procesa es el del día~2 (5~min) para cada espécimen de todos los
-        grupos experimentales; de cada video se analizan solo los últimos 300~segundos. Los primeros 5~min del día~1 del grupo control pueden
-        cargarse opcionalmente como referencia basal.
+        grupos experimentales; de cada video se analizan, como máximo, los últimos 300~segundos
+        (si el video dura menos, se analiza completo). El video del día~1, que es una sesión de
+        habituación, puede subirse para dejar constancia de que el grupo la tuvo; el sistema no
+        lo analiza.
 
   \item \textbf{Localización de los especímenes:} identificación automática de
         hasta cuatro especímenes dentro de la grabación, distinguiéndolos por su posición
@@ -268,8 +271,8 @@ de la validación final.
         del video.
 
   \item \textbf{Clasificación de conductas:} el sistema clasifica de forma continua
-        las tres conductas del FST: nado activo, inmovilidad e intentos de escape
-        (escalamiento). El buceo se clasifica como nado activo. Cada segundo recibe
+        las tres conductas del FST: nado activo, inmovilidad y escalamiento.
+        El buceo se clasifica como nado activo. Cada segundo recibe
         una conducta, sin duración mínima, lo que permite registrar conductas breves
         de unos dos segundos; los resultados también se agrupan en bloques de cinco
         segundos, como en el análisis manual.
@@ -278,12 +281,10 @@ de la validación final.
         activa, una cuarta conducta.
 
   \item \textbf{Métricas y comparación por grupo:} tiempo total de cada conducta en
-        los 5~min del día~2, desglose por minuto, y
+        el video del día~2 (hasta 300~s), desglose por minuto, y
         estadísticos de grupo (media, desviación estándar y varianza por conducta)
         para caracterizar el perfil conductual del conjunto de especímenes de cada
-        grupo experimental. El sistema también compara automáticamente los
-        grupos del experimento del día~2, mostrando el tiempo
-        promedio por conducta de los especímenes de cada grupo.
+        grupo experimental.
 
   \item \textbf{Reportes y exportaciones:} si el análisis falla, un reporte de
         diagnóstico en PDF indica en qué etapa se detuvo y por qué; exportación de
@@ -294,13 +295,14 @@ de la validación final.
   \item \textbf{Revisión segundo a segundo:} cuando el análisis termina, el usuario
         puede abrir una pantalla con el video y una línea de tiempo por espécimen,
         coloreada por conducta, y corregir la etiqueta de cada segundo. Cada segundo
-        guarda si fue propuesto por el sistema, confirmado o corregido, y los totales
+        guarda su origen (del sistema, confirmado, corregido o dudoso), y los totales
         por minuto se recalculan al guardar las correcciones.
 
   \item \textbf{Plataforma web:} interfaz accesible desde el navegador con creación
         de cuenta de usuario por parte del administrador, carga de videos, cola de
         procesamiento secuencial para hasta cuatro usuarios trabajando en un mismo período,
-        consulta de resultados por espécimen y sesión, y descarga de reportes. Los
+        consulta de resultados por espécimen y sesión, avisos de análisis terminado o con error
+        en el panel y por correo, y descarga de reportes. Los
         datos se almacenan en base de datos para permitir comparar grupos y
         experimentos posteriores.
 
@@ -318,10 +320,9 @@ de la validación final.
         inferir diagnósticos de depresión u otros trastornos, ni en especímenes ni en
         humanos.
 
-  \item \textbf{Video completo del día~1:} la sesión del día~1 dura 20~minutos;
-        el sistema no procesa ese video completo. Solo acepta, de forma opcional, los
-        primeros 5~minutos del grupo control como referencia basal. El análisis de los
-        20~min completos queda fuera del alcance de este prototipo.
+  \item \textbf{Video del día~1:} la sesión del día~1 dura 20~minutos y es de
+        habituación. El sistema no la analiza ni conserva recortes de ella; el análisis de
+        esos 20~min queda fuera del alcance de este prototipo.
 
   \item \textbf{Corrección de calidad de video por el usuario:} el sistema no corrige las
         condiciones desfavorables del video (reflejos, pelaje claro, contraste
@@ -396,7 +397,7 @@ cronograma mes a mes de cada integrante. La columna TT-I abarca febrero--junio
 \hline
 \multicolumn{13}{|l|}{\textbf{TT-I --- Documentación, análisis y diseño (febrero--junio)}} \\
 \hline
-Caps.~1--2: introducción, planteamiento y estado del arte
+Caps.~1--3: introducción, estado del arte y marco teórico
   & $\bullet$ & $\bullet$ & $\bullet$ & & & & & & & & & \\
 \hline
 Cap.~4 Análisis: requisitos funcionales y no funcionales, reglas de negocio y criterios de aceptación
@@ -410,7 +411,7 @@ Revisiones mensuales con directores e investigador del laboratorio
 \hline
 \multicolumn{13}{|l|}{\textbf{TT-II --- Implementación y pruebas (julio--enero)}} \\
 \hline
-Entorno Flask\,/\,PostgreSQL\,/\,Docker, esquema BD y API REST
+Entorno Flask\,/\,PostgreSQL\,/\,Docker, esquema de la base de datos y API REST
   & & & & & & $\bullet$ & $\bullet$ & & & & & \\
 \hline
 Autenticación y control de acceso (\textit{JSON Web Token}, JWT, y roles)
@@ -425,7 +426,7 @@ Integración \textit{frontend}--\textit{backend} y módulo de gestión de sesion
 Visualización de resultados y generación de reportes PDF
   & & & & & & & & & $\bullet$ & & & \\
 \hline
-Integración del pipeline de video con backend $+$ pruebas unitarias y de sistema
+Integración del \textit{pipeline} de video con \textit{backend} $+$ pruebas unitarias y de sistema
   & & & & & & & & & $\bullet$ & $\bullet$ & & \\
 \hline
 Corrección de defectos y ajustes de rendimiento
@@ -453,13 +454,13 @@ Empaquetado con Docker Compose, manuales y material de defensa
 \hline
 \multicolumn{13}{|l|}{\textbf{TT-I --- Documentación, análisis y diseño (febrero--junio)}} \\
 \hline
-Caps.~1--2: antecedentes FST, técnicas de visión y modelos de aprendizaje automático y profundo
+Caps.~1--3: antecedentes FST, técnicas de visión y modelos de aprendizaje automático y profundo
   & $\bullet$ & $\bullet$ & $\bullet$ & & & & & & & & & \\
 \hline
 Cap.~4 Análisis: conductas, métricas y protocolo de anotación
   & & & $\bullet$ & $\bullet$ & & & & & & & & \\
 \hline
-Cap.~5 Diseño del pipeline de análisis de video: preprocesamiento y clasificador
+Cap.~5 Diseño del \textit{pipeline} de análisis de video: preprocesamiento, localización de los cilindros y clasificador
   & & & & $\bullet$ & $\bullet$ & & & & & & & \\
 \hline
 Revisiones mensuales con directores e investigador del laboratorio
@@ -470,10 +471,10 @@ Revisiones mensuales con directores e investigador del laboratorio
 \textit{Baseline} (línea base): sustracción de fondo y curación de videos
   & & & & & & $\bullet$ & & & & & & \\
 \hline
-Anotación de conductas con el etiquetador del equipo y extracción de descriptores
+Anotación de conductas con el etiquetador del equipo y preparación de los rasgos o clips de entrada
   & & & & & & $\bullet$ & $\bullet$ & & & & & \\
 \hline
-Entrenamiento del clasificador de conducta (nado\,/\,inmovilidad\,/\,escalamiento)
+Entrenamiento del clasificador de conducta (nado activo, inmovilidad, escalamiento y conducta activa)
   & & & & & & & $\bullet$ & $\bullet$ & & & & \\
 \hline
 Ajuste de hiperparámetros y evaluación del clasificador
