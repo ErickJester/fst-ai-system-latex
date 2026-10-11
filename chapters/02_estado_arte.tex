@@ -162,7 +162,7 @@ del fondo (el cilindro vacío) y en cada cuadro se calcula la diferencia con esa
 referencia. Los píxeles con diferencia mayor a un umbral se clasifican como primer plano
 (el espécimen).
 
-El modelo de mezcla gaussiana (Gaussian Mixture Model, GMM) \cite{zivkovic2004} es
+El modelo de mezcla gaussiana (\textit{Gaussian Mixture Model}, GMM) \cite{zivkovic2004} es
 la versión adaptativa más usada: mantiene un modelo estadístico del fondo que se
 actualiza con cada cuadro, lo que le permite adaptarse a cambios lentos de iluminación.
 Para cámara fija, una alternativa más simple y predecible es calcular un estadístico
@@ -185,9 +185,8 @@ La versión YOLOv8 (Ultralytics, 2023) se ofrece en varios tamaños, desde model
 hasta modelos más precisos, lo que permite elegir entre velocidad y precisión
 \cite{jocher2023}. Para datasets pequeños, Hermens \cite{hermens2024_yolov8}
 encontró que con 100 a 350 imágenes etiquetadas se logra detección casi perfecta en
-fondos consistentes, lo cual es relevante dado el tamaño de dataset disponible en este
-proyecto. El modelo no generaliza bien cuando el fondo cambia mucho entre condiciones,
-lo que hay que considerar durante el entrenamiento.
+fondos consistentes. El modelo, en cambio, no generaliza bien cuando el fondo cambia
+mucho entre condiciones.
 
 Este proyecto no usa YOLO. Con un espécimen por cilindro y el aparato siempre en el
 mismo lugar del encuadre, la sustracción de fondo basta para separar al espécimen, sin
@@ -200,11 +199,11 @@ etiquetar imágenes para entrenar un detector.
 Esta sección revisa los enfoques de \textit{machine learning} (aprendizaje automático, ML) y \textit{deep learning}
 (aprendizaje profundo, DL) que son viables
 para clasificar las tres conductas del FST (nado, inmovilidad, escalamiento) dado el
-tamaño de dataset disponible y las condiciones de grabación del laboratorio.
+tamaño del \textit{dataset} (conjunto de datos) disponible y las condiciones de grabación del laboratorio.
 
 \subsection{Clasificadores clásicos sobre descriptores de movimiento}
 
-Los métodos clásicos de ML (SVM, Random Forest) toman como entrada descriptores
+Los métodos clásicos de ML (máquinas de vectores de soporte, SVM, y bosques aleatorios, \textit{Random Forest}) toman como entrada descriptores
 numéricos del movimiento ---área del contorno, velocidad del centroide, energía cinética,
 histogramas de flujo óptico--- y producen una etiqueta de conducta. Su ventaja es que
 requieren pocos datos etiquetados y son interpretables. Su limitación es que los
@@ -215,12 +214,13 @@ Para el FST, un descriptor útil es la relación entre el área de movimiento y 
 vertical del centroide: el escalamiento produce movimiento en la mitad superior del
 cilindro mientras que el nado se distribuye en toda la superficie del agua. Esa
 diferencia es capturable con descriptores simples \cite{armario2021}. Este proyecto
-sigue ese camino con un clasificador de \textit{gradient boosting} (potenciación del
-gradiente) sobre quince rasgos del espécimen (cap.~5).
+desarrolla ese camino como uno de los dos candidatos, con un clasificador de
+\textit{gradient boosting} (potenciación del gradiente) sobre quince rasgos del
+espécimen (cap.~5).
 
-\subsection{Redes convolucionales con transfer learning}
+\subsection{Redes convolucionales con \textit{transfer learning} (aprendizaje por transferencia)}
 
-Las CNN \cite{lecun1998} son la arquitectura de referencia para clasificación de
+Las redes neuronales convolucionales (CNN) \cite{lecun1998} son la arquitectura de referencia para clasificación de
 imágenes. Entrenar una CNN desde cero requiere conjuntos de datos etiquetados muy grandes,
 lo cual no es viable con el dataset disponible. La solución es el \textit{transfer
 learning} \cite{pan2010}: se toma una red preentrenada en ImageNet (más de un millón
@@ -258,14 +258,14 @@ y software, y establece atributos medibles que permiten verificar si un sistema 
 sus objetivos. Para este proyecto, los atributos relevantes son:
 
 \begin{itemize}
-  \item \textbf{Functional correctness:} los resultados del sistema deben clasificar
+  \item \textbf{\textit{Functional correctness}:} los resultados del sistema deben clasificar
         correctamente las tres conductas del FST. Se evalúa con métricas de
         clasificación estándar: precisión, \textit{recall} y F1 por clase.
-  \item \textbf{Time behaviour:} el tiempo de análisis de un video de 5~minutos debe
+  \item \textbf{\textit{Time behaviour}:} el tiempo de análisis de un video de 5~minutos debe
         ser aceptable para el flujo de trabajo del laboratorio. Se mide en minutos de
         procesamiento por minuto de video y se define el umbral concreto con el
         laboratorio durante la fase de pruebas y validación.
-  \item \textbf{Usability:} un investigador sin conocimientos de programación debe
+  \item \textbf{\textit{Usability}:} un investigador sin conocimientos de programación debe
         poder operar el sistema sin ayuda técnica. Se evalúa con una prueba de
         usabilidad con al menos un usuario real del laboratorio.
 \end{itemize}
@@ -306,11 +306,17 @@ YOLO-Behaviour & No    & ---   & Sí  & No  & Sí  & Precisión, recall \\
 \textbf{Propuesta} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & F1 por conducta, tiempo \\
 \hline
 \end{tabular}}
+
+\vspace{2pt}
+{\footnotesize \textit{Nota.} Espec. FST: específico para el FST; 3 cond.: distingue las tres
+conductas; DL: aprendizaje profundo (\textit{deep learning}); Parc.: parcial; clf: clasificador.}
 \end{table}
 
 Ningún sistema existente cubre los cinco criterios al mismo tiempo. Los comerciales no
-son abiertos y no clasifican las tres conductas. Los de código abierto no usan
-aprendizaje profundo ni tienen interfaz web. Los de aprendizaje profundo más recientes
+son abiertos y no clasifican las tres conductas. Los de código abierto específicos
+para el FST (ezTrack y DBscorer) no usan aprendizaje profundo ni tienen interfaz web;
+los abiertos que sí lo usan (DeepLabCut y YOLO-Behaviour) tampoco ofrecen plataforma web
+ni clasifican las tres conductas de forma directa. Los de aprendizaje profundo más recientes
 sí clasifican las tres conductas pero no tienen plataforma web y no reportan métricas
 de tiempo de análisis. El sistema propuesto busca cubrir los cinco criterios y
 documentar explícitamente los atributos de calidad de la ISO/IEC~25010:2011

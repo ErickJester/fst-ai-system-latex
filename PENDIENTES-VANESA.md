@@ -147,3 +147,31 @@ commit.
 - **M-8 resuelto (6-oct):** se decidió citar la ISO/IEC 25010 en su edición 2011 (la que llama «portabilidad» y «usabilidad» a esos atributos). Se cambió `25010:2023` por `25010:2011` en todo el documento, incluidos `04_analisis.tex` y `05_diseno.tex` (zona de Ángel, solo el año y la atribución de la portabilidad); conviene que él lo revise.
 - **Casos de uso sin ficha propia** (su contenido está dentro de otra ficha): «Ejecutar pipeline de análisis» y «Reportar error de pipeline» (CU-07), «Desglosar por minuto» y «Comparar grupos en Día 2» (CU-09), «Generar archivo de reporte» (CU-10).
 - **CU-06 se fusionó en CU-22** (6-oct), igual que CU-21. CU-24 «Gestionar experimentos globales» se solapa con CU-22 y CU-23 y queda como decisión abierta de Ángel.
+
+---
+
+## 7. Auditoría del 11-oct (`hallazgosAgentes11oct/`)
+
+Aplicado el 2026-10-11 en mi zona: capítulos 1 a 3, `front/`, `bib/` y casos de uso.
+
+**✅ Aplicado (11-oct)**
+
+- **Cap. 1:** C1-01, 04, 06, 07, 09, 10, 11, 13, 15, 17, 18, 20 y 21 (parcial: «los grupos del experimento»); TT-13 («escalamiento»); TT-05 (TT-I/TT-II definidos en el cap. 1); OG y OE-1…OE-6 rotulados.
+- **Cap. 2:** C2-07, 08, 09, 11.
+- **Cap. 3:** C3-01 (subsección de *gradient boosting* y portada del capítulo), 02, 05, 07, 09, 11, 12; ORM como *Object-Relational Mapping*.
+- **Bibliografía:** C2-02 y C2-03 corregidos contra Crossref; C2-01 ya estaba corregido (solo se añadió `number`).
+- **Preliminares:** TT-01 (`documento_tecnico`), TT-13 (`resumen`), TT-14 y entrada CNN del glosario, abreviaturas nuevas (CU, DL, OE, OG, TT-I, TT-II).
+- **Casos de uso (cap. 5):** C5-07 (número de especímenes en CU-05). C5-01, C5-02, C5-16, DF-04, DF-05, DF-22 y DF-25 ya estaban corregidos.
+
+**❓ Pendiente de decidir (preguntas abiertas)**
+
+- C1-03 / C2-05 (DSAAN: ¿tres conductas?), C2-04 (YOLO-Behaviour), C2-10 (Sturman duplicado).
+- C3-03 (`cryan2005`), C3-04 (ResNet), C2-13 (`armario2021`), C1-16 (atributo de la ISO 25010).
+- C1-19 / C2-12 (ANY-maze sin cita).
+- C1-05 (despliegue ESCOM), C1-08 (gráficas de barras), C1-12 («en minutos»), C1-14 (flujo óptico), C1-22 / C3-08 («Sprint 6»), C2-14 / C3-06 (unidad del tiempo de análisis).
+- TT-03 (título con «IA» y «RATA»), TT-06 (F1 por clase o por conducta).
+- DF-09 (CU-11 y CU-12 en el paquete 1 o 5), DF-11 (validación del formato en cliente o servidor), C5-08 (eliminar experimento).
+
+**🟢 Pendiente con fuente, zona compartida**
+
+- Anglicismos con cursiva y traducción en los caps. 4 y 5 y en el glosario (TT-08, TT-09), y TT1/TT2 en el cap. 4 (TT-05): es zona de Erick.

@@ -9,10 +9,11 @@
 El FST produce videos de especímenes nadando en cilindros. Para analizarlos
 automáticamente hace falta entender qué conductas se observan y qué
 significan, cómo procesar las imágenes para detectar al espécimen, qué
-arquitectura de red neuronal puede clasificar esas conductas con pocos
-datos etiquetados, y cómo organizar todo eso en un sistema web que el
-laboratorio pueda usar. Lo que sigue cubre esos cuatro bloques en ese
-orden.
+arquitecturas pueden clasificar esas conductas con pocos datos etiquetados
+---un clasificador de \textit{gradient boosting} (potenciación del gradiente) sobre
+rasgos medidos o una red convolucional espacio-temporal---, cómo organizar todo eso
+en un sistema web que el laboratorio pueda usar y con qué métricas se evaluará.
+Lo que sigue cubre esos cinco bloques en ese orden.
 
 % ============================================================
 \section{El modelo de nado forzado como paradigma preclínico}
@@ -70,8 +71,8 @@ evaluado. Un sistema que solo detecta si el espécimen se mueve o no pierde esa 
 \subsection{Protocolo del laboratorio colaborador}
 
 En el laboratorio de la ENMyH los especímenes se colocan individualmente en cilindros
-transparentes con agua. Hay dos sesiones: 20 minutos el día 1 (línea base) y 5 minutos
-el día 2 (después del tratamiento), con 24 horas de diferencia. Los videos se graban
+transparentes con agua. Hay dos sesiones: 20 minutos el día 1 (habituación, que expone al espécimen al estrés
+del nado) y 5 minutos el día 2 (después del tratamiento), con 24 horas de diferencia. Los videos se graban
 desde una vista lateral con cámara web, capturando de dos a cuatro cilindros al mismo
 tiempo. El laboratorio procura mantener una iluminación de referencia de aproximadamente 2,500
 lúmenes, aunque no la garantiza formalmente entre sesiones; en la práctica, la iluminación
@@ -185,6 +186,20 @@ cuadro, no oscila entre cuadros y no necesita suavizado.
 \section{Redes neuronales y aprendizaje profundo}
 % ============================================================
 
+\subsection{Clasificador por \textit{gradient boosting} sobre rasgos}
+
+Una de las dos alternativas que se evalúan no usa una red profunda. En el
+\textit{gradient boosting} se entrena una secuencia de árboles de decisión
+pequeños, y cada árbol nuevo corrige el error que dejó el conjunto de los anteriores
+\cite{friedman2001}. Su entrada no es la imagen sino un vector de rasgos medidos sobre
+el espécimen (movimiento, postura y trayectoria), y su salida es la probabilidad de
+cada conducta. La variante por histogramas agrupa los valores de cada rasgo en
+intervalos, lo que acelera el entrenamiento sin perder precisión de forma apreciable
+\cite{ke2017,pedregosa2011}. Requiere pocos datos etiquetados y sus decisiones se
+pueden rastrear hasta los rasgos que las causaron. Cuál de las dos alternativas queda
+como clasificador del sistema se decide en TT-II con precisión, \textit{recall} y F1
+por conducta.
+
 \subsection{Redes neuronales y CNN}
 
 Una red neuronal convolucional (CNN) \cite{lecun1998} aplica filtros pequeños
@@ -198,29 +213,30 @@ Adam \cite{kingma2014}, que ajusta la tasa de aprendizaje de cada parámetro
 individualmente usando estimaciones de primer y segundo momento del gradiente.
 
 Entrenar una CNN desde cero requiere conjuntos de datos etiquetados muy grandes, lo que
-no es viable con el dataset disponible. La solución es el \textit{transfer learning}.
+no es viable con el \textit{dataset} (conjunto de datos) disponible. Para el candidato basado en redes
+profundas, la solución es el \textit{transfer learning} (aprendizaje por transferencia).
 
-\subsection{Transfer learning}
+\subsection{\textit{Transfer learning} (aprendizaje por transferencia)}
 
 El \textit{transfer learning} \cite{pan2010} consiste en tomar una red ya entrenada con
 un conjunto grande de datos y adaptar solo su última capa para la tarea nueva. Para
-imágenes, el conjunto de referencia es ImageNet (más de un millón de imágenes de
-1{,}000 clases); para video, Kinetics-400 (videos de 400 acciones humanas). Las capas
+imágenes, el conjunto de referencia es ImageNet (en su versión de preentrenamiento, más de
+un millón de imágenes de 1{,}000 clases); para video, Kinetics-400 (videos de 400 acciones humanas). Las capas
 anteriores ya detectan bordes, texturas, formas y patrones de movimiento; ese
 conocimiento se transfiere directamente al problema del FST. En la práctica se
 reemplaza la capa de clasificación original por una nueva con 3 salidas ---una por
 conducta--- y se re-entrena con los clips etiquetados de los videos del laboratorio.
 
-Este enfoque reduce los requerimientos de datos cuando el dominio de origen (ImageNet)
-y el de destino (recortes de especímenes en el FST) comparten características visuales básicas
+Este enfoque reduce los requerimientos de datos cuando el dominio de origen (ImageNet
+para imágenes, Kinetics-400 para video) y el de destino (recortes y clips de especímenes en el FST) comparten características visuales básicas
 \cite{pan2010}.
 
 \subsection{ResNet y conexiones residuales}
 
-ResNet (\textit{Deep Residual Network}) \cite{he2016} resolvió un problema práctico: las
+ResNet (\textit{Residual Network}) \cite{he2016} resolvió un problema práctico: las
 redes de más de 20 capas entrenadas con retropropagación tendían a empeorar porque el
 gradiente se desvanecía al retroceder por muchas capas consecutivas
-(\textit{vanishing gradient problem}).
+(\textit{vanishing gradient problem}, problema del gradiente que se desvanece).
 
 La solución fue agregar conexiones directas que ``saltan'' una o más capas
 (\textit{skip connections}). En lugar de que cada bloque aprenda una transformación
@@ -234,7 +250,7 @@ $\mathcal{F}(\mathbf{x}) = \mathcal{H}(\mathbf{x}) - \mathbf{x}$:
 
 Esto permite al gradiente fluir directamente hacia atrás sin atenuarse, lo que hace
 posible entrenar redes de 50, 101 o 152 capas. Para este proyecto interesa la versión
-de 18 capas, ResNet-18, porque es la base de la red que se evalúa como clasificador:
+de 18 capas, ResNet-18, porque es la base de la red que se evalúa como candidato a clasificador:
 la R(2+1)D-18 \cite{tran2018} conserva sus 18 capas y sus conexiones residuales, pero
 recibe clips de 16 fotogramas y separa cada convolución en una parte espacial, sobre
 cada fotograma, y una temporal, entre fotogramas. Así aprende patrones de movimiento
@@ -251,7 +267,10 @@ en probabilidades:
     \label{eq:softmax}
 \end{equation}
 
-Se predice la conducta con mayor probabilidad. Durante el entrenamiento, la función de
+El sistema no siempre asigna la conducta de mayor probabilidad: cuando ninguna conducta
+alcanza el umbral de confianza pero la suma de nado activo y escalamiento sí, registra
+\textit{conducta activa}, una cuarta conducta (véase RN-13 en el Capítulo~4); si tampoco,
+asigna la más probable y marca el segundo como dudoso. Durante el entrenamiento, la función de
 pérdida es la entropía cruzada categórica, que penaliza fuertemente predicciones
 incorrectas con alta confianza:
 
@@ -312,7 +331,7 @@ con soporte para transacciones ACID (\textit{Atomicity, Consistency, Isolation,
 Durability}), que garantizan que las operaciones de escritura son seguras incluso ante
 fallos del sistema. En una base de datos relacional, la información se organiza en tablas
 relacionadas entre sí mediante llaves. Las consultas se abstraen con
-SQLAlchemy como ORM (\textit{Object-Relational Mapper}), lo que permite cambiar el
+SQLAlchemy como ORM (\textit{Object-Relational Mapping}, mapeo objeto-relacional), lo que permite cambiar el
 motor de base de datos sin modificar el código de la aplicación.
 
 % ============================================================
@@ -329,8 +348,8 @@ procesamiento) y \textit{usability} (facilidad de uso para el investigador).
 Para cada conducta $c$ se calculan:
 
 \begin{equation}
-    \text{Precisión}_c = \frac{TP_c}{TP_c + FP_c}, \quad
-    \text{Recall}_c = \frac{TP_c}{TP_c + FN_c}
+    \text{Precisión}_c = \frac{VP_c}{VP_c + FP_c}, \quad
+    \text{Recall}_c = \frac{VP_c}{VP_c + FN_c}
     \label{eq:precision_recall}
 \end{equation}
 
@@ -339,7 +358,7 @@ Para cada conducta $c$ se calculan:
     \label{eq:f1}
 \end{equation}
 
-donde $TP_c$, $FP_c$ y $FN_c$ son los verdaderos positivos, falsos positivos y falsos
+donde $VP_c$, $FP_c$ y $FN_c$ son los verdaderos positivos, falsos positivos y falsos
 negativos de la clase $c$ respectivamente. El F1 es útil cuando las clases están
 desbalanceadas, que es esperable en el FST donde la inmovilidad suele dominar en los
 primeros experimentos.
