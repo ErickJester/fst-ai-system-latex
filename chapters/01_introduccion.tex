@@ -4,11 +4,10 @@
 
 En el Laboratorio de Bioquímica Estructural de la Escuela Nacional de Medicina y
 Homeopatía, analizar un video de nado forzado funciona así: el investigador abre
-el video en la computadora, pone en marcha un cronómetro y observa. Cada vez que el
-espécimen cambia de conducta (empieza a nadar, se queda inmóvil, intenta escalar las
-paredes del cilindro) registra la hora a mano. Al terminar los cinco minutos, tiene
-una tabla con los tiempos de cada conducta para un solo espécimen. Luego repite el proceso
-con la siguiente. Si el protocolo requiere que tres analistas hagan la anotación de
+el video en la computadora, pone en marcha un cronómetro y lo repasa una vez por cada
+conducta (nado, inmovilidad, escalamiento) para un solo espécimen, anotando cuánto dura
+cada una. Al terminar, tiene una tabla con los tiempos de cada conducta para ese
+espécimen. Luego repite el proceso con el siguiente. Si el protocolo requiere que tres analistas hagan la anotación de
 forma independiente para verificar consistencia, el mismo video se revisa tres veces.
 
 Ese proceso existe porque el nado forzado es el modelo conductual más usado en
@@ -95,8 +94,8 @@ Tratamiento experimental
 \section{Planteamiento del problema}
 
 El laboratorio realiza experimentos de nado forzado de forma periódica para evaluar el
-efecto de distintas moléculas en grupos de especímenes. Cada video graba de dos a
-cuatro especímenes al mismo tiempo desde una vista lateral, en dos sesiones: 20 minutos el primer día y
+efecto de distintas moléculas en grupos de especímenes. Cada tanda graba de dos a
+cuatro especímenes al mismo tiempo desde una vista lateral, en dos sesiones, cada una en su propio video: 20 minutos el primer día y
 5 minutos el segundo.
 
 Al conjunto de especímenes de un mismo grupo que se graba junto, de dos a cuatro a la vez,
@@ -105,8 +104,8 @@ hasta dos videos, uno por sesión. En este documento, la palabra \textit{experim
 designa siempre el estudio completo, con todos sus grupos y tandas.
 
 El análisis de esos videos se hace completamente a mano. Anotar un video de 5 minutos
-con sus dos a cuatro especímenes ---cronómetro en mano, observando la grabación cuadro
-a cuadro--- lleva entre una hora y media y dos horas. Si el protocolo incluye que tres
+con sus dos a cuatro especímenes ---cronómetro en mano, repasando la grabación una vez por
+cada conducta--- lleva entre una hora y media y dos horas. Si el protocolo incluye que tres
 analistas anotan de forma independiente para verificar consistencia, ese tiempo se
 triplica. En un semestre de actividad regular el laboratorio puede juntar alrededor de
 32 a 40 videos, aunque no tiene un calendario fijo, lo que suma decenas de horas-persona
@@ -140,7 +139,7 @@ resultados para compararlos con los de otros grupos de investigación.
 
 En términos concretos: el investigador sube el video al sistema desde el navegador, el
 sistema lo analiza y en minutos genera un reporte con los tiempos de nado activo,
-inmovilidad e intentos de escape por espécimen y sesión. Lo que hoy lleva horas de
+inmovilidad y escalamiento por espécimen y sesión. Lo que hoy lleva horas de
 anotación manual, el sistema lo produce de forma automática y con los mismos criterios
 cada vez.
 
@@ -160,8 +159,8 @@ metodología.
 El sistema tiene dos partes:
 
 \begin{itemize}
-  \item \textbf{Pipeline de análisis de video:} recibe el video, identifica a cada
-        espécimen dentro de su cilindro y clasifica cuadro a cuadro la conducta que realiza
+  \item \textbf{Cadena de análisis de video (\textit{pipeline}):} recibe el video, identifica a cada
+        espécimen dentro de su cilindro y clasifica la conducta que realiza en cada segundo
         (nado, inmovilidad, escalamiento o, cuando no distingue entre nado y escalamiento, conducta activa) con un modelo de aprendizaje supervisado. La
         salida es el tiempo total por conducta y espécimen y el desglose por minuto.
   \item \textbf{Plataforma web:} interfaz desde el navegador donde el investigador sube
@@ -180,16 +179,16 @@ efficiency} (eficiencia de desempeño) de la norma ISO/IEC~25010:2011 \cite{iso2
 El desempeño del clasificador se evalúa con métricas de clasificación estándar
 (precisión, \textit{recall} y F1 por clase) sobre un conjunto de prueba independiente.
 
-\section{Objetivo general}
+\section{Objetivo general (OG)}
 
 Diseñar, desarrollar y validar un prototipo de sistema web con visión por computadora
 y aprendizaje supervisado que automatice la detección y cuantificación de las conductas
-de la prueba de nado forzado en especímenes ---nado activo, inmovilidad, intentos de escape y conducta activa--- con
+de la prueba de nado forzado en especímenes ---nado activo, inmovilidad, escalamiento y conducta activa--- con
 desempeño validado mediante métricas de clasificación estándar y cumpliendo los
 atributos de calidad de la norma ISO/IEC~25010:2011 \cite{iso25010}.
 
-\subsection{Objetivos específicos}
-\begin{enumerate}
+\subsection{Objetivos específicos (OE)}
+\begin{enumerate}[label=\textbf{OE-\arabic*.}, leftmargin=*, labelwidth=1.6cm, labelsep=0.4cm, align=left]
   \item Revisar trabajos y herramientas existentes para el análisis automatizado del
         FST e identificar los enfoques de visión por computadora y clasificación
         supervisada más adecuados al problema.
@@ -283,8 +282,8 @@ de la validación final.
         los 5~min del día~2, desglose por minuto, y
         estadísticos de grupo (media, desviación estándar y varianza por conducta)
         para caracterizar el perfil conductual del conjunto de especímenes de cada
-        grupo experimental. El sistema también compara automáticamente los tres
-        grupos (control, referencia y tratamiento) del día~2 mediante gráficas de
+        grupo experimental. El sistema también compara automáticamente los
+        grupos del experimento del día~2 mediante gráficas de
         barras de distribución por conducta.
 
   \item \textbf{Reportes y exportaciones:} si el análisis falla, un reporte de
@@ -295,13 +294,13 @@ de la validación final.
 
   \item \textbf{Revisión segundo a segundo:} cuando el análisis termina, el usuario
         puede abrir una pantalla con el video y una línea de tiempo por espécimen,
-        coloreada por conducta, y corregir la etiqueta de cada segundo. La propuesta
-        original del sistema se conserva y los totales por minuto se recalculan al
-        guardar las correcciones.
+        coloreada por conducta, y corregir la etiqueta de cada segundo. Cada segundo
+        guarda si fue propuesto por el sistema, confirmado o corregido, y los totales
+        por minuto se recalculan al guardar las correcciones.
 
   \item \textbf{Plataforma web:} interfaz accesible desde el navegador con creación
         de cuenta de usuario por parte del administrador, carga de videos, cola de
-        procesamiento secuencial para hasta cuatro análisis en un mismo período,
+        procesamiento secuencial para hasta cuatro usuarios trabajando en un mismo período,
         consulta de resultados por espécimen y sesión, y descarga de reportes. Los
         datos se almacenan en base de datos para permitir comparar grupos y
         experimentos posteriores.
@@ -325,10 +324,10 @@ de la validación final.
         primeros 5~minutos del grupo control como referencia basal. El análisis de los
         20~min completos queda fuera del alcance de este prototipo.
 
-  \item \textbf{Corrección automática de calidad de video:} si el análisis detecta
-        condiciones desfavorables (reflejos, pelaje claro, contraste insuficiente), el
-        sistema genera un reporte de diagnóstico, pero no corrige ni preprocesa el
-        video de forma automática.
+  \item \textbf{Corrección de calidad de video por el usuario:} el sistema no corrige las
+        condiciones desfavorables del video (reflejos, pelaje claro, contraste
+        insuficiente). Si por ellas no encuentra los cilindros, el análisis se detiene y
+        genera un reporte de diagnóstico; no repara el video.
 
   \item \textbf{Reentrenamiento del clasificador:} el sistema no actualiza el modelo
         de clasificación a partir de nuevas anotaciones del usuario. Cualquier
@@ -352,7 +351,7 @@ de la validación final.
 
   \item \textbf{Despliegue institucional definitivo:} el producto entregado es un
         prototipo funcional validado. El despliegue permanente en la infraestructura
-        del servidor institucional de la ESCOM está fuera del alcance de este Trabajo
+        del servidor institucional de la Escuela Superior de Cómputo (ESCOM) está fuera del alcance de este Trabajo
         Terminal, aunque el prototipo está diseñado para ejecutarse en ese entorno.
 
   \item \textbf{Otros paradigmas conductuales:} el sistema está diseñado y entrenado
@@ -363,7 +362,7 @@ de la validación final.
 \section{Metodología}
 
 El proyecto usa una metodología ágil basada en Scrum, adaptada a un equipo de dos
-personas con entregas en dos etapas académicas (Trabajo Terminal 1 y 2, abreviados TT1 y TT2). El motivo de elegir este
+personas con entregas en dos etapas académicas (Trabajo Terminal I y II, abreviados TT-I y TT-II). El motivo de elegir este
 enfoque es directo: el proyecto tiene partes muy distintas ---el módulo de video, el
 clasificador, la plataforma web, la base de datos--- y no tiene sentido diseñar todo
 desde el inicio sin saber cómo va a quedar el módulo de video hasta probarlo.
@@ -376,17 +375,18 @@ definidos antes de codificar, revisión del producto al cierre de cada bloque, y
 registro de ajustes para el siguiente ciclo.
 
 La responsabilidad de cada integrante está delimitada por frente técnico:
-Ángel Ali es responsable del sistema web e infraestructura (backend, base de datos,
-frontend, despliegue); Vanesa es responsable del pipeline de análisis de video (preprocesamiento,
+Ángel Alí es responsable del sistema web e infraestructura (\textit{backend} (servidor),
+base de datos, \textit{frontend} (interfaz del navegador), despliegue); Vanesa es responsable de la
+cadena de análisis de video (\textit{pipeline}: preprocesamiento,
 localización de los cilindros, clasificación de conducta y evaluación del desempeño
 por clase).
 
 Las Tablas~\ref{tab:cronograma_angel} y~\ref{tab:cronograma_vanesa} muestran el
-cronograma mes a mes de cada integrante. La columna TT1 abarca febrero--junio
-(documentación, análisis y diseño); la columna TT2 abarca julio--enero
+cronograma mes a mes de cada integrante. La columna TT-I abarca febrero--junio
+(documentación, análisis y diseño); la columna TT-II abarca julio--enero
 (implementación, integración, pruebas y defensa).
 
-% ── Cronograma Ángel Ali ─────────────────────────────────────────────────────
+% ── Cronograma Ángel Alí ─────────────────────────────────────────────────────
 \begin{sidewaystable}
 \centering
 \caption{Cronograma de actividades --- Frausto Robles Ángel Alí.}
@@ -400,32 +400,32 @@ cronograma mes a mes de cada integrante. La columna TT1 abarca febrero--junio
   & \textbf{Feb} & \textbf{Mar} & \textbf{Abr} & \textbf{May} & \textbf{Jun}
   & \textbf{Jul} & \textbf{Ago} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Dic} & \textbf{Ene} \\
 \hline
-\multicolumn{13}{|l|}{\textbf{TT1 --- Documentación, análisis y diseño (febrero--junio)}} \\
+\multicolumn{13}{|l|}{\textbf{TT-I --- Documentación, análisis y diseño (febrero--junio)}} \\
 \hline
 Caps.~1--2: introducción, planteamiento y estado del arte
   & $\bullet$ & $\bullet$ & $\bullet$ & & & & & & & & & \\
 \hline
-Cap.~4 Análisis: requisitos funcionales y no funcionales, casos de uso y criterios de aceptación
+Cap.~4 Análisis: requisitos funcionales y no funcionales, reglas de negocio y criterios de aceptación
   & & & $\bullet$ & $\bullet$ & & & & & & & & \\
 \hline
-Cap.~5 Diseño: arquitectura, base de datos, API REST, UML y wireframes
+Cap.~5 Diseño: arquitectura, base de datos, API REST, casos de uso, UML y \textit{wireframes} (bocetos de pantalla)
   & & & & $\bullet$ & $\bullet$ & & & & & & & \\
 \hline
 Revisiones mensuales con directores e investigador del laboratorio
   & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & & & & & & & \\
 \hline
-\multicolumn{13}{|l|}{\textbf{TT2 --- Implementación, pruebas y despliegue (julio--enero)}} \\
+\multicolumn{13}{|l|}{\textbf{TT-II --- Implementación, pruebas y despliegue (julio--enero)}} \\
 \hline
 Entorno Flask\,/\,PostgreSQL\,/\,Docker, esquema BD y API REST
   & & & & & & $\bullet$ & $\bullet$ & & & & & \\
 \hline
-Autenticación y control de acceso (JWT, roles)
+Autenticación y control de acceso (\textit{JSON Web Token}, JWT, y roles)
   & & & & & & & $\bullet$ & & & & & \\
 \hline
-Vistas React.js: carga de video, dashboard y seguimiento de progreso
+Vistas React.js: carga de video, \textit{dashboard} (panel de control) y seguimiento de progreso
   & & & & & & & $\bullet$ & $\bullet$ & & & & \\
 \hline
-Integración frontend--backend y módulo de gestión de sesiones
+Integración \textit{frontend}--\textit{backend} y módulo de gestión de sesiones
   & & & & & & & & $\bullet$ & & & & \\
 \hline
 Visualización de resultados y generación de reportes PDF
@@ -437,7 +437,7 @@ Integración del pipeline de video con backend $+$ pruebas unitarias y de sistem
 Corrección de defectos y ajustes de rendimiento
   & & & & & & & & & & $\bullet$ & & \\
 \hline
-Docker Compose, manuales, despliegue ESCOM y material de defensa
+Docker Compose, manuales, despliegue en la ESCOM y material de defensa
   & & & & & & & & & & & $\bullet$ & $\bullet$ \\
 \hline
 \end{tabular}
@@ -457,7 +457,7 @@ Docker Compose, manuales, despliegue ESCOM y material de defensa
   & \textbf{Feb} & \textbf{Mar} & \textbf{Abr} & \textbf{May} & \textbf{Jun}
   & \textbf{Jul} & \textbf{Ago} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Dic} & \textbf{Ene} \\
 \hline
-\multicolumn{13}{|l|}{\textbf{TT1 --- Documentación, análisis y diseño (febrero--junio)}} \\
+\multicolumn{13}{|l|}{\textbf{TT-I --- Documentación, análisis y diseño (febrero--junio)}} \\
 \hline
 Caps.~1--2: antecedentes FST, técnicas de visión y modelos de aprendizaje automático y profundo
   & $\bullet$ & $\bullet$ & $\bullet$ & & & & & & & & & \\
@@ -471,9 +471,9 @@ Cap.~5 Diseño del pipeline de análisis de video: preprocesamiento y clasificad
 Revisiones mensuales con directores e investigador del laboratorio
   & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & & & & & & & \\
 \hline
-\multicolumn{13}{|l|}{\textbf{TT2 --- Implementación, pruebas y validación (julio--enero)}} \\
+\multicolumn{13}{|l|}{\textbf{TT-II --- Implementación, pruebas y validación (julio--enero)}} \\
 \hline
-Baseline: sustracción de fondo, flujo óptico y curación de videos
+\textit{Baseline} (línea base): sustracción de fondo, flujo óptico y curación de videos
   & & & & & & $\bullet$ & & & & & & \\
 \hline
 Anotación de conductas con el etiquetador del equipo y extracción de descriptores
@@ -500,13 +500,13 @@ Redacción de caps.\ resultados, manuales y material de defensa
 \end{tabular}
 \end{sidewaystable}
 
-El stack técnico cubre los dos frentes del proyecto: Python con Flask, OpenCV,
-scikit-learn, PyTorch y PostgreSQL para el pipeline y el backend; React.js
-para el frontend; un etiquetador propio del equipo, que propone la conducta de cada
-espécimen y permite revisarla y corregirla, para anotar el dataset de conductas; Git
+El \textit{stack} (conjunto de tecnologías) técnico cubre los dos frentes del proyecto: Python con Flask, OpenCV,
+scikit-learn, PyTorch y PostgreSQL para el \textit{pipeline} y el \textit{backend}; React.js
+para el \textit{frontend}; un etiquetador propio del equipo, que propone la conducta de cada
+espécimen y permite revisarla y corregirla, para anotar el \textit{dataset} (conjunto de datos) de conductas; Git
 con Docker para control de versiones y despliegue.
 
 En la práctica, Ángel y Vanesa trabajan en ramas separadas del repositorio y se
-sincronizan en los sprint reviews semanales. La integración entre los dos módulos
----el endpoint que recibe el video y el pipeline que lo procesa--- se prueba de forma
-conjunta al cierre de cada sprint, no se deja acumular para el final.
+sincronizan en las revisiones semanales de cada \textit{sprint} (iteración). La integración entre los dos módulos
+---el \textit{endpoint} (punto de acceso de la API) que recibe el video y el \textit{pipeline} que lo procesa--- se prueba de forma
+conjunta al cierre de cada \textit{sprint}, no se deja acumular para el final.
