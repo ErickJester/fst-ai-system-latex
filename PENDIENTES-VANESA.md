@@ -41,15 +41,18 @@ Marca aquí lo que termines (`✅`, fecha). Este archivo es solo tuyo: Erick no 
   de video (resumen, ahora con «RF-09») y la postcondición del análisis en cola (sin «ver D-15»).
   **Haz `git pull` antes de seguir editando esa zona** y no vuelvas a escribir códigos `D-xx`
   en el texto.
-- **Erick cambió la regla de los bloques de 5 s** (8-oct, commit `a20d40e`). Ahora la
-  conducta de cada bloque es la de su **último segundo**, como el muestreo cada 5 s de
-  Detke et al. (1995), y ya no la mayoría de los cinco segundos con desempates. La regla
-  completa es la nueva **RN-15** del cap. 4. Tocó RF-18 y la justificación de umbrales
-  (cap. 4) y, en el cap. 5, «Módulo 4», la clasificación segundo a segundo y la pantalla
-  de resultados; ninguno está en tu zona. Agregó `detke1995` **al final de
-  `bib/referencias.bib`** (tu archivo). En tus capítulos y casos de uso no hay nada que
-  cambiar, salvo que algún texto tuyo hable de bloques «por mayoría»: debe decir
-  «conducta del último segundo» y remitir a RN-15. **Haz `git pull`** antes de seguir.
+- **Regla de los bloques de 5 s: vale la mayoría** (corrige el aviso del 8-oct, commit
+  `e51eaa8`). El 8-oct se cambió a «conducta del último segundo» (RN-15), pero eso no es la
+  técnica de Detke et al. (1995): según Craft et al. (2010), al terminar cada periodo de 5 s
+  se anota la conducta **predominante del periodo**. Se revirtió: la conducta de cada bloque
+  es la que ocupa **más de sus cinco segundos**, con los desempates de D-53. La regla
+  completa está en **RN-15** del cap. 4, que sigue siendo el único lugar donde se define.
+  Se tocaron RF-18 y la justificación de umbrales (cap. 4) y, en el cap. 5, «Módulo 4», la
+  clasificación segundo a segundo y la pantalla de resultados; ninguno está en tu zona.
+  Al final de `bib/referencias.bib` (tu archivo) hay ahora dos citas agregadas:
+  `detke1995` y `craft2010`. En tus capítulos y casos de uso no hay nada que cambiar,
+  salvo que algún texto tuyo hable de bloques por «último segundo»: debe decir «conducta
+  con más segundos» y remitir a RN-15. **Haz `git pull`** antes de seguir.
 - **Glosario y abreviaturas son de Erick.** Si necesitas una entrada nueva, anótala al
   final de este archivo y él la agrega.
 
