@@ -1349,7 +1349,7 @@ caso de uso.
 \hline
 5 & Inv. / Admin. & Confirma la tanda sugerida, o la corrige a mano; si es una tanda nueva, indica cuántos especímenes tiene (de 2 a 4); elige la sesión (Día 1 o Día 2) y selecciona el archivo \texttt{.mp4} o \texttt{.mov}. \\
 \hline
-6 & Sistema & Valida que el archivo esté en formato \texttt{.mp4} o \texttt{.mov}, que sea reproducible y que el video esté en horizontal. \\
+6 & Sistema & Valida que el archivo sea reproducible y que el video esté en horizontal (la interfaz ya comprobó que fuera \texttt{.mp4} o \texttt{.mov} antes de enviarlo). \\
 \hline
 7 & Sistema & Guarda la tanda y el video; sube el archivo al volumen compartido del servidor. \\
 \hline
@@ -1368,7 +1368,9 @@ caso de uso.
 \hline
 3 & Ningún grupo del experimento coincide con el nombre escrito: el sistema pide los datos del grupo nuevo (tipo, tratamiento); la primera tanda de un grupo nuevo siempre es la A. \\
 \hline
-6 & El archivo no es \texttt{.mp4} ni \texttt{.mov}, o el video está en vertical (cámara girada): el sistema rechaza la carga con mensaje de error específico antes de iniciar la transmisión (ver RF-08). \\
+6 & El archivo no es \texttt{.mp4} ni \texttt{.mov}: la interfaz rechaza la carga con mensaje de error específico antes de iniciar la transmisión (ver RF-08). \
+\hline
+6 & El video está en vertical (cámara girada): el sistema lo rechaza al recibirlo, con mensaje de error específico, y no lo almacena (ver RF-10). \\
 \hline
 6 & El archivo no es reproducible o está corrupto: el sistema lo rechaza tras la validación e indica al investigador que proporcione un archivo válido. \\
 \hline
@@ -2126,7 +2128,7 @@ caso de uso.
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Experimento y todos sus datos eliminados de forma permanente e irreversible de la base de datos (ver RN-09).} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador eliminar un experimento desde el \textit{dashboard}. La acción es permanente, irreversible y requiere confirmación explícita.} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador eliminar un experimento desde el \textit{dashboard} o desde el detalle del experimento. La acción es permanente, irreversible y requiere confirmación explícita.} \\
 \hline
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador selecciona «Eliminar» en un experimento. El sistema solicita confirmación explícita antes de proceder. Tras confirmar, elimina el experimento, sus videos, resultados y reportes asociados de forma permanente.} \\
 \hline
@@ -2139,9 +2141,9 @@ caso de uso.
 \hline
 \textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
 \hline
-1 & Investigador & Selecciona «Eliminar» en el experimento desde el \textit{dashboard}. \\
+1 & Investigador & Selecciona «Eliminar» en el experimento, desde el \textit{dashboard} o desde su detalle. \\
 \hline
-2 & Sistema & Muestra diálogo de confirmación explícita con advertencia de irreversibilidad (ver RN-09). \\
+2 & Sistema & Muestra un aviso que pregunta si está seguro de eliminar, con advertencia de irreversibilidad (ver RN-09). No pide nombre ni contraseña. \\
 \hline
 3 & Investigador & Confirma la eliminación. \\
 \hline
