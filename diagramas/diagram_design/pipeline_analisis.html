@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pipeline de análisis</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+html,body{height:100%;margin:0;background:#faf9f5}
+body{overflow-x:auto;overflow-y:hidden}
+svg{display:block;height:100vh;width:auto}
+</style></head><body><svg viewBox="0 20 1640 980" role="img" aria-labelledby="pl-title pl-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="pl-title">Pipeline de análisis conductual</title>
+<desc id="pl-desc">Los cuatro módulos del pipeline: preprocesamiento, localización de los cilindros, clasificación de conducta y resultados, con las dos fallas posibles.</desc>
+<defs><marker id="p-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#444" stroke-width="1.2"/></marker></defs>
+<style>
+.a{font:400 9px 'Geist Mono',monospace;fill:#1a1a1a}
+.nm{font:600 12px Geist,sans-serif;fill:#1a1a1a}
+.st{font:400 8px 'Geist Mono',monospace;fill:#6b6b6b;letter-spacing:.06em}
+.r{font:400 8px 'Geist Mono',monospace;fill:#6b6b6b;letter-spacing:.06em}
+.lg text{font:400 9px 'Geist Mono',monospace;fill:#6b6b6b}
+</style>
+<rect x="20" y="36" width="1600" height="150" rx="8" fill="#f4f2ea" stroke="#d8d5cc"/>
+<text x="36" y="60" class="st">MÓDULO 1</text>
+<text x="36" y="78" class="nm" style="text-anchor:start">Preprocesamiento</text>
+<rect x="20" y="290" width="1600" height="150" rx="8" fill="#efede4" stroke="#d8d5cc"/>
+<text x="36" y="314" class="st">MÓDULO 2</text>
+<text x="36" y="332" class="nm" style="text-anchor:start">Localización de los cilindros</text>
+<rect x="20" y="460" width="1600" height="330" rx="8" fill="#f4f2ea" stroke="#d8d5cc"/>
+<text x="36" y="484" class="st">MÓDULO 3</text>
+<text x="36" y="502" class="nm" style="text-anchor:start">Clasificación de conducta</text>
+<rect x="20" y="810" width="1600" height="140" rx="8" fill="#efede4" stroke="#d8d5cc"/>
+<text x="36" y="834" class="st">MÓDULO 4</text>
+<text x="36" y="852" class="nm" style="text-anchor:start">Resultados</text>
+<rect x="250" y="91" width="230" height="54" rx="27" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="365.0" y="111" text-anchor="middle" class="nm">Video subido</text>
+<text x="365.0" y="129" text-anchor="middle" class="a">por el investigador</text>
+<rect x="510" y="91" width="230" height="54" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="625.0" y="111" text-anchor="middle" class="nm">Lee los cuadros</text>
+<text x="625.0" y="129" text-anchor="middle" class="a">del video (OpenCV)</text>
+<polygon points="885.0,72.0 1000,118 885.0,164.0 770,118" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="885.0" y="114" text-anchor="middle" class="a" style="font-weight:600">¿Se pudo abrir</text>
+<text x="885.0" y="128" text-anchor="middle" class="a" style="font-weight:600">el video?</text>
+<rect x="1030" y="84" width="230" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1145.0" y="104" text-anchor="middle" class="nm">Registro de cámara</text>
+<text x="1145.0" y="122" text-anchor="middle" class="a">alinea cada cuadro</text>
+<text x="1145.0" y="136" text-anchor="middle" class="a">contra uno de referencia</text>
+<rect x="1290" y="84" width="230" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1405.0" y="104" text-anchor="middle" class="nm">Modelo de fondo</text>
+<text x="1405.0" y="122" text-anchor="middle" class="a">percentil 10 de cada píxel</text>
+<text x="1405.0" y="136" text-anchor="middle" class="a">y mapa de ocupación</text>
+<path d="M480,118 L510,118" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<path d="M740,118 L770,118" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<path d="M1000,118 L1030,118" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<rect x="1013" y="103" width="18" height="11" fill="#faf9f5"/><text x="1022" y="112" text-anchor="middle" class="r">SÍ</text>
+<path d="M1260,118 L1290,118" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<rect x="770" y="198" width="230" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="5,4"/>
+<text x="885.0" y="218" text-anchor="middle" class="nm">Falla</text>
+<text x="885.0" y="236" text-anchor="middle" class="a">reporte de diagnóstico</text>
+<text x="885.0" y="250" text-anchor="middle" class="a">y análisis en «error»</text>
+<path d="M885,164 L885,198" fill="none" stroke="#6b6b6b" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#p-arr)"/>
+<rect x="901" y="187" width="18" height="11" fill="#faf9f5"/><text x="905" y="196" text-anchor="start" class="r">NO</text>
+<rect x="1290" y="339" width="230" height="54" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1405.0" y="359" text-anchor="middle" class="nm">Línea de agua y suelo</text>
+<text x="1405.0" y="377" text-anchor="middle" class="a">rebordes del recipiente</text>
+<rect x="1030" y="332" width="230" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1145.0" y="352" text-anchor="middle" class="nm">Separa los cilindros</text>
+<text x="1145.0" y="370" text-anchor="middle" class="a">por dónde hubo movimiento</text>
+<text x="1145.0" y="384" text-anchor="middle" class="a">dentro del agua</text>
+<polygon points="885.0,320.0 1000,366 885.0,412.0 770,366" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="885.0" y="362" text-anchor="middle" class="a" style="font-weight:600">¿Se hallaron</text>
+<text x="885.0" y="376" text-anchor="middle" class="a" style="font-weight:600">los cilindros?</text>
+<rect x="510" y="332" width="230" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="625.0" y="352" text-anchor="middle" class="nm">Región de interés</text>
+<text x="625.0" y="370" text-anchor="middle" class="a">de cada cilindro</text>
+<text x="625.0" y="384" text-anchor="middle" class="a">(de 2 a 4 por video)</text>
+<path d="M1405,152 L1405,339" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<path d="M1290,366 L1260,366" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<path d="M1030,366 L1000,366" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<path d="M770,366 L740,366" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<rect x="739" y="351" width="18" height="11" fill="#faf9f5"/><text x="748" y="360" text-anchor="middle" class="r">SÍ</text>
+<path d="M885,320 L885,266" fill="none" stroke="#6b6b6b" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#p-arr)"/>
+<rect x="901" y="313" width="18" height="11" fill="#faf9f5"/><text x="905" y="322" text-anchor="start" class="r">NO</text>
+<rect x="250" y="506" width="230" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="365.0" y="526" text-anchor="middle" class="nm">Recorta el tubo</text>
+<text x="365.0" y="544" text-anchor="middle" class="a">usa la región de interés</text>
+<text x="365.0" y="558" text-anchor="middle" class="a">de cada cilindro</text>
+<rect x="510" y="513" width="230" height="54" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="625.0" y="533" text-anchor="middle" class="nm">Arma el clip de cada segundo</text>
+<text x="625.0" y="551" text-anchor="middle" class="a">16 cuadros de una ventana de 4 s</text>
+<rect x="250" y="666" width="230" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="365.0" y="686" text-anchor="middle" class="nm">Separa al espécimen</text>
+<text x="365.0" y="704" text-anchor="middle" class="a">del fondo, en su cilindro</text>
+<text x="365.0" y="718" text-anchor="middle" class="a">(diferencia y brillo)</text>
+<rect x="510" y="659" width="230" height="82" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="625.0" y="679" text-anchor="middle" class="nm">Mide 15 rasgos</text>
+<text x="625.0" y="697" text-anchor="middle" class="a">movimiento, postura y trayectoria</text>
+<text x="625.0" y="711" text-anchor="middle" class="a">en una ventana de 4 s</text>
+<text x="625.0" y="725" text-anchor="middle" class="a">centrada en cada segundo</text>
+<rect x="770" y="659" width="230" height="82" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="885.0" y="679" text-anchor="middle" class="nm">Mide 7 reglas</text>
+<text x="885.0" y="697" text-anchor="middle" class="a">pataleo bajo el agua y cambio</text>
+<text x="885.0" y="711" text-anchor="middle" class="a">sobre la línea de agua</text>
+<text x="885.0" y="725" text-anchor="middle" class="a">se mide en el mismo clip</text>
+<rect x="1030" y="586" width="230" height="68" rx="6" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/>
+<text x="1145.0" y="606" text-anchor="middle" class="nm">CNN 3D con medidas de apoyo</text>
+<text x="1145.0" y="624" text-anchor="middle" class="a">red R(2+1)D-18 sobre el clip,</text>
+<text x="1145.0" y="638" text-anchor="middle" class="a">más las 22 medidas</text>
+<rect x="1290" y="593" width="230" height="54" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1405.0" y="613" text-anchor="middle" class="nm">Conducta del segundo</text>
+<text x="1405.0" y="631" text-anchor="middle" class="a">inmovilidad, nado o escalamiento</text>
+<path d="M625,400 L625,450 L365,450 L365,506" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<path d="M480,540 L510,540" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<path d="M570,400 L570,435 L220,435 L220,700 L250,700" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<path d="M480,700 L510,700" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<path d="M740,540 L1145,540 L1145,586" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<path d="M740,540 L885,540 L885,659" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<circle cx="885" cy="540" r="3" fill="#1a1a1a"/>
+<path d="M1000,700 L1105,700 L1105,654" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<path d="M625,741 L625,772 L1185,772 L1185,654" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<path d="M1260,620 L1290,620" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<rect x="1290" y="846" width="230" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1405.0" y="866" text-anchor="middle" class="nm">Guarda</text>
+<text x="1405.0" y="884" text-anchor="middle" class="a">conducta de cada segundo</text>
+<text x="1405.0" y="898" text-anchor="middle" class="a">segundos por conducta y minuto</text>
+<path d="M1405,647 L1405,846" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#p-arr)"/>
+<g transform="translate(40,972)" class="lg">
+<line x1="0" y1="0" x2="28" y2="0" stroke="#1a1a1a"/><path d="M22,-4 L28,0 L22,4" fill="none" stroke="#1a1a1a"/><text x="38" y="3">FLUJO NORMAL</text>
+<line x1="160" y1="0" x2="188" y2="0" stroke="#6b6b6b" stroke-dasharray="4,3"/><path d="M182,-4 L188,0 L182,4" fill="none" stroke="#6b6b6b"/><text x="198" y="3">FALLA</text>
+<polygon points="300,0 312,-7 324,0 312,7" fill="#faf9f5" stroke="#1a1a1a"/><text x="334" y="3">DECISIÓN</text>
+<rect x="440" y="-8" width="22" height="14" rx="3" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/><text x="470" y="3">LA RED: DECIDE LA CONDUCTA DE CADA SEGUNDO</text>
+</g>
+</svg></body></html>
