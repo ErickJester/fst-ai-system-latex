@@ -88,8 +88,8 @@ Cambios aplicados al `ROI` (8-oct, tras la revisión de quien construye el clasi
 **Lo que no se agregó, a propósito:** `confianza` en `Segundo` ni ningún otro dato que
 entregue el modelo salvo la conducta (el modelo entrenado solo entrega la conducta de cada
 segundo), ni `bloque` en `ROI` (solo haría falta si la web dibujara el recuadro sobre el
-video original), ni los valores de `origen` `humano_ciego` y `sin_revisar`, que el
-cap. 5 no menciona (el apéndice D sí los define).
+video original), ni los valores de `origen` `humano_ciego` y `sin_revisar`: D-80 dejó
+`origen` con cuatro valores (del sistema, confirmada, corregida y dudosa).
 
 **`Observacion` no tiene atributos, y es correcto:** en el grafo esa tabla solo tiene su
 número y los enlaces al espécimen y al video. Representa «un espécimen en un video». Tiene
@@ -106,3 +106,16 @@ Los **métodos** no tienen contraparte en el grafo (es esquema de datos); se cop
 ```bash
 python diagramas/diagram_design/generadores/gen_clases.py diagramas/diagram_design/clases_completo.html
 ```
+
+## Actualización del 12-oct (rama `decisiones-11oct`)
+
+Se regeneró desde `clases.puml` con las decisiones del Día 1 (D-71): el video del Día 1 se
+sube y se guarda, pero no se analiza. Por eso cambiaron tres multiplicidades:
+
+- `Analisis` — `Video`: el análisis es `0..1` por video (antes `1`).
+- `Especimen` — `Observacion`: `0..1` (antes `1..2`).
+- `Video` — `Observacion`: `0..4` (antes `2..4`).
+
+`Video` pasa de `validarFormatoMp4()` a `validarFormato()` y `validarOrientacion()`, y la
+multiplicidad entre `Intervalo` y `Conducta` quedó como `0..*` del lado de `Intervalo` y
+`2..4` del lado de `Conducta`, como en `clases.puml`.

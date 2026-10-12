@@ -11,9 +11,11 @@
 '  - Sin modulo de seguimiento (CLA-02, 5-oct): un especimen por
 '    cilindro, asi que no hay tracker. Las etapas son las de D-16
 '    revisado: preprocesamiento, cilindros, clasificacion.
-'  - Clasificacion: rasgos + gradient boosting con la regla de tres
-'    pasos y la ventana deslizante de 4 s. La R(2+1)D-18 aparece
-'    como candidata en evaluacion; cual queda se decide en TT-II.
+'  - Clasificacion (D-66): la red de fusion R(2+1)D-18 es el clasificador:
+'    recibe el clip de 16 cuadros de una ventana de 4 s y una rama de
+'    medidas (15 rasgos y 7 reglas); estima la probabilidad de cada
+'    conducta y la regla de tres pasos decide. El gradient boosting es
+'    el etiquetador del equipo y aporta los 15 rasgos.
 '  - Preprocesamiento segun fst_auto (CLA-04, 5-oct): sin correccion
 '    de contraste; fondo por percentil 10, no por mediana.
 '
@@ -56,15 +58,9 @@ partition "2. Localización de los cilindros" {
 
 partition "3. Clasificación de conducta" {
   :Separa al espécimen del fondo\ndentro de su cilindro\n(diferencia y brillo, región más grande);
-  :Mide quince rasgos de movimiento,\npostura y trayectoria;
-  :Para cada segundo, toma una ventana de 4 s\ncentrada en él y estima la probabilidad\nde cada conducta;
-  note right
-    Candidata en evaluación: red
-    R(2+1)D-18 sobre clips de
-    16 cuadros. La elección entre
-    ambas se hace en TT-II con F1
-    por conducta.
-  end note
+  :Mide quince rasgos de movimiento, postura\ny trayectoria y siete reglas de observación\n(pataleo bajo el agua y cambios sobre\nla línea de agua);
+  :Para cada segundo, toma una ventana de 4 s\ncentrada en él y arma el clip de 16 cuadros\ndel cilindro;
+  :La red de fusión R(2+1)D-18 recibe el clip\ny las medidas, y estima la probabilidad\nde cada conducta;
   if (¿Una conducta supera el umbral de confianza?) then (sí)
     :Asigna esa conducta;
   elseif (¿Nado y escalamiento juntos lo superan?) then (sí)
@@ -76,7 +72,7 @@ partition "3. Clasificación de conducta" {
 
 partition "4. Resultados" {
   :Se queda con los últimos 300 s del video\n(como máximo; si dura menos, todo)\ny renumera sus segundos de 1 a 300;
-  :Guarda la conducta de cada segundo,\nlos segundos por conducta de cada minuto,\nel video anotado y las medidas por cuadro;
+  :Guarda la conducta de cada segundo, los segundos\npor conducta de cada minuto y la copia del video\npara revisión (H.264);
 }
 stop
 

@@ -103,9 +103,11 @@ out.append(f'<circle cx="{s3x}" cy="{R("v2")[1]}" r="3" fill="#1a1a1a"/>')
 arrow([R('s3'), (cnx - 40, R('s3')[1]), (cnx - 40, B('cnn')[1])])
 arrow([B('s2'), (B('s2')[0], 772), (cnx + 40, 772), (cnx + 40, B('cnn')[1])])
 arrow([R('cnn'), L('cond')])
+box('pausa', 4, 524, 'En pausa', ['3 s seguidos sin ver al espécimen:', 'aviso al usuario; si ajusta el', 'recuadro, continúa; sin respuesta', 'en 5 min, el análisis se cancela'], dash=True)
+arrow([(cnx + 70, N['cnn']['y']), (cnx + 70, 524), L('pausa')], dashed=True, color='#6b6b6b')
 # ---- Modulo 4 (resultados) ----
 cy4 = 880
-box('b2', 4, cy4, 'Guarda', ['conducta de cada segundo', 'segundos por conducta y minuto'])
+box('b2', 4, cy4, 'Guarda', ['conducta de cada segundo', 'segundos por conducta y minuto', 'copia del video para revisión', '(H.264, recortada a lo analizado)'])
 arrow([B('cond'), T('b2')])
 
 legend = '''<g transform="translate(40,972)" class="lg">

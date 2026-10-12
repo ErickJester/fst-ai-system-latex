@@ -30,8 +30,8 @@ vista de **estructura**: responde «¿de qué está hecho el sistema?». La vist
   al final a «completado» o «error». **No hay una cola de mensajes aparte** (ni Redis ni
   Celery): la cola es la tabla.
 - **Backend → volumen compartido:** lee y sirve al frontend los archivos generados.
-- **Worker → volumen compartido:** guarda videos anotados, reportes y reportes de
-  diagnóstico.
+- **Worker → volumen compartido:** guarda la copia del video para revisión (H.264), los
+  reportes y los reportes de diagnóstico.
 - **Worker → volumen de modelos:** carga el archivo del clasificador al iniciar el
   contenedor. El volumen es de solo lectura para el worker.
 
@@ -73,3 +73,12 @@ pedirlo aparte.
 ```bash
 python diagramas/diagram_design/generadores/gen_capas.py diagramas/diagram_design/arquitectura_capas.html
 ```
+
+## Actualización del 12-oct (rama `decisiones-11oct`)
+
+- El volumen compartido incluye ahora la copia del video para revisión (H.264) que genera el
+  worker (cap. 5, «Módulo 4»).
+- Las tareas diarias (borrado de videos a los 30 días, aviso de vencimiento y vigilancia del
+  disco) las ejecuta el worker (D-82), y así figuran en la capa 3.
+- La capa 3 ya no dice «en evaluación» en la R(2+1)D-18: dice «clasificador de conducta»,
+  porque el documento describe un sistema ya hecho (D-66).

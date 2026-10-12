@@ -41,7 +41,7 @@ arrow([(1405, 86), (1445, 86)])
 Y = 282
 a1 = node(40, Y, 170, 'Investigador', ['sube el video', 'del experimento'])
 a2 = node(250, Y, 190, 'Backend', ['valida formato y orientación', 'y guarda el video'])
-a3 = node(480, Y, 170, 'Se encola el análisis', ['estado «en cola»'])
+a3 = node(480, Y, 170, 'Se encola el análisis', ['estado «en cola»', 'Día 1: solo se guarda'])
 a4 = node(690, Y, 170, 'Worker', ['toma la tarea', '(consulta periódica)'])
 frame(900, 240, 520, 150, 'PIPELINE DE ANÁLISIS · DENTRO DEL WORKER')
 p1 = node(915, Y, 150, 'Preprocesamiento', ['registro de cámara', 'y modelo de fondo'])
@@ -54,6 +54,8 @@ arrow([(650, mid(a3)), (690, mid(a3))])
 arrow([(860, mid(a4)), (915, mid(a4))])
 arrow([(1065, mid(p1)), (1085, mid(p1))])
 arrow([(1235, mid(p2)), (1255, mid(p2))])
+pz = node(1455, Y, 215, 'En pausa', ['3 s seguidos sin ver al espécimen:', 'aviso al usuario; si ajusta el', 'recuadro, continúa; sin respuesta', 'en 5 min, el análisis se cancela'])
+arrow([(1405, mid(p3)), (1455, mid(p3))], dashed=True, color='#6b6b6b')
 # modelo -> clasificacion
 arrow([(1330, 56 + t4['h']), (1330, Y)])
 label(1330, 200, 'MODELO ENTRENADO')
@@ -62,10 +64,10 @@ e1 = node(915, 440, 290, 'Si falla', ['el video no se abre o no se encuentran', 
 arrow([(1065, 390), (1065, 440)], dashed=True, color='#6b6b6b')
 label(1100, 420, 'FALLA')
 # exito
-r1 = node(1235, 440, 190, 'Resultados', ['conducta de cada segundo,', 'tiempos por minuto,', 'video anotado'])
+r1 = node(1235, 440, 190, 'Resultados', ['conducta de cada segundo,', 'tiempos por minuto,', 'copia H.264 para revisión'])
 arrow([(1330, 390), (1330, 440)])
 label(1370, 420, 'ÉXITO', 'start')
-r2 = node(1235, 580, 190, 'Investigador', ['consulta y revisa segundo', 'a segundo; los totales', 'por minuto se recalculan'])
+r2 = node(1235, 580, 190, 'Investigador', ['consulta y revisa segundo', 'a segundo; los totales', 'por minuto se recalculan', 'puede reiniciar el análisis'])
 arrow([(1330, 440 + r1['h']), (1330, 580)])
 r3 = node(985, 580, 190, 'Reportes', ['descarga en PDF,', 'CSV o XLSX'])
 arrow([(1235, 580 + 44), (1175, 580 + 44)])
@@ -75,7 +77,7 @@ legend = '''<g transform="translate(40,690)" class="lg">
 <line x1="160" y1="0" x2="188" y2="0" stroke="#6b6b6b" stroke-dasharray="4,3"/><path d="M182,-4 L188,0 L182,4" fill="none" stroke="#6b6b6b"/><text x="198" y="3">FLUJO DE FALLA</text>
 <rect x="340" y="-8" width="22" height="14" rx="3" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/><text x="370" y="3">CLASIFICACIÓN: LA ÚNICA ETAPA QUE USA EL MODELO</text>
 </g>'''
-W, H = 1700, 720
+W, H = 1720, 720
 svg = f'''<svg viewBox="0 10 {W} {H-10}" role="img" aria-labelledby="fl-title fl-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="fl-title">Flujo general del sistema</title>
 <desc id="fl-desc">Del video subido por el investigador al análisis en cola, las tres etapas del pipeline, los resultados y los reportes, con el entrenamiento del modelo fuera de línea.</desc>

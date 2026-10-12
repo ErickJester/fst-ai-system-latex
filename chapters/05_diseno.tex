@@ -72,7 +72,9 @@ Las responsabilidades de cada componente son:
         cola, ejecuta el pipeline completo de análisis (preprocesamiento, localización
         de los cilindros y clasificación) y escribe los resultados en la base de datos.
         Al correr en un proceso separado, el servidor web sigue respondiendo a
-        otras peticiones mientras el video se procesa.
+        otras peticiones mientras el video se procesa. Además ejecuta una vez al día
+        las tareas programadas: el borrado de los videos a los 30~días, el aviso de
+        los que están por vencer y la vigilancia del espacio en disco.
 
         La cola de tareas no es un servicio aparte: es la propia tabla
         \texttt{ANALISIS}. Cuando se sube un video válido, el backend crea un
@@ -274,7 +276,7 @@ la muestran como una cuarta columna (ver RN-13).
 
 \subsection{Módulo 4: Resultados}
 
-Al finalizar el análisis, el pipeline produce cinco salidas:
+Al finalizar el análisis, el pipeline produce tres salidas:
 
 \begin{itemize}
   \item \textbf{Tiempos por conducta}: segundos de nado activo, inmovilidad,
@@ -288,11 +290,6 @@ Al finalizar el análisis, el pipeline produce cinco salidas:
   \item \textbf{Copia del video para revisión}: el \textit{worker} genera, al
         terminar el análisis, una copia del video recortada a los segundos analizados
         en un formato que el navegador reproduce (H.264), para la pantalla de revisión.
-  \item \textbf{Video anotado}: video original con
-        el recuadro de cada cilindro y la etiqueta de conducta superpuestos,
-        disponible para revisión visual del investigador.
-  \item \textbf{Medidas por cuadro}: las medidas del espécimen en cada
-        cuadro, útiles para depuración y auditoría del análisis.
 \end{itemize}
 
 Además, los resultados se muestran en bloques de 5~segundos, la unidad de la técnica de
@@ -2255,7 +2252,7 @@ caso de uso.
 \hline
 \textbf{Caso de Uso} & Borrar video automáticamente & \textbf{Identificador:} CU-14 \\
 \hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sistema \textsf{<<system>>}} \\
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{\textit{Worker} \textsf{<<system>>}} \\
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario} \\
 \hline
@@ -2265,9 +2262,9 @@ caso de uso.
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Archivo de video eliminado del servidor de forma permanente e irreversible (ver RN-05). Resultados y reportes conservados indefinidamente (ver RN-06).} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El sistema ejecuta diariamente, de forma automática, una tarea programada que elimina los archivos de video cuyo análisis fue exitoso hace 30 días o más, previa emisión de aviso al investigador.} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} ejecuta diariamente, de forma automática, una tarea programada que elimina los archivos de video cuyo análisis fue exitoso hace 30 días o más, previa emisión de aviso al investigador.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El sistema identifica los videos próximos a expirar (menos de 7 días) y emite avisos en el \textit{dashboard}. Al cumplirse los 30 días, elimina el archivo de video del almacenamiento, conservando los resultados y reportes asociados.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} identifica los videos próximos a expirar (menos de 7 días) y emite avisos en el \textit{dashboard}. Al cumplirse los 30 días, elimina el archivo de video del almacenamiento, conservando los resultados y reportes asociados.} \\
 \hline
 \end{tabular}
 
@@ -2278,15 +2275,15 @@ caso de uso.
 \hline
 \textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
 \hline
-1 & Sistema & Ejecuta la tarea programada de expiración (cron diario). \\
+1 & \textit{Worker} & Ejecuta la tarea programada de expiración (cron diario). \\
 \hline
-2 & Sistema & Consulta la base de datos para identificar videos con análisis exitoso hace $\geq 23$ días y $< 30$ días. \\
+2 & \textit{Worker} & Consulta la base de datos para identificar videos con análisis exitoso hace $\geq 23$ días y $< 30$ días. \\
 \hline
 3 & Sistema & Muestra aviso de expiración en el \textit{dashboard} del investigador correspondiente: nombre del experimento y fecha exacta de eliminación (ver RF-24). \\
 \hline
-4 & Sistema & Al cumplirse los 30 días, elimina el archivo de video del volumen de almacenamiento. \\
+4 & \textit{Worker} & Al cumplirse los 30 días, elimina el archivo de video del volumen de almacenamiento. \\
 \hline
-5 & Sistema & Elimina el archivo físico del volumen de almacenamiento; la fila de \texttt{VIDEO} permanece en la base de datos (no puede eliminarse mientras \texttt{ANALISIS} y \texttt{OBSERVACION} la referencien), con \texttt{archivo} ya no disponible; resultados y reportes permanecen accesibles. \\
+5 & \textit{Worker} & Elimina el archivo físico del volumen de almacenamiento; la fila de \texttt{VIDEO} permanece en la base de datos (no puede eliminarse mientras \texttt{ANALISIS} y \texttt{OBSERVACION} la referencien), con \texttt{archivo} ya no disponible; resultados y reportes permanecen accesibles. \\
 \hline
 \end{tabular}
 

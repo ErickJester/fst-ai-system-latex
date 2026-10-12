@@ -24,7 +24,7 @@ El camino de un video desde que el investigador lo sube hasta que descarga los r
    - *Clasificación:* decide la conducta de cada segundo con el modelo entrenado. Es la
      única etapa que usa el modelo.
 6. **Si todo sale bien** se guardan los resultados: conducta de cada segundo, tiempos por
-   minuto y video anotado.
+   minuto y la copia del video para revisión (H.264).
 7. **Si falla** (el video no se abre o no se encuentran los cilindros), el análisis pasa a
    «error», se genera el reporte de diagnóstico y se avisa al investigador (RN-11).
 8. **El investigador consulta y revisa** segundo a segundo; al guardar, los totales por
@@ -54,10 +54,23 @@ Cap. 5: «Arquitectura general», «Diseño del pipeline de análisis conductual
 - **El texto del cap. 5 (párrafo antes de la figura del flujo)** dice que el ciclo de
   entrenamiento es «anotación experta, dataset y entrenamiento». Eso contradice la
   estrategia vigente (se entrena sin las anotaciones del laboratorio) y este diagrama.
-  No se modificó; conviene corregirlo si se usa esta figura.
+  En la rama `decisiones-11oct` ya está corregido: el párrafo dice ahora «clips etiquetados por
+  el equipo, entrenamiento y evaluación».
 
 ## Cómo regenerarlo
 
 ```bash
 python diagramas/diagram_design/generadores/gen_flujo.py diagramas/diagram_design/flujo_sistema.html
 ```
+
+## Actualización del 12-oct (rama `decisiones-11oct`)
+
+- **Día 1:** se sube y se guarda, pero no se encola ni se analiza (D-71). Está en el cuadro
+  «Se encola el análisis».
+- **Pausa:** si durante la clasificación pasan 3 s seguidos sin ver al espécimen, el análisis
+  pasa a «en pausa» y se avisa al usuario; si ajusta el recuadro, continúa, y si no responde
+  en 5 minutos, se cancela (RN-17, D-67). Aparece como un cuadro punteado a la derecha de la
+  clasificación.
+- **Reinicio:** el investigador puede reiniciar el análisis desde la pantalla de revisión; el
+  resultado anterior se borra al empezar el nuevo (RN-04, D-68). Está en el cuadro final del
+  investigador.

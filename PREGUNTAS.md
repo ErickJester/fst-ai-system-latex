@@ -40,15 +40,6 @@ registrado como tuyo, o me dices que lo anote como pendiente para ellos.
    - **Recomiendo:** 2a sigue con «no se ve» y avisa; 2b se descarta (no agrega tablas); 2c reemplaza el resultado
      al terminar el nuevo. Con eso lo aplico en los capítulos 4 y 5 en un solo commit.
 
-3. **¿Qué guarda realmente el *worker* al terminar?** (DF-09) **(equipo)**
-   - **Qué pasa hoy:** el cap. 5 (módulo 4) dice que guarda un *video anotado* con los recuadros y las
-     etiquetas, y «medidas por cuadro». Otras figuras dicen que solo guarda los recuadros de los cilindros y un
-     recorte del video a los últimos 300 s; otra dice que el video anotado «se quitó porque el código no lo
-     genera». Las cuatro figuras y el texto no coinciden.
-   - **Opciones:** (a) solo el recorte reproducible (H.264, D-58) más el archivo de recuadros; (b) además un video
-     anotado.
-   - **Recomiendo (a),** que es lo que el código (`fst_auto`) hace hoy. Alineo texto y figuras a esa lista.
-
 4. **¿La red de fusión (CNN) ya es la línea del proyecto?** (MD-26, DF-18, C3-04, MD-22) **(equipo)**
    - **Qué pasa hoy:** `PENDIENTES.md` dice «clasificador todavía no se elige» (candidatos: *gradient boosting*
      sobre rasgos y la R(2+1)D-18). Pero el repositorio `fst-etiquetador` ya implementa la «versión 5», una CNN 3D
@@ -59,21 +50,10 @@ registrado como tuyo, o me dices que lo anote como pendiente para ellos.
    - **Recomiendo (a)** hasta tener las métricas de TT-II; solo ajusto el cap. 3 para decir que el candidato
      puede combinar la red con una rama de medidas.
 
-5. **Dos columnas y una cardinalidad del modelo de datos** (MD-23, DR-08) **(equipo)**
-   - **5a.** tres columnas de `ANALISIS` (entre ellas `etapa` y `fechaAnalisis`) están como NOT NULL en el apéndice D, pero
-     `INSTRUCCIONES-WEB.md` dice que el backend las deja vacías al encolar y el *worker* las llena después.
-     ¿Pueden ser nulas hasta que el *worker* las llena? **Recomiendo que sí** (cambio el apéndice D y el
-     esquema físico).
+5. **Una cardinalidad del modelo de datos** (DR-08) **(equipo)**
    - **5b.** `INTERVALO — PRESENTA` está dibujada como (2,4), pero el texto dice que siempre hay una fila por
      cada una de las cuatro conductas, incluso con valor 0. ¿Siempre 4 filas? **Recomiendo que sí** y la
      cardinalidad queda (4,4).
-
-6. **Valores de `SEGUNDO.origen`** (C5-06) **(equipo)**
-   - **Qué pasa hoy:** el cap. 5 y RF-32 hablan de cuatro orígenes (del sistema, confirmado, corregido, dudoso);
-     el apéndice D y el esquema físico tienen seis (además `sin_revisar` y `humano_ciego`, que son modos del
-     etiquetador del equipo, no de la aplicación para el usuario final).
-   - **Opciones:** (a) dejar cuatro y quitar los dos del apéndice D y del físico; (b) dejar seis y describirlos.
-   - **Recomiendo (a):** D-53 dice que no se guarda nada cuyo único uso sea mejorar la CNN.
 
 7. **RN-16 (siempre un Administrador activo): ¿también cuando se quita el rol?** (C4-20)
    - **Qué pasa hoy:** RN-16 solo cubre *desactivar* la última cuenta de Administrador. RF-05 también deja
@@ -86,12 +66,6 @@ registrado como tuyo, o me dices que lo anote como pendiente para ellos.
    - **Qué pasa hoy:** el cap. 5 lo dice en la pantalla de administración, pero ningún requisito (RF-28/29) lo
      pide, y el modelo no se guarda en la base de datos (es constante del pipeline).
    - **Recomiendo:** quitarlo del texto y del mockup.
-
-9. **¿Quién borra los videos a los 30 días?** (MD-25) **(equipo)**
-   - **Qué pasa hoy:** `INSTRUCCIONES-WEB.md` dice «tarea programada del backend»; el cap. 5 (CU-14) dice que
-     la ejecuta el *worker*.
-   - **Recomiendo:** el *worker*, como ya está en CU-14, el diagrama de clases y el de casos de uso. Corrijo
-     `INSTRUCCIONES-WEB.md`.
 
 ---
 

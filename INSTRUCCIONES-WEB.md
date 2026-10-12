@@ -27,7 +27,8 @@ pregunta al usuario; no lo inventes.
 ## 1. Qué se construye y qué no
 
 **Se construye:** frontend (React), backend (Flask), base de datos (PostgreSQL),
-orquestación (Docker Compose) y las tareas programadas.
+orquestación (Docker Compose). Las tareas programadas (borrado de videos, aviso de
+vencimiento y vigilancia del disco) las ejecuta el **worker** (D-82; ver secciones 4 y 8).
 
 **No se construye:** el análisis de video ni el clasificador de conductas. Eso es el
 **worker**, lo hace otra persona. Para ti el worker es una caja negra con un contrato
@@ -58,8 +59,9 @@ saber cuánto tiempo pasa cada espécimen nadando, inmóvil o escalando.
 | `mailhog` (solo desarrollo) | MailHog | Servidor de correo falso para ver los mensajes sin enviar nada (sección 11, punto 2). |
 
 Volúmenes:
-- `videos_reportes` (compartido backend y worker): videos `.mp4` y `.mov`, videos anotados,
-  reportes PDF/CSV/XLSX y reportes de diagnóstico PDF.
+- `videos_reportes` (compartido backend y worker): videos `.mp4` y `.mov`, la copia del
+  video para revisión (H.264), reportes PDF/CSV/XLSX y reportes de diagnóstico PDF.
+  No se guardan videos anotados ni medidas por cuadro (D-81).
 - `modelos` (solo lectura, solo para el worker): modelos entrenados.
 - `pgdata`: datos de PostgreSQL.
 
@@ -109,9 +111,9 @@ flowchart TB
 web/
   docker-compose.yml
   .env.example
-  backend/        app Flask, modelos SQLAlchemy, rutas, tareas programadas
+  backend/        app Flask, modelos SQLAlchemy, rutas
   frontend/       app React + Vite
-  worker_fake/    simulador del worker para pruebas
+  worker_fake/    simulador del worker para pruebas, con las tareas programadas (D-82)
   db/init/        SQL de creación (dominios, tablas, restricciones, semillas)
 ```
 
@@ -123,7 +125,10 @@ datos y del volumen**.
 **Lo que hace el backend al subir un video válido:**
 1. Guarda el archivo en `videos_reportes`.
 2. Guarda grupo (si es nuevo), tanda (nueva o existente) y video.
-3. Crea una fila en `ANALISIS` con `estado = 'en cola'` y el `idVideo` del video.
+3. Crea una fila en `ANALISIS` con `estado = 'en cola'`, el `idVideo` del video y estos
+   **valores de arranque** (D-79): `etapa = 'preprocesamiento'`, `nivelClasif = 'preciso'` y
+   `fechaAnalisis` = la fecha de encolado. Las tres columnas son NOT NULL; el worker las
+   reemplaza.
 4. Responde al frontend y el frontend redirige a la pantalla de progreso.
 
 **Lo que hace el worker (tú lo simulas con `worker_fake`):**
@@ -133,8 +138,19 @@ datos y del volumen**.
 3. La CNN analiza el **video completo**; después el worker se queda con los **últimos 300 segundos** de cada espécimen (de final a inicio) y descarta el principio, donde a veces aparecen personas. Es un máximo, sin mínimo: si el video dura menos, se quedan todos los segundos. Renumera las filas de 1 a 300 antes de guardarlas (D-54).
    Ya no existe un umbral de confianza de detección. Si no puede abrir el video o no
    encuentra los tubos: genera el PDF de diagnóstico, llena `rutaDiagnostico`, pasa a
-   `error` y crea una `NOTIFICACION` de tipo `error del pipeline`. No hay reintento ni
-   intervención humana en esta versión (sección 11, punto 14).
+   `error` y crea una `NOTIFICACION` de tipo `error del pipeline`. No hay reintento: el
+   investigador no puede reiniciar un análisis en `error` (R-04).
+
+   **Pausa y cancelación (RN-17, D-59, D-67).** Durante la clasificación, si en un segundo no
+   se ve al espécimen, ese segundo queda como "no se ve" (conducta nula). Si pasan **tres
+   segundos seguidos** así, el worker pasa el análisis a `en pausa` y crea una
+   `NOTIFICACION` de tipo `analisis en pausa`. Espera hasta **5 minutos** a que el usuario
+   ajuste el recuadro del cilindro; con el ajuste vuelve a revisar esos tres segundos y el
+   análisis regresa a `procesando`. Si pasan los 5 minutos sin respuesta, lo pasa a
+   `cancelado` y crea una `NOTIFICACION` de tipo `analisis cancelado`. **[ABIERTO]** Cómo le
+   llega al worker el ajuste del recuadro y si se guarda (D-59 deja pendiente «si se guarda
+   (segundo, tubo y coordenadas)»): no hay tabla ni ruta para eso, así que no las inventes;
+   en `worker_fake` simula las dos salidas (el usuario responde o pasan los 5 minutos).
 4. Si todo sale bien, por cada espécimen:
    - escribe una `OBSERVACION` del video;
    - escribe **una fila en `SEGUNDO` por cada segundo analizado** (hasta 300), con
@@ -146,8 +162,23 @@ datos y del volumen**.
    Después guarda `nivelClasif` (sección 11, punto 15), genera los archivos auxiliares
    (puntos 16 y 17 de la sección 11), pasa a `completado` y crea una `NOTIFICACION` de
    tipo `analisis completado`.
-5. Al pasar a `completado` o a `error`, fija `fechaAnalisis = ahora`. Sin esa fecha el
-   borrado a los 30 días nunca se dispara, y la base rechaza un `completado` sin ella.
+5. Al pasar a `completado` o a `error`, **reemplaza** `fechaAnalisis` por `ahora` (al encolar
+   valía la fecha de encolado, D-79). El borrado a los 30 días cuenta desde esa fecha y solo
+   mira análisis en estado `completado`.
+6. **Tareas programadas (D-82).** Una vez al día ejecuta el borrado de videos vencidos y el
+   aviso de vencimiento, y cada cierto tiempo la vigilancia del disco (sección 8). No las
+   ejecuta el backend. **Pendiente de coordinar:** como el worker lo hace otra persona,
+   hay que acordar quién escribe estas tareas dentro de su contenedor; este contrato no
+   las incluía.
+
+**Reiniciar un análisis (D-60, D-68).** El investigador que subió el video (o un
+Administrador) puede reiniciar un análisis **`completado`** desde la pantalla de revisión
+(sección 9.7). El backend, en una sola transacción: **borra el resultado anterior** (las
+`OBSERVACION` de ese video con sus `INTERVALO`, `SEGUNDO` y `PRESENTA`) *al empezar* el
+nuevo, no al terminar; borra los reportes guardados del experimento para que se regeneren;
+y deja el análisis en `en cola` con los valores de arranque de `etapa`, `nivelClasif` y
+`fechaAnalisis` (D-79). El worker lo toma como cualquier otro. No se puede reiniciar un
+análisis en `error`, `en pausa`, `cancelado` ni en curso.
 
 **Umbral de decisión.** El worker acepta una conducta para un segundo cuando su
 probabilidad llega a **0.80**. Es una **constante del worker**: no se guarda en la base de
@@ -163,10 +194,11 @@ eso, en un intervalo de un minuto, la suma de segundos de sus conductas no pasa 
 hay segundos en los que el espécimen no se ve, la suma queda por debajo de 60.
 
 **El backend nunca escribe `estado`, `etapa` ni `nivelClasif` salvo al crear el análisis
-en cola.**
+en cola o al reiniciarlo, con sus valores de arranque (D-79, D-68).**
 
-Estados válidos de un análisis (`estado_analisis`): `en cola`, `procesando`,
-`completado`, `error`. No hay transición de regreso (regla R-04).
+Estados válidos de un análisis (`estado_analisis`): `en cola`, `procesando`, `en pausa`,
+`completado`, `error` y `cancelado`. Solo hay una transición de regreso: el reinicio de un
+análisis `completado` lo devuelve a `en cola` (regla R-04). `error` y `cancelado` son finales.
 
 ```mermaid
 stateDiagram-v2
@@ -177,15 +209,21 @@ stateDiagram-v2
     preprocesamiento --> cilindros
     cilindros --> clasificacion
   }
-  cilindros --> error: no se pudo abrir el video o no se hallaron los tubos
+  preprocesamiento --> error: no se pudo abrir el video
+  cilindros --> error: no se hallaron los cilindros
   clasificacion --> completado
+  clasificacion --> en_pausa: 3 s seguidos sin ver al espécimen (RN-17)
+  en_pausa --> clasificacion: el usuario ajustó el recuadro del cilindro
+  en_pausa --> cancelado: 5 minutos sin respuesta
+  completado --> en_cola: el investigador reinició el análisis (R-04)
   completado --> [*]
   error --> [*]
+  cancelado --> [*]
 ```
 
 El estado de un **experimento** no se guarda: se calcula a partir de los análisis de
-todas sus tandas, con precedencia `error` > `procesando` > `en cola` > `completado`.
-Un experimento sin videos se muestra como "sin videos".
+todas sus tandas, con precedencia `error` > `cancelado` > `en pausa` > `procesando` >
+`en cola` > `completado`. Un experimento sin videos se muestra como "sin videos".
 
 ```mermaid
 stateDiagram-v2
@@ -194,6 +232,9 @@ stateDiagram-v2
   en_cola --> procesando: el worker empezó alguna tanda
   procesando --> completado: todas las tandas terminaron sin error
   procesando --> error: alguna tanda terminó en error
+  procesando --> en_pausa: alguna tanda quedó en pausa (RN-17)
+  en_pausa --> procesando: el usuario respondió
+  en_pausa --> cancelado: 5 minutos sin respuesta
   completado --> en_cola: se agregó una tanda nueva
 ```
 
@@ -319,11 +360,11 @@ ejemplo «Tanda A · Espécimen 2».
 | `tipo_grupo` | `control`, `referencia`, `tratamiento experimental` |
 | `sesion_video` | `Dia 1`, `Dia 2` |
 | `formato_reporte` | `CSV`, `XLSX`, `PDF` |
-| `tipo_notificacion` | `analisis completado`, `error del pipeline`, `alerta de disco`, `video borrado` |
-| `estado_analisis` | `en cola`, `procesando`, `completado`, `error` |
+| `tipo_notificacion` | `analisis completado`, `error del pipeline`, `analisis en pausa`, `analisis cancelado`, `alerta de disco`, `video borrado` |
+| `estado_analisis` | `en cola`, `procesando`, `en pausa`, `completado`, `error`, `cancelado` |
 | `etapa_analisis` | `preprocesamiento`, `cilindros`, `clasificacion` |
 | `nivel_clasif_analisis` | `preciso`, `agrupado` |
-| `origen_segundo` | `maquina`, `humano_confirma`, `humano_corrige`, `humano_duda`, `sin_revisar`, `humano_ciego` |
+| `origen_segundo` | `maquina`, `confirmada`, `corregida`, `dudosa` |
 
 `CONDUCTA` es tabla y no dominio. Valores iniciales: `nado activo`, `inmovilidad`,
 `escalamiento` y `conducta activa`. Cada intervalo (`INTERVALO`) tiene en `PRESENTA` una
@@ -332,11 +373,11 @@ cardinalidad se declara 2..4, pero en la práctica son siempre 4).
 
 `SEGUNDO` guarda la conducta de cada espécimen en cada segundo analizado (hasta 300 por
 observación). Es la fuente de la pantalla de revisión; `PRESENTA` es su resumen por minuto
-y se recalcula cada vez que el usuario guarda correcciones. Valores de `origen`:
-`maquina`, `humano_confirma`, `humano_corrige`, `humano_duda` (el usuario dejó el segundo
-vacío a propósito), `sin_revisar` y `humano_ciego` (revisión "desde cero", que no muestra la
-conducta del sistema). `conducta` nula significa que el segundo no tiene conducta: la
-máquina no pudo decidir, o el usuario lo marcó "dudosa" (`humano_duda`). La conducta del
+y se recalcula cada vez que el usuario guarda correcciones. Valores de `origen` (cuatro,
+D-80): `maquina` (la puso el sistema, sin revisar), `confirmada` (el usuario vio el segundo y dejó la
+conducta del sistema), `corregida` (la cambió) y `dudosa` (el segundo queda vacío porque el
+usuario lo marcó como dudoso). `conducta` nula significa que el segundo no tiene conducta: la
+máquina no pudo decidir, o el usuario lo marcó "dudosa" (`dudosa`). La conducta del
 sistema no se conserva aparte: al corregir se reemplaza, y `origen` dice que el segundo fue revisado.
 
 ### Restricciones que la base debe hacer cumplir
@@ -412,7 +453,8 @@ Estos nombres los propone este documento; confírmalos con el usuario:
 | Sugerir grupos con nombre parecido y la siguiente tanda | `GET /experiments/{id}/groups?q=` |
 | Datos de la pantalla de revisión: especímenes, etiquetas por segundo y recuadros de los tubos | `GET /experiments/{id}/analyses/{idAnalisis}/review` |
 | Video para la pantalla de revisión (con soporte de `Range`, para poder adelantar y retroceder) | `GET /experiments/{id}/analyses/{idAnalisis}/video` |
-| Guardar las correcciones por segundo | `PUT /experiments/{id}/analyses/{idAnalisis}/segundos` |
+| Guardar las correcciones por segundo (solo quien subió el video o un Administrador, D-57) | `PUT /experiments/{id}/analyses/{idAnalisis}/segundos` |
+| Reiniciar un análisis `completado`: borra el resultado anterior y lo vuelve a encolar (solo quien subió el video o un Administrador; D-60, D-68) | `POST /experiments/{id}/analyses/{idAnalisis}/restart` |
 
 ## 7. Reglas de negocio que el backend debe cumplir
 
@@ -421,7 +463,7 @@ Estos nombres los propone este documento; confírmalos con el usuario:
 | R-01 | Credenciales incorrectas: mensaje genérico, sin decir si falló el correo o la contraseña. |
 | R-02 | Un video pertenece a exactamente una tanda. No se reutiliza en otra. |
 | R-03 | Una tanda tiene como máximo 2 videos: Día 1 (20 min) y Día 2 (5 min). Ambos son opcionales individualmente. Solo el Día 2 se analiza; el Día 1 solo confirma que existe el video de habituación (D-54). |
-| R-04 | El análisis lo inicia el sistema solo. El investigador **no puede** iniciar, pausar, cancelar ni reiniciar un análisis. No pongas botón de cancelar ni de reiniciar. Lo que sí puede hacer, **cuando el análisis termina**, es corregir las etiquetas por segundo (R-14). |
+| R-04 | El análisis lo inicia el sistema solo. El investigador **no puede** iniciar, pausar ni cancelar un análisis: solo el sistema lo pausa o lo cancela (R-15). No pongas botón de cancelar. Lo que sí puede hacer, **cuando el análisis termina**, es corregir las etiquetas por segundo (R-14) y **reiniciar el análisis** desde la pantalla de revisión (D-60): el resultado anterior se borra al empezar el nuevo (D-68). |
 | R-05 | Los videos se borran 30 días después de un análisis exitoso. Irreversible. Aviso con 7 días o más de anticipación. |
 | R-06 | Resultados y reportes se conservan para siempre, aunque el video ya no exista. |
 | R-07 | Todos los investigadores activos pueden ver los experimentos de cualquier otro. El administrador además modifica y desactiva cuentas. |
@@ -431,7 +473,8 @@ Estos nombres los propone este documento; confírmalos con el usuario:
 | R-11 | **Eliminada (D-44).** No hay comparación Día 1 vs Día 2. Se comparan los grupos entre sí con el Día 2; el Día 1 solo sirve para verificar que los especímenes llegaron igual de estresados. |
 | R-12 | Cuando el clasificador sabe que el espécimen no está inmóvil pero no decide entre nado y escalamiento, esos segundos se guardan como "conducta activa", una cuarta conducta. Un mismo análisis puede mezclar las cuatro. Los reportes deben mostrarla como una columna más. En los bloques de 5 s también resuelve el empate entre nado activo y escalamiento (sección 9.5). |
 | R-13 | De cada video se guardan y se muestran como máximo los **últimos 300 s** (de final a inicio), sin mínimo. La CNN analiza el video completo y el worker descarta el principio, donde a veces aparecen personas, y renumera de 1 a 300 (D-54). |
-| R-14 | Solo se puede revisar un análisis en estado `completado`. Al revisar, el usuario corrige las etiquetas segundo a segundo; cada corrección queda en `SEGUNDO` con `origen` `humano_confirma`, `humano_corrige` o `humano_duda`, y al guardar el backend **recalcula `INTERVALO` y `PRESENTA`** de esos especímenes dentro de la misma transacción. La conducta que puso el sistema se reemplaza al corregir; `origen` conserva que el segundo fue revisado. |
+| R-14 | Solo se puede revisar un análisis en estado `completado`. Al revisar, el usuario corrige las etiquetas segundo a segundo; cada corrección queda en `SEGUNDO` con `origen` `confirmada`, `corregida` o `dudosa`, y al guardar el backend **recalcula `INTERVALO` y `PRESENTA`** de esos especímenes dentro de la misma transacción. La conducta que puso el sistema se reemplaza al corregir; `origen` conserva que el segundo fue revisado. **Solo corrigen el investigador que subió el video y el Administrador** (D-57). Corregir etiquetas no cambia el modelo ni el video: si lo que cambia es el video o el modelo, es un análisis nuevo (reinicio, R-04). El video que se reproduce es la copia H.264 que el worker genera al terminar (D-58). |
+| R-15 | Si en un segundo no se ve al espécimen, ese segundo se registra como "no se ve". Tres segundos seguidos así dejan el análisis `en pausa`, se avisa al usuario con una notificación `analisis en pausa` y se le pide ajustar el recuadro del cilindro. Si no responde en 5 minutos, el análisis pasa a `cancelado` y se crea la notificación `analisis cancelado` (RN-17, D-59, D-67). El investigador no cancela ni pausa: lo hace el sistema. |
 
 Otras decisiones tomadas:
 - **Progreso:** el backend calcula el porcentaje por análisis como **un tercio fijo por
@@ -461,6 +504,8 @@ Otras decisiones tomadas:
   subir el primer video de cada grupo.
 
 ## 8. Tareas programadas (cron)
+
+Las ejecuta el **worker** (D-82), no el backend.
 
 | Tarea | Frecuencia | Qué hace |
 |---|---|---|
@@ -558,10 +603,11 @@ Reglas del paso 2:
 - Estados: vacío, lleno, subiendo, error de formato, errores de campo, éxito.
 
 ### 9.4 Progreso del análisis
-Estados: analizando; completado; error (no se pudo abrir el video o no se hallaron los
-tubos). ~~Esta pantalla cambiará si se adopta el análisis en pantalla con intervención
-humana~~ **Resuelto por la sección 11, punto 14:** en esta versión no hay análisis en
-pantalla ni intervención humana, así que la pantalla se queda como está.
+Estados: analizando; en pausa (el sistema no vio al espécimen y espera al usuario); completado;
+error (no se pudo abrir el video o no se hallaron los tubos); cancelado (el usuario no
+respondió en 5 minutos). La pantalla para ajustar el recuadro durante una pausa (RN-17,
+D-59) **todavía no está diseñada** (sección 11, punto 14); por ahora la pantalla solo
+muestra el estado "en pausa" y el aviso.
 
 ```
 +-------------------------------------------------------------+
@@ -578,8 +624,10 @@ pantalla ni intervención humana, así que la pantalla se queda como está.
 
 - Consulta el backend cada **3 a 5 segundos** mientras haya análisis en cola o procesando.
 - Una barra por video. Cada etapa vale un tercio.
-- **Sin botón de cancelar ni de reiniciar** (R-04). El análisis sigue aunque se cierre la
-  pestaña.
+- **Sin botón de cancelar ni de reiniciar** en esta pantalla (R-04). El reinicio está solo
+  en la pantalla de revisión (9.7). El análisis sigue aunque se cierre la pestaña.
+- **En pausa:** muestra "En pausa: no se ve al espécimen" y el tiempo que queda de los 5
+  minutos. **Cancelado:** muestra que se canceló por falta de respuesta.
 - En error: el mensaje se **arma a partir de `etapa`** del análisis (no hay columna de
   código ni de descripción de error). Los errores definidos son: el video no se pudo abrir
   y no se hallaron los tubos. Debajo, el botón del PDF de diagnóstico. Si el PDF aún no
@@ -648,7 +696,8 @@ muestra una sola vez en pantalla al administrador, como respaldo (D-45, sección
 
 ### 9.7 Revisión segundo a segundo
 Se abre **solo cuando el análisis está `completado`**, desde Progreso o Resultados
-(regla R-14). Es una versión web de una herramienta de revisión que ya existe como página
+(regla R-14), y **solo para el investigador que subió el video y el Administrador**
+(D-57); cualquier otro usuario recibe 403. Es una versión web de una herramienta de revisión que ya existe como página
 suelta; aquí lee y guarda en el servidor en vez de usar archivos locales. Tema oscuro,
 pantalla completa. Se revisa **un espécimen a la vez**, con el video corriendo.
 
@@ -684,23 +733,30 @@ Cómo funciona:
   ve". `Espacio` pausa. `←` `→` un segundo, `Shift` + flecha cinco. `R` vuelve 3 s.
   `Tab` cambia de tubo. `Ctrl+Z` deshace. `Ctrl+S` guarda.
 - **"Visto"** son los segundos que el cabezal ya dejó atrás a velocidad 2x o menos. Solo lo
-  visto se guarda como `humano_confirma` (coincide con la conducta del sistema) o `humano_corrige`
-  (la cambiaste). Lo pintado hacia adelante sin verlo queda `sin_revisar`. Un segundo que
-  dejas vacío a propósito queda `humano_duda`.
-- **Modo "desde cero"** (opcional): oculta la conducta del sistema (cartel, colores de la
-  línea de tiempo y contadores); lo que marques queda `humano_ciego`.
+  visto se guarda como `confirmada` (coincide con la conducta del sistema) o `corregida`
+  (la cambiaste). Lo pintado hacia adelante sin verlo no se guarda como revisado: se
+  descarta al guardar y esos segundos conservan la conducta y el origen `maquina` que puso
+  el sistema (D-80: ya no existe `sin_revisar`). Un segundo que dejas vacío a propósito
+  queda `dudosa`.
+- No hay modo de revisión "desde cero" que oculte la conducta del sistema: se quitó con
+  el valor `humano_ciego` (D-80).
 - **Recuadro del tubo:** viene del archivo `analisis_{idAnalisis}_cajas.json` (sección 11,
-  punto 17). Es solo para destacar visualmente al espécimen; no se puede mover.
+  punto 17). Aquí es solo para destacar visualmente al espécimen; no se mueve. El ajuste
+  del recuadro durante una pausa (RN-17) es otra pantalla, aún sin diseñar.
+- **Reiniciar el análisis (D-60, D-68):** botón "Reiniciar el análisis" con confirmación
+  ("se borrará el resultado actual"). Llama a `POST .../restart` (sección 6); al empezar se
+  borra el resultado anterior y el análisis vuelve a "en cola". Solo aparece si el análisis
+  está `completado`.
 - **Borrador:** mientras revisas, el avance se guarda en el navegador; al pulsar "Guardar"
   se manda al servidor (`PUT .../segundos`), que actualiza `SEGUNDO` y recalcula los
   totales por minuto.
 - **Resumen:** una tabla con los segundos por conducta de cada espécimen antes de guardar.
 - Nombres en pantalla: "Nado", "Inmovilidad", "Escalamiento", "Activa", "Dudosa". En la
   base: `nado activo`, `inmovilidad`, `escalamiento`, `conducta activa` y nulo. "Dudosa"
-  guarda `conducta` nula con `origen = 'humano_duda'`; no existe un botón aparte de "No se
+  guarda `conducta` nula con `origen = 'dudosa'`; no existe un botón aparte de "No se
   ve".
-- En la base los reportes dicen si el análisis tuvo revisión humana (algún `origen` que
-  empiece con `humano`).
+- En la base los reportes dicen si el análisis tuvo revisión humana (algún `origen`
+  distinto de `maquina`).
 
 ### 9.8 Textos de la interfaz (reglas)
 - Di **"espécimen"**. Nunca "rata" ni "animal" en ningún texto visible.
@@ -829,7 +885,8 @@ sequenceDiagram
    aplicación); no depende de un servidor del IPN. Se configura con las variables `SMTP_*`
    (servidor, puerto, usuario, contraseña, remitente). Se envían:
    - **Notificaciones:** cada `NOTIFICACION` que el sistema crea (`analisis completado`,
-     `error del pipeline`, `alerta de disco`, `video borrado`) se manda también por correo a su
+     `error del pipeline`, `analisis en pausa`, `analisis cancelado`, `alerta de disco`,
+     `video borrado`) se manda también por correo a su
      destinatario, como copia del aviso. La campanita no cambia. No se agregan tablas ni
      columnas: el correo sale de `USUARIO.correo`.
    - **Contraseña temporal:** al crear una cuenta se envía por correo **y** se muestra una
@@ -846,8 +903,10 @@ sequenceDiagram
    requisito permite cambiar el modelo ni el umbral. El modelo entrenado y el umbral de
    decisión (0.80) son constantes del worker (sección 4). Al encolar, el backend solo
    necesita el `idVideo`.
-4. **Valor de `etapa` mientras el análisis está `en cola`: [PROPUESTA]** es nulo. Así
-   está en el SQL del Anexo B. El usuario no lo ha confirmado.
+4. ~~Valor de `etapa` mientras el análisis está `en cola`~~ **Resuelto (usuario,
+   12-oct-2026, D-79).** `etapa`, `nivelClasif` y `fechaAnalisis` siguen NOT NULL y el
+   backend les pone un valor de arranque al encolar (`preprocesamiento`, `preciso` y la
+   fecha de encolado); el worker los reemplaza.
 5. **[ABIERTO] Tamaño máximo de video.** No está definido. Dejar el límite configurable
    (`MAX_UPLOAD_MB`).
 6. ~~Cardinalidades de especímenes~~ **Resuelto** (sección 5): 2 a 4 por tanda, 2 o más
@@ -875,15 +934,16 @@ sequenceDiagram
     5-oct-2026).** `VIDEO.archivo` admite nulo: al borrar el video, la tarea programada lo
     deja en nulo. Nulo significa "el video ya se borró"; la interfaz lo usa para saber que
     ya no se puede reproducir. La fila de `VIDEO` se conserva.
-14. ~~Análisis en pantalla con intervención humana~~ **Resuelto para esta versión (usuario,
-    3-oct-2026).** **No hay vista en vivo, ni procesamiento a la velocidad del video, ni
-    intervención mientras corre el análisis.** El análisis corre en segundo plano a su
-    propio ritmo (el algoritmo actual hace tres pasadas sobre el video completo, así que
-    tarda más que el video; cada video de 5 min tarda unos 10 min). **Solo al final**, cuando
-    el análisis termina, el usuario abre la pantalla de revisión segundo a segundo
-    (sección 9.7) y puede corregir las etiquetas. Quedan **diferidas** y **no debes
-    implementar**: la vista en tiempo real, detener el análisis cuando se pierde el tubo,
-    y el recuadro manipulable.
+14. ~~Análisis en pantalla con intervención humana~~ **Resuelto (usuario, 3-oct-2026,
+    actualizado el 11-oct con D-59, D-60, D-67 y D-68).** Sigue sin haber vista en vivo ni
+    procesamiento a la velocidad del video: el análisis corre en segundo plano a su propio
+    ritmo (cada video de 5 min tarda unos 10 min). **Lo único que interrumpe el análisis es la
+    pausa por espécimen que no se ve (R-15):** a los 3 s seguidos sin verlo, el análisis pasa a
+    `en pausa`, se avisa al usuario y se espera 5 minutos a que ajuste el recuadro del
+    cilindro; sin respuesta, se cancela. Al final, el usuario abre la pantalla de revisión
+    (sección 9.7), puede corregir las etiquetas y puede reiniciar el análisis. Sigue
+    **diferido**, y no debes implementar, la vista en tiempo real. **[ABIERTO]** La pantalla
+    para ajustar el recuadro y dónde se guarda el ajuste (D-59).
 15. ~~Significado de `ANALISIS.nivelClasif`~~ **Resuelto (usuario, 3-oct-2026).** Se
     queda. `agrupado` si algún segundo quedó como conducta activa; `preciso` si ninguno. La
     interfaz solo lo usa para avisar.
@@ -900,10 +960,11 @@ sequenceDiagram
     Esos datos no tienen tabla. El worker los escribe en un archivo del volumen
     (`analisis_{idAnalisis}_cajas.json`) y el backend lo entrega a la pantalla. No se
     cambia la base de datos por esto.
-18. **[ABIERTO] Quién puede corregir y cómo cuenta.** **[PROPUESTA]** Quien creó el
-    experimento o un administrador. Al guardar correcciones se recalculan los totales por
-    minuto y los reportes se regeneran (ya lo hacen cuando hay datos nuevos). Los reportes
-    indican si hubo revisión humana. El usuario no lo ha confirmado.
+18. ~~Quién puede corregir y cómo cuenta~~ **Resuelto (usuario, 11-oct-2026, D-57).**
+    Corrige el investigador que subió el video y el Administrador. Corregir no mejora el
+    modelo; si cambia el video o el modelo, es un análisis nuevo (reinicio, R-04). Al guardar
+    se recalculan los totales por minuto y los reportes se regeneran. **[ABIERTO]** Si los
+    reportes usan las correcciones y marcan que fueron revisadas (D-57 lo deja sin aclarar).
 
 ## 12. Orden de construcción sugerido [PROPUESTA]
 
@@ -926,9 +987,10 @@ Cada paso termina con algo que se puede probar.
 7. **Progreso y resultados:** endpoint de estado con porcentaje, resultados por espécimen,
    desglose por minuto, comparación entre grupos (Día 2) y bloques de 5 s.
 8. **Reportes:** CSV, XLSX, PDF con regeneración por vigencia, y PDF de diagnóstico.
-   **Revisión segundo a segundo:** las tres rutas de la sección 6, el recálculo de
-   `PRESENTA` y la pantalla 9.7 (después de tener resultados y reportes funcionando).
-9. **Tareas programadas:** borrado a 30 días, aviso a 7 días, vigilancia de disco.
+   **Revisión segundo a segundo:** las rutas de revisión, video, guardar y reiniciar de la
+   sección 6, el recálculo de `PRESENTA` y la pantalla 9.7 (después de tener resultados y reportes funcionando).
+9. **Tareas programadas** (las ejecuta el worker, D-82): borrado a 30 días, aviso a 7 días,
+   vigilancia de disco.
 10. **Frontend:** primero inicio de sesión y dashboard, luego crear experimento, progreso,
     resultados y administración.
 11. **Pruebas:** 4 sesiones simultáneas con un análisis en cola sin pasar de 3 s; los tres
@@ -943,7 +1005,8 @@ Cada paso termina con algo que se puede probar.
   cliente.
 - Un investigador que no es administrador recibe 403 en `/admin/*` aunque conozca la URL.
 - Un reporte vuelve a generarse cuando hay un análisis más nuevo que el guardado.
-- No existe ningún botón para cancelar o reiniciar un análisis.
+- No existe ningún botón para cancelar un análisis, y el reinicio solo aparece en la pantalla de
+  revisión de un análisis `completado`, para quien subió el video o un Administrador.
 
 
 ## 13. Anexo A: diagramas en código PlantUML
@@ -1000,11 +1063,11 @@ rectangle "Docker: frontend" as C_FE #E3F2FD {
 }
 
 rectangle "Docker: backend" as C_BE #E8F8F5 {
-  rectangle "Flask + SQLAlchemy + Flask-JWT-Extended\n\nAPI REST (JSON)\nAutenticacion con JWT\nValidacion de archivos .mp4 / .mov\nEncolado de analisis\nTareas programadas (cron)" as BE #F0FBF8
+  rectangle "Flask + SQLAlchemy + Flask-JWT-Extended\n\nAPI REST (JSON)\nAutenticacion con JWT\nValidacion de archivos .mp4 / .mov\nEncolado de analisis" as BE #F0FBF8
 }
 
 rectangle "Docker: worker\n(lo desarrolla otra persona)" as C_WK #FEF9E7 {
-  rectangle "Pipeline de analisis conductual\n\nToma analisis en cola (polling)\nProcesa el video\nEscribe los resultados" as WK #FFFEF2
+  rectangle "Pipeline de analisis conductual\n\nToma analisis en cola (polling)\nProcesa el video\nEscribe los resultados\nTareas programadas (cron)" as WK #FFFEF2
 }
 
 rectangle "Capa de datos" as DATOS #F4F6F7 {
@@ -1012,7 +1075,7 @@ rectangle "Capa de datos" as DATOS #F4F6F7 {
     database "PostgreSQL\n\nEsquema relacional\n(15 tablas)" as DB
   }
   rectangle "Volumen videos_reportes\n(compartido)" as C_FS #EAEDED {
-    folder "Videos .mp4 / .mov originales\nVideos anotados\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF" as FS
+    folder "Videos .mp4 / .mov originales\nCopia del video para revision (H.264)\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF" as FS
   }
   rectangle "Volumen modelos\n(solo lectura, solo worker)" as C_MD #F5EEF8 {
     folder "Modelos entrenados" as MD
@@ -1183,11 +1246,11 @@ skinparam arrow {
 '   tipo_grupo             IN ('control','referencia','tratamiento experimental')
 '   sesion_video           IN ('Dia 1','Dia 2')
 '   formato_reporte        IN ('CSV','XLSX','PDF')
-'   tipo_notificacion      IN ('analisis completado','error del pipeline','alerta de disco','video borrado')
-'   estado_analisis        IN ('en cola','procesando','completado','error')
+'   tipo_notificacion      IN ('analisis completado','error del pipeline','analisis en pausa','analisis cancelado','alerta de disco','video borrado')
+'   estado_analisis        IN ('en cola','procesando','en pausa','completado','error','cancelado')
 '   etapa_analisis         IN ('preprocesamiento','cilindros','clasificacion')
 '   nivel_clasif_analisis  IN ('preciso','agrupado')
-'   origen_segundo         IN ('maquina','humano_confirma','humano_corrige','humano_duda','sin_revisar','humano_ciego')
+'   origen_segundo         IN ('maquina','confirmada','corregida','dudosa')
 ' Todas las llaves foraneas: ON UPDATE NO ACTION ON DELETE NO ACTION.
 
 entity USUARIO {
@@ -1568,10 +1631,16 @@ state procesando {
   cilindros --> clasificacion
 }
 en_cola --> procesando : el Worker tomó la tarea\n(polling)
-cilindros --> error : [no se pudo abrir el video\no no se hallaron los tubos]\nse generó el reporte de\ndiagnostico
+preprocesamiento --> error : [no se pudo abrir el video] (RN-11)
+cilindros --> error : [no se hallaron los cilindros] (RN-11)\nse generó el reporte de\ndiagnóstico
 clasificacion --> completado : se completaron las\ntres etapas
+clasificacion --> en_pausa : [3 s seguidos sin ver\nal espécimen] se avisó al usuario (RN-17)
+en_pausa --> clasificacion : el usuario ajustó\nel recuadro del cilindro
+en_pausa --> cancelado : el usuario no respondió\nen 5 minutos (RN-17)
+completado --> en_cola : el investigador reinició\nel análisis (RN-04)
 completado --> [*]
 error --> [*]
+cancelado --> [*]
 @enduml
 ```
 
@@ -1581,12 +1650,15 @@ error --> [*]
 skinparam defaultFontName Arial
 skinparam shadowing false
 ' El estado del experimento NO se guarda: se calcula a partir de los
-' analisis de todas sus tandas. Precedencia: error > procesando > en cola > completado.
+' analisis de todas sus tandas. Precedencia: error > cancelado > en pausa > procesando > en cola > completado.
 [*] --> sin_videos : se creó el experimento
 sin_videos --> en_cola : se subió y encoló\nel primer video
 en_cola --> procesando : el Worker empezó a\nprocesar alguna tanda
 procesando --> completado : todas las tandas\nterminaron sin error
 procesando --> error : alguna tanda\nterminó en error
+procesando --> en_pausa : alguna tanda quedó\nen pausa (RN-17)
+en_pausa --> procesando : el usuario respondió
+en_pausa --> cancelado : 5 min sin respuesta
 completado --> en_cola : se agregó una tanda\nnueva
 @enduml
 ```
@@ -2184,19 +2256,30 @@ w -> w: localiza los cilindros y la línea de agua (sobre el video completo)
 alt se hallaron los tubos
   w -> db: actualiza la etapa a "clasificación"
   w -> w: clasifica la conducta de cada espécimen, segundo a segundo\n(nado, inmovilidad, escalamiento o conducta activa)
+  opt pasan tres segundos seguidos sin ver al espécimen (RN-17)
+    w -> db: marca el análisis como "en pausa"
+    w -> db: crea la notificación de análisis en pausa
+    alt el usuario ajusta el recuadro del cilindro antes de 5 minutos
+      w -> w: vuelve a revisar esos tres segundos y continúa
+    else el usuario no responde en 5 minutos
+      w -> db: marca el análisis como "cancelado"
+      w -> db: crea la notificación de análisis cancelado
+    end
+  end
 
   loop por cada espécimen detectado en el video
     w -> db: guarda su observación de este video
     w -> db: guarda sus 5 intervalos, con los segundos\npor conducta de cada uno
   end
 
+  w -> fs: guarda la copia del video recortada a lo analizado,\nen un formato que el navegador reproduce (H.264, D-58)
   w -> db: marca el análisis como "completado",\ncon su nivel de clasificación y fechaAnalisis
   w -> db: crea la notificación de análisis terminado
 else no se pudo abrir el video o no se hallaron los tubos
   w -> w: genera el reporte de diagnóstico PDF
   w -> fs: guarda el PDF de diagnóstico
   w -> db: guarda rutaDiagnostico
-  w -> db: marca el análisis como "error" y fija fechaAnalisis\n(el investigador no puede reiniciarlo)
+  w -> db: marca el análisis como "error" y fija fechaAnalisis\n(no se reinicia desde la pantalla de error, RN-04)
   w -> db: crea la notificación de error en el análisis
 end
 @enduml
@@ -2303,7 +2386,7 @@ participant "Archivos" as fs
 
 u -> ui: en Progreso o Resultados elige\n"Revisar segundo a segundo"
 ui -> api: GET /experiments/{id}/analyses/{idAnalisis}/review
-api -> db: ¿el análisis está "completado" y el usuario puede revisarlo?
+api -> db: ¿el análisis está "completado" y el usuario lo subió o es Administrador? (D-57)
 db --> api: sí / no
 alt no está completado o el usuario no tiene permiso
   api --> ui: 409 o 403
@@ -2320,6 +2403,13 @@ else se puede revisar
   loop el usuario revisa un espécimen a la vez
     u -> ui: pulsa 1 a 4 o 0, pausa o mueve la línea de tiempo
     ui -> ui: guarda un borrador en el navegador
+  end
+  opt el usuario elige "Reiniciar el análisis" (RN-04, D-60)
+    ui -> api: POST .../restart
+    api -> db: [transacción] borra el resultado anterior\n(observaciones, intervalos, segundos y resúmenes de ese video)
+    api -> db: [transacción] deja el análisis "en cola"\ncon sus valores de arranque
+    api --> ui: 202 Accepted
+    ui --> u: vuelve a la pantalla de progreso
   end
   u -> ui: Guardar (Ctrl+S)
   ui -> api: PUT .../segundos\n{cambios: [{numeroCilindro, segundo, conducta, origen}]}
@@ -2477,7 +2567,7 @@ skinparam defaultFontName Arial
 skinparam defaultFontSize 11
 skinparam shadowing false
 skinparam sequenceMessageAlign center
-participant "Tarea programada\n(en el backend)" as job
+participant "Tarea programada\n(en el worker)" as job
 database "Base de datos" as db
 participant "Archivos" as fs
 
@@ -2552,11 +2642,11 @@ CREATE DOMAIN formato_reporte AS varchar(4)
   CHECK (VALUE IN ('CSV', 'XLSX', 'PDF'));
 
 CREATE DOMAIN tipo_notificacion AS varchar(32)
-  CHECK (VALUE IN ('analisis completado', 'error del pipeline', 'alerta de disco',
-                   'video borrado'));
+  CHECK (VALUE IN ('analisis completado', 'error del pipeline', 'analisis en pausa',
+                   'analisis cancelado', 'alerta de disco', 'video borrado'));
 
 CREATE DOMAIN estado_analisis AS varchar(10)
-  CHECK (VALUE IN ('en cola', 'procesando', 'completado', 'error'));
+  CHECK (VALUE IN ('en cola', 'procesando', 'en pausa', 'completado', 'error', 'cancelado'));
 
 CREATE DOMAIN etapa_analisis AS varchar(16)
   CHECK (VALUE IN ('preprocesamiento', 'cilindros', 'clasificacion'));
@@ -2565,8 +2655,7 @@ CREATE DOMAIN nivel_clasif_analisis AS varchar(8)
   CHECK (VALUE IN ('preciso', 'agrupado'));
 
 CREATE DOMAIN origen_segundo AS varchar(16)
-  CHECK (VALUE IN ('maquina', 'humano_confirma', 'humano_corrige', 'humano_duda',
-                   'sin_revisar', 'humano_ciego'));
+  CHECK (VALUE IN ('maquina', 'confirmada', 'corregida', 'dudosa'));
 
 -- ------------------------------------------------------------
 --  Usuarios
@@ -2646,16 +2735,13 @@ CREATE TABLE analisis (
   idvideo          integer NOT NULL
     REFERENCES video (idvideo) ON UPDATE NO ACTION ON DELETE NO ACTION,
   estado           estado_analisis       NOT NULL DEFAULT 'en cola',
-  etapa            etapa_analisis,                     -- nula mientras esta en cola [PROPUESTA]
-  nivelclasif      nivel_clasif_analisis,
-  fechaanalisis    timestamptz,                        -- la fija el worker al terminar
+  etapa            etapa_analisis        NOT NULL DEFAULT 'preprocesamiento',  -- valor de arranque (D-79); el worker la actualiza
+  nivelclasif      nivel_clasif_analisis NOT NULL DEFAULT 'preciso',           -- valor de arranque (D-79); el worker lo fija
+  fechaanalisis    timestamptz           NOT NULL DEFAULT now(),               -- fecha de encolado; el worker la reemplaza al terminar
   rutadiagnostico  text,
   CONSTRAINT uq_analisis_video UNIQUE (idvideo),       -- un video, un analisis vigente
   CONSTRAINT ck_analisis_diagnostico
-    CHECK (rutadiagnostico IS NULL OR estado = 'error'),
-  CONSTRAINT ck_analisis_completado                    -- [PROPUESTA] hace cumplir el contrato del worker
-    CHECK (estado <> 'completado'
-           OR (fechaanalisis IS NOT NULL AND nivelclasif IS NOT NULL))
+    CHECK (rutadiagnostico IS NULL OR estado = 'error')
 );
 
 -- ------------------------------------------------------------
@@ -2760,9 +2846,9 @@ COMMIT;
 Notas para quien implementa el worker o consulta por polling:
 - Para que dos workers no tomen la misma tarea, usa
   `SELECT ... FROM analisis WHERE estado = 'en cola' ORDER BY idanalisis LIMIT 1 FOR UPDATE SKIP LOCKED`.
-- El worker debe fijar `fechaanalisis = now()` al pasar a `completado` o `error`. La
-  restricción `ck_analisis_completado` rechaza un `completado` sin `fechaanalisis`,
-  y `nivelclasif`.
+- El worker debe reemplazar `fechaanalisis` por `now()` al pasar a `completado` o `error`
+  (al encolar vale la fecha de encolado, D-79). Las tres columnas son NOT NULL, así que la
+  base ya no necesita una restricción aparte para el `completado`.
 - Para borrar un experimento hay que seguir el orden de la sección 5, porque todas las
   llaves foráneas rechazan el borrado en cascada.
 
@@ -2878,8 +2964,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 EXPOSE 5000
-# Un solo proceso con varios hilos: las tareas programadas (borrado, aviso, disco)
-# corren dentro del backend y no deben duplicarse. Timeout largo por las subidas de video.
+# Un solo proceso con varios hilos. Las tareas programadas (borrado, aviso, disco) ya no
+# corren aqui: las ejecuta el worker (D-82). Timeout largo por las subidas de video.
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "8", \
      "--timeout", "600", "app:create_app()"]
 ```

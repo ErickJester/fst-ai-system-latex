@@ -51,8 +51,8 @@ plain(230, 276, 420, ['Flask + SQLAlchemy + Flask-JWT-Extended', 'API REST (JSON
 wx, wy, ww = 800, 456, 560
 rows = [('OpenCV', 'Preprocesamiento y localización de cilindros'),
         ('scikit-learn', 'Clasificador sobre rasgos'),
-        ('PyTorch', 'R(2+1)D-18 (en evaluación)'),
-        ('Python', 'Consulta la cola · borra videos a los 30 días')]
+        ('PyTorch', 'R(2+1)D-18: clasificador de conducta'),
+        ('Python', 'Consulta la cola · tareas diarias (borrado, aviso, disco)')]
 wh = 44 + len(rows) * 18 + 10
 out.append(f'<rect x="{wx}" y="{wy}" width="{ww}" height="{wh}" rx="6" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/>')
 out.append(f'<text x="{wx+ww/2}" y="{wy+14}" text-anchor="middle" class="st">«contenedor»</text>')
@@ -65,7 +65,7 @@ for i, (a, b) in enumerate(rows):
 wbot = wy + wh
 # Capa 4
 dbb = plain(230, 686, 240, ['PostgreSQL', 'Cola de tareas: tabla ANALISIS', 'Esquema relacional (15 tablas)'], 'Base de datos', 'contenedor')
-plain(830, 686, 240, ['Videos originales y anotados', 'Reportes PDF / CSV / XLSX', 'Reportes de diagnóstico'], 'Volumen compartido', 'volumen', fill='#ece7d8')
+plain(830, 686, 240, ['Videos originales', 'Copia H.264 para revisión', 'Reportes PDF / CSV / XLSX', 'Reportes de diagnóstico'], 'Volumen compartido', 'volumen', fill='#ece7d8')
 plain(1110, 686, 250, ['Solo lectura para el worker', 'Archivo del clasificador', 'de conducta'], 'Volumen de modelos', 'volumen', fill='#ece7d8')
 
 # ---- Flechas ----
