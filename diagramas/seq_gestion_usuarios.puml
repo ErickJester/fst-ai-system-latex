@@ -43,7 +43,7 @@ participant Backend as api
 database "Base de datos" as db
 
 admin -> ui: abre el panel de usuarios
-ui -> api: GET /admin/usuarios\ncon la sesión activa del Administrador
+ui -> api: solicita la lista de usuarios\ncon la sesión activa del Administrador
 
 api -> db: ¿el idInstitucional de la sesión está en ADMINISTRADOR?
 db --> api: sí / no
@@ -57,7 +57,7 @@ else sí está en ADMINISTRADOR
   api -> db: consulta cuáles de esos usuarios tienen fila en ADMINISTRADOR
   db --> api: lista de idInstitucional con permisos de administrador
   api -> api: combina ambas listas\n(marca en cada fila si es Administrador)
-  api --> ui: 200 OK {usuarios, con marca de administrador}
+  api --> ui: la lista de usuarios, con la marca de administrador
   ui --> admin: muestra la tabla de usuarios
 
   admin -> ui: elige la acción sobre un usuario
@@ -65,14 +65,22 @@ else sí está en ADMINISTRADOR
   alt crear cuenta nueva
     ref over ui, api, db
       ver CU-12 "Crear cuenta de usuario"
-      diagramas/seq_crear_cuenta.puml
     end ref
     ui --> admin: la tabla se actualiza con la cuenta nueva
+
+  else editar datos de una cuenta
+
+    admin -> ui: modifica los datos de un usuario y confirma
+    ui -> api: solicita guardar los cambios de la cuenta
+    api -> db: actualiza los datos de la cuenta
+    db --> api: confirma la actualización
+    api --> ui: confirma los cambios
+    ui --> admin: la tabla muestra los datos actualizados
 
   else desactivar cuenta
 
     admin -> ui: selecciona un usuario y confirma la desactivación
-    ui -> api: PATCH /admin/usuarios/{id} {activo: false}
+    ui -> api: solicita desactivar la cuenta
 
     api -> db: si este usuario es Administrador,\n¿cuántos Administradores activos quedarían después?
     db --> api: cantidad restante (o "no aplica" si no es Administrador)
@@ -83,7 +91,7 @@ else sí está en ADMINISTRADOR
     else se puede desactivar
       api -> db: actualiza USUARIO, marca activo = false
       db --> api: confirma la actualización
-      api --> ui: 200 OK
+      api --> ui: confirma la desactivación
       ui --> admin: usuario marcado como inactivo en la tabla
     end
   end

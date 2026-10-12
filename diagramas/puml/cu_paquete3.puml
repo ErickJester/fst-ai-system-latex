@@ -1,6 +1,6 @@
 @startuml
 !pragma layout smetana
-title Plataforma Web FST\nPaquete 3 - Pipeline de analisis conductual
+title Plataforma Web FST\nPaquete 3 - Pipeline de análisis conductual
 left to right direction
 skinparam packageStyle rectangle
 skinparam actorStyle awesome
@@ -11,10 +11,10 @@ skinparam usecase {
 actor "Investigador\n(solo observa)" as INV
 actor ":Worker:\n<<system>>" as WRK #LightYellow
 rectangle "Plataforma Web FST - Paquete 3" {
-  usecase "Ejecutar pipeline de analisis" as UC30
+  usecase "Ejecutar pipeline de análisis" as UC30
   usecase "Reportar error de pipeline" as UC36
-  usecase "CU-07\nMonitorear progreso del analisis" as CU07
-  usecase "CU-08\nDescargar reporte de diagnostico" as CU08
+  usecase "CU-07\nMonitorear progreso del análisis" as CU07
+  usecase "CU-08\nDescargar reporte de diagnóstico" as CU08
 }
 WRK --> UC30
 INV --> CU07
@@ -22,5 +22,5 @@ INV --> CU08
 WRK --> CU07
 WRK --> CU08
 UC36 ..> UC30 : <<extend>>\n[no se pudo abrir el video\no no se hallaron los cilindros]
-CU08 ..> CU07 : <<extend>>\n[el analisis termino\nen error]
+CU08 ..> CU07 : <<extend>>\n[el análisis termino\nen error]
 @enduml

@@ -89,7 +89,7 @@ Cambios aplicados al `ROI` (8-oct, tras la revisión de quien construye el clasi
 entregue el modelo salvo la conducta (el modelo entrenado solo entrega la conducta de cada
 segundo), ni `bloque` en `ROI` (solo haría falta si la web dibujara el recuadro sobre el
 video original), ni los valores de `origen` `humano_ciego` y `sin_revisar`, que el
-documento no tiene.
+cap. 5 no menciona (el apéndice D sí los define).
 
 **`Observacion` no tiene atributos, y es correcto:** en el grafo esa tabla solo tiene su
 número y los enlaces al espécimen y al video. Representa «un espécimen en un video». Tiene

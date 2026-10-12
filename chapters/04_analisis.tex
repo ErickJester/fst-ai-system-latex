@@ -202,7 +202,7 @@ RF-21 & Resultados
 RF-22 & Resultados
       & El investigador debe poder descargar los datos de resultados en formato CSV
         y XLSX desde la pantalla de resultados y desde el dashboard. El archivo debe
-        contener las columnas: \texttt{Tiempo (min:seg)}, \texttt{Nado},
+        contener las columnas: \texttt{Tiempo (min:seg)}, \texttt{Nado activo},
         \texttt{Escalamiento}, \texttt{Inmovilidad} y \texttt{Conducta activa}, con
         una fila por minuto
         analizado y el valor de cada conducta en segundos. El reporte de diagnóstico y el resumen ejecutivo se descargan
@@ -816,7 +816,7 @@ R-04 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf
        puede asumir en su flujo de trabajo.
      & Medir tiempos por etapa del pipeline. Evaluar reducción de resolución o
        uso de GPU. El umbral aceptable de tiempo se define con el laboratorio
-       durante la fase de pruebas (ver RNF-02). \\
+       durante la fase de pruebas (ver los criterios de aceptación operativa). \\
 \hline
 R-05 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
      & La integración del módulo de visión por computadora con el \textit{backend}
@@ -929,8 +929,8 @@ El laboratorio realiza experimentos de nado forzado (FST) sin un calendario fijo
 un semestre de actividad regular son del orden de 3 a 4, cada uno con tres o más grupos (en promedio cuatro) de entre
 6 y 8 especímenes cada uno. Cada experimento genera alrededor de 8 videos de 5~min en
 el segundo día del protocolo (uno por tanda). El análisis de esos videos es el cuello de botella actual:
-anotarlos manualmente ocupa entre 1.5 y 2~h cada uno (con sus dos a cuatro
-especímenes), lo que convierte el análisis en
+anotarlos manualmente ocupa alrededor de 30~min por espécimen, hasta unas 2~h por
+video de cuatro especímenes, lo que convierte el análisis en
 una actividad que compite con el tiempo de investigación del laboratorio.
 
 \subsubsection{Integración con el protocolo experimental}
@@ -953,9 +953,11 @@ Con base en las reuniones sostenidas con el Dr.\ Sandino durante el arranque del
 proyecto, los criterios que determinan si el sistema es operativamente aceptable son:
 
 \begin{itemize}
-  \item El tiempo de procesamiento de un video de 5~min no debe superar el tiempo
-        que tomaría anotarlo manualmente (entre 1.5 y 2~h). Cualquier resultado en
-        ese rango o por debajo ya representa una ganancia operativa.
+  \item El tiempo de procesamiento de un video de 5~min se mide en segundos de
+        cómputo y su umbral se define con el laboratorio durante la validación en
+        TT-II; como referencia, el análisis manual lleva alrededor de 30~min por
+        espécimen (hasta unas 2~h por video). Cualquier resultado en ese rango o por
+        debajo ya representa una ganancia operativa.
   \item El reporte generado debe incluir, al menos, la duración acumulada por conducta
         (nado activo, inmovilidad, escalamiento y conducta activa) desglosada por
         minuto, de modo que sea directamente comparable con la tabla que el
@@ -1095,7 +1097,7 @@ humano (\$40{,}000), que refleja el esfuerzo real de desarrollo en un contexto
 académico. El resto de la inversión corresponde a servicios de cómputo en la nube para
 el entrenamiento del clasificador, conectividad, documentación e insumos menores. El
 retorno es inmediato para el laboratorio: anotar manualmente un video de 5~min toma
-entre 1.5 y 2~h; con alrededor de 32 a 40~videos en un semestre de actividad regular,
+hasta unas 2~h; con alrededor de 32 a 40~videos en un semestre de actividad regular,
 el sistema evita decenas de horas-persona de trabajo manual por ciclo. Al no requerir compra de hardware
 especializado ni licencias de software comercial, el proyecto es económicamente viable
 con los recursos del equipo académico.
@@ -1109,9 +1111,11 @@ aprobados por el IPN.
 
 \subsubsection{Privacidad y manejo de información}
 
-El sistema no registra ni procesa datos personales de seres humanos. Los únicos datos
-que almacena son la conducta de cada segundo, duraciones de conducta y metadatos del
-experimento (grupo, fecha, tratamiento). Las credenciales de los investigadores
+Del video no se extraen datos personales de seres humanos. Los datos del experimento
+son la conducta de cada segundo, duraciones de conducta y metadatos (grupo, fecha,
+tratamiento). Los únicos datos personales son los de las cuentas (identificador
+institucional, nombre, apellidos y correo), con la contraseña guardada con \textit{hash}
+con sal (bcrypt). Las credenciales de los investigadores
 registrados en la plataforma se manejan bajo las directrices de la Ley Federal de
 Protección de Datos Personales en Posesión de los Particulares (LFPDPPP), empleando
 almacenamiento cifrado y acceso autenticado con \textit{JSON Web Token} (JWT).

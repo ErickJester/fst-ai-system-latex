@@ -1,6 +1,6 @@
 @startuml
 !pragma layout smetana
-title Plataforma Web FST\nVision general del sistema
+title Plataforma Web FST\nVisión general del sistema
 left to right direction
 skinparam packageStyle rectangle
 skinparam actorStyle awesome
@@ -13,11 +13,11 @@ actor "Administrador" as ADMIN
 actor ":Worker:\n<<system>>" as WRK #LightYellow
 INV <|-- ADMIN
 rectangle "Plataforma Web FST" {
-  rectangle "Paquete 1\nAutenticacion y gestion de usuarios" as P1
-  rectangle "Paquete 2\nGestion de experimentos y carga de video" as P2
-  rectangle "Paquete 3\nPipeline de analisis conductual" as P3
+  rectangle "Paquete 1\nAutenticación y gestión de usuarios" as P1
+  rectangle "Paquete 2\nGestión de experimentos y carga de video" as P2
+  rectangle "Paquete 3\nPipeline de análisis conductual" as P3
   rectangle "Paquete 4\nResultados y reportes" as P4
-  rectangle "Paquete 5\nDashboard, notificaciones y administracion" as P5
+  rectangle "Paquete 5\nDashboard, notificaciones y administración" as P5
 }
 INV --> P1
 INV --> P2

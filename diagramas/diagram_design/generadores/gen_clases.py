@@ -27,7 +27,7 @@ cls('Grupo', 3, 40, ['- id: Integer', '- etiqueta: String', '- tipo: String', '-
 cls('Tanda', 4, 40, ['- id: Integer', '- ordinal: Integer', '- nCilindros: Integer'])
 cls('Especimen', 4, 240, ['- id: Integer', '- numeroCilindro: Integer'])
 cls('Video', 3, 200, ['- id: Integer', '- sesion: String', '- archivo: String', '- duracion: Float',
-    '- fechaCarga: DateTime'], ['+ validarFormatoMp4(): Boolean', '+ validarReproducible(): Boolean',
+    '- fechaCarga: DateTime'], ['+ validarFormato(): Boolean', '+ validarOrientacion(): Boolean', '+ validarReproducible(): Boolean',
     '+ estaProximaEliminacion(dias): Boolean'])
 cls('Analisis', 2, 240, ['- id: Integer', '- estado: String', '- etapa: String', '- nivelClasif: String',
     '- fechaAnalisis: DateTime'])
@@ -122,7 +122,7 @@ edge([L('Especimen', 36), (g3(50), C['Especimen']['y'] + 36), (g3(50), C['Observ
 edge([B('Video', cx('Video')), T('Observacion', cx('Video'))], ASSOC, '1', '2..4', 'CONTIENE', end='arrow')
 edge([R('Observacion', 36), L('Intervalo', 26)], ASSOC, '1', '5', 'SE DIVIDE EN', start='dia')
 edge([B('Observacion', cx('Video')), T('Segundo', cx('Video'))], ASSOC, '1', '1..300', 'SE ETIQUETA EN', start='dia')
-edge([B('Intervalo', cx('Intervalo')), T('Conducta', cx('Intervalo'))], PLAIN, '2..4', '0..*', '')
+edge([B('Intervalo', cx('Intervalo')), T('Conducta', cx('Intervalo'))], PLAIN, '0..*', '2..4', '')
 
 # ROI: creado por el pipeline (2..4) y delimita a cada especimen
 roi = C['ROI']; rx = roi['x'] + roi['w']

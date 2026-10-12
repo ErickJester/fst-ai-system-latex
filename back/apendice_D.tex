@@ -209,7 +209,7 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{idObservacion} & \texttt{integer} & No & PK, FK $\to$ OBSERVACION & Espécimen y video al que pertenece el segundo \\
 \hline
-\texttt{segundo} & \texttt{smallint} & No & PK; CK entre 1 y 300 & Segundo del video. Solo se analizan los últimos 300 segundos \\
+\texttt{segundo} & \texttt{smallint} & No & PK; CK entre 1 y 300 & Posición del segundo dentro de la ventana analizada (1 a 300), tras recortar los últimos 300 segundos \\
 \hline
 \texttt{conducta} & \texttt{varchar(n)} & Sí & FK $\to$ CONDUCTA & Conducta vigente del segundo, que el usuario puede corregir en la revisión. Queda nula si el sistema no pudo decidir o si el usuario lo marcó como dudoso \\
 \hline
