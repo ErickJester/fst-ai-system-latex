@@ -3,30 +3,39 @@
 skinparam defaultFontName Arial
 skinparam defaultFontSize 11
 skinparam shadowing false
+skinparam nodesep 40
+skinparam ranksep 45
 
-[*] --> en_cola : se validó y almacenó\nel video (CU-05, RF-12)
+state "en cola" as en_cola
+state "en pausa" as en_pausa
 
 state procesando {
+  state preprocesamiento
+  state cilindros
+  state "clasificación" as clasificacion
   [*] --> preprocesamiento
   preprocesamiento --> cilindros
-  preprocesamiento --> error : [no se pudo abrir el video] (RN-11)
   cilindros --> clasificacion : [se hallaron los cilindros]
 }
 
-en_cola --> procesando : el Worker tomó la tarea\n(polling, CU-07)
-cilindros --> error : [no se hallaron los cilindros] (RN-11)\nse generó el reporte de\ndiagnóstico
-clasificacion --> completado : se completaron las\ntres etapas
+state "Estados finales" as terminado {
+  state completado
+  state error
+  state cancelado
+}
 
-procesando --> en_pausa : [el sistema no ve al espécimen\ndurante tres segundos seguidos]\nse notifica al investigador (RF-34)
+[*] --> en_cola : se validó y almacenó\nel video (CU-05, RF-12)
+en_cola --> procesando : el Worker tomó la tarea\n(polling, CU-07)
+
+procesando --> en_pausa : [el sistema no ve al espécimen durante\ntres segundos seguidos]\nse notifica al investigador (RF-34)
 en_pausa --> procesando : el investigador ajusta\nel recuadro del cilindro
 en_pausa --> cancelado : sin respuesta\nen 5 minutos
 
-completado --> en_cola : el investigador reinicia\nel análisis (se borra el\nresultado anterior, RN-04)
-error --> en_cola : el investigador reinicia\nel análisis
-cancelado --> en_cola : el investigador reinicia\nel análisis
+preprocesamiento --> error : [no se pudo abrir el video]\n(RN-11)
+cilindros --> error : [no se hallaron los cilindros]\n(RN-11)\nse generó el reporte de diagnóstico
+clasificacion --> completado : se completaron\nlas tres etapas
 
-completado --> [*]
-error --> [*]
-cancelado --> [*]
+terminado --> en_cola : el investigador reinicia el análisis\n(se borra el resultado anterior, RN-04)
+terminado --> [*]
 
 @enduml
