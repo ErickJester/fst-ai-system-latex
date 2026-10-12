@@ -102,7 +102,7 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
 - **Entrenamiento sin las anotaciones del laboratorio** (D-26, `CLAUDE.md`). Las etiquetas
   las generan los autores con el **etiquetador del equipo** (propone la conducta y ellos la
   revisan y corrigen); **BORIS ya no aparece** en el documento (D-56, 7-oct). Métricas:
-  precisión, *recall* y F1 por clase; **nunca** κ de Cohen, MAE ni «gold standard».
+  precisión, *recall* y F1 por conducta (D-65); **nunca** κ de Cohen, MAE ni «gold standard».
 
 **Los resultados**
 - Se comparan **grupos entre sí con el Día 2**. **No existe** comparación Día 1 contra
@@ -147,6 +147,15 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
   RNF-11 es diseño modular; validar otros paradigmas queda fuera (D-75).
 - Dos PDF: **reporte de resultados** y **reporte de diagnóstico** (D-76). Bloques de 5 s: el laboratorio usa
   muestreo instantáneo cada 5 s; el sistema, la conducta predominante del periodo (D-77).
+
+**Decisiones del 12-oct (D-79 a D-82)**
+
+- `ANALISIS.etapa`, `nivelClasif` y `fechaAnalisis` siguen NOT NULL; el backend les pone un valor de arranque al
+  encolar y el worker los reemplaza (D-79). `SEGUNDO.origen` tiene cuatro valores: `maquina`, `confirmada`,
+  `corregida` y `dudosa` (D-80).
+- Se quitan el **video anotado** y las **medidas por cuadro**; el módulo 4 deja tres salidas (D-81).
+- El **worker** ejecuta las tareas diarias: borrado de videos a 30 días, aviso de vencimiento y vigilancia del
+  disco (D-82). D-78 (si la red entrega probabilidades) sigue pendiente.
 
 ## Reglas de contenido
 
