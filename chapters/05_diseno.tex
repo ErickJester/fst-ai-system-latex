@@ -2371,10 +2371,10 @@ activa y permite actualizar nombre, apellidos, correo electrónico y contraseña
 \subsection{Notificaciones}
 
 El sistema genera notificaciones de forma automática cuando un análisis finaliza
-(con o sin error) o cuando el espacio en disco supera el umbral de alerta (ver
-RN-11, RNF-09). La Figura~\ref{fig:seq_notificaciones} muestra cómo el backend
-persiste la notificación y cómo el frontend la consulta en el siguiente ciclo de
-actualización.
+(con o sin error), queda en pausa o se cancela por falta de respuesta (ver RF-34),
+o cuando el espacio en disco supera el umbral de alerta (ver RN-11, RNF-09). La
+Figura~\ref{fig:seq_notificaciones} muestra cómo el \textit{Worker} crea el aviso y lo
+envía también por correo, y cómo el investigador lo consulta y lo marca como leído.
 
 \begin{figure}[H]
 \centering
