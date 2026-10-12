@@ -221,7 +221,7 @@ Usuario ──registra──> Experimento
                                 └── Tanda    (fuerte · ordinal)    nCilindros ∈ {2,3,4}  (D-28)
                                       ├── Espécimen  (fuerte · numeroCilindro dentro de la tanda; sin número de rata, D-55)
                                       └── Video      (fuerte · sesión ∈ {Día 1, Día 2}, Día 1 opcional)
-                                                └── Análisis  (1,1 — un video, un análisis vigente · D-03/D-24)
+                                                └── Análisis  (0,1 — solo el video del Día 2 se analiza; un análisis vigente · D-03/D-24/D-71)
 
      Observación (fuerte, asociativa) = Espécimen ──aparece en──> Video
            └── Intervalo (fuerte · minuto 1..5)
@@ -263,7 +263,28 @@ en el esquema lógico definitivo.
 
 ## 5. Estado actual
 
-### Cambios del 6-oct-2026 (D-53, D-54, D-55) — leer antes que todo lo de abajo
+### Cambios del 11-oct-2026 (D-66 a D-77) — leer antes que todo lo de abajo
+
+Aplicados en la rama `decisiones-11oct` (caps. 1 a 5, apéndice D, `esquema_fisico.puml`,
+`grafo_relacional_3_vigente.puml`, `clases.puml`, `esquema_conceptual.tex`, `estados_*.puml`,
+`seq_revision_segundos.puml`, `seq_analisis_automatico.puml` y `cu_paquete5.puml`). Los PNG
+**no están regenerados**. Detalle de cada decisión en `errores/preguntas-doctor.md` §6.
+
+| Cambio | Detalle |
+|---|---|
+| **Día 1 (D-71)** | El video se sube, se guarda como `VIDEO` y no se analiza. `VIDEO–ANALISIS` pasa de (1,1) a **(0,1)**; `VIDEO–OBSERVACION` de (2,4) a **(0,4)**; `ESPECIMEN–OBSERVACION` de (1,2) a **(0,1)**. Solo el Día 2 tiene análisis y de 2 a 4 observaciones |
+| **Estados nuevos (D-59, D-67)** | `estado_analisis` suma **`en pausa`** y **`cancelado`**, y `tipo_notificacion` suma `analisis en pausa` y `analisis cancelado` (siguen siendo ocho dominios). 3 s seguidos «no se ve» dejan el análisis en pausa y se avisa al usuario; 5 min sin respuesta lo cancelan (RN-17) |
+| **Reiniciar (D-60, D-68)** | El usuario reinicia el análisis desde la pantalla de revisión: se borra el resultado anterior y el análisis vuelve a `en cola` (RN-04). Corrige solo el investigador que subió el video o el Administrador (D-57, RN-14) |
+| **Copia H.264 (D-58)** | El worker la genera al terminar el análisis; no es columna ni tabla. No se decidió si se guarda el recuadro ajustado por el usuario |
+| **Rol (D-72)** | RN-16 también prohíbe quitar el rol de Administrador a la última cuenta activa |
+| **Borrado a 30 días (D-69)** | Lo hace «el sistema» de forma automática (CU-14 ya no nombra al worker) |
+| **Clasificador (D-66)** | La CNN de fusión; el *gradient boosting* es el etiquetador |
+| **Dos PDF (D-76)** | «reporte de resultados» y «reporte de diagnóstico» |
+
+**No se aplicó** (sin confirmación): columnas de `ANALISIS` nulas, `PRESENTA` en (4,4), cuatro valores de
+`SEGUNDO.origen`, quitar el modelo del panel de administración.
+
+### Cambios del 6-oct-2026 (D-53, D-54, D-55)
 
 Principio del usuario: **la base de datos es para el usuario final.** La red neuronal (CNN) debe
 estar terminada antes de salir a producción, así que no se guarda nada cuyo único uso sea
@@ -485,7 +506,9 @@ Además de las de `CLAUDE.md`, que aplican siempre:
 Resuelta por D-03 (equipo, 2026-09-13): al reanalizar un video, el resultado nuevo **reemplaza**
 al anterior. Por eso `VIDEO — ANALISIS` queda en (1,1), reforzado con `UNIQUE (idVideo)` (D-24), y
 `OBSERVACION` sigue colgando de `VIDEO` sin cambios. P-08 y D-03 eran una sola decisión con dos
-nombres. Si D-60 (el usuario puede reiniciar el análisis) se aplica, hay que revisar esta nota.
+nombres. Con D-71 el video del Día 1 no tiene análisis, así que `VIDEO — ANALISIS` pasa a (0,1). D-60 y
+D-68 (el usuario puede reiniciar el análisis) no cambian esta nota: reiniciar **borra** el resultado
+anterior y deja el análisis `en cola`; sigue habiendo un solo análisis vigente por video.
 
 ### Ya corregido — `GRUPO.tratamiento` sin nulo
 

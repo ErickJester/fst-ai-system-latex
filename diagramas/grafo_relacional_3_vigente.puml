@@ -241,9 +241,9 @@ EXPERIMENTO    "1" --o "3..*" GRUPO
 GRUPO          "1" --o "1..*" TANDA
 TANDA          "1" --o "2..4" ESPECIMEN
 TANDA          "1" --o "1..2" VIDEO
-VIDEO          "1" --o "1"    ANALISIS
-ESPECIMEN      "1" --o "1..2" OBSERVACION
-VIDEO          "1" --o "2..4" OBSERVACION
+VIDEO          "1" --o "0..1" ANALISIS
+ESPECIMEN      "1" --o "0..1" OBSERVACION
+VIDEO          "1" --o "0..4" OBSERVACION
 OBSERVACION    "1" --o "5"    INTERVALO
 INTERVALO      "1" --o "2..4" PRESENTA
 CONDUCTA       "1" --o "0..*" PRESENTA

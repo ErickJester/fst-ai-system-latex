@@ -194,10 +194,10 @@ cilindro es su espécimen.
 \subsection{Módulo 3: Clasificación de conducta}
 
 La clasificación trabaja sobre el cilindro de cada espécimen y se basa en
-aprendizaje supervisado. Se construye en dos partes: un clasificador sobre rasgos
-medidos, que ya funciona y que además sirve para etiquetar el conjunto de
-entrenamiento, y una red neuronal convolucional que se compara contra él y que
-sigue en desarrollo.
+aprendizaje supervisado. El clasificador es una red neuronal convolucional
+espacio-temporal que se fusiona con una rama de medidas del espécimen. Un
+clasificador sobre rasgos medidos, que ya funciona, sirve al equipo para proponer las
+etiquetas del conjunto de entrenamiento y aporta los rasgos de esa rama de medidas.
 
 \paragraph{Separación del espécimen.} En cada cuadro alineado y dentro de la
 región de interés de cada cilindro, un píxel pertenece al espécimen si difiere del
@@ -224,7 +224,17 @@ boosting} (potenciación del gradiente) sobre árboles de decisión
 \cite{friedman2001}, en la variante por histogramas que implementa scikit-learn
 como \texttt{HistGradientBoostingClassifier} \cite{pedregosa2011,ke2017}, recibe
 los quince rasgos y estima la probabilidad de nado activo, inmovilidad y
-escalamiento. La conducta se decide con una regla de tres pasos:
+escalamiento. Es la herramienta con la que el equipo propone las etiquetas de
+entrenamiento, y sus quince rasgos son la entrada de la rama de medidas de la red de
+fusión que describe el párrafo siguiente.
+
+\paragraph{Red de fusión.} El clasificador del sistema es una red convolucional
+espacio-temporal R(2+1)D-18 \cite{tran2018}, preentrenada con videos de acciones
+humanas e implementada con PyTorch \cite{paszke2019}. Recibe un clip de 16
+fotogramas del cilindro de cada espécimen y lo fusiona con una rama de medidas: los
+quince rasgos y siete reglas de observación del pataleo bajo el agua y de los
+cambios sobre la línea de agua. Estima la probabilidad de nado activo, inmovilidad y
+escalamiento, y la conducta se decide con una regla de tres pasos:
 
 \begin{enumerate}
   \item Si una conducta supera el umbral de confianza, se asigna esa conducta.
@@ -236,41 +246,35 @@ escalamiento. La conducta se decide con una regla de tres pasos:
 \end{enumerate}
 
 \paragraph{Decisión segundo a segundo.} Para decidir el segundo $k$, el sistema
-mide los rasgos en una ventana de 4~s centrada en él (desde 1.5~s antes hasta
-2.5~s después) y aplica el clasificador. La ventana avanza un segundo a la vez,
+toma el clip y las medidas de una ventana de 4~s centrada en él (desde 1.5~s antes
+hasta 2.5~s después) y aplica la red. La ventana avanza un segundo a la vez,
 así que cada segundo tiene su propia decisión y aparecen conductas breves, de unos
 2~s, que una decisión por bloques de 5~s esconde. Una ventana más corta vería
 conductas más breves, pero mediría con muy pocos datos; 4~s es el punto de
 equilibrio. El segundo es la unidad con la que el sistema registra las conductas;
 no se aplica una duración mínima de episodio (ver RF-18 y
 sec.~\ref{sec:umbrales}). Al agrupar los segundos de cada bloque de 5~s y tomar la
-conducta mayoritaria (RN-15), el resultado se compara directamente con el análisis
-manual por bloques.
+conducta mayoritaria (RN-15), el resultado se presenta en la unidad de la técnica de
+muestreo por intervalos de la literatura.
 
-\paragraph{Conjunto de entrenamiento.} El clasificador se entrena con bloques de
-5~s etiquetados por el equipo, sin usar las anotaciones del laboratorio. El
-etiquetado crece en bola de nieve: se etiqueta a mano un primer video, el
-clasificador propone las etiquetas del siguiente, el equipo revisa solo las
-marcadas como dudosas y se vuelve a entrenar con ambos videos. La validación agrupa
-por video, no por bloque, porque dos bloques seguidos del mismo espécimen son casi
-iguales y medirlos por separado inflaría el resultado.
+\paragraph{Conjunto de entrenamiento.} La red se entrena con segundos que el equipo
+marca a mano en la pantalla de revisión, sin usar las anotaciones del laboratorio.
+Las propuestas del clasificador sobre rasgos aceleran el etiquetado, pero una
+propuesta solo cuenta como etiqueta cuando el equipo la ha visto y confirmado;
+medir contra propuestas que nadie revisó sería medir al modelo contra sí mismo. La
+validación agrupa por video, no por segundo ni por bloque, porque los segundos
+vecinos comparten casi el mismo clip y medirlos por separado inflaría el resultado.
 
-\paragraph{Red neuronal convolucional (en desarrollo).} Se compara contra el
-clasificador sobre rasgos una red convolucional espacio-temporal R(2+1)D-18
-\cite{tran2018}, preentrenada con videos de acciones humanas e implementada con
-PyTorch \cite{paszke2019}. Recibe clips de 16 fotogramas del cilindro de cada
-espécimen; su versión más reciente fusiona la red con una rama de medidas: los
-quince rasgos y siete reglas de observación del pataleo bajo el agua y de los
-cambios sobre la línea de agua. Por ahora decide por bloques de 5~s; llevarla al
-nivel de segundo y elegir entre ella y el clasificador sobre rasgos se hará en
-TT-II, con precisión, \textit{recall} y F1 por conducta (ver OE-5 y RNF-02).
+\paragraph{Estado de la red.} La red de fusión sigue en desarrollo. Su desempeño
+se evaluará en TT-II con precisión, \textit{recall} y F1 por conducta (ver OE-5 y
+RNF-02); hasta entonces no se reportan cifras de desempeño.
 
 Cuando el sistema registra un segundo como \textit{conducta activa}, los reportes
 la muestran como una cuarta columna (ver RN-13).
 
 \subsection{Módulo 4: Resultados}
 
-Al finalizar el análisis, el pipeline produce cuatro salidas:
+Al finalizar el análisis, el pipeline produce cinco salidas:
 
 \begin{itemize}
   \item \textbf{Tiempos por conducta}: segundos de nado activo, inmovilidad,
@@ -281,6 +285,9 @@ Al finalizar el análisis, el pipeline produce cuatro salidas:
   \item \textbf{Etiqueta de cada segundo}: la conducta asignada a cada segundo
         analizado, almacenada en \texttt{SEGUNDO}. Es la fuente de la pantalla de
         revisión y de \texttt{PRESENTA}.
+  \item \textbf{Copia del video para revisión}: el \textit{worker} genera, al
+        terminar el análisis, una copia del video recortada a los segundos analizados
+        en un formato que el navegador reproduce (H.264), para la pantalla de revisión.
   \item \textbf{Video anotado}: video original con
         el recuadro de cada cilindro y la etiqueta de conducta superpuestos,
         disponible para revisión visual del investigador.
@@ -288,8 +295,8 @@ Al finalizar el análisis, el pipeline produce cuatro salidas:
         cuadro, útiles para depuración y auditoría del análisis.
 \end{itemize}
 
-Además, los resultados se muestran en bloques de 5~segundos para compararlos con el
-análisis manual. Los bloques no son una salida guardada: se calculan al mostrarse, a
+Además, los resultados se muestran en bloques de 5~segundos, la unidad de la técnica de
+muestreo por intervalos de la literatura. Los bloques no son una salida guardada: se calculan al mostrarse, a
 partir de la conducta de cada segundo almacenada en \texttt{SEGUNDO}, y el clasificador
 no interviene. La conducta de cada bloque es la que ocupa más de sus cinco segundos,
 como en el muestreo por intervalos de 5~s de Detke et~al.\ \cite{detke1995}, descrito por
@@ -304,9 +311,13 @@ pasa a \texttt{procesando} y avanza por las tres etapas del pipeline (preprocesa
 cilindros, clasificación). Si no se puede abrir
 el video o no se encuentran los cilindros (RN-11), el análisis termina en
 \texttt{error} y se genera el reporte de diagnóstico; si las tres
-etapas terminan con éxito, termina en \texttt{completado}. No existe
-transición de regreso: el investigador no puede reiniciar ni cancelar un
-análisis en curso (RN-04).
+etapas terminan con éxito, termina en \texttt{completado}. Si durante la
+clasificación pasan tres segundos seguidos sin ver al espécimen, el análisis pasa a
+\texttt{en pausa} y el sistema avisa al usuario; si este ajusta el recuadro del
+cilindro, el análisis vuelve a \texttt{procesando}, y si no responde en 5~minutos,
+pasa a \texttt{cancelado} (RN-17). El investigador no puede iniciar, pausar ni
+cancelar un análisis, pero sí reiniciarlo desde la pantalla de revisión: el
+resultado anterior se borra y el análisis vuelve a \texttt{en cola} (RN-04).
 
 \begin{figure}[H]
 \centering
@@ -319,8 +330,8 @@ Un experimento agrupa varias tandas, cada una con su propio análisis, así que
 el estado que ve el investigador en el dashboard (Figura~\ref{fig:estados_experimento})
 es un valor calculado, no una columna de \texttt{EXPERIMENTO} (ver CU-22, RF-23):
 se deriva del conjunto de análisis de todas sus tandas, con precedencia
-error > procesando > en cola > completado cuando coexisten tandas en
-distintos estados.
+error > cancelado > en pausa > procesando > en cola > completado cuando
+coexisten tandas en distintos estados.
 
 \begin{figure}[H]
 \centering
@@ -354,8 +365,8 @@ sistema. Las entidades principales son \textbf{USUARIO}, \textbf{EXPERIMENTO},
 sistema: un usuario crea experimentos; cada experimento se organiza en grupos
 (control, referencia, tratamiento); cada grupo se graba en una o más tandas de
 hasta cuatro especímenes; cada tanda tiene uno o dos videos (Día~1 y/o Día~2); y
-cada video se procesa mediante un análisis que produce observaciones de conducta
-por espécimen (\textbf{OBSERVACION}, \textbf{SEGUNDO}, \textbf{INTERVALO},
+cada video del Día~2 se procesa mediante un análisis que produce observaciones de
+conducta por espécimen, mientras que el video del Día~1 se guarda sin análisis (\textbf{OBSERVACION}, \textbf{SEGUNDO}, \textbf{INTERVALO},
 \textbf{PRESENTA}, \textbf{CONDUCTA}). La figura muestra las entidades del dominio experimental; el subtipo
 \textbf{ADMINISTRADOR} (un usuario con permisos adicionales) y las entidades
 \textbf{REPORTE} y \textbf{NOTIFICACION}, derivadas del experimento, aparecen en el esquema
@@ -419,12 +430,13 @@ Las tablas están organizadas en cuatro grupos funcionales:
   \item \textbf{VIDEO}: uno o dos videos por tanda (Día~1 y/o Día~2), con
         ruta de almacenamiento, duración y fecha de carga. La ruta queda vacía
         cuando el archivo ya se borró (ver RF-25, RN-05); la fila se conserva
-        porque los resultados la referencian.
+        porque los resultados la referencian. El video del Día~1 se guarda como
+        constancia de la sesión de habituación y no tiene análisis (ver RN-12).
 \end{itemize}
 
 \textbf{Análisis.}
 \begin{itemize}
-  \item \textbf{ANALISIS}: ejecución del pipeline sobre un video. Registra
+  \item \textbf{ANALISIS}: ejecución del pipeline sobre un video del Día~2. Registra
         estado, etapa actual, nivel de clasificación (preciso o agrupado) y,
         cuando falla, la ruta al reporte de diagnóstico (ver RN-11).
 \end{itemize}
@@ -474,7 +486,7 @@ de cada columna, está en el Apéndice~\ref{ap:diccionario}.
 La base de datos usa PostgreSQL como gestor relacional. Los datos del sistema
 tienen una estructura jerárquica natural: un experimento se organiza en grupos,
 cada grupo se graba en tandas de hasta cuatro especímenes, cada tanda tiene uno
-o dos videos, y cada video se analiza produciendo resultados desglosados por
+o dos videos, y cada video del Día~2 se analiza produciendo resultados desglosados por
 espécimen, por conducta y por minuto. Esa jerarquía se representa con integridad
 referencial entre tablas relacionadas, sin repetir información en varios
 lugares.
@@ -698,7 +710,7 @@ GET    & \path{/experiments/{id}}    & Devuelve detalle y estado de un experimen
 \hline
 
 % --- Videos y análisis ---
-POST   & \path{/experiments/{id}/groups/{grupo}/videos}  & Sube un video (Día~1 o Día~2) a una tanda del grupo indicado (se crea la tanda si no existe) y encola el análisis. & Investiga\-dor \\
+POST   & \path{/experiments/{id}/groups/{grupo}/videos}  & Sube un video (Día~1 o Día~2) a una tanda del grupo indicado (se crea la tanda si no existe) y, si es el del Día~2, encola el análisis. & Investiga\-dor \\
 \hline
 GET    & \path{/experiments/{id}/status}  & Devuelve el progreso del análisis en porcentaje. & Investiga\-dor \\
 \hline
@@ -712,7 +724,7 @@ GET    & \path{/experiments/{id}/results/groups} & Devuelve la comparación entr
 \hline
 
 % --- Reportes ---
-GET    & \path{/experiments/{id}/report/pdf}  & Descarga el reporte en PDF. & Investiga\-dor \\
+GET    & \path{/experiments/{id}/report/pdf}  & Descarga el reporte de resultados en PDF. & Investiga\-dor \\
 \hline
 GET    & \path{/experiments/{id}/report/csv}  & Descarga los datos en CSV. & Investiga\-dor \\
 \hline
@@ -1287,7 +1299,7 @@ caso de uso.
 \hline
 2 & Sistema & Muestra la lista de usuarios con nombre, correo, si es administrador o investigador, y estado. \\
 \hline
-3 & Administrador & Selecciona la acción: (a) crear una cuenta nueva (ver CU-12); (b) editar datos de cuenta existente; o (c) desactivar cuenta. \\
+3 & Administrador & Selecciona la acción: (a) crear una cuenta nueva (ver CU-12); (b) editar datos de cuenta existente, incluido su rol de Investigador o Administrador; o (c) desactivar cuenta. \\
 \hline
 4 & Sistema & Aplica el cambio en la base de datos y muestra confirmación de la operación. \\
 \hline
@@ -1300,7 +1312,7 @@ caso de uso.
 \hline
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
-4a & Intento de desactivar la última cuenta de Administrador activa: el sistema rechaza la acción y muestra advertencia de que debe existir al menos un Administrador activo en todo momento (ver RN-16). \\
+4a & Intento de desactivar la última cuenta de Administrador activa, o de quitarle el rol: el sistema rechaza la acción y muestra advertencia de que debe existir al menos un Administrador activo en todo momento (ver RN-16). \\
 \hline
 4b & Al crear una cuenta nueva, el identificador institucional o el correo ya están registrados (ver CU-12): el sistema informa el conflicto y no crea el registro duplicado. \\
 \hline
@@ -1476,7 +1488,7 @@ caso de uso.
 \hline
 7 & Sistema & Guarda la tanda y el video; sube el archivo al volumen compartido del servidor. \\
 \hline
-8 & Sistema & Encola automáticamente la tarea de análisis conductual (ver RF-12). \\
+8 & Sistema & Si el video es del Día~2, encola automáticamente la tarea de análisis conductual (ver RF-12); el video del Día~1 solo se guarda. \\
 \hline
 9 & Sistema & Muestra confirmación y redirige a la pantalla de progreso del análisis. \\
 \hline
@@ -1624,13 +1636,13 @@ caso de uso.
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-13, RF-14, RF-15, RF-16. Extiende: CU-05 (Subir video). Extendido por: CU-08 (Descargar reporte de diagnóstico).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-13, RF-14, RF-15, RF-16. Reglas: RN-04, RN-17. Extiende: CU-05 (Subir video). Extendido por: CU-08 (Descargar reporte de diagnóstico).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Tarea de análisis encolada; \textit{Worker} disponible para procesar; sesión activa del investigador.} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pipeline ejecutado por el \textit{Worker}; estado visible en pantalla del investigador; al completarse exitosamente, acceso a resultados habilitado; ante error, descarga de reporte de diagnóstico habilitada.} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} ejecuta el pipeline de análisis conductual de forma autónoma en tres etapas secuenciales. El investigador consulta el avance por etapas sin poder intervenir en la ejecución (ver RN-04).} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} ejecuta el pipeline de análisis conductual de forma autónoma en tres etapas secuenciales. El investigador consulta el avance por etapas y solo interviene cuando el análisis queda en pausa por no ver al espécimen (ver RN-04 y RN-17).} \\
 \hline
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} toma la tarea de la cola y ejecuta el pipeline completo. El frontend consulta periódicamente el estado y muestra la etapa activa y el porcentaje de avance. Al completarse, el \textit{Worker} registra los resultados y el sistema habilita el acceso a la pantalla de resultados. Si el pipeline falla, el \textit{Worker} genera el reporte de diagnóstico PDF.} \\
 \hline
@@ -1655,7 +1667,7 @@ caso de uso.
 \hline
 6 & Sistema & Actualiza periódicamente la barra de porcentaje y la etapa activa en la pantalla del investigador. \\
 \hline
-7 & \textit{Worker} & Registra los resultados en la base de datos al completar el pipeline. \\
+7 & \textit{Worker} & Registra los resultados en la base de datos al completar el pipeline y genera la copia del video recortada en H.264 para la revisión (ver CU-25). \\
 \hline
 8 & Sistema & Notifica al investigador y habilita el acceso a la pantalla de resultados. \\
 \hline
@@ -1668,7 +1680,11 @@ caso de uso.
 \hline
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
-4 & El \textit{Worker} no puede abrir el video o no encuentra los cilindros (ver RN-11): detiene el pipeline, genera el reporte de diagnóstico PDF (ver CU-08) y actualiza el estado de la tarea a «error». El sistema muestra alerta con la descripción del error. El investigador no puede reiniciar el análisis (ver RN-04). \\
+4 & El \textit{Worker} no puede abrir el video o no encuentra los cilindros (ver RN-11): detiene el pipeline, genera el reporte de diagnóstico PDF (ver CU-08) y actualiza el estado de la tarea a «error». El sistema muestra alerta con la descripción del error. El investigador no puede reiniciar el análisis desde esta pantalla (ver RN-04). \\
+\hline
+5 & Pasan tres segundos seguidos sin ver al espécimen (ver RN-17): el \textit{Worker} deja el análisis «en pausa», el sistema notifica al usuario y le pide ajustar el recuadro del cilindro; con el ajuste, el \textit{Worker} vuelve a revisar esos tres segundos y el análisis continúa. \\
+\hline
+5 & El usuario no responde en 5 minutos durante la pausa: el sistema cancela el análisis, actualiza el estado de la tarea a «cancelado» y lo notifica al usuario. \\
 \hline
 \end{tabular}
 
@@ -1852,7 +1868,7 @@ caso de uso.
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-32, RN-14. Extendido por: CU-26 (Corregir etiqueta de un segundo).} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Análisis en estado «completado»; sesión activa.} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Análisis en estado «completado»; sesión activa; el usuario es el investigador que subió el video o un Administrador (ver RN-14).} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pantalla de revisión abierta con las etiquetas de cada segundo; si el usuario no corrige nada, las conductas no cambian y solo se marcan como confirmadas las que vio.} \\
 \hline
@@ -1873,7 +1889,7 @@ caso de uso.
 \hline
 2 & Sistema & Comprueba que el análisis esté completado y consulta la etiqueta de cada segundo de cada espécimen. \\
 \hline
-3 & Sistema & Muestra el video, la línea de tiempo de cada espécimen y la conducta que puso el sistema en cada segundo. \\
+3 & Sistema & Muestra la copia del video en formato H.264 que generó el \textit{worker} al terminar el análisis, la línea de tiempo de cada espécimen y la conducta que puso el sistema en cada segundo. \\
 \hline
 4 & Inv. / Admin. & Revisa un espécimen a la vez con el video corriendo, y corrige las etiquetas que no coincidan con lo que observa (ver CU-26). \\
 \hline
@@ -1891,6 +1907,10 @@ caso de uso.
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
 2 & El análisis no está completado: el sistema rechaza la petición e informa el motivo. \\
+\hline
+2 & El usuario no subió el video y no es Administrador: el sistema rechaza la petición. \\
+\hline
+4 & El usuario elige «Reiniciar el análisis»: el sistema borra el resultado anterior y vuelve a encolar el análisis del video, que empieza de nuevo (ver RN-04). \\
 \hline
 \end{tabular}
 
@@ -2235,7 +2255,7 @@ caso de uso.
 \hline
 \textbf{Caso de Uso} & Borrar video automáticamente & \textbf{Identificador:} CU-14 \\
 \hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{\textit{Worker} \textsf{<<system>>}} \\
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sistema \textsf{<<system>>}} \\
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario} \\
 \hline
@@ -2245,9 +2265,9 @@ caso de uso.
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Archivo de video eliminado del servidor de forma permanente e irreversible (ver RN-05). Resultados y reportes conservados indefinidamente (ver RN-06).} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} ejecuta diariamente una tarea programada que elimina los archivos de video cuyo análisis fue exitoso hace 30 días o más, previa emisión de aviso al investigador.} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El sistema ejecuta diariamente, de forma automática, una tarea programada que elimina los archivos de video cuyo análisis fue exitoso hace 30 días o más, previa emisión de aviso al investigador.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} identifica los videos próximos a expirar (menos de 7 días) y emite avisos en el \textit{dashboard}. Al cumplirse los 30 días, elimina el archivo de video del almacenamiento, conservando los resultados y reportes asociados.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El sistema identifica los videos próximos a expirar (menos de 7 días) y emite avisos en el \textit{dashboard}. Al cumplirse los 30 días, elimina el archivo de video del almacenamiento, conservando los resultados y reportes asociados.} \\
 \hline
 \end{tabular}
 
@@ -2258,13 +2278,13 @@ caso de uso.
 \hline
 \textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
 \hline
-1 & \textit{Worker} & Ejecuta la tarea programada de expiración (cron diario). \\
+1 & Sistema & Ejecuta la tarea programada de expiración (cron diario). \\
 \hline
-2 & \textit{Worker} & Consulta la base de datos para identificar videos con análisis exitoso hace $\geq 23$ días y $< 30$ días. \\
+2 & Sistema & Consulta la base de datos para identificar videos con análisis exitoso hace $\geq 23$ días y $< 30$ días. \\
 \hline
 3 & Sistema & Muestra aviso de expiración en el \textit{dashboard} del investigador correspondiente: nombre del experimento y fecha exacta de eliminación (ver RF-24). \\
 \hline
-4 & \textit{Worker} & Al cumplirse los 30 días, elimina el archivo de video del volumen de almacenamiento. \\
+4 & Sistema & Al cumplirse los 30 días, elimina el archivo de video del volumen de almacenamiento. \\
 \hline
 5 & Sistema & Elimina el archivo físico del volumen de almacenamiento; la fila de \texttt{VIDEO} permanece en la base de datos (no puede eliminarse mientras \texttt{ANALISIS} y \texttt{OBSERVACION} la referencien), con \texttt{archivo} ya no disponible; resultados y reportes permanecen accesibles. \\
 \hline
@@ -2279,7 +2299,7 @@ caso de uso.
 \hline
 4 & El uso de disco supera el 90\,\%: el sistema borra primero los videos más antiguos aunque no hayan cumplido 30 días y notifica al investigador de cada experimento afectado (ver RNF-09). \\
 \hline
-4 & El archivo de video ya no existe en el sistema de archivos (eliminado previamente de forma manual): el \textit{Worker} registra la situación y actualiza el estado sin generar error. \\
+4 & El archivo de video ya no existe en el sistema de archivos (eliminado previamente de forma manual): el sistema registra la situación y actualiza el estado sin generar error. \\
 \hline
 \end{tabular}
 
@@ -2653,11 +2673,12 @@ no se pudo abrir o no se encontraron los cilindros. Cuando un análisis se compl
 la pantalla habilita «Ver resultados» y «Revisar segundo a segundo». Debajo lista la
 cola de trabajos. El análisis continúa aunque el investigador cierre la pestaña (RF-15).
 
-No hay botón de cancelar visible durante el análisis. La decisión fue deliberada: el
-laboratorio no tiene casos de uso donde cancele un análisis a mitad de camino, y
-agregar la funcionalidad implicaría manejar el estado de cancelación en el worker y
-limpiar los archivos parciales. Si en el futuro surge esa necesidad, habría que añadir un
-\textit{endpoint} de cancelación del análisis.
+No hay botón de pausar ni de cancelar durante el análisis: es el sistema quien decide
+cuándo pausar. Si pasan tres segundos seguidos sin ver al espécimen, el análisis queda
+en pausa, aparece una notificación y el usuario puede ajustar el recuadro del cilindro;
+si no responde en 5~minutos, el análisis se cancela (RN-17). Desde la pantalla de
+revisión el investigador sí puede reiniciar el análisis: el resultado anterior se
+borra y el análisis empieza de nuevo (RN-04).
 
 \begin{figure}[H]
 \centering
@@ -2671,8 +2692,9 @@ limpiar los archivos parciales. Si en el futuro surge esa necesidad, habría que
 Cuatro pestañas: resultados por espécimen, comparación entre grupos, línea de tiempo
 por minuto (RF-20) y bloques de 5~s (RF-18), donde cada bloque muestra la conducta con
 más segundos y, dentro, los cinco segundos que lo componen, para notar las conductas
-breves y comparar con el análisis manual. La regla con que se decide la conducta de cada
-bloque es RN-15. Los fragmentos «no se ve» se marcan en pantalla y en el PDF final.
+breves y presentar los bloques en la unidad de la literatura. La regla con que se decide
+la conducta de cada bloque es RN-15. Los fragmentos «no se ve» se marcan en pantalla y
+en el reporte de resultados.
 La vista por espécimen
 muestra el tiempo por conducta con media, desviación estándar y varianza por grupo (RF-19, RF-31), el
 nivel de clasificación del análisis y la leyenda de conductas; en el panel lateral
