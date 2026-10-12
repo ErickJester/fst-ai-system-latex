@@ -93,7 +93,7 @@ edge([B('Tanda', C['Tanda']['w'] - 60), B('Especimen', C['Tanda']['w'] - 60) if 
      ASSOC, '1', '2..4', 'ALOJA', start='dia')
 edge([B('Tanda', 60), (tx + 60, C['Video']['y'] + 16), R('Video', 16)], ASSOC, '1', '1..2', 'PRODUCE', start='dia')
 # Analisis
-edge([R('Analisis', 30), L('Video', 70)], ASSOC, '1', '1', 'PROCESA', end='arrow')
+edge([R('Analisis', 30), L('Video', 70)], ASSOC, '0..1', '1', 'PROCESA', end='arrow')
 # Dependencias del Worker / Pipeline
 edge([T('Worker', cx('Worker')), B('Analisis', cx('Worker'))], DEP, role='PROCESA', end='arrow')
 edge([B('Worker', cx('Worker')), T('PipelineAnalisis', cx('Worker'))], DEP, role='INVOCA', end='arrow')
@@ -118,8 +118,8 @@ edge([L('Experimento', 100), (g1(60), C['Experimento']['y'] + 100), (g1(60), C['
 # Resultados
 g3 = lambda off: gapx(3, off)
 edge([L('Especimen', 36), (g3(50), C['Especimen']['y'] + 36), (g3(50), C['Observacion']['y'] + 16), R('Observacion', 16)],
-     ASSOC, '1', '1..2', 'APARECE EN', end='arrow', role_seg=1)
-edge([B('Video', cx('Video')), T('Observacion', cx('Video'))], ASSOC, '1', '2..4', 'CONTIENE', end='arrow')
+     ASSOC, '1', '0..1', 'APARECE EN', end='arrow', role_seg=1)
+edge([B('Video', cx('Video')), T('Observacion', cx('Video'))], ASSOC, '1', '0..4', 'CONTIENE', end='arrow')
 edge([R('Observacion', 36), L('Intervalo', 26)], ASSOC, '1', '5', 'SE DIVIDE EN', start='dia')
 edge([B('Observacion', cx('Video')), T('Segundo', cx('Video'))], ASSOC, '1', '1..300', 'SE ETIQUETA EN', start='dia')
 edge([B('Intervalo', cx('Intervalo')), T('Conducta', cx('Intervalo'))], PLAIN, '0..*', '2..4', '')

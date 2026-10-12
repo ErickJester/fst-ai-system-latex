@@ -10,8 +10,8 @@ box('nav', 'dispositivo', 'Equipo del investigador', ['Navegador web:', 'Chrome 
 box('fe', 'contenedor', 'frontend', ['React.js + Vite', 'Interfaz del investigador', 'Descarga de reportes (PDF, CSV, XLSX)'], 410, 120, 260)
 box('be', 'contenedor', 'backend', ['Flask + SQLAlchemy + JWT', 'API REST (JSON)', 'Valida los archivos de video', 'Encola las tareas de análisis'], 410, 300, 260)
 box('db', 'contenedor', 'db', ['PostgreSQL', 'Cola de tareas: tabla ANALISIS', 'Esquema relacional (15 tablas)'], 750, 120, 230)
-box('wk', 'contenedor', 'worker', ['Python · OpenCV · scikit-learn · PyTorch', 'Pipeline de análisis conductual', 'Consulta la cola periódicamente', 'Borra videos a los 30 días (tarea diaria)', 'Clasificador sobre rasgos: sin GPU'], 1060, 300, 280)
-box('vc', 'volumen', 'Volumen compartido', ['Videos originales', 'Videos anotados', 'Reportes PDF / CSV / XLSX', 'Reportes de diagnóstico'], 750, 500, 230, 'vol')
+box('wk', 'contenedor', 'worker', ['Python · OpenCV · scikit-learn · PyTorch', 'Pipeline de análisis conductual', 'Consulta la cola periódicamente', 'Tareas diarias: borra videos a 30 días,', 'avisa del vencimiento y vigila el disco', 'Clasificador sobre rasgos: sin GPU'], 1060, 300, 280)
+box('vc', 'volumen', 'Volumen compartido', ['Videos originales', 'Copia del video para revisión (H.264)', 'Reportes PDF / CSV / XLSX', 'Reportes de diagnóstico'], 750, 500, 230, 'vol')
 box('vm', 'volumen', 'Volumen de modelos', ['Solo lectura para el worker', 'Archivo del clasificador de conducta'], 1060, 500, 280, 'vol')
 box('mail', 'servicio externo', 'Cuenta de correo', ['Configurable en el servidor', '(avisos, RF-33)'], 1450, 120, 200, 'ext')
 

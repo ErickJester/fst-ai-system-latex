@@ -277,12 +277,25 @@ Aplicados en la rama `decisiones-11oct` (caps. 1 a 5, apéndice D, `esquema_fisi
 | **Reiniciar (D-60, D-68)** | El usuario reinicia el análisis desde la pantalla de revisión: se borra el resultado anterior y el análisis vuelve a `en cola` (RN-04). Corrige solo el investigador que subió el video o el Administrador (D-57, RN-14) |
 | **Copia H.264 (D-58)** | El worker la genera al terminar el análisis; no es columna ni tabla. No se decidió si se guarda el recuadro ajustado por el usuario |
 | **Rol (D-72)** | RN-16 también prohíbe quitar el rol de Administrador a la última cuenta activa |
-| **Borrado a 30 días (D-69)** | Lo hace «el sistema» de forma automática (CU-14 ya no nombra al worker) |
+| **Borrado a 30 días (D-69, D-82)** | Lo hace el sistema de forma automática, y desde el 12-oct lo ejecuta **el worker** (CU-14 vuelve a nombrarlo) junto con el aviso de vencimiento y la vigilancia del disco |
 | **Clasificador (D-66)** | La CNN de fusión; el *gradient boosting* es el etiquetador |
 | **Dos PDF (D-76)** | «reporte de resultados» y «reporte de diagnóstico» |
 
-**No se aplicó** (sin confirmación): columnas de `ANALISIS` nulas, `PRESENTA` en (4,4), cuatro valores de
-`SEGUNDO.origen`, quitar el modelo del panel de administración.
+**No se aplicó** (sin confirmación): `PRESENTA` en (4,4) y quitar el modelo del panel de administración.
+Las columnas de `ANALISIS` y los valores de `SEGUNDO.origen` se resolvieron el 12-oct (abajo).
+
+### Cambios del 12-oct-2026 (D-79 a D-82)
+
+Detalle de cada decisión en `errores/preguntas-doctor.md` §6. D-78 sigue pendiente (si la red entrega
+probabilidades); mientras tanto el backend funciona igual en los dos casos.
+
+| Cambio | Detalle |
+|---|---|
+| **Columnas de `ANALISIS` (D-79)** | `etapa`, `nivelClasif` y `fechaAnalisis` **siguen NOT NULL**. Al encolar el backend les pone un valor de arranque (`preprocesamiento`, `preciso` y la fecha de encolado) y el worker los reemplaza; el borrado a 30 días cuenta desde la `fechaAnalisis` final y solo mira análisis `completado`. Apéndice D e `INSTRUCCIONES-WEB.md` actualizados; el esquema no cambia |
+| **`SEGUNDO.origen` (D-80)** | **Cuatro valores**, con los nombres del cap. 5: `maquina`, `confirmada`, `corregida` y `dudosa` (ya no llevan el prefijo «humano_»; `maquina` equivale a «del sistema»). Se quitan `sin_revisar` y `humano_ciego` del apéndice D, del físico y de `INSTRUCCIONES-WEB.md` (también el modo de revisión «desde cero») |
+| **Video anotado y medidas por cuadro (D-81)** | Se quitan del documento y de las figuras. El pipeline produce tres salidas: tiempos por conducta, etiqueta de cada segundo y copia H.264 para revisión |
+| **Pausa, cancelación, reinicio y revisión (D-57 a D-60, D-67, D-68)** | Ya estaban en los capítulos y el apéndice D; el 12-oct se propagaron a `INSTRUCCIONES-WEB.md`: estados `en pausa` y `cancelado` (dominios, SQL y diagramas de estados), notificaciones `analisis en pausa` y `analisis cancelado`, regla R-15, reinicio (`POST .../restart`), solo corrige quien subió el video o el Administrador, y la copia H.264 en la secuencia del worker. **Abierto:** cómo llega y si se guarda el ajuste del recuadro durante la pausa |
+| **Tareas diarias (D-82)** | Borrado de videos a 30 días, aviso de vencimiento y vigilancia del disco: las ejecuta el worker (CU-14, cap. 5, `cu_paquete5.puml` e `INSTRUCCIONES-WEB.md`). **Pendiente de coordinar:** el contrato con el worker (sección 4 de `INSTRUCCIONES-WEB.md`) no las incluía y el worker lo hace otra persona |
 
 ### Cambios del 6-oct-2026 (D-53, D-54, D-55)
 

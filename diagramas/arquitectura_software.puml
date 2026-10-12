@@ -84,7 +84,7 @@ rectangle "Docker: backend" as C_BE #E8F8F5 {
 ' ═══════════════════════════════════════════════════════════
 
 rectangle "Docker: worker" as C_WK #FEF9E7 {
-  rectangle "Pipeline de analisis conductual\n\nOpenCV         Preprocesamiento (registro de cámara y modelo de fondo)\nOpenCV         Localizacion de los cilindros\nscikit-learn   Clasificador sobre rasgos\nPyTorch        R(2+1)D-18 (en evaluacion)" as WK #FFFEF2
+  rectangle "Pipeline de analisis conductual\n\nOpenCV         Preprocesamiento (registro de cámara y modelo de fondo)\nOpenCV         Localizacion de los cilindros\nscikit-learn   Clasificador sobre rasgos\nPyTorch        R(2+1)D-18, clasificador de conducta" as WK #FFFEF2
 }
 
 ' ═══════════════════════════════════════════════════════════
@@ -98,7 +98,7 @@ rectangle "Capa de datos" as DATOS #F4F6F7 {
   }
 
   rectangle "Volumen compartido" as C_FS #EAEDED {
-    folder "Sistema de archivos local\n\nVideos originales (.mp4 y .mov)\nVideos anotados\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF" as FS
+    folder "Sistema de archivos local\n\nVideos originales (.mp4 y .mov)\nCopia del video para revisión (H.264)\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF" as FS
   }
 
   rectangle "Volumen de modelos" as C_MD #F5EEF8 {

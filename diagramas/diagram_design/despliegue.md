@@ -25,11 +25,12 @@ Dentro del servidor:
 - **frontend:** React.js + Vite.
 - **backend:** Flask + SQLAlchemy + JWT. Valida los videos y encola los análisis.
 - **worker:** pipeline de análisis (OpenCV, scikit-learn, PyTorch). Consulta la cola
-  periódicamente y borra los videos a los 30 días con una tarea diaria. El clasificador
-  sobre rasgos corre en procesador, sin GPU.
+  periódicamente y ejecuta las tareas diarias (borrado de videos a los 30 días, aviso de
+  vencimiento y vigilancia del disco; D-82). El clasificador sobre rasgos corre en
+  procesador, sin GPU.
 - **db:** PostgreSQL. La cola de tareas es la tabla `ANALISIS`.
-- **Volumen compartido:** videos originales, videos anotados, reportes y reportes de
-  diagnóstico.
+- **Volumen compartido:** videos originales, la copia del video para revisión (H.264),
+  reportes y reportes de diagnóstico.
 - **Volumen de modelos:** el archivo del clasificador; solo lectura para el worker.
 
 ## Cómo se comunican
@@ -66,3 +67,16 @@ volumen compartido; solo el worker carga el volumen de modelos.
 ```bash
 python diagramas/diagram_design/generadores/gen_despliegue.py diagramas/diagram_design/despliegue.html
 ```
+
+## Actualización del 12-oct (rama `decisiones-11oct`)
+
+- **Volumen compartido:** se agregó la copia del video para revisión (H.264) que el worker
+  genera al terminar el análisis (cap. 5, «Módulo 4»; D-57 a D-60).
+- **Worker:** ahora dice «tareas diarias: borra videos a 30 días, avisa del vencimiento y
+  vigila el disco». D-82 aclaró que las ejecuta el worker (D-69 solo decía «el sistema»).
+- **Correo:** los diagramas de secuencia ya responden qué contenedor envía los correos. El
+  worker envía el aviso cuando un análisis termina, falla, queda en pausa o se cancela
+  (`seq_analisis_automatico`), y el backend envía las credenciales al crear una cuenta
+  (`seq_crear_cuenta`). Como son dos contenedores, la flecha sigue saliendo del borde del
+  servidor.
+- **Sigue sin respaldo en el documento:** HTTPS.

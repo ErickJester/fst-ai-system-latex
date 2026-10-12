@@ -82,9 +82,8 @@
 '  etapa_analisis         varchar(16) IN ('preprocesamiento',
 '                          'cilindros','clasificacion')         [D-16]
 '  nivel_clasif_analisis   varchar(8) IN ('preciso','agrupado')  [D-17]
-'  origen_segundo         varchar(16) IN ('maquina','humano_confirma',
-'                          'humano_corrige','humano_duda','sin_revisar',
-'                          'humano_ciego')                      [D-35]
+'  origen_segundo         varchar(16) IN ('maquina','confirmada',
+'                          'corregida','dudosa')                [D-35]
 '
 '  ---- Todas las FK: ON UPDATE NO ACTION ON DELETE NO ACTION ----
 '  La base de datos rechaza el borrado en vez de propagarlo - por
@@ -276,7 +275,7 @@ entity SEGUNDO {
 note bottom of SEGUNDO
   Una fila por espécimen y por segundo analizado.
   Es lo que el usuario revisa y corrige al terminar el
-  analisis. origen dice si la conducta la puso la maquina
+  analisis. origen dice si la conducta la puso el sistema
   o la reviso el usuario. conducta es nula si el sistema
   no clasificó el segundo. Hay hasta 300 segundos por
   observacion, los ultimos 300 del video; si el video dura

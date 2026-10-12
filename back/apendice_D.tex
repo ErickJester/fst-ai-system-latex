@@ -62,7 +62,7 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & \texttt{varchar(8)} & \texttt{preciso} si ningún segundo del análisis quedó como conducta activa; \texttt{agrupado} si al menos uno quedó así \\
 \hline
-\texttt{origen\_\allowbreak{}segundo} & \texttt{varchar(16)} & \texttt{maquina}: conducta puesta por el sistema, sin revisar. \texttt{humano\_\allowbreak{}confirma}: el usuario vio el segundo y dejó la conducta del sistema. \texttt{humano\_\allowbreak{}corrige}: el usuario vio el segundo y la cambió. \texttt{humano\_\allowbreak{}duda}: el usuario lo marcó como dudoso y quedó sin conducta. \texttt{sin\_\allowbreak{}revisar}: el usuario lo etiquetó sin llegar a verlo en el video. \texttt{humano\_\allowbreak{}ciego}: etiquetado en el modo de revisión que oculta la conducta del sistema \\
+\texttt{origen\_\allowbreak{}segundo} & \texttt{varchar(16)} & \texttt{maquina}: conducta puesta por el sistema, sin revisar. \texttt{confirmada}: el usuario vio el segundo y dejó la conducta del sistema. \texttt{corregida}: el usuario vio el segundo y la cambió. \texttt{dudosa}: el segundo quedó sin conducta porque el usuario lo marcó como dudoso \\
 \hline
 \end{longtable}
 }
@@ -173,11 +173,11 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{estado} & \texttt{estado\_\allowbreak{}analisis} & No & Dominio & En cola, procesando, en pausa (el sistema no ve al espécimen y espera al usuario), completado, error o cancelado (el usuario no respondió en 5 minutos). El \textit{worker} toma de la cola los análisis en estado \texttt{en cola} \\
 \hline
-\texttt{etapa} & \texttt{etapa\_\allowbreak{}analisis} & No & Dominio & Etapa del pipeline en curso o, si hubo error, la etapa donde se detuvo. Con ella se arma el mensaje de error \\
+\texttt{etapa} & \texttt{etapa\_\allowbreak{}analisis} & No & Dominio & Etapa del pipeline en curso o, si hubo error, la etapa donde se detuvo. Con ella se arma el mensaje de error. Al encolar el análisis el backend le pone el valor de arranque \texttt{preprocesamiento}; el \textit{worker} la actualiza en cada etapa \\
 \hline
-\texttt{nivelClasif} & \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & No & Dominio & Preciso o agrupado. La interfaz lo usa para avisar en los resultados \\
+\texttt{nivelClasif} & \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & No & Dominio & Preciso o agrupado. La interfaz lo usa para avisar en los resultados. Al encolar el análisis el backend le pone el valor de arranque \texttt{preciso}; el \textit{worker} lo fija al clasificar \\
 \hline
-\texttt{fechaAnalisis} & \texttt{timestamptz} & No & & Momento del análisis \\
+\texttt{fechaAnalisis} & \texttt{timestamptz} & No & & Momento del análisis. Al encolar el análisis vale la fecha de encolado; el \textit{worker} la reemplaza al terminar (completado o error), y desde esa fecha se cuentan los 30 días del borrado de videos \\
 \hline
 \texttt{rutaDiagnostico} & \texttt{text} & Sí & & Ruta del reporte de diagnóstico en PDF. Solo tiene valor cuando el estado es \texttt{error} \\
 \hline
