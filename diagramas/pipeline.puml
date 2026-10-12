@@ -57,14 +57,16 @@ partition "2. Localización de los cilindros" {
 partition "3. Clasificación de conducta" {
   :Separa al espécimen del fondo\ndentro de su cilindro\n(diferencia y brillo, región más grande);
   :Mide quince rasgos de movimiento,\npostura y trayectoria;
-  :Para cada segundo, toma una ventana de 4 s\ncentrada en él y estima la probabilidad\nde cada conducta;
+  :Para cada segundo, toma una ventana de 4 s\ncentrada en él y la red de fusión estima\nla probabilidad de cada conducta;
   note right
-    Candidata en evaluación: red
-    R(2+1)D-18 sobre clips de
-    16 cuadros. La elección entre
-    ambas se hace en TT-II con F1
+    Red R(2+1)D-18 sobre clips de
+    16 cuadros, fusionada con una
+    rama de medidas (quince rasgos
+    y siete reglas de observación).
+    Se evalúa en TT-II con F1
     por conducta.
   end note
+  :Si no ve al espécimen durante tres segundos\nseguidos, pone el análisis en pausa y pide\nun ajuste (sin respuesta en 5 minutos,\nse cancela);
   if (¿Una conducta supera el umbral de confianza?) then (sí)
     :Asigna esa conducta;
   elseif (¿Nado y escalamiento juntos lo superan?) then (sí)
@@ -76,7 +78,7 @@ partition "3. Clasificación de conducta" {
 
 partition "4. Resultados" {
   :Se queda con los últimos 300 s del video\n(como máximo; si dura menos, todo)\ny renumera sus segundos de 1 a 300;
-  :Guarda la conducta de cada segundo,\nlos segundos por conducta de cada minuto,\nel video anotado y las medidas por cuadro;
+  :Guarda la conducta de cada segundo,\nlos segundos por conducta de cada minuto,\nlos recuadros de los cilindros y la copia\nreproducible del video (H.264);
 }
 stop
 

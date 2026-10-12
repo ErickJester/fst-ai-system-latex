@@ -9,9 +9,9 @@
 El FST produce videos de especímenes nadando en cilindros. Para analizarlos
 automáticamente hace falta entender qué conductas se observan y qué
 significan, cómo procesar las imágenes para detectar al espécimen, qué
-arquitecturas pueden clasificar esas conductas con pocos datos etiquetados
----un clasificador de \textit{gradient boosting} (potenciación del gradiente) sobre
-rasgos medidos o una red convolucional espacio-temporal---, cómo organizar todo eso
+arquitectura puede clasificar esas conductas con pocos datos etiquetados
+---una red convolucional espacio-temporal fusionada con medidas del espécimen---,
+cómo organizar todo eso
 en un sistema web que el laboratorio pueda usar y con qué métricas se evaluará.
 Lo que sigue cubre esos cinco bloques en ese orden.
 
@@ -87,7 +87,7 @@ puede repetirse, por ejemplo con varias moléculas o dosis. Lo habitual es que c
 tenga de 6 a 8 especímenes, aunque no es una regla del protocolo. Como en una grabación
 caben de dos a cuatro cilindros, cada grupo se graba en una o más tandas de dos a cuatro
 especímenes. El laboratorio realiza de tres a cuatro experimentos por semestre y cada uno
-genera alrededor de ocho videos.
+genera alrededor de ocho videos; estima entre 32 y 40 videos nuevos por semestre.
 
 % ============================================================
 \section{Procesamiento de video para localizar al espécimen}
@@ -186,9 +186,10 @@ cuadro, no oscila entre cuadros y no necesita suavizado.
 \section{Redes neuronales y aprendizaje profundo}
 % ============================================================
 
-\subsection{Clasificador por \textit{gradient boosting} sobre rasgos}
+\subsection{\textit{Gradient boosting} sobre rasgos en el etiquetador}
 
-Una de las dos alternativas que se evalúan no usa una red profunda. En el
+El etiquetador del equipo, que propone las etiquetas del conjunto de entrenamiento, no
+usa una red profunda. En el
 \textit{gradient boosting} se entrena una secuencia de árboles de decisión
 pequeños, y cada árbol nuevo corrige el error que dejó el conjunto de los anteriores
 \cite{friedman2001}. Su entrada no es la imagen sino un vector de rasgos medidos sobre
@@ -196,9 +197,9 @@ el espécimen (movimiento, postura y trayectoria), y su salida es la probabilida
 cada conducta. La variante por histogramas agrupa los valores de cada rasgo en
 intervalos, lo que acelera el entrenamiento sin perder precisión de forma apreciable
 \cite{ke2017,pedregosa2011}. Requiere pocos datos etiquetados y sus decisiones se
-pueden rastrear hasta los rasgos que las causaron. Cuál de las dos alternativas queda
-como clasificador del sistema se decide en TT-II con precisión, \textit{recall} y F1
-por conducta.
+pueden rastrear hasta los rasgos que las causaron. El clasificador del sistema es la
+red de la sección siguiente, que se evalúa en TT-II con precisión, \textit{recall} y
+F1 por conducta.
 
 \subsection{Redes neuronales y CNN}
 
@@ -213,19 +214,21 @@ Adam \cite{kingma2014}, que ajusta la tasa de aprendizaje de cada parámetro
 individualmente usando estimaciones de primer y segundo momento del gradiente.
 
 Entrenar una CNN desde cero requiere conjuntos de datos etiquetados muy grandes, lo que
-no es viable con el \textit{dataset} (conjunto de datos) disponible. Para el candidato basado en redes
-profundas, la solución es el \textit{transfer learning} (aprendizaje por transferencia).
+no es viable con el \textit{dataset} (conjunto de datos) disponible. Para el clasificador, la
+solución es el \textit{transfer learning} (aprendizaje por transferencia).
 
 \subsection{\textit{Transfer learning} (aprendizaje por transferencia)}
 
 El \textit{transfer learning} \cite{pan2010} consiste en tomar una red ya entrenada con
-un conjunto grande de datos y adaptar solo su última capa para la tarea nueva. Para
+un conjunto grande de datos y adaptar sobre todo sus últimas capas para la tarea nueva. Para
 imágenes, el conjunto de referencia es ImageNet (en su versión de preentrenamiento, más de
 un millón de imágenes de 1{,}000 clases); para video, Kinetics-400 (videos de 400 acciones humanas). Las capas
 anteriores ya detectan bordes, texturas, formas y patrones de movimiento; ese
 conocimiento se transfiere directamente al problema del FST. En la práctica se
 reemplaza la capa de clasificación original por una nueva con 3 salidas ---una por
-conducta--- y se re-entrena con los \textit{clips} (fragmentos de video) etiquetados de los videos del laboratorio.
+conducta--- y se re-entrena con los \textit{clips} (fragmentos de video) etiquetados de los videos del laboratorio. En el sistema, la salida de la red se fusiona
+con una rama de medidas del espécimen (quince rasgos y siete reglas de observación)
+antes de la capa de clasificación.
 
 Este enfoque reduce los requerimientos de datos cuando el dominio de origen (ImageNet
 para imágenes, Kinetics-400 para video) y el de destino (recortes y clips de especímenes en el FST) comparten características visuales básicas
@@ -250,7 +253,7 @@ $\mathcal{F}(\mathbf{x}) = \mathcal{H}(\mathbf{x}) - \mathbf{x}$:
 
 Esto permite al gradiente fluir directamente hacia atrás sin atenuarse, lo que hace
 posible entrenar redes de 50, 101 o 152 capas. Para este proyecto interesa la versión
-de 18 capas, ResNet-18, porque es la base de la red que se evalúa como candidato a clasificador:
+de 18 capas, ResNet-18, porque es la base de la red que es el clasificador del sistema:
 la R(2+1)D-18 \cite{tran2018} conserva sus 18 capas y sus conexiones residuales, pero
 recibe clips de 16 fotogramas y separa cada convolución en una parte espacial, sobre
 cada fotograma, y una temporal, entre fotogramas. Así aprende patrones de movimiento
@@ -341,7 +344,8 @@ motor de base de datos sin modificar el código de la aplicación.
 La evaluación del sistema se basa en métricas que cubren los atributos de calidad
 definidos en la norma ISO/IEC~25010:2011 \cite{iso25010}: \textit{functional
 correctness} (precisión de las predicciones), \textit{time behaviour} (tiempo de
-procesamiento) y \textit{usability} (facilidad de uso para el investigador).
+procesamiento) y \textit{usability} (facilidad de uso para el investigador), más la
+repetibilidad que fijó el laboratorio (RNF-14).
 
 \subsection{Precisión, \textit{recall} y F1 por conducta}
 
@@ -361,7 +365,15 @@ Para cada conducta $c$ se calculan:
 donde, para el clasificador, cada conducta es una clase y $VP_c$, $FP_c$ y $FN_c$ son los verdaderos positivos, falsos positivos y falsos
 negativos de la clase $c$ respectivamente. El F1 es útil cuando las clases están
 desbalanceadas, que es esperable en el FST donde la inmovilidad suele dominar en los
-primeros experimentos.
+primeros experimentos. La meta de F1 aplica a las tres conductas directas (nado
+activo, inmovilidad y escalamiento); la conducta activa se reporta, pero no se exige.
+
+\subsection{Repetibilidad}
+
+El laboratorio considera la repetibilidad su criterio principal: el mismo video
+analizado varias veces debe producir el mismo resultado, con una variabilidad máxima
+de entre 5 y 10\,\%. Se mide analizando varias veces el mismo video y comparando los
+tiempos por conducta de cada corrida (RNF-14).
 
 \subsection{Tiempo de análisis}
 

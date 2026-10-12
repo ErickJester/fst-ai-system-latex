@@ -84,8 +84,10 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
   clasificación (D-16). **Sin YOLO, ByteTrack ni ningún *tracker***: un espécimen por
   cilindro, detectado por sustracción de fondo (CLA-02). YOLO solo aparece como trabajo
   revisado en el cap. 2.
-- **Clasificador: todavía no se elige.** Candidatos: *gradient boosting* sobre rasgos y
-  R(2+1)D-18 (CLA-03). No escribir ResNet-50 ni Random Forest, ni cifras de desempeño.
+- **Clasificador: la red de fusión** (R(2+1)D-18 más una rama de medidas: quince rasgos y siete
+  reglas de observación; D-66). El *gradient boosting* sobre rasgos queda solo en el etiquetador
+  del equipo. La conducta activa se deriva con la regla de tres pasos. No escribir ResNet-50 ni
+  Random Forest, ni cifras de desempeño.
 - **Cuatro conductas:** nado activo, inmovilidad, escalamiento y **conducta activa** (cuando
   no se distingue nado de escalamiento) (D-29, RN-13).
 - **Cada segundo recibe una conducta, sin duración mínima.** El sistema detecta conductas
@@ -128,8 +130,11 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
 - **Validación del video:** la extensión se comprueba en la interfaz; la orientación y la reproducibilidad, en el
   servidor (D-64).
 - **F1 «por conducta»**; el tiempo de análisis se mide en segundos; el título de la portada no se cambia (D-65).
-- **D-57 a D-60** (revisión y corrección, copia H.264, pausa de 5 min por «no se ve», reinicio del análisis por el
-  usuario): **registradas, sin aplicar.** No corregir RN-04 ni el LaTeX todavía.
+- **Revisión, pausa y reinicio (D-68, aplica D-57 a D-60):** el Día 1 se sube para que el investigador confirme la
+  habituación y no se analiza (D-67). Si no se ve al espécimen en tres segundos seguidos, el análisis queda en pausa y
+  se notifica; si en 5 minutos no hay respuesta, se **cancela** (estado nuevo, con su mensaje). El recuadro ajustado no
+  se guarda. El investigador puede **reiniciar** y eso borra el resultado anterior (RN-04). El *worker* guarda la copia
+  reproducible H.264 y los recuadros, sin video anotado, y es quien borra los videos a los 30 días.
 
 ## Reglas de contenido
 

@@ -54,15 +54,15 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{formato\_\allowbreak{}reporte} & \texttt{varchar(4)} & \texttt{CSV}, \texttt{XLSX}, \texttt{PDF} \\
 \hline
-\texttt{tipo\_\allowbreak{}notificacion} & \texttt{varchar(32)} & \texttt{analisis completado}, \texttt{error del pipeline}, \texttt{alerta de disco}, \texttt{video borrado} \\
+\texttt{tipo\_\allowbreak{}notificacion} & \texttt{varchar(32)} & \texttt{analisis completado}, \texttt{error del pipeline}, \texttt{analisis en pausa}, \texttt{analisis cancelado}, \texttt{alerta de disco}, \texttt{video borrado} \\
 \hline
-\texttt{estado\_\allowbreak{}analisis} & \texttt{varchar(10)} & \texttt{en cola}, \texttt{procesando}, \texttt{completado}, \texttt{error} \\
+\texttt{estado\_\allowbreak{}analisis} & \texttt{varchar(10)} & \texttt{en cola}, \texttt{procesando}, \texttt{en pausa}, \texttt{cancelado}, \texttt{completado}, \texttt{error} \\
 \hline
 \texttt{etapa\_\allowbreak{}analisis} & \texttt{varchar(16)} & \texttt{preprocesamiento}, \texttt{cilindros}, \texttt{clasificacion} \\
 \hline
 \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & \texttt{varchar(8)} & \texttt{preciso} si ningún segundo del análisis quedó como conducta activa; \texttt{agrupado} si al menos uno quedó así \\
 \hline
-\texttt{origen\_\allowbreak{}segundo} & \texttt{varchar(16)} & \texttt{maquina}: conducta puesta por el sistema, sin revisar. \texttt{humano\_\allowbreak{}confirma}: el usuario vio el segundo y dejó la conducta del sistema. \texttt{humano\_\allowbreak{}corrige}: el usuario vio el segundo y la cambió. \texttt{humano\_\allowbreak{}duda}: el usuario lo marcó como dudoso y quedó sin conducta. \texttt{sin\_\allowbreak{}revisar}: el usuario lo etiquetó sin llegar a verlo en el video. \texttt{humano\_\allowbreak{}ciego}: etiquetado en el modo de revisión que oculta la conducta del sistema \\
+\texttt{origen\_\allowbreak{}segundo} & \texttt{varchar(16)} & \texttt{maquina}: conducta puesta por el sistema, sin revisar. \texttt{humano\_\allowbreak{}confirma}: el usuario vio el segundo y dejó la conducta del sistema. \texttt{humano\_\allowbreak{}corrige}: el usuario vio el segundo y la cambió. \texttt{humano\_\allowbreak{}duda}: el usuario lo marcó como dudoso y quedó sin conducta \\
 \hline
 \end{longtable}
 }
@@ -171,13 +171,13 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{idVideo} & \texttt{integer} & No & FK $\to$ VIDEO; UK & Video analizado. Es único: un video tiene un solo análisis vigente y un análisis nuevo reemplaza al anterior \\
 \hline
-\texttt{estado} & \texttt{estado\_\allowbreak{}analisis} & No & Dominio & En cola, procesando, completado o error. El \textit{worker} toma de la cola los análisis en estado \texttt{en cola} \\
+\texttt{estado} & \texttt{estado\_\allowbreak{}analisis} & No & Dominio & En cola, procesando, en pausa (el sistema no ve al espécimen y espera un ajuste), cancelado (sin respuesta en 5 minutos), completado o error. El \textit{worker} toma de la cola los análisis en estado \texttt{en cola} \\
 \hline
-\texttt{etapa} & \texttt{etapa\_\allowbreak{}analisis} & No & Dominio & Etapa del pipeline en curso o, si hubo error, la etapa donde se detuvo. Con ella se arma el mensaje de error \\
+\texttt{etapa} & \texttt{etapa\_\allowbreak{}analisis} & Sí & Dominio & Nula mientras está en cola. Etapa del pipeline en curso o, si hubo error, la etapa donde se detuvo. Con ella se arma el mensaje de error \\
 \hline
-\texttt{nivelClasif} & \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & No & Dominio & Preciso o agrupado. La interfaz lo usa para avisar en los resultados \\
+\texttt{nivelClasif} & \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & Sí & Dominio & Nulo hasta que el \textit{worker} lo fija. Preciso o agrupado. La interfaz lo usa para avisar en los resultados \\
 \hline
-\texttt{fechaAnalisis} & \texttt{timestamptz} & No & & Momento del análisis \\
+\texttt{fechaAnalisis} & \texttt{timestamptz} & Sí & & Momento del análisis; la fija el \textit{worker} al terminar \\
 \hline
 \texttt{rutaDiagnostico} & \texttt{text} & Sí & & Ruta del reporte de diagnóstico en PDF. Solo tiene valor cuando el estado es \texttt{error} \\
 \hline
@@ -188,7 +188,7 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{idEspecimen} & \texttt{integer} & No & FK $\to$ ESPECIMEN; UK (idEspecimen, idVideo) & Espécimen observado \\
 \hline
-\texttt{idVideo} & \texttt{integer} & No & FK $\to$ VIDEO; UK (idEspecimen, idVideo) & Video en que se le observó. Cada video tiene de 2 a 4 observaciones, una por espécimen \\
+\texttt{idVideo} & \texttt{integer} & No & FK $\to$ VIDEO; UK (idEspecimen, idVideo) & Video del Día~2 en que se le observó. Cada video analizado tiene de 2 a 4 observaciones, una por espécimen; el video del Día~1 no tiene observaciones \\
 \hline
 % ---------------- INTERVALO ----------------
 \multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{INTERVALO}: cada minuto de una observación} \\
@@ -246,7 +246,7 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{idExperimento} & \texttt{integer} & Sí & FK $\to$ EXPERIMENTO & Experimento del que trata el aviso. Es nulo en la alerta de disco, que no viene de ningún experimento \\
 \hline
-\texttt{tipo} & \texttt{tipo\_\allowbreak{}notificacion} & No & Dominio & Análisis completado, error del pipeline, alerta de disco o video borrado (el borrado adelantado de RN-05). Cada aviso también se envía por correo (RF-33) \\
+\texttt{tipo} & \texttt{tipo\_\allowbreak{}notificacion} & No & Dominio & Análisis completado, error del pipeline, análisis en pausa, análisis cancelado, alerta de disco o video borrado (el borrado adelantado de RN-05). Cada aviso también se envía por correo (RF-33) \\
 \hline
 \texttt{mensaje} & \texttt{text} & No & & Texto del aviso, con el detalle del caso \\
 \hline

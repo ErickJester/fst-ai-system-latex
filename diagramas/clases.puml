@@ -174,7 +174,7 @@ Grupo       "1" *--> "1..*" Tanda     : "se graba en"
 Tanda       "1" *--> "2..4" Especimen : aloja
 Tanda       "1" *--> "1..2" Video     : produce
 
-Analisis "1" --> "1" Video            : procesa
+Analisis "0..1" --> "1" Video          : procesa
 
 Worker ..> PipelineAnalisis : invoca
 Worker ..> Analisis         : procesa
@@ -187,14 +187,14 @@ PipelineAnalisis ..> Analisis    : actualiza
 PipelineAnalisis ..> Observacion : origina
 PipelineAnalisis ..> PRESENTA    : genera
 
-Especimen   "1" --> "1..2" Observacion : "aparece en"
-Video       "1" --> "2..4" Observacion : contiene
+Especimen   "1" --> "0..1" Observacion : "aparece en"
+Video       "1" --> "0..4" Observacion : contiene
 Observacion "1" *--> "5"   Intervalo   : "se divide en"
 
 ' D-54: 300 es un maximo, sin minimo (los ultimos 300 s del video;
 ' si dura menos, se guardan todos sus segundos).
 Observacion "1" *--> "1..300" Segundo : "se etiqueta en"
-Intervalo "0..*" -- "2..4" Conducta : presenta
+Intervalo "0..*" -- "4" Conducta : presenta
 (Intervalo, Conducta) .. PRESENTA
 
 Experimento "1"    --> "0..*" Reporte      : origina

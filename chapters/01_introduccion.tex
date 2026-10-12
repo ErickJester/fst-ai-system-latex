@@ -206,8 +206,8 @@ atributos de calidad de la norma ISO/IEC~25010:2011 \cite{iso25010}.
         clasificación estándar (precisión, \textit{recall} y F1 por conducta) sobre un
         conjunto de prueba independiente.
   \item Cuantificar la reducción de tiempo de análisis respecto al proceso manual, y
-        dejar documentado qué tendría que cambiar en el \textit{pipeline} si el laboratorio
-        quisiera aplicarlo a otro paradigma conductual.
+        dejar un diseño modular del \textit{pipeline} que pueda reconfigurarse para otro
+        paradigma conductual; su validación con otros paradigmas queda fuera del alcance.
 \end{enumerate}
 
 \section{Justificación}
@@ -243,12 +243,15 @@ conductas del FST (y la conducta activa cuando no distingue entre nado y escalam
 
 En cuanto a calidad del software, el sistema se diseña para cumplir atributos concretos
 de la ISO/IEC~25010:2011 \cite{iso25010}: \textit{functional correctness} (corrección
-funcional), que mide el desempeño del clasificador con métricas de clasificación
-estándar sobre el conjunto de prueba; \textit{time behaviour} (desempeño temporal), que establece que el análisis
-debe terminar en un tiempo asumible en el flujo de trabajo; y \textit{usability}
-(usabilidad), que garantiza que un investigador sin conocimientos de programación puede
-operar el sistema sin ayuda técnica. Esos tres atributos son los criterios de aceptación
-de la validación final.
+funcional, subcaracterística de la adecuación funcional), que mide el desempeño del
+clasificador con métricas de clasificación estándar sobre el conjunto de prueba;
+\textit{time behaviour} (desempeño temporal, subcaracterística de la eficiencia de
+desempeño), que establece que el análisis debe terminar en un tiempo asumible en el
+flujo de trabajo; y \textit{usability} (usabilidad), característica que garantiza que
+un investigador sin conocimientos de programación puede operar el sistema sin ayuda
+técnica. A esos tres se suma la repetibilidad que fijó el laboratorio (RNF-14): el
+mismo video analizado varias veces debe dar el mismo resultado. Esos cuatro criterios
+son los de aceptación de la validación final.
 
 
 \section{Alcance del proyecto}
@@ -297,7 +300,10 @@ de la validación final.
         puede abrir una pantalla con el video y una línea de tiempo por espécimen,
         coloreada por conducta, y corregir la etiqueta de cada segundo. Cada segundo
         guarda su origen (del sistema, confirmado, corregido o dudoso), y los totales
-        por minuto se recalculan al guardar las correcciones.
+        por minuto se recalculan al guardar las correcciones. Si el análisis no ve a un
+        espécimen durante tres segundos seguidos, queda en pausa y pide al investigador
+        ajustar el recuadro del cilindro; si no responde en cinco minutos, se cancela.
+        El investigador puede reiniciar un análisis, lo que borra el resultado anterior.
 
   \item \textbf{Plataforma web:} interfaz accesible desde el navegador con creación
         de cuenta de usuario por parte del administrador, carga de videos, cola de
@@ -352,7 +358,8 @@ de la validación final.
 
   \item \textbf{Otros paradigmas conductuales:} el sistema está diseñado y entrenado
         específicamente para el FST con especímenes. No se garantiza su funcionamiento con
-        otras pruebas conductuales ni con otras especies.
+        otras pruebas conductuales ni con otras especies. El diseño es modular para poder
+        reconfigurarlo, pero validarlo con otros paradigmas queda fuera del alcance.
 \end{itemize}
 
 \section{Metodología}

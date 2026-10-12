@@ -462,6 +462,8 @@ Otras decisiones tomadas:
 
 ## 8. Tareas programadas (cron)
 
+Las ejecuta el *worker*, no el backend.
+
 | Tarea | Frecuencia | Qué hace |
 |---|---|---|
 | Borrar videos vencidos | Diaria | Elimina el archivo del video 30 días después de `ANALISIS.fechaAnalisis` si `estado = completado`. La fila de `VIDEO` se conserva y su `archivo` queda en nulo. |
@@ -2477,7 +2479,7 @@ skinparam defaultFontName Arial
 skinparam defaultFontSize 11
 skinparam shadowing false
 skinparam sequenceMessageAlign center
-participant "Tarea programada\n(en el backend)" as job
+participant "Tarea programada\n(en el worker)" as job
 database "Base de datos" as db
 participant "Archivos" as fs
 
