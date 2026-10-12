@@ -1,0 +1,49 @@
+@startuml seq_cambio_pass_inv
+' ================================================================
+'  Secuencia - Cambio de contraseña
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Cubre CU-16 "Cambiar contraseña al primer acceso" (RF-05, RF-07)
+'  y el cambio voluntario desde el perfil (CU-18). Aplica a
+'  cualquier usuario con sesion activa. La cuenta creada por el
+'  Administrador lleva una contraseña temporal y la marca de cambio
+'  obligatorio; al cambiarla, la marca se quita.
+'
+'  Reemplaza a figures/mermaid/seq_cambio_pass_inv.png, un Mermaid
+'  de mayo sin fuente y sin acentos.
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/seq_cambio_pass_inv.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+u -> ui: escribe su contraseña actual y la nueva
+ui -> api: envía la contraseña actual y la nueva\ncon la sesión activa
+
+api -> db: busca la contraseña cifrada de la cuenta
+db --> api: contraseña cifrada
+api -> api: compara la contraseña actual\ncon la cifrada
+
+alt la contraseña actual es incorrecta
+  api --> ui: error: contraseña actual incorrecta
+  ui --> u: muestra el error, no cambia nada
+else la contraseña actual es correcta
+  api -> api: cifra la contraseña nueva con sal
+  api -> db: guarda la contraseña nueva\ny quita la marca de cambio obligatorio
+  db --> api: confirma la actualización
+  api --> ui: confirma el cambio
+  ui --> u: muestra la confirmación y continúa\nal panel principal
+end
+
+@enduml

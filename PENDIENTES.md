@@ -11,8 +11,8 @@ El trabajo está repartido en dos listas:
 
 | Lista | Quién | Ítems |
 |-------|-------|-------|
-| [`PENDIENTES-VANESA.md`](PENDIENTES-VANESA.md) | Vanesa | 13 🔴 · 17 🟡 · 4 🟢 · 4 ❓ · 1 🔒 |
-| [`PENDIENTES-ERICK.md`](PENDIENTES-ERICK.md) | Erick | 5 🔴 · 19 🟡 · 6 🟢 · 3 ❓ · 4 🔒 |
+| [`PENDIENTES-VANESA.md`](PENDIENTES-VANESA.md) | Vanesa | todo ✅ al 11-oct (antes: 13 🔴 · 17 🟡 · 4 🟢 · 4 ❓ · 1 🔒) |
+| [`PENDIENTES-ERICK.md`](PENDIENTES-ERICK.md) | Erick | abiertos al 11-oct: 0 🔴 · 14 🟡 · 5 🟢 · 3 ❓ · 3 🔒 (antes: 5 🔴 · 19 🟡 · 6 🟢 · 3 ❓ · 4 🔒) |
 
 ---
 

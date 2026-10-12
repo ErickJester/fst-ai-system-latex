@@ -1,0 +1,58 @@
+@startuml seq_perfil
+' ================================================================
+'  Secuencia - Actualizar perfil propio
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Cubre CU-18 "Actualizar perfil propio" (RF-06). Cualquier usuario
+'  con sesion activa. El rol no se guarda en USUARIO (se deduce de
+'  ADMINISTRADOR), asi que el perfil no lo muestra ni lo edita.
+'  El cambio de contraseña sigue el flujo de seq_cambio_pass_inv.
+'
+'  Reemplaza a figures/mermaid/seq_perfil.png, un Mermaid de mayo
+'  que "obtenia nombre, correo y rol" y omitia los apellidos.
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/seq_perfil.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+u -> ui: abre la pantalla de perfil desde el menú de usuario
+ui -> api: solicita los datos de la cuenta con la sesión activa
+api -> db: busca nombre, apellidos y correo de la cuenta
+db --> api: datos de la cuenta
+api --> ui: datos de la cuenta
+ui --> u: muestra el formulario con los datos actuales\ny la opción de cambiar la contraseña
+
+u -> ui: modifica sus datos y confirma
+ui -> api: envía los datos actualizados
+
+api -> db: ¿el correo nuevo ya está registrado\nen otra cuenta?
+db --> api: sí / no
+
+alt el correo ya está registrado en otra cuenta
+  api --> ui: informa el conflicto
+  ui --> u: muestra el error, no guarda los cambios
+else el correo está disponible
+  api -> db: actualiza nombre, apellidos y correo de la cuenta
+  db --> api: confirma la actualización
+  api --> ui: confirma los cambios
+  ui --> u: muestra la confirmación del perfil actualizado
+end
+
+note over u, db
+  Para cambiar la contraseña, el usuario sigue el flujo
+  de la secuencia de cambio de contraseña (CU-16).
+end note
+
+@enduml
