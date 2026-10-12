@@ -78,14 +78,18 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
   lateral**.
 
 **El análisis**
-- Arranca solo al terminar la carga; el investigador no lo inicia, pausa, cancela ni
-  reinicia (RN-04). Reanalizar **reemplaza** el resultado anterior (D-03).
+- Arranca solo al terminar la carga; el investigador no lo inicia, pausa ni cancela, pero
+  **sí puede reiniciarlo** desde la pantalla de revisión: se borra el resultado anterior
+  (RN-04, D-60, D-68). Solo el sistema pausa (3 s seguidos sin ver al espécimen) o cancela
+  (5 min sin respuesta del usuario) (RN-17, D-59, D-67). Reanalizar **reemplaza** el
+  resultado anterior (D-03).
 - Pipeline de **tres etapas**: preprocesamiento, localización de los cilindros y
   clasificación (D-16). **Sin YOLO, ByteTrack ni ningún *tracker***: un espécimen por
   cilindro, detectado por sustracción de fondo (CLA-02). YOLO solo aparece como trabajo
   revisado en el cap. 2.
-- **Clasificador: todavía no se elige.** Candidatos: *gradient boosting* sobre rasgos y
-  R(2+1)D-18 (CLA-03). No escribir ResNet-50 ni Random Forest, ni cifras de desempeño.
+- **Clasificador: la CNN de fusión** (R(2+1)D-18 más una rama de 22 medidas), que decide cada
+  segundo (D-66). El *gradient boosting* sobre rasgos es el etiquetador del equipo y aporta
+  los 15 rasgos. No escribir ResNet-50 ni Random Forest, ni cifras de desempeño.
 - **Cuatro conductas:** nado activo, inmovilidad, escalamiento y **conducta activa** (cuando
   no se distingue nado de escalamiento) (D-29, RN-13).
 - **Cada segundo recibe una conducta, sin duración mínima.** El sistema detecta conductas
@@ -128,8 +132,21 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
 - **Validación del video:** la extensión se comprueba en la interfaz; la orientación y la reproducibilidad, en el
   servidor (D-64).
 - **F1 «por conducta»**; el tiempo de análisis se mide en segundos; el título de la portada no se cambia (D-65).
-- **D-57 a D-60** (revisión y corrección, copia H.264, pausa de 5 min por «no se ve», reinicio del análisis por el
-  usuario): **registradas, sin aplicar.** No corregir RN-04 ni el LaTeX todavía.
+- **D-57 a D-60** (revisión y corrección, copia H.264, pausa por «no se ve», reinicio del análisis por el
+  usuario): **aplicadas el 11-oct** en los caps. 4 y 5 junto con D-66 a D-77 (rama `decisiones-11oct`).
+
+**Decisiones del 11-oct (D-66 a D-77)**
+
+- **CNN de fusión como clasificador** (D-66). Pausa por «no se ve»: si pasan 5 min sin respuesta, el análisis
+  **se cancela** (D-67). **Reiniciar borra** el resultado anterior (D-68).
+- Los videos se **borran a los 30 días de forma automática por el sistema** (D-69). Fecha de portada y documento
+  técnico: «Fecha pendiente» (D-70).
+- **Día 1:** se sube, se guarda como video y **no se analiza**; `VIDEO–ANALISIS` pasa a (0,1) (D-71).
+- El Administrador **puede cambiar el rol** de una cuenta; RN-16 también prohíbe quitárselo al último (D-72).
+- **Docker:** solo herramienta de empaquetado (D-73). **Repetibilidad:** RNF-14 y cuarto criterio (D-74).
+  RNF-11 es diseño modular; validar otros paradigmas queda fuera (D-75).
+- Dos PDF: **reporte de resultados** y **reporte de diagnóstico** (D-76). Bloques de 5 s: el laboratorio usa
+  muestreo instantáneo cada 5 s; el sistema, la conducta predominante del periodo (D-77).
 
 ## Reglas de contenido
 

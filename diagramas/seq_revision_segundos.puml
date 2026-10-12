@@ -10,7 +10,10 @@
 '  la etiqueta de cada segundo. Las correcciones se guardan en
 '  SEGUNDO (D-35) y los totales por minuto (PRESENTA) se recalculan.
 '
-'  Quien puede corregir queda pendiente (PREGUNTAS.md).
+'  Corrige el investigador que subio el video o el Administrador. La
+'  copia del video en H.264 la genera el worker al terminar el analisis.
+'  El usuario puede reiniciar el analisis desde esta pantalla: se borra
+'  el resultado anterior y el analisis empieza de nuevo.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_revision_segundos.puml
@@ -31,10 +34,11 @@ participant "Archivos" as fs
 
 u -> ui: en Progreso o en Resultados elige\n"Revisar segundo a segundo"
 ui -> api: pide los datos de la revisión del análisis
-api -> db: ¿el análisis está "completado"?
+api -> db: ¿el análisis está "completado" y el usuario subió el video
+o es Administrador?
 db --> api: sí / no
 
-alt el análisis no está completado
+alt el análisis no está completado o el usuario no puede corregirlo
   api --> ui: rechaza la petición
   ui --> u: muestra el motivo
 else el análisis está completado
@@ -44,7 +48,7 @@ else el análisis está completado
   fs --> api: recuadros
   api --> ui: duración, especímenes, etiquetas y recuadros
   ui -> api: pide el video
-  api -> fs: lee la copia del video para reproducir
+  api -> fs: lee la copia del video en H.264 para reproducir
   api --> ui: video, por partes (para adelantar y retroceder)
 
   loop el usuario revisa un espécimen a la vez
@@ -61,5 +65,13 @@ else el análisis está completado
   db --> api: confirma
   api --> ui: guardado
   ui --> u: confirma que se guardó
+
+  opt el usuario elige "Reiniciar el análisis"
+    u -> ui: elige "Reiniciar el análisis"
+    ui -> api: pide reiniciar el análisis del video
+    api -> db: borra el resultado anterior
+y deja el análisis "en cola"
+    api --> ui: confirma el reinicio
+  end
 end
 @enduml

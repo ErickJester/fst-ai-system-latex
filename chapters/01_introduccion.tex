@@ -206,8 +206,9 @@ atributos de calidad de la norma ISO/IEC~25010:2011 \cite{iso25010}.
         clasificación estándar (precisión, \textit{recall} y F1 por conducta) sobre un
         conjunto de prueba independiente.
   \item Cuantificar la reducción de tiempo de análisis respecto al proceso manual, y
-        dejar documentado qué tendría que cambiar en el \textit{pipeline} si el laboratorio
-        quisiera aplicarlo a otro paradigma conductual.
+        diseñar el módulo de clasificación de forma modular, dejando documentado qué
+        tendría que cambiar en el \textit{pipeline} si el laboratorio quisiera aplicarlo
+        a otro paradigma conductual, sin validarlo con otros paradigmas.
 \end{enumerate}
 
 \section{Justificación}
@@ -247,8 +248,8 @@ funcional), que mide el desempeño del clasificador con métricas de clasificaci
 estándar sobre el conjunto de prueba; \textit{time behaviour} (desempeño temporal), que establece que el análisis
 debe terminar en un tiempo asumible en el flujo de trabajo; y \textit{usability}
 (usabilidad), que garantiza que un investigador sin conocimientos de programación puede
-operar el sistema sin ayuda técnica. Esos tres atributos son los criterios de aceptación
-de la validación final.
+operar el sistema sin ayuda técnica. Esos tres atributos, junto con la repetibilidad que
+fijó el laboratorio, son los cuatro criterios de aceptación de la validación final.
 
 
 \section{Alcance del proyecto}
@@ -322,8 +323,9 @@ de la validación final.
         humanos.
 
   \item \textbf{Video del día~1:} la sesión del día~1 dura 20~minutos y es de
-        habituación. El sistema no la analiza ni conserva recortes de ella; el análisis de
-        esos 20~min queda fuera del alcance de este prototipo.
+        habituación. El sistema guarda su video como constancia, pero no lo analiza ni
+        conserva recortes de ella; el análisis de esos 20~min queda fuera del alcance de
+        este prototipo.
 
   \item \textbf{Corrección de calidad de video por el usuario:} el sistema no corrige las
         condiciones desfavorables del video (reflejos, pelaje claro, contraste
@@ -350,9 +352,10 @@ de la validación final.
         NOM-062-ZOO-1999 \cite{nom062}; este sistema únicamente analiza los videos
         resultantes.
 
-  \item \textbf{Otros paradigmas conductuales:} el sistema está diseñado y entrenado
-        específicamente para el FST con especímenes. No se garantiza su funcionamiento con
-        otras pruebas conductuales ni con otras especies.
+  \item \textbf{Otros paradigmas conductuales:} el módulo de clasificación se diseña de
+        forma modular, pero el sistema se entrena y valida específicamente para el FST con
+        especímenes. No se garantiza su funcionamiento con otras pruebas conductuales ni
+        con otras especies, y validarlo con otros paradigmas queda fuera del alcance.
 \end{itemize}
 
 \section{Metodología}

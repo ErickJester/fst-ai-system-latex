@@ -16,8 +16,13 @@ state procesando {
 en_cola --> procesando : el Worker tomó la tarea\n(polling, CU-07)
 cilindros --> error : [no se hallaron los cilindros] (RN-11)\nse generó el reporte de\ndiagnóstico
 clasificacion --> completado : se completaron las\ntres etapas
+clasificacion --> en_pausa : [3 s seguidos sin ver\nal espécimen] se avisó al usuario (RN-17)
+en_pausa --> clasificacion : el usuario ajustó\nel recuadro del cilindro
+en_pausa --> cancelado : el usuario no respondió\nen 5 minutos (RN-17)
+completado --> en_cola : el investigador reinició\nel análisis (RN-04)
 
 completado --> [*]
 error --> [*]
+cancelado --> [*]
 
 @enduml

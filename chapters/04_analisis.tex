@@ -75,11 +75,12 @@ RF-04 & Autenticación
 
 % ── Gestión de usuarios ────────────────────────────────────
 RF-05 & Gestión de usuarios
-      & El Administrador debe poder crear, modificar y desactivar cuentas de usuario
-        desde el panel de administración. La creación requiere identificador institucional,
+      & El Administrador debe poder crear, modificar (incluido el rol de Investigador o
+        Administrador) y desactivar cuentas de usuario desde el panel de administración.
+        La creación requiere identificador institucional,
         nombre, apellidos y correo; el sistema genera una contraseña temporal que el
         usuario cambia al primer ingreso. No se puede desactivar la última cuenta de
-        Administrador activa (ver RN-16).
+        Administrador activa ni quitarle el rol (ver RN-16).
       & Alta & Admin \\
 \hline
 RF-06 & Gestión de usuarios
@@ -106,7 +107,7 @@ RF-09 & Carga de video
         son opcionales individualmente. El pipeline analiza, como máximo, los últimos
         300~segundos del video de Día~2 (si dura menos, lo analiza completo; el resto
         se descarta). El video de Día~1 solo confirma que la sesión de habituación
-        existe: no se analiza (ver RN-03). Al subir el
+        existe: el sistema lo guarda y no lo analiza (ver RN-03 y RN-12). Al subir el
         primer video de una tanda nueva, el investigador indica el grupo y el
         tratamiento; si el nombre coincide con un grupo ya registrado en el mismo
         experimento, el sistema sugiere la siguiente tanda y pide confirmación
@@ -152,7 +153,9 @@ RF-14 & Análisis conductual
 RF-15 & Análisis conductual
       & Mientras el análisis corre, el investigador debe ver el progreso en tiempo
         real con una barra de porcentaje y la etapa activa. El análisis continúa
-        en segundo plano aunque el investigador cierre la pestaña.
+        en segundo plano aunque el investigador cierre la pestaña. Si el sistema deja de
+        ver al espécimen, el análisis queda en pausa hasta que el usuario responda
+        (ver RN-17).
       & Alta & Investigador \\
 \hline
 RF-16 & Análisis conductual
@@ -175,10 +178,11 @@ RF-18 & Análisis conductual
       & El sistema debe asignar una conducta a cada segundo del análisis, sin
         descartar ninguna por su duración, de modo que registre conductas breves (de
         unos 2~segundos) que el análisis manual por bloques de 5~segundos no
-        distingue. Para compararse con ese método, los resultados también se
-        presentan en bloques de 5~segundos, calculados según RN-15, y cada bloque
-        muestra dentro los segundos que lo componen. Los fragmentos en que el
-        espécimen no se ve se marcan en el PDF final.
+        distingue. Para presentarlos en la unidad de la técnica de bloques de
+        5~segundos, los resultados también se muestran en bloques de 5~segundos,
+        calculados según RN-15, y cada bloque muestra dentro los segundos que lo
+        componen. Los fragmentos en que el espécimen no se ve se marcan en el
+        reporte de resultados.
       & Alta & Sistema \\
 \hline
 
@@ -205,8 +209,10 @@ RF-22 & Resultados
         contener las columnas: \texttt{Tiempo (min:seg)}, \texttt{Nado activo},
         \texttt{Escalamiento}, \texttt{Inmovilidad} y \texttt{Conducta activa}, con
         una fila por minuto
-        analizado y el valor de cada conducta en segundos. El reporte de diagnóstico y el resumen ejecutivo se descargan
-        por separado en PDF.
+        analizado y el valor de cada conducta en segundos. Además se descargan, por
+        separado y en PDF, el reporte de resultados (los tiempos por espécimen y
+        conducta, con los fragmentos en que el espécimen no se ve marcados) y el
+        reporte de diagnóstico (ver RN-11).
       & Alta & Investigador \\
 \hline
 
@@ -283,7 +289,11 @@ RF-32 & Resultados
       & Cuando un análisis está completado, el sistema debe ofrecer una pantalla de
         revisión segundo a segundo: el video con una línea de tiempo por espécimen,
         coloreada por conducta, donde cada segundo muestra la conducta que puso el
-        sistema y el usuario puede corregirla. Cada conducta guarda su origen
+        sistema y el usuario puede corregirla. Para reproducirlo en el navegador, al
+        terminar el análisis el sistema genera una copia del video recortado a los
+        segundos analizados en un formato compatible con el navegador (H.264). Solo
+        el investigador que subió el video y el Administrador pueden corregir. Cada
+        conducta guarda su origen
         (del sistema, confirmada, corregida o dudosa). Al guardar las correcciones, el sistema recalcula los
         totales por minuto (ver RN-14).
       & Media & Investigador \\
@@ -406,8 +416,10 @@ RNF-10 & Portabilidad
        & Empaquetado verificado en al menos dos equipos distintos. \\
 \hline
 RNF-11 & Escalabilidad
-       & El módulo de clasificación debe poder reconfigurarse para soportar
-         paradigmas conductuales distintos al FST sin modificar la plataforma web.
+       & El módulo de clasificación debe estar diseñado de forma modular, de modo que
+         pueda reconfigurarse para paradigmas conductuales distintos al FST sin
+         modificar la plataforma web. Validar el sistema con otros paradigmas queda fuera
+         del alcance de este trabajo.
        & Diseño modular verificado en la revisión de arquitectura al cierre
          del bloque de diseño. \\
 \hline
@@ -428,6 +440,14 @@ RNF-13 & Concurrencia
        & Pruebas con 4 sesiones de usuario activas simultáneamente y al menos 1
          análisis en cola, sin degradación de respuesta $> 3$~s en operaciones
          de interfaz. \\
+\hline
+RNF-14 & Repetibilidad
+       & El mismo video, analizado varias veces con el mismo sistema, debe dar siempre
+         el mismo resultado. El laboratorio lo declaró en la entrevista de levantamiento
+         como lo que más le importa: reducir la variabilidad que introduce el analista
+         (véase la justificación de umbrales en la sección~\ref{sec:umbrales}).
+       & Variación máxima de entre el 5 y el 10\,\% en los segundos de cada conducta
+         entre análisis repetidos del mismo video, verificada en TT-II. \\
 \hline
 
 \end{longtable}
@@ -458,6 +478,13 @@ ajustarse en la fase de validación (TT-II).
         El F1 por conducta se evaluará sobre el conjunto de prueba de la fase de
         validación en TT-II.
 
+  \item \textbf{Repetibilidad: variación máxima de entre el 5 y el 10\,\%.}
+        En la entrevista de levantamiento, el investigador colaborador indicó que lo
+        que más importa no es la velocidad sino reducir la variabilidad del factor
+        humano: lo ideal es que el mismo video analizado varias veces dé siempre el
+        mismo resultado, con una variabilidad máxima de entre el 5 y el 10\,\%
+        (ver RNF-14).
+
   \item \textbf{Sin duración mínima de episodio; bloques de 5~segundos como referencia.}
         En la entrevista de levantamiento, el investigador colaborador indicó que en
         el análisis manual una conducta se contabiliza si se mantiene alrededor de 3
@@ -465,8 +492,8 @@ ajustarse en la fase de validación (TT-II).
         segundo y detecta conductas breves de unos 2~segundos, que es justo lo que el
         análisis a ojo no alcanza a registrar. El criterio manual se conserva como
         referencia: los resultados también se agrupan en bloques de 5~segundos, con la
-        conducta que más segundos ocupó en cada bloque, para compararlos con el
-        análisis manual (ver RF-18 y RN-15).
+        conducta que más segundos ocupó en cada bloque, la unidad de la técnica de
+        muestreo por intervalos de la literatura (ver RF-18 y RN-15).
 
   \item \textbf{Período de retención de videos: 30~días.}
         Confirmado por el investigador colaborador en la entrevista de levantamiento
@@ -521,13 +548,18 @@ RN-02 & Un video pertenece a exactamente una tanda (y, a través de ella, a un
 \hline
 RN-03 & Una tanda tiene como máximo dos videos: uno del Día~1 (20~min) y uno del
         Día~2 (5~min). Un experimento, al tener varios grupos y tandas, puede
-        acumular muchos más de dos videos en total.
+        acumular muchos más de dos videos en total. El video del Día~1 se guarda, pero
+        no se analiza (ver RN-12).
       & Así funciona el protocolo FST del laboratorio \cite{slattery2012}. Ver RF-09. \\
 \hline
 RN-04 & El análisis lo inicia el sistema automáticamente al terminar la carga. El
-        investigador no puede iniciarlo, pausarlo, cancelarlo ni reiniciarlo desde
-        la interfaz.
-      & Evita estados inconsistentes en la cola. Ver RF-12, RF-16. \\
+        investigador no puede iniciarlo, pausarlo ni cancelarlo. Sí puede
+        reiniciarlo desde la pantalla de revisión: al reiniciar se borra el resultado
+        anterior y el análisis empieza de nuevo. Solo el sistema pausa o cancela un
+        análisis (ver RN-17).
+      & Evita estados inconsistentes en la cola, que procesa un análisis a la vez. Si
+        cambia el video o el modelo, el resultado es un análisis nuevo y no una
+        corrección. Ver RF-12, RF-16, RF-32. \\
 \hline
 RN-05 & Los videos se borran automáticamente 30~días después de que el análisis
         termina exitosamente. La acción es irreversible. El sistema avisa con al
@@ -576,8 +608,9 @@ RN-11 & Si el video no se puede abrir o el pipeline no encuentra los cilindros, 
 RN-12 & La comparación entre grupos usa solo los videos del Día~2. Los
         especímenes cuyo video del Día~2 aún no está analizado se señalan como
         faltantes.
-      & El Día~1 solo verifica que los especímenes lleguen con el mismo nivel de
-        estrés; el efecto del tratamiento se mide en el Día~2. Ver RF-21. \\
+      & El Día~1 es la sesión de habituación: el sistema guarda su video como
+        constancia y no lo analiza; el efecto del tratamiento se mide en el Día~2.
+        Ver RF-09, RF-21. \\
 \hline
 RN-13 & Cuando el clasificador sabe que el espécimen no está inmóvil pero no
         decide entre nado activo y escalamiento, esos segundos se registran como
@@ -589,36 +622,51 @@ RN-13 & Cuando el clasificador sabe que el espécimen no está inmóvil pero no
         nivel de Porsolt (inmóvil o no inmóvil) cuando no se separa lo activo en
         nado y escalamiento. Ver RF-17, RF-18. \\
 \hline
-RN-14 & Solo se puede revisar un análisis completado. Al revisar, el usuario corrige
+RN-14 & Solo se puede revisar un análisis completado, y solo lo corrigen el
+        investigador que subió el video y el Administrador. Al revisar, el usuario corrige
         las etiquetas segundo a segundo; cada etiqueta guarda su origen. Al guardar, el sistema
         recalcula los totales por minuto de los especímenes corregidos y los
         reportes guardados del experimento se regeneran con los datos nuevos.
-      & La revisión humana corrige al clasificador sin sustituirlo. Ver RF-32. \\
+        Corregir etiquetas no cambia el modelo ni el video.
+      & La revisión humana corrige al clasificador sin sustituirlo. Si lo que cambia
+        es el video o el modelo, el resultado es un análisis nuevo (ver RN-04).
+        Ver RF-32. \\
 \hline
-RN-15 & Los resultados también se agrupan en bloques de 5~segundos para compararlos
-        con el análisis manual. La conducta de cada bloque es la que ocupa más de sus
+RN-15 & Los resultados también se agrupan en bloques de 5~segundos, la unidad de la
+        técnica de muestreo por intervalos de la literatura. La conducta de cada bloque es la que ocupa más de sus
         cinco segundos, tomada de la conducta ya asignada a cada segundo; el cálculo
         no vuelve a usar el clasificador. Si nado activo y escalamiento empatan, el
         bloque es conducta activa; con dos segundos de inmovilidad y dos de nado
         activo decide el quinto, y tanto escalamiento como «no se ve» dan conducta
         activa. Un bloque cuyos cinco segundos son «no se ve» se muestra como
-        conducta activa. Los fragmentos «no se ve» se marcan en pantalla y en el PDF
-        final. Los bloques se calculan al mostrarse y no se guardan; dentro de cada
+        conducta activa. Los fragmentos «no se ve» se marcan en pantalla y en el reporte
+        de resultados. Los bloques se calculan al mostrarse y no se guardan; dentro de cada
         uno se siguen viendo sus cinco segundos.
-      & Es la técnica de muestreo por intervalos de Detke et~al.\ \cite{detke1995},
+      & Sigue la técnica de muestreo por intervalos de Detke et~al.\ \cite{detke1995},
         tal como la describen Craft et~al.\ \cite{craft2010} para la prueba de nado
         forzado: la sesión se divide en periodos de 5~s y, al terminar
         cada uno, se anota la conducta predominante del periodo; el porcentaje de
-        cada conducta es el de periodos en que fue la predominante. El laboratorio
-        la ha usado en parte de sus análisis manuales. Aquí la conducta predominante
-        sale de los segundos ya clasificados, no de la apreciación de un observador.
-        Los desempates son criterios propios del sistema; esos autores no los
-        tratan. Ver RF-18, RN-13 y la sección~\ref{sec:umbrales}. \\
+        cada conducta es el de periodos en que fue la predominante. Aquí la conducta
+        predominante sale de los segundos ya clasificados, no de la apreciación de un
+        observador. No equivale al conteo «por eventos» que el laboratorio ha usado en
+        parte de sus análisis manuales, que registra la conducta del instante exacto
+        cada 5~segundos y no la predominante del periodo. Los desempates son criterios
+        propios del sistema; esos autores no los tratan. Ver RF-18, RN-13 y la
+        sección~\ref{sec:umbrales}. \\
 \hline
 RN-16 & Siempre debe existir al menos un Administrador activo: el sistema rechaza
-        desactivar la última cuenta de Administrador activa.
+        desactivar la última cuenta de Administrador activa y quitarle el rol.
       & Sin un Administrador activo nadie podría crear cuentas ni desactivar otras
-        (RF-05), y el sistema quedaría sin quien lo administre. \\
+        (RF-05), y el sistema quedaría sin quien lo administre. Ver RF-05. \\
+\hline
+RN-17 & Si en un segundo no se ve al espécimen, ese segundo se registra como «no se ve».
+        Si pasan tres segundos seguidos «no se ve», el análisis queda en pausa, el sistema
+        avisa al usuario en el panel de notificaciones y le pide ajustar el recuadro del
+        cilindro; con el ajuste, el sistema vuelve a revisar esos mismos tres segundos.
+        Si el usuario no responde en 5~minutos, el análisis se cancela.
+      & Evita entregar como resultado un tramo en que el sistema no vio al espécimen sin
+        que el usuario pueda intervenir, y evita dejar un análisis esperando para siempre
+        en la cola. Ver RN-04, RN-07, RF-15. \\
 \hline
 
 \end{longtable}
@@ -688,9 +736,9 @@ R(2+1)D-18 \cite{tran2018}
       \cite{he2016}: una ResNet-18 para video. Recibe clips de 16 fotogramas y se
       preentrena con Kinetics-400 (videos de acciones humanas) para aplicar
       transfer learning \cite{pan2010}.
-    & Candidata para el clasificador de conducta. Se compara contra el
-      clasificador sobre rasgos; la elección se hace en TT-II con F1 por
-      conducta. \\
+    & Es el clasificador de conducta. Se fusiona con una rama de 22 medidas (los quince
+      rasgos del etiquetador y siete reglas de pataleo y nariz) y decide la conducta de
+      cada segundo. Se evalúa en TT-II con F1 por conducta. \\
 \hline
 PyTorch \cite{paszke2019}
     & Framework de aprendizaje profundo para entrenamiento e inferencia de redes
@@ -702,7 +750,8 @@ scikit-learn \cite{pedregosa2011}
     & Biblioteca de ML con clasificadores de \textit{gradient boosting}, métricas y
       validación cruzada.
     & Implementa el clasificador sobre rasgos (\texttt{HistGradientBoostingClassifier}),
-      la otra candidata para el clasificador de conducta, y calcula las métricas de
+      que propone las etiquetas del equipo y aporta los quince rasgos de la rama de
+      medidas de la red, y calcula las métricas de
       clasificación (F1, precisión y \textit{recall} por conducta) y la validación
       cruzada. \\
 \hline
@@ -940,7 +989,7 @@ videos ya están grabados. El investigador sube los archivos desde cualquier com
 con navegador ---sin instalar nada--- y el sistema los procesa de forma asíncrona
 mientras él continúa con otras tareas. Los resultados se descargan en los formatos que
 el laboratorio ya usa para sus análisis estadísticos: CSV y XLSX para datos tabulares
-y PDF para el reporte diagnóstico de calidad del video.
+y PDF para el reporte de resultados y el reporte de diagnóstico.
 
 Esta ausencia de cambio en el protocolo de grabación es una ventaja operativa
 importante: el laboratorio no necesita adaptar su metodología ni adquirir equipo nuevo.
@@ -966,9 +1015,12 @@ proyecto, los criterios que determinan si el sistema es operativamente aceptable
         cilindros, según RN-11), el sistema debe notificarlo explícitamente en el
         reporte de diagnóstico en lugar de entregar un resultado silencioso
         potencialmente erróneo.
+  \item El mismo video, analizado varias veces, debe dar el mismo resultado, con una
+        variación máxima de entre el 5 y el 10\,\% en los segundos de cada conducta
+        (ver RNF-14).
 \end{itemize}
 
-Estos tres criterios se verificarán durante la etapa de validación en TT-II con los
+Estos cuatro criterios se verificarán durante la etapa de validación en TT-II con los
 videos del laboratorio y las métricas de clasificación definidas en RNF-02.
 
 \subsection{Factibilidad económica}

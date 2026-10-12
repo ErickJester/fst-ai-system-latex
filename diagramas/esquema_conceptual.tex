@@ -138,19 +138,19 @@
 \draw[lin] (produce) -- node[card, right, pos=0.45] {(1,1)} (video);
 
 % -- Video se procesa en Analisis -------------------------------
-% (1,1): el reanalisis reemplaza el resultado anterior, no se
-% conserva historial (D-03, reunion 3-sep).
-\draw[lin] (video) -- node[card, above, pos=0.35] {(1,1)} (procesa);
+% (0,1): el video del Dia 1 no se analiza. El reanalisis reemplaza el
+% resultado anterior, no se conserva historial (D-03, reunion 3-sep).
+\draw[lin] (video) -- node[card, above, pos=0.35] {(0,1)} (procesa);
 \draw[lin] (procesa) -- node[card, above, pos=0.65] {(1,1)} (analisis);
 
 % -- Especimen aparece en Observaciones -------------------------
-% (1,2): una por sesion. Minimo 1 porque el Dia 1 es opcional.
-\draw[lin] (especimen) -- node[card, right, pos=0.60] {(1,2)} (aparece);
+% (0,1): solo el video del Dia 2 se analiza; el del Dia 1 no tiene observacion.
+\draw[lin] (especimen) -- node[card, right, pos=0.60] {(0,1)} (aparece);
 \draw[lin] (aparece.south) |- node[card, above, pos=0.72] {(1,1)} (observ.west);
 
 % -- Video contiene Observaciones -------------------------------
-% (2,4): una por cilindro del encuadre. Antes era (3,4).
-\draw[lin] (video) -- node[card, right, pos=0.60] {(2,4)} (contiene);
+% (0,4): el video del Dia 1 no tiene; el del Dia 2 analizado tiene de 2 a 4, una por cilindro.
+\draw[lin] (video) -- node[card, right, pos=0.60] {(0,4)} (contiene);
 \draw[lin] (contiene.south) |- node[card, above, pos=0.72] {(1,1)} (observ.east);
 
 % -- Observacion se divide en Intervalos ------------------------

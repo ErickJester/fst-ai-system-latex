@@ -70,13 +70,15 @@
 '                          'tratamiento experimental')
 '  sesion_video            varchar(6) IN ('Dia 1','Dia 2')
 '                          (el Dia 1 solo confirma que existe el video de
-'                          habituacion; no se analiza, D-54)
+'                          habituacion; se guarda y no se analiza, D-54)
 '  formato_reporte         varchar(4) IN ('CSV','XLSX','PDF')
 '  tipo_notificacion      varchar(32) IN ('analisis completado',
-'                          'error del pipeline','alerta de disco',
+'                          'error del pipeline','analisis en pausa',
+'                          'analisis cancelado','alerta de disco',
 '                          'video borrado')                     [D-51]
 '  estado_analisis        varchar(10) IN ('en cola','procesando',
-'                          'completado','error')                [D-15]
+'                          'en pausa','completado','error',
+'                          'cancelado')                         [D-15]
 '  etapa_analisis         varchar(16) IN ('preprocesamiento',
 '                          'cilindros','clasificacion')         [D-16]
 '  nivel_clasif_analisis   varchar(8) IN ('preciso','agrupado')  [D-17]
@@ -330,10 +332,10 @@ GRUPO          "1" --o "1..*" TANDA                     : idGrupo
 TANDA          "1" --o "2..4" ESPECIMEN                 : idTanda
 TANDA          "1" --o "1..2" VIDEO                     : idTanda
 
-VIDEO          "1" --o "1"    ANALISIS                  : idVideo <color:#8A5A0B>· única</color>
-VIDEO          "1" --o "2..4" OBSERVACION                : idVideo
+VIDEO          "1" --o "0..1" ANALISIS                  : idVideo <color:#8A5A0B>· única</color>
+VIDEO          "1" --o "0..4" OBSERVACION                : idVideo
 
-ESPECIMEN      "1" --o "1..2" OBSERVACION                : idEspecimen
+ESPECIMEN      "1" --o "0..1" OBSERVACION                : idEspecimen
 
 OBSERVACION    "1" --o "5"    INTERVALO                 : idObservacion
 INTERVALO      "1" --o "2..4" PRESENTA                  : idIntervalo
