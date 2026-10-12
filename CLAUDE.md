@@ -117,7 +117,7 @@ respalde. Si no hay fuente, se registra como *pregunta abierta*, no como error.
 ### Siglas
 
 Definir en primera aparición: nombre completo + sigla entre paréntesis. Aplica a FST,
-CLAHE, BORIS, IEEE, ISO, IEC.
+IEEE, ISO, IEC.
 
 ---
 
@@ -129,7 +129,7 @@ CLAHE, BORIS, IEEE, ISO, IEC.
 sin confirmación explícita del usuario.**
 
 En su lugar, OE-5 evalúa «el desempeño del clasificador con métricas de clasificación
-estándar (precisión, \textit{recall} y F1 por clase)»; RNF-02 usa «F1 ≥ 85 % por clase».
+estándar (precisión, \textit{recall} y F1 por conducta)»; RNF-02 usa «F1 ≥ 85 % por conducta».
 
 **Por qué:** el clasificador se entrena con videos del laboratorio pero **sin** usar las
 anotaciones manuales del Dr. Sandino, para evitar sobreentrenamiento en los patrones de un

@@ -112,7 +112,7 @@ web/
   backend/        app Flask, modelos SQLAlchemy, rutas, tareas programadas
   frontend/       app React + Vite
   worker_fake/    simulador del worker para pruebas
-  db/init/        SQL de creación (dominios, tablas, disparador, semillas)
+  db/init/        SQL de creación (dominios, tablas, restricciones, semillas)
 ```
 
 ## 4. Contrato con el worker
@@ -410,7 +410,6 @@ Estos nombres los propone este documento; confírmalos con el usuario:
 | Listar y marcar notificaciones como leídas | `GET /notifications`, `PATCH /notifications/{id}` |
 | Descargar el PDF de diagnóstico de un análisis | `GET /experiments/{id}/analyses/{idAnalisis}/diagnostic` |
 | Sugerir grupos con nombre parecido y la siguiente tanda | `GET /experiments/{id}/groups?q=` |
-| Comparación entre los tres grupos (solo Día 2) | `GET /experiments/{id}/groups/comparison` |
 | Datos de la pantalla de revisión: especímenes, etiquetas por segundo y recuadros de los tubos | `GET /experiments/{id}/analyses/{idAnalisis}/review` |
 | Video para la pantalla de revisión (con soporte de `Range`, para poder adelantar y retroceder) | `GET /experiments/{id}/analyses/{idAnalisis}/video` |
 | Guardar las correcciones por segundo | `PUT /experiments/{id}/analyses/{idAnalisis}/segundos` |
@@ -445,11 +444,11 @@ Otras decisiones tomadas:
   viejo que el último análisis del experimento, se regenera y se reemplaza; si sigue
   vigente, se devuelve el guardado.
 - **Contenido de los reportes:** CSV y XLSX con datos por espécimen y desglose por minuto
-  (columnas `Tiempo (min:seg)`, `Nado`, `Escalamiento`, `Inmovilidad`, una fila por
+  (columnas `Tiempo (min:seg)`, `Nado`, `Escalamiento`, `Inmovilidad`, `Conducta activa`, una fila por
   minuto) más estadísticas por grupo: media, desviación estándar y varianza del tiempo de
   cada conducta entre los especímenes de cada grupo (agregando todas sus tandas). El PDF
   es un resumen ejecutivo, distinto del PDF de diagnóstico.
-- **Cuentas:** no existe autoregistro ni formulario público. Solo el administrador crea
+- **Cuentas:** no existe autorregistro ni formulario público. Solo el administrador crea
   cuentas con identificador institucional (propuesta, sección 11 punto 12), nombre,
   apellidos y correo (de cualquier dominio, D-46); el sistema genera la contraseña temporal. Se pone
   `cambioRequerido = true` y el sistema obliga a cambiarla en el primer ingreso.
@@ -759,7 +758,7 @@ sequenceDiagram
     UI-->>I: actualiza barras
   end
   alt algún análisis en error
-    UI-->>I: código, descripción y botón de diagnóstico
+    UI-->>I: mensaje armado con la etapa y botón de diagnóstico
   else algún análisis completado
     UI-->>I: habilita resultados
   end
@@ -854,7 +853,7 @@ sequenceDiagram
 6. ~~Cardinalidades de especímenes~~ **Resuelto** (sección 5): 2 a 4 por tanda, 2 o más
    por grupo, 1 o más tandas por grupo.
 7. **[ABIERTO] Usuario administrador inicial:** hace falta una semilla en la base, porque
-   no hay autoregistro. Pregunta al usuario qué nombre y correo usar.
+   no hay autorregistro. Pregunta al usuario qué nombre y correo usar.
 8. ~~Conteo de conductas~~ **Resuelto (RF-18).** No hay duración mínima: cada segundo
    recibe una conducta y ninguna se descarta por durar poco. `INTERVALO` y `PRESENTA` no
    cambian: `PRESENTA` cuenta los segundos de cada conducta en cada minuto.
@@ -912,8 +911,8 @@ Cada paso termina con algo que se puede probar.
 
 1. **Docker Compose con `db` y `backend`** que arrancan (parte del Anexo C). Prueba:
    `docker compose up` y un endpoint de salud responde.
-2. **Base de datos:** usa el SQL del Anexo B (dominios, 15 tablas, restricciones,
-   disparador de `ESPECIMEN.idGrupo` y datos semilla de `CONDUCTA`). Falta el administrador
+2. **Base de datos:** usa el SQL del Anexo B (dominios, 15 tablas, restricciones
+   y datos semilla de `CONDUCTA`). Falta el administrador
    inicial (sección 11, punto 7).
    Pruébalo contra un PostgreSQL real y corrige lo que falle.
 3. **Autenticación:** login, logout, cambio de contraseña, cambio obligatorio en el primer
@@ -2356,8 +2355,8 @@ participant Backend as api
 database "Base de datos" as db
 
 inv -> ui: abre resultados del experimento\n(desde el dashboard o la pantalla de progreso)
-ui -> api: GET /experiments/{id}/groups/comparison
-api -> db: busca los tres grupos del experimento
+ui -> api: GET /experiments/{id}/results/groups
+api -> db: busca los grupos del experimento
 db --> api: grupos (control, referencia, tratamiento)
 
 loop por cada grupo
@@ -2365,7 +2364,7 @@ loop por cada grupo
   api -> db: para cada espécimen, busca su observación\ndel video con sesión "Día 2"
   alt el espécimen ya tiene su Día 2 analizado
     api -> db: suma los segundos por conducta\nde los 5 intervalos de esa observación
-    db --> api: segundos de nado activo, inmovilidad y escalamiento
+    db --> api: segundos de nado activo, inmovilidad, escalamiento y conducta activa
   else el Día 2 de ese espécimen no tiene resultado\n(análisis en cola, procesando, con error, o sin subir)
     api -> api: marca al espécimen como dato faltante\npara este grupo
   end
@@ -2380,7 +2379,7 @@ else todos los especímenes analizados coinciden en su nivel
   api --> ui: comparación entre grupos, un solo nivel
 end
 
-ui -> inv: muestra la comparación de los tres grupos\n(solo Día 2), con los especímenes faltantes señalados
+ui -> inv: muestra la comparación de los grupos\n(solo Día 2), con los especímenes faltantes señalados
 inv -> ui: puede pedir el reporte descargable
 @enduml
 ```
@@ -2424,7 +2423,7 @@ note right of api
   media, desviación estándar y varianza por conducta,
   entre los especímenes de cada uno de los tres grupos.
   Columnas: Tiempo (min:seg), Nado, Escalamiento,
-  Inmovilidad. Una fila por minuto.
+  Inmovilidad, Conducta activa. Una fila por minuto.
   PDF: resumen ejecutivo, documento distinto del
   reporte de diagnóstico.
 end note

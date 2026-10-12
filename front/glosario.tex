@@ -47,8 +47,8 @@
   \textbf{Aprendizaje supervisado}
   & Paradigma de aprendizaje automático en el que el modelo se entrena con
     pares entrada-etiqueta proporcionados por un experto. En el proyecto, el
-    clasificador de conductas se entrena con fotogramas etiquetados manualmente
-    por el colaborador clínico. \\[5pt]
+    clasificador de conductas se entrena con segundos y bloques etiquetados por los
+    autores del proyecto, con criterios de conducta descritos por escrito. \\[5pt]
 
   % ── B ──────────────────────────────────────────────────────────────
   \textbf{Behavioral despair}
@@ -144,9 +144,9 @@
 
   \textbf{Frame}
   & (Cuadro de video.) Imagen estática individual dentro de una secuencia de
-    video. El análisis del FST opera cuadro a cuadro (\textit{frame-by-frame}):
-    cada fotograma es clasificado independientemente y los tiempos de conducta
-    se acumulan en segundos sumando los cuadros clasificados en cada categoría. \\[5pt]
+    video. El pipeline mide cuadro a cuadro (posición y movimiento del espécimen) y
+    clasifica por segundo: cada segundo recibe una conducta a partir de una ventana
+    de 4~s alrededor de él, y los tiempos de conducta se acumulan en segundos. \\[5pt]
 
   \textbf{FST}
   & (\textit{Forced Swim Test} / Prueba de Nado Forzado.) Paradigma experimental
@@ -300,7 +300,7 @@
   & Proceso independiente del servidor web que consume trabajos de la cola de
     tareas y ejecuta el pipeline de análisis completo. Al correr en un contenedor
     Docker separado, permite que el backend siga respondiendo peticiones HTTP
-    mientras se procesa un video de larga duración. \\[5pt]
+    mientras se procesa un video. \\[5pt]
 
   % ── Y ──────────────────────────────────────────────────────────────
   \textbf{YOLO}

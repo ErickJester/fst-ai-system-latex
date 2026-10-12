@@ -406,7 +406,7 @@ Hasta que ocurran esas dos revisiones, en los términos del método lo que exist
 | D-04 | ~~¿Cómo se garantiza que `numeroRata` no se repita dentro de su **grupo**, si `idGrupo` ya no vive en `ESPECIMEN`?~~ **Cerrada (equipo, 2026-09-13):** redundancia controlada — `idGrupo` reingresa a `ESPECIMEN` como columna redundante, con `UNIQUE (idGrupo, numeroRata)`. Solo en el esquema físico, no toca el grafo lógico. **Sin objeto desde D-55 (6-oct):** se quitó `numeroRata` y con ella esta redundancia | Falta decidir cómo mantener `idGrupo` sincronizado si una rata cambia de tanda (caso raro) |
 | D-05 | ~~¿El sistema permite correr dos veces la misma `CONFIGURACION` sobre el mismo video?~~ | **Sin objeto:** se disolvió con D-03 y, desde D-51, `CONFIGURACION` ya no existe |
 | D-06 | ~~El pipeline usa más de un modelo, pero `CONFIGURACION` solo guarda un `hashModelo`~~ | **Sin objeto desde D-51:** `MODELO` y `CONFIGURACION` se eliminaron |
-| Q-08 / D-01 | ~~¿Autoregistro con aprobación (cap. 1) o solo el Admin (cap. 4, RF-07)?~~ **Cerrada (equipo, 2026-09-13):** solo el Admin crea cuentas | El cap. 1 queda mal, hay que corregirlo al RF-07 |
+| Q-08 / D-01 | ~~¿Autorregistro con aprobación (cap. 1) o solo el Admin (cap. 4, RF-07)?~~ **Cerrada (equipo, 2026-09-13):** solo el Admin crea cuentas | El cap. 1 queda mal, hay que corregirlo al RF-07 |
 | Q-09 | ¿`NOTIFICACION.mensaje` lleva detalle por instancia o es plantilla por tipo? | Si fuera plantilla, `tipo → mensaje` sería transitiva y haría falta catálogo `TIPO_NOTIFICACION` |
 
 > D-05, D-06 y Q-09 son pendientes **del equipo**, no del laboratorio — no van en la

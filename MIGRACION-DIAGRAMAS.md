@@ -1,5 +1,7 @@
 # Migración de diagramas — viejo modelo → nuevo modelo
 
+> **Desactualizado (11-oct-2026).** Varias cifras y decisiones de este archivo ya se revirtieron (`numeroRata`, umbral 0.70, comparación Día 1 contra Día 2, BORIS, YOLOv8 y ResNet). Lo vigente está en [`PENDIENTES.md`](PENDIENTES.md) y en `errores/preguntas-doctor.md`. Este archivo queda solo como evidencia.
+
 > **Documento temporal. Se borra cuando termine el bloque de diagramas del capítulo 5**
 > (ver §6). No es un entregable del TT ni una fuente permanente — lo que sobreviva de
 > valor duradero se mueve a [`CAMBIOS-CAP5.md`](CAMBIOS-CAP5.md) antes de borrar esto.

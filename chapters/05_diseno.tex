@@ -23,10 +23,10 @@ establece cómo describir una arquitectura de software mediante múltiples vista
 ---estructural y de comportamiento--- que atienden las preocupaciones
 de los distintos actores del sistema.
 
-La decisión de diseño más importante fue separar el worker del backend en un proceso
-independiente. La opción más simple habría sido ejecutar el pipeline dentro del mismo
+La decisión de diseño más importante fue separar el \textit{worker} (proceso de segundo
+plano) del \textit{backend} en un proceso independiente. La opción más simple habría sido ejecutar el pipeline dentro del mismo
 servidor Flask, pero eso significa bloquear todas las peticiones HTTP mientras un video
-de 20 minutos se procesa. El worker resuelve ese problema a costa de mayor complejidad
+de 5 minutos se procesa (el análisis cubre como máximo 300~s). El \textit{worker} resuelve ese problema a costa de mayor complejidad
 de operación: hace falta una cola de tareas, un proceso adicional y comunicación
 entre procesos. Esa complejidad extra está justificada porque el laboratorio puede
 tener varios análisis en cola al mismo tiempo.
@@ -82,7 +82,7 @@ Las responsabilidades de cada componente son:
         «completado» o «error». Se eligió este enfoque en lugar de un sistema de
         colas de mensajes dedicado (como Celery con RabbitMQ o Redis) porque evita
         un contenedor y una dependencia más; con el volumen del laboratorio, de
-        hasta cuatro análisis en un mismo período, la base de datos basta como cola.
+        hasta cuatro usuarios trabajando en el mismo período, la base de datos basta como cola.
 
   \item \textbf{Base de datos (PostgreSQL):} almacena usuarios, experimentos,
         sesiones de video, resultados por espécimen y conducta, y reportes generados.
@@ -115,8 +115,9 @@ El pipeline recibe un video del FST, analiza solo sus últimos 300 segundos y pr
 como salida los tiempos totales de cada conducta por espécimen y el desglose por minuto. Sigue el patrón arquitectónico de
 tubería y filtro (\textit{pipe and filter}) \cite{sommerville2011}: cada módulo es
 un filtro discreto que transforma los datos y los pasa al siguiente. Está organizado
-en cuatro módulos secuenciales: preprocesamiento, localización de los cilindros,
-clasificación de conducta y generación de resultados. La Figura~\ref{fig:pipeline}
+en tres etapas secuenciales ---preprocesamiento, localización de los cilindros y
+clasificación de conducta--- seguidas de la generación de resultados, que no es una
+etapa visible en el progreso. La Figura~\ref{fig:pipeline}
 muestra el flujo completo con las tecnologías de cada módulo.
 
 \begin{figure}[H]
@@ -412,7 +413,7 @@ Las tablas están organizadas en cuatro grupos funcionales:
 
   \item \textbf{ESPECIMEN}: un registro por espécimen dentro de su tanda,
         identificado por su posición de cilindro dentro de la tanda. El sistema
-        no guarda el número de rata del laboratorio.
+        no guarda el número con que el laboratorio identifica a cada espécimen.
 
   \item \textbf{VIDEO}: uno o dos videos por tanda (Día~1 y/o Día~2), con
         ruta de almacenamiento, duración y fecha de carga. La ruta queda vacía
@@ -427,9 +428,9 @@ Las tablas están organizadas en cuatro grupos funcionales:
         cuando falla, la ruta al reporte de diagnóstico (ver RN-11).
 \end{itemize}
 
-El modelo del clasificador y el umbral de confianza (0.80) no se guardan en la
+El modelo del clasificador y el umbral de confianza no se guardan en la
 base de datos: ningún requisito permite cambiarlos, así que son constantes del
-pipeline y se documentan en el Capítulo~6.
+pipeline y se describen en la clasificación de conducta (módulo 3).
 
 \textbf{Resultados, reportes y notificaciones.}
 \begin{itemize}
@@ -589,10 +590,11 @@ El resto de las relaciones se revisó una por una: en cada una, los únicos
 determinantes son su clave primaria y, cuando la tiene, su clave alterna. Por
 ejemplo, \texttt{GRUPO} tiene como determinantes \texttt{idGrupo} (primaria) y la
 combinación (\texttt{idExperimento}, \texttt{etiqueta}) (alterna). Con eso, las
-quince relaciones del esquema lógico cumplen FNBC.
+quince relaciones del modelo relacional cumplen FNBC.
 
-El esquema físico tiene las mismas columnas que el lógico, sin columnas repetidas, así
-que también cumple FNBC.
+El esquema físico tiene las mismas columnas que el modelo relacional más
+\texttt{rutaDiagnostico} (ruta del reporte de diagnóstico), que depende solo de la clave
+del análisis, así que también cumple FNBC.
 
 \subsection{Resumen de formas normales aplicadas}
 
@@ -618,7 +620,8 @@ las tablas afectadas y la decisión de diseño concreta en cada caso.
   Clave primaria que identifica cada fila de forma única &
   Las 15 relaciones &
   Clave subrogada autogenerada, salvo \texttt{USUARIO}/\texttt{ADMINISTRADOR}
-  (\texttt{idInstitucional}), \texttt{CONDUCTA} (\texttt{nombre}) y
+  (\texttt{idInstitucional}), \texttt{CONDUCTA} (\texttt{nombre}),
+  \texttt{PRESENTA} (clave compuesta \texttt{idIntervalo}, \texttt{conducta}) y
   \texttt{SEGUNDO} (clave compuesta \texttt{idObservacion}, \texttt{segundo}) \\
 \hline
 2FN &
@@ -636,7 +639,7 @@ las tablas afectadas y la decisión de diseño concreta en cada caso.
   \texttt{ESPECIMEN} solo referencia su tanda \\
 \hline
 3FN &
-  Clave sustituta en lugar de dato de negocio como clave primaria &
+  Los atributos dependen de la clave primaria, no del correo &
   \texttt{USUARIO} &
   \texttt{idInstitucional} como primaria; correo declarado como clave alterna
   (\texttt{UNIQUE}) \\
@@ -716,7 +719,7 @@ GET    & \path{/experiments/{id}/report/xlsx} & Descarga los datos en XLSX. & In
 \hline
 
 % --- Revisión segundo a segundo ---
-GET    & \path{/experiments/{id}/analyses/{idAnalisis}/review}   & Devuelve los especímenes, las etiquetas de cada segundo y los recuadros de los tubos de un análisis completado. & Investiga\-dor \\
+GET    & \path{/experiments/{id}/analyses/{idAnalisis}/review}   & Devuelve los especímenes, las etiquetas de cada segundo y los recuadros de los cilindros de un análisis completado. & Investiga\-dor \\
 \hline
 GET    & \path{/experiments/{id}/analyses/{idAnalisis}/video}    & Entrega el video de la revisión por partes, para poder adelantar y retroceder. & Investiga\-dor \\
 \hline
@@ -1323,7 +1326,7 @@ caso de uso.
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Cuenta creada en la base de datos con contraseña temporal; investigador notificado por correo con sus credenciales de acceso inicial; la contraseña temporal se mostró una sola vez al Administrador como respaldo.} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al Administrador dar de alta una nueva cuenta de investigador. El único mecanismo de ingreso al sistema es que el Administrador cree la cuenta; no existe autoregistro.} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al Administrador dar de alta una nueva cuenta de investigador. El único mecanismo de ingreso al sistema es que el Administrador cree la cuenta; no existe autorregistro.} \\
 \hline
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El Administrador introduce los datos del nuevo usuario (identificador institucional, nombre, apellidos y correo electrónico) y el sistema genera una contraseña temporal. En el primer acceso, el sistema obliga al investigador a cambiar la contraseña.} \\
 \hline
@@ -2652,9 +2655,8 @@ cola de trabajos. El análisis continúa aunque el investigador cierre la pesta�
 No hay botón de cancelar visible durante el análisis. La decisión fue deliberada: el
 laboratorio no tiene casos de uso donde cancele un análisis a mitad de camino, y
 agregar la funcionalidad implicaría manejar el estado de cancelación en el worker y
-limpiar los archivos parciales. Si en el futuro surge esa necesidad, el endpoint
-\texttt{POST /experiments/\{id\}/groups/\{grupo\}/videos} puede extenderse para
-soportar cancelación.
+limpiar los archivos parciales. Si en el futuro surge esa necesidad, habría que añadir un
+\textit{endpoint} de cancelación del análisis.
 
 \begin{figure}[H]
 \centering
@@ -2671,7 +2673,7 @@ más segundos y, dentro, los cinco segundos que lo componen, para notar las cond
 breves y comparar con el análisis manual. La regla con que se decide la conducta de cada
 bloque es RN-15. Los fragmentos «no se ve» se marcan en pantalla y en el PDF final.
 La vista por espécimen
-muestra el tiempo por conducta con media, desviación estándar y varianza (RF-19), el
+muestra el tiempo por conducta con media, desviación estándar y varianza por grupo (RF-19, RF-31), el
 nivel de clasificación del análisis y la leyenda de conductas; en el panel lateral
 se compara la inmovilidad entre los grupos con los videos del Día~2 (RF-21). Esa
 comparación promedia los segundos por espécimen de cada grupo y señala los especímenes
