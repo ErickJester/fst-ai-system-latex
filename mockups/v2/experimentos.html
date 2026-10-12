@@ -40,13 +40,25 @@
 
     <table class="table">
       <thead><tr>
-        <th style="width:29%">Experimento</th><th>Grupos</th><th>Especímenes</th><th style="width:14%">Videos Día 2</th><th>Estado</th><th>Responsable</th><th>Retención</th><th>Reporte</th>
+        <th style="width:29%">Experimento</th><th>Grupos</th><th>Especímenes</th><th style="width:14%">Videos Día 2</th><th>Estado</th><th>Responsable</th><th>Retención</th><th>Reporte</th><th>Acciones</th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table>
     <p id="empty" class="hint hidden" style="margin:14px 0 0">Ningún experimento coincide con la búsqueda.</p>
-    <p style="margin:14px 0 0;font-size:11.5px;color:var(--muted)">Eliminar un experimento es permanente e irreversible: la acción vive dentro del detalle del experimento, nunca en esta lista.</p>
+    <p style="margin:14px 0 0;font-size:11.5px;color:var(--muted)">Eliminar un experimento es permanente e irreversible: se puede hacer desde esta lista o desde el detalle del experimento, y solo lo puede hacer quien lo creó o un administrador. Antes de borrar se pide confirmación.</p>
   </div>
+</div>
+
+<!-- diálogo de eliminación -->
+<div class="dialog-backdrop hidden" id="dlg">
+  <form class="dialog" id="fDel" novalidate role="dialog" aria-modal="true" aria-labelledby="dlgT">
+    <div class="dialog-title" id="dlgT">Eliminar experimento</div>
+    <div class="dialog-body" style="font-size:12.5px;line-height:1.6">¿Eliminar «<span id="dlgNombre"></span>»? Borra grupos, tandas, videos, análisis y reportes. Es permanente e irreversible.</div>
+    <div class="dialog-actions" style="justify-content:flex-start">
+      <button type="submit" class="btn btn-primary" id="dOk">Eliminar experimento</button>
+      <button type="button" class="btn btn-secondary" id="dCancel">Cancelar</button>
+    </div>
+  </form>
 </div>
 
 <script>
@@ -78,6 +90,10 @@
   const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   const chip = (label, href) => '<a class="chip" href="' + href + '">' + label + '</a>';
 
+  // D-43: solo quien creó el experimento o un administrador puede eliminarlo.
+  const sesion = FST.USERS[document.querySelector('.nav[data-user]').dataset.user] || FST.USERS.MR;
+  const puedeEliminar = e => sesion.admin || e.responsable === sesion.nombre.split(' ')[0][0] + '. ' + sesion.nombre.split(' ')[1];
+
   function render() {
     const f = FILTROS.find(x => x.v === FST.segValue(segEl));
     const q = norm(document.getElementById('q').value.trim());
@@ -96,11 +112,35 @@
         '<td style="font-size:13px">' + e.responsable + '</td>' +
         '<td class="num" style="font-size:12px;color:' + e.retFg + '">' + e.retencion + '</td>' +
         '<td><div style="display:flex;gap:4px">' + chip('CSV', 'resultados.html') + chip('XLSX', 'resultados.html') + chip('PDF', 'resultados.html') + '</div></td>' +
+        '<td>' + (puedeEliminar(e) ? '<button type="button" class="btn btn-secondary" data-del="' + e.clave + '" style="padding:4px 10px;font-size:11.5px">Eliminar…</button>' : '<span style="font-size:11.5px;color:var(--muted)">—</span>') + '</td>' +
       '</tr>';
     }).join('');
     document.getElementById('empty').classList.toggle('hidden', list.length > 0);
   }
   render();
+
+  // ── eliminar desde la lista (D-63: solo una confirmación, sin nombre ni contraseña) ──
+  let porEliminar = null;
+  const dlg = document.getElementById('dlg');
+  const cerrar = () => { dlg.classList.add('hidden'); porEliminar = null; };
+  document.getElementById('rows').addEventListener('click', ev => {
+    const b = ev.target.closest('[data-del]');
+    if (!b) return;
+    porEliminar = experiments.find(e => e.clave === b.dataset.del);
+    document.getElementById('dlgNombre').textContent = porEliminar.titulo;
+    dlg.classList.remove('hidden');
+    document.getElementById('dCancel').focus(); // el foco empieza en «Cancelar»
+  });
+  document.getElementById('dCancel').onclick = cerrar;
+  dlg.addEventListener('click', ev => { if (ev.target === dlg) cerrar(); });
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape') cerrar(); });
+  document.getElementById('fDel').onsubmit = ev => {
+    ev.preventDefault();
+    experiments = experiments.filter(e => e !== porEliminar);
+    segEl.querySelectorAll('.seg-opt').forEach((el, i) => { el.textContent = FILTROS[i].label + ' · ' + experiments.filter(FILTROS[i].test).length; });
+    cerrar();
+    render();
+  };
 </script>
 </body>
 </html>
