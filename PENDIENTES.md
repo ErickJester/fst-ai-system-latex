@@ -57,7 +57,7 @@ una están en `errores/preguntas-doctor.md` §6 (el número D-XX). **Si algo de 
 choca con lo que vas a escribir, gana esta lista**; si crees que está mal, no la cambies:
 anótalo como pregunta (ver «Reglas de contenido», abajo).
 
-> **Vigente al 2026-10-05.** Cuando una decisión nueva cambie algo de aquí, Erick actualiza
+> **Vigente al 2026-10-11.** Cuando una decisión nueva cambie algo de aquí, Erick actualiza
 > esta sección en el mismo commit en que la registra; si no, la lista se vuelve vieja como
 > los trackers.
 
@@ -116,6 +116,20 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
   (D-43, RN-08).
 - Los videos se borran a los 30 días; si el disco pasa del 90 % se adelanta el borrado de
   los más antiguos y se avisa (D-39). Resultados y reportes se conservan siempre.
+
+**Decisiones del 11-oct (D-57 a D-65)**
+
+- El grupo control **recibe placebo el Día 2**; el Día 1 nadie recibe nada. El Día 1 solo confirma la sesión de
+  habituación y **no se analiza**; del Día 2 se analizan **como máximo** 300 s (D-54).
+- **Siempre debe existir al menos un Administrador activo** (RN-16, D-61).
+- El **despliegue está fuera del alcance y no se registra** en el documento (D-62).
+- **Eliminar un experimento:** desde el *dashboard* y desde el detalle, solo con un aviso de «¿está seguro?», sin
+  nombre ni contraseña (D-63).
+- **Validación del video:** la extensión se comprueba en la interfaz; la orientación y la reproducibilidad, en el
+  servidor (D-64).
+- **F1 «por conducta»**; el tiempo de análisis se mide en segundos; el título de la portada no se cambia (D-65).
+- **D-57 a D-60** (revisión y corrección, copia H.264, pausa de 5 min por «no se ve», reinicio del análisis por el
+  usuario): **registradas, sin aplicar.** No corregir RN-04 ni el LaTeX todavía.
 
 ## Reglas de contenido
 

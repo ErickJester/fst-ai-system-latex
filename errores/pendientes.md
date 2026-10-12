@@ -1,5 +1,7 @@
 # Capítulos sin revisar — 5, 6, 7 y 8
 
+> **Desactualizado (11-oct-2026).** El capítulo 5 ya se reescribió y los capítulos 6 a 8 están comentados en `main.tex`. Lo vigente, verificado contra el LaTeX, está en [`PENDIENTES.md`](../PENDIENTES.md). Este archivo queda como evidencia.
+
 Consolida los cuatro capítulos que todavía no se contrastan contra las fuentes primarias.
 Antes había un archivo por capítulo, los cuatro con el mismo contenido; se unificaron aquí.
 

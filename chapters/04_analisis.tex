@@ -78,7 +78,8 @@ RF-05 & Gestión de usuarios
       & El Administrador debe poder crear, modificar y desactivar cuentas de usuario
         desde el panel de administración. La creación requiere identificador institucional,
         nombre, apellidos y correo; el sistema genera una contraseña temporal que el
-        usuario cambia al primer ingreso.
+        usuario cambia al primer ingreso. No se puede desactivar la última cuenta de
+        Administrador activa (ver RN-16).
       & Alta & Admin \\
 \hline
 RF-06 & Gestión de usuarios
@@ -87,10 +88,8 @@ RF-06 & Gestión de usuarios
       & Media & Investigador \\
 \hline
 RF-07 & Gestión de usuarios
-      & Solo el Administrador puede crear cuentas de usuario. No existe formulario
-        público de autoregistro. El Administrador asigna identificador institucional,
-        nombre, apellidos y correo; el sistema genera una contraseña temporal y obliga
-        al usuario a cambiarla en el primer ingreso.
+      & Solo el Administrador puede crear cuentas de usuario; no existe formulario
+        público de autorregistro (ver RF-05).
       & Alta & Admin \\
 \hline
 
@@ -164,7 +163,7 @@ RF-16 & Análisis conductual
       & Alta & Investigador \\
 \hline
 RF-17 & Análisis conductual
-      & El sistema debe clasificar cuadro a cuadro la conducta de cada espécimen: nado
+      & El sistema debe clasificar segundo a segundo la conducta de cada espécimen: nado
         activo, inmovilidad o escalamiento \cite{armario2021}. Cuando sabe que el
         espécimen no está inmóvil pero no decide entre nado y escalamiento, lo registra
         como \textit{conducta activa}, una cuarta conducta (ver RN-13). El buceo se
@@ -192,7 +191,7 @@ RF-19 & Resultados
 \hline
 RF-20 & Resultados
       & El sistema debe ofrecer un desglose de conductas por minuto para cada espécimen.
-      & Media & Investigador \\
+      & Alta & Investigador \\
 \hline
 RF-21 & Resultados
       & El sistema debe mostrar una comparación entre los grupos de un experimento
@@ -206,7 +205,7 @@ RF-22 & Resultados
         contener las columnas: \texttt{Tiempo (min:seg)}, \texttt{Nado},
         \texttt{Escalamiento}, \texttt{Inmovilidad} y \texttt{Conducta activa}, con
         una fila por minuto
-        analizado. El reporte de diagnóstico y el resumen ejecutivo se descargan
+        analizado y el valor de cada conducta en segundos. El reporte de diagnóstico y el resumen ejecutivo se descargan
         por separado en PDF.
       & Alta & Investigador \\
 \hline
@@ -262,7 +261,7 @@ RF-28 & Administración
 RF-29 & Administración
       & El Administrador debe poder monitorear el estado del sistema: porcentaje de
         uso del disco, espacio disponible en GB, tamaño de la cola de procesamiento,
-        número de análisis activos y ETA estimado. El sistema alerta cuando el disco
+        número de análisis activos y tiempo estimado de término. El sistema alerta cuando el disco
         supera el 80\,\% de uso.
       & Baja & Admin \\
 \hline
@@ -293,7 +292,9 @@ RF-33 & Notificaciones
       & El sistema debe avisar al usuario correspondiente, en el panel de
         notificaciones de la barra superior y también por correo electrónico, cuando
         un análisis termina, cuando un análisis se detiene por error y, al
-        Administrador, cuando el almacenamiento rebasa el 80\,\% (ver RF-29). Los
+        Administrador, cuando el almacenamiento rebasa el 80\,\% (ver RF-29), y al
+        investigador de cada experimento afectado cuando un video se borra antes de
+        los 30 días por falta de espacio (ver RN-05). Los
         correos se envían desde una cuenta de correo configurable en el servidor; si
         el envío falla, el aviso permanece en el panel de notificaciones.
       & Media & Investigador / Admin \\
@@ -342,7 +343,7 @@ RNF-02 & Calidad del análisis
          colaborador en la entrevista de levantamiento (véase la
          justificación de umbrales en la sección~\ref{sec:umbrales}).
        & F1 $\geq 85$\,\% por conducta (nado, inmovilidad, escalamiento) sobre el
-         conjunto de prueba de la fase de validación (TT2). \\
+         conjunto de prueba de la fase de validación (TT-II). \\
 \hline
 RNF-03 & Disponibilidad
        & El sistema debe estar disponible las 24 horas del día, los 7 días de la
@@ -420,7 +421,7 @@ RNF-12 & Mantenibilidad
 RNF-13 & Concurrencia
        & El sistema debe soportar hasta 4 usuarios registrados trabajando en el
          mismo periodo de tiempo. El uso simultáneo estricto no se requiere: los
-         análisis se encolan y procesan de forma secuencial (ver RN-04). Este valor
+         análisis se encolan y procesan de forma secuencial, uno por uno (ver RF-12). Este valor
          fue declarado por el investigador colaborador en la entrevista de
          levantamiento (véase la justificación de umbrales en la
          sección~\ref{sec:umbrales}).
@@ -438,7 +439,7 @@ RNF-13 & Concurrencia
 
 Los requerimientos y reglas de negocio contienen valores numéricos concretos.
 A continuación se documenta el origen de cada uno para que puedan auditarse y
-ajustarse en la fase de validación (TT2).
+ajustarse en la fase de validación (TT-II).
 
 \begin{itemize}
   \item \textbf{F1 mínimo por conducta: $\geq 85$\,\%.}
@@ -455,7 +456,7 @@ ajustarse en la fase de validación (TT2).
         ubica en ese rango y que es consistente con los umbrales reportados en
         sistemas automatizados comparables \cite{nandi2021_dbscorer,meng2024_dsaan}.
         El F1 por conducta se evaluará sobre el conjunto de prueba de la fase de
-        validación en TT2.
+        validación en TT-II.
 
   \item \textbf{Sin duración mínima de episodio; bloques de 5~segundos como referencia.}
         En la entrevista de levantamiento, el investigador colaborador indicó que en
@@ -536,15 +537,16 @@ RN-05 & Los videos se borran automáticamente 30~días después de que el análi
         (ver RNF-09).
       & Control de almacenamiento. Ver RF-24, RF-23, RNF-08. \\
 \hline
-RN-06 & Los resultados y reportes (PDF y CSV) se conservan indefinidamente aunque
+RN-06 & Los resultados y reportes (PDF, CSV y XLSX) se conservan indefinidamente aunque
         el video original ya haya sido borrado.
       & Los datos de investigación tienen valor a largo plazo. Ver RF-26. \\
 \hline
-RN-07 & En cada cuadro del video, a cada espécimen se le asigna exactamente una
-        conducta: nado activo, inmovilidad, escalamiento o conducta activa. No pueden
-        coexistir dos conductas al mismo tiempo para el mismo espécimen.
+RN-07 & En cada segundo analizado, a cada espécimen se le asigna como máximo una
+        conducta: nado activo, inmovilidad, escalamiento o conducta activa; un segundo
+        en que no se ve al espécimen o que se marca como dudoso queda sin conducta. No
+        pueden coexistir dos conductas al mismo tiempo para el mismo espécimen.
       & El FST define estas conductas como mutuamente excluyentes
-        \cite{armario2021,cryan2005}. Ver RF-17, RF-18. \\
+        \cite{armario2021}. Ver RF-17, RF-18. \\
 \hline
 RN-08 & Todos los investigadores con cuenta activa pueden consultar los experimentos
         y resultados de cualquier otro investigador del laboratorio, pero solo pueden
@@ -569,7 +571,7 @@ RN-11 & Si el video no se puede abrir o el pipeline no encuentra los cilindros, 
         descargable que indica el motivo del fallo. Los videos en que sí se
         encuentran continúan el análisis de forma normal.
       & Evita que el sistema produzca resultados incorrectos sin advertir al
-        investigador. Véase la sección~\ref{sec:umbrales}. Ver RF-14, RF-16. \\
+        investigador. Ver RF-14, RF-16. \\
 \hline
 RN-12 & La comparación entre grupos usa solo los videos del Día~2. Los
         especímenes cuyo video del Día~2 aún no está analizado se señalan como
@@ -657,7 +659,7 @@ Sustracción de fondo por percentil \cite{piccardi2004}
     & El fondo se estima como el percentil 10 de cada píxel a lo largo del video,
       con los cuadros ya alineados. Como el espécimen es claro sobre agua oscura,
       un percentil bajo lo borra del fondo.
-    & Más simple y predecible que el GMM \cite{zivkovic2004} para el caso de cámara
+    & Más simple y predecible que el modelo de mezcla de gaussianas (GMM) \cite{zivkovic2004} para el caso de cámara
       fija. Se prefirió a la mediana porque esta deja incrustado en el fondo a un
       espécimen que pasa mucho tiempo inmóvil, y luego no se le puede separar.
     & No \\
@@ -792,10 +794,10 @@ R-01 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
        cilindros, se genera el reporte de diagnóstico (ver RN-11). \\
 \hline
 R-02 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
-     & El dataset de cuadros etiquetados no alcanza para entrenar un clasificador
+     & El \textit{dataset} (conjunto de datos) de bloques y segundos etiquetados no alcanza para entrenar un clasificador
        con el F1 objetivo.
-     & Ampliar el dataset anotando más cuadros con el etiquetador del equipo y aplicar
-       \textit{data augmentation}. Si el escalamiento no se distingue del nado
+     & Ampliar el \textit{dataset} anotando más segundos con el etiquetador del equipo y aplicar
+       \textit{data augmentation} (aumento de datos). Si el escalamiento no se distingue del nado
        con la precisión objetivo, los segundos en que no se distinguen se registran
        como ``conducta activa'' (ver RN-13). \\
 \hline
@@ -825,7 +827,7 @@ R-05 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf
 \hline
 R-07 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
      & El laboratorio solicita cambios en los requerimientos a mitad del desarrollo.
-     & Diseño modular del clasificador para incorporar clases adicionales sin
+     & Diseño modular del clasificador para incorporar conductas adicionales sin
        reescribir la arquitectura. Gestionar los cambios dentro del proceso de
        revisión de \textit{sprint} conforme a la metodología Scrum. \\
 \hline
@@ -867,11 +869,11 @@ seleccionado ---Python, OpenCV, PyTorch, Flask y React--- adquirida en cursos de
 carrera en la ESCOM. Todas las herramientas son de código abierto, están bien
 documentadas y tienen comunidades activas que reducen el riesgo de incompatibilidades.
 
-La brecha tecnológica más relevante identificada es el dataset de cuadros etiquetados
+La brecha tecnológica más relevante identificada es el \textit{dataset} de bloques y segundos etiquetados
 para entrenar el clasificador de conducta. Con el número de videos disponibles actualmente
 en el laboratorio, ese dataset requiere un esfuerzo de anotación manual con el etiquetador del equipo que
 es viable pero no trivial. La estrategia de transfer learning con una red preentrenada
-reduce ese requerimiento a unos pocos cientos de ejemplos por clase, lo que está dentro
+reduce ese requerimiento a unos pocos cientos de ejemplos por conducta, lo que está dentro
 del alcance del proyecto \cite{pan2010,meng2024_dsaan}. El clasificador sobre rasgos
 corre en procesador, sin GPU. Para entrenar la red convolucional, si el laboratorio no
 dispone de GPU, Google Colab ofrece hasta 12~horas de GPU por sesión de forma gratuita,
@@ -1163,7 +1165,7 @@ adaptarlo a otros paradigmas conductuales (laberinto en cruz elevada, campo abie
 etc.) reconfigurando solo el módulo de clasificación. Eso abre la puerta a que otros
 grupos del IPN lo usen sin desarrollarlo desde cero.
 
-Si funciona bien, los investigadores del laboratorio dejaran de cronometrar videos a mano. Eso es lo que
+Si funciona bien, los investigadores del laboratorio dejarán de cronometrar videos a mano. Eso es lo que
 el laboratorio necesita; cualquier beneficio más amplio ---reproducibilidad entre
 grupos, escalabilidad a otros paradigmas--- depende de que primero funcione para
 el caso para el que fue construido.

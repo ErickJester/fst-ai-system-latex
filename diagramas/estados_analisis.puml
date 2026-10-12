@@ -10,7 +10,7 @@ state procesando {
   [*] --> preprocesamiento
   preprocesamiento --> cilindros
   preprocesamiento --> error : [no se pudo abrir el video] (RN-11)
-  cilindros --> clasificacion : [se hallaron los tubos]
+  cilindros --> clasificacion : [se hallaron los cilindros]
 }
 
 en_cola --> procesando : el Worker tomó la tarea\n(polling, CU-07)
