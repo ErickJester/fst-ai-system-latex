@@ -433,7 +433,7 @@ Reglas generales:
 | GET | `/experiments/{id}/report/xlsx` | Descarga XLSX | Investigador |
 | GET | `/admin/users` | Lista usuarios (filtros: rol, estado) | Admin |
 | POST | `/admin/users` | Crea cuenta con contraseña temporal | Admin |
-| PATCH | `/admin/users/{id}` | Modifica datos o desactiva cuenta | Admin |
+| PATCH | `/admin/users/{id}` | Modifica datos (incluido el rol de Investigador o Administrador) o desactiva cuenta. Rechaza con 409 desactivar la última cuenta de Administrador activa o quitarle el rol (R-16) | Admin |
 | GET | `/admin/system` | Métricas: disco y cola | Admin |
 
 **Importante:** el rol Administrador es un permiso de **backend**. Ocultar la sección en
@@ -468,12 +468,13 @@ Estos nombres los propone este documento; confírmalos con el usuario:
 | R-06 | Resultados y reportes se conservan para siempre, aunque el video ya no exista. |
 | R-07 | Todos los investigadores activos pueden ver los experimentos de cualquier otro. El administrador además modifica y desactiva cuentas. |
 | R-08 | Borrar un experimento es permanente (se van video, resultados y reportes). Pide confirmación explícita. |
-| R-09 | Solo se aceptan archivos `.mp4` y `.mov`. La validación de formato ocurre **en el cliente** antes de subir, y el backend la repite. También valida que el video sea reproducible y que esté **en horizontal** (ancho mayor que alto): un video girado (vertical) **no se puede procesar** y se rechaza con un mensaje claro. No hay opción de rotar. |
+| R-09 | Solo se aceptan archivos `.mp4` y `.mov`. La **extensión** se comprueba **en la interfaz** antes de subir, y el backend la repite. La **orientación** y la **reproducibilidad** las valida **el servidor** al recibir el video (D-64): debe ser reproducible y estar **en horizontal** (ancho mayor que alto); un video girado (vertical) **no se puede procesar** y se rechaza con un mensaje claro. No hay opción de rotar. |
 | R-10 | **Eliminada.** Ya no hay umbral de confianza de detección de cilindros, y nada la sustituye en esta versión (sección 11, punto 14). |
 | R-11 | **Eliminada (D-44).** No hay comparación Día 1 vs Día 2. Se comparan los grupos entre sí con el Día 2; el Día 1 solo sirve para verificar que los especímenes llegaron igual de estresados. |
 | R-12 | Cuando el clasificador sabe que el espécimen no está inmóvil pero no decide entre nado y escalamiento, esos segundos se guardan como "conducta activa", una cuarta conducta. Un mismo análisis puede mezclar las cuatro. Los reportes deben mostrarla como una columna más. En los bloques de 5 s también resuelve el empate entre nado activo y escalamiento (sección 9.5). |
 | R-13 | De cada video se guardan y se muestran como máximo los **últimos 300 s** (de final a inicio), sin mínimo. La CNN analiza el video completo y el worker descarta el principio, donde a veces aparecen personas, y renumera de 1 a 300 (D-54). |
 | R-14 | Solo se puede revisar un análisis en estado `completado`. Al revisar, el usuario corrige las etiquetas segundo a segundo; cada corrección queda en `SEGUNDO` con `origen` `confirmada`, `corregida` o `dudosa`, y al guardar el backend **recalcula `INTERVALO` y `PRESENTA`** de esos especímenes dentro de la misma transacción. La conducta que puso el sistema se reemplaza al corregir; `origen` conserva que el segundo fue revisado. **Solo corrigen el investigador que subió el video y el Administrador** (D-57). Corregir etiquetas no cambia el modelo ni el video: si lo que cambia es el video o el modelo, es un análisis nuevo (reinicio, R-04). El video que se reproduce es la copia H.264 que el worker genera al terminar (D-58). |
+| R-16 | Siempre debe existir al menos un Administrador activo: el backend rechaza desactivar la última cuenta de Administrador activa o quitarle el rol (RN-16, D-61, D-72). El Administrador sí puede cambiar el rol de una cuenta desde el panel de administración. |
 | R-15 | Si en un segundo no se ve al espécimen, ese segundo se registra como "no se ve". Tres segundos seguidos así dejan el análisis `en pausa`, se avisa al usuario con una notificación `analisis en pausa` y se le pide ajustar el recuadro del cilindro. Si no responde en 5 minutos, el análisis pasa a `cancelado` y se crea la notificación `analisis cancelado` (RN-17, D-59, D-67). El investigador no cancela ni pausa: lo hace el sistema. |
 
 Otras decisiones tomadas:
@@ -490,7 +491,8 @@ Otras decisiones tomadas:
   (columnas `Tiempo (min:seg)`, `Nado`, `Escalamiento`, `Inmovilidad`, `Conducta activa`, una fila por
   minuto) más estadísticas por grupo: media, desviación estándar y varianza del tiempo de
   cada conducta entre los especímenes de cada grupo (agregando todas sus tandas). El PDF
-  es un resumen ejecutivo, distinto del PDF de diagnóstico.
+  es el **reporte de resultados** (D-76), distinto del **reporte de diagnóstico** (el que se
+  genera cuando un análisis termina en error).
 - **Cuentas:** no existe autorregistro ni formulario público. Solo el administrador crea
   cuentas con identificador institucional (propuesta, sección 11 punto 12), nombre,
   apellidos y correo (de cualquier dominio, D-46); el sistema genera la contraseña temporal. Se pone
@@ -597,8 +599,9 @@ Reglas del paso 2:
   primera tanda es la "A" y se piden tipo (control, referencia o tratamiento
   experimental) y tratamiento.
 - Rechaza en el cliente cualquier archivo que no sea `.mp4` o `.mov`, con un mensaje
-  específico, antes de subir. También rechaza un video en vertical (alto mayor que ancho),
-  que se puede detectar en el navegador al cargar los metadatos; el backend lo repite.
+  específico, antes de subir. La orientación (un video en vertical, con alto mayor que ancho) y
+  la reproducibilidad **no se validan en el navegador**: las valida el servidor al recibir el
+  archivo (D-64) y la interfaz muestra su mensaje de rechazo.
 - Muestra errores de validación por campo (campos obligatorios vacíos).
 - Estados: vacío, lleno, subiendo, error de formato, errores de campo, éxito.
 
@@ -644,7 +647,7 @@ Los bloques **no usan la CNN**: la CNN solo clasifica cada segundo, y el bloque 
 - Gana la conducta con más segundos. Si nado activo y escalamiento empatan (por ejemplo 2 y 2), el bloque es **conducta activa**.
 - Con 2 de inmovilidad y 2 de nado activo, decide el quinto segundo: si es escalamiento, el bloque es conducta activa; si es "no se ve", también es conducta activa, con el matiz de abajo.
 - Un bloque cuyos cinco segundos son "no se ve" se muestra como **conducta activa con un matiz** que avisa que el modelo no pudo ver bien esa parte del video.
-- Los fragmentos "no se ve" también se marcan en el PDF final que se entrega al cliente.
+- Los fragmentos "no se ve" también se marcan en el **reporte de resultados** en PDF que se entrega al terminar.
 
 ```
 +-------------------------------------------------------------+
@@ -688,7 +691,9 @@ crear usuario; modal de editar usuario.
 +-------------------------------------------------------------+
 Modal "Crear cuenta":  Identificador institucional*, Nombre*, Apellidos*, Correo*  [Crear]
    (el identificador institucional en el formulario quedó decidido, sección 11, punto 12)
-Modal "Editar cuenta": datos editables + interruptor Activo/Inactivo [Guardar]
+Modal "Editar cuenta": datos editables + rol (Investigador / Administrador) + interruptor Activo/Inactivo [Guardar]
+  Si es la última cuenta de Administrador activa, desactivarla o quitarle el rol se rechaza
+  con el aviso "debe existir al menos un Administrador activo" (R-16).
 ```
 
 Al crear una cuenta, el sistema envía la contraseña temporal por correo y **además** la
@@ -1001,10 +1006,16 @@ Cada paso termina con algo que se puede probar.
 - Un administrador puede crear una cuenta y esa cuenta debe cambiar la contraseña al entrar.
 - Subir un `.mp4` o `.mov` en horizontal crea un análisis `en cola`; el `worker_fake` lo lleva a `completado`
   y la pantalla de progreso lo refleja sin recargar.
-- Subir un archivo que no es `.mp4` ni `.mov`, o un video en vertical, se rechaza en el
-  cliente.
+- Subir un archivo que no es `.mp4` ni `.mov` se rechaza en el cliente; un video en vertical o que
+  no se puede reproducir lo rechaza el servidor (D-64).
+- Un Administrador no puede desactivarse ni quitarse el rol si es el último Administrador activo
+  (R-16).
 - Un investigador que no es administrador recibe 403 en `/admin/*` aunque conozca la URL.
 - Un reporte vuelve a generarse cuando hay un análisis más nuevo que el guardado.
+- Repetibilidad (RNF-14, D-74): analizar varias veces el mismo video debe dar el mismo resultado,
+  con una variación máxima de entre el 5 y el 10 %. La prueba la hace quien construye el
+  clasificador (TT-II); el backend solo debe conservar, sin alterarlos, los resultados que
+  escribe el worker.
 - No existe ningún botón para cancelar un análisis, y el reinicio solo aparece en la pantalla de
   revisión de un análisis `completado`, para quien subió el video o un Administrador.
 
@@ -2514,7 +2525,7 @@ note right of api
   entre los especímenes de cada uno de los tres grupos.
   Columnas: Tiempo (min:seg), Nado, Escalamiento,
   Inmovilidad, Conducta activa. Una fila por minuto.
-  PDF: resumen ejecutivo, documento distinto del
+  PDF: reporte de resultados, documento distinto del
   reporte de diagnóstico.
 end note
 
