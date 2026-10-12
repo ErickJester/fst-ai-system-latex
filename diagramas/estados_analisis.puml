@@ -17,7 +17,16 @@ en_cola --> procesando : el Worker tomó la tarea\n(polling, CU-07)
 cilindros --> error : [no se hallaron los cilindros] (RN-11)\nse generó el reporte de\ndiagnóstico
 clasificacion --> completado : se completaron las\ntres etapas
 
+procesando --> en_pausa : [el sistema no ve al espécimen\ndurante tres segundos seguidos]\nse notifica al investigador (RF-34)
+en_pausa --> procesando : el investigador ajusta\nel recuadro del cilindro
+en_pausa --> cancelado : sin respuesta\nen 5 minutos
+
+completado --> en_cola : el investigador reinicia\nel análisis (se borra el\nresultado anterior, RN-04)
+error --> en_cola : el investigador reinicia\nel análisis
+cancelado --> en_cola : el investigador reinicia\nel análisis
+
 completado --> [*]
 error --> [*]
+cancelado --> [*]
 
 @enduml

@@ -15,7 +15,7 @@
 %  (2,3) (1,2) no son expresables en notacion de pata de gallo, que
 %  es la unica que PlantUML soporta para ER.
 %
-%  11 entidades - todas fuertes - y 13 interrelaciones
+%  11 entidades - todas fuertes - y 12 interrelaciones
 %  (D-35, 3-oct: se agrego Segundo y sus dos interrelaciones).
 %  Los atributos NO se dibujan: son 34 y harian ilegible la figura.
 %  Van en el diccionario de datos (anexo). La unica excepcion es
@@ -64,7 +64,6 @@
 \node[rel] (compone)   at ( 7.4,  -2.3) {compone};
 \node[ent] (grupo)     at ( 7.4,  -3.7) {Grupo};
 
-\node[rel] (agrupa)    at ( 3.6,  -5.1) {agrupa};
 \node[rel] (grabaen)   at (11.1,  -5.1) {se graba en};
 
 \node[ent] (especimen) at ( 3.6,  -6.5) {Espécimen};
@@ -108,15 +107,7 @@
 % -- Bus de salida del Grupo hacia sus dos ramas ----------------
 \coordinate (bus) at ($(grupo.south) + (0,-0.35)$);
 \draw[lin] (grupo.south) -- (bus);
-\draw[lin] (bus) -| (agrupa.north);
 \draw[lin] (bus) -| (grabaen.north);
-
-% -- Grupo agrupa Especimenes  (el hecho experimental) ----------
-% (2,N): un grupo puede tener una sola tanda con 2 especimenes;
-% sin tope superior (reunion 3-sep). Decision del equipo, 3-oct.
-% Antes era (6,N).
-\node[card, anchor=south east] at ($(agrupa.north) + (-0.10,0.05)$) {(2,N)};
-\draw[lin] (agrupa) -- node[card, right, pos=0.45] {(1,1)} (especimen);
 
 % -- Grupo se graba en Tandas  (la logistica de camara) ---------
 % (1,N): un grupo tiene al menos una tanda (la A); las demas
@@ -138,19 +129,21 @@
 \draw[lin] (produce) -- node[card, right, pos=0.45] {(1,1)} (video);
 
 % -- Video se procesa en Analisis -------------------------------
-% (1,1): el reanalisis reemplaza el resultado anterior, no se
-% conserva historial (D-03, reunion 3-sep).
-\draw[lin] (video) -- node[card, above, pos=0.35] {(1,1)} (procesa);
+% (0,1): el reanalisis reemplaza el resultado anterior, no se
+% conserva historial (D-03, reunion 3-sep). El video del Dia 1 no
+% se analiza.
+\draw[lin] (video) -- node[card, above, pos=0.35] {(0,1)} (procesa);
 \draw[lin] (procesa) -- node[card, above, pos=0.65] {(1,1)} (analisis);
 
 % -- Especimen aparece en Observaciones -------------------------
-% (1,2): una por sesion. Minimo 1 porque el Dia 1 es opcional.
-\draw[lin] (especimen) -- node[card, right, pos=0.60] {(1,2)} (aparece);
+% (0,1): una, la del Dia 2. El Dia 1 no se analiza.
+\draw[lin] (especimen) -- node[card, right, pos=0.60] {(0,1)} (aparece);
 \draw[lin] (aparece.south) |- node[card, above, pos=0.72] {(1,1)} (observ.west);
 
 % -- Video contiene Observaciones -------------------------------
-% (2,4): una por cilindro del encuadre. Antes era (3,4).
-\draw[lin] (video) -- node[card, right, pos=0.60] {(2,4)} (contiene);
+% (0,4): una por cilindro del encuadre en el video del Dia 2; el
+% video del Dia 1 no tiene observaciones.
+\draw[lin] (video) -- node[card, right, pos=0.60] {(0,4)} (contiene);
 \draw[lin] (contiene.south) |- node[card, above, pos=0.72] {(1,1)} (observ.east);
 
 % -- Observacion se divide en Intervalos ------------------------
@@ -159,11 +152,11 @@
 \draw[lin] (divide) -- node[card, right, pos=0.45] {(1,1)} (interv);
 
 % -- Intervalo presenta Conductas -------------------------------
-% (2,4): hay cuatro conductas (nado activo, inmovilidad, escalamiento
+% (4,4): hay cuatro conductas (nado activo, inmovilidad, escalamiento
 % y conducta activa, D-29); cada minuto registra de dos a cuatro.
 % Antes era (2,3).
 % (0,N) del lado Conducta: es un catalogo, puede no usarse.
-\draw[lin] (interv) -- node[card, above, pos=0.35] {(2,4)} (presenta);
+\draw[lin] (interv) -- node[card, above, pos=0.35] {(4,4)} (presenta);
 \draw[lin] (presenta) -- node[card, above, pos=0.65] {(0,N)} (conducta);
 
 % -- Atributo de la interrelacion -------------------------------

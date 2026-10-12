@@ -97,7 +97,7 @@ Marca aquí lo que termines (`✅`, fecha). Este archivo es solo tuyo: Erick no 
 
 | # | Prioridad | Dónde | Qué hacer |
 |---|-----------|-------|-----------|
-| ⏳ A-14 (reabierto 11-oct: los nombres sí se unificaron; la fecha sigue en «Mayo 2026» y falta la fecha de entrega) | 🔴 | `portada.tex:73`, `documento_tecnico.tex:32` | Fecha «Mayo 2026» → la de entrega. Unificar los nombres entre los dos archivos (acentos y orden de apellidos: «Ángel Alí» contra «Angel Ali») |
+| ✅ A-14 (11-oct: los nombres se unificaron; la fecha se queda en «Mayo 2026» hasta que haya otra, D-70) | 🔴 | `portada.tex:73`, `documento_tecnico.tex:32` | Fecha «Mayo 2026» → la de entrega. Unificar los nombres entre los dos archivos (acentos y orden de apellidos: «Ángel Alí» contra «Angel Ali») |
 | ✅ A-2b (5-oct) | 🔴 | `resumen.tex:7` | Mismo cambio que A-2: tres analistas, se triplica |
 | ✅ M-4 (5-oct) | 🟡 | `resumen.tex:4` | «entre una y dos horas» → «entre una hora y media y dos horas» (como el cap. 1); expandir ISO e IEEE en su primera aparición |
 | ✅ L-4 (5-oct) | 🟢 | `referencias.bib:293` | Quitar el comentario sobrante «INSTRUCCIONES: Pegar estas entradas…» |
@@ -253,3 +253,9 @@ Aplicado el 2026-10-11, primer bloque (hallazgos con fuente que decide):
 - ⏳ **PNG sin regenerar:** las figuras de `figures/mermaid/` y `diagramas/clases.png` siguen mostrando lo anterior hasta
   regenerarlas con PlantUML (no hay `plantuml.jar` en este equipo).
 - ⏳ **Mockups** `experimento` y `experimentos` (`figures/mockups/v2/`): hay que revisar que no pidan nombre y contraseña.
+
+**Tercer bloque (11-oct): respuestas a PREGUNTAS.md, D-66 a D-70.** Aplicadas todas: red de fusión como clasificador, Día 1 sin
+análisis (VIDEO—ANALISIS 0..1), pausa por «no se ve» y cancelación a los 5 minutos, reinicio que borra el resultado anterior,
+copia H.264 del *worker* sin video anotado, columnas nulas del análisis, cuatro valores de `origen`, RN-16 ampliada,
+repetibilidad (RNF-14), PDF con nombre fijo, OE-6 y RNF-11 modulares, bloques de 5 s como resumen, volumen según la
+entrevista, DSAAN corregido y línea Grupo—Espécimen quitada del conceptual. Pendiente: nada de PREGUNTAS.md.
