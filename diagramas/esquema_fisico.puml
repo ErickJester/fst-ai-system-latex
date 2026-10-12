@@ -89,8 +89,7 @@
 '  eso USUARIO.activo (D-10) existe: dar de baja sin poder borrar.
 '
 '  ---- CONDUCTA sigue siendo tabla, no dominio cerrado ----
-'  Su extension cambia segun el modo del clasificador (tres valores
-'  en modo completo, dos en modo degradado / D-17) - un dominio
+'  Su extension puede crecer (hoy son cuatro conductas) - un dominio
 '  cerrado no puede expresar eso.
 '
 '  Generar:
@@ -325,7 +324,7 @@ USUARIO        "1" --o "0..1" ADMINISTRADOR             : idInstitucional
 
 EXPERIMENTO    "1" --o "3..*" GRUPO                     : idExperimento
 EXPERIMENTO    "1" --o "0..*" REPORTE                   : idExperimento
-EXPERIMENTO    "1" --o "0..*" NOTIFICACION               : idExperimento
+EXPERIMENTO    "0..1" --o "0..*" NOTIFICACION               : idExperimento
 
 GRUPO          "1" --o "1..*" TANDA                     : idGrupo
 TANDA          "1" --o "2..4" ESPECIMEN                 : idTanda

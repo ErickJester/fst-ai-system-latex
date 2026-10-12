@@ -90,8 +90,8 @@ rectangle "Sistema web" as WEBBOX #FFF9DB {
 }
 
 rectangle "Análisis de conducta" as CONDUCTA #FFF9DB {
-  rectangle "Preprocesamiento\n(cuadros y limpieza)" as PRE
-  rectangle "Clasificación de conducta\n(nado activo, inmovilidad, escalamiento)" as CLASIF
+  rectangle "Preprocesamiento\n(registro de cámara y modelo de fondo)" as PRE
+  rectangle "Clasificación de conducta\n(nado activo, inmovilidad,\nescalamiento y conducta activa)" as CLASIF
   rectangle "Resultados\nTiempos y reporte" as RES
 
   PRE -right-> CLASIF

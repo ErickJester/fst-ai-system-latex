@@ -40,7 +40,7 @@ alt el análisis no está completado
 else el análisis está completado
   api -> db: consulta los especímenes y la etiqueta\nde cada segundo (SEGUNDO)
   db --> api: etiquetas por espécimen y por segundo
-  api -> fs: lee los recuadros de los tubos
+  api -> fs: lee los recuadros de los cilindros
   fs --> api: recuadros
   api --> ui: duración, especímenes, etiquetas y recuadros
   ui -> api: pide el video

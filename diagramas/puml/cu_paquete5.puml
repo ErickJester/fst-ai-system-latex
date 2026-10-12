@@ -1,6 +1,6 @@
 @startuml
 !pragma layout smetana
-title Plataforma Web FST\nPaquete 5 - Dashboard, notificaciones y administracion
+title Plataforma Web FST\nPaquete 5 - Dashboard, notificaciones y administración
 left to right direction
 skinparam packageStyle rectangle
 skinparam actorStyle awesome
@@ -15,10 +15,10 @@ INV <|-- ADMIN
 rectangle "Plataforma Web FST - Paquete 5" {
   usecase "CU-22\nConsultar dashboard" as CU22
   usecase "Filtrar experimentos" as UC51a
-  usecase "Avisar expiracion de video" as UC52
+  usecase "Avisar expiración de video" as UC52
   usecase "CU-23\nEliminar experimento" as CU23
-  usecase "Confirmar eliminacion" as UC53a
-  usecase "CU-14\nBorrar video automaticamente" as CU14
+  usecase "Confirmar eliminación" as UC53a
+  usecase "CU-14\nBorrar video automáticamente" as CU14
   usecase "Listar usuarios" as UC56
   usecase "CU-13\nMonitorear estado del sistema" as CU13
   usecase "Notificar uso de disco" as UC57a

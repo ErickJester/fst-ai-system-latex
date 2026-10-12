@@ -81,7 +81,7 @@ else sí está en ADMINISTRADOR
     ui --> admin: muestra el error, no crea el duplicado
   else ambos están disponibles
     api -> api: genera contraseña temporal
-    api -> db: crea USUARIO\n(idInstitucional, nombre, apellidos, correo,\ncontrasenaHash, activo = sí, cambioRequerido = sí)
+    api -> db: crea USUARIO\n(identificador, nombre, apellidos y correo),\ncon contraseña temporal cifrada,\ncuenta activa y cambio de contraseña obligatorio
     db --> api: confirma la creación
     api -> api: envía correo al nuevo investigador\ncon sus credenciales de acceso inicial
     note right of api

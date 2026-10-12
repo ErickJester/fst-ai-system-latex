@@ -41,7 +41,11 @@ alt la cuenta existe, está activa y la contraseña coincide
   api -> api: genera el token JWT\n(vigencia larga y configurable)
   api --> ui: token y rol del usuario
   ui -> ui: guarda el token en el navegador
-  ui --> u: muestra el panel principal
+  alt la cuenta tiene el cambio de contraseña obligatorio
+    ui --> u: muestra la pantalla de cambio de contraseña (ver CU-16)
+  else
+    ui --> u: muestra el panel principal
+  end
 else el correo no existe, la cuenta está desactivada\no la contraseña no coincide
   api --> ui: error de credenciales\n(no dice cuál dato falló, RN-01)
   ui --> u: muestra "correo o contraseña incorrectos"

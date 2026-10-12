@@ -5,7 +5,7 @@
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Las 11 relaciones del esquema logico definitivo mas las dos
+'  Las 12 relaciones del dominio experimental mas las dos
 '  que el sistema necesita y que el universo del discurso del
 '  laboratorio no contenia: REPORTE y NOTIFICACION. Mas
 '  ADMINISTRADOR (D-08, 13-sep): no es un tipo
@@ -104,7 +104,7 @@ skinparam arrow {
 }
 
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-'  DOMINIO EXPERIMENTAL  -  las 11 del esquema logico definitivo
+'  DOMINIO EXPERIMENTAL  -  las 12 del dominio experimental
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class USUARIO {
@@ -252,7 +252,7 @@ OBSERVACION    "1" --o "1..300" SEGUNDO
 CONDUCTA       "0..1" --o "0..*" SEGUNDO
 EXPERIMENTO    "1" --o "0..*" REPORTE
 USUARIO        "1" --o "0..*" NOTIFICACION
-EXPERIMENTO    "1" --o "0..*" NOTIFICACION
+EXPERIMENTO    "0..1" --o "0..*" NOTIFICACION
 USUARIO        "1" --o "0..1" ADMINISTRADOR
 
 @enduml

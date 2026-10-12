@@ -49,7 +49,7 @@ condiciones habituales en el laboratorio colaborador.
 \subsection{Red 3D-RCNN para clasificación de tres conductas}
 
 Della Valle et al.\ \cite{della_valle2025} entrenaron un modelo basado en redes
-residuales 3D (ResNet-3D) que procesa segmentos de video cortos para capturar el
+residuales 3D (ResNet-3D, \textit{Residual Network}) que procesa segmentos de video cortos para capturar el
 movimiento en el tiempo. A diferencia de la mayoría de los sistemas revisados, este
 distingue las tres conductas del FST: nado, inmovilidad y escalamiento. Los propios
 autores señalan que eso lo diferencia de trabajos anteriores, que solo discriminan entre
@@ -264,7 +264,7 @@ sus objetivos. Para este proyecto, los atributos relevantes son:
         clasificación estándar: precisión, \textit{recall} y F1 por conducta.
   \item \textbf{\textit{Time behaviour}:} el tiempo de análisis de un video de 5~minutos debe
         ser aceptable para el flujo de trabajo del laboratorio. Se mide en segundos de
-        procesamiento por video (cualquier otra relación es opcional) y se define el umbral concreto con el
+        procesamiento por video (cualquier otra relación con la duración del video es opcional) y se define el umbral concreto con el
         laboratorio durante la fase de pruebas y validación.
   \item \textbf{\textit{Usability}:} un investigador sin conocimientos de programación debe
         poder operar el sistema sin ayuda técnica. Se evalúa con una prueba de

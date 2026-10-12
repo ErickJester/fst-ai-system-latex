@@ -111,7 +111,7 @@ al clasificador de conducta.
 \section{Diseño del pipeline de análisis conductual}
 % -----------------------------------------------------------
 
-El pipeline recibe un video del FST, analiza solo sus últimos 300 segundos y produce
+El pipeline recibe un video del FST, analiza como máximo sus últimos 300 segundos y produce
 como salida los tiempos totales de cada conducta por espécimen y el desglose por minuto. Sigue el patrón arquitectónico de
 tubería y filtro (\textit{pipe and filter}) \cite{sommerville2011}: cada módulo es
 un filtro discreto que transforma los datos y los pasa al siguiente. Está organizado
@@ -356,9 +356,10 @@ sistema: un usuario crea experimentos; cada experimento se organiza en grupos
 hasta cuatro especímenes; cada tanda tiene uno o dos videos (Día~1 y/o Día~2); y
 cada video se procesa mediante un análisis que produce observaciones de conducta
 por espécimen (\textbf{OBSERVACION}, \textbf{SEGUNDO}, \textbf{INTERVALO},
-\textbf{PRESENTA}, \textbf{CONDUCTA}). Un usuario puede además ser \textbf{ADMINISTRADOR}, modelado
-como subtipo con permisos adicionales. Las entidades \textbf{REPORTE} y
-\textbf{NOTIFICACION} se derivan también del experimento.
+\textbf{PRESENTA}, \textbf{CONDUCTA}). La figura muestra las entidades del dominio experimental; el subtipo
+\textbf{ADMINISTRADOR} (un usuario con permisos adicionales) y las entidades
+\textbf{REPORTE} y \textbf{NOTIFICACION}, derivadas del experimento, aparecen en el esquema
+físico.
 
 \begin{sidewaysfigure}
 \centering
@@ -751,7 +752,7 @@ El sistema tiene dos actores principales: \textbf{Investigador} y
 \textbf{Administrador}. El Investigador gestiona experimentos y consulta
 resultados de cualquier investigador del laboratorio (ver RN-08); el Administrador
 gestiona usuarios y monitorea el estado del sistema. El Administrador hereda todas
-las capacidades del Investigador y además puede modificar y desactivar cuentas.
+las capacidades del Investigador y además puede crear, modificar y desactivar cuentas. El \textit{Worker}, que ejecuta el análisis, aparece en los diagramas como actor del sistema.
 
 Los casos de uso están organizados en cinco paquetes funcionales. La
 Figura~\ref{fig:cu_vision_general} muestra la visión general con los dos actores y
@@ -1450,7 +1451,7 @@ caso de uso.
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador subir el archivo de video del experimento para su análisis automático.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador escribe el nombre del grupo o tratamiento; si coincide con un grupo ya usado en el mismo experimento, el sistema sugiere la siguiente tanda y pide confirmación explícita (RF-09). Elige la sesión (Día 1 o Día 2) y el archivo MP4 o MOV; el sistema valida formato, reproducibilidad y orientación (horizontal), lo almacena y encola la tarea de análisis de forma automática.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador escribe el nombre del grupo o tratamiento; si coincide con un grupo ya usado en el mismo experimento, el sistema sugiere la siguiente tanda y pide confirmación explícita (RF-09). Elige la sesión (Día 1 o Día 2) y el archivo MP4 o MOV; el sistema valida reproducibilidad y orientación (horizontal), pues la interfaz ya comprobó el formato, lo almacena y encola la tarea de análisis de forma automática.} \\
 \hline
 \end{tabular}
 
@@ -2346,7 +2347,7 @@ quien pertenece a \texttt{ADMINISTRADOR} (ver CU-15): permite crear cuentas
 nuevas con contraseña temporal y desactivar cuentas existentes sin eliminarlas
 (ver RF-05, RF-07). La configuración de perfil
 (Figura~\ref{fig:seq_perfil}) está disponible para cualquier usuario con sesión
-activa y permite actualizar nombre y correo electrónico.
+activa y permite actualizar nombre, apellidos, correo electrónico y contraseña.
 
 \begin{figure}[H]
 \centering

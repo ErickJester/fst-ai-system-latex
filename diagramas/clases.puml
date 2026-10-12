@@ -71,7 +71,8 @@ package P2_Experimentos_y_carga_de_video {
     -archivo : String
     -duracion : Float
     -fechaCarga : DateTime
-    +validarFormatoMp4() : Boolean
+    +validarFormato() : Boolean
+    +validarOrientacion() : Boolean
     +validarReproducible() : Boolean
     +estaProximaEliminacion(dias) : Boolean
   }
@@ -193,7 +194,7 @@ Observacion "1" *--> "5"   Intervalo   : "se divide en"
 ' D-54: 300 es un maximo, sin minimo (los ultimos 300 s del video;
 ' si dura menos, se guardan todos sus segundos).
 Observacion "1" *--> "1..300" Segundo : "se etiqueta en"
-Intervalo "2..4" -- "0..*" Conducta : presenta
+Intervalo "0..*" -- "2..4" Conducta : presenta
 (Intervalo, Conducta) .. PRESENTA
 
 Experimento "1"    --> "0..*" Reporte      : origina
