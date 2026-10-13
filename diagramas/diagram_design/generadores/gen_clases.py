@@ -20,7 +20,8 @@ cls('Usuario', 1, 40, [
     '+ iniciarSesion(correo, contrasena): String', '+ cerrarSesion(token): void',
     '+ cambiarContrasena(nueva): void', '+ crearExperimento(datos): Experimento',
     '+ subirVideo(idTanda, sesion, archivo): Video', '+ eliminarExperimento(id): void',
-    '+ descargarReporte(idExperimento, formato): Reporte', '+ reiniciarAnalisis(idAnalisis): void'])
+    '+ descargarReporte(idExperimento, formato): Reporte', '+ reiniciarAnalisis(idAnalisis): void',
+    '+ ajustarRecuadro(idAnalisis, cilindro, recuadro): void', '+ cancelarAnalisisEnPausa(idAnalisis): void'])
 cls('Experimento', 2, 40, ['- id: Integer', '- nombre: String', '- fecha: Date', '- notas: String'],
     ['+ validarNombreUnico(): Boolean', '+ consultarEstado(): String'])
 cls('Grupo', 3, 40, ['- id: Integer', '- etiqueta: String', '- tipo: String', '- tratamiento: String'])
@@ -31,16 +32,16 @@ cls('Video', 3, 200, ['- id: Integer', '- sesion: String', '- archivo: String', 
     '+ estaProximaEliminacion(dias): Boolean'])
 cls('Analisis', 2, 240, ['- id: Integer', '- estado: String', '- etapa: String', '- nivelClasif: String',
     '- fechaAnalisis: DateTime'])
-cls('Worker', 2, 400, [], ['+ procesarCola(): void', '+ borrarVideosExpirados(): void', '+ avisarVencimientos(): void', '+ vigilarDisco(): void'], stereo='control')
-cls('PipelineAnalisis', 2, 520, [], [
+cls('Worker', 2, 400, [], ['+ procesarCola(): void', '+ borrarVideosExpirados(): void', '+ avisarVencimientos(): void', '+ vigilarDisco(): void', '+ reencolarHuerfanos(): void', '+ cancelarPausasVencidas(): void'], stereo='control')
+cls('PipelineAnalisis', 2, 560, [], [
     '+ preprocesarVideo(video): void', '+ detectarCilindros(): List<ROI>',
     '+ clasificarConducta(especimen, roi, segundo): String', '+ generarReporte(experimento, tipo): Reporte',
-    '+ actualizarProgreso(idAnalisis, pct, etapa): void', '+ marcarError(idAnalisis, mensaje): void', '+ pausarAnalisis(idAnalisis): void', '+ cancelarAnalisis(idAnalisis): void', '+ generarCopiaRevision(video): void'],
+    '+ actualizarProgreso(idAnalisis, etapa): void', '+ marcarError(idAnalisis, mensaje): void', '+ pausarAnalisis(idAnalisis): void', '+ guardarImagenPausa(idAnalisis, cilindro, segundo): void', '+ aplicarAjusteRecuadro(idAnalisis): void','+ cancelarAnalisis(idAnalisis): void', '+ generarCopiaRevision(video): void'],
     stereo='control')
 cls('ROI', 5, 240, ['- numeroCilindro: Integer', '- x: Integer', '- y: Integer', '- w: Integer', '- h: Integer', '- yAgua: Integer', '- yFondo: Integer'])
-cls('Notificacion', 1, 330, ['- id: Integer', '- tipo: String', '- mensaje: String', '- leido: Boolean',
+cls('Notificacion', 1, 390, ['- id: Integer', '- tipo: String', '- mensaje: String', '- leido: Boolean',
     '- fechaCreacion: DateTime'], ['+ marcarComoLeida(): void'])
-cls('Reporte', 1, 500, ['- id: Integer', '- formato: String', '- ruta: String', '- fechaGeneracion: DateTime'],
+cls('Reporte', 1, 560, ['- id: Integer', '- formato: String', '- ruta: String', '- fechaGeneracion: DateTime'],
     ['+ generar(experimento, formato): void', '+ descargar(): File'])
 cls('Observacion', 3, 450, [], ['+ calcularBloques(): List<String>'])
 cls('Intervalo', 4, 460, ['- minuto: Integer'])

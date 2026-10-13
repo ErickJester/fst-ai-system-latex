@@ -13,8 +13,8 @@ en_cola --> procesando : el Worker empezó a\nprocesar alguna tanda
 procesando --> completado : todas las tandas\nterminaron sin error
 procesando --> error : alguna tanda\nterminó en error
 procesando --> en_pausa : alguna tanda quedó\nen pausa (RN-17)
-en_pausa --> procesando : el usuario respondió
-en_pausa --> cancelado : 5 min sin respuesta
+en_pausa --> en_cola : el usuario ajustó\nel recuadro
+en_pausa --> cancelado : el usuario canceló o\n5 min sin respuesta
 completado --> en_cola : se agregó una tanda\nnueva (CU-05)
 note right of error
   error tiene precedencia: mientras alguna

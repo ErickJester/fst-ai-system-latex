@@ -58,8 +58,17 @@ participant Worker as w
 participant "Archivos" as fs
 database "Base de datos" as db
 
-w -> db: revisa la tabla de análisis, buscando uno en cola\n(polling periódico)
+== Al arrancar el Worker ==
+
+w -> db: busca los análisis que quedaron "procesando" sin nadie\ntrabajando en ellos (el Worker se apagó a media análisis)
+w -> db: los pasa a "en cola" con la etapa "preprocesamiento":\nempiezan de cero (D-84)
+w -> db: revisa que cada análisis "en pausa" tenga su archivo de pausa;\nsi no lo tiene, lo cancela
+
+== Un análisis a la vez ==
+
+w -> db: revisa la tabla de análisis, buscando el más antiguo en cola\n(polling periódico; se atiende uno a la vez, D-85)
 db --> w: siguiente análisis en cola, si hay alguno
+w -> fs: revisa el espacio libre del disco\n(aviso al 80 %, limpieza al 90 %, D-86)
 w -> db: marca el análisis como "procesando"
 
 w -> fs: lee el archivo de video de la tanda
@@ -74,33 +83,30 @@ w -> w: localiza los cilindros y la línea de agua\n(sobre el video completo)
 alt se hallaron los cilindros
   w -> db: actualiza la etapa a "clasificación"
   w -> w: clasifica la conducta de cada espécimen, segundo a segundo\n(nado, inmovilidad, escalamiento o conducta activa)
-  opt pasan tres segundos seguidos sin ver al espécimen (RN-17)
+  alt pasan tres segundos seguidos sin ver al espécimen (RN-17)
+    w -> fs: guarda una imagen fija de ese instante\ny el archivo de pausa
     w -> db: marca el análisis como "en pausa"
     w -> db: crea la notificación de análisis en pausa
-    alt el usuario ajusta el recuadro del cilindro antes de 5 minutos
-      w -> w: vuelve a revisar esos tres segundos y continúa
-    else el usuario no responde en 5 minutos
-      w -> db: marca el análisis como "cancelado"
-      w -> db: crea la notificación de análisis cancelado
+    w -> w: suelta el video y atiende el siguiente de la cola\n(el ajuste, la cancelación y la reanudación están\nen seq_pausa_y_ajuste.puml)
+  else se clasificó todo el video
+
+    w -> w: la red analizó el video completo; se queda con los últimos 300 segundos de cada espécimen\n(como máximo; si el video dura menos, todos)\ny los renumera de 1 a 300
+
+    loop por cada espécimen detectado en el video
+      w -> db: guarda su observación de este video
+      w -> db: guarda una etiqueta por cada segundo analizado (SEGUNDO)
+      w -> db: guarda sus intervalos (uno por minuto analizado),\ncon los segundos por conducta de cada uno (PRESENTA)
     end
+
+    w -> fs: guarda los recuadros de los cilindros\n(archivo de recuadros del análisis)
+    w -> fs: recorta el video a esos mismos últimos 300 s y guarda la copia\nen un formato que el navegador puede reproducir\n(es el video que ve el usuario)
+
+    w -> db: marca el análisis como "completado",\ncon su nivel de clasificación y fechaAnalisis
+    w -> db: deja el video sujeto al borrado automático\na los 30 días (RNF-08)
+    w -> db: crea la notificación de análisis terminado
+    w -> w: envía también el aviso por correo\n(si el envío falla, el aviso queda en el panel)
   end
-
-  w -> w: se queda con los últimos 300 segundos de cada espécimen\n(como máximo; si el video dura menos, todos)\ny los renumera de 1 a 300
-
-  loop por cada espécimen detectado en el video
-    w -> db: guarda su observación de este video
-    w -> db: guarda una etiqueta por cada segundo analizado (SEGUNDO)
-    w -> db: guarda sus intervalos (uno por minuto analizado),\ncon los segundos por conducta de cada uno (PRESENTA)
-  end
-
-  w -> fs: guarda los recuadros de los cilindros\n(archivo de recuadros del análisis)
-  w -> fs: recorta el video a esos mismos últimos 300 s y guarda la copia\nen un formato que el navegador puede reproducir\n(es el video que ve el usuario)
-
-  w -> db: marca el análisis como "completado",\ncon su nivel de clasificación y fechaAnalisis
-  w -> db: deja el video sujeto al borrado automático\na los 30 días (RNF-08)
-  w -> db: crea la notificación de análisis terminado
-  w -> w: envía también el aviso por correo\n(si el envío falla, el aviso queda en el panel)
-else no se pudo abrir el video o no se hallaron los cilindros (RN-11)
+else no se pudo abrir el video, no se hallaron los cilindros (RN-11)\no falló algo imprevisto en el pipeline (D-88)
   w -> w: genera el reporte de diagnóstico PDF (ver CU-08)
   w -> fs: guarda el PDF de diagnóstico
   w -> db: guarda la ruta del PDF (rutaDiagnostico)

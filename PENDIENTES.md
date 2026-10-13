@@ -157,6 +157,18 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
 - El **worker** ejecuta las tareas diarias: borrado de videos a 30 días, aviso de vencimiento y vigilancia del
   disco (D-82). D-78 (si la red entrega probabilidades) sigue pendiente.
 
+**Decisiones del 12-oct, segunda parte (D-83 a D-89)**
+
+- Un experimento con solo el Día 1 se muestra **«en espera del Día 2»** (D-83).
+- **Worker:** reencola solo los análisis huérfanos al arrancar (D-84); analiza **un video a la vez** (D-85); tareas
+  diarias **una vez al día de madrugada** y disco **antes de cada análisis** (D-86); eliminar un experimento se
+  rechaza con `procesando` o `en pausa` (D-87); un fallo imprevisto termina en `error` y el worker sigue (D-88).
+- **Pausa (D-89):** imagen fija del segundo central de los 3 s sin ver, el worker suelta el video, el usuario
+  ajusta o cancela, el análisis vuelve al frente de la cola y continúa desde la pausa. El recuadro vive en un
+  archivo del volumen. Ajustan y cancelan quien subió el video o un Administrador (igual que el reinicio).
+- **Para el laboratorio (Q-H):** cuántas personas usan el sistema a la vez; hoy el requisito dice 4 y el usuario
+  mencionó 10 como exageración.
+
 ## Reglas de contenido
 
 1. **Ninguna corrección sin fuente de rango superior** (jerarquía de `CLAUDE.md`: equipo >

@@ -553,10 +553,10 @@ RN-03 & Una tanda tiene como máximo dos videos: uno del Día~1 (20~min) y uno d
       & Así funciona el protocolo FST del laboratorio \cite{slattery2012}. Ver RF-09. \\
 \hline
 RN-04 & El análisis lo inicia el sistema automáticamente al terminar la carga. El
-        investigador no puede iniciarlo, pausarlo ni cancelarlo. Sí puede
-        reiniciarlo desde la pantalla de revisión: al reiniciar se borra el resultado
-        anterior y el análisis empieza de nuevo. Solo el sistema pausa o cancela un
-        análisis (ver RN-17).
+        investigador no puede iniciarlo ni pausarlo, y solo puede cancelarlo mientras
+        el análisis está en pausa. Sí puede reiniciarlo desde la pantalla de revisión:
+        al reiniciar se borra el resultado anterior y el análisis empieza de nuevo.
+        Solo el sistema pausa un análisis (ver RN-17).
       & Evita estados inconsistentes en la cola, que procesa un análisis a la vez. Si
         cambia el video o el modelo, el resultado es un análisis nuevo y no una
         corrección. Ver RF-12, RF-16, RF-32. \\
@@ -588,8 +588,11 @@ RN-08 & Todos los investigadores con cuenta activa pueden consultar los experime
 \hline
 RN-09 & Borrar un experimento es permanente e irreversible: se eliminan el video,
         los resultados y los reportes. Antes de ejecutarlo, el sistema muestra un aviso
-        que pregunta si está seguro; no pide nombre ni contraseña.
-      & Previene borrados accidentales. Ver RF-27. \\
+        que pregunta si está seguro; no pide nombre ni contraseña. No se puede borrar
+        un experimento mientras alguno de sus análisis está procesando o en pausa;
+        los que están en cola salen de la cola al borrarlo.
+      & Previene borrados accidentales y que el sistema pierda los datos de un
+        análisis que está usando. Ver RF-27. \\
 \hline
 RN-10 & La interfaz rechaza cualquier archivo que no sea \texttt{.mp4} o
         \texttt{.mov} antes de intentar subirlo al servidor. El servidor rechaza, al
@@ -663,7 +666,10 @@ RN-17 & Si en un segundo no se ve al espécimen, ese segundo se registra como «
         Si pasan tres segundos seguidos «no se ve», el análisis queda en pausa, el sistema
         avisa al usuario en el panel de notificaciones y le pide ajustar el recuadro del
         cilindro; con el ajuste, el sistema vuelve a revisar esos mismos tres segundos.
-        Si el usuario no responde en 5~minutos, el análisis se cancela.
+        El usuario también puede cancelar el análisis mientras está en pausa; si no
+        responde en 5~minutos, el análisis se cancela. Mientras el análisis espera, el
+        sistema atiende el siguiente video de la cola; el análisis ajustado vuelve al
+        frente de la cola y continúa desde el segundo de la pausa.
       & Evita entregar como resultado un tramo en que el sistema no vio al espécimen sin
         que el usuario pueda intervenir, y evita dejar un análisis esperando para siempre
         en la cola. Ver RN-04, RN-07, RF-15. \\

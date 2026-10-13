@@ -27,6 +27,8 @@ package P1_Autenticacion_y_usuarios {
     +eliminarExperimento(id) : void
     +descargarReporte(idExperimento, formato) : Reporte
     +reiniciarAnalisis(idAnalisis) : void
+    +ajustarRecuadro(idAnalisis, cilindro, recuadro) : void
+    +cancelarAnalisisEnPausa(idAnalisis) : void
   }
 
   class Administrador {
@@ -87,6 +89,8 @@ package P3_Pipeline_de_analisis_conductual {
     +borrarVideosExpirados() : void
     +avisarVencimientos() : void
     +vigilarDisco() : void
+    +reencolarHuerfanos() : void
+    +cancelarPausasVencidas() : void
   }
 
   class PipelineAnalisis <<control>> {
@@ -94,9 +98,11 @@ package P3_Pipeline_de_analisis_conductual {
     +detectarCilindros() : List<ROI>
     +clasificarConducta(especimen, roi, segundo) : String
     +generarReporte(experimento, tipo) : Reporte
-    +actualizarProgreso(idAnalisis, pct, etapa) : void
+    +actualizarProgreso(idAnalisis, etapa) : void
     +marcarError(idAnalisis, mensaje) : void
     +pausarAnalisis(idAnalisis) : void
+    +guardarImagenPausa(idAnalisis, cilindro, segundo) : void
+    +aplicarAjusteRecuadro(idAnalisis) : void
     +cancelarAnalisis(idAnalisis) : void
     +generarCopiaRevision(video) : void
   }

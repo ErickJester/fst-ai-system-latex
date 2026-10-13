@@ -295,7 +295,19 @@ probabilidades); mientras tanto el backend funciona igual en los dos casos.
 | **`SEGUNDO.origen` (D-80)** | **Cuatro valores**, con los nombres del cap. 5: `maquina`, `confirmada`, `corregida` y `dudosa` (ya no llevan el prefijo «humano_»; `maquina` equivale a «del sistema»). Se quitan `sin_revisar` y `humano_ciego` del apéndice D, del físico y de `INSTRUCCIONES-WEB.md` (también el modo de revisión «desde cero») |
 | **Video anotado y medidas por cuadro (D-81)** | Se quitan del documento y de las figuras. El pipeline produce tres salidas: tiempos por conducta, etiqueta de cada segundo y copia H.264 para revisión |
 | **Pausa, cancelación, reinicio y revisión (D-57 a D-60, D-67, D-68)** | Ya estaban en los capítulos y el apéndice D; el 12-oct se propagaron a `INSTRUCCIONES-WEB.md`: estados `en pausa` y `cancelado` (dominios, SQL y diagramas de estados), notificaciones `analisis en pausa` y `analisis cancelado`, regla R-15, reinicio (`POST .../restart`), solo corrige quien subió el video o el Administrador, y la copia H.264 en la secuencia del worker. **Abierto:** cómo llega y si se guarda el ajuste del recuadro durante la pausa |
-| **Tareas diarias (D-82)** | Borrado de videos a 30 días, aviso de vencimiento y vigilancia del disco: las ejecuta el worker (CU-14, cap. 5, `cu_paquete5.puml` e `INSTRUCCIONES-WEB.md`). **Pendiente de coordinar:** el contrato con el worker (sección 4 de `INSTRUCCIONES-WEB.md`) no las incluía y el worker lo hace otra persona |
+| **Tareas diarias (D-82)** | Borrado de videos a 30 días, aviso de vencimiento y vigilancia del disco: las ejecuta el worker (CU-14, cap. 5, `cu_paquete5.puml` e `INSTRUCCIONES-WEB.md`). Resuelto el 12-oct: las escribe quien construye el worker, y el contrato de la sección 4 de `INSTRUCCIONES-WEB.md` ya las incluye (horario y disco en D-86) |
+
+### Cambios del 12-oct-2026 (D-83 a D-89): el modelo de datos no cambia
+
+Detalle en `errores/preguntas-doctor.md` §6. **Ninguna de estas decisiones agrega tablas ni columnas**:
+
+| Decisión | Qué hace y por qué no toca el modelo |
+|---|---|
+| **Experimento «en espera del Día 2» (D-83)** | Estado derivado de los análisis (no se guarda): un experimento que solo tiene videos del Día 1 |
+| **Reencolado al arrancar, un análisis a la vez, fallos imprevistos (D-84, D-85, D-88)** | Solo usan los estados que ya existen (`en cola`, `procesando`, `error`) |
+| **Tareas diarias y disco (D-86)** | Una vez al día de madrugada y antes de cada análisis; la fecha de la última corrida va en un archivo del volumen, no en la base |
+| **Eliminar durante un análisis (D-87)** | Regla del backend: 409 si hay `procesando` o `en pausa` |
+| **Pausa y ajuste del recuadro (D-89)** | El recuadro, la imagen fija y la hora de la pausa viven en `pausa.json` y `pausa.jpg` del volumen. Los cambios de estado `en pausa` → `en cola` o `cancelado` usan los valores que ya tiene `estado_analisis`; el estado de la base es el árbitro |
 
 ### Cambios del 6-oct-2026 (D-53, D-54, D-55)
 

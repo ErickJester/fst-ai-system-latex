@@ -96,3 +96,10 @@ python diagramas/diagram_design/generadores/gen_pipeline.py diagramas/diagram_de
   - El módulo 3 aplica a la red una regla de tres pasos (umbral de confianza, conducta activa
     y marca de duda). El diagrama solo muestra la conducta del segundo.
   - `origen = dudosa` sigue saliendo de esa regla.
+
+## Nota del 12-oct (D-89)
+
+`pipeline.puml` (figura del cap. 5) ahora tiene, al inicio del módulo 3, la rama «¿Pasan 3 s seguidos sin
+ver al espécimen?»: guarda una imagen fija y avisa al worker para pausar el análisis. Esta versión HTML
+no la dibuja, porque su cuadrícula es fija; la pausa está en `seq_pausa_y_ajuste.puml` y en los diagramas
+de estados.

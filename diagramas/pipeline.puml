@@ -58,6 +58,10 @@ partition "2. Localización de los cilindros" {
 
 partition "3. Clasificación de conducta" {
   :Separa al espécimen del fondo\ndentro de su cilindro\n(diferencia y brillo, región más grande);
+  if (¿Pasan 3 s seguidos sin ver\nal espécimen en un cilindro?) then (sí)
+    :Guarda una imagen fija de ese instante\ny avisa al worker, que deja el análisis\nen pausa hasta que el usuario ajuste\nel recuadro o lo cancele;
+    stop
+  endif
   :Mide quince rasgos de movimiento, postura\ny trayectoria y siete reglas de observación\n(pataleo bajo el agua y cambios sobre\nla línea de agua);
   :Para cada segundo, toma una ventana de 4 s\ncentrada en él y arma el clip de 16 cuadros\ndel cilindro;
   :La red de fusión R(2+1)D-18 recibe el clip\ny las medidas, y estima la probabilidad\nde cada conducta;
