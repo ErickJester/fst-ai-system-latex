@@ -1,0 +1,67 @@
+@startuml seq_analisis_automatico
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
+participant Worker as w
+participant "Archivos" as fs
+database "Base de datos" as db
+
+note over w, db
+  Esto lo hace el worker (lo desarrolla otra persona).
+  Aqui sirve como contrato: tu worker_fake debe
+  escribir en la base exactamente estos cambios
+  (el detalle completo esta en la seccion 4).
+end note
+
+== Al arrancar el Worker ==
+
+w -> db: busca los análisis que quedaron "procesando" sin nadie\ntrabajando en ellos (el Worker se apagó a media análisis)
+w -> db: los pasa a "en cola" con la etapa "preprocesamiento":\nempiezan de cero (D-84)
+w -> db: revisa que cada análisis "en pausa" tenga su archivo de pausa;\nsi no lo tiene, lo cancela
+
+== Un análisis a la vez ==
+
+w -> db: revisa la tabla de análisis, buscando el más antiguo en cola\n(polling periódico; se atiende uno a la vez, D-85)
+db --> w: siguiente análisis en cola, si hay alguno
+w -> fs: revisa el espacio libre del disco\n(aviso al 80 %, limpieza al 90 %, D-86)
+w -> db: marca el análisis como "procesando"
+
+w -> fs: lee el archivo de video de la tanda
+fs --> w: video listo para procesar
+
+w -> db: actualiza la etapa a "preprocesamiento"
+w -> w: alinea la cámara y construye el modelo de fondo
+
+w -> db: actualiza la etapa a "cilindros"
+w -> w: localiza los cilindros y la línea de agua (sobre el video completo)
+
+alt se hallaron los tubos
+  w -> db: actualiza la etapa a "clasificación"
+  w -> w: clasifica la conducta de cada espécimen, segundo a segundo\n(nado, inmovilidad, escalamiento o conducta activa)
+  alt pasan tres segundos seguidos sin ver al espécimen (RN-17)
+    w -> fs: guarda una imagen fija del segundo central de esos tres\ny el archivo de pausa
+    w -> db: marca el análisis como "en pausa"
+    w -> db: crea la notificación de análisis en pausa
+    w -> w: suelta el video y atiende el siguiente de la cola\n(el ajuste, la cancelación y la reanudación están\nen seq_pausa_y_ajuste)
+  else se clasificó todo el video
+
+    loop por cada espécimen detectado en el video
+      w -> db: guarda su observación de este video
+      w -> db: guarda sus 5 intervalos, con los segundos\npor conducta de cada uno
+    end
+
+    w -> fs: guarda la copia del video recortada a lo analizado,\nen un formato que el navegador reproduce (H.264, D-58)
+    w -> db: marca el análisis como "completado",\ncon su nivel de clasificación y fechaAnalisis
+    w -> db: crea la notificación de análisis terminado
+  end
+else no se pudo abrir el video, no se hallaron los tubos\no falló algo imprevisto en el pipeline (D-88)
+  w -> w: genera el reporte de diagnóstico PDF
+  w -> fs: guarda el PDF de diagnóstico
+  w -> db: guarda rutaDiagnostico
+  w -> db: marca el análisis como "error" y fija fechaAnalisis\n(no se reinicia desde la pantalla de error, RN-04)
+  w -> db: crea la notificación de error en el análisis
+end
+@enduml

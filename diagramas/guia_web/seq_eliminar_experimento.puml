@@ -1,0 +1,34 @@
+@startuml seq_eliminar_experimento
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant "Archivos" as fs
+
+u -> ui: elige "Eliminar" en un experimento
+ui -> u: advierte que es permanente e irreversible\ny pide confirmación explícita
+u -> ui: confirma
+ui -> api: DELETE /experiments/{id}
+api -> db: lee el experimento, su dueño y el estado de sus análisis
+db --> api: datos
+alt el usuario no es quien lo creó ni es Administrador
+  api --> ui: 403
+else algún análisis del experimento está "procesando" o "en pausa"
+  api --> ui: 409, "Espera a que termine el análisis o cancélalo"
+else se puede eliminar
+  api -> db: borra en orden, de las hojas hacia arriba:\nSEGUNDO, PRESENTA, INTERVALO, OBSERVACION, ANALISIS,\nVIDEO, ESPECIMEN, TANDA, GRUPO,\nREPORTE, NOTIFICACION, EXPERIMENTO\n(todo en una sola transacción)
+  db --> api: confirma
+  api -> fs: borra los videos, reportes, diagnósticos y carpetas de pausa del experimento
+  api --> ui: 200 OK
+  ui --> u: quita el experimento del dashboard
+end
+note over api, db
+  Quién puede eliminar y qué pasa con un análisis
+  en curso son propuestas, aún no aprobadas.
+end note
+@enduml

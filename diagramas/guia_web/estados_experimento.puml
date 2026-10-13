@@ -1,0 +1,18 @@
+@startuml estados_experimento
+!theme plain
+skinparam defaultFontName Arial
+skinparam shadowing false
+' El estado del experimento NO se guarda: se calcula a partir de los
+' analisis de todas sus tandas. Precedencia: error > cancelado > en pausa > procesando > en cola > completado.
+[*] --> sin_videos : se creó el experimento
+sin_videos --> en_espera_dia2 : solo se subió video\ndel Día 1
+sin_videos --> en_cola : se subió y encoló\nun video del Día 2
+en_espera_dia2 --> en_cola : se subió y encoló\nun video del Día 2
+en_cola --> procesando : el Worker empezó a\nprocesar alguna tanda
+procesando --> completado : todas las tandas\nterminaron sin error
+procesando --> error : alguna tanda\nterminó en error
+procesando --> en_pausa : alguna tanda quedó\nen pausa (RN-17)
+en_pausa --> en_cola : el usuario ajustó\nel recuadro
+en_pausa --> cancelado : el usuario canceló o\n5 min sin respuesta
+completado --> en_cola : se agregó una tanda\nnueva
+@enduml
