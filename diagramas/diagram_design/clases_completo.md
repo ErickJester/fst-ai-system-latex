@@ -132,3 +132,16 @@ requisitos vigentes (no están en el grafo, que solo describe datos):
   las tareas diarias del worker (D-82, RF-24, RF-29).
 - `PipelineAnalisis.pausarAnalisis()`, `cancelarAnalisis()` y `generarCopiaRevision(video)`: la pausa
   y la cancelación por espécimen que no se ve (RN-17) y la copia H.264 para revisión (D-58).
+
+## Cambios de la segunda parte del 12-oct (D-84 a D-89)
+
+Se agregaron los métodos que salen de las decisiones del worker y de la pausa, y se movieron
+`Notificacion`, `Reporte` y `PipelineAnalisis` para que no se encimen con las clases que crecieron:
+
+- `Usuario.ajustarRecuadro(idAnalisis, cilindro, recuadro)` y `Usuario.cancelarAnalisisEnPausa(idAnalisis)`
+  (pantalla de pausa, D-89).
+- `Worker.reencolarHuerfanos()` (D-84) y `Worker.cancelarPausasVencidas()` (D-89).
+- `PipelineAnalisis.guardarImagenPausa(idAnalisis, cilindro, segundo)` y
+  `PipelineAnalisis.aplicarAjusteRecuadro(idAnalisis)` (D-89).
+- `PipelineAnalisis.actualizarProgreso(idAnalisis, etapa)`: ya no lleva `pct`; el backend calcula el
+  porcentaje como un tercio por etapa.

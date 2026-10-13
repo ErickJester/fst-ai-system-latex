@@ -72,9 +72,12 @@ Las responsabilidades de cada componente son:
         cola, ejecuta el pipeline completo de análisis (preprocesamiento, localización
         de los cilindros y clasificación) y escribe los resultados en la base de datos.
         Al correr en un proceso separado, el servidor web sigue respondiendo a
-        otras peticiones mientras el video se procesa. Además ejecuta una vez al día
+        otras peticiones mientras el video se procesa. Analiza un video a la vez, en
+        orden de llegada, y al arrancar reencola los análisis que quedaron a medias
+        por un reinicio. Además ejecuta una vez al día, a una hora de la madrugada,
         las tareas programadas: el borrado de los videos a los 30~días, el aviso de
-        los que están por vencer y la vigilancia del espacio en disco.
+        los que están por vencer y la vigilancia del espacio en disco, que también
+        revisa antes de empezar cada análisis.
 
         La cola de tareas no es un servicio aparte: es la propia tabla
         \texttt{ANALISIS}. Cuando se sube un video válido, el backend crea un
@@ -310,11 +313,15 @@ el video o no se encuentran los cilindros (RN-11), el análisis termina en
 \texttt{error} y se genera el reporte de diagnóstico; si las tres
 etapas terminan con éxito, termina en \texttt{completado}. Si durante la
 clasificación pasan tres segundos seguidos sin ver al espécimen, el análisis pasa a
-\texttt{en pausa} y el sistema avisa al usuario; si este ajusta el recuadro del
-cilindro, el análisis vuelve a \texttt{procesando}, y si no responde en 5~minutos,
-pasa a \texttt{cancelado} (RN-17). El investigador no puede iniciar, pausar ni
-cancelar un análisis, pero sí reiniciarlo desde la pantalla de revisión: el
-resultado anterior se borra y el análisis vuelve a \texttt{en cola} (RN-04).
+\texttt{en pausa}, el Worker lo suelta para atender el siguiente de la cola y el
+sistema avisa al usuario; si este ajusta el recuadro del cilindro, el análisis
+vuelve a \texttt{en cola}, por delante de los que llegaron después, y continúa
+desde el segundo de la pausa. Si el usuario cancela, o no responde en 5~minutos,
+pasa a \texttt{cancelado} (RN-17). El investigador no puede iniciar ni pausar un
+análisis, y solo puede cancelarlo mientras está en pausa, pero sí reiniciarlo desde la
+pantalla de revisión: el resultado anterior se borra y el análisis vuelve a
+\texttt{en cola} (RN-04). Si el Worker se apaga a media análisis, al arrancar
+reencola los que quedaron en \texttt{procesando} y los empieza de nuevo.
 
 \begin{figure}[H]
 \centering
@@ -1679,9 +1686,9 @@ caso de uso.
 \hline
 4 & El \textit{Worker} no puede abrir el video o no encuentra los cilindros (ver RN-11): detiene el pipeline, genera el reporte de diagnóstico PDF (ver CU-08) y actualiza el estado de la tarea a «error». El sistema muestra alerta con la descripción del error. El investigador no puede reiniciar el análisis desde esta pantalla (ver RN-04). \\
 \hline
-5 & Pasan tres segundos seguidos sin ver al espécimen (ver RN-17): el \textit{Worker} deja el análisis «en pausa», el sistema notifica al usuario y le pide ajustar el recuadro del cilindro; con el ajuste, el \textit{Worker} vuelve a revisar esos tres segundos y el análisis continúa. \\
+5 & Pasan tres segundos seguidos sin ver al espécimen (ver RN-17): el \textit{Worker} guarda una imagen fija del segundo central de esos tres, deja el análisis «en pausa» y atiende el siguiente de la cola, y el sistema notifica al usuario. El usuario mueve el recuadro del cilindro sobre esa imagen y pulsa «Ajustar y continuar»: el análisis vuelve al frente de la cola y, cuando el \textit{Worker} lo retoma, vuelve a revisar esos tres segundos y continúa desde ahí. \\
 \hline
-5 & El usuario no responde en 5 minutos durante la pausa: el sistema cancela el análisis, actualiza el estado de la tarea a «cancelado» y lo notifica al usuario. \\
+5 & El usuario pulsa «Cancelar análisis» durante la pausa, o no responde en 5 minutos: el sistema cancela el análisis y actualiza el estado de la tarea a «cancelado»; si fue por falta de respuesta, lo notifica al usuario. \\
 \hline
 \end{tabular}
 
@@ -2144,7 +2151,7 @@ caso de uso.
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-27, RN-09} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; experimento existente a nombre del investigador, o sesión de Administrador.} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; experimento existente a nombre del investigador, o sesión de Administrador; ninguno de sus análisis está procesando ni en pausa.} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Experimento y todos sus datos eliminados de forma permanente e irreversible de la base de datos (ver RN-09).} \\
 \hline
@@ -2412,7 +2419,10 @@ describe el mecanismo de \textit{polling} con el que el frontend verifica el
 estado del análisis, incluyendo el camino alternativo cuando el video no se puede
 procesar (no se abre o no se encuentran los cilindros, ver RN-11): el Worker genera
 el reporte de diagnóstico PDF y lo pone disponible para descarga, sin necesidad de
-un diagrama aparte para ese caso. Una vez completado el análisis, la consulta de
+un diagrama aparte para ese caso. Si el Worker deja de ver al espécimen, la pausa del
+análisis (Figura~\ref{fig:seq_pausa}) muestra cómo guarda una imagen fija, cómo el
+usuario ajusta el recuadro del cilindro o cancela, y cómo el análisis ajustado vuelve al
+frente de la cola. Una vez completado el análisis, la consulta de
 resultados (Figura~\ref{fig:seq_resultados}) devuelve los tiempos por espécimen
 y conducta, y la descarga de reportes (Figura~\ref{fig:seq_reportes}) permite
 exportar los datos en PDF, CSV o XLSX. Además, el usuario puede revisar el análisis
@@ -2438,6 +2448,13 @@ a CU-27), lo que recalcula los totales por minuto.
 \includegraphics[width=\textwidth]{figures/mermaid/seq_consulta_progreso}
 \caption{Secuencia: consulta de progreso del análisis, incluye manejo de error [autoría propia].}
 \label{fig:seq_progreso}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/mermaid/seq_pausa_y_ajuste}
+\caption{Secuencia: pausa del análisis, ajuste del recuadro del cilindro y cancelación [autoría propia].}
+\label{fig:seq_pausa}
 \end{figure}
 
 \begin{figure}[H]
@@ -2670,10 +2687,11 @@ no se pudo abrir o no se encontraron los cilindros. Cuando un análisis se compl
 la pantalla habilita «Ver resultados» y «Revisar segundo a segundo». Debajo lista la
 cola de trabajos. El análisis continúa aunque el investigador cierre la pestaña (RF-15).
 
-No hay botón de pausar ni de cancelar durante el análisis: es el sistema quien decide
-cuándo pausar. Si pasan tres segundos seguidos sin ver al espécimen, el análisis queda
-en pausa, aparece una notificación y el usuario puede ajustar el recuadro del cilindro;
-si no responde en 5~minutos, el análisis se cancela (RN-17). Desde la pantalla de
+No hay botón de pausar durante el análisis: es el sistema quien decide cuándo pausar.
+Si pasan tres segundos seguidos sin ver al espécimen, el análisis queda en pausa,
+aparece una notificación y el usuario ve una imagen fija de ese instante, con los botones
+«Ajustar y continuar» (mueve el recuadro del cilindro sobre la imagen) y «Cancelar
+análisis»; si no responde en 5~minutos, el análisis se cancela (RN-17). Desde la pantalla de
 revisión el investigador sí puede reiniciar el análisis: el resultado anterior se
 borra y el análisis empieza de nuevo (RN-04).
 

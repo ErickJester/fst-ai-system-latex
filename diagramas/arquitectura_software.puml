@@ -84,7 +84,7 @@ rectangle "Docker: backend" as C_BE #E8F8F5 {
 ' ═══════════════════════════════════════════════════════════
 
 rectangle "Docker: worker" as C_WK #FEF9E7 {
-  rectangle "Pipeline de analisis conductual\n\nOpenCV         Preprocesamiento (registro de cámara y modelo de fondo)\nOpenCV         Localizacion de los cilindros\nscikit-learn   Clasificador sobre rasgos\nPyTorch        R(2+1)D-18, clasificador de conducta\nTareas diarias: borrado de videos, aviso\nde vencimiento y vigilancia del disco" as WK #FFFEF2
+  rectangle "Pipeline de analisis conductual\n\nOpenCV         Preprocesamiento (registro de cámara y modelo de fondo)\nOpenCV         Localizacion de los cilindros\nscikit-learn   Clasificador sobre rasgos\nPyTorch        R(2+1)D-18, clasificador de conducta\nUn análisis a la vez; al arrancar reencola los que\nquedaron a medias. Tareas diarias (de madrugada):\nborrado de videos, aviso de vencimiento y\nvigilancia del disco (también antes de cada análisis)" as WK #FFFEF2
 }
 
 ' ═══════════════════════════════════════════════════════════
