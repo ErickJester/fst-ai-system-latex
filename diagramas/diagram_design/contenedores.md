@@ -64,3 +64,10 @@ antiguos a 90 % (RNF-08 y RNF-09).
 ```bash
 python diagramas/diagram_design/generadores/gen_contenedores.py diagramas/diagram_design/contenedores.html
 ```
+
+## Actualización del 12-oct (D-84 a D-89)
+
+- **worker:** un video a la vez, retoma al arrancar lo que quedó a medias (D-84, D-85), hace las
+  tareas diarias a una hora fija de la madrugada y revisa el disco antes de cada análisis (D-86).
+- **Volumen compartido:** por análisis guarda también los recuadros, la imagen y los datos de la
+  pausa y el reporte de diagnóstico (D-88, D-89).

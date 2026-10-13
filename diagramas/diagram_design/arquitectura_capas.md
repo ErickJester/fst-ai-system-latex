@@ -82,3 +82,9 @@ python diagramas/diagram_design/generadores/gen_capas.py diagramas/diagram_desig
   disco) las ejecuta el worker (D-82), y así figuran en la capa 3.
 - La capa 3 ya no dice «en evaluación» en la R(2+1)D-18: dice «clasificador de conducta»,
   porque el documento describe un sistema ya hecho (D-66).
+
+## Actualización del 12-oct (D-84 a D-89)
+
+La capa del worker dice que atiende la cola de a un video, retoma pendientes al arrancar, maneja
+las pausas y hace las tareas diarias a la madrugada. El volumen compartido incluye lo de la
+pausa (recuadros, imagen y datos).

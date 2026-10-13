@@ -103,3 +103,11 @@ python diagramas/diagram_design/generadores/gen_pipeline.py diagramas/diagram_de
 ver al espécimen?»: guarda una imagen fija y avisa al worker para pausar el análisis. Esta versión HTML
 no la dibuja, porque su cuadrícula es fija; la pausa está en `seq_pausa_y_ajuste.puml` y en los diagramas
 de estados.
+
+## Actualización del 12-oct (D-84 a D-89)
+
+El cuadro «En pausa» ahora dice lo que define D-89: la que pierde al espécimen 3 s seguidos es
+la **segmentación del pipeline, no la red**; el pipeline guarda una imagen fija, el usuario
+ajusta el recuadro o cancela, el análisis continúa desde ese segundo y, sin respuesta en
+5 minutos, se cancela. La flecha punteada sale de la zona de la red solo porque la cuadrícula
+es fija; el flujo completo está en `../seq_pausa_y_ajuste.puml`.
