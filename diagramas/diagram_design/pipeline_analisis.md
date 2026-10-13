@@ -70,9 +70,10 @@ Este diagrama sigue la descripción que se dio el 8-oct. El LaTeX todavía dice 
 - **RN-13 y RF-17.** Hablan de la conducta activa como cuarta conducta.
 - **`origen = dudosa`.** El documento marca los segundos dudosos con ese valor, que sale de la
   regla de umbral que aquí ya no existe.
-- **Cap. 5, inicio de la sección del pipeline** dice que analiza solo los últimos 300 s.
-- **`pipeline.puml`.** Sigue la versión anterior: rasgos con regla de tres pasos, la red como
-  candidata y el recorte a 300 s dentro del módulo 4.
+- **Cap. 5, inicio de la sección del pipeline:** ya corregido (12-oct). Dice que el pipeline
+  analiza el video completo y conserva los resultados de sus últimos 300 s.
+- **`pipeline.puml`.** Ya no tiene el recorte a 300 s (12-oct). Sigue con la rama de regla de
+  tres pasos y «dudosa», porque D-78 (si la red entrega probabilidades) está en pausa.
 
 Ningún otro archivo se modificó.
 

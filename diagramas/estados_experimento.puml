@@ -6,7 +6,9 @@ skinparam shadowing false
 
 [*] --> sin_videos : se creó el experimento\n(CU-04)
 
-sin_videos --> en_cola : se subió y encoló\nel primer video (CU-05)
+sin_videos --> en_espera_dia2 : solo se subió video\ndel Día 1 (CU-05)
+sin_videos --> en_cola : se subió y encoló\nun video del Día 2 (CU-05)
+en_espera_dia2 --> en_cola : se subió y encoló\nun video del Día 2 (CU-05)
 en_cola --> procesando : el Worker empezó a\nprocesar alguna tanda
 procesando --> completado : todas las tandas\nterminaron sin error
 procesando --> error : alguna tanda\nterminó en error

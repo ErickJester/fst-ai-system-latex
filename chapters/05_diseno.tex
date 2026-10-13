@@ -113,7 +113,7 @@ al clasificador de conducta.
 \section{Diseño del pipeline de análisis conductual}
 % -----------------------------------------------------------
 
-El pipeline recibe un video del FST, analiza el video completo y produce
+El pipeline recibe un video del FST, analiza el video completo, conserva los resultados de sus últimos 300 segundos y produce
 como salida los tiempos totales de cada conducta por espécimen y el desglose por minuto. Sigue el patrón arquitectónico de
 tubería y filtro (\textit{pipe and filter}) \cite{sommerville2011}: cada módulo es
 un filtro discreto que transforma los datos y los pasa al siguiente. Está organizado
@@ -1452,11 +1452,11 @@ caso de uso.
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-08, RF-09, RF-10, RF-12. Incluye: CU-19 (Encolar análisis automático). Extendido por: CU-20 (Notificar rechazo de video) y CU-07 (Monitorear progreso del análisis).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-08, RF-09, RF-10, RF-12. Extendido por: CU-19 (Encolar análisis automático, solo si el video es del Día~2), CU-20 (Notificar rechazo de video) y CU-07 (Monitorear progreso del análisis).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Experimento registrado (CU-04 completado); sesión activa; archivo a subir en formato \texttt{.mp4} o \texttt{.mov}.} \\
 \hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Archivo almacenado en el volumen compartido; tarea de análisis encolada automáticamente; investigador en la pantalla de progreso.} \\
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Archivo almacenado en el volumen compartido; si el video es del Día~2, tarea de análisis encolada automáticamente y el investigador en la pantalla de progreso; si es del Día~1, solo queda guardado.} \\
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador subir el archivo de video del experimento para su análisis automático.} \\
 \hline
@@ -1521,7 +1521,7 @@ caso de uso.
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Investigador / Administrador (al subir un video, ver CU-05)} \\
 \hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<include>>} de CU-05 Subir video)} \\
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<extend>>} de CU-05 Subir video, solo si el video es del Día~2)} \\
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-12, RN-04. Incluido en: CU-05 (Subir video).} \\
 \hline
@@ -2091,7 +2091,7 @@ caso de uso.
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pantalla principal del investigador. Muestra todos los experimentos del laboratorio con nombre, fecha, número de grupos, sesión, estado y accesos directos a resultados o progreso (ver RN-08). Incluye avisos cuando algún video expira en menos de 7 días.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Al acceder al \textit{dashboard}, el sistema recupera la lista de experimentos del laboratorio (ver RN-08) y muestra cualquier aviso de expiración próxima. El investigador puede filtrar la lista o acceder directamente a un experimento. El estado de cada experimento se calcula a partir de los análisis de sus tandas: sin videos cargados, en cola, procesando, completado o error.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Al acceder al \textit{dashboard}, el sistema recupera la lista de experimentos del laboratorio (ver RN-08) y muestra cualquier aviso de expiración próxima. El investigador puede filtrar la lista o acceder directamente a un experimento. El estado de cada experimento se calcula a partir de los análisis de sus tandas: sin videos cargados, en espera del Día~2 (solo hay videos del Día~1, que no se analizan), en cola, procesando, completado o error.} \\
 \hline
 \end{tabular}
 
@@ -2104,7 +2104,7 @@ caso de uso.
 \hline
 1 & Investigador & Accede al \textit{dashboard} principal de la aplicación tras iniciar sesión. \\
 \hline
-2 & Sistema & Recupera la lista de experimentos del laboratorio con nombre, fecha, número de grupos, sesión y estado (ver RN-08). El estado de cada experimento se calcula a partir de los análisis de sus tandas: sin videos cargados, en cola, procesando, completado o error. \\
+2 & Sistema & Recupera la lista de experimentos del laboratorio con nombre, fecha, número de grupos, sesión y estado (ver RN-08). El estado de cada experimento se calcula a partir de los análisis de sus tandas: sin videos cargados, en espera del Día~2 (solo hay videos del Día~1, que no se analizan), en cola, procesando, completado o error. \\
 \hline
 3 & Sistema & Verifica si algún video expira en menos de 7 días y muestra aviso con nombre del experimento y fecha exacta de eliminación (ver RF-24). \\
 \hline

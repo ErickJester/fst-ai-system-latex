@@ -21,13 +21,10 @@
 '  - "Rastrea a los animales" -> "rastrea a los especimenes"
 '    (terminologia obligatoria, CLAUDE.md).
 '  - "Detecta las zonas de interes" -> "detecta los cilindros", igual
-'    a como lo nombra CU-07 paso 4, y agrega el umbral de confianza
-'    0.70 de RN-11 -- el diagrama viejo no tenia el curso alterno de
-'    error (CU-07, alterno del paso 4): confianza < 0.70 detiene el
-'    pipeline, marca el analisis en estado "error" (D-15) y genera el
-'    reporte de diagnostico (CU-08). El investigador no puede
-'    reiniciar el analisis (RN-04) -- por eso el pipeline no reintenta,
-'    solo se detiene.
+'    a como lo nombra CU-07 paso 4. Si no se abre el video o no se
+'    hallan los cilindros, el analisis queda en "error" (D-15, RN-11)
+'    y se genera el reporte de diagnostico (CU-08). El pipeline no
+'    reintenta: solo se detiene (RN-04).
 '  - "Guarda los resultados por animal" (un paso plano) -> se abre en
 '    la jerarquia real del modelo: por cada especimen, una OBSERVACION
 '    de este video, con sus 5 INTERVALO y los segundos por conducta en

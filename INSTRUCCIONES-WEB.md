@@ -223,12 +223,15 @@ stateDiagram-v2
 
 El estado de un **experimento** no se guarda: se calcula a partir de los análisis de
 todas sus tandas, con precedencia `error` > `cancelado` > `en pausa` > `procesando` >
-`en cola` > `completado`. Un experimento sin videos se muestra como "sin videos".
+`en cola` > `completado`. Un experimento sin videos se muestra como "sin videos"; uno que solo
+tiene videos del Día 1 (que no se analizan, D-71) se muestra como "en espera del Día 2" (D-83).
 
 ```mermaid
 stateDiagram-v2
   [*] --> sin_videos: se creó el experimento
-  sin_videos --> en_cola: se subió el primer video
+  sin_videos --> en_espera_dia2: solo se subió video del Día 1
+  sin_videos --> en_cola: se subió un video del Día 2
+  en_espera_dia2 --> en_cola: se subió un video del Día 2
   en_cola --> procesando: el worker empezó alguna tanda
   procesando --> completado: todas las tandas terminaron sin error
   procesando --> error: alguna tanda terminó en error
@@ -1663,7 +1666,9 @@ skinparam shadowing false
 ' El estado del experimento NO se guarda: se calcula a partir de los
 ' analisis de todas sus tandas. Precedencia: error > cancelado > en pausa > procesando > en cola > completado.
 [*] --> sin_videos : se creó el experimento
-sin_videos --> en_cola : se subió y encoló\nel primer video
+sin_videos --> en_espera_dia2 : solo se subió video\ndel Día 1
+sin_videos --> en_cola : se subió y encoló\nun video del Día 2
+en_espera_dia2 --> en_cola : se subió y encoló\nun video del Día 2
 en_cola --> procesando : el Worker empezó a\nprocesar alguna tanda
 procesando --> completado : todas las tandas\nterminaron sin error
 procesando --> error : alguna tanda\nterminó en error
