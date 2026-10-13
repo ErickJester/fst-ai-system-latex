@@ -11,11 +11,15 @@ Proyecto TT 2026-B066, ESCOM-IPN.
 > Solo cambia la parte inicial `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex`; lo que sigue
 > (`\diagramas\guia_web\nombre.puml`) es relativo al repositorio y es igual en cualquier equipo.
 > Los mismos diagramas están escritos completos en el Anexo A: si no tienes los archivos,
-> cópialos de ahí.
+> cópialos de ahí. **Todas** las rutas que cita esta guía (diagramas, maquetas, decisiones,
+> capítulos del documento, apéndices y el código de referencia del pipeline) son de esa laptop y
+> se cambian igual. El código de referencia vive en otro repositorio hermano
+> (`C:\Users\Samsung\Desktop\proyectos\fst_auto`): ajústalo por separado.
 
 **Este archivo es el único contexto que tienes.** Todo lo que necesitas (reglas, datos,
-diagramas, pantallas) está aquí. No busques ni esperes otros documentos. Si algo falta,
-pregunta al usuario; no lo inventes.
+diagramas, pantallas) está aquí. Los archivos que esta guía cita (diagramas y decisiones) son
+solo de consulta: no los necesitas para construir ni debes esperar otros documentos. Si algo
+falta, pregunta al usuario; no lo inventes.
 
 ---
 
@@ -36,9 +40,16 @@ pregunta al usuario; no lo inventes.
    Dockerfiles, nginx y variables) en el **Anexo C (sección 15)**. Ninguno está probado:
    pruébalos en cuanto levantes `db` y corrige lo que falle.
 7. **Etiquetas como `D-79`, `RN-17`, `RF-12` o `R-04`.** Son referencias internas del equipo
-   a decisiones y requisitos. **No tienes que buscarlas ni abrirlas**: cada regla está
-   escrita completa donde aparece. Las únicas que consultas por su número son las `R-xx`
-   de la sección 7. Puedes citarlas en tus comentarios para rastrear de dónde sale algo.
+   a decisiones y requisitos:
+   - Las **decisiones `D-xx`** están registradas, con su fecha y su estado, en el archivo
+     `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\errores\preguntas-doctor.md` (sección 6). Las **preguntas para el laboratorio** (`Q-A`, `Q-H`...) están
+     en las secciones 1 y 2 de ese mismo archivo.
+   - Los **requisitos y reglas del documento** (`RF-xx`, `RNF-xx` y `RN-xx`) están en
+     `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\chapters\04_analisis.tex`.
+   - **No necesitas abrirlos para construir:** cada regla está escrita completa donde aparece.
+     Sirven para ver el origen de una decisión o para citarla en tus comentarios. Las únicas que
+     consultas por su número dentro de esta guía son las `R-xx` de la sección 7.
+   - Esas rutas son de la laptop del usuario: cámbialas como se explica en la nota del inicio.
 8. **Vocabulario.**
    - **Espécimen:** cada sujeto de prueba del experimento. En la interfaz nunca se escribe
      "rata" ni "animal" (sección 9.8).
@@ -130,8 +141,8 @@ ni producción (D-62). Debe arrancar igual en al menos dos equipos con Docker. N
 ni cola de mensajes: **la cola es la tabla `ANALISIS`** (polling).
 
 Navegadores: Chrome, Firefox y Edge en sus versiones actuales, sin instalar nada en el
-equipo del usuario. Solo escritorio, no hay versión móvil. El documento del proyecto pide
-disponibilidad 24/7 con 95 % mensual, pero cómo se logra (servidores, producción) **queda
+equipo del usuario. Solo escritorio, no hay versión móvil. El documento del proyecto (requisitos en
+`C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\chapters\04_analisis.tex`) pide disponibilidad 24/7 con 95 % mensual, pero cómo se logra (servidores, producción) **queda
 fuera de esta guía** (D-62): no agregues redundancia, monitoreo ni alta disponibilidad.
 
 Rendimiento: las operaciones interactivas (abrir el dashboard, filtrar, abrir resultados)
@@ -413,10 +424,17 @@ Mientras alguna tanda siga en error, el experimento sigue en `error`.
   del video completo: el worker toma las **últimas 300 filas** de cada espécimen (todas, si hay
   menos) y las renumera de 1 a 300 para que coincidan con el video recortado que ve el usuario
   (D-54). Las hojas manuales `X_seg.csv` solo entrenan la red y no entran a la base (D-53).
+- **Código de referencia del pipeline** (otro repositorio, solo consulta): `C:\Users\Samsung\Desktop\proyectos\fst_auto\etiquetar.py` y `C:\Users\Samsung\Desktop\proyectos\fst_auto\lib.py` (preprocesamiento, localización de cilindros y medidas por fotograma), `C:\Users\Samsung\Desktop\proyectos\fst_auto\segundos.py` (regla de conducta por segundo) y `C:\Users\Samsung\Desktop\proyectos\fst_auto\cnn\probar_seg.py` (la red por segundo, que deja `X_cnnseg.csv`).
 
 ## 5. Modelo de datos (PostgreSQL)
 
 15 tablas. Esta es la única versión vigente.
+
+Fuentes del modelo (solo consulta; si difieren de esta guía, manda esta guía):
+- Grafo relacional vigente: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\grafo_relacional_3_vigente.puml`
+- Esquema físico del documento: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\esquema_fisico.puml`
+- Estado del diseño de la base de datos: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\DISENO-BD.md`
+- Diccionario de datos: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\back\apendice_D.tex`
 
 **Jerarquía:** un experimento tiene grupos; un grupo tiene tandas; una tanda tiene
 especímenes y hasta dos videos (Día 1 y Día 2); un video **del Día 2** tiene un análisis y, por
@@ -797,13 +815,17 @@ disparar a mano para probarlas sin esperar a la madrugada.
 Siete pantallas (la de progreso incluye la vista de pausa). Estilo sobrio, para escritorio, todo en español. El objetivo es que una
 persona sin conocimientos de programación cree un experimento, suba un video, espere y
 descargue el reporte sin ayuda. La meta es que 9 de cada 10 personas lo logren sin
-asistencia. **No hay mockups: los esquemas de abajo son tu referencia.** Cada pantalla
-tiene varios estados; impleméntalos todos.
+asistencia. Cada pantalla cita su **maqueta v2** (HTML e imagen). Las maquetas son anteriores a algunas
+decisiones del 11 y 12 de octubre: no muestran la pantalla de pausa, el rol editable de las cuentas,
+las notificaciones nuevas ni los cambios de la revisión. **Si difieren de esta guía, mandan los
+esquemas y las reglas de esta guía**; la maqueta sirve para el estilo visual y la disposición.
+Cada pantalla tiene varios estados; impleméntalos todos. Capturas de los estados: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\estados`.
 
 Estructura común: barra superior con el nombre del sistema, notificaciones (campana) y
 menú de usuario con "Cerrar sesión" accesible desde cualquier pantalla.
 
 ### 9.1 Inicio de sesión
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\login.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\login.png`). Cambio de contraseña obligatorio: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\primer-acceso.html`.
 Estados: normal; error genérico de credenciales. Incluye enlace "Recuperar contraseña".
 
 ```
@@ -826,6 +848,7 @@ antes de continuar.
 Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_login.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_logout.puml` (Anexo A.8).
 
 ### 9.2 Dashboard
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\experimentos.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\experimentos.png`). Detalle de un experimento: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\experimento.html`.
 Estados: con experimentos; vacío ("Aún no hay experimentos" y botón de crear); con aviso de
 video por vencer.
 
@@ -849,6 +872,7 @@ calcula (sección 4.8) y se muestra como «Sin videos», «En espera del Día 2�
 menos un grupo con ese tratamiento. "Eliminar" pide confirmación explícita (R-08).
 
 ### 9.3 Crear experimento
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\cargar-video.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\cargar-video.png`). Grupo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\grupo.html`.
 Se hace en pasos, porque subir un video puede tardar varios minutos y así se puede corregir
 el nombre o la fecha sin volver a subir nada, y agregar tandas después.
 
@@ -888,6 +912,7 @@ Reglas del paso 2:
 Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_experimento.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_carga_video.puml` (Anexo A.9).
 
 ### 9.4 Progreso del análisis
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\progreso.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\progreso.png`).
 Estados: analizando; en pausa (el sistema no vio al espécimen y espera al usuario); completado;
 error (no se pudo abrir el video o no se hallaron los tubos); cancelado (el usuario canceló o no
 respondió en 5 minutos). En pausa se muestra la **pantalla de pausa** (RN-17, D-59, D-89):
@@ -942,6 +967,7 @@ pocos segundos para actualizar el tiempo que queda.
 Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_consulta_progreso.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_pausa_y_ajuste.puml` (Anexo A.9).
 
 ### 9.5 Resultados
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\resultados.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\resultados.png`).
 Cuatro pestañas: por espécimen, comparación entre grupos (Día 2), línea de tiempo por
 minuto y bloques de 5 s. En la de bloques, cada bloque muestra la conducta con más segundos
 y, al abrirlo, sus cinco segundos, para notar las conductas breves.
@@ -979,6 +1005,7 @@ Los bloques **no usan la CNN**: la CNN solo clasifica cada segundo, y el bloque 
 Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_consulta_resultados.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_descarga_reportes.puml` (Anexo A.10).
 
 ### 9.6 Panel de administración (solo administrador)
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\admin.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\admin.png`). Perfil propio (menú de usuario): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\perfil.html`.
 Estados: vista de métricas; alerta de disco elevado; cola de análisis activa; modal de
 crear usuario; modal de editar usuario.
 
@@ -1007,6 +1034,7 @@ muestra una sola vez en pantalla al administrador, como respaldo (D-45, sección
 Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_cuenta.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_gestion_usuarios.puml` (Anexo A.8).
 
 ### 9.7 Revisión segundo a segundo
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\revision.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\revision.png`). Prototipo de la herramienta de revisión de la que sale esta pantalla (otro repositorio, solo consulta): `C:\Users\Samsung\Desktop\proyectos\fst_auto\revisor_segundos.html`.
 Se abre **solo cuando el análisis está `completado`**, desde Progreso o Resultados
 (regla R-14), y **solo para el investigador que subió el video y el Administrador**
 (D-57); cualquier otro usuario recibe 403. Lee y guarda en el servidor. Tema oscuro,
@@ -3175,6 +3203,7 @@ job -> fs: guarda la fecha de hoy en worker/ultima_corrida_tareas.txt\n(para no 
 
 ## 14. Anexo B: SQL completo (PostgreSQL)
 
+Diagrama del modelo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\esquema_fisico.puml` (Anexo A.4).
 Guárdalo como `db/init/001_esquema.sql`. El contenedor `db` lo ejecuta **solo la primera
 vez**, cuando el volumen `pgdata` está vacío. Para volver a aplicarlo hay que borrar el
 volumen (`docker compose down -v`), lo que **destruye todos los datos**.
