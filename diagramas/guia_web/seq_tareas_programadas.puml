@@ -1,0 +1,48 @@
+@startuml seq_tareas_programadas
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+participant "Tarea programada\n(en el worker)" as job
+database "Base de datos" as db
+participant "Archivos" as fs
+
+== Una vez al día: borrar videos vencidos ==
+job -> db: análisis con estado "completado" cuya fechaAnalisis\nsea de hace 30 días o más
+db --> job: lista de videos vencidos
+loop por cada video vencido
+  job -> fs: borra el archivo del video y su copia web.mp4 (si todavía existen)
+  job -> db: deja VIDEO.archivo en nulo
+end
+job -> fs: borra las carpetas de pausa (pausa.json, pausa.jpg) que hayan quedado huérfanas
+note right of job
+  Resultados y reportes se conservan.
+end note
+
+== Una vez al día: avisar del vencimiento ==
+job -> db: análisis completados cuya fechaAnalisis + 30 días\ncaiga dentro de los próximos 7 días\ny cuyo archivo todavía exista
+db --> job: lista de videos por vencer
+note right of job
+  No se guarda nada: el dashboard calcula el aviso
+  con esta misma regla (nombre del experimento y
+  fecha exacta de vencimiento).
+end note
+
+== Una vez al día, y antes de cada análisis: vigilar el disco ==
+job -> fs: mide el porcentaje de uso del disco
+fs --> job: porcentaje
+alt uso >= DISK_CLEANUP_PERCENT (90 %)
+  loop mientras el uso siga >= 90 %
+    job -> db: video más antiguo cuyo archivo todavía exista
+    job -> fs: borra el archivo del video y su copia web.mp4
+    job -> db: deja VIDEO.archivo en nulo
+    job -> db: crea NOTIFICACION "video borrado" para\nquien creó ese experimento
+  end
+else uso >= DISK_ALERT_PERCENT (80 %)
+  job -> db: crea NOTIFICACION "alerta de disco"\npara cada Administrador activo\n(si no hay ya una sin leer)
+end
+
+== Al terminar la corrida diaria ==
+job -> fs: guarda la fecha de hoy en worker/ultima_corrida_tareas.txt\n(para no repetir las tareas el mismo día)
+@enduml

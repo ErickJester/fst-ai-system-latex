@@ -1,0 +1,49 @@
+@startuml seq_consulta_progreso
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant "Archivos" as fs
+
+inv -> ui: abre la pantalla de progreso del experimento\n(o llega redirigido tras subir un video)
+
+loop cada 3 a 5 segundos, mientras haya análisis en cola, procesando o en pausa
+  ui -> api: GET /experiments/{id}/status
+  api -> db: busca los análisis de este experimento\n(vía sus grupos, tandas y videos)
+  db --> api: cada análisis, con su estado y su etapa
+  api -> api: calcula el porcentaje de avance de cada uno\nsegún su etapa: un tercio fijo por etapa
+  api --> ui: estado, etapa y porcentaje de cada análisis
+  ui -> inv: actualiza la barra de progreso de cada video
+end
+
+alt algún análisis llegó a "completado"
+  ui -> inv: habilita el acceso a los resultados
+else algún análisis quedó "en pausa"
+  ui -> inv: avisa que el sistema no vio al espécimen,\nmuestra el tiempo que queda de los 5 minutos\ny los botones "Ajustar y continuar" y "Cancelar análisis"\n(ver seq_pausa_y_ajuste y RN-17)
+else algún análisis quedó "cancelado"
+  ui -> inv: muestra que el análisis se canceló, por falta de respuesta\no porque el usuario lo canceló (RN-17)
+else algún análisis llegó a "error"
+  ui -> inv: muestra el mensaje armado con la etapa,\ny habilita la descarga del reporte de diagnóstico
+  inv -> ui: selecciona la descarga del reporte de diagnóstico
+  ui -> api: GET /experiments/{id}/analyses/{idAnalisis}/diagnostic
+  api -> db: busca la ruta guardada en ANALISIS.rutaDiagnostico
+  alt el worker ya guardó la ruta del PDF
+    db --> api: ruta del archivo
+    api -> fs: recupera el PDF de diagnóstico
+    fs --> api: archivo listo
+    api --> ui: PDF de diagnóstico
+    ui --> inv: descarga inmediata en el navegador
+  else el worker todavía no termina de generarlo\n(la ruta sigue en blanco)
+    db --> api: sin ruta todavía
+    api --> ui: 404, aún no está disponible
+    ui -> inv: muestra indicación de espera
+    ui -> api: reintenta automáticamente tras unos segundos
+  end
+end
+@enduml

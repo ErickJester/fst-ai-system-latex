@@ -1,0 +1,32 @@
+@startuml seq_notificaciones
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+note over db
+  Las notificaciones las crean el worker (análisis
+  terminado o con error) y las tareas programadas
+  (alerta de disco). Cada una pertenece a un usuario.
+end note
+
+loop al abrir la aplicación y luego cada 30 segundos
+  ui -> api: GET /notifications
+  api -> db: notificaciones del idInstitucional del token,\nmás recientes primero
+  db --> api: lista (tipo, mensaje, leido, fechaCreacion)
+  api --> ui: 200 OK
+  ui -> u: muestra el contador de no leídas en la campana
+end
+
+u -> ui: abre la campana y toca una notificación
+ui -> api: PATCH /notifications/{id} {leido: true}
+api -> db: marca leido = true\n(solo si pertenece al usuario del token)
+db --> api: confirma
+api --> ui: 200 OK
+ui --> u: abre el experimento relacionado, si lo hay
+@enduml

@@ -1,0 +1,65 @@
+@startuml modulos_backend
+!theme plain
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam componentStyle rectangle
+left to right direction
+
+package "Rutas (blueprints Flask)" {
+  [auth\n/auth/*] as r_auth
+  [users\n/users/me] as r_users
+  [admin\n/admin/*] as r_admin
+  [experiments\n/experiments/*] as r_exp
+  [results\n/experiments/{id}/results*] as r_res
+  [reports\n/experiments/{id}/report/*] as r_rep
+  [notifications\n/notifications*] as r_not
+}
+
+package "Servicios" as SERV {
+  [AuthService\nlogin, JWT, bcrypt, recuperacion] as s_auth
+  [UserService\ncuentas, perfil, desactivar] as s_user
+  [ExperimentService\nexperimentos, grupos, tandas, videos] as s_exp
+  [StorageService\nguardar, leer y borrar archivos] as s_sto
+  [ProgressService\nporcentaje por etapa (un tercio)] as s_prog
+  [ResultService\ntotales, desglose, comparaciones] as s_res
+  [ReportService\nCSV, XLSX, PDF y vigencia] as s_rep
+  [NotificationService] as s_not
+  [MailService\nSMTP] as s_mail
+  [Scheduler\nborrado 30 dias, aviso 7 dias, disco] as s_sch
+}
+
+package "Acceso a datos" {
+  [Modelos SQLAlchemy\n15 tablas] as m
+}
+
+database "PostgreSQL" as db
+folder "Volumen videos_reportes" as fs
+
+r_auth --> s_auth
+r_users --> s_user
+r_admin --> s_user
+r_admin --> s_sto : metricas de disco
+r_exp --> s_exp
+r_exp --> s_prog
+r_res --> s_res
+r_rep --> s_rep
+r_not --> s_not
+
+s_auth --> s_mail
+s_user --> s_mail
+s_exp --> s_sto
+s_rep --> s_res
+s_rep --> s_sto
+s_sch --> s_sto
+s_sch --> s_not
+
+SERV --> m : "todos los servicios leen\ny escriben por los modelos"
+m --> db
+s_sto --> fs
+
+note bottom of s_auth
+  Un decorador de rol consulta ADMINISTRADOR
+  en cada ruta /admin/*. Ocultar la seccion en
+  la interfaz no es suficiente.
+end note
+@enduml

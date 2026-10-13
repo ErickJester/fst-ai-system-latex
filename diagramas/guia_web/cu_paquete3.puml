@@ -1,0 +1,35 @@
+@startuml cu_paquete3
+!pragma layout smetana
+title Plataforma Web FST\nPaquete 3 - Pipeline de analisis conductual (lo ejecuta el worker)
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor White
+  BorderColor DarkSlateGray
+}
+actor "Investigador\n(solo observa)" as INV
+actor ":Worker:\n<<system>>" as WRK #LightYellow
+rectangle "Plataforma Web FST - Paquete 3" {
+  usecase "Ejecutar pipeline de analisis" as UC30
+  usecase "Preprocesar video" as UC31
+  usecase "Localizar cilindros" as UC32
+  usecase "Clasificar conducta" as UC34
+  usecase "Monitorear progreso" as UC35
+  usecase "Reportar error de pipeline" as UC36
+  usecase "Pausar el análisis\n(y cancelarlo si no\nhay respuesta)" as UC37
+  usecase "Ajustar el recuadro\ndel cilindro y continuar" as UC38
+  usecase "Cancelar el análisis\nen pausa" as UC39
+}
+WRK --> UC30
+INV --> UC35
+UC30 ..> UC31 : <<include>>
+UC30 ..> UC32 : <<include>>
+UC30 ..> UC34 : <<include>>
+UC36 ..> UC32 : <<extend>>\n[no se hallaron los tubos]
+INV --> UC38
+INV --> UC39
+UC37 ..> UC30 : <<extend>>\n[3 s seguidos sin ver\nal espécimen]
+UC38 ..> UC37 : <<extend>>\n[el análisis está en pausa]
+UC39 ..> UC37 : <<extend>>\n[el análisis está en pausa]
+@enduml

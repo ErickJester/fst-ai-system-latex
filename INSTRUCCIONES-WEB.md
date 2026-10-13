@@ -4,6 +4,15 @@ Sistema web para analizar videos de la prueba de nado forzado (FST, por sus sigl
 inglés) del Laboratorio de Bioquímica Estructural, Sección de Posgrado, ENMyH-IPN.
 Proyecto TT 2026-B066, ESCOM-IPN.
 
+> **Rutas de archivos: léelo primero.** Cada vez que esta guía habla de un diagrama, cita su
+> archivo `.puml` con una ruta completa de **la laptop del usuario**, por ejemplo
+> `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\estados_analisis.puml`.
+> **Esas rutas no existirán en tu equipo: cámbialas por el lugar donde tengas el repositorio.**
+> Solo cambia la parte inicial `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex`; lo que sigue
+> (`\diagramas\guia_web\nombre.puml`) es relativo al repositorio y es igual en cualquier equipo.
+> Los mismos diagramas están escritos completos en el Anexo A: si no tienes los archivos,
+> cópialos de ahí.
+
 **Este archivo es el único contexto que tienes.** Todo lo que necesitas (reglas, datos,
 diagramas, pantallas) está aquí. No busques ni esperes otros documentos. Si algo falta,
 pregunta al usuario; no lo inventes.
@@ -19,8 +28,10 @@ pregunta al usuario; no lo inventes.
    cambiarlo si hay razón técnica, pero dilo.
 4. El usuario tiene TDAH. Responde corto, empieza por la acción, numera los pasos y
    termina con una sola cosa que pueda hacer ahora.
-5. Los diagramas completos en código PlantUML están en el **Anexo A (sección 13)**. Los
-   diagramas Mermaid del cuerpo son vistas rápidas; si hay diferencia, manda el anexo.
+5. Los diagramas completos en código PlantUML están en el **Anexo A (sección 13)** y cada uno
+   está guardado como archivo en `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web` (cambia la ruta, ver la nota del inicio).
+   Los diagramas Mermaid del cuerpo son vistas rápidas, y cada uno cita su archivo `.puml`; si
+   hay diferencia, manda el anexo.
 6. El SQL completo está en el **Anexo B (sección 14)** y la base de Docker (compose,
    Dockerfiles, nginx y variables) en el **Anexo C (sección 15)**. Ninguno está probado:
    pruébalos en cuanto levantes `db` y corrige lo que falle.
@@ -146,6 +157,8 @@ solo para dimensionar disco; no pongas límites en el código con estas cifras.
 - Para crear el primer administrador (sección 11, punto 7): `ADMIN_ID`, `ADMIN_NOMBRE`,
   `ADMIN_APELLIDOS`, `ADMIN_CORREO` y `ADMIN_PASSWORD`.
 
+Versión completa en PlantUML (Anexo A.1): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\arquitectura_software.puml`
+
 ```mermaid
 flowchart TB
   INV([Investigador / Administrador<br/>navegador]) --> FE
@@ -208,6 +221,8 @@ especificación de lo que hace el worker real y de lo que debe imitar tu `worker
    mensaje técnico) y la notificación `error del pipeline`, y sigue con el siguiente análisis
    sin apagarse. Ya no existe un umbral de confianza de detección.
 5. Si todo sale bien, escribe los resultados (sección 4.4) y pasa a `completado`.
+
+Diagrama de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_analisis_automatico.puml` (Anexo A.9).
 
 ### 4.3 Pausa, ajuste y cancelación (RN-17, D-59, D-67, D-89)
 Durante la clasificación, si en un segundo no se ve al espécimen, ese segundo queda como
@@ -272,6 +287,8 @@ una imagen gris de 1280×720) y un `pausa.json` con valores inventados; luego pr
 salidas: el usuario ajusta (el análisis vuelve a `en cola` y el worker lo termina), el usuario
 cancela y pasan los 5 minutos. Dispara la pausa con un archivo cuyo nombre contenga `pausa`.
 
+Diagrama de secuencia de la pausa: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_pausa_y_ajuste.puml` (Anexo A.9).
+
 ### 4.4 Lo que escribe el worker al terminar bien
 La red neuronal analiza el **video completo**; después el worker se queda con los **últimos
 300 segundos** de cada espécimen (de final a inicio) y descarta el principio, donde a veces
@@ -306,6 +323,8 @@ termine. Si el worker estaba apagado a esa hora, las corre al arrancar; para no 
 mismo día, guarda la fecha de la última corrida en `worker/ultima_corrida_tareas.txt`. El disco
 se revisa también antes de empezar cada análisis. Estas tareas son parte del worker.
 
+Diagrama de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_tareas_programadas.puml` (Anexo A.11).
+
 ### 4.6 Reiniciar un análisis (lo hace el backend, D-60, D-68)
 El investigador que subió el video (o un Administrador) puede reiniciar un análisis
 **`completado`** desde la pantalla de revisión (sección 9.7). El backend, en una sola
@@ -328,6 +347,8 @@ Estados válidos de un análisis (`estado_analisis`): `en cola`, `procesando`, `
 de un análisis `completado` (R-04), el ajuste del recuadro de uno `en pausa` (R-15, D-89) y el
 reencolado de los `procesando` huérfanos al arrancar el worker (D-84). `error` y `cancelado`
 son finales.
+
+Versión completa en PlantUML (Anexo A.6): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\estados_analisis.puml`
 
 ```mermaid
 stateDiagram-v2
@@ -355,6 +376,8 @@ El estado de un **experimento** no se guarda: se calcula a partir de los anális
 todas sus tandas, con precedencia `error` > `cancelado` > `en pausa` > `procesando` >
 `en cola` > `completado`. Un experimento sin videos se muestra como "sin videos"; uno que solo
 tiene videos del Día 1 (que no se analizan, D-71) se muestra como "en espera del Día 2" (D-83).
+
+Versión completa en PlantUML (Anexo A.6): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\estados_experimento.puml`
 
 ```mermaid
 stateDiagram-v2
@@ -399,6 +422,8 @@ Mientras alguna tanda siga en error, el experimento sigue en `error`.
 especímenes y hasta dos videos (Día 1 y Día 2); un video **del Día 2** tiene un análisis y, por
 cada espécimen, una observación con 5 intervalos y sus segundos por conducta. El video del
 Día 1 no tiene análisis ni observaciones (D-71).
+
+Versión completa en PlantUML (Anexo A.4): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\esquema_fisico.puml`
 
 ```mermaid
 erDiagram
@@ -798,6 +823,8 @@ Estados: normal; error genérico de credenciales. Incluye enlace "Recuperar cont
 Si la cuenta tiene `cambioRequerido = true`, tras entrar obliga a cambiar la contraseña
 antes de continuar.
 
+Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_login.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_logout.puml` (Anexo A.8).
+
 ### 9.2 Dashboard
 Estados: con experimentos; vacío ("Aún no hay experimentos" y botón de crear); con aviso de
 video por vencer.
@@ -858,6 +885,8 @@ Reglas del paso 2:
 - Muestra errores de validación por campo (campos obligatorios vacíos).
 - Estados: vacío, lleno, subiendo, error de formato, errores de campo, éxito.
 
+Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_experimento.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_carga_video.puml` (Anexo A.9).
+
 ### 9.4 Progreso del análisis
 Estados: analizando; en pausa (el sistema no vio al espécimen y espera al usuario); completado;
 error (no se pudo abrir el video o no se hallaron los tubos); cancelado (el usuario canceló o no
@@ -910,6 +939,8 @@ pocos segundos para actualizar el tiempo que queda.
 - No hay "log de ejecución": ninguna tabla lo guarda (sección 11, punto 10).
 - Al completarse, habilita "Ver resultados" y "Revisar segundo a segundo" (sección 9.7).
 
+Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_consulta_progreso.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_pausa_y_ajuste.puml` (Anexo A.9).
+
 ### 9.5 Resultados
 Cuatro pestañas: por espécimen, comparación entre grupos (Día 2), línea de tiempo por
 minuto y bloques de 5 s. En la de bloques, cada bloque muestra la conducta con más segundos
@@ -945,6 +976,8 @@ Los bloques **no usan la CNN**: la CNN solo clasifica cada segundo, y el bloque 
   breve que lo explique.
 - Descargas en PDF, CSV y XLSX.
 
+Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_consulta_resultados.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_descarga_reportes.puml` (Anexo A.10).
+
 ### 9.6 Panel de administración (solo administrador)
 Estados: vista de métricas; alerta de disco elevado; cola de análisis activa; modal de
 crear usuario; modal de editar usuario.
@@ -970,6 +1003,8 @@ Modal "Editar cuenta": datos editables + rol (Investigador / Administrador) + in
 
 Al crear una cuenta, el sistema envía la contraseña temporal por correo y **además** la
 muestra una sola vez en pantalla al administrador, como respaldo (D-45, sección 11, punto 2).
+
+Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_cuenta.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_gestion_usuarios.puml` (Anexo A.8).
 
 ### 9.7 Revisión segundo a segundo
 Se abre **solo cuando el análisis está `completado`**, desde Progreso o Resultados
@@ -1034,6 +1069,8 @@ Cómo funciona:
 - En la base los reportes dicen si el análisis tuvo revisión humana (algún `origen`
   distinto de `maquina`).
 
+Diagrama de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_revision_segundos.puml` (Anexo A.9).
+
 ### 9.8 Textos de la interfaz (reglas)
 - Di **"espécimen"**. Nunca "rata" ni "animal" en ningún texto visible.
 - Nunca "inteligencia artificial" ni "IA" en la interfaz.
@@ -1045,6 +1082,8 @@ Cómo funciona:
 ## 10. Secuencias clave
 
 **Carga de video:**
+
+Versión completa en PlantUML (Anexo A.9): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_carga_video.puml`
 
 ```mermaid
 sequenceDiagram
@@ -1080,6 +1119,8 @@ sequenceDiagram
 
 **Consulta de progreso (polling cada 3 a 5 s):**
 
+Versión completa en PlantUML (Anexo A.9): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_consulta_progreso.puml`
+
 ```mermaid
 sequenceDiagram
   actor I as Investigador
@@ -1107,6 +1148,8 @@ sequenceDiagram
 
 **Descarga de reporte:**
 
+Versión completa en PlantUML (Anexo A.10): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_descarga_reportes.puml`
+
 ```mermaid
 sequenceDiagram
   actor I as Investigador
@@ -1133,6 +1176,8 @@ sequenceDiagram
 ```
 
 **Crear cuenta (solo administrador):**
+
+Versión completa en PlantUML (Anexo A.8): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_cuenta.puml`
 
 ```mermaid
 sequenceDiagram
@@ -1326,8 +1371,9 @@ Cada paso termina con algo que se puede probar.
 
 ## 13. Anexo A: diagramas en código PlantUML
 
-Cada bloque empieza con `@startuml nombre` y termina con `@enduml`. Guarda cada uno como
-`nombre.puml` y genéralo con:
+Cada bloque empieza con `@startuml nombre` y termina con `@enduml`, y va precedido de la ruta
+de su archivo `nombre.puml` (carpeta `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web`; cambia la ruta, ver la nota del
+inicio). Si no tienes los archivos, guarda cada bloque como `nombre.puml` y genéralo con:
 
 ```
 java -jar plantuml.jar -tpng -o salida nombre.puml
@@ -1352,6 +1398,8 @@ los demás describen el diseño ya acordado.
 - A.11 Tareas programadas [PROPUESTA]
 
 ### A.1 Arquitectura de software
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\arquitectura_software.puml`
 
 ```plantuml
 @startuml arquitectura_software
@@ -1413,6 +1461,8 @@ WK   -->      C_ML : "SMTP (solo desarrollo)"
 
 ### A.2 Contenedores con Docker [PROPUESTA]
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\contenedores_docker.puml`
+
 ```plantuml
 @startuml contenedores_docker
 !theme plain
@@ -1462,6 +1512,8 @@ end note
 ```
 
 ### A.3 Módulos del backend [PROPUESTA]
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\modulos_backend.puml`
 
 ```plantuml
 @startuml modulos_backend
@@ -1532,6 +1584,8 @@ end note
 ```
 
 ### A.4 Esquema físico de la base de datos
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\esquema_fisico.puml`
 
 ```plantuml
 @startuml esquema_fisico
@@ -1770,6 +1824,8 @@ CONDUCTA       "0..1" --o "0..*" SEGUNDO                : conducta
 El paquete P3 (worker y pipeline) lo desarrolla otra persona; se incluye para ver cómo se
 relaciona con el resto. El backend implementa los paquetes P1, P2, P4 y P5.
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\clases.puml`
+
 ```plantuml
 @startuml clases
 !theme plain
@@ -1967,6 +2023,8 @@ Experimento "0..1" --> "0..*" Notificacion : origina
 
 ### A.6 Estados del análisis y del experimento
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\estados_analisis.puml`
+
 ```plantuml
 @startuml estados_analisis
 !theme plain
@@ -1993,6 +2051,8 @@ cancelado --> [*]
 @enduml
 ```
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\estados_experimento.puml`
+
 ```plantuml
 @startuml estados_experimento
 !theme plain
@@ -2015,6 +2075,8 @@ completado --> en_cola : se agregó una tanda\nnueva
 ```
 
 ### A.7 Casos de uso
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\cu_vision_general.puml`
 
 ```plantuml
 @startuml cu_vision_general
@@ -2047,6 +2109,8 @@ ADMIN --> P5
 WRK --> P3 : ejecuta pipeline
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\cu_paquete1.puml`
 
 ```plantuml
 @startuml cu_paquete1
@@ -2088,6 +2152,8 @@ UC17 ..> UC15a : <<include>>
 @enduml
 ```
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\cu_paquete2.puml`
+
 ```plantuml
 @startuml cu_paquete2
 !pragma layout smetana
@@ -2122,6 +2188,8 @@ UC26 ..> UC24 : <<extend>>\n[no reproducible]
 UC26 ..> UC24 : <<extend>>\n[formato invalido]
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\cu_paquete3.puml`
 
 ```plantuml
 @startuml cu_paquete3
@@ -2161,6 +2229,8 @@ UC39 ..> UC37 : <<extend>>\n[el análisis está en pausa]
 @enduml
 ```
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\cu_paquete4.puml`
+
 ```plantuml
 @startuml cu_paquete4
 !pragma layout smetana
@@ -2187,6 +2257,8 @@ UC42 ..> UC41 : <<extend>>\n[solicita desglose]
 UC45 ..> UC46 : <<include>>
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\cu_paquete5.puml`
 
 ```plantuml
 @startuml cu_paquete5
@@ -2237,6 +2309,8 @@ programada del backend** (sección 8 y A.11).
 
 ### A.8 Secuencias: autenticación y cuentas
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_login.puml`
+
 ```plantuml
 @startuml seq_login
 !theme plain
@@ -2270,6 +2344,8 @@ end
 @enduml
 ```
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_logout.puml`
+
 ```plantuml
 @startuml seq_logout
 !theme plain
@@ -2288,6 +2364,8 @@ ui -> ui: borra el token del navegador
 ui --> u: muestra la pantalla de inicio de sesión
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_cambiar_contrasena.puml`
 
 ```plantuml
 @startuml seq_cambiar_contrasena
@@ -2326,6 +2404,8 @@ end
 @enduml
 ```
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_recuperar_contrasena.puml`
+
 ```plantuml
 @startuml seq_recuperar_contrasena
 !theme plain
@@ -2362,6 +2442,8 @@ else enlace válido
 end
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_cuenta.puml`
 
 ```plantuml
 @startuml seq_crear_cuenta
@@ -2407,6 +2489,8 @@ else sí está en ADMINISTRADOR
 end
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_gestion_usuarios.puml`
 
 ```plantuml
 @startuml seq_gestion_usuarios
@@ -2458,6 +2542,8 @@ end
 @enduml
 ```
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_perfil.puml`
+
 ```plantuml
 @startuml seq_perfil
 !theme plain
@@ -2495,6 +2581,8 @@ end note
 
 ### A.9 Secuencias: experimentos, carga y análisis
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_experimento.puml`
+
 ```plantuml
 @startuml seq_crear_experimento
 !theme plain
@@ -2522,6 +2610,8 @@ else el nombre es único
 end
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_carga_video.puml`
 
 ```plantuml
 @startuml seq_carga_video
@@ -2586,6 +2676,8 @@ else el archivo es válido
 end
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_analisis_automatico.puml`
 
 ```plantuml
 @startuml seq_analisis_automatico
@@ -2657,6 +2749,8 @@ end
 @enduml
 ```
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_consulta_progreso.puml`
+
 ```plantuml
 @startuml seq_consulta_progreso
 !theme plain
@@ -2708,6 +2802,8 @@ else algún análisis llegó a "error"
 end
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_pausa_y_ajuste.puml`
 
 ```plantuml
 @startuml seq_pausa_y_ajuste
@@ -2787,6 +2883,8 @@ end
 @enduml
 ```
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_eliminar_experimento.puml`
+
 ```plantuml
 @startuml seq_eliminar_experimento
 !theme plain
@@ -2823,6 +2921,8 @@ note over api, db
 end note
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_revision_segundos.puml`
 
 ```plantuml
 @startuml seq_revision_segundos
@@ -2885,6 +2985,8 @@ end note
 
 ### A.10 Secuencias: resultados, reportes y notificaciones
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_consulta_resultados.puml`
+
 ```plantuml
 @startuml seq_consulta_resultados
 !theme plain
@@ -2927,6 +3029,8 @@ ui -> inv: muestra la comparación de los grupos\n(solo Día 2), con los especí
 inv -> ui: puede pedir el reporte descargable
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_descarga_reportes.puml`
 
 ```plantuml
 @startuml seq_descarga_reportes
@@ -2977,6 +3081,8 @@ ui --> inv: descarga inmediata en el navegador
 @enduml
 ```
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_notificaciones.puml`
+
 ```plantuml
 @startuml seq_notificaciones
 !theme plain
@@ -3013,6 +3119,8 @@ ui --> u: abre el experimento relacionado, si lo hay
 ```
 
 ### A.11 Tareas programadas [PROPUESTA]
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_tareas_programadas.puml`
 
 ```plantuml
 @startuml seq_tareas_programadas
