@@ -77,10 +77,16 @@ else el archivo es válido
   api -> db: guarda el grupo, si es nuevo
   api -> db: guarda la tanda, nueva o existente
   api -> db: guarda el video, con su tanda y su sesión
-  api -> db: crea el análisis del video, con estado "en cola"
-  db --> api: confirma que todo quedó guardado
-  api --> ui: video almacenado, análisis en cola
-  ui --> inv: confirmación, y redirección a la pantalla de progreso
+  alt la sesión es el Día 2
+    api -> db: crea el análisis del video, con estado "en cola"
+    db --> api: confirma que todo quedó guardado
+    api --> ui: video almacenado, análisis en cola
+    ui --> inv: confirmación, y redirección a la pantalla de progreso
+  else la sesión es el Día 1 (habituación)
+    db --> api: confirma que todo quedó guardado
+    api --> ui: video almacenado; el Día 1 no se analiza
+    ui --> inv: confirmación de que el video quedó guardado
+  end
 end
 
 @enduml

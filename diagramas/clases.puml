@@ -26,6 +26,7 @@ package P1_Autenticacion_y_usuarios {
     +subirVideo(idTanda, sesion, archivo) : Video
     +eliminarExperimento(id) : void
     +descargarReporte(idExperimento, formato) : Reporte
+    +reiniciarAnalisis(idAnalisis) : void
   }
 
   class Administrador {
@@ -33,6 +34,7 @@ package P1_Autenticacion_y_usuarios {
     +desactivarCuentaUsuario(id) : void
     +listarUsuarios() : List<Usuario>
     +monitorearSistema() : void
+    +modificarCuentaUsuario(id, datos) : void
   }
 }
 
@@ -83,6 +85,8 @@ package P3_Pipeline_de_analisis_conductual {
   class Worker <<control>> {
     +procesarCola() : void
     +borrarVideosExpirados() : void
+    +avisarVencimientos() : void
+    +vigilarDisco() : void
   }
 
   class PipelineAnalisis <<control>> {
@@ -92,6 +96,9 @@ package P3_Pipeline_de_analisis_conductual {
     +generarReporte(experimento, tipo) : Reporte
     +actualizarProgreso(idAnalisis, pct, etapa) : void
     +marcarError(idAnalisis, mensaje) : void
+    +pausarAnalisis(idAnalisis) : void
+    +cancelarAnalisis(idAnalisis) : void
+    +generarCopiaRevision(video) : void
   }
 
   class ROI {
@@ -194,7 +201,7 @@ Observacion "1" *--> "5"   Intervalo   : "se divide en"
 ' D-54: 300 es un maximo, sin minimo (los ultimos 300 s del video;
 ' si dura menos, se guardan todos sus segundos).
 Observacion "1" *--> "1..300" Segundo : "se etiqueta en"
-Intervalo "0..*" -- "2..4" Conducta : presenta
+Intervalo "0..*" -- "4" Conducta : presenta
 (Intervalo, Conducta) .. PRESENTA
 
 Experimento "1"    --> "0..*" Reporte      : origina

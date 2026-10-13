@@ -113,7 +113,7 @@ al clasificador de conducta.
 \section{Diseño del pipeline de análisis conductual}
 % -----------------------------------------------------------
 
-El pipeline recibe un video del FST, analiza como máximo sus últimos 300 segundos y produce
+El pipeline recibe un video del FST, analiza el video completo y produce
 como salida los tiempos totales de cada conducta por espécimen y el desglose por minuto. Sigue el patrón arquitectónico de
 tubería y filtro (\textit{pipe and filter}) \cite{sommerville2011}: cada módulo es
 un filtro discreto que transforma los datos y los pasa al siguiente. Está organizado
@@ -780,7 +780,7 @@ Agrupa los flujos de acceso al sistema: inicio de sesión con correo y contrase�
 cierre de sesión y recuperación o cambio de contraseña. El flujo es idéntico para
 Investigador y Administrador; la diferencia de permisos se resuelve dentro del
 sistema una vez autenticados. Incluye además la gestión de cuentas a cargo del
-Administrador (crear y desactivar), el cambio obligatorio de contraseña en el primer
+Administrador (crear, editar, cambiar el rol y desactivar), el cambio obligatorio de contraseña en el primer
 acceso y la actualización del perfil propio.
 
 \begin{figure}[H]
@@ -2369,7 +2369,7 @@ activa y permite actualizar nombre, apellidos, correo electrónico y contraseña
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/mermaid/seq_gestion_usuarios}
-\caption{Secuencia: gestión de usuarios por administrador (crear y desactivar) [autoría propia].}
+\caption{Secuencia: gestión de usuarios por administrador (crear, editar, cambiar el rol y desactivar) [autoría propia].}
 \label{fig:seq_gestion_usuarios}
 \end{figure}
 

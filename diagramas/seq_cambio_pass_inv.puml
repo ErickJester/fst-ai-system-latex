@@ -1,0 +1,60 @@
+@startuml seq_cambio_pass_inv
+' ================================================================
+'  Secuencia - Cambio de contraseña del usuario
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Reemplaza a figures/mermaid/seq_cambio_pass_inv.png, que no tenia
+'  fuente en el repositorio (esta era una imagen sin .puml).
+'
+'  Cubre CU-16 "Cambiar contraseña al primer acceso" (cuenta con
+'  contraseña temporal, marca de cambio obligatorio) y el cambio
+'  voluntario desde el perfil (CU-18, RF-06). En ambos casos el
+'  usuario ya tiene sesion y escribe su contraseña actual (en el
+'  primer acceso, la temporal) y la nueva.
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/seq_cambio_pass_inv.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
+
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+note over u, ui
+  Aplica al cambio obligatorio del primer ingreso
+  (cuenta con contraseña temporal) y al cambio
+  voluntario desde el perfil.
+end note
+
+u -> ui: escribe la contraseña actual\ny la nueva (dos veces)
+ui -> api: envía la contraseña actual y la nueva\ncon la sesión del usuario
+
+api -> db: lee la contraseña cifrada del usuario
+db --> api: contraseña cifrada actual
+
+alt la contraseña actual no coincide
+  api --> ui: rechaza: la contraseña actual no es correcta
+  ui --> u: muestra el error, no cambia nada
+else la contraseña actual coincide
+  alt la nueva no cumple los requisitos\no es igual a la actual
+    api --> ui: rechaza e indica los criterios incumplidos
+    ui --> u: pide escribir una contraseña diferente
+  else la nueva contraseña es válida
+    api -> api: cifra la contraseña nueva (con sal)
+    api -> db: guarda la contraseña nueva\ny quita la marca de cambio obligatorio
+    db --> api: confirma
+    api --> ui: cambio realizado
+    ui --> u: confirma el cambio y continúa al dashboard
+  end
+end
+
+@enduml

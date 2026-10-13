@@ -67,6 +67,14 @@
 '  reanalizar, el resultado nuevo sustituye al anterior, no se
 '  conserva historial. VIDEO--ANALISIS baja de (1,N) a (1,1).
 '
+'  ---- D-71 (11-oct): el Dia 1 se sube y se guarda, pero no se analiza ----
+'  VIDEO--ANALISIS pasa de (1,1) a (0,1); VIDEO--OBSERVACION de (2,4) a
+'  (0,4) y ESPECIMEN--OBSERVACION de (1,2) a (0,1). Solo el Dia 2 tiene
+'  analisis y de 2 a 4 observaciones.
+'  D-79 (12-oct): etapa, nivelClasif y fechaAnalisis siguen NOT NULL; el
+'  backend les pone un valor de arranque al encolar. D-80 (12-oct): origen
+'  de SEGUNDO tiene cuatro valores. Ninguno cambia las columnas.
+'
 
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/grafo_relacional_3_vigente.puml
@@ -245,7 +253,7 @@ VIDEO          "1" --o "0..1" ANALISIS
 ESPECIMEN      "1" --o "0..1" OBSERVACION
 VIDEO          "1" --o "0..4" OBSERVACION
 OBSERVACION    "1" --o "5"    INTERVALO
-INTERVALO      "1" --o "2..4" PRESENTA
+INTERVALO      "1" --o "4"    PRESENTA
 CONDUCTA       "1" --o "0..*" PRESENTA
 ' D-54: 300 es un maximo, sin minimo (los ultimos 300 s del video)
 OBSERVACION    "1" --o "1..300" SEGUNDO

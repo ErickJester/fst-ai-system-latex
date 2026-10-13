@@ -9,7 +9,7 @@ Versión en PlantUML del documento: [`../arquitectura_software.puml`](../arquite
 
 Qué tecnología vive en cada capa del sistema y cómo se comunican las capas. Es la
 vista de **estructura**: responde «¿de qué está hecho el sistema?». La vista de
-**dónde corre** (servidor, navegador, correo) está en [despliegue.md](despliegue.md).
+**cómo se empaqueta en contenedores** (Docker Compose, navegador, correo) está en [contenedores.md](contenedores.md).
 
 | Capa | Contenedor | Tecnología | Qué hace |
 |------|------------|------------|----------|

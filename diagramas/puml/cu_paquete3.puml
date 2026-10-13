@@ -13,6 +13,7 @@ actor ":Worker:\n<<system>>" as WRK #LightYellow
 rectangle "Plataforma Web FST - Paquete 3" {
   usecase "Ejecutar pipeline de análisis" as UC30
   usecase "Reportar error de pipeline" as UC36
+  usecase "Pausar o cancelar\nel análisis" as UC37
   usecase "CU-07\nMonitorear progreso del análisis" as CU07
   usecase "CU-08\nDescargar reporte de diagnóstico" as CU08
 }
@@ -22,5 +23,6 @@ INV --> CU08
 WRK --> CU07
 WRK --> CU08
 UC36 ..> UC30 : <<extend>>\n[no se pudo abrir el video\no no se hallaron los cilindros]
+UC37 ..> UC30 : <<extend>>\n[3 s seguidos sin ver\nal espécimen]
 CU08 ..> CU07 : <<extend>>\n[el análisis termino\nen error]
 @enduml

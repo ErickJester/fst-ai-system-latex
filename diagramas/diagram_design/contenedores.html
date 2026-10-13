@@ -1,14 +1,14 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Diagrama de despliegue</title>
+<title>Contenedores del sistema</title>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
 html,body{height:100%;margin:0;background:#faf9f5}
 body{overflow-x:auto;overflow-y:hidden}
 svg{display:block;height:100vh;width:auto}
 </style></head><body><svg viewBox="0 10 1690 730" role="img" aria-labelledby="dp-title dp-desc" xmlns="http://www.w3.org/2000/svg">
-<title id="dp-title">Diagrama de despliegue del sistema</title>
-<desc id="dp-desc">Cuatro contenedores Docker (frontend, backend, worker y base de datos) y dos volúmenes en un servidor, con el navegador del investigador y una cuenta de correo fuera de él.</desc>
+<title id="dp-title">Contenedores del sistema</title>
+<desc id="dp-desc">Cuatro contenedores Docker (frontend, backend, worker y base de datos) y dos volúmenes en Docker Compose, con el navegador del investigador y una cuenta de correo fuera de él.</desc>
 <defs><marker id="d-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#1a1a1a" stroke-width="1.2"/></marker></defs>
 <style>
 .a{font:400 9px 'Geist Mono',monospace;fill:#1a1a1a}
@@ -18,9 +18,8 @@ svg{display:block;height:100vh;width:auto}
 .lg text{font:400 9px 'Geist Mono',monospace;fill:#6b6b6b}
 </style>
 <rect x="380" y="40" width="990" height="640" rx="8" fill="#f1eee5" stroke="#6b6b6b" stroke-dasharray="6,4"/>
-<text x="396" y="62" class="st">«servidor»</text>
-<text x="396" y="80" class="nm" text-anchor="start">Servidor institucional ESCOM · Docker Compose</text>
-<text x="396" y="96" class="st">o cualquier equipo con Docker (RNF-10)</text>
+<text x="396" y="62" class="st">«docker compose»</text>
+<text x="396" y="80" class="nm" text-anchor="start">Contenedores del sistema</text>
 <path d="M240,320 L300,320 L300,170 L410,170" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#d-arr)"/>
 <path d="M240,370 L410,370" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#d-arr)"/>
 <path d="M670,330 L825,330 L825,220" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#d-arr)"/>
@@ -93,12 +92,12 @@ svg{display:block;height:100vh;width:auto}
 <text x="1550.0" y="134" text-anchor="middle" class="st">«servicio externo»</text>
 <text x="1550.0" y="150" text-anchor="middle" class="nm">Cuenta de correo</text>
 <line x1="1450" y1="160" x2="1650" y2="160" stroke="#1a1a1a"/>
-<text x="1462" y="178" class="a">Configurable en el servidor</text>
+<text x="1462" y="178" class="a">Cuenta configurable</text>
 <text x="1462" y="192" class="a">(avisos, RF-33)</text>
 <g transform="translate(40,710)" class="lg">
 <rect x="0" y="-8" width="22" height="14" rx="3" fill="#faf9f5" stroke="#1a1a1a"/><text x="30" y="3">CONTENEDOR</text>
 <rect x="130" y="-8" width="22" height="14" rx="3" fill="#ece7d8" stroke="#1a1a1a"/><text x="160" y="3">VOLUMEN</text>
-<rect x="250" y="-8" width="22" height="14" rx="3" fill="#faf9f5" stroke="#1a1a1a" stroke-dasharray="4,3"/><text x="280" y="3">FUERA DEL SERVIDOR</text>
+<rect x="250" y="-8" width="22" height="14" rx="3" fill="#faf9f5" stroke="#1a1a1a" stroke-dasharray="4,3"/><text x="280" y="3">FUERA DE DOCKER</text>
 <line x1="440" y1="0" x2="468" y2="0" stroke="#1a1a1a"/><path d="M462,-4 L468,0 L462,4" fill="none" stroke="#1a1a1a"/><text x="478" y="3">COMUNICACIÓN</text>
 <rect x="600" y="-8" width="22" height="14" rx="3" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/><text x="630" y="3">PIEZA CLAVE: WORKER SEPARADO DEL BACKEND</text>
 </g>

@@ -72,7 +72,7 @@ participant "Archivos" as fs
 
 inv -> ui: abre la pantalla de progreso del experimento\n(o llega redirigido tras subir un video)
 
-loop cada 3 a 5 segundos, mientras haya análisis en cola o procesando
+loop cada 3 a 5 segundos, mientras haya análisis en cola, procesando o en pausa
   ui -> api: consulta el estado de los análisis del experimento
   api -> db: busca los análisis de este experimento\n(vía sus grupos, tandas y videos)
   db --> api: cada análisis, con su estado y su etapa
@@ -83,6 +83,10 @@ end
 
 alt algún análisis llegó a "completado"
   ui -> inv: habilita el acceso a los resultados\n(ver seq_consulta_resultados.puml)
+else algún análisis quedó "en pausa"
+  ui -> inv: avisa que el sistema no vio al espécimen,\nmuestra el tiempo que queda de los 5 minutos\ny la notificación del análisis en pausa (ver RN-17)
+else algún análisis quedó "cancelado"
+  ui -> inv: muestra que el análisis se canceló\npor falta de respuesta (ver RN-17)
 else algún análisis llegó a "error"
   ui -> inv: muestra el mensaje del error armado con la etapa,\ny habilita la descarga del reporte de diagnóstico
 
