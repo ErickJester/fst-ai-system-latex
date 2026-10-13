@@ -65,10 +65,10 @@ Volúmenes:
 - `modelos` (solo lectura, solo para el worker): modelos entrenados.
 - `pgdata`: datos de PostgreSQL.
 
-Despliegue: todo se levanta con `docker compose up`. El laboratorio no instala nada más
-que Docker. Debe funcionar en el servidor institucional de la ESCOM y en al menos un
-entorno más. No hay Redis ni cola de mensajes: **la cola es la tabla `ANALISIS`**
-(polling).
+Empaquetado: todo se levanta con `docker compose up`. El laboratorio no instala nada más
+que Docker. Docker es solo la herramienta de empaquetado (D-73): esta guía no trata servidores
+ni producción (D-62). Debe arrancar igual en al menos dos equipos con Docker. No hay Redis
+ni cola de mensajes: **la cola es la tabla `ANALISIS`** (polling).
 
 Disponibilidad objetivo: 24/7, 95 % mensual. Navegadores: Chrome, Firefox y Edge en sus
 versiones actuales, sin instalar nada en el equipo del usuario. Solo escritorio, no hay
@@ -368,8 +368,8 @@ ejemplo «Tanda A · Espécimen 2».
 
 `CONDUCTA` es tabla y no dominio. Valores iniciales: `nado activo`, `inmovilidad`,
 `escalamiento` y `conducta activa`. Cada intervalo (`INTERVALO`) tiene en `PRESENTA` una
-fila por cada una de las cuatro conductas, **incluso con 0 segundos** (en el diseño la
-cardinalidad se declara 2..4, pero en la práctica son siempre 4).
+fila por cada una de las cuatro conductas, **incluso con 0 segundos** (la
+cardinalidad en el diseño es exactamente 4).
 
 `SEGUNDO` guarda la conducta de cada espécimen en cada segundo analizado (hasta 300 por
 observación). Es la fuente de la pantalla de revisión; `PRESENTA` es su resumen por minuto
@@ -999,7 +999,7 @@ Cada paso termina con algo que se puede probar.
 10. **Frontend:** primero inicio de sesión y dashboard, luego crear experimento, progreso,
     resultados y administración.
 11. **Pruebas:** 4 sesiones simultáneas con un análisis en cola sin pasar de 3 s; los tres
-    navegadores; despliegue limpio con solo Docker en una segunda máquina.
+    navegadores; arranque limpio con solo Docker en una segunda máquina.
 
 ### Criterios de aceptación mínimos
 - `docker compose up` en una máquina limpia deja todo funcionando.
@@ -1036,7 +1036,7 @@ los demás describen el diseño ya acordado.
 
 Índice:
 - A.1 Arquitectura de software
-- A.2 Despliegue con Docker [PROPUESTA]
+- A.2 Contenedores con Docker [PROPUESTA]
 - A.3 Módulos del backend [PROPUESTA]
 - A.4 Esquema físico de la base de datos
 - A.5 Diagrama de clases
@@ -1106,10 +1106,10 @@ BE   -->      C_ML : "SMTP (solo desarrollo)"
 @enduml
 ```
 
-### A.2 Despliegue con Docker [PROPUESTA]
+### A.2 Contenedores con Docker [PROPUESTA]
 
 ```plantuml
-@startuml despliegue_docker
+@startuml contenedores_docker
 !theme plain
 skinparam defaultFontName Arial
 skinparam shadowing false
@@ -1117,7 +1117,7 @@ skinparam BackgroundColor White
 
 actor "Usuario\n(navegador)" as U
 
-node "Servidor (docker compose up)" {
+node "docker compose up" {
   node "frontend\nReact (build) servido por nginx\npuerto 80" as fe
   node "backend\nFlask con gunicorn\npuerto 5000 (interno)" as be
   node "worker\nPython" as wk
@@ -1444,7 +1444,7 @@ VIDEO          "1" --o "2..4" OBSERVACION                : idVideo
 ESPECIMEN      "1" --o "1..2" OBSERVACION                : idEspecimen
 
 OBSERVACION    "1" --o "5"    INTERVALO                 : idObservacion
-INTERVALO      "1" --o "2..4" PRESENTA                  : idIntervalo
+INTERVALO      "1" --o "4"    PRESENTA                  : idIntervalo
 CONDUCTA       "1" --o "0..*" PRESENTA                  : conducta
 OBSERVACION    "1" --o "1..300" SEGUNDO                 : idObservacion
 CONDUCTA       "0..1" --o "0..*" SEGUNDO                : conducta
@@ -1620,7 +1620,7 @@ Especimen   "1" --> "1..2" Observacion : "aparece en"
 Video       "1" --> "2..4" Observacion : contiene
 Observacion "1" *--> "5"   Intervalo   : "se divide en"
 Observacion "1" *--> "1..300" Segundo  : "se etiqueta en"
-Intervalo "2..4" -- "0..*" Conducta : presenta
+Intervalo "0..*" -- "4" Conducta : presenta
 (Intervalo, Conducta) .. PRESENTA
 
 Experimento "1"    --> "0..*" Reporte      : origina
@@ -2092,15 +2092,15 @@ else sí está en ADMINISTRADOR
   alt crear cuenta nueva
     ui --> admin: abre el formulario de "Crear cuenta"\n(ver seq_crear_cuenta)
   else editar o desactivar cuenta
-    admin -> ui: cambia datos, o selecciona un usuario\ny confirma la desactivación
-    ui -> api: PATCH /admin/users/{id} {datos, o activo: false}
-    api -> db: si este usuario es Administrador y se desactiva,\n¿cuántos Administradores activos quedarían?
+    admin -> ui: cambia datos o rol, o selecciona un usuario\ny confirma la desactivación
+    ui -> api: PATCH /admin/users/{id} {datos, rol, o activo: false}
+    api -> db: si este usuario es Administrador y se desactiva\no pierde el rol, ¿cuántos Administradores activos quedarían?
     db --> api: cantidad restante (o "no aplica")
     alt quedarían 0 Administradores activos
       api --> ui: rechaza la desactivación
       ui --> admin: muestra la advertencia\n"debe existir al menos un Administrador activo"
     else se puede aplicar el cambio
-      api -> db: actualiza USUARIO (activo = false si se desactiva)
+      api -> db: actualiza USUARIO (datos o activo = false)\ny agrega o quita su fila en ADMINISTRADOR si cambia el rol
       db --> api: confirma la actualización
       api --> ui: 200 OK
       ui --> admin: la tabla refleja el cambio
@@ -2225,10 +2225,16 @@ else el archivo es válido
   api -> db: guarda el grupo, si es nuevo
   api -> db: guarda la tanda, nueva o existente
   api -> db: guarda el video, con su tanda y su sesión
-  api -> db: crea el análisis del video, con estado "en cola"
-  db --> api: confirma que todo quedó guardado
-  api --> ui: 201, video almacenado, análisis en cola
-  ui --> inv: confirmación, y redirección a la pantalla de progreso
+  alt la sesión es el Día 2
+    api -> db: crea el análisis del video, con estado "en cola"
+    db --> api: confirma que todo quedó guardado
+    api --> ui: 201, video almacenado, análisis en cola
+    ui --> inv: confirmación, y redirección a la pantalla de progreso
+  else la sesión es el Día 1 (habituación)
+    db --> api: confirma que todo quedó guardado
+    api --> ui: 201, video almacenado; el Día 1 no se analiza
+    ui --> inv: confirmación de que el video quedó guardado
+  end
 end
 @enduml
 ```
@@ -2312,7 +2318,7 @@ participant "Archivos" as fs
 
 inv -> ui: abre la pantalla de progreso del experimento\n(o llega redirigido tras subir un video)
 
-loop cada 3 a 5 segundos, mientras haya análisis en cola o procesando
+loop cada 3 a 5 segundos, mientras haya análisis en cola, procesando o en pausa
   ui -> api: GET /experiments/{id}/status
   api -> db: busca los análisis de este experimento\n(vía sus grupos, tandas y videos)
   db --> api: cada análisis, con su estado y su etapa
@@ -2323,6 +2329,10 @@ end
 
 alt algún análisis llegó a "completado"
   ui -> inv: habilita el acceso a los resultados
+else algún análisis quedó "en pausa"
+  ui -> inv: avisa que el sistema no vio al espécimen,\nmuestra el tiempo que queda de los 5 minutos\ny la notificación del análisis en pausa (RN-17)
+else algún análisis quedó "cancelado"
+  ui -> inv: muestra que el análisis se canceló\npor falta de respuesta (RN-17)
 else algún análisis llegó a "error"
   ui -> inv: muestra el mensaje armado con la etapa,\ny habilita la descarga del reporte de diagnóstico
   inv -> ui: selecciona la descarga del reporte de diagnóstico

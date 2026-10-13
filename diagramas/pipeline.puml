@@ -71,7 +71,6 @@ partition "3. Clasificación de conducta" {
 }
 
 partition "4. Resultados" {
-  :Se queda con los últimos 300 s del video\n(como máximo; si dura menos, todo)\ny renumera sus segundos de 1 a 300;
   :Guarda la conducta de cada segundo, los segundos\npor conducta de cada minuto y la copia del video\npara revisión (H.264);
 }
 stop

@@ -207,6 +207,11 @@ entity VIDEO {
   ..
   UK (idTanda, sesion)
 }
+note bottom of VIDEO
+  El video del Día 1 se guarda y no se analiza: no
+  tiene análisis ni observaciones. El archivo queda
+  nulo cuando el video se borra.
+end note
 
 entity ANALISIS {
   * idAnalisis : integer <<PK>>
@@ -222,9 +227,12 @@ note bottom of ANALISIS
   idVideo es único: un video tiene un solo análisis
   vigente, y el reanálisis reemplaza al anterior.
   rutaDiagnostico solo se llena si el estado es
-  «error», igual que VIDEO.archivo. No hay columna de
-  confianza ni de configuración: el modelo y el umbral
-  son constantes del pipeline. Los recuadros de los
+  «error». Al encolar el análisis, etapa, nivelClasif y
+  fechaAnalisis llevan un valor de arranque
+  (preprocesamiento, preciso y la fecha de encolado) que
+  el worker reemplaza. No hay columna de confianza ni de
+  configuración: el modelo y el umbral son constantes
+  del pipeline. Los recuadros de los
   tubos van en un archivo cuyo nombre sale del id del
   análisis; no se guarda su ruta.
 end note
@@ -337,7 +345,7 @@ VIDEO          "1" --o "0..4" OBSERVACION                : idVideo
 ESPECIMEN      "1" --o "0..1" OBSERVACION                : idEspecimen
 
 OBSERVACION    "1" --o "5"    INTERVALO                 : idObservacion
-INTERVALO      "1" --o "2..4" PRESENTA                  : idIntervalo
+INTERVALO      "1" --o "4"    PRESENTA                  : idIntervalo
 CONDUCTA       "1" --o "0..*" PRESENTA                  : conducta
 
 OBSERVACION    "1" --o "1..300" SEGUNDO                 : idObservacion

@@ -1,0 +1,65 @@
+@startuml seq_perfil
+' ================================================================
+'  Secuencia - Configuración de perfil del usuario
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Reemplaza a figures/mermaid/seq_perfil.png, que no tenia fuente en
+'  el repositorio (era una imagen sin .puml) y mostraba un "rol" del
+'  usuario que el perfil no edita.
+'
+'  Cubre CU-18 "Actualizar perfil propio" (RF-06): nombre, apellidos
+'  y correo. El cambio de contraseña es un diagrama aparte
+'  (seq_cambio_pass_inv.puml). El correo no puede estar en uso por
+'  otra cuenta (USUARIO.correo es clave alterna).
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/seq_perfil.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
+
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+u -> ui: abre su perfil desde el menú de usuario
+ui -> api: pide los datos del perfil\ncon la sesión del usuario
+api -> db: lee nombre, apellidos y correo del usuario
+db --> api: datos actuales
+api --> ui: datos del perfil
+ui --> u: muestra el formulario con los datos actuales\ny la opción de cambiar la contraseña
+
+u -> ui: modifica nombre, apellidos o correo y confirma
+ui -> api: envía los datos modificados
+
+alt el correo nuevo no tiene un formato válido
+  api --> ui: rechaza: el correo no es válido
+  ui --> u: muestra el error
+else el correo es válido
+  api -> db: ¿otra cuenta ya usa ese correo?
+  db --> api: sí / no
+
+  alt ya lo usa otra cuenta
+    api --> ui: informa el conflicto, no aplica el cambio
+    ui --> u: muestra el error
+  else el correo está libre
+    api -> db: actualiza nombre, apellidos y correo\ndel usuario de la sesión
+    db --> api: confirma
+    api --> ui: datos actualizados
+    ui --> u: muestra el perfil actualizado
+  end
+end
+
+note over u, ui
+  El cambio de contraseña se hace aparte
+  (ver seq_cambio_pass_inv).
+end note
+
+@enduml

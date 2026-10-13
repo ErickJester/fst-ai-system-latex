@@ -34,8 +34,7 @@ participant "Archivos" as fs
 
 u -> ui: en Progreso o en Resultados elige\n"Revisar segundo a segundo"
 ui -> api: pide los datos de la revisión del análisis
-api -> db: ¿el análisis está "completado" y el usuario subió el video
-o es Administrador?
+api -> db: ¿el análisis está "completado" y el usuario subió el video\no es Administrador?
 db --> api: sí / no
 
 alt el análisis no está completado o el usuario no puede corregirlo
@@ -69,8 +68,7 @@ else el análisis está completado
   opt el usuario elige "Reiniciar el análisis"
     u -> ui: elige "Reiniciar el análisis"
     ui -> api: pide reiniciar el análisis del video
-    api -> db: borra el resultado anterior
-y deja el análisis "en cola"
+    api -> db: borra el resultado anterior\ny deja el análisis "en cola"
     api --> ui: confirma el reinicio
   end
 end

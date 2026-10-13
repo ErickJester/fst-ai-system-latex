@@ -13,7 +13,7 @@ box('db', 'contenedor', 'db', ['PostgreSQL', 'Cola de tareas: tabla ANALISIS', '
 box('wk', 'contenedor', 'worker', ['Python · OpenCV · scikit-learn · PyTorch', 'Pipeline de análisis conductual', 'Consulta la cola periódicamente', 'Tareas diarias: borra videos a 30 días,', 'avisa del vencimiento y vigila el disco', 'Clasificador sobre rasgos: sin GPU'], 1060, 300, 280)
 box('vc', 'volumen', 'Volumen compartido', ['Videos originales', 'Copia del video para revisión (H.264)', 'Reportes PDF / CSV / XLSX', 'Reportes de diagnóstico'], 750, 500, 230, 'vol')
 box('vm', 'volumen', 'Volumen de modelos', ['Solo lectura para el worker', 'Archivo del clasificador de conducta'], 1060, 500, 280, 'vol')
-box('mail', 'servicio externo', 'Cuenta de correo', ['Configurable en el servidor', '(avisos, RF-33)'], 1450, 120, 200, 'ext')
+box('mail', 'servicio externo', 'Cuenta de correo', ['Cuenta configurable', '(avisos, RF-33)'], 1450, 120, 200, 'ext')
 
 SX, SY, SW, SH = 380, 40, 990, 640
 W = 1690; H = 740
@@ -41,9 +41,8 @@ edge([(SX + SW, B['mail']['y'] + 50), L('mail', 50)], 'ENVÍA CORREO', seg=0)
 out = []
 # Servidor
 out.append(f'<rect x="{SX}" y="{SY}" width="{SW}" height="{SH}" rx="8" fill="#f1eee5" stroke="#6b6b6b" stroke-dasharray="6,4"/>')
-out.append(f'<text x="{SX+16}" y="{SY+22}" class="st">«servidor»</text>')
-out.append(f'<text x="{SX+16}" y="{SY+40}" class="nm" text-anchor="start">Servidor institucional ESCOM · Docker Compose</text>')
-out.append(f'<text x="{SX+16}" y="{SY+56}" class="st">o cualquier equipo con Docker (RNF-10)</text>')
+out.append(f'<text x="{SX+16}" y="{SY+22}" class="st">«docker compose»</text>')
+out.append(f'<text x="{SX+16}" y="{SY+40}" class="nm" text-anchor="start">Contenedores del sistema</text>')
 
 labs = []
 for pts, label, seg, dy in edges:
@@ -80,14 +79,14 @@ ly = 710
 legend = f'''<g transform="translate(40,{ly})" class="lg">
 <rect x="0" y="-8" width="22" height="14" rx="3" fill="#faf9f5" stroke="#1a1a1a"/><text x="30" y="3">CONTENEDOR</text>
 <rect x="130" y="-8" width="22" height="14" rx="3" fill="#ece7d8" stroke="#1a1a1a"/><text x="160" y="3">VOLUMEN</text>
-<rect x="250" y="-8" width="22" height="14" rx="3" fill="#faf9f5" stroke="#1a1a1a" stroke-dasharray="4,3"/><text x="280" y="3">FUERA DEL SERVIDOR</text>
+<rect x="250" y="-8" width="22" height="14" rx="3" fill="#faf9f5" stroke="#1a1a1a" stroke-dasharray="4,3"/><text x="280" y="3">FUERA DE DOCKER</text>
 <line x1="440" y1="0" x2="468" y2="0" stroke="#1a1a1a"/><path d="M462,-4 L468,0 L462,4" fill="none" stroke="#1a1a1a"/><text x="478" y="3">COMUNICACIÓN</text>
 <rect x="600" y="-8" width="22" height="14" rx="3" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/><text x="630" y="3">PIEZA CLAVE: WORKER SEPARADO DEL BACKEND</text>
 </g>'''
 
 svg = f'''<svg viewBox="0 10 {W} {H-10}" role="img" aria-labelledby="dp-title dp-desc" xmlns="http://www.w3.org/2000/svg">
-<title id="dp-title">Diagrama de despliegue del sistema</title>
-<desc id="dp-desc">Cuatro contenedores Docker (frontend, backend, worker y base de datos) y dos volúmenes en un servidor, con el navegador del investigador y una cuenta de correo fuera de él.</desc>
+<title id="dp-title">Contenedores del sistema</title>
+<desc id="dp-desc">Cuatro contenedores Docker (frontend, backend, worker y base de datos) y dos volúmenes en Docker Compose, con el navegador del investigador y una cuenta de correo fuera de él.</desc>
 <defs><marker id="d-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#1a1a1a" stroke-width="1.2"/></marker></defs>
 <style>
 .a{{font:400 9px 'Geist Mono',monospace;fill:#1a1a1a}}
@@ -102,7 +101,7 @@ svg = f'''<svg viewBox="0 10 {W} {H-10}" role="img" aria-labelledby="dp-title dp
 
 page = f'''<!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Diagrama de despliegue</title>
+<title>Contenedores del sistema</title>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
 html,body{{height:100%;margin:0;background:#faf9f5}}

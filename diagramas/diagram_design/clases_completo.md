@@ -118,4 +118,17 @@ sube y se guarda, pero no se analiza. Por eso cambiaron tres multiplicidades:
 
 `Video` pasa de `validarFormatoMp4()` a `validarFormato()` y `validarOrientacion()`, y la
 multiplicidad entre `Intervalo` y `Conducta` quedó como `0..*` del lado de `Intervalo` y
-`2..4` del lado de `Conducta`, como en `clases.puml`.
+`4` del lado de `Conducta` (cambió de `2..4` el 12-oct: cada minuto guarda siempre las cuatro conductas, con 0 segundos si no apareció), como en `clases.puml`.
+
+## Métodos agregados el 12-oct
+
+Se agregaron a `clases.puml` y a este diagrama los métodos que salen de las decisiones y
+requisitos vigentes (no están en el grafo, que solo describe datos):
+
+- `Usuario.reiniciarAnalisis(idAnalisis)`: el investigador puede reiniciar un análisis desde la
+  revisión (D-60, D-68, RN-04).
+- `Administrador.modificarCuentaUsuario(id, datos)`: incluye el rol (D-72, RF-05).
+- `Worker.avisarVencimientos()` y `Worker.vigilarDisco()`: junto con `borrarVideosExpirados()`,
+  las tareas diarias del worker (D-82, RF-24, RF-29).
+- `PipelineAnalisis.pausarAnalisis()`, `cancelarAnalisis()` y `generarCopiaRevision(video)`: la pausa
+  y la cancelación por espécimen que no se ve (RN-17) y la copia H.264 para revisión (D-58).
