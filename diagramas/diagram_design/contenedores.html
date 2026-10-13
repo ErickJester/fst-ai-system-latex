@@ -26,7 +26,7 @@ svg{display:block;height:100vh;width:auto}
 <path d="M1060,330 L905,330 L905,220" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#d-arr)"/>
 <path d="M670,390 L825,390 L825,500" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#d-arr)"/>
 <path d="M1060,390 L905,390 L905,500" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#d-arr)"/>
-<path d="M1100,442 L1100,500" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#d-arr)"/>
+<path d="M1100,470 L1100,500" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#d-arr)"/>
 <path d="M1370,170 L1450,170" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#d-arr)"/>
 <text x="294" y="245" text-anchor="end" class="r">CARGA LA APP</text>
 <rect x="285" y="355" width="81" height="11" fill="#f1eee5"/><text x="325" y="364" text-anchor="middle" class="r">API REST + JWT</text>
@@ -35,7 +35,7 @@ svg{display:block;height:100vh;width:auto}
 <rect x="692" y="375" width="112" height="11" fill="#f1eee5"/><text x="748" y="384" text-anchor="middle" class="r">LEE Y SIRVE ARCHIVOS</text>
 <rect x="934" y="375" width="96" height="11" fill="#f1eee5"/><text x="982" y="384" text-anchor="middle" class="r">GUARDA RESULTADOS</text>
 <rect x="1375" y="155" width="70" height="11" fill="#f1eee5"/><text x="1410" y="164" text-anchor="middle" class="r">ENVÍA CORREO</text>
-<text x="1108" y="474" class="r">CARGA AL INICIAR (SOLO LECTURA)</text>
+<text x="1108" y="488" class="r">CARGA AL INICIAR (SOLO LECTURA)</text>
 <rect x="40" y="300" width="200" height="86" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="6,4"/>
 <text x="140.0" y="314" text-anchor="middle" class="st">«dispositivo»</text>
 <text x="140.0" y="330" text-anchor="middle" class="nm">Equipo del investigador</text>
@@ -64,24 +64,27 @@ svg{display:block;height:100vh;width:auto}
 <text x="762" y="178" class="a">PostgreSQL</text>
 <text x="762" y="192" class="a">Cola de tareas: tabla ANALISIS</text>
 <text x="762" y="206" class="a">Esquema relacional (15 tablas)</text>
-<rect x="1060" y="300" width="280" height="142" rx="6" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/>
+<rect x="1060" y="300" width="280" height="170" rx="6" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/>
 <text x="1200.0" y="314" text-anchor="middle" class="st">«contenedor»</text>
 <text x="1200.0" y="330" text-anchor="middle" class="nm">worker</text>
 <line x1="1060" y1="340" x2="1340" y2="340" stroke="#d9532c"/>
 <text x="1072" y="358" class="a">Python · OpenCV · scikit-learn · PyTorch</text>
 <text x="1072" y="372" class="a">Pipeline de análisis conductual</text>
-<text x="1072" y="386" class="a">Consulta la cola periódicamente</text>
-<text x="1072" y="400" class="a">Tareas diarias: borra videos a 30 días,</text>
-<text x="1072" y="414" class="a">avisa del vencimiento y vigila el disco</text>
-<text x="1072" y="428" class="a">Clasificador sobre rasgos: sin GPU</text>
-<rect x="750" y="500" width="230" height="114" rx="6" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1072" y="386" class="a">Consulta la cola; un video a la vez</text>
+<text x="1072" y="400" class="a">Al arrancar, retoma lo que quedó a medias</text>
+<text x="1072" y="414" class="a">Diarias (madrugada): borra videos a 30 días,</text>
+<text x="1072" y="428" class="a">avisa del vencimiento y vigila el disco</text>
+<text x="1072" y="442" class="a">Revisa el disco antes de cada análisis</text>
+<text x="1072" y="456" class="a">Clasificador sobre rasgos: sin GPU</text>
+<rect x="750" y="500" width="230" height="128" rx="6" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1"/>
 <text x="865.0" y="514" text-anchor="middle" class="st">«volumen»</text>
 <text x="865.0" y="530" text-anchor="middle" class="nm">Volumen compartido</text>
 <line x1="750" y1="540" x2="980" y2="540" stroke="#1a1a1a"/>
 <text x="762" y="558" class="a">Videos originales</text>
 <text x="762" y="572" class="a">Copia del video para revisión (H.264)</text>
-<text x="762" y="586" class="a">Reportes PDF / CSV / XLSX</text>
-<text x="762" y="600" class="a">Reportes de diagnóstico</text>
+<text x="762" y="586" class="a">Por análisis: recuadros, imagen y datos</text>
+<text x="762" y="600" class="a">de la pausa y reporte de diagnóstico</text>
+<text x="762" y="614" class="a">Reportes PDF / CSV / XLSX</text>
 <rect x="1060" y="500" width="280" height="86" rx="6" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1"/>
 <text x="1200.0" y="514" text-anchor="middle" class="st">«volumen»</text>
 <text x="1200.0" y="530" text-anchor="middle" class="nm">Volumen de modelos</text>

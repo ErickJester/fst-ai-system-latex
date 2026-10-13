@@ -74,3 +74,11 @@ python diagramas/diagram_design/generadores/gen_flujo.py diagramas/diagram_desig
 - **Reinicio:** el investigador puede reiniciar el análisis desde la pantalla de revisión; el
   resultado anterior se borra al empezar el nuevo (RN-04, D-68). Está en el cuadro final del
   investigador.
+
+## Actualización del 12-oct (D-84 a D-89)
+
+- **Worker:** toma la tarea más antigua y procesa un video a la vez (D-85).
+- **Pausa:** guarda una imagen fija, avisa, y el usuario ajusta el recuadro o cancela; el
+  análisis continúa desde ahí, y sin respuesta en 5 minutos se cancela (D-89).
+- **Falla:** cualquier fallo imprevisto termina igual, con «error» y reporte de diagnóstico, y
+  el worker sigue con el siguiente video (D-88).
