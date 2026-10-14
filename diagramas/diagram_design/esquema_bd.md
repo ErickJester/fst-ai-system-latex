@@ -8,7 +8,7 @@ Versión en PlantUML: [`../esquema_fisico.puml`](../esquema_fisico.puml).
 
 ## Qué muestra
 
-Las 15 tablas de PostgreSQL con sus columnas y tipos, y las 17 llaves foráneas con su
+Las 13 tablas de PostgreSQL con sus columnas y tipos, y las 14 llaves foráneas con su
 cardinalidad. Cada columna lleva su marca: **PK** (llave primaria), **FK** (foránea) o **UK**
 (única). Las restricciones de varias columnas (`UK (...)`, `CK ...`) van debajo de cada tabla.
 Abajo a la izquierda están los ocho dominios cerrados con sus valores.
@@ -21,7 +21,7 @@ Abajo a la izquierda están los ocho dominios cerrados con sus valores.
 - Las tablas de color más oscuro (`NOTIFICACION`, `REPORTE`) son soporte del sistema.
 - `ANALISIS.idVideo` es única: un video tiene un solo análisis vigente (D-24). Solo existe
   para videos del Día 2 (D-71).
-- `PRESENTA` tiene siempre cuatro filas por intervalo, una por conducta, aunque tenga 0 s.
+- Los totales por minuto no tienen tabla (D-52): se calculan desde `SEGUNDO`. El esquema tiene 13 tablas y 14 llaves foráneas.
 
 ## Fuente
 

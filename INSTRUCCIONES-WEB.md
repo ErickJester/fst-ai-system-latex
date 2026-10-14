@@ -308,9 +308,9 @@ segundos. Renumera las filas de 1 a 300 antes de guardarlas (D-54). Por cada esp
 - una `OBSERVACION` del video;
 - **una fila en `SEGUNDO` por cada segundo analizado** (hasta 300), con `conducta` (nula si el
   worker no decidió ese segundo o "no se ve") y `origen = 'maquina'`;
-- los 5 `INTERVALO` (minutos 1 a 5) y, en `PRESENTA`, **una fila por cada una de las cuatro
-  conductas**, incluso con 0 segundos, con el conteo de segundos de ese minuto. Un mismo
-  análisis puede mezclar las cuatro conductas.
+
+Los totales por minuto no se guardan: se calculan desde `SEGUNDO` (D-52). Un mismo
+análisis puede mezclar las cuatro conductas.
 
 En cada instante un espécimen está en exactamente una conducta: nado activo, inmovilidad,
 escalamiento o conducta activa. Por eso, en un intervalo de un minuto, la suma de segundos de
@@ -340,7 +340,7 @@ Diagrama de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\d
 El investigador que subió el video (o un Administrador) puede reiniciar un análisis
 **`completado`** desde la pantalla de revisión (sección 9.7). El backend, en una sola
 transacción: **borra el resultado anterior** (las `OBSERVACION` de ese video con sus
-`INTERVALO`, `SEGUNDO` y `PRESENTA`) *al empezar* el nuevo, no al terminar; borra los reportes
+`SEGUNDO`) *al empezar* el nuevo, no al terminar; borra los reportes
 guardados del experimento para que se regeneren; y deja el análisis en `en cola` con los
 valores de arranque de `etapa`, `nivelClasif` y `fechaAnalisis` (D-79). El worker lo toma como
 cualquier otro. No se puede reiniciar un análisis en `error`, `en pausa`, `cancelado` ni en
@@ -416,8 +416,9 @@ Mientras alguna tanda siga en error, el experimento sigue en `error`.
 - **De dónde salen los segundos.** La red por segundo deja un `X_cnnseg.csv` con una fila por
   espécimen y segundo (`especimen` de 1 a 4, la posición en el cuadro; `segundo`; `clase`, que
   es la conducta; y columnas de probabilidad que la base **no** guarda) y un
-  `X_cnnseg_resumen.csv` con los segundos por conducta de cada minuto. El worker lo convierte
-  en filas de `SEGUNDO` (solo `conducta`) y de `PRESENTA`. La conducta vale `nado`,
+  `X_cnnseg_resumen.csv` con los segundos por conducta de cada minuto. El worker convierte el primero
+  en filas de `SEGUNDO` (solo `conducta`) y no guarda el resumen: los totales por minuto se
+  calculan desde `SEGUNDO` (D-52). La conducta vale `nado`,
   `inmovilidad`, `escalamiento`, `activa` o vacío si no decidió; el worker traduce `nado` a
   `nado activo` y `activa` a `conducta activa`, y el vacío queda como `conducta` nula.
   `especimen` se enlaza con `ESPECIMEN.numeroCilindro`. El CSV trae un segundo por cada segundo
@@ -428,7 +429,7 @@ Mientras alguna tanda siga en error, el experimento sigue en `error`.
 
 ## 5. Modelo de datos (PostgreSQL)
 
-15 tablas. Esta es la única versión vigente.
+13 tablas. Esta es la única versión vigente.
 
 Fuentes del modelo (solo consulta; si difieren de esta guía, manda esta guía):
 - Grafo relacional vigente: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\grafo_relacional_3_vigente.puml`
@@ -438,7 +439,7 @@ Fuentes del modelo (solo consulta; si difieren de esta guía, manda esta guía):
 
 **Jerarquía:** un experimento tiene grupos; un grupo tiene tandas; una tanda tiene
 especímenes y hasta dos videos (Día 1 y Día 2); un video **del Día 2** tiene un análisis y, por
-cada espécimen, una observación con 5 intervalos y sus segundos por conducta. El video del
+cada espécimen, una observación y una fila por cada segundo analizado. El video del
 Día 1 no tiene análisis ni observaciones (D-71).
 
 Versión completa en PlantUML (Anexo A.4): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\esquema_fisico.puml`
@@ -457,9 +458,6 @@ erDiagram
   VIDEO ||--o| ANALISIS : "idVideo UNIQUE (solo Día 2)"
   VIDEO ||--o{ OBSERVACION : tiene
   ESPECIMEN ||--o| OBSERVACION : aparece
-  OBSERVACION ||--|{ INTERVALO : "5 por observación"
-  INTERVALO ||--|{ PRESENTA : tiene
-  CONDUCTA ||--o{ PRESENTA : "se presenta"
   OBSERVACION ||--|{ SEGUNDO : "un renglón por segundo"
   CONDUCTA ||--o{ SEGUNDO : "conducta"
 
@@ -503,13 +501,7 @@ erDiagram
   OBSERVACION { int idObservacion PK
                 int idEspecimen FK
                 int idVideo FK }
-  INTERVALO { int idIntervalo PK
-              int idObservacion FK
-              smallint minuto }
   CONDUCTA { varchar nombre PK }
-  PRESENTA { int idIntervalo PK
-             varchar conducta PK
-             numeric segundos }
   SEGUNDO { int idObservacion PK
             smallint segundo PK
             varchar conducta FK
@@ -545,7 +537,7 @@ ejemplo «Tanda A · Espécimen 2».
 - **Todas** las llaves foráneas son `ON UPDATE NO ACTION ON DELETE NO ACTION`. La base
   rechaza el borrado en vez de propagarlo. Por eso `USUARIO.activo` existe: dar de baja
   sin borrar. Para borrar un experimento, la aplicación debe borrar de las hojas hacia
-  arriba: `SEGUNDO`, `PRESENTA`, `INTERVALO`, `OBSERVACION`, `ANALISIS`, `VIDEO`, `ESPECIMEN`,
+  arriba: `SEGUNDO`, `OBSERVACION`, `ANALISIS`, `VIDEO`, `ESPECIMEN`,
   `TANDA`, `GRUPO`, `REPORTE`, `NOTIFICACION`, `EXPERIMENTO`.
 - Contraseñas con **bcrypt + sal**. Nunca texto plano.
 
@@ -562,13 +554,12 @@ ejemplo «Tanda A · Espécimen 2».
 | `origen_segundo` | `maquina`, `confirmada`, `corregida`, `dudosa` |
 
 `CONDUCTA` es tabla y no dominio. Valores iniciales: `nado activo`, `inmovilidad`,
-`escalamiento` y `conducta activa`. Cada intervalo (`INTERVALO`) tiene en `PRESENTA` una
-fila por cada una de las cuatro conductas, **incluso con 0 segundos** (la
-cardinalidad en el diseño es exactamente 4).
+`escalamiento` y `conducta activa`. Los totales por minuto no tienen tabla: se calculan desde `SEGUNDO`
+(el minuto sale del número de segundo; D-52).
 
 `SEGUNDO` guarda la conducta de cada espécimen en cada segundo analizado (hasta 300 por
-observación). Es la fuente de la pantalla de revisión; `PRESENTA` es su resumen por minuto
-y se recalcula cada vez que el usuario guarda correcciones. Valores de `origen` (cuatro,
+observación). Es la fuente de la pantalla de revisión; de él salen también los totales y el
+desglose por minuto, que no se guardan (D-52). Valores de `origen` (cuatro,
 D-80): `maquina` (la puso el sistema, sin revisar), `confirmada` (el usuario vio el segundo y dejó la
 conducta del sistema), `corregida` (la cambió) y `dudosa` (el segundo queda vacío porque el
 usuario lo marcó como dudoso). `conducta` nula significa que el segundo no tiene conducta: el
@@ -580,7 +571,6 @@ sistema no se conserva aparte: al corregir se reemplaza, y `origen` dice que el 
   resultado anterior, no hay historial.
 - `GRUPO`: `UNIQUE (idExperimento, etiqueta)`. `TANDA`: `UNIQUE (idGrupo, ordinal)`.
 - `VIDEO`: `UNIQUE (idTanda, sesion)`. `OBSERVACION`: `UNIQUE (idEspecimen, idVideo)`.
-- `INTERVALO`: `UNIQUE (idObservacion, minuto)`.
 - `ESPECIMEN`: `UNIQUE (idTanda, numeroCilindro)`.
 - `EXPERIMENTO.nombre` es `UNIQUE` en todo el sistema.
 - `ANALISIS.rutaDiagnostico` solo se llena cuando `estado = 'error'`.
@@ -739,7 +729,7 @@ segundos. `revisado` es verdadero si algún `origen` del espécimen no es `maqui
 ```
 `PUT .../segundos` recibe solo los segundos que cambiaron:
 `{"especimenes": [{"numeroCilindro": 1, "segundos": [{"segundo": 12, "conducta": "inmovilidad",
-"origen": "corregida"}]}]}`. Responde 200 con los totales por minuto recalculados.
+"origen": "corregida"}]}]}`. Responde 200; los totales por minuto no se guardan, se calculan desde `SEGUNDO`.
 
 **Usuarios (administración).** `GET /admin/users?rol=&estado=` devuelve una lista de
 `{"idInstitucional", "nombre", "apellidos", "correo", "rol", "activo", "nExperimentos"}`;
@@ -763,7 +753,7 @@ contraseña temporal **una sola vez**: `{"passwordTemporal": "..."}`.
 | R-11 | **Eliminada (D-44).** No hay comparación Día 1 vs Día 2. Se comparan los grupos entre sí con el Día 2; el Día 1 solo sirve para verificar que los especímenes llegaron igual de estresados. |
 | R-12 | Cuando el clasificador sabe que el espécimen no está inmóvil pero no decide entre nado y escalamiento, esos segundos se guardan como "conducta activa", una cuarta conducta. Un mismo análisis puede mezclar las cuatro. Los reportes deben mostrarla como una columna más. En los bloques de 5 s también resuelve el empate entre nado activo y escalamiento (sección 9.5). |
 | R-13 | De cada video se guardan y se muestran como máximo los **últimos 300 s** (de final a inicio), sin mínimo. La CNN analiza el video completo y el worker descarta el principio, donde a veces aparecen personas, y renumera de 1 a 300 (D-54). |
-| R-14 | Solo se puede revisar un análisis en estado `completado`. Al revisar, el usuario corrige las etiquetas segundo a segundo; cada corrección queda en `SEGUNDO` con `origen` `confirmada`, `corregida` o `dudosa`, y al guardar el backend **recalcula `INTERVALO` y `PRESENTA`** de esos especímenes dentro de la misma transacción. La conducta que puso el sistema se reemplaza al corregir; `origen` conserva que el segundo fue revisado. **Solo corrigen el investigador que subió el video y el Administrador** (D-57). Corregir etiquetas no cambia el modelo ni el video: si lo que cambia es el video o el modelo, es un análisis nuevo (reinicio, R-04). El video que se reproduce es la copia H.264 que el worker genera al terminar (D-58). |
+| R-14 | Solo se puede revisar un análisis en estado `completado`. Al revisar, el usuario corrige las etiquetas segundo a segundo; cada corrección queda en `SEGUNDO` con `origen` `confirmada`, `corregida` o `dudosa`, y al guardar el backend solo actualiza `SEGUNDO`: los totales por minuto no se guardan, se calculan desde `SEGUNDO` (D-52). La conducta que puso el sistema se reemplaza al corregir; `origen` conserva que el segundo fue revisado. **Solo corrigen el investigador que subió el video y el Administrador** (D-57). Corregir etiquetas no cambia el modelo ni el video: si lo que cambia es el video o el modelo, es un análisis nuevo (reinicio, R-04). El video que se reproduce es la copia H.264 que el worker genera al terminar (D-58). |
 | R-15 | Si en un segundo no se ve al espécimen, ese segundo se registra como "no se ve". Tres segundos seguidos así dejan el análisis `en pausa`, se guarda una imagen fija de ese instante, se avisa al usuario con una notificación `analisis en pausa` y se le pide ajustar el recuadro del cilindro. El worker atiende mientras tanto el siguiente análisis. Con el ajuste, el análisis vuelve al frente de la cola y continúa desde el segundo de la pausa. Si el usuario cancela, o no responde en 5 minutos, el análisis pasa a `cancelado` (con notificación `analisis cancelado` solo si fue por falta de respuesta) (RN-17, D-59, D-67, D-89). |
 | R-16 | Siempre debe existir al menos un Administrador activo: el backend rechaza desactivar la última cuenta de Administrador activa o quitarle el rol (RN-16, D-61, D-72). El Administrador sí puede cambiar el rol de una cuenta desde el panel de administración. |
 
@@ -1089,8 +1079,8 @@ Cómo funciona:
   borra el resultado anterior y el análisis vuelve a "en cola". Solo aparece si el análisis
   está `completado`.
 - **Borrador:** mientras revisas, el avance se guarda en el navegador; al pulsar "Guardar"
-  se manda al servidor (`PUT .../segundos`), que actualiza `SEGUNDO` y recalcula los
-  totales por minuto.
+  se manda al servidor (`PUT .../segundos`), que actualiza `SEGUNDO`; los totales por
+  minuto se calculan desde `SEGUNDO`.
 - **Resumen:** una tabla con los segundos por conducta de cada espécimen antes de guardar.
 - Nombres en pantalla: "Nado", "Inmovilidad", "Escalamiento", "Activa", "Dudosa". En la
   base: `nado activo`, `inmovilidad`, `escalamiento`, `conducta activa` y nulo. "Dudosa"
@@ -1282,8 +1272,8 @@ a segundo, resultados, notificaciones y tareas programadas) están en el Anexo A
    hash bcrypt, pone `cambioRequerido = true` e inserta la fila en `ADMINISTRADOR`. Los valores
    reales los pone el usuario: no inventes ninguno ni los escribas en el SQL.
 8. ~~Conteo de conductas~~ **Resuelto (RF-18).** No hay duración mínima: cada segundo
-   recibe una conducta y ninguna se descarta por durar poco. `INTERVALO` y `PRESENTA` no
-   cambian: `PRESENTA` cuenta los segundos de cada conducta en cada minuto.
+   recibe una conducta y ninguna se descarta por durar poco. Los totales por minuto
+   se calculan contando los segundos de cada conducta en `SEGUNDO`.
 9. ~~"Último acceso" de cada usuario~~ **Resuelto (usuario, 3-oct-2026).** Se quita:
    la lista de administración no muestra último acceso y `USUARIO` no lleva esa columna.
 10. **[ABIERTO] Log de ejecución del análisis.** Se quería un registro expandible en la
@@ -1332,9 +1322,9 @@ a segundo, resultados, notificaciones y tareas programadas) están en el Anexo A
 18. ~~Quién puede corregir y cómo cuenta~~ **Resuelto (usuario, 11-oct-2026, D-57).**
     Corrige el investigador que subió el video y el Administrador. Corregir no mejora el
     modelo; si cambia el video o el modelo, es un análisis nuevo (reinicio, R-04). Al guardar
-    se recalculan los totales por minuto y los reportes se regeneran. **[ABIERTO]** Si los
+    los totales por minuto reflejan los cambios (se calculan desde `SEGUNDO`) y los reportes se regeneran. **[ABIERTO]** Si los
     reportes usan las correcciones y marcan que fueron revisadas (D-57 lo deja sin aclarar).
-    **Por defecto:** los reportes usan los datos actuales de `SEGUNDO` y `PRESENTA` (con las
+    **Por defecto:** los reportes usan los datos actuales de `SEGUNDO` (con las
     correcciones) e indican si el análisis tuvo revisión humana (algún `origen` distinto de
     `maquina`).
 
@@ -1344,7 +1334,7 @@ Cada paso termina con algo que se puede probar.
 
 1. **Docker Compose con `db` y `backend`** que arrancan (parte del Anexo C). Prueba:
    `docker compose up` y un endpoint de salud responde.
-2. **Base de datos:** usa el SQL del Anexo B (dominios, 15 tablas, restricciones
+2. **Base de datos:** usa el SQL del Anexo B (dominios, 13 tablas, restricciones
    y datos semilla de `CONDUCTA`). El administrador inicial no va en el SQL: lo crea el
    comando `flask crear-admin` (sección 11, punto 7).
    Pruébalo contra un PostgreSQL real y corrige lo que falle.
@@ -1362,7 +1352,7 @@ Cada paso termina con algo que se puede probar.
    desglose por minuto, comparación entre grupos (Día 2) y bloques de 5 s.
 8. **Reportes:** CSV, XLSX, PDF con regeneración por vigencia, y PDF de diagnóstico.
    **Revisión segundo a segundo:** las rutas de revisión, video, guardar y reiniciar de la
-   sección 6, el recálculo de `PRESENTA` y la pantalla 9.7 (después de tener resultados y reportes funcionando).
+   sección 6, el cálculo de los totales por minuto y la pantalla 9.7 (después de tener resultados y reportes funcionando).
 9. **Tareas programadas** (las ejecuta el worker, D-82; impleméntalas en `worker_fake`, en un
    módulo aparte, sección 8): borrado a 30 días, aviso a 7 días, vigilancia de disco.
 10. **Frontend:** primero inicio de sesión y dashboard, luego crear experimento, progreso (con
@@ -1465,7 +1455,7 @@ rectangle "Docker: worker\n(lo desarrolla otra persona)" as C_WK #FEF9E7 {
 
 rectangle "Capa de datos" as DATOS #F4F6F7 {
   rectangle "Docker: db" as C_DB #EBF5FB {
-    database "PostgreSQL\n\nEsquema relacional\n(15 tablas)" as DB
+    database "PostgreSQL\n\nEsquema relacional\n(13 tablas)" as DB
   }
   rectangle "Volumen videos_reportes\n(compartido)" as C_FS #EAEDED {
     folder "Videos .mp4 / .mov originales\nCopia del video para revision (H.264)\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF\nArchivos de pausa (imagen fija y recuadros)" as FS
@@ -1577,7 +1567,7 @@ package "Servicios" as SERV {
 }
 
 package "Acceso a datos" {
-  [Modelos SQLAlchemy\n15 tablas] as m
+  [Modelos SQLAlchemy\\n13 tablas] as m
 }
 
 database "PostgreSQL" as db
@@ -1760,30 +1750,9 @@ entity OBSERVACION {
   UK (idEspecimen, idVideo)
 }
 
-entity INTERVALO {
-  * idIntervalo : integer <<PK>>
-  --
-  idObservacion : integer <<FK>>
-  minuto : smallint
-  ..
-  UK (idObservacion, minuto)
-}
-
 entity CONDUCTA {
   * nombre : varchar(n) <<PK>>
 }
-
-entity PRESENTA {
-  * idIntervalo : integer <<PK>> <<FK>>
-  * conducta : varchar(n) <<PK>> <<FK>>
-  --
-  segundos : numeric(p,s)
-}
-note bottom of PRESENTA
-  Resumen por minuto. Una fila por cada una de las
-  cuatro conductas, incluso con 0 segundos. Se recalcula
-  desde SEGUNDO cada vez que el usuario guarda correcciones.
-end note
 
 entity SEGUNDO {
   * idObservacion : integer <<PK>> <<FK>>
@@ -1841,9 +1810,6 @@ VIDEO          "1" --o "0..4" OBSERVACION                : idVideo
 
 ESPECIMEN      "1" --o "0..1" OBSERVACION                : idEspecimen
 
-OBSERVACION    "1" --o "5"    INTERVALO                 : idObservacion
-INTERVALO      "1" --o "4"    PRESENTA                  : idIntervalo
-CONDUCTA       "1" --o "0..*" PRESENTA                  : conducta
 OBSERVACION    "1" --o "1..300" SEGUNDO                 : idObservacion
 CONDUCTA       "0..1" --o "0..*" SEGUNDO                : conducta
 @enduml
@@ -1982,14 +1948,8 @@ package P4_Resultados_y_reportes {
   class Observacion {
     +calcularBloques() : List<String>
   }
-  class Intervalo {
-    -minuto : Integer
-  }
   class Conducta {
     -nombre : String
-  }
-  class PRESENTA {
-    -segundos : Float
   }
   class Segundo {
     -segundo : Integer
@@ -2037,14 +1997,11 @@ Especimen "1" --> "0..*" ROI     : "se delimita con"
 PipelineAnalisis ..> Video       : procesa
 PipelineAnalisis ..> Analisis    : actualiza
 PipelineAnalisis ..> Observacion : origina
-PipelineAnalisis ..> PRESENTA    : genera
+PipelineAnalisis ..> Segundo      : genera
 
 Especimen   "1" --> "0..1" Observacion : "aparece en"
 Video       "1" --> "0..4" Observacion : contiene
-Observacion "1" *--> "5"   Intervalo   : "se divide en"
 Observacion "1" *--> "1..300" Segundo  : "se etiqueta en"
-Intervalo "0..*" -- "4" Conducta : presenta
-(Intervalo, Conducta) .. PRESENTA
 
 Experimento "1"    --> "0..*" Reporte      : origina
 Experimento "0..1" --> "0..*" Notificacion : origina
@@ -2762,7 +2719,7 @@ alt se hallaron los tubos
 
     loop por cada espécimen detectado en el video
       w -> db: guarda su observación de este video
-      w -> db: guarda sus 5 intervalos, con los segundos\npor conducta de cada uno
+      w -> db: guarda una etiqueta por cada segundo analizado (SEGUNDO)
     end
 
     w -> fs: guarda la copia del video recortada a lo analizado,\nen un formato que el navegador reproduce (H.264, D-58)
@@ -2939,7 +2896,7 @@ alt el usuario no es quien lo creó ni es Administrador
 else algún análisis del experimento está "procesando" o "en pausa"
   api --> ui: 409, "Espera a que termine el análisis o cancélalo"
 else se puede eliminar
-  api -> db: borra en orden, de las hojas hacia arriba:\nSEGUNDO, PRESENTA, INTERVALO, OBSERVACION, ANALISIS,\nVIDEO, ESPECIMEN, TANDA, GRUPO,\nREPORTE, NOTIFICACION, EXPERIMENTO\n(todo en una sola transacción)
+  api -> db: borra en orden, de las hojas hacia arriba:\nSEGUNDO, OBSERVACION, ANALISIS,\nVIDEO, ESPECIMEN, TANDA, GRUPO,\nREPORTE, NOTIFICACION, EXPERIMENTO\n(todo en una sola transacción)
   db --> api: confirma
   api -> fs: borra los videos, reportes, diagnósticos y carpetas de pausa del experimento
   api --> ui: 200 OK
@@ -2990,7 +2947,7 @@ else se puede revisar
   end
   opt el usuario elige "Reiniciar el análisis" (RN-04, D-60)
     ui -> api: POST .../restart
-    api -> db: [transacción] borra el resultado anterior\n(observaciones, intervalos, segundos y resúmenes de ese video)
+    api -> db: [transacción] borra el resultado anterior\n(observaciones y segundos de ese video)
     api -> db: [transacción] deja el análisis "en cola"\ncon sus valores de arranque
     api --> ui: 202 Accepted
     ui --> u: vuelve a la pantalla de progreso
@@ -2998,7 +2955,6 @@ else se puede revisar
   u -> ui: Guardar (Ctrl+S)
   ui -> api: PUT .../segundos\n{cambios: [{numeroCilindro, segundo, conducta, origen}]}
   api -> db: [transacción] actualiza SEGUNDO\n(conducta y origen)
-  api -> db: [transacción] recalcula INTERVALO y PRESENTA\nde los especímenes tocados (4 filas por intervalo)
   api -> db: [transacción] actualiza nivelClasif\n(agrupado si queda algún segundo como conducta activa)
   api -> db: borra los reportes guardados del experimento\npara que se regeneren con los datos nuevos
   api -> fs: borra los archivos de esos reportes
@@ -3039,7 +2995,7 @@ loop por cada grupo
   api -> db: busca los especímenes del grupo, vía sus tandas
   api -> db: para cada espécimen, busca su observación\ndel video con sesión "Día 2"
   alt el espécimen ya tiene su Día 2 analizado
-    api -> db: suma los segundos por conducta\nde los 5 intervalos de esa observación
+    api -> db: cuenta los segundos de cada conducta\\nen los segundos de esa observación
     db --> api: segundos de nado activo, inmovilidad, escalamiento y conducta activa
   else el Día 2 de ese espécimen no tiene resultado\n(análisis en cola, procesando, con error, o sin subir)
     api -> api: marca al espécimen como dato faltante\npara este grupo
@@ -3357,29 +3313,12 @@ CREATE TABLE observacion (
   CONSTRAINT uq_observacion UNIQUE (idespecimen, idvideo)
 );
 
-CREATE TABLE intervalo (
-  idintervalo    integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  idobservacion  integer  NOT NULL
-    REFERENCES observacion (idobservacion) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  minuto         smallint NOT NULL CHECK (minuto BETWEEN 1 AND 5),
-  CONSTRAINT uq_intervalo UNIQUE (idobservacion, minuto)
-);
-
 CREATE TABLE conducta (
   nombre varchar(30) PRIMARY KEY
 );
 
-CREATE TABLE presenta (
-  idintervalo  integer     NOT NULL
-    REFERENCES intervalo (idintervalo) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  conducta     varchar(30) NOT NULL
-    REFERENCES conducta (nombre) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  segundos     numeric(6,2) NOT NULL CHECK (segundos >= 0 AND segundos <= 60),
-  PRIMARY KEY (idintervalo, conducta)
-);
-
 -- Una fila por espécimen y por segundo. Es lo que se revisa y corrige en la pantalla
--- de revisión; PRESENTA es su resumen por minuto y se recalcula al guardar.
+-- de revisión; los totales por minuto no se guardan: se calculan desde esta tabla.
 CREATE TABLE segundo (
   idobservacion  integer        NOT NULL
     REFERENCES observacion (idobservacion) ON UPDATE NO ACTION ON DELETE NO ACTION,
@@ -3423,7 +3362,7 @@ CREATE TABLE notificacion (
 CREATE INDEX ix_experimento_usuario   ON experimento (idinstitucional);
 CREATE INDEX ix_analisis_estado       ON analisis (estado);       -- el worker hace polling por aqui
 CREATE INDEX ix_observacion_video     ON observacion (idvideo);
-CREATE INDEX ix_presenta_conducta     ON presenta (conducta);
+CREATE INDEX ix_segundo_conducta      ON segundo (conducta);
 CREATE INDEX ix_notificacion_usuario  ON notificacion (idinstitucional, leido);
 CREATE INDEX ix_notificacion_experim  ON notificacion (idexperimento);
 CREATE INDEX ix_segundo_conducta      ON segundo (conducta);
@@ -3634,7 +3573,7 @@ CMD ["python", "worker_fake.py"]
 - al arrancar reencola los análisis `procesando` huérfanos y revisa las pausas sin archivo;
 - cada `WORKER_POLL_SECONDS` toma **un** análisis `en cola` (el más antiguo, con
   `FOR UPDATE SKIP LOCKED`), revisa el disco, recorre las tres etapas con una pausa entre cada una
-  y termina en `completado` (escribiendo observaciones, intervalos y segundos inventados, la copia
+  y termina en `completado` (escribiendo observaciones y segundos inventados, la copia
   `web.mp4` copiando el original y `cajas.json`), en `error` si el nombre del archivo contiene la
   palabra `falla`, o en `en pausa` si contiene `pausa` (escribe `pausa.jpg` con Pillow y
   `pausa.json`, y atiende el siguiente análisis);

@@ -275,24 +275,26 @@ la muestran como una cuarta columna (ver RN-13).
 
 \subsection{Módulo 4: Resultados}
 
-Al finalizar el análisis, el pipeline produce tres salidas:
+Al finalizar el análisis, el pipeline produce dos salidas:
 
 \begin{itemize}
-  \item \textbf{Tiempos por conducta}: segundos de nado activo, inmovilidad,
-        escalamiento y conducta activa por minuto, almacenados en
-        \texttt{PRESENTA} (una fila por intervalo y conducta, ligada a la
-        \texttt{OBSERVACION} del espécimen en ese video). El tiempo total por
-        espécimen y el desglose por minuto se derivan de esta misma tabla.
   \item \textbf{Etiqueta de cada segundo}: la conducta asignada a cada segundo
-        analizado, almacenada en \texttt{SEGUNDO}. Es la fuente de la pantalla de
-        revisión y de \texttt{PRESENTA}.
+        analizado, almacenada en \texttt{SEGUNDO} (ligada a la
+        \texttt{OBSERVACION} del espécimen en ese video). Es la fuente de la pantalla
+        de revisión y de todos los tiempos que muestra el sistema.
   \item \textbf{Copia del video para revisión}: el \textit{worker} genera, al
         terminar el análisis, una copia del video recortada a los segundos analizados
         en un formato que el navegador reproduce (H.264), para la pantalla de revisión.
 \end{itemize}
 
+Los tiempos por conducta ---los segundos de nado activo, inmovilidad, escalamiento y
+conducta activa de cada espécimen, su total y su desglose por minuto--- no se guardan:
+se calculan al mostrarse, contando los segundos de cada conducta en \texttt{SEGUNDO}
+(el minuto sale del número de segundo). Así no puede haber un total que contradiga a
+las etiquetas, y una corrección en la revisión cambia solo una fila.
+
 Además, los resultados se muestran en bloques de 5~segundos, la unidad de la técnica de
-muestreo por intervalos de la literatura. Los bloques no son una salida guardada: se calculan al mostrarse, a
+muestreo por intervalos de la literatura. Los bloques tampoco son una salida guardada: se calculan al mostrarse, a
 partir de la conducta de cada segundo almacenada en \texttt{SEGUNDO}, y el clasificador
 no interviene. La conducta de cada bloque es la que ocupa más de sus cinco segundos,
 como en el muestreo por intervalos de 5~s de Detke et~al.\ \cite{detke1995}, descrito por
@@ -366,8 +368,7 @@ sistema: un usuario crea experimentos; cada experimento se organiza en grupos
 (control, referencia, tratamiento); cada grupo se graba en una o más tandas de
 hasta cuatro especímenes; cada tanda tiene uno o dos videos (Día~1 y/o Día~2); y
 cada video del Día~2 se procesa mediante un análisis que produce observaciones de
-conducta por espécimen, mientras que el video del Día~1 se guarda sin análisis (\textbf{OBSERVACION}, \textbf{SEGUNDO}, \textbf{INTERVALO},
-\textbf{PRESENTA}, \textbf{CONDUCTA}). La figura muestra las entidades del dominio experimental; el subtipo
+conducta por espécimen, mientras que el video del Día~1 se guarda sin análisis (\textbf{OBSERVACION}, \textbf{SEGUNDO} y \textbf{CONDUCTA}). La figura muestra las entidades del dominio experimental; el subtipo
 \textbf{ADMINISTRADOR} (un usuario con permisos adicionales) y las entidades
 \textbf{REPORTE} y \textbf{NOTIFICACION}, derivadas del experimento, aparecen en el esquema
 físico.
@@ -450,8 +451,6 @@ clasificación de conducta (módulo 3).
   \item \textbf{OBSERVACION}: vincula un espécimen con el video en el que
         fue analizado.
 
-  \item \textbf{INTERVALO}: cada minuto analizado dentro de una observación.
-
   \item \textbf{CONDUCTA}: catálogo cerrado de las cuatro conductas (nado
         activo, inmovilidad, escalamiento y conducta activa, esta última
         cuando el clasificador no decide entre nado y escalamiento; ver RN-13).
@@ -459,12 +458,8 @@ clasificación de conducta (módulo 3).
   \item \textbf{SEGUNDO}: una fila por espécimen y por segundo analizado, con
         la conducta asignada (o ninguna, si el espécimen no se ve) y el origen
         de esa conducta (del sistema, confirmada, corregida o dudosa). Es lo que el usuario revisa y
-        corrige al terminar el análisis (ver RF-32).
-
-  \item \textbf{PRESENTA}: segundos de cada conducta dentro de cada
-        intervalo. Es la fuente de los tiempos totales y del desglose
-        por minuto, y se recalcula a partir de \texttt{SEGUNDO} cada vez que
-        el usuario guarda correcciones.
+        corrige al terminar el análisis (ver RF-32). De esta tabla se calculan los
+        tiempos totales y el desglose por minuto, que no se guardan.
 
   \item \textbf{REPORTE}: referencia a los archivos PDF, CSV y XLSX
         generados, con su ruta y fecha de creación. Se conservan aunque el
@@ -499,11 +494,11 @@ estuviese copiado en las tablas de videos y de resultados, una actualización pa
 produciría registros con datos contradictorios. Normalizar también hace que el
 esquema sea más fácil de mantener cuando el sistema evolucione durante TT-II.
 
-Las quince relaciones del sistema son: \texttt{USUARIO}, \texttt{ADMINISTRADOR},
+Las trece relaciones del sistema son: \texttt{USUARIO}, \texttt{ADMINISTRADOR},
 \texttt{EXPERIMENTO}, \texttt{GRUPO}, \texttt{TANDA}, \texttt{ESPECIMEN},
 \texttt{VIDEO}, \texttt{ANALISIS},
-\texttt{OBSERVACION}, \texttt{SEGUNDO}, \texttt{INTERVALO}, \texttt{CONDUCTA},
-\texttt{PRESENTA}, \texttt{REPORTE} y \texttt{NOTIFICACION}. Las subsecciones siguientes explican
+\texttt{OBSERVACION}, \texttt{SEGUNDO}, \texttt{CONDUCTA},
+\texttt{REPORTE} y \texttt{NOTIFICACION}. Las subsecciones siguientes explican
 cómo se aplicó cada forma normal sobre este conjunto.
 
 \subsection{Primera Forma Normal (1FN)}
@@ -520,15 +515,13 @@ ocupa su propia fila con su conducta y su origen. Así
 es posible consultar o corregir un segundo en la revisión sin reescribir la lista
 completa ni parsear texto.
 
-Los totales por minuto siguen el mismo principio, pero evitando además una
-columna por conducta: en vez de columnas fijas para nado, inmovilidad y
-escalamiento, cada combinación de intervalo y conducta es una fila en
-\texttt{PRESENTA}, con su propia columna \texttt{segundos}. Esto evitó tener que
-agregar una columna nueva cuando se incorporó una cuarta conducta (la conducta
-activa), y permite consultar todas las conductas de un intervalo con una sola
-condición sobre la clave foránea, en vez de una columna por caso. Todas las
-tablas con clave subrogada usan un campo entero autogenerado como clave
-primaria.
+Los totales por minuto no se guardan en ninguna tabla: se calculan contando las
+filas de \texttt{SEGUNDO} de cada conducta, y el minuto sale del número de segundo.
+Un total guardado sería un dato derivado que habría que mantener al día cada vez que
+el usuario corrige una etiqueta, con el riesgo de que contradijera a las etiquetas.
+Tampoco hay una columna por conducta, así que incorporar una cuarta conducta (la
+conducta activa) no obligó a cambiar el esquema. Todas las tablas con clave
+subrogada usan un campo entero autogenerado como clave primaria.
 
 \subsection{Segunda Forma Normal (2FN)}
 
@@ -536,22 +529,15 @@ Una tabla en 2FN cumple la 1FN y, además, cada columna no clave depende de la c
 primaria \emph{completa} \cite{elmasri2015}. Esto es relevante cuando la clave
 primaria es compuesta.
 
-El caso compuesto del esquema es \texttt{PRESENTA}, cuya clave primaria es el par
-(\texttt{idIntervalo}, \texttt{conducta}). Su única columna no clave,
-\texttt{segundos}, depende de ambas partes de la clave a la vez: son los segundos
-que esa conducta específica ocupó dentro de ese intervalo específico, no un dato
-de la conducta en general ni del intervalo en general. Por eso no hay dependencia
-parcial dentro de \texttt{PRESENTA} mismo. Pero si ahí también se hubiera
-guardado una descripción de la conducta, esa columna dependería solo de
-\texttt{conducta}, no del par completo. Esa es la razón por la que
-\texttt{CONDUCTA} es un catálogo aparte: su nombre y cualquier atributo propio de
-la conducta viven ahí, no repetidos en cada fila de \texttt{PRESENTA}.
-
-\texttt{SEGUNDO} también tiene clave compuesta (\texttt{idObservacion},
-\texttt{segundo}). Sus columnas no clave ---la conducta asignada y el origen
-de esa conducta--- describen ese segundo específico de esa
+El caso compuesto del esquema es \texttt{SEGUNDO}, cuya clave primaria es el par
+(\texttt{idObservacion}, \texttt{segundo}). Sus columnas no clave ---la conducta
+asignada y el origen de esa conducta--- describen ese segundo específico de esa
 observación específica, así que dependen de la clave completa y no de una de sus
-partes.
+partes. Pero si ahí también se hubiera guardado una descripción de la conducta,
+esa columna dependería solo de \texttt{conducta}, no del par completo. Esa es la
+razón por la que \texttt{CONDUCTA} es un catálogo aparte: su nombre y cualquier
+atributo propio de la conducta viven ahí, no repetidos en cada fila de
+\texttt{SEGUNDO}.
 
 \subsection{Tercera Forma Normal (3FN)}
 
@@ -603,7 +589,7 @@ El resto de las relaciones se revisó una por una: en cada una, los únicos
 determinantes son su clave primaria y, cuando la tiene, su clave alterna. Por
 ejemplo, \texttt{GRUPO} tiene como determinantes \texttt{idGrupo} (primaria) y la
 combinación (\texttt{idExperimento}, \texttt{etiqueta}) (alterna). Con eso, las
-quince relaciones del modelo relacional cumplen FNBC.
+trece relaciones del modelo relacional cumplen FNBC.
 
 El esquema físico tiene las mismas columnas que el modelo relacional más
 \texttt{rutaDiagnostico} (ruta del reporte de diagnóstico), que depende solo de la clave
@@ -625,23 +611,21 @@ las tablas afectadas y la decisión de diseño concreta en cada caso.
 \hline
 1FN &
   Valores atómicos; sin campos JSON ni listas en el esquema &
-  \texttt{SEGUNDO}, \texttt{PRESENTA} &
-  Cada segundo de un espécimen y cada conducta por intervalo ocupa su propia
-  fila \\
+  \texttt{SEGUNDO} &
+  Cada segundo de un espécimen ocupa su propia fila; los totales por minuto no
+  se guardan \\
 \hline
 1FN &
   Clave primaria que identifica cada fila de forma única &
-  Las 15 relaciones &
+  Las 13 relaciones &
   Clave subrogada autogenerada, salvo \texttt{USUARIO}/\texttt{ADMINISTRADOR}
-  (\texttt{idInstitucional}), \texttt{CONDUCTA} (\texttt{nombre}),
-  \texttt{PRESENTA} (clave compuesta \texttt{idIntervalo}, \texttt{conducta}) y
+  (\texttt{idInstitucional}), \texttt{CONDUCTA} (\texttt{nombre}) y
   \texttt{SEGUNDO} (clave compuesta \texttt{idObservacion}, \texttt{segundo}) \\
 \hline
 2FN &
   Eliminación de dependencias parciales &
-  \texttt{PRESENTA}, \texttt{SEGUNDO}, \texttt{CONDUCTA} &
-  \texttt{segundos} depende del par completo (\texttt{idIntervalo},
-  \texttt{conducta}); las columnas de \texttt{SEGUNDO} dependen de
+  \texttt{SEGUNDO}, \texttt{CONDUCTA} &
+  Las columnas de \texttt{SEGUNDO} dependen de
   (\texttt{idObservacion}, \texttt{segundo}); atributos de la conducta viven en
   \texttt{CONDUCTA} \\
 \hline
@@ -659,7 +643,7 @@ las tablas afectadas y la decisión de diseño concreta en cada caso.
 \hline
 FNBC &
   Todo determinante es clave candidata &
-  Las 15 relaciones &
+  Las 13 relaciones &
   Verificado relación por relación; el esquema físico no repite columnas \\
 \hline
 \end{tabular}
@@ -1770,7 +1754,7 @@ caso de uso.
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-19, RF-20, RF-21, RF-31. Extendido por: CU-10 (Descargar reporte) y CU-28 (Consultar estadísticas de grupo o tanda).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-19, RF-20, RF-21, RF-31. Extendido por: CU-10 (Descargar reporte) y CU-27 (Consultar estadísticas de grupo o tanda).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Análisis completado exitosamente; sesión activa.} \\
 \hline
@@ -1791,11 +1775,11 @@ caso de uso.
 \hline
 1 & Inv. / Admin. & Accede a la pantalla de resultados desde el \textit{dashboard}, desde la pantalla de progreso o desde el detalle de un grupo, y elige ver los resultados del grupo completo, con todas sus tandas, o los de una sola tanda (RF-19). \\
 \hline
-2 & Sistema & Recupera de la base de datos los registros de \textbf{OBSERVACION}, \textbf{INTERVALO} y \textbf{PRESENTA} del análisis, o de los análisis de todas las tandas del grupo si se eligió el grupo completo. \\
+2 & Sistema & Recupera de la base de datos los registros de \textbf{OBSERVACION} y \textbf{SEGUNDO} del análisis, o de los análisis de todas las tandas del grupo si se eligió el grupo completo. \\
 \hline
 3 & Sistema & Muestra tabla de tiempos por espécimen: nado activo, inmovilidad, escalamiento y conducta activa, con totales en segundos y porcentaje. Si se eligió el grupo completo, cada espécimen se rotula con su tanda, por ejemplo «Tanda~A $\cdot$ Espécimen~2». \\
 \hline
-4 & Sistema & Muestra el desglose de conductas por minuto para cada espécimen. \\
+4 & Sistema & Calcula y muestra el desglose de conductas por minuto para cada espécimen, contando los segundos de cada conducta. \\
 \hline
 5 & Sistema & Muestra la comparación entre grupos: el tiempo promedio por conducta de los especímenes de cada grupo en el Día~2, con los especímenes sin analizar señalados como faltantes. \\
 \hline
@@ -1827,7 +1811,7 @@ caso de uso.
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-22, RF-31. Extiende: CU-09 (Consultar resultados del análisis). Extendido por: CU-28 (Consultar estadísticas de grupo o tanda).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-22, RF-31. Extiende: CU-09 (Consultar resultados del análisis). Extendido por: CU-27 (Consultar estadísticas de grupo o tanda).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Resultados del análisis disponibles en la base de datos; sesión activa.} \\
 \hline
@@ -1872,7 +1856,7 @@ caso de uso.
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.9cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Consultar estadísticas de grupo o tanda &\textbf{Identificador:} CU-28 \\
+\textbf{Caso de Uso} & Consultar estadísticas de grupo o tanda &\textbf{Identificador:} CU-27 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Investigador / Administrador} \\
 \hline
@@ -1992,15 +1976,15 @@ caso de uso.
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<extend>>} de CU-25 Revisar segundo a segundo)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-32, RN-14. Extiende: CU-25 (Revisar segundo a segundo). Incluye: CU-27 (Recalcular totales por minuto).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-32, RN-14. Extiende: CU-25 (Revisar segundo a segundo).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pantalla de revisión abierta (CU-25); la conducta del sistema no coincide con lo que el usuario observa.} \\
 \hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{La conducta corregida queda guardada con su origen y reemplaza a la del sistema.} \\
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{La conducta corregida queda guardada con su origen y reemplaza a la del sistema; los reportes guardados del experimento se eliminaron para regenerarse.} \\
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite cambiar la conducta asignada a uno o varios segundos de un espécimen.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El usuario pulsa la conducta correcta. Con el video corriendo, el cambio se aplica desde 0.4~s antes del clic (lo que tarda una persona en reaccionar) hasta el siguiente cambio de color; en pausa, solo cambia el segundo actual.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El usuario pulsa la conducta correcta. Con el video corriendo, el cambio se aplica desde 0.4~s antes del clic (lo que tarda una persona en reaccionar) hasta el siguiente cambio de color; en pausa, solo cambia el segundo actual. Los totales por minuto no se guardan, así que no hay nada que recalcular: se calculan desde las etiquetas.} \\
 \hline
 \end{tabular}
 
@@ -2017,7 +2001,7 @@ caso de uso.
 \hline
 3 & Inv. / Admin. & Elige «Guardar». \\
 \hline
-4 & Sistema & Guarda la conducta de cada segundo con su origen, y recalcula los totales por minuto (CU-27). \\
+4 & Sistema & Guarda la conducta de cada segundo con su origen y elimina los reportes guardados del experimento para que se regeneren con los datos nuevos. \\
 \hline
 \end{tabular}
 
@@ -2031,57 +2015,6 @@ caso de uso.
 1 & El usuario deja un segundo sin conducta a propósito: queda marcado como «dudosa». \\
 \hline
 4 & No se puede guardar: el borrador se conserva en el navegador y el sistema informa el error. \\
-\hline
-\end{tabular}
-
-\normalsize\bigskip
-
-\noindent\textbf{Recalcular totales por minuto}
-
-\noindent\small
-\begin{tabular}{|p{2.8cm}|p{7.9cm}|p{4.0cm}|}
-\hline
-\textbf{Caso de Uso} & Recalcular totales por minuto & \textbf{Identificador:} CU-27 \\
-\hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Investigador / Administrador (al guardar correcciones, ver CU-26)} \\
-\hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<include>>} de CU-26 Corregir etiqueta de un segundo)} \\
-\hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-32, RN-14. Incluido en: CU-26 (Corregir etiqueta de un segundo).} \\
-\hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El usuario guardó correcciones en al menos un espécimen.} \\
-\hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Los segundos por conducta de cada minuto de los especímenes corregidos coinciden con sus etiquetas por segundo; los reportes guardados del experimento se eliminaron para regenerarse.} \\
-\hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Mantiene coherentes los totales por minuto con las etiquetas que el usuario corrigió.} \\
-\hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Para cada espécimen cuyas etiquetas cambiaron, el sistema cuenta los segundos de cada conducta en cada uno de los cinco minutos y actualiza el resumen por minuto.} \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
-\hline
-\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
-\hline
-\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
-\hline
-1 & Sistema & Cuenta los segundos de cada conducta en cada minuto de los especímenes corregidos. \\
-\hline
-2 & Sistema & Actualiza el resumen por minuto (una fila por cada una de las cuatro conductas, incluso con 0 segundos). \\
-\hline
-3 & Sistema & Elimina los reportes guardados del experimento para que se regeneren con los datos nuevos. \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
-\hline
-\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
-\hline
-\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
-\hline
---- & No se identifican cursos alternos para este caso de uso. \\
 \hline
 \end{tabular}
 
@@ -2488,7 +2421,7 @@ resultados (Figura~\ref{fig:seq_resultados}) devuelve los tiempos por espécimen
 y conducta, y la descarga de reportes (Figura~\ref{fig:seq_reportes}) permite
 exportar los datos en PDF, CSV o XLSX. Además, el usuario puede revisar el análisis
 y corregir las etiquetas segundo a segundo (Figura~\ref{fig:seq_revision}; ver CU-25
-a CU-27), lo que recalcula los totales por minuto.
+y CU-26), y los totales por minuto reflejan las correcciones porque se calculan desde las etiquetas.
 
 \begin{figure}[H]
 \centering
@@ -2561,9 +2494,9 @@ correspondiente. El modelo del clasificador no es una clase del diagrama: es una
 constante del pipeline y no se registra por análisis.
 
 Los resultados de conducta se modelan con \textbf{Observacion} (un espécimen
-dentro de un video), \textbf{Intervalo} (cada minuto analizado) y la clase
-asociativa \textbf{PRESENTA}, que vincula cada intervalo con las conductas del
-catálogo \textbf{Conducta} y los segundos que ocupó cada una.
+dentro de un video) y \textbf{Segundo} (la conducta de cada segundo analizado, que
+apunta al catálogo \textbf{Conducta}). Los totales por minuto no son una clase: se
+calculan desde \textbf{Segundo}.
 
 Las estadísticas (RF-31) son datos derivados: no se guardan en la base de datos.
 \textbf{Grupo} y \textbf{Tanda} las calculan con \texttt{calcularEstadisticas()}, que
@@ -2834,7 +2767,7 @@ corriendo, el cambio se aplica desde 0.4~s antes del clic hasta el siguiente cam
 de color; en pausa, cambia solo el segundo actual. Se revisa un espécimen a la vez y
 el avance se guarda como borrador en el navegador hasta que el usuario elige
 «Guardar», momento en que el sistema registra las correcciones, reemplaza la
-conducta del sistema y recalcula los totales por minuto (CU-25 a CU-27).
+conducta del sistema (CU-25 y CU-26); los totales por minuto se calculan desde las etiquetas y reflejan las correcciones.
 
 El panel lateral muestra la conducta del segundo actual y si es la del
 sistema o una corrección, el avance de revisión del espécimen, los segundos por

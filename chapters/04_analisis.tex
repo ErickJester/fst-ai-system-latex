@@ -306,8 +306,8 @@ RF-32 & Resultados
         segundos analizados en un formato compatible con el navegador (H.264). Solo
         el investigador que subió el video y el Administrador pueden corregir. Cada
         conducta guarda su origen
-        (del sistema, confirmada, corregida o dudosa). Al guardar las correcciones, el sistema recalcula los
-        totales por minuto (ver RN-14).
+        (del sistema, confirmada, corregida o dudosa). Los totales por minuto se calculan desde las
+        etiquetas, así que reflejan las correcciones (ver RN-14).
       & Media & Investigador \\
 \hline
 RF-33 & Notificaciones
@@ -643,9 +643,10 @@ RN-13 & Cuando el clasificador sabe que el espécimen no está inmóvil pero no
 \hline
 RN-14 & Solo se puede revisar un análisis completado, y solo lo corrigen el
         investigador que subió el video y el Administrador. Al revisar, el usuario corrige
-        las etiquetas segundo a segundo; cada etiqueta guarda su origen. Al guardar, el sistema
-        recalcula los totales por minuto de los especímenes corregidos y los
-        reportes guardados del experimento se regeneran con los datos nuevos.
+        las etiquetas segundo a segundo; cada etiqueta guarda su origen. Al guardar, los totales por
+        minuto de los especímenes corregidos ya reflejan los cambios, porque se
+        calculan desde las etiquetas, y los reportes guardados del experimento se
+        regeneran con los datos nuevos.
         Corregir etiquetas no cambia el modelo ni el video.
       & La revisión humana corrige al clasificador sin sustituirlo. Si lo que cambia
         es el video o el modelo, el resultado es un análisis nuevo (ver RN-04).

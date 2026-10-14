@@ -7,7 +7,7 @@
 \chapter{Diccionario de datos}
 \label{ap:diccionario}
 
-Este apéndice describe cada columna de las 15 tablas del esquema físico
+Este apéndice describe cada columna de las 13 tablas del esquema físico
 (Figura~\ref{fig:er}), implementado en PostgreSQL. Para cada columna se indica su
 tipo, si admite nulo, las restricciones que hace cumplir la base de datos y qué
 guarda.
@@ -190,15 +190,6 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{idVideo} & \texttt{integer} & No & FK $\to$ VIDEO; UK (idEspecimen, idVideo) & Video en que se le observó. Cada video analizado (el del Día 2) tiene de 2 a 4 observaciones, una por espécimen; el del Día 1 no tiene ninguna \\
 \hline
-% ---------------- INTERVALO ----------------
-\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{INTERVALO}: cada minuto de una observación} \\
-\hline
-\texttt{idIntervalo} & \texttt{integer} & No & PK & Identificador subrogado \\
-\hline
-\texttt{idObservacion} & \texttt{integer} & No & FK $\to$ OBSERVACION; UK (idObservacion, minuto) & Observación a la que pertenece el minuto \\
-\hline
-\texttt{minuto} & \texttt{smallint} & No & UK (idObservacion, minuto) & Minuto del análisis, de 1 a 5 \\
-\hline
 % ---------------- CONDUCTA ----------------
 \multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{CONDUCTA}: catálogo de conductas} \\
 \hline
@@ -209,20 +200,11 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{idObservacion} & \texttt{integer} & No & PK, FK $\to$ OBSERVACION & Espécimen y video al que pertenece el segundo \\
 \hline
-\texttt{segundo} & \texttt{smallint} & No & PK; CK entre 1 y 300 & Posición del segundo dentro de la ventana analizada (1 a 300), tras recortar los últimos 300 segundos \\
+\texttt{segundo} & \texttt{smallint} & No & PK; CK entre 1 y 300 & Posición del segundo dentro de la ventana analizada (1 a 300), tras recortar los últimos 300 segundos. El minuto del análisis sale de este número y no se guarda \\
 \hline
 \texttt{conducta} & \texttt{varchar(n)} & Sí & FK $\to$ CONDUCTA & Conducta vigente del segundo, que el usuario puede corregir en la revisión. Queda nula si el sistema no pudo decidir o si el usuario lo marcó como dudoso \\
 \hline
 \texttt{origen} & \texttt{origen\_\allowbreak{}segundo} & No & Dominio & Quién puso la conducta vigente y cómo (Tabla~\ref{tab:dominios}) \\
-\hline
-% ---------------- PRESENTA ----------------
-\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{PRESENTA}: segundos de cada conducta en cada minuto} \\
-\hline
-\texttt{idIntervalo} & \texttt{integer} & No & PK, FK $\to$ INTERVALO & Minuto resumido \\
-\hline
-\texttt{conducta} & \texttt{varchar(n)} & No & PK, FK $\to$ CONDUCTA & Conducta contada \\
-\hline
-\texttt{segundos} & \texttt{numeric(p,s)} & No & & Segundos que el espécimen pasó en esa conducta dentro del minuto. Hay una fila por conducta aunque valga 0. Se recalcula desde \texttt{SEGUNDO} cada vez que el usuario guarda correcciones, y de aquí salen los totales y el desglose por minuto \\
 \hline
 % ---------------- REPORTE ----------------
 \multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{REPORTE}: archivos exportados de un experimento} \\

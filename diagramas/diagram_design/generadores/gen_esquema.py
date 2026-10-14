@@ -7,7 +7,7 @@ LH = 14
 GAPV = 46  # espacio vertical entre tablas de una misma columna
 esc = html.escape
 
-# ---- Datos tomados de diagramas/esquema_fisico.puml (15 tablas, 17 FK) ----
+# ---- Datos tomados de diagramas/esquema_fisico.puml (13 tablas, 14 FK; D-52 quita INTERVALO y PRESENTA) ----
 # columna: (marca, nombre, tipo)   marca: PK, FK, 'PK FK', UK, 'FK UK' o ''
 T = {}
 COLS = [[], [], []]
@@ -28,7 +28,7 @@ tab('NOTIFICACION', 0, [
 tab('REPORTE', 0, [
     ('PK', 'idReporte', 'integer'), ('FK', 'idExperimento', 'integer'), ('', 'formato', 'formato_reporte'),
     ('UK', 'ruta', 'text'), ('', 'fechaGeneracion', 'timestamptz')], soporte=True)
-# columna 1: experimento, espécimen, observación, intervalo, presenta, conducta
+# columna 1: experimento, espécimen, observación, conducta
 tab('EXPERIMENTO', 1, [
     ('PK', 'idExperimento', 'integer'), ('FK', 'idInstitucional', 'varchar(10)'), ('UK', 'nombre', 'varchar(n)'),
     ('', 'fecha', 'date'), ('', 'notas', 'text · nulo')])
@@ -38,11 +38,6 @@ tab('ESPECIMEN', 1, [
 tab('OBSERVACION', 1, [
     ('PK', 'idObservacion', 'integer'), ('FK', 'idEspecimen', 'integer'), ('FK', 'idVideo', 'integer')],
     ['UK (idEspecimen, idVideo)'])
-tab('INTERVALO', 1, [
-    ('PK', 'idIntervalo', 'integer'), ('FK', 'idObservacion', 'integer'), ('', 'minuto', 'smallint')],
-    ['UK (idObservacion, minuto)'])
-tab('PRESENTA', 1, [
-    ('PK FK', 'idIntervalo', 'integer'), ('PK FK', 'conducta', 'varchar(n)'), ('', 'segundos', 'numeric(p,s)')])
 tab('CONDUCTA', 1, [('PK', 'nombre', 'varchar(n)')])
 # columna 2: grupo, tanda, video, analisis, segundo
 tab('GRUPO', 2, [
@@ -95,15 +90,13 @@ stack(COLS[0])
 stack(['EXPERIMENTO'])
 T['ESPECIMEN']['y'] = T['EXPERIMENTO']['y'] + T['EXPERIMENTO']['h'] + GAPV
 T['OBSERVACION']['y'] = T['ESPECIMEN']['y'] + T['ESPECIMEN']['h'] + GAPV
-T['INTERVALO']['y'] = T['OBSERVACION']['y'] + T['OBSERVACION']['h'] + GAPV
-T['PRESENTA']['y'] = T['INTERVALO']['y'] + T['INTERVALO']['h'] + GAPV
 # columna 2: la PK de TANDA a la altura del idTanda de ESPECIMEN y la de VIDEO a la del idVideo de OBSERVACION
 T['GRUPO']['y'] = Y0
 T['TANDA']['y'] = T['ESPECIMEN']['y'] + 14
 T['VIDEO']['y'] = T['OBSERVACION']['y'] + 28
 T['ANALISIS']['y'] = T['VIDEO']['y'] + T['VIDEO']['h'] + GAPV
 seg_min = T['ANALISIS']['y'] + T['ANALISIS']['h'] + GAPV
-cond_y = max(T['PRESENTA']['y'] + T['PRESENTA']['h'] + GAPV, seg_min + 28)
+cond_y = max(T['OBSERVACION']['y'] + T['OBSERVACION']['h'] + GAPV, seg_min + 28)
 T['CONDUCTA']['y'] = cond_y
 T['SEGUNDO']['y'] = cond_y - 28
 
@@ -139,9 +132,6 @@ edge([Tc('VIDEO'), Bc('TANDA')], '1..2', '1')
 edge([Tc('ANALISIS'), Bc('VIDEO')], '0..1', '1')
 edge([Rr('OBSERVACION', 'idVideo'), Lr('VIDEO', 'idVideo')], '0..4', '1')
 edge([Tc('OBSERVACION'), Bc('ESPECIMEN')], '0..1', '1')
-edge([Tc('INTERVALO'), Bc('OBSERVACION')], '5', '1')
-edge([Tc('PRESENTA'), Bc('INTERVALO')], '4', '1')
-edge([Tc('CONDUCTA'), Bc('PRESENTA')], '0..*', '1')
 edge([Lr('SEGUNDO', 'idObservacion'), (gap(1, 45), rowy('SEGUNDO', 'idObservacion')),
       (gap(1, 45), rowy('OBSERVACION', 'idObservacion')), Rr('OBSERVACION', 'idObservacion')], '1..300', '1')
 edge([Lr('SEGUNDO', 'conducta'), Rr('CONDUCTA', 'nombre')], '0..*', '0..1')
@@ -217,7 +207,7 @@ W, H = int(maxx), int(maxy)
 MARCADORES = ''.join(f'<marker id="es-arr-{i}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="{c}" stroke-width="1.5"/></marker>' for i, c in enumerate(PALETA))
 svg = f'''<svg viewBox="0 0 {W} {H}" role="img" aria-labelledby="es-title es-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="es-title">Esquema de la base de datos</title>
-<desc id="es-desc">Las 15 tablas de la base de datos PostgreSQL con sus columnas, tipos, llaves primarias, foráneas y únicas, y las 17 llaves foráneas con su cardinalidad.</desc>
+<desc id="es-desc">Las 13 tablas de la base de datos PostgreSQL con sus columnas, tipos, llaves primarias, foráneas y únicas, y las 14 llaves foráneas con su cardinalidad.</desc>
 <defs>
 {MARCADORES}
 </defs>

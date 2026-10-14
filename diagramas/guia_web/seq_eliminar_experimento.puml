@@ -21,7 +21,7 @@ alt el usuario no es quien lo creó ni es Administrador
 else algún análisis del experimento está "procesando" o "en pausa"
   api --> ui: 409, "Espera a que termine el análisis o cancélalo"
 else se puede eliminar
-  api -> db: borra en orden, de las hojas hacia arriba:\nSEGUNDO, PRESENTA, INTERVALO, OBSERVACION, ANALISIS,\nVIDEO, ESPECIMEN, TANDA, GRUPO,\nREPORTE, NOTIFICACION, EXPERIMENTO\n(todo en una sola transacción)
+  api -> db: borra en orden, de las hojas hacia arriba:\nSEGUNDO, OBSERVACION, ANALISIS,\nVIDEO, ESPECIMEN, TANDA, GRUPO,\nREPORTE, NOTIFICACION, EXPERIMENTO\n(todo en una sola transacción)
   db --> api: confirma
   api -> fs: borra los videos, reportes, diagnósticos y carpetas de pausa del experimento
   api --> ui: 200 OK

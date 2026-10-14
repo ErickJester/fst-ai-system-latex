@@ -6,7 +6,7 @@ quepa en una hoja carta horizontal del documento con su pie de figura.
 | Hoja | Contenido | Archivo |
 |------|-----------|---------|
 | 1 | Usuarios, experimentos, grupos, tandas, espécimen, video y análisis | [clases_hoja1.html](clases_hoja1.html) / [clases_hoja1.png](clases_hoja1.png) |
-| 2 | Observaciones, resultados y análisis automático (worker, pipeline, intervalo, conducta, segundo, ROI) | [clases_hoja2.html](clases_hoja2.html) / [clases_hoja2.png](clases_hoja2.png) |
+| 2 | Observaciones, resultados y análisis automático (worker, pipeline, conducta, segundo, ROI) | [clases_hoja2.html](clases_hoja2.html) / [clases_hoja2.png](clases_hoja2.png) |
 
 `Video`, `Analisis` y `Especimen` aparecen en las dos hojas, porque son los puntos donde se
 unen.

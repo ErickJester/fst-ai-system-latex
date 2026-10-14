@@ -50,7 +50,7 @@ alt se hallaron los tubos
 
     loop por cada espécimen detectado en el video
       w -> db: guarda su observación de este video
-      w -> db: guarda sus 5 intervalos, con los segundos\npor conducta de cada uno
+      w -> db: guarda una etiqueta por cada segundo analizado (SEGUNDO)
     end
 
     w -> fs: guarda la copia del video recortada a lo analizado,\nen un formato que el navegador reproduce (H.264, D-58)
