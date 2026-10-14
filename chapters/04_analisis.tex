@@ -354,8 +354,8 @@ RNF-02 & Calidad del análisis
          variabilidad aceptada entre analistas humanos, declarada por el investigador
          colaborador en la entrevista de levantamiento (véase la
          justificación de umbrales en la sección~\ref{sec:umbrales}).
-       & F1 $\geq 85$\,\% por conducta (nado, inmovilidad, escalamiento) sobre el
-         conjunto de prueba de la fase de validación (TT-II). \\
+       & F1 $\geq 85$\,\% por conducta (nado, inmovilidad, escalamiento y conducta
+         activa) sobre el conjunto de prueba de la fase de validación (TT-II). \\
 \hline
 RNF-03 & Disponibilidad
        & El sistema debe estar disponible las 24 horas del día, los 7 días de la
@@ -478,7 +478,11 @@ ajustarse en la fase de validación (TT-II).
         ubica en ese rango y que es consistente con los umbrales reportados en
         sistemas automatizados comparables \cite{nandi2021_dbscorer,meng2024_dsaan}.
         El F1 por conducta se evaluará sobre el conjunto de prueba de la fase de
-        validación en TT-II.
+        validación en TT-II. El umbral se exige a las cuatro conductas, incluida la
+        conducta activa (ver RN-13): como es la clase a la que el sistema manda los
+        segundos en que no distingue entre nado y escalamiento, medirla evita que esos
+        segundos dejen de contar como error en las otras dos y que su F1 salga mejor
+        de lo que el sistema acierta.
 
   \item \textbf{Repetibilidad: variación máxima de entre el 5 y el 10\,\%.}
         En la entrevista de levantamiento, el investigador colaborador indicó que lo

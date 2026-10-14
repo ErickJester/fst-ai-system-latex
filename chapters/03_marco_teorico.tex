@@ -37,7 +37,8 @@ inmovilidad en este test \cite{slattery2012}.
 
 \subsection{La prueba de nado forzado (FST)}
 
-La prueba de nado forzado fue propuesta por Porsolt et al.\ en 1977 \cite{porsolt1977}.
+La prueba de nado forzado fue propuesta por Porsolt et al.\ en 1977 \cite{porsolt1977} y
+descrita con detalle en ratas un año después \cite{porsolt1978}.
 Consiste en poner al espécimen en un cilindro con agua del que no puede salir y registrar
 cómo responde. Al principio intenta escapar; después de un rato empieza a flotar con
 movimientos mínimos. Esa conducta pasiva ---\textit{behavioral despair} o desesperanza
@@ -68,6 +69,14 @@ Distinguir las tres conductas importa porque cada una refleja la activación de 
 neurotransmisor distinto, lo que permite inferir el mecanismo de acción del fármaco
 evaluado. Un sistema que solo detecta si el espécimen se mueve o no pierde esa información
 \cite{della_valle2025}.
+
+El sistema añade una cuarta categoría, la \textit{conducta activa}, para los segundos en que
+sabe que el espécimen no está inmóvil pero no decide entre nado y escalamiento (RN-13). No
+es una categoría inventada para el sistema: la prueba original de Porsolt et al.\
+\cite{porsolt1977,porsolt1978} solo medía el tiempo de inmovilidad, de modo que todo lo que no era
+inmovilidad se tomaba como conducta activa, y fueron Detke et al.\ \cite{detke1995} quienes
+separaron lo activo en nado y escalamiento. Cuando el sistema no logra separar las dos, vuelve
+al nivel de Porsolt, que es una lectura aceptada de la prueba.
 
 \subsection{Protocolo del laboratorio colaborador}
 
@@ -370,6 +379,20 @@ donde, para el clasificador, cada conducta es una clase y $VP_c$, $FP_c$ y $FN_c
 negativos de la clase $c$ respectivamente. El F1 es útil cuando las clases están
 desbalanceadas, que es esperable en el FST donde la inmovilidad suele dominar en los
 primeros experimentos.
+
+El F1 se calcula para cada una de las cuatro conductas del clasificador: nado,
+inmovilidad, escalamiento y conducta activa (RN-13). Cada una es una clase y el conjunto
+de prueba se etiqueta con las mismas cuatro. La conducta activa, que la prueba de Porsolt
+et al.\ ya aceptaba como lo que no es inmovilidad, no se deja fuera de la
+medición por ser la más ambigua, sino por esa misma razón: es la clase a la que el
+sistema manda los segundos en que no distingue entre nado y escalamiento. Si no se
+midiera, esos segundos dejarían de contar como error en las otras dos y su F1 saldría
+más alto de lo que el sistema realmente acierta. Con la conducta activa dentro de la
+medición, los dos extremos se penalizan: si el sistema le manda segundos que una persona
+sí distingue, bajan su precisión y el \textit{recall} de la conducta que se omitió; si decide
+nado o escalamiento donde la persona vio ambigüedad, baja su \textit{recall} y la precisión
+de la conducta que eligió. La meta de F1 $\geq 85$\,\% (RNF-02) se aplica por igual a las
+cuatro.
 
 \subsection{Tiempo de análisis}
 
