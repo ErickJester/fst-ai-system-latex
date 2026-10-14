@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Casos de uso: visión general</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:#faf9f5}
+svg{display:block;width:1444px;height:824px}
+</style></head><body><svg viewBox="0 0 1444 824" role="img" aria-labelledby="cu-title cu-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="cu-title">Casos de uso: visión general</title>
+<desc id="cu-desc">Los tres actores del sistema (investigador, administrador y worker) y los cinco paquetes de casos de uso con los casos de uso de cada uno.</desc>
+<defs><marker id="cu-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#444" stroke-width="1.2"/></marker></defs>
+<style>
+.a{font:400 9px 'Geist Mono',monospace;fill:#1a1a1a}
+.nm{font:600 12px Geist,sans-serif;fill:#1a1a1a}
+.st{font:400 8px 'Geist Mono',monospace;fill:#6b6b6b;letter-spacing:.06em}
+.r{font:400 8px 'Geist Mono',monospace;fill:#6b6b6b;letter-spacing:.06em}
+.lg text{font:400 9px 'Geist Mono',monospace;fill:#6b6b6b}
+</style>
+<rect x="330" y="40" width="864" height="136" rx="8" fill="#f1eee5" stroke="#6b6b6b" stroke-dasharray="6,4"/>
+<text x="344" y="56" class="st">PAQUETE 1</text>
+<text x="344" y="71" class="nm">Autenticación y gestión de usuarios</text>
+<rect x="344" y="80" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="444.0" y="94" text-anchor="middle" class="st">CU-01</text>
+<text x="444.0" y="107" text-anchor="middle" class="a">Iniciar sesión</text>
+<rect x="556" y="80" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="656.0" y="94" text-anchor="middle" class="st">CU-02</text>
+<text x="656.0" y="107" text-anchor="middle" class="a">Cerrar sesión</text>
+<rect x="768" y="80" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="868.0" y="94" text-anchor="middle" class="st">CU-03</text>
+<text x="868.0" y="107" text-anchor="middle" class="a">Recuperar contraseña</text>
+<rect x="980" y="80" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="1080.0" y="94" text-anchor="middle" class="st">CU-16</text>
+<text x="1080.0" y="107" text-anchor="middle" class="a">Cambiar contraseña al primer acceso</text>
+<rect x="344" y="126" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="444.0" y="140" text-anchor="middle" class="st">CU-18</text>
+<text x="444.0" y="153" text-anchor="middle" class="a">Actualizar perfil propio</text>
+<rect x="556" y="126" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="656.0" y="140" text-anchor="middle" class="st">CU-11</text>
+<text x="656.0" y="153" text-anchor="middle" class="a">Gestionar cuenta de usuario</text>
+<rect x="768" y="126" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="868.0" y="140" text-anchor="middle" class="st">CU-12</text>
+<text x="868.0" y="153" text-anchor="middle" class="a">Crear cuenta de usuario</text>
+<rect x="980" y="126" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="1080.0" y="140" text-anchor="middle" class="st">CU-17</text>
+<text x="1080.0" y="153" text-anchor="middle" class="a">Desactivar cuenta de usuario</text>
+<rect x="330" y="198" width="864" height="90" rx="8" fill="#f1eee5" stroke="#6b6b6b" stroke-dasharray="6,4"/>
+<text x="344" y="214" class="st">PAQUETE 2</text>
+<text x="344" y="229" class="nm">Gestión de experimentos y carga de video</text>
+<rect x="344" y="238" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="444.0" y="252" text-anchor="middle" class="st">CU-04</text>
+<text x="444.0" y="265" text-anchor="middle" class="a">Registrar experimento</text>
+<rect x="556" y="238" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="656.0" y="252" text-anchor="middle" class="st">CU-05</text>
+<text x="656.0" y="265" text-anchor="middle" class="a">Subir video</text>
+<rect x="768" y="238" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="868.0" y="252" text-anchor="middle" class="st">CU-19</text>
+<text x="868.0" y="265" text-anchor="middle" class="a">Encolar análisis automático</text>
+<rect x="980" y="238" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="1080.0" y="252" text-anchor="middle" class="st">CU-20</text>
+<text x="1080.0" y="265" text-anchor="middle" class="a">Notificar rechazo de video</text>
+<rect x="330" y="310" width="864" height="136" rx="8" fill="#f1eee5" stroke="#6b6b6b" stroke-dasharray="6,4"/>
+<text x="344" y="326" class="st">PAQUETE 3</text>
+<text x="344" y="341" class="nm">Pipeline de análisis conductual</text>
+<rect x="344" y="350" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="444.0" y="371.0" text-anchor="middle" class="a">Ejecutar pipeline de análisis</text>
+<rect x="556" y="350" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="656.0" y="371.0" text-anchor="middle" class="a">Reportar error de pipeline</text>
+<rect x="768" y="350" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="868.0" y="371.0" text-anchor="middle" class="a">Pausar el análisis</text>
+<rect x="980" y="350" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="1080.0" y="371.0" text-anchor="middle" class="a">Ajustar el recuadro y continuar</text>
+<rect x="344" y="396" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="444.0" y="417.0" text-anchor="middle" class="a">Cancelar el análisis en pausa</text>
+<rect x="556" y="396" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="656.0" y="410" text-anchor="middle" class="st">CU-07</text>
+<text x="656.0" y="423" text-anchor="middle" class="a">Monitorear progreso</text>
+<rect x="768" y="396" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="868.0" y="410" text-anchor="middle" class="st">CU-08</text>
+<text x="868.0" y="423" text-anchor="middle" class="a">Descargar reporte de diagnóstico</text>
+<rect x="330" y="468" width="864" height="136" rx="8" fill="#f1eee5" stroke="#6b6b6b" stroke-dasharray="6,4"/>
+<text x="344" y="484" class="st">PAQUETE 4</text>
+<text x="344" y="499" class="nm">Resultados y reportes</text>
+<rect x="344" y="508" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="444.0" y="522" text-anchor="middle" class="st">CU-09</text>
+<text x="444.0" y="535" text-anchor="middle" class="a">Consultar resultados</text>
+<rect x="556" y="508" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="656.0" y="522" text-anchor="middle" class="st">CU-10</text>
+<text x="656.0" y="535" text-anchor="middle" class="a">Descargar reporte (PDF, CSV, XLSX)</text>
+<rect x="768" y="508" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="868.0" y="522" text-anchor="middle" class="st">CU-25</text>
+<text x="868.0" y="535" text-anchor="middle" class="a">Revisar segundo a segundo</text>
+<rect x="980" y="508" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="1080.0" y="522" text-anchor="middle" class="st">CU-26</text>
+<text x="1080.0" y="535" text-anchor="middle" class="a">Corregir etiqueta de un segundo</text>
+<rect x="344" y="554" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="444.0" y="568" text-anchor="middle" class="st">CU-27</text>
+<text x="444.0" y="581" text-anchor="middle" class="a">Recalcular totales por minuto</text>
+<rect x="556" y="554" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="656.0" y="575.0" text-anchor="middle" class="a">Reiniciar el análisis</text>
+<rect x="330" y="626" width="864" height="136" rx="8" fill="#f1eee5" stroke="#6b6b6b" stroke-dasharray="6,4"/>
+<text x="344" y="642" class="st">PAQUETE 5</text>
+<text x="344" y="657" class="nm">Dashboard, notificaciones y administración</text>
+<rect x="344" y="666" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="444.0" y="680" text-anchor="middle" class="st">CU-22</text>
+<text x="444.0" y="693" text-anchor="middle" class="a">Consultar dashboard</text>
+<rect x="556" y="666" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="656.0" y="680" text-anchor="middle" class="st">CU-23</text>
+<text x="656.0" y="693" text-anchor="middle" class="a">Eliminar experimento</text>
+<rect x="768" y="666" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="868.0" y="680" text-anchor="middle" class="st">CU-14</text>
+<text x="868.0" y="693" text-anchor="middle" class="a">Borrar video automáticamente</text>
+<rect x="980" y="666" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="1080.0" y="680" text-anchor="middle" class="st">CU-13</text>
+<text x="1080.0" y="693" text-anchor="middle" class="a">Monitorear estado del sistema</text>
+<rect x="344" y="712" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="444.0" y="726" text-anchor="middle" class="st">CU-24</text>
+<text x="444.0" y="739" text-anchor="middle" class="a">Gestionar experimentos globales</text>
+<rect x="556" y="712" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="656.0" y="733.0" text-anchor="middle" class="a">Listar usuarios</text>
+<rect x="768" y="712" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="868.0" y="733.0" text-anchor="middle" class="a">Notificar uso de disco</text>
+<rect x="980" y="712" width="200" height="36" rx="18" fill="#faf9f5" stroke="#1a1a1a"/>
+<text x="1080.0" y="733.0" text-anchor="middle" class="a">Avisar expiración de video</text>
+<line x1="250" y1="108.0" x2="250" y2="694.0" stroke="#1a1a1a"/>
+<path d="M172,401.0 L250,401.0" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#cu-arr)"/>
+<path d="M250,108.0 L330,108.0" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#cu-arr)"/>
+<path d="M250,243.0 L330,243.0" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#cu-arr)"/>
+<path d="M250,378.0 L330,378.0" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#cu-arr)"/>
+<path d="M250,536.0 L330,536.0" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#cu-arr)"/>
+<path d="M250,694.0 L330,694.0" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#cu-arr)"/>
+<rect x="286" y="363.0" width="44" height="12" fill="#faf9f5"/><text x="290" y="372.0" text-anchor="start" class="r">observa</text>
+<line x1="200" y1="122.0" x2="200" y2="708.0" stroke="#d9532c"/>
+<path d="M117,138.0 L200,138.0" fill="none" stroke="#d9532c" stroke-width="1.1" marker-end="url(#cu-arr)"/>
+<path d="M200,122.0 L324,122.0" fill="none" stroke="#d9532c" stroke-width="1.1"/>
+<path d="M318,118.0 L324,122.0 L318,126.0" fill="none" stroke="#d9532c"/>
+<path d="M200,708.0 L324,708.0" fill="none" stroke="#d9532c" stroke-width="1.1"/>
+<path d="M318,704.0 L324,708.0 L318,712.0" fill="none" stroke="#d9532c"/>
+<line x1="1254" y1="378.0" x2="1254" y2="694.0" stroke="#6b6b6b" stroke-dasharray="4,3"/>
+<path d="M1312,536.0 L1254,536.0" fill="none" stroke="#6b6b6b" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#cu-arr)"/>
+<path d="M1254,378.0 L1200,378.0" fill="none" stroke="#6b6b6b" stroke-width="1.1" stroke-dasharray="4,3"/>
+<path d="M1206,374.0 L1200,378.0 L1206,382.0" fill="none" stroke="#6b6b6b"/>
+<path d="M1254,694.0 L1200,694.0" fill="none" stroke="#6b6b6b" stroke-width="1.1" stroke-dasharray="4,3"/>
+<path d="M1206,690.0 L1200,694.0 L1206,698.0" fill="none" stroke="#6b6b6b"/>
+<rect x="1256" y="363.0" width="107" height="12" fill="#faf9f5"/><text x="1260" y="372.0" text-anchor="start" class="r">ejecuta el pipeline</text>
+<circle cx="150" cy="375.0" r="9" fill="#faf9f5" stroke="#1a1a1a"/>
+<line x1="150" y1="384.0" x2="150" y2="409.0" stroke="#1a1a1a"/>
+<line x1="136" y1="391.0" x2="164" y2="391.0" stroke="#1a1a1a"/>
+<line x1="150" y1="409.0" x2="138" y2="427.0" stroke="#1a1a1a"/>
+<line x1="150" y1="409.0" x2="162" y2="427.0" stroke="#1a1a1a"/>
+<text x="150" y="443.0" text-anchor="middle" class="nm">Investigador</text>
+<circle cx="95" cy="112.0" r="9" fill="#fbe9e2" stroke="#1a1a1a"/>
+<line x1="95" y1="121.0" x2="95" y2="146.0" stroke="#1a1a1a"/>
+<line x1="81" y1="128.0" x2="109" y2="128.0" stroke="#1a1a1a"/>
+<line x1="95" y1="146.0" x2="83" y2="164.0" stroke="#1a1a1a"/>
+<line x1="95" y1="146.0" x2="107" y2="164.0" stroke="#1a1a1a"/>
+<text x="95" y="180.0" text-anchor="middle" class="nm">Administrador</text>
+<text x="95" y="193.0" text-anchor="middle" class="st">con permisos extra</text>
+<circle cx="1334" cy="510.0" r="9" fill="#fdf6d8" stroke="#1a1a1a"/>
+<line x1="1334" y1="519.0" x2="1334" y2="544.0" stroke="#1a1a1a"/>
+<line x1="1320" y1="526.0" x2="1348" y2="526.0" stroke="#1a1a1a"/>
+<line x1="1334" y1="544.0" x2="1322" y2="562.0" stroke="#1a1a1a"/>
+<line x1="1334" y1="544.0" x2="1346" y2="562.0" stroke="#1a1a1a"/>
+<text x="1334" y="578.0" text-anchor="middle" class="nm">:Worker:</text>
+<text x="1334" y="591.0" text-anchor="middle" class="st">«system»</text>
+<g transform="translate(40,802)" class="lg">
+<line x1="0" y1="0" x2="28" y2="0" stroke="#1a1a1a"/><path d="M22,-4 L28,0 L22,4" fill="none" stroke="#1a1a1a"/><text x="38" y="3">INVESTIGADOR</text>
+<line x1="170" y1="0" x2="198" y2="0" stroke="#d9532c"/><path d="M192,-4 L198,0 L192,4" fill="none" stroke="#d9532c"/><text x="208" y="3">ADMINISTRADOR (ADEMÁS DE LO DEL INVESTIGADOR)</text>
+<line x1="540" y1="0" x2="568" y2="0" stroke="#6b6b6b" stroke-dasharray="4,3"/><path d="M562,-4 L568,0 L562,4" fill="none" stroke="#6b6b6b"/><text x="578" y="3">WORKER (SISTEMA)</text>
+</g>
+</svg></body></html>
