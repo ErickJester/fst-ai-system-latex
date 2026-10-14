@@ -21,9 +21,15 @@
   </nav>
 
   <div class="page">
-    <div style="margin-bottom:6px">
-      <h2 style="margin:0 0 9px"><span id="titulo"></span> <span class="tag" id="tipo" style="vertical-align:middle;margin-left:8px"></span></h2>
-      <div style="display:flex;gap:24px;font-size:13px;color:var(--muted-2)"><span id="trat"></span><span class="num" id="nEsp"></span><span class="num" id="nTandas"></span></div>
+    <div style="margin-bottom:6px;display:flex;align-items:flex-end;gap:24px">
+      <div style="flex:1">
+        <h2 style="margin:0 0 9px"><span id="titulo"></span> <span class="tag" id="tipo" style="vertical-align:middle;margin-left:8px"></span></h2>
+        <div style="display:flex;gap:24px;font-size:13px;color:var(--muted-2)"><span id="trat"></span><span class="num" id="nEsp"></span><span class="num" id="nTandas"></span></div>
+      </div>
+      <div style="text-align:right">
+        <a class="btn btn-primary" id="verGrupo" href="resultados.html">Ver resultados del grupo completo</a>
+        <div class="hint" id="verGrupoNota" style="margin-top:6px"></div>
+      </div>
     </div>
 
     <hr class="hr">
@@ -47,6 +53,8 @@
   $('trat').textContent = g.trat;
   $('nEsp').textContent = g.n + ' especímenes';
   $('nTandas').textContent = g.tandas.length + ' tandas · ' + g.reparto.join(' + ') + ' cilindros';
+  const listas = g.tandas.filter(t => t.estado === 'Completado').length;
+  $('verGrupoNota').textContent = 'Reúne las tandas con análisis completado: ' + listas + ' de ' + g.tandas.length;
 
   // Notas de Día 2 según su estado (textos del mockup, 2d y 2e).
   const D2 = {
@@ -98,7 +106,7 @@
           '</div>' +
           '<div style="display:flex;align-items:center;gap:12px;margin-top:12px;font-size:11.5px;color:color-mix(in srgb,var(--color-text) 60%,transparent)">' +
             '<span>' + d2.analisis + '</span><div style="flex:1"></div>' +
-            (t.estado === 'Completado' ? '<a href="resultados.html">Ver resultados</a>' : t.estado === 'Error' || t.estado === 'Procesando' || t.estado === 'En cola' ? '<a href="progreso.html">Ver progreso del análisis →</a>' : '') +
+            (t.estado === 'Completado' ? '<a href="resultados.html">Ver resultados de esta tanda</a>' : t.estado === 'Error' || t.estado === 'Procesando' || t.estado === 'En cola' ? '<a href="progreso.html">Ver progreso del análisis →</a>' : '') +
           '</div>' +
         '</div>' +
       '</div>' +

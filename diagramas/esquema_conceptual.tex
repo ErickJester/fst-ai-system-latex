@@ -45,6 +45,9 @@
                   minimum height=0.9cm, align=center, font=\small},
   rel/.style   = {draw, thick, diamond, aspect=2.4, inner sep=1.5pt,
                   align=center, font=\scriptsize},
+  % interrelacion derivada: no se guarda, se obtiene de otras dos (D-92)
+  reld/.style  = {draw, thick, dashed, diamond, aspect=2.4, inner sep=1.5pt,
+                  align=center, font=\scriptsize},
   att/.style   = {draw, thick, ellipse, minimum width=2.6cm,
                   minimum height=0.75cm, font=\scriptsize},
   lin/.style   = {draw, thick},
@@ -64,7 +67,7 @@
 \node[rel] (compone)   at ( 7.4,  -2.3) {compone};
 \node[ent] (grupo)     at ( 7.4,  -3.7) {Grupo};
 
-\node[rel] (agrupa)    at ( 3.6,  -5.1) {agrupa};
+\node[reld] (agrupa)   at ( 3.6,  -5.1) {agrupa};
 \node[rel] (grabaen)   at (11.1,  -5.1) {se graba en};
 
 \node[ent] (especimen) at ( 3.6,  -6.5) {Espécimen};
@@ -108,15 +111,21 @@
 % -- Bus de salida del Grupo hacia sus dos ramas ----------------
 \coordinate (bus) at ($(grupo.south) + (0,-0.35)$);
 \draw[lin] (grupo.south) -- (bus);
-\draw[lin] (bus) -| (agrupa.north);
+\draw[lin, dashed] (bus) -| (agrupa.north);
 \draw[lin] (bus) -| (grabaen.north);
 
 % -- Grupo agrupa Especimenes  (el hecho experimental) ----------
 % (2,N): un grupo puede tener una sola tanda con 2 especimenes;
 % sin tope superior (reunion 3-sep). Decision del equipo, 3-oct.
 % Antes era (6,N).
+% Interrelacion DERIVADA (D-92, 13-oct): el modelo relacional no la
+% guarda; el grupo de un espécimen se obtiene por su tanda (Grupo -
+% Tanda - Espécimen). Se conserva en el esquema porque la pantalla del
+% grupo y las estadisticas por grupo (RF-31) usan a todos sus
+% especimenes sin separarlos por tanda. Va punteada.
 \node[card, anchor=south east] at ($(agrupa.north) + (-0.10,0.05)$) {(2,N)};
-\draw[lin] (agrupa) -- node[card, right, pos=0.45] {(1,1)} (especimen);
+\draw[lin, dashed] (agrupa) -- node[card, right, pos=0.45] {(1,1)} (especimen);
+\node[font=\tiny\itshape, anchor=east] at ($(agrupa.west) + (-0.15,0)$) {derivada de Tanda};
 
 % -- Grupo se graba en Tandas  (la logistica de camara) ---------
 % (1,N): un grupo tiene al menos una tanda (la A); las demas
@@ -196,8 +205,12 @@
         (lg3) at (0,-1.24) {};
   \node[font=\tiny, anchor=west] at (0.5,-1.24) {atributo de interrelación};
 
-  \node[font=\tiny\ttfamily, anchor=west] at (-0.42,-1.86) {(mín,máx)};
-  \node[font=\tiny, anchor=west] at (0.5,-1.86) {cardinalidad};
+  \node[draw, thick, dashed, diamond, aspect=2.2, minimum width=0.85cm,
+        minimum height=0.38cm, inner sep=0pt] (lg4) at (0,-1.86) {};
+  \node[font=\tiny, anchor=west] at (0.5,-1.86) {interrelación derivada};
+
+  \node[font=\tiny\ttfamily, anchor=west] at (-0.42,-2.48) {(mín,máx)};
+  \node[font=\tiny, anchor=west] at (0.5,-2.48) {cardinalidad};
 \end{scope}
 
 \end{tikzpicture}

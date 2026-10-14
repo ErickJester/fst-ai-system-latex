@@ -3,6 +3,7 @@ import html, math, sys
 # Esquema conceptual (diagramas/esquema_conceptual.tex): modelo entidad-relacion extendido, notacion
 # de Chen con cardinalidades (minimo,maximo). 11 entidades y 13 interrelaciones; los atributos no se
 # dibujan salvo 'segundos', que cuelga de 'presenta'. Las posiciones son las del .tex.
+# 'agrupa' (Grupo-Espécimen) es una interrelacion derivada (D-92): va punteada, no se guarda en la base.
 esc = html.escape
 SX, SY, OX, OY = 56, 47, 60, 62        # px por cm del .tex y desplazamiento
 
@@ -63,11 +64,12 @@ tramo(a('compone', 's'), a('grupo', 'n'), '(1,1)', .5, 'der')
 # -- Grupo: bus hacia 'agrupa' (espécimen) y 'se graba en' (tanda)
 g = a('grupo', 's'); bus_y = g[1] + 16
 linea([g, (g[0], bus_y)])
-linea([(g[0], bus_y), (a('agrupa', 'n')[0], bus_y), a('agrupa', 'n')])
+linea([(g[0], bus_y), (a('agrupa', 'n')[0], bus_y), a('agrupa', 'n')], dash=True)   # derivada (D-92)
 linea([(g[0], bus_y), (a('grabaen', 'n')[0], bus_y), a('grabaen', 'n')])
 cards.append(('(2,N)', a('agrupa', 'n')[0] - 6, a('agrupa', 'n')[1] - 8, 'end'))
 cards.append(('(1,N)', a('grabaen', 'n')[0] + 6, a('grabaen', 'n')[1] - 8, 'start'))
-tramo(a('agrupa', 's'), a('especimen', 'n'), '(1,1)', .5, 'der')
+linea([a('agrupa', 's'), a('especimen', 'n')], dash=True)
+card('(1,1)', a('agrupa', 's'), a('especimen', 'n'), .5, 'der')
 tramo(a('grabaen', 's'), a('tanda', 'n'), '(1,1)', .5, 'der')
 # -- Tanda aloja Espécimenes (2,4)
 tramo(a('especimen', 'e'), a('aloja', 'w'), '(1,1)', .3, 'arriba')
@@ -115,7 +117,7 @@ for k, d in N.items():
     if d['t'] == 'ent':
         out.append(f'<rect x="{x-w/2:.0f}" y="{y-h/2:.0f}" width="{w}" height="{h}" rx="3" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.4"/>')
     elif d['t'] == 'rel':
-        out.append(f'<polygon points="{x:.0f},{y-h/2:.0f} {x+w/2:.0f},{y:.0f} {x:.0f},{y+h/2:.0f} {x-w/2:.0f},{y:.0f}" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1.2"/>')
+        out.append(f'<polygon points="{x:.0f},{y-h/2:.0f} {x+w/2:.0f},{y:.0f} {x:.0f},{y+h/2:.0f} {x-w/2:.0f},{y:.0f}" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1.2"' + (' stroke-dasharray="4,3"' if k == 'agrupa' else '') + '/>')
     else:
         out.append(f'<ellipse cx="{x:.0f}" cy="{y:.0f}" rx="{w/2}" ry="{h/2}" fill="#faf9f5" stroke="#1a1a1a" stroke-dasharray="4,3" stroke-width="1.2"/>')
     cls = 'nm' if d['t'] == 'ent' else 'rl'
@@ -123,6 +125,8 @@ for k, d in N.items():
         yy = y + 4 - (len(lines) - 1) * 5.5 + i * 11
         out.append(f'<text x="{x:.0f}" y="{yy:.0f}" text-anchor="middle" class="{cls}">{esc(l)}</text>')
 
+ag = N['agrupa']
+out.append(f'<text x="{ag["cx"] - ag["w"] / 2 - 8:.0f}" y="{ag["cy"] + 3:.0f}" text-anchor="end" class="rl" style="font-style:italic">derivada de Tanda</text>')
 for texto, x, y, anc in cards:
     out.append(f'<text x="{x:.0f}" y="{y:.0f}" text-anchor="{anc}" class="m">{texto}</text>')
 
@@ -134,6 +138,7 @@ leg = f'''<g transform="translate(40,{ly})" class="lg">
 <polygon points="150,0 163,-8 176,0 163,8" fill="#ece7d8" stroke="#1a1a1a"/><text x="186" y="3">INTERRELACIÓN</text>
 <ellipse cx="330" cy="0" rx="14" ry="8" fill="#faf9f5" stroke="#1a1a1a" stroke-dasharray="3,2"/><text x="352" y="3">ATRIBUTO DE LA INTERRELACIÓN</text>
 <text x="620" y="3" style="font-weight:600;fill:#000">(mín,máx)</text><text x="690" y="3">CARDINALIDAD</text>
+<polygon points="800,0 813,-8 826,0 813,8" fill="#ece7d8" stroke="#1a1a1a" stroke-dasharray="3,2"/><text x="836" y="3">INTERRELACIÓN DERIVADA</text>
 </g>'''
 svg = f'''<svg viewBox="0 0 {W} {H}" role="img" aria-labelledby="co-title co-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="co-title">Esquema conceptual</title>
