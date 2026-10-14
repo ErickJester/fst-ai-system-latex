@@ -43,6 +43,13 @@
 '       confirmar cual prefiere el laboratorio.
 '  Ver errores/preguntas-doctor.md SS2 (Q-E, Q-F) para el detalle.
 '
+'  D-93 y RF-31 (14-oct): primero se muestra la tabla por espécimen, con
+'  su tanda, y el investigador elige ver el grupo completo o una sola
+'  tanda; la media, la desviación estándar y la varianza se calculan sobre
+'  los especímenes que se ven (de la tanda o del grupo completo) y el reporte
+'  descargable las incluye para esa misma vista. La comparación entre grupos
+'  usa todas las tandas de cada grupo.
+'
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_consulta_resultados.puml
 ' ================================================================
@@ -60,6 +67,13 @@ participant Backend as api
 database "Base de datos" as db
 
 inv -> ui: abre resultados del experimento\n(desde el dashboard o la pantalla de progreso)
+ui -> api: pide los resultados del experimento
+api -> db: busca los especímenes analizados, con su tanda y su grupo,\ny sus segundos por conducta de cada minuto
+db --> api: segundos por conducta de cada espécimen
+api --> ui: resultados por espécimen
+ui -> inv: muestra la tabla por espécimen, cada uno con su tanda
+inv -> ui: elige ver el grupo completo o una sola tanda
+ui -> ui: calcula la media, la desviación estándar y la varianza\nde los especímenes que se ven
 ui -> api: pide la comparación entre grupos
 api -> db: busca los grupos del experimento
 
@@ -77,7 +91,7 @@ loop por cada grupo
   end
 end
 
-api -> api: promedia los segundos por conducta\nentre los especímenes analizados de cada grupo\n(no se suman, para que el tamaño del grupo\nno distorsione la comparación)
+api -> api: calcula la media, la desviación estándar y la varianza\nde los segundos por conducta entre los especímenes\nanalizados de cada grupo, con todas sus tandas\n(no se suman, para que el tamaño del grupo\nno distorsione la comparación)
 
 alt algún análisis es "agrupado" (parte de sus segundos quedó como conducta activa)
   api --> ui: comparación entre grupos en las cuatro conductas,\ncon aviso de que parte de los segundos son conducta activa
@@ -91,6 +105,6 @@ note right of ui
   "agrupado" significa que al menos un segundo
   del análisis quedó como "conducta activa"
 end note
-inv -> ui: puede pedir el reporte descargable (ver CU-10)
+inv -> ui: puede pedir el reporte descargable de lo que ve,\nde la tanda o del grupo completo (ver CU-10)
 
 @enduml

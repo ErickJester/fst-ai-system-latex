@@ -49,6 +49,7 @@ package P2_Experimentos_y_carga_de_video {
     -notas : String
     +validarNombreUnico() : Boolean
     +consultarEstado() : String
+    +compararGrupos() : List<Estadisticas>
   }
 
   class Grupo {
@@ -56,12 +57,14 @@ package P2_Experimentos_y_carga_de_video {
     -etiqueta : String
     -tipo : String
     -tratamiento : String
+    +calcularEstadisticas() : Estadisticas
   }
 
   class Tanda {
     -id : Integer
     -ordinal : Integer
     -nCilindros : Integer
+    +calcularEstadisticas() : Estadisticas
   }
 
   class Especimen {
@@ -73,7 +76,7 @@ package P2_Experimentos_y_carga_de_video {
     -id : Integer
     -sesion : String
     -archivo : String
-    -duracion : Float
+    -duracion : Decimal
     -fechaCarga : DateTime
     +validarFormato() : Boolean
     +validarOrientacion() : Boolean
@@ -128,6 +131,7 @@ package P3_Pipeline_de_analisis_conductual {
     -etapa : String
     -nivelClasif : String
     -fechaAnalisis : DateTime
+    -rutaDiagnostico : String
   }
 }
 
@@ -146,7 +150,7 @@ package P4_Resultados_y_reportes {
   }
 
   class PRESENTA {
-    -segundos : Float
+    -segundos : Decimal
   }
   class Segundo {
     -segundo : Integer
@@ -208,6 +212,7 @@ Observacion "1" *--> "5"   Intervalo   : "se divide en"
 ' si dura menos, se guardan todos sus segundos).
 Observacion "1" *--> "1..300" Segundo : "se etiqueta en"
 Intervalo "0..*" -- "4" Conducta : presenta
+Segundo "0..*" --> "0..1" Conducta : "se clasifica como"
 (Intervalo, Conducta) .. PRESENTA
 
 Experimento "1"    --> "0..*" Reporte      : origina

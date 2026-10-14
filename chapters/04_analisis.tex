@@ -69,7 +69,11 @@ RF-04 & Autenticación
       & El sistema debe gestionar dos roles con permisos distintos: Investigador
         (puede consultar todos los experimentos del laboratorio) y Administrador
         (mismos permisos que el Investigador, más la capacidad de crear, modificar
-        y desactivar cuentas de usuario, y monitorear el estado del sistema).
+        y desactivar cuentas de usuario, y monitorear el estado del sistema). Los
+        investigadores no necesitan permisos distintos entre sí, como indicó el
+        laboratorio en la entrevista, así que el Administrador no es un tipo de
+        usuario aparte: es un Investigador con permisos adicionales (el investigador
+        responsable del laboratorio es ambos a la vez).
       & Alta & Sistema \\
 \hline
 
@@ -103,8 +107,9 @@ RF-08 & Carga de video
 \hline
 RF-09 & Carga de video
       & El sistema debe permitir subir uno o dos videos por tanda: Día~1
-        (sesión de habituación, 20~min) y Día~2 (sesión post-tratamiento, 5~min). Ambos
-        son opcionales individualmente. El pipeline analiza, como máximo, los últimos
+        (sesión de habituación, 20~min) y Día~2 (sesión post-tratamiento, 5~min). Cada
+        tanda debe tener al menos un video: el Día~1 es opcional y, si una tanda solo
+        tiene el Día~1, su experimento queda «en espera del Día~2». El pipeline analiza, como máximo, los últimos
         300~segundos del video de Día~2 (si dura menos, lo analiza completo; el resto
         se descarta). El video de Día~1 solo confirma que la sesión de habituación
         existe: el sistema lo guarda y no lo analiza (ver RN-03 y RN-12). Al subir el
@@ -208,10 +213,13 @@ RF-21 & Resultados
 RF-22 & Resultados
       & El investigador debe poder descargar los datos de resultados en formato CSV
         y XLSX desde la pantalla de resultados y desde el dashboard. El archivo debe
-        contener las columnas: \texttt{Tiempo (min:seg)}, \texttt{Nado activo},
-        \texttt{Escalamiento}, \texttt{Inmovilidad} y \texttt{Conducta activa}, con
-        una fila por minuto
-        analizado y el valor de cada conducta en segundos. Además se descargan, por
+        contener las columnas: \texttt{Grupo}, \texttt{Tanda}, \texttt{Espécimen},
+        \texttt{Tiempo (min:seg)}, \texttt{Nado activo}, \texttt{Escalamiento},
+        \texttt{Inmovilidad} y \texttt{Conducta activa}, con una fila por espécimen
+        y por minuto analizado y el valor de cada conducta en segundos. Al final
+        incluye las filas con la media, la desviación estándar y la varianza de cada
+        conducta de los especímenes de esa descarga, sean los de una tanda o los del
+        grupo completo (ver RF-31). Además se descargan, por
         separado y en PDF, el reporte de resultados (los tiempos por espécimen y
         conducta, con los fragmentos en que el espécimen no se ve marcados) y el
         reporte de diagnóstico (ver RN-11).
@@ -279,12 +287,14 @@ RF-30 & Administración
       & Media & Admin \\
 \hline
 RF-31 & Resultados
-      & El sistema debe calcular estadísticas por grupo experimental (control,
-        referencia, tratamiento) dentro de cada experimento: media, desviación
-        estándar y varianza del tiempo total de cada conducta entre los
-        especímenes de ese grupo, agregando todas sus tandas. Estas estadísticas
-        deben incluirse en el reporte descargable (CSV/XLSX) junto con los datos
-        individuales por espécimen.
+      & El sistema debe calcular estadísticas del tiempo total de cada conducta
+        ---media, desviación estándar y varianza--- entre los especímenes de un grupo
+        experimental (control, referencia, tratamiento) dentro de cada experimento,
+        agregando todas sus tandas, y entre los especímenes de una sola tanda. Al ver
+        una tanda, el investigador ve y descarga las estadísticas de esa tanda; al ver
+        el grupo completo, las del grupo (ver RF-19). Las estadísticas se incluyen en
+        el reporte descargable (CSV/XLSX), para la misma vista que se descarga, junto
+        con los datos individuales por espécimen.
       & Media & Investigador \\
 \hline
 RF-32 & Resultados
@@ -345,8 +355,7 @@ RNF-01 & Rendimiento
          dashboard, filtrar experimentos, abrir resultados) deben responder en menos
          de 3~s. Derivado del atributo \textit{time behaviour} de la ISO/IEC~25010:2011
          \cite{iso25010}.
-       & Tiempo de respuesta $\leq 3$~s en el 95\,\% de las solicitudes en condiciones
-         normales de red. \\
+       & Tiempo de respuesta $\leq 3$~s en condiciones normales de red. \\
 \hline
 RNF-02 & Calidad del análisis
        & El tiempo de procesamiento no es el criterio prioritario para el laboratorio.
@@ -359,10 +368,10 @@ RNF-02 & Calidad del análisis
          activa) sobre el conjunto de prueba de la fase de validación (TT-II). \\
 \hline
 RNF-03 & Disponibilidad
-       & El sistema debe estar disponible las 24 horas del día, los 7 días de la
-         semana, para permitir que los investigadores dejen análisis corriendo fuera
-         del horario laboral.
-       & $\geq 95$\,\% de disponibilidad mensual medida durante la operación. \\
+       & El sistema debe permitir que los investigadores dejen análisis corriendo
+         fuera del horario laboral, sin que nadie intervenga.
+       & Un análisis dejado en cola por la noche se encuentra terminado al día
+         siguiente. \\
 \hline
 RNF-04 & Seguridad
        & Solo los usuarios autenticados pueden acceder al sistema. La autenticación
@@ -1224,9 +1233,8 @@ César Augusto Sandino Reyes López.
 Reducir el análisis manual quita la necesidad de que los investigadores vayan al
 laboratorio solo para cronometrar videos. Al ser web, el sistema se puede usar desde
 cualquier lugar. La política de borrar videos a los 30~días evita que el disco crezca
-sin control. Según las directrices de la norma ISO~14064-1 \cite{iso14064}, el consumo
-energético de procesar un video de 5~min en una computadora local es marginal comparado
-con las horas de trabajo que reemplaza.
+sin control. El consumo energético de procesar un video de 5~min en una computadora
+local es pequeño comparado con las horas de trabajo que reemplaza.
 
 \subsection{Sostenibilidad social e institucional}
 

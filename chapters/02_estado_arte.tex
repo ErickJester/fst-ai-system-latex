@@ -227,7 +227,9 @@ imágenes. Entrenar una CNN desde cero requiere conjuntos de datos etiquetados m
 lo cual no es viable con el dataset disponible. La solución es el \textit{transfer
 learning} \cite{pan2010}: se toma una red preentrenada en ImageNet (más de un millón
 de imágenes de 1{,}000 clases) y se reemplaza solo la última capa de clasificación por
-una nueva con 3 salidas, una por conducta. Las capas anteriores ya saben detectar bordes,
+una nueva con 4 salidas: una por cada conducta del FST (nado, inmovilidad y escalamiento) y
+una cuarta para la conducta activa, que el sistema añade para los segundos en que no distingue
+entre nado y escalamiento. Las capas anteriores ya saben detectar bordes,
 texturas y formas generales, y eso se aprovecha directamente.
 
 ResNet \cite{he2016} es una de las arquitecturas más usadas para ese fin. Sus
@@ -261,7 +263,7 @@ sus objetivos. Para este proyecto, los atributos relevantes son:
 
 \begin{itemize}
   \item \textbf{\textit{Functional correctness}:} los resultados del sistema deben clasificar
-        correctamente las tres conductas del FST. Se evalúa con métricas de
+        correctamente las tres conductas del FST y la conducta activa. Se evalúa con métricas de
         clasificación estándar: precisión, \textit{recall} y F1 por conducta.
   \item \textbf{\textit{Time behaviour}:} el tiempo de análisis de un video de 5~minutos debe
         ser aceptable para el flujo de trabajo del laboratorio. Se mide en segundos de

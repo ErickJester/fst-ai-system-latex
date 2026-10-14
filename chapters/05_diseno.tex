@@ -35,7 +35,8 @@ tener varios análisis en cola al mismo tiempo.
 \section{Arquitectura general del sistema}
 % -----------------------------------------------------------
 
-El sistema tiene una arquitectura cliente-servidor de tres capas separadas en
+El sistema tiene una arquitectura cliente-servidor de tres capas (\textit{three-tier}:
+presentación, lógica de negocio y datos) separadas en
 contenedores Docker independientes: frontend, backend y base de datos. Un cuarto
 contenedor ---el worker--- ejecuta el pipeline de análisis de forma asíncrona, sin
 bloquear al servidor web mientras procesa los videos.
@@ -97,8 +98,8 @@ Las responsabilidades de cada componente son:
 
 La separación en contenedores empaqueta cada servicio con sus dependencias. La
 separación entre worker
-y backend también satisface el RF-12 y el RF-15 (análisis automático en segundo plano) y permite
-escalar el número de workers de forma independiente si el volumen de análisis aumenta.
+y backend también satisface el RF-12 y el RF-15 (análisis automático en segundo plano) y deja
+al servidor web atendiendo peticiones mientras el worker procesa un video a la vez.
 
 La Figura~\ref{fig:flujo_sistema} muestra el flujo funcional del sistema: cómo
 transita el video desde la carga hasta la generación de resultados, y cómo el ciclo
@@ -238,17 +239,12 @@ espacio-temporal R(2+1)D-18 \cite{tran2018}, preentrenada con videos de acciones
 humanas e implementada con PyTorch \cite{paszke2019}. Recibe un clip de 16
 fotogramas del cilindro de cada espécimen y lo fusiona con una rama de medidas: los
 quince rasgos y siete reglas de observación del pataleo bajo el agua y de los
-cambios sobre la línea de agua. Estima la probabilidad de nado activo, inmovilidad y
-escalamiento, y la conducta se decide con una regla de tres pasos:
-
-\begin{enumerate}
-  \item Si una conducta supera el umbral de confianza, se asigna esa conducta.
-  \item Si ninguna lo supera, pero la suma de nado activo y escalamiento sí, se
-        asigna \textit{conducta activa}: el espécimen no está inmóvil, pero el
-        clasificador no decide entre las dos conductas activas (ver RN-13).
-  \item Si tampoco, se asigna la conducta más probable y el resultado se marca
-        como dudoso para que la revisión humana lo atienda primero.
-\end{enumerate}
+cambios sobre la línea de agua. Entrega, para cada segundo, una de las cuatro conductas:
+nado activo, inmovilidad, escalamiento o \textit{conducta activa}. La red toma la conducta
+de mayor probabilidad: no hay umbral de confianza y entrega solo la conducta, no las
+probabilidades. La conducta activa es la que elige cuando el espécimen no está inmóvil
+pero no distingue entre nado y escalamiento (ver RN-13). El sistema no marca segundos
+como dudosos por sí mismo: la marca «dudosa» la puede poner el usuario al revisar.
 
 \paragraph{Decisión segundo a segundo.} Para decidir el segundo $k$, el sistema
 toma el clip y las medidas de una ventana de 4~s centrada en él (desde 1.5~s antes
@@ -445,9 +441,9 @@ Las tablas están organizadas en cuatro grupos funcionales:
         cuando falla, la ruta al reporte de diagnóstico (ver RN-11).
 \end{itemize}
 
-El modelo del clasificador y el umbral de confianza no se guardan en la
-base de datos: ningún requisito permite cambiarlos, así que son constantes del
-pipeline y se describen en la clasificación de conducta (módulo 3).
+El modelo del clasificador no se guarda en la base de datos: ningún requisito
+permite cambiarlo, así que es una constante del pipeline y se describe en la
+clasificación de conducta (módulo 3).
 
 \textbf{Resultados, reportes y notificaciones.}
 \begin{itemize}
@@ -673,11 +669,23 @@ FNBC &
 \section{Diseño de la API REST}
 % -----------------------------------------------------------
 
-La API REST sigue las convenciones HTTP estándar \cite{grinberg2018}. Todos los
-endpoints requieren autenticación con JWT salvo los de inicio de sesión y recuperación
-de contraseña. Las respuestas usan JSON con una estructura consistente: campo
-\texttt{data} para el resultado, \texttt{error} para mensajes de error y
-\texttt{status} para el código HTTP.
+La API REST sigue las convenciones HTTP estándar \cite{grinberg2018}. Es una API de
+nivel~2 del modelo de madurez de Richardson: cada recurso tiene su propia ruta y los
+verbos HTTP se usan con su significado (\texttt{GET} consulta, \texttt{POST} crea,
+\texttt{PATCH} modifica solo los campos que se envían y \texttt{DELETE} elimina). No
+llega al nivel~3, en el que cada respuesta incluye enlaces a las acciones siguientes
+(\textit{hypermedia as the engine of application state}, HATEOAS), porque el único
+cliente de la API es el propio frontend, que ya conoce las rutas, y ningún requisito
+lo pide. El
+cliente es una aplicación de una sola página (\textit{single-page application}, SPA):
+el navegador la carga una vez y después pide datos a la API sin recargar la página.
+Todos los endpoints requieren autenticación con JWT salvo los de inicio de sesión y
+recuperación de contraseña. La autenticación y la autorización son pasos distintos: el
+JWT identifica al usuario, y su rol decide qué puede hacer, con un control de acceso
+basado en roles (\textit{role-based access control}, RBAC) en el que el Administrador
+tiene los permisos del Investigador más los de gestión de cuentas. Las respuestas usan
+JSON con una estructura consistente: campo \texttt{data} para el resultado,
+\texttt{error} para mensajes de error y \texttt{status} para el código HTTP.
 
 La Tabla~\ref{tab:api} describe los endpoints principales agrupados por recurso.
 
@@ -730,9 +738,9 @@ GET    & \path{/experiments/{id}/results/groups} & Devuelve la comparación entr
 % --- Reportes ---
 GET    & \path{/experiments/{id}/report/pdf}  & Descarga el reporte de resultados en PDF. & Investiga\-dor \\
 \hline
-GET    & \path{/experiments/{id}/report/csv}  & Descarga los datos en CSV. & Investiga\-dor \\
+GET    & \path{/experiments/{id}/report/csv}  & Descarga los datos en CSV, del grupo completo o de una tanda. & Investiga\-dor \\
 \hline
-GET    & \path{/experiments/{id}/report/xlsx} & Descarga los datos en XLSX. & Investiga\-dor \\
+GET    & \path{/experiments/{id}/report/xlsx} & Descarga los datos en XLSX, del grupo completo o de una tanda. & Investiga\-dor \\
 \hline
 
 % --- Revisión segundo a segundo ---
@@ -829,7 +837,7 @@ el investigador solo observa.
 
 Cubre la consulta de resultados una vez finalizado el análisis: tiempos por
 espécimen y conducta, desglose por minuto, comparación entre los grupos del experimento con el Día~2,
-descarga de reportes en PDF, CSV y XLSX y, cuando el análisis termina, revisión y corrección de las etiquetas segundo a segundo (ver
+estadísticas por grupo o por tanda (media, desviación estándar y varianza), descarga de reportes en PDF, CSV y XLSX y, cuando el análisis termina, revisión y corrección de las etiquetas segundo a segundo (ver
 RF-32 y RN-14).
 
 \begin{figure}[H]
@@ -1762,7 +1770,7 @@ caso de uso.
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-19, RF-20, RF-21, RF-31. Extendido por: CU-10 (Descargar reporte).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-19, RF-20, RF-21, RF-31. Extendido por: CU-10 (Descargar reporte) y CU-28 (Consultar estadísticas de grupo o tanda).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Análisis completado exitosamente; sesión activa.} \\
 \hline
@@ -1819,7 +1827,7 @@ caso de uso.
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-22, RF-31. Extiende: CU-09 (Consultar resultados del análisis).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-22, RF-31. Extiende: CU-09 (Consultar resultados del análisis). Extendido por: CU-28 (Consultar estadísticas de grupo o tanda).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Resultados del análisis disponibles en la base de datos; sesión activa.} \\
 \hline
@@ -1854,6 +1862,59 @@ caso de uso.
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
 --- & No se identifican cursos alternos para este caso de uso. \\
+\hline
+\end{tabular}
+
+\normalsize\bigskip
+
+\noindent\textbf{Consultar estadísticas de grupo o tanda}
+
+\noindent\small
+\begin{tabular}{|p{2.8cm}|p{7.9cm}|p{4.0cm}|}
+\hline
+\textbf{Caso de Uso} & Consultar estadísticas de grupo o tanda &\textbf{Identificador:} CU-28 \\
+\hline
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Investigador / Administrador} \\
+\hline
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<extend>>} de CU-09 Consultar resultados del análisis y de CU-10 Descargar reporte)} \\
+\hline
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-31, RF-21, RN-12. Extiende: CU-09 (Consultar resultados del análisis) y CU-10 (Descargar reporte).} \\
+\hline
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Análisis del Día~2 completado de especímenes del grupo; sesión activa.} \\
+\hline
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Media, desviación estándar y varianza del tiempo total de cada conducta visibles para el grupo completo o para una tanda y, si se descarga un reporte CSV o XLSX, incluidas en el archivo de esa misma vista.} \\
+\hline
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador consultar las estadísticas del tiempo total de cada conducta entre los especímenes de una tanda o entre los del grupo completo, agregando todas sus tandas.} \\
+\hline
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El sistema calcula las estadísticas al pedirlas, a partir de los segundos por conducta de los especímenes analizados; no se guardan en la base de datos. Las muestra al pie de la tabla de resultados, calculadas sobre los especímenes que se están viendo (el grupo completo o una sola tanda), y las incluye en el reporte descargable de esa misma vista.} \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
+\hline
+\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
+\hline
+\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
+\hline
+1 & Inv. / Admin. & Pide las estadísticas desde la pantalla de resultados de una tanda o del grupo completo (ver CU-09) o descarga un reporte en CSV o XLSX (ver CU-10). \\
+\hline
+2 & Sistema & Reúne los segundos por conducta de los especímenes analizados de la vista: los de una tanda o los del grupo completo, con todas sus tandas. \\
+\hline
+3 & Sistema & Calcula la media, la desviación estándar muestral y la varianza del tiempo total de cada conducta para esos especímenes. \\
+\hline
+4 & Sistema & Las muestra como renglones al pie de la tabla de resultados y las incluye en el reporte descargable de esa vista, junto con los datos de cada espécimen. \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
+\hline
+\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
+\hline
+2a & Si algún espécimen del grupo no tiene el Día~2 analizado, no entra al cálculo y se señala como faltante (ver RN-12). \\
 \hline
 \end{tabular}
 
@@ -2496,13 +2557,19 @@ El pipeline de análisis se modela con dos clases de control: \textbf{Worker}, q
 procesa la cola y elimina videos expirados, y \textbf{PipelineAnalisis}, que
 ejecuta las tres etapas del análisis (preprocesamiento, localización de los
 cilindros y clasificación) sobre cada \textbf{Video} y actualiza el \textbf{Analisis}
-correspondiente. El modelo del clasificador y el umbral de confianza no son
-clases del diagrama: son constantes del pipeline y no se registran por análisis.
+correspondiente. El modelo del clasificador no es una clase del diagrama: es una
+constante del pipeline y no se registra por análisis.
 
 Los resultados de conducta se modelan con \textbf{Observacion} (un espécimen
 dentro de un video), \textbf{Intervalo} (cada minuto analizado) y la clase
 asociativa \textbf{PRESENTA}, que vincula cada intervalo con las conductas del
 catálogo \textbf{Conducta} y los segundos que ocupó cada una.
+
+Las estadísticas (RF-31) son datos derivados: no se guardan en la base de datos.
+\textbf{Grupo} y \textbf{Tanda} las calculan con \texttt{calcularEstadisticas()}, que
+devuelve la media, la desviación estándar y la varianza del tiempo de cada conducta entre
+sus especímenes (el grupo, agregando todas sus tandas); \textbf{Experimento} reúne las de
+todos sus grupos con \texttt{compararGrupos()} para compararlos (RF-21).
 
 \begin{sidewaysfigure}
 \centering
@@ -2699,8 +2766,15 @@ borra y el análisis empieza de nuevo (RN-04).
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.75\textwidth]{figures/mockups/v2/progreso}
-\caption{Pantalla de progreso del análisis: un análisis en curso, uno completado con acceso a resultados y a la revisión, dos detenidos por error ---cilindros no detectados y video que no se pudo abrir--- (RF-16) y la cola de trabajos [autoría propia].}
+\caption{Pantalla de progreso del análisis: un análisis en curso, uno completado con acceso a resultados y a la revisión, dos detenidos por error ---cilindros no detectados y video que no se pudo abrir--- (RF-16), uno en pausa, uno cancelado y la cola de trabajos [autoría propia].}
 \label{fig:ui_progreso}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/mockups/v2/pausa}
+\caption{Pantalla de pausa: imagen fija del instante en que no se ve al espécimen, con el recuadro del cilindro que el usuario mueve, el tiempo que queda de los 5~minutos y los botones «Ajustar y continuar» y «Cancelar análisis» (RN-17) [autoría propia].}
+\label{fig:ui_pausa}
 \end{figure}
 
 \subsection{Resultados del experimento}
@@ -2713,7 +2787,7 @@ la conducta de cada bloque es RN-15. Los fragmentos «no se ve» se marcan en pa
 en el reporte de resultados.
 Un selector en la parte superior permite ver el grupo completo, con todas sus tandas, o una
 sola tanda (RF-19); en el grupo completo, cada espécimen se rotula con su tanda. La vista por espécimen
-muestra el tiempo por conducta con media, desviación estándar y varianza por grupo (RF-19, RF-31), el
+muestra el tiempo por conducta con media, desviación estándar y varianza de los especímenes que se ven (RF-19, RF-31; el reporte descargable las incluye para esa misma vista), el
 nivel de clasificación del análisis y la leyenda de conductas; en el panel lateral
 se compara la inmovilidad entre los grupos con los videos del Día~2 (RF-21). Esa
 comparación promedia los segundos por espécimen de cada grupo y señala los especímenes

@@ -30,13 +30,14 @@ cls('Experimento', ['- id: Integer', '- nombre: String', '- fecha: Date', '- not
     ['+ validarNombreUnico(): Boolean', '+ consultarEstado(): String', '+ compararGrupos(): List<Estadisticas>'])
 cls('Grupo', ['- id: Integer', '- etiqueta: String', '- tipo: String', '- tratamiento: String'],
     ['+ calcularEstadisticas(): Estadisticas'])
-cls('Tanda', ['- id: Integer', '- ordinal: Integer', '- nCilindros: Integer'])
+cls('Tanda', ['- id: Integer', '- ordinal: Integer', '- nCilindros: Integer'],
+    ['+ calcularEstadisticas(): Estadisticas'])
 cls('Especimen', ['- id: Integer', '- numeroCilindro: Integer'])
-cls('Video', ['- id: Integer', '- sesion: String', '- archivo: String', '- duracion: Float', '- fechaCarga: DateTime'],
+cls('Video', ['- id: Integer', '- sesion: String', '- archivo: String', '- duracion: Decimal', '- fechaCarga: DateTime'],
     ['+ validarFormato(): Boolean', '+ validarOrientacion(): Boolean', '+ validarReproducible(): Boolean',
      '+ estaProximaEliminacion(dias): Boolean'])
 cls('Analisis', ['- id: Integer', '- estado: String', '- etapa: String', '- nivelClasif: String',
-                 '- fechaAnalisis: DateTime'])
+                 '- fechaAnalisis: DateTime', '- rutaDiagnostico: String'])
 cls('Worker', [], ['+ procesarCola(): void', '+ borrarVideosExpirados(): void', '+ avisarVencimientos(): void',
                    '+ vigilarDisco(): void', '+ reencolarHuerfanos(): void', '+ cancelarPausasVencidas(): void'],
     stereo='control')
@@ -56,7 +57,7 @@ cls('Reporte', ['- id: Integer', '- formato: String', '- ruta: String', '- fecha
 cls('Observacion', [], ['+ calcularBloques(): List<String>'])
 cls('Intervalo', ['- minuto: Integer'])
 cls('Conducta', ['- nombre: String'])
-cls('PRESENTA', ['- segundos: Float'])
+cls('PRESENTA', ['- segundos: Decimal'])
 cls('Segundo', ['- segundo: Integer', '- conducta: String', '- origen: String'], ['+ corregir(conducta, origen): void'])
 
 def partir(linea, limite=44):
@@ -194,6 +195,9 @@ def hoja2():
     edge([B('Observacion'), T('Segundo')], ASSOC, '1', '1..300', 'SE ETIQUETA EN', start='dia', end='')
     edge([R('Intervalo', 16), L('Conducta', 16)], PLAIN, '0..*', '4', '', end='')
     edge([R('Especimen', 16), L('ROI', 16)], ASSOC, '1', '0..*', 'SE DELIMITA CON')
+    sg = C['Segundo']
+    sx, sy = B('Segundo', sg['w'] // 2 + 70)[0], sg['y'] + sg['h'] + 34
+    edge([(sx, sg['y'] + sg['h']), (sx, sy), (B('Conducta')[0], sy), B('Conducta')], ASSOC, '0..*', '0..1', 'SE CLASIFICA COMO', role_seg=1)
     # conector punteado de la clase asociativa
     extra.append(f'<line x1="{mid}" y1="{C["Intervalo"]["y"] + 16}" x2="{mid}" y2="{C["PRESENTA"]["y"]}" stroke="#6b6b6b" stroke-dasharray="2,3"/>')
     chips.extend([('Especimen', '← hoja 1'), ('Video', '← hoja 1'), ('Analisis', '← hoja 1')])
@@ -278,6 +282,8 @@ def hojaU():
     edge([B('Observacion'), T('Segundo')], ASSOC, '1', '1..300', 'SE ETIQUETA EN', start='dia', end='')
     edge([R('Intervalo', 16), L('Conducta', 16)], PLAIN, '0..*', '4', '', end='')
     edge([R('Especimen', 16), L('ROI', 16)], ASSOC, '1', '0..*', 'SE DELIMITA CON')
+    sg = C['Segundo']
+    edge([R('Segundo', 36), (B('Conducta')[0], sg['y'] + 36), B('Conducta')], ASSOC, '0..*', '0..1', 'SE CLASIFICA COMO', role_seg=0)
     extra.append(f'<line x1="{mid}" y1="{y("Intervalo") + 16}" x2="{mid}" y2="{pres["y"]}" stroke="#6b6b6b" stroke-dasharray="2,3"/>')
     return ('Diagrama de clases del sistema',
             'Las 18 clases del sistema con sus relaciones: usuarios, experimentos, video, pipeline de análisis y resultados.')
