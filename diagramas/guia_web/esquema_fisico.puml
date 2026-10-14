@@ -140,30 +140,9 @@ entity OBSERVACION {
   UK (idEspecimen, idVideo)
 }
 
-entity INTERVALO {
-  * idIntervalo : integer <<PK>>
-  --
-  idObservacion : integer <<FK>>
-  minuto : smallint
-  ..
-  UK (idObservacion, minuto)
-}
-
 entity CONDUCTA {
   * nombre : varchar(n) <<PK>>
 }
-
-entity PRESENTA {
-  * idIntervalo : integer <<PK>> <<FK>>
-  * conducta : varchar(n) <<PK>> <<FK>>
-  --
-  segundos : numeric(p,s)
-}
-note bottom of PRESENTA
-  Resumen por minuto. Una fila por cada una de las
-  cuatro conductas, incluso con 0 segundos. Se recalcula
-  desde SEGUNDO cada vez que el usuario guarda correcciones.
-end note
 
 entity SEGUNDO {
   * idObservacion : integer <<PK>> <<FK>>
@@ -221,9 +200,6 @@ VIDEO          "1" --o "0..4" OBSERVACION                : idVideo
 
 ESPECIMEN      "1" --o "0..1" OBSERVACION                : idEspecimen
 
-OBSERVACION    "1" --o "5"    INTERVALO                 : idObservacion
-INTERVALO      "1" --o "4"    PRESENTA                  : idIntervalo
-CONDUCTA       "1" --o "0..*" PRESENTA                  : conducta
 OBSERVACION    "1" --o "1..300" SEGUNDO                 : idObservacion
 CONDUCTA       "0..1" --o "0..*" SEGUNDO                : conducta
 @enduml

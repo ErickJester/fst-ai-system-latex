@@ -8,7 +8,8 @@
 '  analisis termina (D-34, 3-oct). El usuario ve el video con una
 '  linea de tiempo por especimen, coloreada por conducta, y corrige
 '  la etiqueta de cada segundo. Las correcciones se guardan en
-'  SEGUNDO (D-35) y los totales por minuto (PRESENTA) se recalculan.
+'  SEGUNDO (D-35). Los totales por minuto no se guardan (D-52): se
+'  calculan desde SEGUNDO al mostrarse, asi que no hay que recalcularlos.
 '
 '  Corrige el investigador que subio el video o el Administrador. La
 '  copia del video en H.264 la genera el worker al terminar el analisis.
@@ -58,7 +59,6 @@ else el análisis está completado
   u -> ui: elige "Guardar"
   ui -> api: envía las correcciones\n(espécimen, segundo, conducta, origen)
   api -> db: actualiza SEGUNDO\n(conducta y origen de cada segundo)
-  api -> db: recalcula los 5 intervalos y los segundos\npor conducta de los especímenes tocados (PRESENTA)
   api -> db: borra los reportes guardados del experimento\npara que se regeneren con los datos nuevos
   api -> fs: borra los archivos de esos reportes
   db --> api: confirma

@@ -21,7 +21,7 @@ PAQUETES = [
     ('PAQUETE 4', 'Resultados y reportes', [
         ('CU-09', 'Consultar resultados'), ('CU-10', 'Descargar reporte (PDF, CSV, XLSX)'),
         ('CU-25', 'Revisar segundo a segundo'), ('CU-26', 'Corregir etiqueta de un segundo'),
-        ('CU-27', 'Recalcular totales por minuto'), ('', 'Reiniciar el análisis')]),
+        ('CU-27', 'Consultar estadísticas de grupo o tanda'), ('', 'Reiniciar el análisis')]),
     ('PAQUETE 5', 'Dashboard, notificaciones y administración', [
         ('CU-22', 'Consultar dashboard'), ('CU-23', 'Eliminar experimento'),
         ('CU-14', 'Borrar video automáticamente'), ('CU-13', 'Monitorear estado del sistema'),

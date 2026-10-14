@@ -1,8 +1,8 @@
 import html, math, sys
 
 # Esquema conceptual (diagramas/esquema_conceptual.tex): modelo entidad-relacion extendido, notacion
-# de Chen con cardinalidades (minimo,maximo). 11 entidades y 13 interrelaciones; los atributos no se
-# dibujan salvo 'segundos', que cuelga de 'presenta'. Las posiciones son las del .tex.
+# de Chen con cardinalidades (minimo,maximo). 10 entidades y 11 interrelaciones (D-52: sin Intervalo ni
+# 'presenta'); los atributos no se dibujan. Las posiciones son las del .tex.
 # 'agrupa' (Grupo-Espécimen) es una interrelacion derivada (D-92): va punteada, no se guarda en la base.
 esc = html.escape
 SX, SY, OX, OY = 56, 47, 60, 62        # px por cm del .tex y desplazamiento
@@ -18,16 +18,15 @@ P = {
     'video': (11.1, -9.3, 'ent', 'Video'), 'procesa': (14.5, -9.3, 'rel', 'procesa'),
     'analisis': (17.6, -9.3, 'ent', 'Análisis'),
     'aparece': (3.6, -10.6, 'rel', 'aparece en'), 'contiene': (11.1, -10.6, 'rel', 'contiene'),
-    'observ': (7.4, -12.0, 'ent', 'Observación'), 'divide': (7.4, -13.4, 'rel', 'se divide en'),
-    'interv': (7.4, -14.8, 'ent', 'Intervalo'), 'presenta': (11.1, -14.8, 'rel', 'presenta'),
-    'conducta': (14.4, -14.8, 'ent', 'Conducta'), 'segundos': (11.1, -16.4, 'att', 'segundos'),
+    'observ': (7.4, -12.0, 'ent', 'Observación'),
+    'conducta': (11.1, -14.8, 'ent', 'Conducta'),
     'etiqueta': (3.6, -13.4, 'rel', 'se etiqueta en'), 'segundo': (3.6, -14.8, 'ent', 'Segundo'),
-    'clasifica': (9.0, -18.2, 'rel', 'se clasifica como'),
+    'clasifica': (7.4, -14.8, 'rel', 'se clasifica como'),
 }
 DIM = {'ent': (150, 38), 'rel': (112, 50), 'att': (104, 32)}
 N = {k: dict(cx=OX + x * SX, cy=OY - y * SY, t=t, lab=l, w=DIM[t][0], h=DIM[t][1]) for k, (x, y, t, l) in P.items()}
 # las interrelaciones con etiqueta de dos lineas son un poco mas grandes
-for k in ('etiqueta', 'clasifica', 'divide', 'grabaen', 'aparece'):
+for k in ('etiqueta', 'clasifica', 'grabaen', 'aparece'):
     N[k]['w'] = 124
 
 def a(n, lado):
@@ -88,21 +87,12 @@ linea([ap, (ap[0], ow[1]), ow]); card('(1,1)', (ap[0], ow[1]), ow, .72, 'arriba'
 tramo(a('video', 's'), a('contiene', 'n'), '(0,4)', .6, 'der')
 co = a('contiene', 's'); oe = a('observ', 'e')
 linea([co, (co[0], oe[1]), oe]); card('(1,1)', (co[0], oe[1]), oe, .72, 'arriba')
-# -- Observación se divide en Intervalos (5,5)
-tramo(a('observ', 's'), a('divide', 'n'), '(5,5)', .5, 'der')
-tramo(a('divide', 's'), a('interv', 'n'), '(1,1)', .5, 'der')
-# -- Intervalo presenta Conductas (4,4) y (0,N); 'segundos' cuelga de 'presenta'
-tramo(a('interv', 'e'), a('presenta', 'w'), '(4,4)', .35, 'arriba')
-tramo(a('presenta', 'e'), a('conducta', 'w'), '(0,N)', .65, 'arriba')
-linea([a('presenta', 's'), a('segundos', 'n')], dash=True)
 # -- Observación se etiqueta en Segundos (1,300) y cada segundo se clasifica como Conducta
 o_sw = (N['observ']['cx'] - 50, N['observ']['cy'] + N['observ']['h'] / 2)
 linea([o_sw, a('etiqueta', 'e')]); card('(1,300)', o_sw, a('etiqueta', 'e'), .5, 'der')
 tramo(a('etiqueta', 's'), a('segundo', 'n'), '(1,1)', .5, 'der')
-sg = a('segundo', 's'); cl = a('clasifica', 'w')
-linea([sg, (sg[0], cl[1]), cl]); card('(0,1)', (sg[0], cl[1]), cl, .72, 'arriba')
-ce = a('clasifica', 'e'); cs = a('conducta', 's')
-linea([ce, (cs[0], ce[1]), cs]); card('(0,N)', ce, (cs[0], ce[1]), .3, 'arriba')
+tramo(a('segundo', 'e'), a('clasifica', 'w'), '(0,1)', .5, 'arriba')
+tramo(a('clasifica', 'e'), a('conducta', 'w'), '(0,N)', .5, 'arriba')
 
 # ---- figuras ----
 def partir(t):
@@ -131,18 +121,17 @@ for texto, x, y, anc in cards:
     out.append(f'<text x="{x:.0f}" y="{y:.0f}" text-anchor="{anc}" class="m">{texto}</text>')
 
 W = int(OX + 17.6 * SX + 110)
-H = int(OY + 18.2 * SY + 110)
+H = int(OY + 14.8 * SY + 142)
 ly = H - 60
 leg = f'''<g transform="translate(40,{ly})" class="lg">
 <rect x="0" y="-8" width="26" height="16" rx="2" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.4"/><text x="36" y="3">ENTIDAD</text>
 <polygon points="150,0 163,-8 176,0 163,8" fill="#ece7d8" stroke="#1a1a1a"/><text x="186" y="3">INTERRELACIÓN</text>
-<ellipse cx="330" cy="0" rx="14" ry="8" fill="#faf9f5" stroke="#1a1a1a" stroke-dasharray="3,2"/><text x="352" y="3">ATRIBUTO DE LA INTERRELACIÓN</text>
-<text x="620" y="3" style="font-weight:600;fill:#000">(mín,máx)</text><text x="690" y="3">CARDINALIDAD</text>
-<polygon points="800,0 813,-8 826,0 813,8" fill="#ece7d8" stroke="#1a1a1a" stroke-dasharray="3,2"/><text x="836" y="3">INTERRELACIÓN DERIVADA</text>
+<text x="340" y="3" style="font-weight:600;fill:#000">(mín,máx)</text><text x="410" y="3">CARDINALIDAD</text>
+<polygon points="540,0 553,-8 566,0 553,8" fill="#ece7d8" stroke="#1a1a1a" stroke-dasharray="3,2"/><text x="576" y="3">INTERRELACIÓN DERIVADA</text>
 </g>'''
 svg = f'''<svg viewBox="0 0 {W} {H}" role="img" aria-labelledby="co-title co-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="co-title">Esquema conceptual</title>
-<desc id="co-desc">Modelo entidad-relación con las 11 entidades del sistema y sus 13 interrelaciones, con cardinalidades mínima y máxima.</desc>
+<desc id="co-desc">Modelo entidad-relación con las 10 entidades del sistema y sus 11 interrelaciones, con cardinalidades mínima y máxima.</desc>
 <style>
 .nm{{font:600 12px Geist,sans-serif;fill:#1a1a1a}}
 .rl{{font:400 9px 'Geist Mono',monospace;fill:#1a1a1a}}

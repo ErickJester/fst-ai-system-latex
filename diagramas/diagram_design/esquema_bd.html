@@ -7,7 +7,7 @@ html,body{margin:0;background:#faf9f5}
 svg{display:block;width:924px;height:906px}
 </style></head><body><svg viewBox="0 0 924 906" role="img" aria-labelledby="es-title es-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="es-title">Esquema de la base de datos</title>
-<desc id="es-desc">Las 15 tablas de la base de datos PostgreSQL con sus columnas, tipos, llaves primarias, foráneas y únicas, y las 17 llaves foráneas con su cardinalidad.</desc>
+<desc id="es-desc">Las 13 tablas de la base de datos PostgreSQL con sus columnas, tipos, llaves primarias, foráneas y únicas, y las 14 llaves foráneas con su cardinalidad.</desc>
 <defs>
 <marker id="es-arr-0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#1b6fb0" stroke-width="1.5"/></marker><marker id="es-arr-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#2e8b57" stroke-width="1.5"/></marker><marker id="es-arr-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#8e44ad" stroke-width="1.5"/></marker><marker id="es-arr-3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#c0392b" stroke-width="1.5"/></marker><marker id="es-arr-4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#b8860b" stroke-width="1.5"/></marker><marker id="es-arr-5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#16a085" stroke-width="1.5"/></marker><marker id="es-arr-6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#d35400" stroke-width="1.5"/></marker><marker id="es-arr-7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#e84393" stroke-width="1.5"/></marker><marker id="es-arr-8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#34495e" stroke-width="1.5"/></marker><marker id="es-arr-9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#6c8e00" stroke-width="1.5"/></marker><marker id="es-arr-10" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#0097a7" stroke-width="1.5"/></marker><marker id="es-arr-11" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#a0522d" stroke-width="1.5"/></marker><marker id="es-arr-12" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#5e35b1" stroke-width="1.5"/></marker><marker id="es-arr-13" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#c2185b" stroke-width="1.5"/></marker><marker id="es-arr-14" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#00796b" stroke-width="1.5"/></marker><marker id="es-arr-15" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#f57c00" stroke-width="1.5"/></marker><marker id="es-arr-16" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#455a64" stroke-width="1.5"/></marker>
 </defs>
@@ -30,11 +30,8 @@ svg{display:block;width:924px;height:906px}
 <path d="M779,570 L779,524" fill="none" stroke="#6c8e00" stroke-width="1.4" marker-end="url(#es-arr-9)"/>
 <path d="M564,419 L664,419" fill="none" stroke="#0097a7" stroke-width="1.4" marker-end="url(#es-arr-10)"/>
 <path d="M464,350 L464,304" fill="none" stroke="#a0522d" stroke-width="1.4" marker-end="url(#es-arr-11)"/>
-<path d="M464,500 L464,454" fill="none" stroke="#5e35b1" stroke-width="1.4" marker-end="url(#es-arr-12)"/>
-<path d="M464,650 L464,604" fill="none" stroke="#c2185b" stroke-width="1.4" marker-end="url(#es-arr-13)"/>
-<path d="M464,786 L464,736" fill="none" stroke="#00796b" stroke-width="1.4" marker-end="url(#es-arr-14)"/>
-<path d="M664,799 L609,799 L609,391 L564,391" fill="none" stroke="#f57c00" stroke-width="1.4" marker-end="url(#es-arr-15)"/>
-<path d="M664,827 L564,827" fill="none" stroke="#455a64" stroke-width="1.4" marker-end="url(#es-arr-16)"/>
+<path d="M664,799 L609,799 L609,391 L564,391" fill="none" stroke="#5e35b1" stroke-width="1.4" marker-end="url(#es-arr-12)"/>
+<path d="M664,827 L564,827" fill="none" stroke="#c2185b" stroke-width="1.4" marker-end="url(#es-arr-13)"/>
 <text x="356" y="90" text-anchor="end" class="m">0..*</text>
 <text x="288" y="76" text-anchor="start" class="m">1</text>
 <text x="62" y="382" text-anchor="end" class="m">0..*</text>
@@ -59,12 +56,6 @@ svg{display:block;width:924px;height:906px}
 <text x="656" y="414" text-anchor="end" class="m">1</text>
 <text x="470" y="342" text-anchor="start" class="m">0..1</text>
 <text x="470" y="315" text-anchor="start" class="m">1</text>
-<text x="470" y="492" text-anchor="start" class="m">5</text>
-<text x="470" y="465" text-anchor="start" class="m">1</text>
-<text x="470" y="642" text-anchor="start" class="m">4</text>
-<text x="470" y="615" text-anchor="start" class="m">1</text>
-<text x="470" y="778" text-anchor="start" class="m">0..*</text>
-<text x="470" y="747" text-anchor="start" class="m">1</text>
 <text x="656" y="794" text-anchor="end" class="m">1..300</text>
 <text x="572" y="386" text-anchor="start" class="m">1</text>
 <text x="656" y="822" text-anchor="end" class="m">0..*</text>
@@ -173,30 +164,6 @@ svg{display:block;width:924px;height:906px}
 <text x="554" y="424" text-anchor="end" class="ty">integer</text>
 <line x1="372" y1="434" x2="556" y2="434" stroke="#6b6b6b" stroke-dasharray="3,3"/>
 <text x="374" y="446" class="ty">UK (idEspecimen, idVideo)</text>
-<rect x="364" y="500" width="200" height="104" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
-<text x="464.0" y="521" text-anchor="middle" class="nm">INTERVALO</text>
-<line x1="364" y1="532" x2="564" y2="532" stroke="#1a1a1a"/>
-<text x="372" y="546" class="b" fill="#d9532c">PK</text>
-<text x="406" y="546" class="a">idIntervalo</text>
-<text x="554" y="546" text-anchor="end" class="ty">integer</text>
-<text x="372" y="560" class="b" fill="#1a1a1a">FK</text>
-<text x="406" y="560" class="a">idObservacion</text>
-<text x="554" y="560" text-anchor="end" class="ty">integer</text>
-<text x="406" y="574" class="a">minuto</text>
-<text x="554" y="574" text-anchor="end" class="ty">smallint</text>
-<line x1="372" y1="584" x2="556" y2="584" stroke="#6b6b6b" stroke-dasharray="3,3"/>
-<text x="374" y="596" class="ty">UK (idObservacion, minuto)</text>
-<rect x="364" y="650" width="200" height="86" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
-<text x="464.0" y="671" text-anchor="middle" class="nm">PRESENTA</text>
-<line x1="364" y1="682" x2="564" y2="682" stroke="#1a1a1a"/>
-<text x="372" y="696" class="b" fill="#d9532c">PK FK</text>
-<text x="406" y="696" class="a">idIntervalo</text>
-<text x="554" y="696" text-anchor="end" class="ty">integer</text>
-<text x="372" y="710" class="b" fill="#d9532c">PK FK</text>
-<text x="406" y="710" class="a">conducta</text>
-<text x="554" y="710" text-anchor="end" class="ty">varchar(n)</text>
-<text x="406" y="724" class="a">segundos</text>
-<text x="554" y="724" text-anchor="end" class="ty">numeric(p,s)</text>
 <rect x="364" y="786" width="200" height="58" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
 <text x="464.0" y="807" text-anchor="middle" class="nm">CONDUCTA</text>
 <line x1="364" y1="818" x2="564" y2="818" stroke="#1a1a1a"/>

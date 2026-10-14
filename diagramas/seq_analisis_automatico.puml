@@ -27,9 +27,10 @@
 '    reintenta: solo se detiene (RN-04).
 '  - "Guarda los resultados por animal" (un paso plano) -> se abre en
 '    la jerarquia real del modelo: por cada especimen, una OBSERVACION
-'    de este video, con sus 5 INTERVALO y los segundos por conducta en
-'    cada uno (PRESENTA) -- nada de esto se guarda como total, los
-'    totales se derivan en consulta (ver seq_consulta_resultados.puml).
+'    de este video, con una fila SEGUNDO por cada segundo analizado --
+'    nada de esto se guarda como total (D-52, 14-oct: ya no hay
+'    INTERVALO ni PRESENTA), los totales se derivan en consulta (ver
+'    seq_consulta_resultados.puml).
 '  - Se agrega el registro del nivel de clasificacion (D-17, 13-sep):
 '    el Worker etiqueta el analisis como "preciso" o "agrupado" segun
 '    la capacidad del modelo activo (RN-13, F1 >= 85% por conducta) --
@@ -95,7 +96,6 @@ alt se hallaron los cilindros
     loop por cada espécimen detectado en el video
       w -> db: guarda su observación de este video
       w -> db: guarda una etiqueta por cada segundo analizado (SEGUNDO)
-      w -> db: guarda sus intervalos (uno por minuto analizado),\ncon los segundos por conducta de cada uno (PRESENTA)
     end
 
     w -> fs: guarda los recuadros de los cilindros\n(archivo de recuadros del análisis)

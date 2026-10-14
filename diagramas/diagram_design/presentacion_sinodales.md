@@ -14,12 +14,12 @@ anterior. Va de lo general a lo técnico. Todos están hechos con el estilo de `
 | 6 | Cuando algo sale mal: pausa y ajuste | Secuencia | [`../seq_pausa_y_ajuste.puml`](../seq_pausa_y_ajuste.puml) |
 | 7 | Con qué está construido | Arquitectura por capas | [arquitectura_capas.html](arquitectura_capas.html) |
 
-Respaldo, por si preguntan: [esquema_bd.html](esquema_bd.html) (las 15 tablas),
+Respaldo, por si preguntan: [esquema_bd.html](esquema_bd.html) (las 13 tablas),
 [clases_completo.html](clases_completo.html) y [contenedores.html](contenedores.html).
 
 ## Qué cambió respecto al modelo anterior
 
-Lo que los sinodales ya conocen y ahora es distinto: el modelo de datos es de 15 tablas, la
+Lo que los sinodales ya conocen y ahora es distinto: el modelo de datos es de 13 tablas (sin totales guardados), la
 conducta se decide por segundo, hay un worker aparte del backend, solo el video del Día 2 se
 analiza y existe un flujo de pausa y ajuste del recuadro.
 
@@ -31,8 +31,9 @@ analiza y existe un flujo de pausa y ajuste del recuadro.
 | Esquema conceptual | `../esquema_conceptual.tex` | `generadores/gen_conceptual.py` |
 
 El esquema conceptual usa las posiciones y cardinalidades del `.tex`, con las del 12-oct
-(Video–Análisis `(0,1)`, Video–Observación `(0,4)`, Intervalo–Presenta `(4,4)`). El PDF
-`../esquema_conceptual.pdf` es de antes de esos cambios y hay que recompilarlo.
+(Video–Análisis `(0,1)`, Video–Observación `(0,4)`) y, desde el 14-oct (D-52), sin
+`Intervalo` ni `presenta`: 10 entidades y 11 interrelaciones. El PDF
+`../esquema_conceptual.pdf` está recompilado.
 
 ## Diagramas de secuencia
 

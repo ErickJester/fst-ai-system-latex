@@ -55,9 +55,7 @@ cls('Notificacion', ['- id: Integer', '- tipo: String', '- mensaje: String', '- 
 cls('Reporte', ['- id: Integer', '- formato: String', '- ruta: String', '- fechaGeneracion: DateTime'],
     ['+ generar(experimento, formato): void', '+ descargar(): File'])
 cls('Observacion', [], ['+ calcularBloques(): List<String>'])
-cls('Intervalo', ['- minuto: Integer'])
 cls('Conducta', ['- nombre: String'])
-cls('PRESENTA', ['- segundos: Decimal'])
 cls('Segundo', ['- segundo: Integer', '- conducta: String', '- origen: String'], ['+ corregir(conducta, origen): void'])
 
 def partir(linea, limite=44):
@@ -151,7 +149,7 @@ def hoja1():
 # ---------------------------------------------------------------- hoja 2
 def hoja2():
     xs, w = columnas([['Analisis', 'Worker', 'PipelineAnalisis'], ['Video', 'Observacion', 'Segundo'],
-                      ['Especimen', 'Intervalo'], ['ROI', 'Conducta']], [170, 150, 160])
+                      ['Especimen'], ['ROI', 'Conducta']], [170, 150, 160])
     C['Analisis']['y'] = 40
     C['Worker']['y'] = 40 + h('Analisis') + 76
     C['PipelineAnalisis']['y'] = C['Worker']['y'] + h('Worker') + 76
@@ -159,14 +157,10 @@ def hoja2():
     C['Observacion']['y'] = C['Video']['y'] + h('Video') + 84
     C['Especimen']['y'] = C['Observacion']['y']
     C['ROI']['y'] = C['Especimen']['y']
-    C['Intervalo']['y'] = C['Observacion']['y'] + h('ROI') + 70
-    C['Conducta']['y'] = C['Intervalo']['y']
+    C['Conducta']['y'] = C['Observacion']['y'] + h('ROI') + 70
     C['Segundo']['y'] = C['Observacion']['y'] + h('Observacion') + 136
-    # PRESENTA (clase asociativa) debajo de la linea Intervalo-Conducta
-    mid = (xs[2] + w[2] + xs[3]) // 2
-    C['PRESENTA'] = dict(DATOS['PRESENTA'], x=mid - 100, w=200, y=C['Intervalo']['y'] + h('Intervalo') + 84, col=9)
     BM = max(c['y'] + c['h'] for c in C.values())
-    R1, R2 = BM + 22, BM + 48
+    R1, R2 = BM + 22, BM + 72
     gx = lambda i, off: xs[i] + w[i] + off
     px = xs[0] - 34
     # control
@@ -179,40 +173,32 @@ def hoja2():
          DEP, role='PROCESA', role_seg=1)
     edge([R('PipelineAnalisis', 60), (gx(0, 110), pip + 60), (gx(0, 110), C['Observacion']['y'] + 22),
           L('Observacion', 22)], DEP, role='ORIGINA', role_seg=1)
-    edge([R('PipelineAnalisis', 90), (gx(0, 75), pip + 90), (gx(0, 75), R1),
-          (C['PRESENTA']['x'] + C['PRESENTA']['w'] // 2, R1),
-          (C['PRESENTA']['x'] + C['PRESENTA']['w'] // 2, C['PRESENTA']['y'] + C['PRESENTA']['h'])],
-         DEP, role='GENERA', role_seg=2)
+    edge([R('PipelineAnalisis', 90), (gx(0, 75), pip + 90), (gx(0, 75), C['Segundo']['y'] + 20), L('Segundo', 20)],
+         DEP, role='GENERA', role_seg=1)
     roi = C['ROI']; rx = roi['x'] + roi['w']
     edge([R('PipelineAnalisis', 120), (gx(0, 45), pip + 120), (gx(0, 45), R2), (rx + 30, R2),
           (rx + 30, roi['y'] + 60), (rx, roi['y'] + 60)], DEP, m2='2..4', role='CREA', role_seg=2)
     # datos
     edge([B('Video'), T('Observacion')], ASSOC, '1', '0..4', 'CONTIENE')
     edge([L('Especimen', 16), R('Observacion', 16)], ASSOC, '1', '0..1', 'APARECE EN')
-    gm = gx(1, 70)
-    edge([R('Observacion', 46), (gm, C['Observacion']['y'] + 46), (gm, C['Intervalo']['y'] + 16), L('Intervalo', 16)],
-         ASSOC, '1', '5', 'SE DIVIDE EN', start='dia', end='', role_seg=1)
     edge([B('Observacion'), T('Segundo')], ASSOC, '1', '1..300', 'SE ETIQUETA EN', start='dia', end='')
-    edge([R('Intervalo', 16), L('Conducta', 16)], PLAIN, '0..*', '4', '', end='')
     edge([R('Especimen', 16), L('ROI', 16)], ASSOC, '1', '0..*', 'SE DELIMITA CON')
     sg = C['Segundo']
     sx, sy = B('Segundo', sg['w'] // 2 + 70)[0], sg['y'] + sg['h'] + 34
     edge([(sx, sg['y'] + sg['h']), (sx, sy), (B('Conducta')[0], sy), B('Conducta')], ASSOC, '0..*', '0..1', 'SE CLASIFICA COMO', role_seg=1)
-    # conector punteado de la clase asociativa
-    extra.append(f'<line x1="{mid}" y1="{C["Intervalo"]["y"] + 16}" x2="{mid}" y2="{C["PRESENTA"]["y"]}" stroke="#6b6b6b" stroke-dasharray="2,3"/>')
     chips.extend([('Especimen', '← hoja 1'), ('Video', '← hoja 1'), ('Analisis', '← hoja 1')])
     notas_hoja.extend([
         '← hoja 1 en Especimen: viene de allí (lo aloja una Tanda).',
         '← hoja 1 en Video: viene de allí (lo produce una Tanda y Analisis lo procesa).',
         '← hoja 1 en Analisis: viene de allí (procesa a un Video).'])
     return ('Diagrama de clases (hoja 2): observaciones, resultados y análisis automático',
-            'Clases de worker, pipeline, análisis, video, observación, intervalo, conducta, segundo y ROI, con sus relaciones.')
+            'Clases de worker, pipeline, análisis, video, observación, conducta, segundo y ROI, con sus relaciones.')
 
 def hojaU():
     xs, w = columnas([['Administrador', 'Usuario', 'Notificacion', 'Reporte'],
                       ['Experimento', 'Grupo', 'Tanda', 'Analisis', 'Worker', 'PipelineAnalisis'],
-                      ['Especimen', 'Video', 'Observacion', 'Segundo'], ['Intervalo'], ['ROI', 'Conducta']],
-                     [150, 230, 170, 100])
+                      ['Especimen', 'Video', 'Observacion', 'Segundo'], ['ROI', 'Conducta']],
+                     [150, 230, 170])
     Y = lambda n, v: C[n].__setitem__('y', v)
     Y('Administrador', 40)
     Y('Usuario', 40 + h('Administrador') + 70)
@@ -228,11 +214,8 @@ def hojaU():
     Y('Analisis', C['Video']['y'] + 104)
     Y('Worker', C['Analisis']['y'] + h('Analisis') + 76)
     Y('PipelineAnalisis', C['Worker']['y'] + h('Worker') + 76)
-    Y('Intervalo', C['Observacion']['y'])
     Y('ROI', C['Especimen']['y'])
     Y('Conducta', C['Observacion']['y'])
-    mid = (xs[3] + w[3] + xs[4]) // 2
-    C['PRESENTA'] = dict(DATOS['PRESENTA'], x=mid - 100, w=200, y=C['Intervalo']['y'] + h('Intervalo') + 84, col=9)
     BM = max(c['y'] + c['h'] for c in C.values())
     R1, R2 = BM + 22, BM + 48
     gA = lambda off: xs[0] + w[0] + off
@@ -267,10 +250,8 @@ def hojaU():
           R('Analisis', 100)], DEP)
     edge([R('PipelineAnalisis', 85), (gB(150), y('PipelineAnalisis') + 85), (gB(150), y('Observacion') + 22),
           L('Observacion', 22)], DEP, role='ORIGINA')
-    pres = C['PRESENTA']
-    edge([R('PipelineAnalisis', 100), (gB(205), y('PipelineAnalisis') + 100), (gB(205), R1),
-          (pres['x'] + pres['w'] // 2, R1), (pres['x'] + pres['w'] // 2, pres['y'] + pres['h'])],
-         DEP, role='GENERA', role_seg=2)
+    edge([R('PipelineAnalisis', 100), (gB(205), y('PipelineAnalisis') + 100), (gB(205), y('Segundo') + 20),
+          L('Segundo', 20)], DEP, role='GENERA', role_seg=1)
     roi = C['ROI']; rx = roi['x'] + roi['w']
     edge([R('PipelineAnalisis', 150), (gB(180), y('PipelineAnalisis') + 150), (gB(180), R2), (rx + 30, R2),
           (rx + 30, roi['y'] + 60), (rx, roi['y'] + 60)], DEP, m2='2..4', role='CREA', role_seg=2)
@@ -278,15 +259,12 @@ def hojaU():
     edge([B('Video'), T('Observacion')], ASSOC, '1', '0..4', 'CONTIENE')
     edge([R('Especimen', 55), (gC(60), y('Especimen') + 55), (gC(60), y('Observacion') + 22),
           R('Observacion', 22)], ASSOC, '1', '0..1', 'APARECE EN', role_seg=1)
-    edge([R('Observacion', 46), L('Intervalo', 46)], ASSOC, '1', '5', 'SE DIVIDE EN', start='dia', end='')
     edge([B('Observacion'), T('Segundo')], ASSOC, '1', '1..300', 'SE ETIQUETA EN', start='dia', end='')
-    edge([R('Intervalo', 16), L('Conducta', 16)], PLAIN, '0..*', '4', '', end='')
     edge([R('Especimen', 16), L('ROI', 16)], ASSOC, '1', '0..*', 'SE DELIMITA CON')
     sg = C['Segundo']
     edge([R('Segundo', 36), (B('Conducta')[0], sg['y'] + 36), B('Conducta')], ASSOC, '0..*', '0..1', 'SE CLASIFICA COMO', role_seg=0)
-    extra.append(f'<line x1="{mid}" y1="{y("Intervalo") + 16}" x2="{mid}" y2="{pres["y"]}" stroke="#6b6b6b" stroke-dasharray="2,3"/>')
     return ('Diagrama de clases del sistema',
-            'Las 18 clases del sistema con sus relaciones: usuarios, experimentos, video, pipeline de análisis y resultados.')
+            'Las 16 clases del sistema con sus relaciones: usuarios, experimentos, video, pipeline de análisis y resultados.')
 
 hoja = sys.argv[1]
 titulo, desc = {'1': hoja1, '2': hoja2, 'U': hojaU}[hoja]()

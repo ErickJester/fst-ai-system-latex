@@ -224,8 +224,9 @@ Usuario ──registra──> Experimento
                                                 └── Análisis  (0,1 — solo el video del Día 2 se analiza; un análisis vigente · D-03/D-24/D-71)
 
      Observación (fuerte, asociativa) = Espécimen ──aparece en──> Video
-           └── Intervalo (fuerte · minuto 1..5)
-                 └──presenta──> Conducta     [ segundos ]  ← el único dato medido del sistema
+           └──se etiqueta en──> Segundo (una fila por segundo, 1..300) ──se clasifica como──> Conducta
+                 (D-52, 14-oct: ya no hay Intervalo ni «presenta»; los segundos por conducta
+                  de cada minuto se calculan desde Segundo)
 
      + 4 relaciones de soporte del sistema, añadidas en la reconciliación del 6-sep
        (no las nombra el laboratorio): Modelo, Configuración, Reporte, Notificación
@@ -254,8 +255,8 @@ en el esquema lógico definitivo.
    tanda. Es el error que el libro documenta en §2.5.3 con el ejemplo de las audiciones
    que no generan grabación. La agregación cierra primero el par válido y clasifica
    después.
-4. **Todo el sistema mide un solo dato:** `segundos`, en la interrelación *presenta*.
-   Los otros 26 atributos son estructura para ubicarlo o metadato del análisis. Los
+4. **Todo el sistema mide un solo dato:** la conducta de cada segundo (`SEGUNDO`; hasta el
+   14-oct eran los `segundos` de *presenta*, ver D-52). Los demás atributos son estructura para ubicarlo o metadato del análisis. Los
    totales y los estadísticos de grupo se **derivan**, no se almacenan (actividad 6:
    sin redundancia).
 
@@ -281,8 +282,23 @@ Aplicados en la rama `decisiones-11oct` (caps. 1 a 5, apéndice D, `esquema_fisi
 | **Clasificador (D-66)** | La CNN de fusión; el *gradient boosting* es el etiquetador |
 | **Dos PDF (D-76)** | «reporte de resultados» y «reporte de diagnóstico» |
 
-**No se aplicó** (sin confirmación): `PRESENTA` en (4,4) y quitar el modelo del panel de administración.
+**No se aplicó** (sin confirmación): `PRESENTA` en (4,4), que ya no tiene objeto porque D-52 quita la tabla, y quitar el modelo del panel de administración.
 Las columnas de `ANALISIS` y los valores de `SEGUNDO.origen` se resolvieron el 12-oct (abajo).
+
+### Cambios del 14-oct-2026 (D-52): se quitan `INTERVALO` y `PRESENTA`
+
+Detalle en `errores/preguntas-doctor.md` §6. Los segundos por conducta de cada minuto no se guardan:
+se calculan al mostrarlos, contando las filas de `SEGUNDO` de cada conducta (el minuto sale del número
+de segundo). Es el mismo principio de las estadísticas de grupo (D-93) y de los bloques de 5 s.
+
+| Cambio | Detalle |
+|---|---|
+| **Cifras vigentes** | **13 relaciones**, esquema lógico con **57 atributos y 14 llaves foráneas** (antes 63 y 17; el físico suma `rutaDiagnostico`) |
+| **Corregir una etiqueta** | Solo toca `SEGUNDO`. Ya no hay que recalcular nada, así que **CU-27 «Recalcular totales por minuto» se fundió en CU-26** y el antiguo CU-28 pasó a ser CU-27 |
+| **Resultados y reportes** | Cuentan `SEGUNDO` por observación y conducta; el CSV/XLSX por minuto sale de la misma cuenta |
+| **Índice** | `ix_presenta_conducta` pasa a `ix_segundo_conducta` sobre `SEGUNDO (conducta)` |
+| **Borrado de un experimento** | El orden de las hojas hacia arriba empieza en `SEGUNDO` y sigue en `OBSERVACION` |
+| **Aplicado** | `grafo_relacional_3_vigente.puml`, `esquema_fisico.puml`, `clases.puml`, `esquema_conceptual.tex` (10 entidades y 11 interrelaciones), `seq_consulta_resultados`, `seq_revision_segundos` y `seq_analisis_automatico`, con sus PNG y HTML; cap. 1, 4 y 5 y apéndice D (13 tablas); `INSTRUCCIONES-WEB.md` (modelo, SQL del Anexo B y diagramas del Anexo A) y `diagramas/guia_web/` |
 
 ### Cambios del 12-oct-2026 (D-79 a D-82)
 
@@ -323,7 +339,7 @@ mejorarla. Detalle en `errores/preguntas-doctor.md` §6.
 | **Bloques de 5 s sin la CNN** | La CNN solo clasifica segundos; el bloque se calcula por mayoría de sus cinco segundos. Si nado activo y escalamiento empatan, es conducta activa; con 2 de inmovilidad y 2 de nado decide el quinto segundo (escalamiento o «no se ve» dan conducta activa). Un bloque de «no se ve» se muestra como conducta activa con un matiz, y el PDF final marca esos fragmentos. No cambia el modelo |
 | **Últimos 300 s, no los primeros** | D-54: al inicio de algunos videos aparecen personas. Es un **máximo, sin mínimo**: si el video dura menos, se analiza todo. La CNN analiza el video completo; el worker conserva las últimas 300 filas de cada espécimen, las renumera de 1 a 300 y recorta el video a esos mismos segundos (el segundo N cae en el instante N − 1 del video recortado, que es el que ve el usuario). El Día 1 solo confirma que existe el video de habituación y no se analiza. `INTERVALO` y `SEGUNDO` no cambian |
 | **Se mantiene `ANALISIS.rutaDiagnostico`** | Se había propuesto quitarla y se revirtió el mismo día (D-23, D-42) |
-| **Contrato del CSV de la CNN** | El worker convierte `X_cnnseg.csv` en filas de `SEGUNDO` (solo `conducta`; no guarda `confianza` ni `p_*`) y `X_cnnseg_resumen.csv` en `PRESENTA`. `especimen` (1 a 4) se enlaza con `numeroCilindro`. Las hojas manuales `X_seg.csv` solo entrenan la CNN y no entran a la base |
+| **Contrato del CSV de la CNN** | El worker convierte `X_cnnseg.csv` en filas de `SEGUNDO` (solo `conducta`; no guarda `confianza` ni `p_*`) y no guarda `X_cnnseg_resumen.csv` (D-52: los totales por minuto se calculan desde `SEGUNDO`). `especimen` (1 a 4) se enlaza con `numeroCilindro`. Las hojas manuales `X_seg.csv` solo entrenan la CNN y no entran a la base |
 
 **Cifras vigentes (6-oct):** **15 relaciones**; esquema lógico con **63 atributos y 17 llaves
 foráneas**; esquema físico con **64 atributos** (más `rutaDiagnostico`) y **17 llaves foráneas**:
@@ -337,7 +353,7 @@ y los tres artifacts (Conceptual, Lógico y Físico, con D-28 a D-55; URLs en §
 **D-54 quedó resuelto del todo (6-oct, más tarde):** máximo de 300 s sin mínimo; la CNN sobre el video
 completo, con recorte y renumeración posteriores; el Día 1 solo confirma el video de habituación. Está
 aplicado en los tres artifacts, `pipeline.puml`, `seq_analisis_automatico.puml` y `esquema_fisico.puml`.
-**Sin decidir:** D-52. **Falta actualizar el LaTeX** (cap. 1, 4 y 5 y apéndice D) con esta última
+**D-52** se resolvió el 14-oct (ver arriba). **Falta actualizar el LaTeX** (cap. 1, 4 y 5 y apéndice D) con esta última
 resolución de D-54. **Sin aplicar:** el
 comentario de `seq_analisis_automatico.puml` sobre `idConfig` y el cap. 6 (comentado en
 `main.tex`).

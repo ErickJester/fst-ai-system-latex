@@ -33,7 +33,7 @@ else se puede revisar
   end
   opt el usuario elige "Reiniciar el análisis" (RN-04, D-60)
     ui -> api: POST .../restart
-    api -> db: [transacción] borra el resultado anterior\n(observaciones, intervalos, segundos y resúmenes de ese video)
+    api -> db: [transacción] borra el resultado anterior\n(observaciones y segundos de ese video)
     api -> db: [transacción] deja el análisis "en cola"\ncon sus valores de arranque
     api --> ui: 202 Accepted
     ui --> u: vuelve a la pantalla de progreso
@@ -41,7 +41,6 @@ else se puede revisar
   u -> ui: Guardar (Ctrl+S)
   ui -> api: PUT .../segundos\n{cambios: [{numeroCilindro, segundo, conducta, origen}]}
   api -> db: [transacción] actualiza SEGUNDO\n(conducta y origen)
-  api -> db: [transacción] recalcula INTERVALO y PRESENTA\nde los especímenes tocados (4 filas por intervalo)
   api -> db: [transacción] actualiza nivelClasif\n(agrupado si queda algún segundo como conducta activa)
   api -> db: borra los reportes guardados del experimento\npara que se regeneren con los datos nuevos
   api -> fs: borra los archivos de esos reportes

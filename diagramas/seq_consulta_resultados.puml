@@ -17,9 +17,10 @@
 '    existe el video de habituacion de la prueba de Porsolt (D-54).
 '    No se analiza ni entra en esta comparacion.
 '  - Camino de datos real: GRUPO -> TANDA -> ESPECIMEN -> OBSERVACION
-'    (del video con sesion = "Dia 2") -> INTERVALO -> PRESENTA
-'    (segundos por conducta). Se suma por especimen y se agrega por
-'    grupo -- nada de esto se preguarda, se deriva en consulta
+'    (del video con sesion = "Dia 2") -> SEGUNDO (una fila por
+'    segundo, con su conducta). Se cuenta por especimen y se agrega
+'    por grupo -- nada de esto se preguarda, se deriva en consulta
+'    (D-52, 14-oct: ya no hay INTERVALO ni PRESENTA)
 '    (ver DISENO-BD.md SS0, "Decisiones que sostienen el modelo").
 '  - D-17 (13-sep): un analisis puede ser "preciso" (tres conductas
 '    separadas) o "agrupado" (nado activo + escalamiento fundidos en
@@ -84,7 +85,7 @@ loop por cada grupo
   api -> db: para cada espécimen, busca su observación\ndel video con sesión "Día 2"
 
   alt el espécimen ya tiene su Día 2 analizado
-    api -> db: suma los segundos por conducta\nde los intervalos de esa observación\ny lee el nivel de clasificación de su análisis
+    api -> db: cuenta los segundos de cada conducta\nen los segundos de esa observación\ny lee el nivel de clasificación de su análisis
     db --> api: segundos de nado activo, inmovilidad, escalamiento y conducta activa,\ny el nivel ("preciso" o "agrupado")
   else el Día 2 de ese espécimen no tiene resultado\n(análisis en cola, procesando, con error, o sin subir)
     api -> api: marca al espécimen como dato faltante\npara este grupo

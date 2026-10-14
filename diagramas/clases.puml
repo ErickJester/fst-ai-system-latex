@@ -141,17 +141,10 @@ package P4_Resultados_y_reportes {
     +calcularBloques() : List<String>
   }
 
-  class Intervalo {
-    -minuto : Integer
-  }
-
   class Conducta {
     -nombre : String
   }
 
-  class PRESENTA {
-    -segundos : Decimal
-  }
   class Segundo {
     -segundo : Integer
     -conducta : String
@@ -202,18 +195,15 @@ Especimen "1" --> "0..*" ROI     : "se delimita con"
 PipelineAnalisis ..> Video       : procesa
 PipelineAnalisis ..> Analisis    : actualiza
 PipelineAnalisis ..> Observacion : origina
-PipelineAnalisis ..> PRESENTA    : genera
+PipelineAnalisis ..> Segundo      : genera
 
 Especimen   "1" --> "0..1" Observacion : "aparece en"
 Video       "1" --> "0..4" Observacion : contiene
-Observacion "1" *--> "5"   Intervalo   : "se divide en"
 
 ' D-54: 300 es un maximo, sin minimo (los ultimos 300 s del video;
 ' si dura menos, se guardan todos sus segundos).
 Observacion "1" *--> "1..300" Segundo : "se etiqueta en"
-Intervalo "0..*" -- "4" Conducta : presenta
 Segundo "0..*" --> "0..1" Conducta : "se clasifica como"
-(Intervalo, Conducta) .. PRESENTA
 
 Experimento "1"    --> "0..*" Reporte      : origina
 Experimento "0..1" --> "0..*" Notificacion : origina
