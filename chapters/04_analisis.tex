@@ -130,8 +130,9 @@ RF-11 & Carga de video
       & Alta & Investigador \\
 \hline
 RF-12 & Carga de video
-      & El análisis debe iniciarse automáticamente al completarse la carga y
-        validación del video, sin intervención del investigador.
+      & El análisis del video del Día~2 debe iniciarse automáticamente al completarse la
+        carga y validación del video, sin intervención del investigador; el video del
+        Día~1 se guarda y no se analiza (ver RN-12).
       & Alta & Sistema \\
 \hline
 
@@ -219,8 +220,8 @@ RF-22 & Resultados
 % ── Dashboard / gestión de experimentos ──────────────────
 RF-23 & Dashboard
       & El dashboard debe mostrar la lista de todos los experimentos del laboratorio
-        con nombre, fecha, número de grupos, sesión, estado (en cola, procesando,
-        completado, error) y accesos directos a resultados y descarga (ver RN-08).
+        con nombre, fecha, número de grupos, sesión, estado (en cola, procesando, en pausa,
+        completado, error; «en espera del Día~2» si solo tiene el video del Día~1) y accesos directos a resultados y descarga (ver RN-08).
         La lista es filtrable por estado, fecha o tratamiento; el filtro por
         tratamiento muestra los experimentos que tengan al menos un grupo con
         ese tratamiento.
@@ -301,7 +302,8 @@ RF-32 & Resultados
 RF-33 & Notificaciones
       & El sistema debe avisar al usuario correspondiente, en el panel de
         notificaciones de la barra superior y también por correo electrónico, cuando
-        un análisis termina, cuando un análisis se detiene por error y, al
+        un análisis termina, cuando un análisis queda en pausa (ver RN-17), cuando
+        un análisis se detiene por error y, al
         Administrador, cuando el almacenamiento rebasa el 80\,\% (ver RF-29), y al
         investigador de cada experimento afectado cuando un video se borra antes de
         los 30 días por falta de espacio (ver RN-05). Los
@@ -396,7 +398,7 @@ RNF-08 & Almacenamiento
          termina exitosamente. Los resultados y reportes se conservan
          indefinidamente. El sistema alerta al usuario cuando un video está a menos
          de 7~días de ser borrado.
-       & Tarea programada (\textit{cron job}) diaria. Aviso visible en dashboard
+       & Tarea programada (\textit{cron job}) diaria, a cargo del \textit{worker}. Aviso visible en dashboard
          con indicador de días restantes. \\
 \hline
 RNF-09 & Almacenamiento
@@ -510,7 +512,7 @@ ajustarse en la fase de validación (TT-II).
         Umbrales estándar de gestión de capacidad en sistemas de almacenamiento
         \cite{pressman2014}. Dejan margen operativo suficiente antes de que el
         disco se llene y evitan pérdida de datos por falta de espacio. Se
-        revisarán según el volumen real de videos generados por semestre (ver RNF-09).
+        revisarán según el volumen real de videos generados (ver RNF-09).
 \end{itemize}
 
 % -----------------------------------------------------------
@@ -859,9 +861,10 @@ R-02 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
 
 % ---- NIVEL MEDIO (amarillo) ----
 R-03 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
-     & El laboratorio no confirma a tiempo qué técnica de cuantificación usa en sus
-       análisis manuales, por lo que no hay una referencia externa contra la cual
-       contrastar los bloques de 5~s.
+     & El laboratorio cuantifica por eventos (la conducta del instante exacto cada
+       5~s) y el sistema entrega la conducta predominante de cada bloque de 5~s, por
+       lo que sus análisis manuales no son una referencia directa contra la cual
+       contrastar los bloques (ver RN-15).
      & Etiquetar el conjunto de prueba propio con el etiquetador del equipo y
        acordar con el laboratorio una sesión de contraste de los bloques de 5~s,
        aprovechando las sesiones con el Dr.\ Sandino. \\
