@@ -104,7 +104,7 @@ Los **métodos** no tienen contraparte en el grafo (es esquema de datos); se cop
 ## Cómo regenerarlo
 
 ```bash
-python diagramas/diagram_design/generadores/gen_clases.py diagramas/diagram_design/clases_completo.html
+python diagramas/diagram_design/generadores/gen_clases_hojas.py U diagramas/diagram_design/clases_completo.html
 ```
 
 ## Actualización del 12-oct (rama `decisiones-11oct`)
@@ -145,3 +145,30 @@ Se agregaron los métodos que salen de las decisiones del worker y de la pausa, 
   `PipelineAnalisis.aplicarAjusteRecuadro(idAnalisis)` (D-89).
 - `PipelineAnalisis.actualizarProgreso(idAnalisis, etapa)`: ya no lleva `pct`; el backend calcula el
   porcentaje como un tercio por etapa.
+
+## Actualización del 13-oct: una sola hoja carta horizontal
+
+Se reacomodaron las clases para que el diagrama (2150 × 1619 px) quepa en una hoja carta
+horizontal: se quitó la columna del Administrador (ahora va sobre Usuario), las clases del
+análisis automático van en la misma columna que Experimento y las firmas largas se parten en
+dos renglones. Cada flecha lleva su propio color, las palabras de las relaciones verticales van
+giradas y se quitó la nota de las coordenadas del ROI.
+
+Con los márgenes del documento, la letra de las clases queda en unos 3 pt en papel. Hay una
+versión en dos hojas ([clases_hojas.md](clases_hojas.md)) con letra de unos 4 pt.
+
+El generador es `generadores/gen_clases_hojas.py` (opción `U`); ya no existe `gen_clases.py`.
+Los PNG se sacan con Edge sin ventana, al doble de resolución.
+
+## Actualización del 13-oct: estadísticas por grupo (RF-31)
+
+Dos métodos nuevos, sin tablas ni columnas nuevas: las estadísticas se derivan de `SEGUNDO` y
+`PRESENTA`, no se guardan (`../../DISENO-BD.md`, sección 4).
+
+- `Grupo.calcularEstadisticas(): Estadisticas`: media, desviación estándar y varianza del tiempo
+  de cada conducta entre los espécimen del grupo.
+- `Experimento.compararGrupos(): List<Estadisticas>`: las estadísticas de todos los grupos, para
+  la comparación entre grupos (RF-21) y para el CSV y el XLSX.
+
+`Estadisticas` es un valor que se calcula y se devuelve; no es una clase de la base de datos.
+Falta pasar estos métodos a `../clases.puml`, que todavía no los tiene.

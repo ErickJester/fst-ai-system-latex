@@ -17,6 +17,7 @@ rectangle "Plataforma Web FST - Paquete 4" {
   usecase "CU-26\nCorregir etiqueta de un segundo" as CU26
   usecase "CU-27\nRecalcular totales por minuto" as CU27
   usecase "Reiniciar el análisis" as UC25R
+  usecase "CU-28\nConsultar estadísticas por grupo\n(media, desviación estándar\ny varianza)" as CU28
 }
 INV --> CU09
 INV --> CU10
@@ -26,4 +27,6 @@ CU10 ..> UC46 : <<include>>
 CU26 ..> CU25 : <<extend>>\n[la conducta del sistema\nno es la correcta]
 CU26 ..> CU27 : <<include>>
 UC25R ..> CU25 : <<extend>>\n[el usuario reinicia\nel análisis]
+CU28 ..> CU09 : <<extend>>\n[el investigador pide las\nestadísticas de los grupos]
+CU28 ..> CU10 : <<extend>>\n[el reporte es CSV o XLSX]
 @enduml

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagrama de clases (hoja 2): observaciones, resultados y análisis automático</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:#faf9f5}
+svg{display:block;width:1740px;height:1173px}
+</style></head><body><svg viewBox="0 0 1740 1173" role="img" aria-labelledby="cl-title cl-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="cl-title">Diagrama de clases (hoja 2): observaciones, resultados y análisis automático</title>
+<desc id="cl-desc">Clases de worker, pipeline, análisis, video, observación, intervalo, conducta, segundo y ROI, con sus relaciones.</desc>
+<defs><marker id="cl-dia-0" viewBox="0 0 16 12" refX="0" refY="6" markerWidth="16" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,6 L8,0 L16,6 L8,12 Z" fill="#1b6fb0" stroke="#1b6fb0"/></marker><marker id="cl-arr-0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#1b6fb0" stroke-width="1.5"/></marker><marker id="cl-tri-0" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#faf9f5" stroke="#1b6fb0" stroke-width="1.4"/></marker><marker id="cl-dia-1" viewBox="0 0 16 12" refX="0" refY="6" markerWidth="16" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,6 L8,0 L16,6 L8,12 Z" fill="#2e8b57" stroke="#2e8b57"/></marker><marker id="cl-arr-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#2e8b57" stroke-width="1.5"/></marker><marker id="cl-tri-1" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#faf9f5" stroke="#2e8b57" stroke-width="1.4"/></marker><marker id="cl-dia-2" viewBox="0 0 16 12" refX="0" refY="6" markerWidth="16" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,6 L8,0 L16,6 L8,12 Z" fill="#8e44ad" stroke="#8e44ad"/></marker><marker id="cl-arr-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#8e44ad" stroke-width="1.5"/></marker><marker id="cl-tri-2" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#faf9f5" stroke="#8e44ad" stroke-width="1.4"/></marker><marker id="cl-dia-3" viewBox="0 0 16 12" refX="0" refY="6" markerWidth="16" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,6 L8,0 L16,6 L8,12 Z" fill="#c0392b" stroke="#c0392b"/></marker><marker id="cl-arr-3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#c0392b" stroke-width="1.5"/></marker><marker id="cl-tri-3" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#faf9f5" stroke="#c0392b" stroke-width="1.4"/></marker><marker id="cl-dia-4" viewBox="0 0 16 12" refX="0" refY="6" markerWidth="16" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,6 L8,0 L16,6 L8,12 Z" fill="#b8860b" stroke="#b8860b"/></marker><marker id="cl-arr-4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#b8860b" stroke-width="1.5"/></marker><marker id="cl-tri-4" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#faf9f5" stroke="#b8860b" stroke-width="1.4"/></marker><marker id="cl-dia-5" viewBox="0 0 16 12" refX="0" refY="6" markerWidth="16" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,6 L8,0 L16,6 L8,12 Z" fill="#16a085" stroke="#16a085"/></marker><marker id="cl-arr-5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#16a085" stroke-width="1.5"/></marker><marker id="cl-tri-5" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#faf9f5" stroke="#16a085" stroke-width="1.4"/></marker><marker id="cl-dia-6" viewBox="0 0 16 12" refX="0" refY="6" markerWidth="16" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,6 L8,0 L16,6 L8,12 Z" fill="#d35400" stroke="#d35400"/></marker><marker id="cl-arr-6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#d35400" stroke-width="1.5"/></marker><marker id="cl-tri-6" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#faf9f5" stroke="#d35400" stroke-width="1.4"/></marker><marker id="cl-dia-7" viewBox="0 0 16 12" refX="0" refY="6" markerWidth="16" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,6 L8,0 L16,6 L8,12 Z" fill="#e84393" stroke="#e84393"/></marker><marker id="cl-arr-7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#e84393" stroke-width="1.5"/></marker><marker id="cl-tri-7" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#faf9f5" stroke="#e84393" stroke-width="1.4"/></marker><marker id="cl-dia-8" viewBox="0 0 16 12" refX="0" refY="6" markerWidth="16" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,6 L8,0 L16,6 L8,12 Z" fill="#34495e" stroke="#34495e"/></marker><marker id="cl-arr-8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#34495e" stroke-width="1.5"/></marker><marker id="cl-tri-8" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#faf9f5" stroke="#34495e" stroke-width="1.4"/></marker><marker id="cl-dia-9" viewBox="0 0 16 12" refX="0" refY="6" markerWidth="16" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,6 L8,0 L16,6 L8,12 Z" fill="#6c8e00" stroke="#6c8e00"/></marker><marker id="cl-arr-9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#6c8e00" stroke-width="1.5"/></marker><marker id="cl-tri-9" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#faf9f5" stroke="#6c8e00" stroke-width="1.4"/></marker><marker id="cl-dia-10" viewBox="0 0 16 12" refX="0" refY="6" markerWidth="16" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,6 L8,0 L16,6 L8,12 Z" fill="#0097a7" stroke="#0097a7"/></marker><marker id="cl-arr-10" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#0097a7" stroke-width="1.5"/></marker><marker id="cl-tri-10" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#faf9f5" stroke="#0097a7" stroke-width="1.4"/></marker><marker id="cl-dia-11" viewBox="0 0 16 12" refX="0" refY="6" markerWidth="16" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,6 L8,0 L16,6 L8,12 Z" fill="#a0522d" stroke="#a0522d"/></marker><marker id="cl-arr-11" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#a0522d" stroke-width="1.5"/></marker><marker id="cl-tri-11" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#faf9f5" stroke="#a0522d" stroke-width="1.4"/></marker><marker id="cl-dia-12" viewBox="0 0 16 12" refX="0" refY="6" markerWidth="16" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,6 L8,0 L16,6 L8,12 Z" fill="#5e35b1" stroke="#5e35b1"/></marker><marker id="cl-arr-12" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#5e35b1" stroke-width="1.5"/></marker><marker id="cl-tri-12" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#faf9f5" stroke="#5e35b1" stroke-width="1.4"/></marker><marker id="cl-dia-13" viewBox="0 0 16 12" refX="0" refY="6" markerWidth="16" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,6 L8,0 L16,6 L8,12 Z" fill="#c2185b" stroke="#c2185b"/></marker><marker id="cl-arr-13" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#c2185b" stroke-width="1.5"/></marker><marker id="cl-tri-13" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#faf9f5" stroke="#c2185b" stroke-width="1.4"/></marker></defs>
+<style>
+.a{font:400 11px 'Geist Mono',monospace;fill:#1a1a1a}
+.nm{font:600 14px Geist,sans-serif;fill:#1a1a1a}
+.st{font:400 10px 'Geist Mono',monospace;fill:#6b6b6b}
+.m{font:600 10px 'Geist Mono',monospace}
+.r{font:600 11px 'Geist Mono',monospace;letter-spacing:.04em}
+.lg text{font:400 9px 'Geist Mono',monospace;fill:#6b6b6b}
+</style>
+<path d="M280,245 L280,169" fill="none" stroke-width="1.4" stroke="#1b6fb0" stroke-dasharray="4,3" marker-end="url(#cl-arr-0)"/>
+<path d="M280,391 L280,467" fill="none" stroke-width="1.4" stroke="#2e8b57" stroke-dasharray="4,3" marker-end="url(#cl-arr-1)"/>
+<path d="M490,265 L660,265" fill="none" stroke-width="1.4" stroke="#8e44ad" stroke-dasharray="4,3" marker-end="url(#cl-arr-2)"/>
+<path d="M70,487 L36,487 L36,130 L70,130" fill="none" stroke-width="1.4" stroke="#c0392b" stroke-dasharray="4,3" marker-end="url(#cl-arr-3)"/>
+<path d="M490,492 L530,492 L530,369 L660,369" fill="none" stroke-width="1.4" stroke="#b8860b" stroke-dasharray="4,3" marker-end="url(#cl-arr-4)"/>
+<path d="M490,527 L600,527 L600,564 L660,564" fill="none" stroke-width="1.4" stroke="#16a085" stroke-dasharray="4,3" marker-end="url(#cl-arr-5)"/>
+<path d="M490,557 L565,557 L565,1003 L1390,1003 L1390,981" fill="none" stroke-width="1.4" stroke="#d35400" stroke-dasharray="4,3" marker-end="url(#cl-arr-6)"/>
+<path d="M490,587 L535,587 L535,1029 L1700,1029 L1700,602 L1670,602" fill="none" stroke-width="1.4" stroke="#e84393" stroke-dasharray="4,3" marker-end="url(#cl-arr-7)"/>
+<path d="M810,458 L810,542" fill="none" stroke-width="1.4" stroke="#34495e" marker-end="url(#cl-arr-8)"/>
+<path d="M1110,558 L960,558" fill="none" stroke-width="1.4" stroke="#6c8e00" marker-end="url(#cl-arr-9)"/>
+<path d="M960,588 L1030,588 L1030,791 L1110,791" fill="none" stroke-width="1.4" stroke="#0097a7" marker-start="url(#cl-dia-10)"/>
+<path d="M810,603 L810,739" fill="none" stroke-width="1.4" stroke="#a0522d" marker-start="url(#cl-dia-11)"/>
+<path d="M1310,791 L1470,791" fill="none" stroke-width="1.4" stroke="#5e35b1"/>
+<path d="M1310,558 L1470,558" fill="none" stroke-width="1.4" stroke="#c2185b" marker-end="url(#cl-arr-13)"/>
+<text x="1684" y="596" text-anchor="start" class="m" fill="#e84393">2..4</text>
+<text x="818" y="471" text-anchor="start" class="m" fill="#34495e">1</text>
+<text x="818" y="528" text-anchor="start" class="m" fill="#34495e">0..4</text>
+<text x="1100" y="552" text-anchor="end" class="m" fill="#6c8e00">1</text>
+<text x="974" y="552" text-anchor="start" class="m" fill="#6c8e00">0..1</text>
+<text x="984" y="582" text-anchor="start" class="m" fill="#0097a7">1</text>
+<text x="1096" y="785" text-anchor="end" class="m" fill="#0097a7">5</text>
+<text x="818" y="630" text-anchor="start" class="m" fill="#a0522d">1</text>
+<text x="818" y="725" text-anchor="start" class="m" fill="#a0522d">1..300</text>
+<text x="1320" y="785" text-anchor="start" class="m" fill="#5e35b1">0..*</text>
+<text x="1456" y="785" text-anchor="end" class="m" fill="#5e35b1">4</text>
+<text x="1320" y="552" text-anchor="start" class="m" fill="#c2185b">1</text>
+<text x="1456" y="552" text-anchor="end" class="m" fill="#c2185b">0..*</text>
+<g transform="rotate(-90 280 207)"><rect x="250" y="189" width="60" height="15" fill="#faf9f5"/><text x="280" y="201" text-anchor="middle" class="r" fill="#1b6fb0">PROCESA</text></g>
+<g transform="rotate(-90 280 429)"><rect x="254" y="411" width="52" height="15" fill="#faf9f5"/><text x="280" y="423" text-anchor="middle" class="r" fill="#2e8b57">INVOCA</text></g>
+<rect x="545" y="268" width="60" height="15" fill="#faf9f5"/><text x="575" y="280" text-anchor="middle" class="r" fill="#8e44ad">ELIMINA</text>
+<g transform="rotate(-90 530 430)"><rect x="500" y="412" width="60" height="15" fill="#faf9f5"/><text x="530" y="424" text-anchor="middle" class="r" fill="#b8860b">PROCESA</text></g>
+<g transform="rotate(-90 600 546)"><rect x="570" y="528" width="60" height="15" fill="#faf9f5"/><text x="600" y="540" text-anchor="middle" class="r" fill="#16a085">ORIGINA</text></g>
+<rect x="951" y="1006" width="52" height="15" fill="#faf9f5"/><text x="978" y="1018" text-anchor="middle" class="r" fill="#d35400">GENERA</text>
+<rect x="1099" y="1032" width="38" height="15" fill="#faf9f5"/><text x="1118" y="1044" text-anchor="middle" class="r" fill="#e84393">CREA</text>
+<g transform="rotate(-90 810 500)"><rect x="776" y="482" width="67" height="15" fill="#faf9f5"/><text x="810" y="494" text-anchor="middle" class="r" fill="#34495e">CONTIENE</text></g>
+<rect x="994" y="561" width="82" height="15" fill="#faf9f5"/><text x="1035" y="573" text-anchor="middle" class="r" fill="#6c8e00">APARECE EN</text>
+<g transform="rotate(-90 1030 690)"><rect x="982" y="672" width="97" height="15" fill="#faf9f5"/><text x="1030" y="684" text-anchor="middle" class="r" fill="#0097a7">SE DIVIDE EN</text></g>
+<g transform="rotate(-90 810 671)"><rect x="754" y="653" width="112" height="15" fill="#faf9f5"/><text x="810" y="665" text-anchor="middle" class="r" fill="#a0522d">SE ETIQUETA EN</text></g>
+<rect x="1330" y="561" width="119" height="15" fill="#faf9f5"/><text x="1390" y="573" text-anchor="middle" class="r" fill="#c2185b">SE DELIMITA CON</text>
+<rect x="70" y="40" width="420" height="129" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="280.0" y="62" text-anchor="middle" class="nm">Analisis</text>
+<line x1="70" y1="72" x2="490" y2="72" stroke="#1a1a1a"/>
+<text x="82" y="89" class="a">- id: Integer</text>
+<text x="82" y="106" class="a">- estado: String</text>
+<text x="82" y="123" class="a">- etapa: String</text>
+<text x="82" y="140" class="a">- nivelClasif: String</text>
+<text x="82" y="157" class="a">- fechaAnalisis: DateTime</text>
+<rect x="70" y="245" width="420" height="146" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="280.0" y="258" text-anchor="middle" class="st">«control»</text>
+<text x="280.0" y="273" text-anchor="middle" class="nm">Worker</text>
+<line x1="70" y1="277" x2="490" y2="277" stroke="#1a1a1a"/>
+<text x="82" y="294" class="a">+ procesarCola(): void</text>
+<text x="82" y="311" class="a">+ borrarVideosExpirados(): void</text>
+<text x="82" y="328" class="a">+ avisarVencimientos(): void</text>
+<text x="82" y="345" class="a">+ vigilarDisco(): void</text>
+<text x="82" y="362" class="a">+ reencolarHuerfanos(): void</text>
+<text x="82" y="379" class="a">+ cancelarPausasVencidas(): void</text>
+<rect x="70" y="467" width="420" height="231" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="280.0" y="480" text-anchor="middle" class="st">«control»</text>
+<text x="280.0" y="495" text-anchor="middle" class="nm">PipelineAnalisis</text>
+<line x1="70" y1="499" x2="490" y2="499" stroke="#1a1a1a"/>
+<text x="82" y="516" class="a">+ preprocesarVideo(video): void</text>
+<text x="82" y="533" class="a">+ detectarCilindros(): List&lt;ROI&gt;</text>
+<text x="82" y="550" class="a">+ clasificarConducta(especimen, roi, segundo): String</text>
+<text x="82" y="567" class="a">+ generarReporte(experimento, tipo): Reporte</text>
+<text x="82" y="584" class="a">+ actualizarProgreso(idAnalisis, etapa): void</text>
+<text x="82" y="601" class="a">+ marcarError(idAnalisis, mensaje): void</text>
+<text x="82" y="618" class="a">+ pausarAnalisis(idAnalisis): void</text>
+<text x="82" y="635" class="a">+ guardarImagenPausa(idAnalisis, cilindro, segundo): void</text>
+<text x="82" y="652" class="a">+ aplicarAjusteRecuadro(idAnalisis): void</text>
+<text x="82" y="669" class="a">+ cancelarAnalisis(idAnalisis): void</text>
+<text x="82" y="686" class="a">+ generarCopiaRevision(video): void</text>
+<rect x="660" y="249" width="300" height="209" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="810.0" y="271" text-anchor="middle" class="nm">Video</text>
+<line x1="660" y1="281" x2="960" y2="281" stroke="#1a1a1a"/>
+<text x="672" y="298" class="a">- id: Integer</text>
+<text x="672" y="315" class="a">- sesion: String</text>
+<text x="672" y="332" class="a">- archivo: String</text>
+<text x="672" y="349" class="a">- duracion: Float</text>
+<text x="672" y="366" class="a">- fechaCarga: DateTime</text>
+<line x1="660" y1="378" x2="960" y2="378" stroke="#1a1a1a"/>
+<text x="672" y="395" class="a">+ validarFormato(): Boolean</text>
+<text x="672" y="412" class="a">+ validarOrientacion(): Boolean</text>
+<text x="672" y="429" class="a">+ validarReproducible(): Boolean</text>
+<text x="672" y="446" class="a">+ estaProximaEliminacion(dias): Boolean</text>
+<rect x="660" y="542" width="300" height="61" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="810.0" y="564" text-anchor="middle" class="nm">Observacion</text>
+<line x1="660" y1="574" x2="960" y2="574" stroke="#1a1a1a"/>
+<text x="672" y="591" class="a">+ calcularBloques(): List&lt;String&gt;</text>
+<rect x="660" y="739" width="300" height="124" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="810.0" y="761" text-anchor="middle" class="nm">Segundo</text>
+<line x1="660" y1="771" x2="960" y2="771" stroke="#1a1a1a"/>
+<text x="672" y="788" class="a">- segundo: Integer</text>
+<text x="672" y="805" class="a">- conducta: String</text>
+<text x="672" y="822" class="a">- origen: String</text>
+<line x1="660" y1="834" x2="960" y2="834" stroke="#1a1a1a"/>
+<text x="672" y="851" class="a">+ corregir(conducta, origen): void</text>
+<rect x="1110" y="542" width="200" height="78" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1210.0" y="564" text-anchor="middle" class="nm">Especimen</text>
+<line x1="1110" y1="574" x2="1310" y2="574" stroke="#1a1a1a"/>
+<text x="1122" y="591" class="a">- id: Integer</text>
+<text x="1122" y="608" class="a">- numeroCilindro: Integer</text>
+<rect x="1110" y="775" width="200" height="61" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1210.0" y="797" text-anchor="middle" class="nm">Intervalo</text>
+<line x1="1110" y1="807" x2="1310" y2="807" stroke="#1a1a1a"/>
+<text x="1122" y="824" class="a">- minuto: Integer</text>
+<rect x="1470" y="542" width="200" height="163" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1570.0" y="564" text-anchor="middle" class="nm">ROI</text>
+<line x1="1470" y1="574" x2="1670" y2="574" stroke="#1a1a1a"/>
+<text x="1482" y="591" class="a">- numeroCilindro: Integer</text>
+<text x="1482" y="608" class="a">- x: Integer</text>
+<text x="1482" y="625" class="a">- y: Integer</text>
+<text x="1482" y="642" class="a">- w: Integer</text>
+<text x="1482" y="659" class="a">- h: Integer</text>
+<text x="1482" y="676" class="a">- yAgua: Integer</text>
+<text x="1482" y="693" class="a">- yFondo: Integer</text>
+<rect x="1470" y="775" width="200" height="61" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1570.0" y="797" text-anchor="middle" class="nm">Conducta</text>
+<line x1="1470" y1="807" x2="1670" y2="807" stroke="#1a1a1a"/>
+<text x="1482" y="824" class="a">- nombre: String</text>
+<rect x="1290" y="920" width="200" height="61" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1390.0" y="942" text-anchor="middle" class="nm">PRESENTA</text>
+<line x1="1290" y1="952" x2="1490" y2="952" stroke="#1a1a1a"/>
+<text x="1302" y="969" class="a">- segundos: Float</text>
+<line x1="1390" y1="791" x2="1390" y2="920" stroke="#6b6b6b" stroke-dasharray="2,3"/>
+<rect x="1120" y="514" width="72" height="20" rx="10" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.3"/>
+<text x="1156" y="528" text-anchor="middle" class="a" style="font-weight:600">← hoja 1</text>
+<rect x="670" y="221" width="72" height="20" rx="10" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.3"/>
+<text x="706" y="235" text-anchor="middle" class="a" style="font-weight:600">← hoja 1</text>
+<rect x="80" y="12" width="72" height="20" rx="10" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.3"/>
+<text x="116" y="26" text-anchor="middle" class="a" style="font-weight:600">← hoja 1</text>
+<g transform="translate(40,1083)" class="lg">
+<path d="M0,0 L8,-6 L16,0 L8,6 Z" fill="#1a1a1a"/><line x1="16" y1="0" x2="44" y2="0" stroke="#1a1a1a"/><text x="54" y="3">COMPOSICIÓN</text>
+<line x1="190" y1="0" x2="218" y2="0" stroke="#6b6b6b"/><path d="M212,-4 L218,0 L212,4" fill="none" stroke="#6b6b6b"/><text x="228" y="3">ASOCIACIÓN</text>
+<line x1="350" y1="0" x2="378" y2="0" stroke="#6b6b6b" stroke-dasharray="4,3"/><path d="M372,-4 L378,0 L372,4" fill="none" stroke="#6b6b6b"/><text x="388" y="3">DEPENDENCIA</text>
+<path d="M520,0 L532,-6 L532,6 Z" fill="#faf9f5" stroke="#1a1a1a"/><line x1="510" y1="0" x2="520" y2="0" stroke="#1a1a1a"/><text x="542" y="3">HERENCIA</text>
+<text x="640" y="3" style="fill:#6b6b6b">CADA FLECHA TIENE SU PROPIO COLOR</text>
+</g>
+<text x="40" y="1111" class="a">← hoja 1 en Especimen: viene de allí (lo aloja una Tanda).</text><text x="40" y="1129" class="a">← hoja 1 en Video: viene de allí (lo produce una Tanda y Analisis lo procesa).</text><text x="40" y="1147" class="a">← hoja 1 en Analisis: viene de allí (procesa a un Video).</text>
+</svg></body></html>
