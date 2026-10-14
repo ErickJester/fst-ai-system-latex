@@ -1768,7 +1768,7 @@ caso de uso.
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Tiempos por conducta y desglose por minuto visibles en pantalla; acceso a descarga habilitado.} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador visualizar los resultados del análisis conductual: tiempos por conducta por espécimen y desglose por minuto.} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador visualizar los resultados del análisis conductual: tiempos por conducta por espécimen y desglose por minuto, del grupo completo o de una sola tanda.} \\
 \hline
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El sistema recupera los resultados de la base de datos y los presenta en tablas por espécimen y desglose minuto a minuto. Además muestra la comparación entre los grupos del experimento con los videos del Día~2.} \\
 \hline
@@ -1781,11 +1781,11 @@ caso de uso.
 \hline
 \textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
 \hline
-1 & Inv. / Admin. & Accede a la pantalla de resultados desde el \textit{dashboard} o desde la pantalla de progreso. \\
+1 & Inv. / Admin. & Accede a la pantalla de resultados desde el \textit{dashboard}, desde la pantalla de progreso o desde el detalle de un grupo, y elige ver los resultados del grupo completo, con todas sus tandas, o los de una sola tanda (RF-19). \\
 \hline
-2 & Sistema & Recupera de la base de datos los registros de \textbf{OBSERVACION}, \textbf{INTERVALO} y \textbf{PRESENTA} del análisis. \\
+2 & Sistema & Recupera de la base de datos los registros de \textbf{OBSERVACION}, \textbf{INTERVALO} y \textbf{PRESENTA} del análisis, o de los análisis de todas las tandas del grupo si se eligió el grupo completo. \\
 \hline
-3 & Sistema & Muestra tabla de tiempos por espécimen: nado activo, inmovilidad, escalamiento y conducta activa, con totales en segundos y porcentaje. \\
+3 & Sistema & Muestra tabla de tiempos por espécimen: nado activo, inmovilidad, escalamiento y conducta activa, con totales en segundos y porcentaje. Si se eligió el grupo completo, cada espécimen se rotula con su tanda, por ejemplo «Tanda~A $\cdot$ Espécimen~2». \\
 \hline
 4 & Sistema & Muestra el desglose de conductas por minuto para cada espécimen. \\
 \hline
@@ -2605,7 +2605,8 @@ El detalle de un experimento reúne sus grupos y el estado de cada tanda. Solo q
 creó el experimento o un administrador puede eliminarlo, y la acción solo pide
 confirmar con un aviso de «¿está seguro?» (RF-27, RN-09), sin nombre ni contraseña. El detalle de un grupo muestra
 sus tandas, los especímenes de cada una con el cilindro que ocuparon y los videos de
-Día~1 y Día~2 con su estado.
+Día~1 y Día~2 con su estado. Desde ahí se abren los resultados de una tanda o los del
+grupo completo, que reúne los análisis de todas sus tandas (RF-19).
 
 \begin{figure}[H]
 \centering
@@ -2710,7 +2711,8 @@ más segundos y, dentro, los cinco segundos que lo componen, para notar las cond
 breves y presentar los bloques en la unidad de la literatura. La regla con que se decide
 la conducta de cada bloque es RN-15. Los fragmentos «no se ve» se marcan en pantalla y
 en el reporte de resultados.
-La vista por espécimen
+Un selector en la parte superior permite ver el grupo completo, con todas sus tandas, o una
+sola tanda (RF-19); en el grupo completo, cada espécimen se rotula con su tanda. La vista por espécimen
 muestra el tiempo por conducta con media, desviación estándar y varianza por grupo (RF-19, RF-31), el
 nivel de clasificación del análisis y la leyenda de conductas; en el panel lateral
 se compara la inmovilidad entre los grupos con los videos del Día~2 (RF-21). Esa
