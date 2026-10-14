@@ -186,7 +186,7 @@ conceptual estaba prohibido.
 ## 4. Dónde está el trabajo hecho
 
 Tres artifacts publicados. **Son la fuente de verdad del diseño**, por encima del LaTeX.
-**Actualizados el 2026-10-06** con las decisiones de octubre (D-28 a D-55): Conceptual https://claude.ai/artifact/Y7uJ7Mje7CyDxppJYzzXkh · Lógico https://claude.ai/artifact/FJtL6wbw4K7wYYWJTYmrLP · Físico https://claude.ai/artifact/972fCkz4K4U7fQrPRR3qyH. Las celdas de «Estado» de la tabla de abajo son de septiembre.
+**Vigentes: los enlaces de la tabla de abajo** (confirmado por el usuario, 14-oct-2026). Un juego anterior de enlaces, que antes se marcaba como «actualizado el 2026-10-06» y que ya no es el vigente, se deja solo como referencia: Conceptual https://claude.ai/artifact/Y7uJ7Mje7CyDxppJYzzXkh · Lógico https://claude.ai/artifact/FJtL6wbw4K7wYYWJTYmrLP · Físico https://claude.ai/artifact/972fCkz4K4U7fQrPRR3qyH. Las celdas de «Estado» de la tabla de abajo son de septiembre.
 
 | Artifact | URL | Cubre | Estado |
 |----------|-----|-------|--------|

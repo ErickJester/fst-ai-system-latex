@@ -29,7 +29,7 @@
     <div style="display:flex;align-items:flex-end;gap:24px">
       <div style="flex:1">
         <h2 style="margin:0 0 9px" id="hTitulo">Resultados · Grupo referencia, Tanda A</h2>
-        <div class="num" style="font-size:12.5px;color:var(--muted-2)">Fluoxetina 10 mg/kg · Día 2, 300 s de evaluación · analizado 24 feb 2026, 15:02 · modelo clf-cascada v2.1</div>
+        <div class="num" style="font-size:12.5px;color:var(--muted-2)">Fluoxetina 10 mg/kg · Día 2, 300 s de evaluación · analizado 24 feb 2026, 15:02</div>
         <div class="no-print" style="display:flex;align-items:center;gap:8px;margin-top:12px">
           <span class="k" style="margin-right:4px">Ver</span>
           <button type="button" class="tab on" id="vTanda" style="white-space:nowrap;margin-bottom:0;padding:6px 13px;border:1px solid var(--color-accent)">Tanda A · 4 especímenes</button>
@@ -44,7 +44,7 @@
       <div style="display:flex;gap:8px" class="no-print">
         <button type="button" class="btn btn-secondary" id="xCSV">CSV</button>
         <button type="button" class="btn btn-secondary" id="xXLSX">XLSX</button>
-        <button type="button" class="btn btn-primary" id="xPDF" style="justify-content:flex-start">PDF · resumen ejecutivo</button>
+        <button type="button" class="btn btn-primary" id="xPDF" style="justify-content:flex-start">PDF · reporte de resultados</button>
       </div>
     </div>
 
@@ -72,7 +72,7 @@
           <tbody id="rows"></tbody>
         </table>
 
-        <p class="hint" style="margin:14px 0 0">Cada segundo cuenta, sin duración mínima; el buceo se contabiliza como nado activo. Los tres renglones grises son los estadísticos de grupo de RF-31. El desglose por minuto se almacena y exporta <strong>en segundos</strong>, no en porcentaje.</p>
+        <p class="hint" style="margin:14px 0 0">Cada segundo cuenta, sin duración mínima; el buceo se contabiliza como nado activo. Los tres renglones grises son los estadísticos de RF-31 de lo que se ve (la tanda o el grupo completo); el CSV y el XLSX descargan esos mismos. El desglose por minuto se almacena y exporta <strong>en segundos</strong>, no en porcentaje.</p>
 
         <div class="k" id="secTimeline" style="margin:26px 0 12px">Espécimen 1 · Cilindro P1</div>
         <div style="border:1px solid var(--color-divider);padding:16px 18px">
@@ -83,7 +83,7 @@
         <div style="border:1px solid var(--color-divider);padding:16px 18px">
           <div id="bloques" style="display:flex;flex-direction:column;gap:10px"></div>
         </div>
-        <p class="hint" style="margin:10px 0 0">Cada bloque toma la conducta que más segundos ocupó (arriba) y muestra debajo sus 5 segundos. Así se ven las conductas breves, de unos 2 s, que el análisis a ojo por bloques no distingue, y el resultado se compara directo con el manual. El bloque sale por mayoría de sus 5 segundos; si nado activo y escalamiento empatan, es conducta activa. Los bloques rayados tienen segundos «no se ve»: el modelo no vio bien esa parte del video, y el PDF final también los marca.</p>
+        <p class="hint" style="margin:10px 0 0">Cada bloque toma la conducta que más segundos ocupó (arriba) y muestra debajo sus 5 segundos. Así se ven las conductas breves, de unos 2 s, que el análisis a ojo por bloques no distingue, y el resultado se compara directo con el manual. El bloque sale por mayoría de sus 5 segundos; si nado activo y escalamiento empatan, es conducta activa. Los bloques rayados tienen segundos «no se ve»: el modelo no vio bien esa parte del video, y el reporte de resultados también los marca.</p>
       </div>
 
       <div style="background:var(--color-bg);padding-left:26px;display:flex;flex-direction:column;gap:24px">

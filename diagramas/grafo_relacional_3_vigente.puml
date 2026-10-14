@@ -172,11 +172,12 @@ class VIDEO {
 class ANALISIS {
   <u>idAnalisis</u>
   --
-  idVideo   [FK]
+  idVideo   [FK] [AK]
   estado
   etapa
   nivelClasif
   fechaAnalisis
+  rutaDiagnostico   (nulo)
 }
 
 class OBSERVACION {

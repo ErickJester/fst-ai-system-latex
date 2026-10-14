@@ -778,8 +778,8 @@ Otras decisiones tomadas:
   viejo que el último análisis del experimento, se regenera y se reemplaza; si sigue
   vigente, se devuelve el guardado.
 - **Contenido de los reportes:** CSV y XLSX con datos por espécimen y desglose por minuto
-  (columnas `Tiempo (min:seg)`, `Nado`, `Escalamiento`, `Inmovilidad`, `Conducta activa`, una fila por
-  minuto) más estadísticas por grupo: media, desviación estándar y varianza del tiempo de
+  (columnas `Grupo`, `Tanda`, `Espécimen`, `Tiempo (min:seg)`, `Nado`, `Escalamiento`, `Inmovilidad`,
+  `Conducta activa`, una fila por espécimen y por minuto) más estadísticas por grupo: media, desviación estándar y varianza del tiempo de
   cada conducta entre los especímenes de cada grupo (agregando todas sus tandas). El PDF
   es el **reporte de resultados** (D-76), distinto del **reporte de diagnóstico** (el que se
   genera cuando un análisis termina en error).
@@ -915,7 +915,7 @@ Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\
 Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\progreso.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\progreso.png`).
 Estados: analizando; en pausa (el sistema no vio al espécimen y espera al usuario); completado;
 error (no se pudo abrir el video o no se hallaron los tubos); cancelado (el usuario canceló o no
-respondió en 5 minutos). En pausa se muestra la **pantalla de pausa** (RN-17, D-59, D-89):
+respondió en 5 minutos). En pausa se muestra la **pantalla de pausa** (RN-17, D-59, D-89; maqueta `mockups/v2/pausa.html`, imagen `figures/mockups/v2/pausa.png`):
 
 ```
 +-------------------------------------------------------------+
@@ -972,7 +972,7 @@ Cuatro pestañas: por espécimen, comparación entre grupos (Día 2), línea de 
 minuto y bloques de 5 s. En la de bloques, cada bloque muestra la conducta con más segundos
 y, al abrirlo, sus cinco segundos, para notar las conductas breves.
 
-**Grupo completo o una tanda (RF-19, D-93).** Arriba de las pestañas hay un selector «Ver»: el investigador elige los resultados del **grupo completo**, con todas sus tandas, o los de **una sola tanda**. No hace falta un endpoint nuevo: `GET /experiments/{id}/results` ya devuelve cada espécimen con su `tanda`, y el frontend filtra por grupo o por tanda. En el grupo completo cada espécimen se rotula con su tanda («Tanda A · Espécimen 2»), la tabla suma sus especímenes y los renglones de media, desviación estándar y varianza (RF-31) se calculan sobre todos ellos. El nombre del archivo exportado dice si es del grupo o de la tanda. Se llega desde el detalle del grupo (`mockups/v2/grupo.html`), que tiene el botón «Ver resultados del grupo completo» y, en cada tanda, «Ver resultados de esta tanda». El grupo completo reúne solo las tandas con análisis completado; las demás se señalan como faltantes (RN-12).
+**Grupo completo o una tanda (RF-19, D-93).** Arriba de las pestañas hay un selector «Ver»: el investigador elige los resultados del **grupo completo**, con todas sus tandas, o los de **una sola tanda**. No hace falta un endpoint nuevo: `GET /experiments/{id}/results` ya devuelve cada espécimen con su `tanda`, y el frontend filtra por grupo o por tanda. En el grupo completo cada espécimen se rotula con su tanda («Tanda A · Espécimen 2»), la tabla suma sus especímenes y los renglones de media, desviación estándar y varianza (RF-31) se calculan sobre los especímenes que se ven: en el grupo completo son las del grupo y en una tanda, las de esa tanda. El reporte descargable (`report/csv` y `report/xlsx`) las incluye para esa misma vista: recibe como parámetro el grupo (`?grupo={idGrupo}`) o la tanda (`?tanda={idTanda}`), y el nombre del archivo dice cuál es. `results/groups` devuelve, además del promedio, la desviación estándar y la varianza por conducta de cada grupo, con todas sus tandas. El nombre del archivo exportado dice si es del grupo o de la tanda. Se llega desde el detalle del grupo (`mockups/v2/grupo.html`), que tiene el botón «Ver resultados del grupo completo» y, en cada tanda, «Ver resultados de esta tanda». El grupo completo reúne solo las tandas con análisis completado; las demás se señalan como faltantes (RN-12).
 
 Los bloques **no usan la CNN**: la CNN solo clasifica cada segundo, y el bloque se calcula por mayoría sobre esos cinco segundos (3 de nado activo y 2 de inmovilidad dan nado activo). Reglas del bloque (D-53):
 - Gana la conducta con más segundos. Si nado activo y escalamiento empatan (por ejemplo 2 y 2), el bloque es **conducta activa**.
@@ -3100,8 +3100,9 @@ note right of api
   desglose por minuto) más estadísticas por grupo:
   media, desviación estándar y varianza por conducta,
   entre los especímenes de cada uno de los tres grupos.
-  Columnas: Tiempo (min:seg), Nado, Escalamiento,
-  Inmovilidad, Conducta activa. Una fila por minuto.
+  Columnas: Grupo, Tanda, Espécimen, Tiempo (min:seg), Nado,
+  Escalamiento, Inmovilidad, Conducta activa. Una fila por
+  espécimen y por minuto.
   PDF: reporte de resultados, documento distinto del
   reporte de diagnóstico.
 end note
