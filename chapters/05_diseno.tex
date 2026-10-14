@@ -50,7 +50,7 @@ arrancar el contenedor.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{figures/mermaid/arquitectura_software}
+\includegraphics[width=\textwidth]{diagramas/diagram_design/arquitectura_capas}
 \caption{Arquitectura de software por capas tecnológicas [autoría propia].}
 \label{fig:arquitectura_software}
 \end{figure}
@@ -105,12 +105,12 @@ transita el video desde la carga hasta la generación de resultados, y cómo el 
 de entrenamiento del modelo ---clips etiquetados por el equipo, entrenamiento y evaluación--- alimenta
 al clasificador de conducta.
 
-\begin{figure}[H]
+\begin{sidewaysfigure}
 \centering
-\includegraphics[width=\textwidth]{figures/mermaid/flujo_general}
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{diagramas/diagram_design/flujo_sistema}
 \caption{Diagrama de flujo del sistema [autoría propia].}
 \label{fig:flujo_sistema}
-\end{figure}
+\end{sidewaysfigure}
 
 % -----------------------------------------------------------
 \section{Diseño del pipeline de análisis conductual}
@@ -125,12 +125,12 @@ clasificación de conducta--- seguidas de la generación de resultados, que no e
 etapa visible en el progreso. La Figura~\ref{fig:pipeline}
 muestra el flujo completo con las tecnologías de cada módulo.
 
-\begin{figure}[H]
+\begin{sidewaysfigure}
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/mermaid/pipeline}
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{diagramas/diagram_design/pipeline_analisis}
 \caption{Diagrama de flujo del pipeline de análisis conductual [autoría propia].}
 \label{fig:pipeline}
-\end{figure}
+\end{sidewaysfigure}
 
 \subsection{Módulo 1: Preprocesamiento}
 
@@ -321,11 +321,11 @@ pasa a \texttt{cancelado} (RN-17). El investigador no puede iniciar ni pausar un
 análisis, y solo puede cancelarlo mientras está en pausa, pero sí reiniciarlo desde la
 pantalla de revisión: el resultado anterior se borra y el análisis vuelve a
 \texttt{en cola} (RN-04). Si el Worker se apaga a media análisis, al arrancar
-reencola los que quedaron en \texttt{procesando} y los empieza de nuevo.
+reencola los que quedaron en \texttt{procesando} y los empieza de nuevo, y cancela los \texttt{en pausa} que ya no tengan su archivo de pausa. Si el pipeline falla por un motivo imprevisto (falta de memoria o un error de código), el Worker lo atrapa, pasa el análisis a \texttt{error} con su reporte de diagnóstico y sigue con el siguiente de la cola, sin reintentar.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{figures/mermaid/estados_analisis}
+\includegraphics[width=0.85\textwidth]{diagramas/diagram_design/estados_analisis}
 \caption{Diagrama de estados de un análisis [autoría propia].}
 \label{fig:estados_analisis}
 \end{figure}
@@ -339,7 +339,7 @@ coexisten tandas en distintos estados.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{figures/mermaid/estados_experimento}
+\includegraphics[width=0.85\textwidth]{diagramas/diagram_design/estados_experimento}
 \caption{Diagrama de estados agregado de un experimento [autoría propia].}
 \label{fig:estados_experimento}
 \end{figure}
@@ -378,7 +378,7 @@ físico.
 
 \begin{sidewaysfigure}
 \centering
-\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{diagramas/esquema_conceptual}
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{diagramas/diagram_design/esquema_conceptual}
 \caption{Diagrama entidad-relación conceptual del sistema [autoría propia].}
 \label{fig:der}
 \end{sidewaysfigure}
@@ -393,7 +393,7 @@ Figura~\ref{fig:er} muestra el resultado.
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth, height=0.90\textheight, keepaspectratio]{figures/mermaid/esquema_fisico}
+\includegraphics[width=\textwidth, height=0.90\textheight, keepaspectratio]{diagramas/diagram_design/esquema_bd}
 \caption{Esquema físico de la base de datos [autoría propia].}
 \label{fig:er}
 \end{figure}
@@ -748,7 +748,7 @@ GET    & \path{/admin/users}        & Lista todos los usuarios (filtrable por ad
 \hline
 POST   & \path{/admin/users}        & Crea una cuenta de usuario con contraseña temporal. & Admin \\
 \hline
-PATCH  & \path{/admin/users/{id}}   & Modifica datos o desactiva una cuenta. & Admin \\
+PATCH  & \path{/admin/users/{id}}   & Modifica datos, cambia el rol o desactiva una cuenta. & Admin \\
 \hline
 GET    & \path{/admin/system}       & Devuelve métricas del sistema: disco y cola. & Admin \\
 \hline
@@ -1530,7 +1530,7 @@ caso de uso.
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Secundario (\textit{<<extend>>} de CU-05 Subir video, solo si el video es del Día~2)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-12, RN-04. Incluido en: CU-05 (Subir video).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-12, RN-04. Extiende: CU-05 (Subir video).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Video validado en formato \texttt{.mp4} o \texttt{.mov}, reproducible y en horizontal; almacenado en el volumen compartido.} \\
 \hline
@@ -2098,7 +2098,7 @@ caso de uso.
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pantalla principal del investigador. Muestra todos los experimentos del laboratorio con nombre, fecha, número de grupos, sesión, estado y accesos directos a resultados o progreso (ver RN-08). Incluye avisos cuando algún video expira en menos de 7 días.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Al acceder al \textit{dashboard}, el sistema recupera la lista de experimentos del laboratorio (ver RN-08) y muestra cualquier aviso de expiración próxima. El investigador puede filtrar la lista o acceder directamente a un experimento. El estado de cada experimento se calcula a partir de los análisis de sus tandas: sin videos cargados, en espera del Día~2 (solo hay videos del Día~1, que no se analizan), en cola, procesando, completado o error.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Al acceder al \textit{dashboard}, el sistema recupera la lista de experimentos del laboratorio (ver RN-08) y muestra cualquier aviso de expiración próxima. El investigador puede filtrar la lista o acceder directamente a un experimento. El estado de cada experimento se calcula a partir de los análisis de sus tandas: sin videos cargados, en espera del Día~2 (solo hay videos del Día~1, que no se analizan), en cola, procesando, en pausa, cancelado, completado o error.} \\
 \hline
 \end{tabular}
 
@@ -2111,7 +2111,7 @@ caso de uso.
 \hline
 1 & Investigador & Accede al \textit{dashboard} principal de la aplicación tras iniciar sesión. \\
 \hline
-2 & Sistema & Recupera la lista de experimentos del laboratorio con nombre, fecha, número de grupos, sesión y estado (ver RN-08). El estado de cada experimento se calcula a partir de los análisis de sus tandas: sin videos cargados, en espera del Día~2 (solo hay videos del Día~1, que no se analizan), en cola, procesando, completado o error. \\
+2 & Sistema & Recupera la lista de experimentos del laboratorio con nombre, fecha, número de grupos, sesión y estado (ver RN-08). El estado de cada experimento se calcula a partir de los análisis de sus tandas: sin videos cargados, en espera del Día~2 (solo hay videos del Día~1, que no se analizan), en cola, procesando, en pausa, cancelado, completado o error. \\
 \hline
 3 & Sistema & Verifica si algún video expira en menos de 7 días y muestra aviso con nombre del experimento y fecha exacta de eliminación (ver RF-24). \\
 \hline
@@ -2290,7 +2290,7 @@ caso de uso.
 \hline
 4 & \textit{Worker} & Al cumplirse los 30 días, elimina el archivo de video del volumen de almacenamiento. \\
 \hline
-5 & \textit{Worker} & Elimina el archivo físico del volumen de almacenamiento; la fila de \texttt{VIDEO} permanece en la base de datos (no puede eliminarse mientras \texttt{ANALISIS} y \texttt{OBSERVACION} la referencien), con \texttt{archivo} ya no disponible; resultados y reportes permanecen accesibles. \\
+5 & \textit{Worker} & Elimina el archivo físico del volumen de almacenamiento; la fila de \texttt{VIDEO} permanece en la base de datos (no puede eliminarse mientras \texttt{ANALISIS} y \texttt{OBSERVACION} la referencien), con \texttt{archivo} vacío; resultados y reportes permanecen accesibles. \\
 \hline
 \end{tabular}
 
@@ -2392,8 +2392,8 @@ activa y permite actualizar nombre, apellidos, correo electrónico y contraseña
 \subsection{Notificaciones}
 
 El sistema genera notificaciones de forma automática cuando un análisis finaliza
-(con o sin error) o cuando el espacio en disco supera el umbral de alerta (ver
-RN-11, RNF-09). La Figura~\ref{fig:seq_notificaciones} muestra cómo el backend
+(con o sin error), queda en pausa o se cancela, cuando el espacio en disco supera el umbral de alerta o cuando se borra un video por adelantado (ver
+RN-05, RN-11, RN-17, RNF-09). La Figura~\ref{fig:seq_notificaciones} muestra cómo el backend
 persiste la notificación y cómo el frontend la consulta en el siguiente ciclo de
 actualización.
 
@@ -2506,7 +2506,7 @@ catálogo \textbf{Conducta} y los segundos que ocupó cada una.
 
 \begin{sidewaysfigure}
 \centering
-\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{diagramas/clases}
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{diagramas/diagram_design/clases_completo}
 \caption{Diagrama de clases del sistema [autoría propia].}
 \label{fig:clases}
 \end{sidewaysfigure}
@@ -2682,8 +2682,8 @@ nuevas más adelante sin repetir los datos del experimento.
 Muestra el estado actual del pipeline con las tres etapas (preprocesamiento,
 localización de los cilindros y clasificación) y una barra de progreso en
 porcentaje. Si ocurre un error, muestra la descripción, según la etapa en que se
-detuvo, y el botón de descarga del reporte de diagnóstico (RF-16). Los errores definidos son dos: el video
-no se pudo abrir o no se encontraron los cilindros. Cuando un análisis se completa,
+detuvo, y el botón de descarga del reporte de diagnóstico (RF-16). Los errores previstos son dos: el video
+no se pudo abrir o no se encontraron los cilindros; cualquier otro fallo imprevisto también termina en error, con su reporte de diagnóstico. Cuando un análisis se completa,
 la pantalla habilita «Ver resultados» y «Revisar segundo a segundo». Debajo lista la
 cola de trabajos. El análisis continúa aunque el investigador cierre la pestaña (RF-15).
 
@@ -2784,7 +2784,7 @@ RNF-09); y las conductas y el modelo del clasificador en uso. Para crear una cue
 Administrador captura identificador institucional, nombre, apellidos y correo (RF-05);
 el sistema envía la contraseña temporal por correo y además se la muestra una sola vez
 al Administrador, como respaldo.
-Al editar una cuenta puede cambiar el nombre, los apellidos, el correo y el estado
+Al editar una cuenta puede cambiar el nombre, los apellidos, el correo, el rol y el estado
 (activa o inactiva); el identificador institucional es de solo lectura, y el sistema
 impide dejar sin ningún Administrador activo.
 
