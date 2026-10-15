@@ -7,7 +7,7 @@
 \chapter{Diccionario de datos}
 \label{ap:diccionario}
 
-Este apéndice describe cada columna de las 13 tablas del esquema físico
+Este apéndice describe cada columna de las 12 tablas del esquema físico
 (Figura~\ref{fig:er}), implementado en PostgreSQL. Para cada columna se indica su
 tipo, si admite nulo, las restricciones que hace cumplir la base de datos y qué
 guarda.
@@ -29,12 +29,10 @@ escribir el DDL.
 
 \section*{Dominios cerrados}
 
-Ocho columnas toman sus valores de una lista fija, declarada como dominio
+Nueve columnas toman sus valores de una lista fija, declarada como dominio
 (\texttt{CREATE DOMAIN} con una condición \texttt{CHECK}). La Tabla~\ref{tab:dominios}
-los reúne. \texttt{CONDUCTA} no es un dominio sino una tabla, para que las demás
-tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
-\texttt{nado activo}, \texttt{inmovilidad}, \texttt{escalamiento} y
-\texttt{conducta activa}.
+los reúne. Las conductas son uno de ellos: \texttt{SEGUNDO.conducta} toma una de
+cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 
 {\footnotesize\singlespacing
 \begin{longtable}{|>{\raggedright}p{3.4cm}|>{\raggedright}p{2.2cm}|>{\raggedright\arraybackslash}p{7.8cm}|}
@@ -63,6 +61,8 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & \texttt{varchar(8)} & \texttt{preciso} si ningún segundo del análisis quedó como conducta activa; \texttt{agrupado} si al menos uno quedó así \\
 \hline
 \texttt{origen\_\allowbreak{}segundo} & \texttt{varchar(16)} & \texttt{maquina}: conducta puesta por el sistema, sin revisar. \texttt{confirmada}: el usuario vio el segundo y dejó la conducta del sistema. \texttt{corregida}: el usuario vio el segundo y la cambió. \texttt{dudosa}: el segundo quedó sin conducta porque el usuario lo marcó como dudoso \\
+\hline
+\texttt{tipo\_\allowbreak{}conducta} & \texttt{varchar(16)} & \texttt{nado activo}, \texttt{inmovilidad}, \texttt{escalamiento}, \texttt{conducta activa}. La última se usa cuando el clasificador no distingue entre nado y escalamiento \\
 \hline
 \end{longtable}
 }
@@ -190,11 +190,6 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{idVideo} & \texttt{integer} & No & FK $\to$ VIDEO; UK (idEspecimen, idVideo) & Video en que se le observó. Cada video analizado (el del Día 2) tiene de 2 a 4 observaciones, una por espécimen; el del Día 1 no tiene ninguna \\
 \hline
-% ---------------- CONDUCTA ----------------
-\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{CONDUCTA}: catálogo de conductas} \\
-\hline
-\texttt{nombre} & \texttt{varchar(n)} & No & PK & Nado activo, inmovilidad, escalamiento o conducta activa. La última se usa cuando el clasificador no distingue entre nado y escalamiento \\
-\hline
 % ---------------- SEGUNDO ----------------
 \multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{SEGUNDO}: la conducta de un espécimen en cada segundo analizado} \\
 \hline
@@ -202,7 +197,7 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{segundo} & \texttt{smallint} & No & PK; CK entre 1 y 300 & Posición del segundo dentro de la ventana analizada (1 a 300), tras recortar los últimos 300 segundos. El minuto del análisis sale de este número y no se guarda \\
 \hline
-\texttt{conducta} & \texttt{varchar(n)} & Sí & FK $\to$ CONDUCTA & Conducta vigente del segundo, que el usuario puede corregir en la revisión. Queda nula si el sistema no pudo decidir o si el usuario lo marcó como dudoso \\
+\texttt{conducta} & \texttt{tipo\_\allowbreak{}conducta} & Sí & Dominio & Conducta vigente del segundo, que el usuario puede corregir en la revisión. Queda nula si el sistema no pudo decidir o si el usuario lo marcó como dudoso \\
 \hline
 \texttt{origen} & \texttt{origen\_\allowbreak{}segundo} & No & Dominio & Quién puso la conducta vigente y cómo (Tabla~\ref{tab:dominios}) \\
 \hline

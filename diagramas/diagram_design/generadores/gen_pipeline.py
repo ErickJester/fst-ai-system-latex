@@ -84,7 +84,7 @@ box('s1', 0, r2, 'Separa al espécimen', ['del fondo, en su cilindro', '(diferen
 box('s2', 1, r2, 'Mide 15 rasgos', ['movimiento, postura y trayectoria', 'en una ventana de 4 s', 'centrada en cada segundo'])
 box('s3', 2, r2, 'Mide 7 reglas', ['pataleo bajo el agua y cambio', 'sobre la línea de agua', 'se mide en el mismo clip'])
 box('cnn', 3, rc, 'CNN 3D con medidas de apoyo', ['red R(2+1)D-18 sobre el clip,', 'más las 22 medidas'], focal=True)
-box('cond', 4, rc, 'Conducta del segundo', ['inmovilidad, nado o escalamiento'])
+box('cond', 4, rc, 'Conducta del segundo', ['nado activo, inmovilidad, escalamiento', 'o conducta activa'])
 # modulo 2 -> modulo 3
 ca, cb = B('m2c'), T('v1')
 arrow([ca, (ca[0], 450), (cb[0], 450), cb])
@@ -107,7 +107,7 @@ box('pausa', 4, 524, 'En pausa', ['la segmentación (no la red) pierde', 'al esp
 arrow([(cnx + 70, N['cnn']['y']), (cnx + 70, 524), L('pausa')], dashed=True, color='#6b6b6b')
 # ---- Modulo 4 (resultados) ----
 cy4 = 880
-box('b2', 4, cy4, 'Guarda', ['conducta de cada segundo', 'segundos por conducta y minuto', 'copia del video para revisión', '(H.264, recortada a lo analizado)'])
+box('b2', 4, cy4, 'Guarda', ['conducta de cada segundo', 'copia del video para revisión', '(H.264, recortada a lo analizado)'])
 arrow([B('cond'), T('b2')])
 
 legend = '''<g transform="translate(40,972)" class="lg">

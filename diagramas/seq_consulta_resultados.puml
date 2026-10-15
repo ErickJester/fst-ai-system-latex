@@ -69,7 +69,7 @@ database "Base de datos" as db
 
 inv -> ui: abre resultados del experimento\n(desde el dashboard o la pantalla de progreso)
 ui -> api: pide los resultados del experimento
-api -> db: busca los especímenes analizados, con su tanda y su grupo,\ny sus segundos por conducta de cada minuto
+api -> db: busca los especímenes analizados, con su tanda y su grupo,\ny la conducta de cada segundo
 db --> api: segundos por conducta de cada espécimen
 api --> ui: resultados por espécimen
 ui -> inv: muestra la tabla por espécimen, cada uno con su tanda

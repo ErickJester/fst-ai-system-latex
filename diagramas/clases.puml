@@ -141,13 +141,16 @@ package P4_Resultados_y_reportes {
     +calcularBloques() : List<String>
   }
 
-  class Conducta {
-    -nombre : String
+  enum Conducta {
+    nado activo
+    inmovilidad
+    escalamiento
+    conducta activa
   }
 
   class Segundo {
     -segundo : Integer
-    -conducta : String
+    -conducta : Conducta
     -origen : String
     +corregir(conducta, origen) : void
   }

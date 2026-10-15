@@ -39,6 +39,7 @@ skinparam arrow {
 '   etapa_analisis         IN ('preprocesamiento','cilindros','clasificacion')
 '   nivel_clasif_analisis  IN ('preciso','agrupado')
 '   origen_segundo         IN ('maquina','confirmada','corregida','dudosa')
+'   tipo_conducta          IN ('nado activo','inmovilidad','escalamiento','conducta activa')
 ' Todas las llaves foraneas: ON UPDATE NO ACTION ON DELETE NO ACTION.
 
 entity USUARIO {
@@ -140,15 +141,11 @@ entity OBSERVACION {
   UK (idEspecimen, idVideo)
 }
 
-entity CONDUCTA {
-  * nombre : varchar(n) <<PK>>
-}
-
 entity SEGUNDO {
   * idObservacion : integer <<PK>> <<FK>>
   * segundo : smallint <<PK>>
   --
-  conducta : varchar(n) <<FK>> (nulo = "no se ve")
+  conducta : tipo_conducta (nulo = "no se ve")
   origen : origen_segundo
   ..
   CK segundo BETWEEN 1 AND 300
@@ -201,5 +198,4 @@ VIDEO          "1" --o "0..4" OBSERVACION                : idVideo
 ESPECIMEN      "1" --o "0..1" OBSERVACION                : idEspecimen
 
 OBSERVACION    "1" --o "1..300" SEGUNDO                 : idObservacion
-CONDUCTA       "0..1" --o "0..*" SEGUNDO                : conducta
 @enduml

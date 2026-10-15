@@ -186,7 +186,7 @@ conceptual estaba prohibido.
 ## 4. Dónde está el trabajo hecho
 
 Tres artifacts publicados. **Son la fuente de verdad del diseño**, por encima del LaTeX.
-**Vigentes: los enlaces de la tabla de abajo** (confirmado por el usuario, 14-oct-2026). Un juego anterior de enlaces, que antes se marcaba como «actualizado el 2026-10-06» y que ya no es el vigente, se deja solo como referencia: Conceptual https://claude.ai/artifact/Y7uJ7Mje7CyDxppJYzzXkh · Lógico https://claude.ai/artifact/FJtL6wbw4K7wYYWJTYmrLP · Físico https://claude.ai/artifact/972fCkz4K4U7fQrPRR3qyH. Las celdas de «Estado» de la tabla de abajo son de septiembre.
+**Vigentes: los enlaces de la tabla de abajo** (confirmado por el usuario, 14-oct-2026). Un juego anterior de enlaces, que antes se marcaba como «actualizado el 2026-10-06» y que ya no es el vigente, se deja solo como referencia: Conceptual https://claude.ai/artifact/Y7uJ7Mje7CyDxppJYzzXkh · Lógico https://claude.ai/artifact/FJtL6wbw4K7wYYWJTYmrLP · Físico https://claude.ai/artifact/972fCkz4K4U7fQrPRR3qyH. Las celdas de «Estado» de la tabla de abajo son de septiembre. **Aclaración (14-oct):** los dos juegos de enlaces apuntan a los mismos tres artifacts (`fc01fd30…` es `Y7uJ7…`, `73df37d9…` es `FJtL6…` y `41a09816…` es `972fCk…`); el 14-oct se actualizaron los tres con D-52 y las decisiones desde el 6-oct.
 
 | Artifact | URL | Cubre | Estado |
 |----------|-----|-------|--------|
@@ -285,6 +285,19 @@ Aplicados en la rama `decisiones-11oct` (caps. 1 a 5, apéndice D, `esquema_fisi
 **No se aplicó** (sin confirmación): `PRESENTA` en (4,4), que ya no tiene objeto porque D-52 quita la tabla, y quitar el modelo del panel de administración.
 Las columnas de `ANALISIS` y los valores de `SEGUNDO.origen` se resolvieron el 12-oct (abajo).
 
+### Cambios del 14-oct-2026 (D-102): `CONDUCTA` pasa a dominio
+
+Solo `SEGUNDO.conducta` la referenciaba desde D-52, son cuatro valores fijos (D-29) y no tiene atributos propios.
+Deja de ser tabla y es el noveno dominio cerrado, `tipo_conducta`. El conceptual no cambia (`Conducta` sigue siendo
+entidad); en el diagrama de clases es una enumeración.
+
+| Cambio | Detalle |
+|---|---|
+| **Cifras vigentes** | **12 relaciones**, **57 atributos** y **13 llaves foráneas**, en BCNF (antes 13, 58 y 14) |
+| **Dominios** | **Nueve**: se suma `tipo_conducta` (`nado activo`, `inmovilidad`, `escalamiento`, `conducta activa`) |
+| **SQL** | `CREATE DOMAIN tipo_conducta`; se quitan `CREATE TABLE conducta`, la llave foránea de `segundo.conducta`, los datos semilla y el índice `ix_segundo_conducta` (que además aparecía dos veces) |
+| **Aplicado** | `grafo_relacional_3_vigente.puml`, `esquema_fisico.puml`, `clases.puml` y su HTML/PNG, `esquema_bd` (HTML/PNG), cap. 5 y apéndice D (ejemplo de 2FN, tabla de normalización, tabla de dominios y diccionario), `INSTRUCCIONES-WEB.md` y `diagramas/guia_web/` |
+
 ### Cambios del 14-oct-2026 (D-52): se quitan `INTERVALO` y `PRESENTA`
 
 Detalle en `errores/preguntas-doctor.md` §6. Los segundos por conducta de cada minuto no se guardan:
@@ -293,7 +306,7 @@ de segundo). Es el mismo principio de las estadísticas de grupo (D-93) y de los
 
 | Cambio | Detalle |
 |---|---|
-| **Cifras vigentes** | **13 relaciones**, esquema lógico con **57 atributos y 14 llaves foráneas** (antes 63 y 17; el físico suma `rutaDiagnostico`) |
+| **Cifras vigentes** | **13 relaciones**, esquema lógico y físico con **58 atributos y 14 llaves foráneas** (antes 64 y 17, contando `rutaDiagnostico`, que el grafo lógico ya incluye desde M-24) |
 | **Corregir una etiqueta** | Solo toca `SEGUNDO`. Ya no hay que recalcular nada, así que **CU-27 «Recalcular totales por minuto» se fundió en CU-26** y el antiguo CU-28 pasó a ser CU-27 |
 | **Resultados y reportes** | Cuentan `SEGUNDO` por observación y conducta; el CSV/XLSX por minuto sale de la misma cuenta |
 | **Índice** | `ix_presenta_conducta` pasa a `ix_segundo_conducta` sobre `SEGUNDO (conducta)` |

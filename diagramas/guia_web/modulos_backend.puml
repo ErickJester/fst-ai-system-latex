@@ -29,7 +29,7 @@ package "Servicios" as SERV {
 }
 
 package "Acceso a datos" {
-  [Modelos SQLAlchemy\\n13 tablas] as m
+  [Modelos SQLAlchemy\\n12 tablas] as m
 }
 
 database "PostgreSQL" as db

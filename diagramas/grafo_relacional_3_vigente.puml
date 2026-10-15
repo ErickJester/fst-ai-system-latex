@@ -13,10 +13,14 @@
 '  modelado como subtipo -- si el usuario no aparece aqui, es
 '  investigador simple.
 '
-'  13 relaciones - 57 atributos - 14 llaves foraneas.
+'  12 relaciones - 57 atributos - 13 llaves foraneas.
+'  (D-102, 14-oct: CONDUCTA deja de ser relacion y pasa a dominio
+'   cerrado tipo_conducta -- solo SEGUNDO la referenciaba, son cuatro
+'   valores fijos y no tiene atributos propios. Baja de 13 a 12
+'   relaciones, de 58 a 57 atributos y de 14 a 13 llaves foraneas)
 '  (D-52, 14-oct: se quitaron INTERVALO y PRESENTA -- los segundos por
 '   conducta de cada minuto se calculan desde SEGUNDO, no se guardan.
-'   Baja de 15 a 13 relaciones, de 63 a 57 atributos y de 17 a 14
+'   Baja de 15 a 13 relaciones, de 64 (con rutaDiagnostico) a 58 atributos y de 17 a 14
 '   llaves foraneas)
 '  (D-55, 6-oct: se quito ESPECIMEN.numeroRata -- el sistema no
 '   necesita identificar a cada rata por su numero del laboratorio;
@@ -58,7 +62,7 @@
 '                         instancia (modulo 1, RN-11), no plantilla.
 '                         Si algun dia se vuelven plantilla pura,
 '                         el texto debe mudarse a un catalogo
-'                         TIPO_NOTIFICACION, como CONDUCTA.
+'                         TIPO_NOTIFICACION.
 '  ruta -> formato        en REPORTE. Si se cumple (la extension del
 '                         archivo), pero 'ruta' es clave candidata,
 '                         asi que no viola BCNF.
@@ -191,15 +195,11 @@ class OBSERVACION {
   idVideo   [FK] [AK]
 }
 
-class CONDUCTA {
-  <u>nombre</u>
-}
-
 class SEGUNDO {
   <u>idObservacion</u>   [FK]
   <u>segundo</u>
   --
-  conducta   [FK] (nulo)
+  conducta   (nulo)
   origen
 }
 
@@ -245,7 +245,6 @@ ESPECIMEN      "1" --o "0..1" OBSERVACION
 VIDEO          "1" --o "0..4" OBSERVACION
 ' D-54: 300 es un maximo, sin minimo (los ultimos 300 s del video)
 OBSERVACION    "1" --o "1..300" SEGUNDO
-CONDUCTA       "0..1" --o "0..*" SEGUNDO
 EXPERIMENTO    "1" --o "0..*" REPORTE
 USUARIO        "1" --o "0..*" NOTIFICACION
 EXPERIMENTO    "0..1" --o "0..*" NOTIFICACION

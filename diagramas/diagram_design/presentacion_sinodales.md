@@ -14,12 +14,12 @@ anterior. Va de lo general a lo técnico. Todos están hechos con el estilo de `
 | 6 | Cuando algo sale mal: pausa y ajuste | Secuencia | [`../seq_pausa_y_ajuste.puml`](../seq_pausa_y_ajuste.puml) |
 | 7 | Con qué está construido | Arquitectura por capas | [arquitectura_capas.html](arquitectura_capas.html) |
 
-Respaldo, por si preguntan: [esquema_bd.html](esquema_bd.html) (las 13 tablas),
+Respaldo, por si preguntan: [esquema_bd.html](esquema_bd.html) (las 12 tablas),
 [clases_completo.html](clases_completo.html) y [contenedores.html](contenedores.html).
 
 ## Qué cambió respecto al modelo anterior
 
-Lo que los sinodales ya conocen y ahora es distinto: el modelo de datos es de 13 tablas (sin totales guardados), la
+Lo que los sinodales ya conocen y ahora es distinto: el modelo de datos es de 12 tablas (sin totales guardados y con las conductas como dominio), la
 conducta se decide por segundo, hay un worker aparte del backend, solo el video del Día 2 se
 analiza y existe un flujo de pausa y ajuste del recuadro.
 

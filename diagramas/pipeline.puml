@@ -69,7 +69,7 @@ partition "3. Clasificación de conducta" {
 }
 
 partition "4. Resultados" {
-  :Guarda la conducta de cada segundo, los segundos\npor conducta de cada minuto y la copia del video\npara revisión (H.264);
+  :Guarda la conducta de cada segundo\y la copia del video para revisión (H.264);
 }
 stop
 
