@@ -63,10 +63,11 @@ El proyecto de documentación está organizado de la siguiente manera para facil
 ├── chapters/             # Capítulos 1–5
 ├── back/                 # Apéndices y trabajo futuro
 ├── bib/                  # Referencias bibliográficas (.bib)
-├── figures/              # Imágenes que el documento incluye
-│   ├── mermaid/          #   Diagramas exportados a PNG
-│   └── mockups/          #   Capturas de los mockups de interfaz
-├── logos/                # Logos institucionales (IPN, ESCOM)
+├── figures/              # TODAS las imágenes del documento, en un solo lugar
+│   ├── diagramas/        #   Diagramas en PNG (PlantUML y diagram_design)
+│   ├── mockups/          #   Capturas de los mockups de interfaz (y estados/)
+│   ├── logos/            #   Logos institucionales (IPN, ESCOM)
+│   └── _sin_uso/         #   Imágenes viejas que el documento ya no incluye
 │
 │   # ── Material de trabajo (no entra a la compilación) ──────
 ├── diagramas/            # Fuentes de diagramas (.puml, .svg) y exportaciones

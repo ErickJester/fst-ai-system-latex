@@ -15,7 +15,7 @@ from pathlib import Path
 from pdf_diagramas import construir
 
 REPO = Path(__file__).resolve().parent.parent
-FIGS = REPO / "figures" / "mermaid"
+FIGS = REPO / "figures" / "diagramas"
 OUT = REPO / "docs" / "casos_uso.pdf"
 
 DIAGRAMAS = [

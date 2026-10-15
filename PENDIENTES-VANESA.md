@@ -22,7 +22,7 @@ Marca aquí lo que termines (`✅`, fecha). Este archivo es solo tuyo: Erick no 
   - `chapters/01_introduccion.tex`, `chapters/02_estado_arte.tex`, `chapters/03_marco_teorico.tex`
   - `front/resumen.tex`, `front/portada.tex`, `front/documento_tecnico.tex`
   - `bib/referencias.bib` y la configuración de `biblatex` en `preamble.tex`
-  - `diagramas/puml/cu_*.puml`, `diagramas/puml/gen_pngs.sh` y `figures/mermaid/cu_*.png`
+  - `diagramas/puml/cu_*.puml`, `diagramas/puml/gen_pngs.sh` y `figures/diagramas/cu_*.png`
   - En `chapters/05_diseno.tex`, **solo** la sección «Diseño de casos de uso» (de
     `\section{Diseño de casos de uso}` a justo antes de `\section{Diagramas de secuencia}`,
     hoy líneas 693–2333)
@@ -141,7 +141,7 @@ Marca aquí lo que termines (`✅`, fecha). Este archivo es solo tuyo: Erick no 
 ## 6. Casos de uso: diagramas y fichas del cap. 5
 
 Diagramas en `diagramas/puml/cu_*.puml`; el LaTeX incluye los PNG de
-`figures/mermaid/cu_*.png`. Genera con PlantUML 1.2026.8 (la versión con la que se
+`figures/diagramas/cu_*.png`. Genera con PlantUML 1.2026.8 (la versión con la que se
 verificó todo) y revisa la imagen antes de comitear.
 
 **Regla de oro:** cada `<<include>>` o `<<extend>>` del diagrama aparece también en la fila
@@ -277,6 +277,6 @@ Aplicado el 2026-10-11, primer bloque (hallazgos con fuente que decide):
 - ✅ **`.puml`** (fuente de las figuras): arquitectura (sin CLAHE, `_tracked`, solo `.mp4` ni SQL), esquema físico (sin
   `D-xx`, SQL ni «rata»), `estados_analisis`, `seq_consulta_progreso`, `seq_consulta_resultados` (cuatro conductas),
   `seq_crear_cuenta`, `seq_descarga_reportes` y `flujo_general`.
-- ⏳ **PNG sin regenerar:** las figuras de `figures/mermaid/` y `diagramas/clases.png` siguen mostrando lo anterior hasta
+- ⏳ **PNG sin regenerar:** las figuras de `figures/diagramas/` y `diagramas/clases.png` siguen mostrando lo anterior hasta
   regenerarlas con PlantUML (no hay `plantuml.jar` en este equipo).
-- ⏳ **Mockups** `experimento` y `experimentos` (`figures/mockups/v2/`): hay que revisar que no pidan nombre y contraseña.
+- ⏳ **Mockups** `experimento` y `experimentos` (`figures/mockups/`): hay que revisar que no pidan nombre y contraseña.

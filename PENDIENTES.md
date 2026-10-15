@@ -32,7 +32,7 @@ bibliografía y casos de uso, que ella diseñó). A Erick, lo que necesita ese c
 | `chapters/04_analisis.tex` | Erick |
 | `chapters/05_diseno.tex`, sección «Diseño de casos de uso» (hoy 693–2333) | Vanesa |
 | `chapters/05_diseno.tex`, todo lo demás | Erick |
-| `diagramas/puml/cu_*.puml`, `gen_pngs.sh`, `figures/mermaid/cu_*.png` | Vanesa |
+| `diagramas/puml/cu_*.puml`, `gen_pngs.sh`, `figures/diagramas/cu_*.png` | Vanesa |
 | Resto de `diagramas/` y `figures/` (modelo, secuencias, clases, estados, pipeline) | Erick |
 | `back/`, `errores/`, `DISENO-BD.md`, `INSTRUCCIONES-WEB.md`, mockups | Erick |
 
@@ -196,4 +196,4 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
 
 - **DOC-02:** no hay capítulo de conclusiones (caps. 6–8 comentados en `main.tex`).
 - **D-51 sin aplicar:** comentario de `seq_analisis_automatico.puml` y cap. 6. (Artifacts e `INSTRUCCIONES-WEB.md` ya se actualizaron el 5-oct.)
-- Archivos huérfanos con el modelo viejo que no entran al documento (`ciclo_vida_experimento.puml`, `seq_analisis.png`, `seq_registro.png`, `figures/mermaid/clases.png`, `casos_uso.png`, `cu_*.png` de `diagramas/`).
+- Archivos huérfanos con el modelo viejo que no entran al documento (`ciclo_vida_experimento.puml`, `seq_analisis.png`, `seq_registro.png`, `figures/diagramas/clases.png`, `casos_uso.png`, `cu_*.png` de `diagramas/`).

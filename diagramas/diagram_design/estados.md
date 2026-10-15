@@ -1,8 +1,8 @@
 # Máquinas de estados: análisis y experimento
 
-![Estados del análisis](estados_analisis.png)
+![Estados del análisis](../../figures/diagramas/estados_analisis.png)
 
-![Estados del experimento](estados_experimento.png)
+![Estados del experimento](../../figures/diagramas/estados_experimento.png)
 
 Archivos interactivos: [estados_analisis.html](estados_analisis.html) y
 [estados_experimento.html](estados_experimento.html).
