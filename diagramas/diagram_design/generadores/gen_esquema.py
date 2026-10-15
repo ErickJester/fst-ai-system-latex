@@ -7,7 +7,7 @@ LH = 14
 GAPV = 46  # espacio vertical entre tablas de una misma columna
 esc = html.escape
 
-# ---- Datos tomados de diagramas/esquema_fisico.puml (13 tablas, 14 FK; D-52 quita INTERVALO y PRESENTA) ----
+# ---- Datos tomados de diagramas/esquema_fisico.puml (12 tablas, 13 FK; D-52 quita INTERVALO y PRESENTA y D-102 quita CONDUCTA) ----
 # columna: (marca, nombre, tipo)   marca: PK, FK, 'PK FK', UK, 'FK UK' o ''
 T = {}
 COLS = [[], [], []]
@@ -38,7 +38,6 @@ tab('ESPECIMEN', 1, [
 tab('OBSERVACION', 1, [
     ('PK', 'idObservacion', 'integer'), ('FK', 'idEspecimen', 'integer'), ('FK', 'idVideo', 'integer')],
     ['UK (idEspecimen, idVideo)'])
-tab('CONDUCTA', 1, [('PK', 'nombre', 'varchar(n)')])
 # columna 2: grupo, tanda, video, analisis, segundo
 tab('GRUPO', 2, [
     ('PK', 'idGrupo', 'integer'), ('FK', 'idExperimento', 'integer'), ('', 'etiqueta', 'varchar(n)'),
@@ -56,7 +55,7 @@ tab('ANALISIS', 2, [
     ('', 'fechaAnalisis', 'timestamptz'), ('', 'rutaDiagnostico', 'text · nulo')])
 tab('SEGUNDO', 2, [
     ('PK FK', 'idObservacion', 'integer'), ('PK', 'segundo', 'smallint'),
-    ('FK', 'conducta', 'varchar(n) · nulo'), ('', 'origen', 'origen_segundo')],
+    ('', 'conducta', 'tipo_conducta · nulo'), ('', 'origen', 'origen_segundo')],
     ['CK segundo entre 1 y 300'])
 
 # ---- Anchos y alturas ----
@@ -96,9 +95,7 @@ T['TANDA']['y'] = T['ESPECIMEN']['y'] + 14
 T['VIDEO']['y'] = T['OBSERVACION']['y'] + 28
 T['ANALISIS']['y'] = T['VIDEO']['y'] + T['VIDEO']['h'] + GAPV
 seg_min = T['ANALISIS']['y'] + T['ANALISIS']['h'] + GAPV
-cond_y = max(T['OBSERVACION']['y'] + T['OBSERVACION']['h'] + GAPV, seg_min + 28)
-T['CONDUCTA']['y'] = cond_y
-T['SEGUNDO']['y'] = cond_y - 28
+T['SEGUNDO']['y'] = seg_min
 
 def Lr(n, name): return (T[n]['x'], rowy(n, name))
 def Rr(n, name): return (T[n]['x'] + T[n]['w'], rowy(n, name))
@@ -134,7 +131,6 @@ edge([Rr('OBSERVACION', 'idVideo'), Lr('VIDEO', 'idVideo')], '0..4', '1')
 edge([Tc('OBSERVACION'), Bc('ESPECIMEN')], '0..1', '1')
 edge([Lr('SEGUNDO', 'idObservacion'), (gap(1, 45), rowy('SEGUNDO', 'idObservacion')),
       (gap(1, 45), rowy('OBSERVACION', 'idObservacion')), Rr('OBSERVACION', 'idObservacion')], '1..300', '1')
-edge([Lr('SEGUNDO', 'conducta'), Rr('CONDUCTA', 'nombre')], '0..*', '0..1')
 
 # ---- SVG ----
 out = []
@@ -207,7 +203,7 @@ W, H = int(maxx), int(maxy)
 MARCADORES = ''.join(f'<marker id="es-arr-{i}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="{c}" stroke-width="1.5"/></marker>' for i, c in enumerate(PALETA))
 svg = f'''<svg viewBox="0 0 {W} {H}" role="img" aria-labelledby="es-title es-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="es-title">Esquema de la base de datos</title>
-<desc id="es-desc">Las 13 tablas de la base de datos PostgreSQL con sus columnas, tipos, llaves primarias, foráneas y únicas, y las 14 llaves foráneas con su cardinalidad.</desc>
+<desc id="es-desc">Las 12 tablas de la base de datos PostgreSQL con sus columnas, tipos, llaves primarias, foráneas y únicas, y las 13 llaves foráneas con su cardinalidad.</desc>
 <defs>
 {MARCADORES}
 </defs>

@@ -5,7 +5,9 @@
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
 '  Figura 5.5 de chapters/05_diseno.tex
-'  Gestor: PostgreSQL (D-11) - 13 tablas, 14 llaves foraneas
+'  Gestor: PostgreSQL (D-11) - 12 tablas, 13 llaves foraneas
+'  (14-oct: D-102 quita la tabla CONDUCTA; pasa a ser el dominio
+'   cerrado tipo_conducta)
 '  (14-oct: D-52 quita INTERVALO y PRESENTA; los segundos por
 '   conducta de cada minuto se calculan desde SEGUNDO)
 '  (6-oct: D-55 quita ESPECIMEN.numeroRata y, con ella, el idGrupo
@@ -29,7 +31,7 @@
 '
 '  ---- Fuentes ----
 '  Estructura  : diagramas/grafo_relacional_3_vigente.puml
-'                (13 relaciones, 57 atributos, 14 FK, BCNF)
+'                (12 relaciones, 57 atributos, 13 FK, BCNF)
 '  Tipos y DDL : artifact "Diseno Fisico FST" (13-sep) - actividades
 '                1 a 6 de la etapa fisica, todas resueltas
 '  Decisiones  : errores/preguntas-doctor.md - D-02, D-04, D-08,
@@ -37,11 +39,11 @@
 '
 '  ---- Que agrega esta etapa sobre el grafo logico ----
 '  1. Tipos concretos de PostgreSQL por dominio (ver tabla abajo).
-'  2. Ocho dominios cerrados via CREATE DOMAIN + CHECK (D-14 a D-17
-'     mas los tres ya cerrados en la etapa logica).
+'  2. Nueve dominios cerrados via CREATE DOMAIN + CHECK (D-14 a D-17
+'     mas los tres ya cerrados en la etapa logica, y tipo_conducta, D-102).
 '  3. D-04 (13-sep) agregaba ESPECIMEN.idGrupo como redundancia; D-55
 '     (6-oct) la retira junto con numeroRata. El fisico y el logico
-'     tienen las mismas 17 llaves foraneas.
+'     tienen las mismas llaves foraneas (13 desde D-102).
 '  4. D-24 (15-sep, esta sesion): ANALISIS.idVideo se declara UNIQUE
 '     para forzar estructuralmente la cardinalidad (1,1) de D-03.
 '     Kendall & Kendall p.425 respalda la "clave unica" como
@@ -67,7 +69,10 @@
 '  Contadores cortos -> smallint
 '  Booleano          -> boolean
 '
-'  ---- Los ocho dominios cerrados (CREATE DOMAIN ... CHECK) ----
+'  ---- Los nueve dominios cerrados (CREATE DOMAIN ... CHECK) ----
+'  tipo_conducta           varchar(16) IN ('nado activo',
+'                          'inmovilidad','escalamiento',
+'                          'conducta activa')                [D-29, D-102]
 '  tipo_grupo             varchar(24) IN ('control','referencia',
 '                          'tratamiento experimental')
 '  sesion_video            varchar(6) IN ('Dia 1','Dia 2')
@@ -91,9 +96,10 @@
 '  La base de datos rechaza el borrado en vez de propagarlo - por
 '  eso USUARIO.activo (D-10) existe: dar de baja sin poder borrar.
 '
-'  ---- CONDUCTA sigue siendo tabla, no dominio cerrado ----
-'  Su extension puede crecer (hoy son cuatro conductas) - un dominio
-'  cerrado no puede expresar eso.
+'  ---- CONDUCTA ya no es tabla (D-102, 14-oct) ----
+'  Solo SEGUNDO.conducta la usaba, son cuatro valores fijos y no
+'  tiene atributos propios: es el dominio cerrado tipo_conducta.
+'  Si algun dia cambian las conductas, se modifica el dominio.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/esquema_fisico.puml
@@ -248,15 +254,11 @@ entity OBSERVACION {
   UK (idEspecimen, idVideo)
 }
 
-entity CONDUCTA {
-  * nombre : varchar(n) <<PK>>
-}
-
 entity SEGUNDO {
   * idObservacion : integer <<PK>> <<FK>>
   * segundo : smallint <<PK>>
   --
-  conducta : varchar(n) <<FK>> (nulo = "no se ve")
+  conducta : tipo_conducta (nulo = "no se ve")
   origen : origen_segundo
   ..
   CK segundo entre 1 y 300
@@ -326,6 +328,5 @@ VIDEO          "1" --o "0..4" OBSERVACION                : idVideo
 ESPECIMEN      "1" --o "0..1" OBSERVACION                : idEspecimen
 
 OBSERVACION    "1" --o "1..300" SEGUNDO                 : idObservacion
-CONDUCTA       "0..1" --o "0..*" SEGUNDO                : conducta
 
 @enduml

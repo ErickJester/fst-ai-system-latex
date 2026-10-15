@@ -451,9 +451,12 @@ clasificación de conducta (módulo 3).
   \item \textbf{OBSERVACION}: vincula un espécimen con el video en el que
         fue analizado.
 
-  \item \textbf{CONDUCTA}: catálogo cerrado de las cuatro conductas (nado
-        activo, inmovilidad, escalamiento y conducta activa, esta última
-        cuando el clasificador no decide entre nado y escalamiento; ver RN-13).
+  \item \textbf{CONDUCTA}: las cuatro conductas (nado activo, inmovilidad,
+        escalamiento y conducta activa, esta última cuando el clasificador no
+        decide entre nado y escalamiento; ver RN-13). Es una entidad del esquema
+        conceptual; en el relacional no es tabla sino el dominio cerrado
+        \texttt{tipo\_conducta} de la columna \texttt{SEGUNDO.conducta}, porque son
+        cuatro valores fijos y no tiene atributos propios.
 
   \item \textbf{SEGUNDO}: una fila por espécimen y por segundo analizado, con
         la conducta asignada (o ninguna, si el espécimen no se ve) y el origen
@@ -494,10 +497,10 @@ estuviese copiado en las tablas de videos y de resultados, una actualización pa
 produciría registros con datos contradictorios. Normalizar también hace que el
 esquema sea más fácil de mantener cuando el sistema evolucione durante TT-II.
 
-Las trece relaciones del sistema son: \texttt{USUARIO}, \texttt{ADMINISTRADOR},
+Las doce relaciones del sistema son: \texttt{USUARIO}, \texttt{ADMINISTRADOR},
 \texttt{EXPERIMENTO}, \texttt{GRUPO}, \texttt{TANDA}, \texttt{ESPECIMEN},
 \texttt{VIDEO}, \texttt{ANALISIS},
-\texttt{OBSERVACION}, \texttt{SEGUNDO}, \texttt{CONDUCTA},
+\texttt{OBSERVACION}, \texttt{SEGUNDO},
 \texttt{REPORTE} y \texttt{NOTIFICACION}. Las subsecciones siguientes explican
 cómo se aplicó cada forma normal sobre este conjunto.
 
@@ -533,11 +536,9 @@ El caso compuesto del esquema es \texttt{SEGUNDO}, cuya clave primaria es el par
 (\texttt{idObservacion}, \texttt{segundo}). Sus columnas no clave ---la conducta
 asignada y el origen de esa conducta--- describen ese segundo específico de esa
 observación específica, así que dependen de la clave completa y no de una de sus
-partes. Pero si ahí también se hubiera guardado una descripción de la conducta,
-esa columna dependería solo de \texttt{conducta}, no del par completo. Esa es la
-razón por la que \texttt{CONDUCTA} es un catálogo aparte: su nombre y cualquier
-atributo propio de la conducta viven ahí, no repetidos en cada fila de
-\texttt{SEGUNDO}.
+partes. El valor de \texttt{conducta} es uno de los cuatro del dominio cerrado
+\texttt{tipo\_conducta}: no hay descripción ni otro dato de la conducta que
+dependa solo de ella y que hubiera que repetir en cada fila de \texttt{SEGUNDO}.
 
 \subsection{Tercera Forma Normal (3FN)}
 
@@ -589,7 +590,7 @@ El resto de las relaciones se revisó una por una: en cada una, los únicos
 determinantes son su clave primaria y, cuando la tiene, su clave alterna. Por
 ejemplo, \texttt{GRUPO} tiene como determinantes \texttt{idGrupo} (primaria) y la
 combinación (\texttt{idExperimento}, \texttt{etiqueta}) (alterna). Con eso, las
-trece relaciones del modelo relacional cumplen FNBC.
+doce relaciones del modelo relacional cumplen FNBC.
 
 El esquema físico tiene las mismas columnas que el modelo relacional más
 \texttt{rutaDiagnostico} (ruta del reporte de diagnóstico), que depende solo de la clave
@@ -617,17 +618,17 @@ las tablas afectadas y la decisión de diseño concreta en cada caso.
 \hline
 1FN &
   Clave primaria que identifica cada fila de forma única &
-  Las 13 relaciones &
+  Las 12 relaciones &
   Clave subrogada autogenerada, salvo \texttt{USUARIO}/\texttt{ADMINISTRADOR}
-  (\texttt{idInstitucional}), \texttt{CONDUCTA} (\texttt{nombre}) y
+  (\texttt{idInstitucional}) y
   \texttt{SEGUNDO} (clave compuesta \texttt{idObservacion}, \texttt{segundo}) \\
 \hline
 2FN &
   Eliminación de dependencias parciales &
-  \texttt{SEGUNDO}, \texttt{CONDUCTA} &
+  \texttt{SEGUNDO} &
   Las columnas de \texttt{SEGUNDO} dependen de
-  (\texttt{idObservacion}, \texttt{segundo}); atributos de la conducta viven en
-  \texttt{CONDUCTA} \\
+  (\texttt{idObservacion}, \texttt{segundo}); la conducta es un valor del dominio
+  \texttt{tipo\_conducta} \\
 \hline
 3FN &
   Eliminación de dependencias transitivas entre columnas no clave &
@@ -643,7 +644,7 @@ las tablas afectadas y la decisión de diseño concreta en cada caso.
 \hline
 FNBC &
   Todo determinante es clave candidata &
-  Las 13 relaciones &
+  Las 12 relaciones &
   Verificado relación por relación; el esquema físico no repite columnas \\
 \hline
 \end{tabular}
@@ -732,7 +733,7 @@ GET    & \path{/experiments/{id}/analyses/{idAnalisis}/review}   & Devuelve los 
 \hline
 GET    & \path{/experiments/{id}/analyses/{idAnalisis}/video}    & Entrega el video de la revisión por partes, para poder adelantar y retroceder. & Investiga\-dor \\
 \hline
-PUT    & \path{/experiments/{id}/analyses/{idAnalisis}/segundos} & Guarda las correcciones por segundo y recalcula los totales por minuto. & Investiga\-dor \\
+PUT    & \path{/experiments/{id}/analyses/{idAnalisis}/segundos} & Guarda las correcciones por segundo. & Investiga\-dor \\
 \hline
 
 % --- Administración ---
@@ -2495,7 +2496,7 @@ constante del pipeline y no se registra por análisis.
 
 Los resultados de conducta se modelan con \textbf{Observacion} (un espécimen
 dentro de un video) y \textbf{Segundo} (la conducta de cada segundo analizado, que
-apunta al catálogo \textbf{Conducta}). Los totales por minuto no son una clase: se
+es de tipo \textbf{Conducta}, una enumeración con las cuatro conductas). Los totales por minuto no son una clase: se
 calculan desde \textbf{Segundo}.
 
 Las estadísticas (RF-31) son datos derivados: no se guardan en la base de datos.

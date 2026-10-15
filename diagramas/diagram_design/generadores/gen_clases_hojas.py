@@ -3,7 +3,7 @@ import math, html, sys
 # Diagrama de clases (diagramas/clases.puml) partido en dos hojas carta horizontales:
 #   hoja 1: usuarios, experimentos, tandas y videos
 #   hoja 2: observaciones, resultados y analisis automatico (worker y pipeline)
-# Uso: gen_clases_hojas.py 1|2 salida.html
+# Uso: gen_clases_hojas.py U salida.html  (las hojas 1 y 2 se retiraron el 14-oct; el documento usa la U)
 esc = html.escape
 CH = 6.8     # ancho aprox. de un caracter mono de 11px
 LH = 17
@@ -55,8 +55,8 @@ cls('Notificacion', ['- id: Integer', '- tipo: String', '- mensaje: String', '- 
 cls('Reporte', ['- id: Integer', '- formato: String', '- ruta: String', '- fechaGeneracion: DateTime'],
     ['+ generar(experimento, formato): void', '+ descargar(): File'])
 cls('Observacion', [], ['+ calcularBloques(): List<String>'])
-cls('Conducta', ['- nombre: String'])
-cls('Segundo', ['- segundo: Integer', '- conducta: String', '- origen: String'], ['+ corregir(conducta, origen): void'])
+cls('Conducta', ['nado activo', 'inmovilidad', 'escalamiento', 'conducta activa'], stereo='enumeración')
+cls('Segundo', ['- segundo: Integer', '- conducta: Conducta', '- origen: String'], ['+ corregir(conducta, origen): void'])
 
 def partir(linea, limite=44):
     """Parte una firma larga en dos renglones, despues de una coma."""

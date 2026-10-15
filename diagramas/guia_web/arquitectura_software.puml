@@ -31,7 +31,7 @@ rectangle "Docker: worker\n(lo desarrolla otra persona)" as C_WK #FEF9E7 {
 
 rectangle "Capa de datos" as DATOS #F4F6F7 {
   rectangle "Docker: db" as C_DB #EBF5FB {
-    database "PostgreSQL\n\nEsquema relacional\n(13 tablas)" as DB
+    database "PostgreSQL\n\nEsquema relacional\n(12 tablas)" as DB
   }
   rectangle "Volumen videos_reportes\n(compartido)" as C_FS #EAEDED {
     folder "Videos .mp4 / .mov originales\nCopia del video para revision (H.264)\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF\nArchivos de pausa (imagen fija y recuadros)" as FS

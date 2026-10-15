@@ -20,7 +20,7 @@ sola vista.
 | Arriba a la izquierda (autenticación y usuarios) | `Administrador`, `Usuario`, `Notificacion`, `Reporte` |
 | Arriba al centro y a la derecha (experimentos y video) | `Experimento`, `Grupo`, `Tanda`, `Especimen`, `Video` |
 | Centro (pipeline de análisis) | `Analisis`, `Worker`, `PipelineAnalisis`, `ROI` |
-| Derecha (resultados) | `Observacion`, `Conducta`, `Segundo` |
+| Derecha (resultados) | `Observacion`, `Conducta` (enumeración), `Segundo` |
 
 ## Relaciones
 
@@ -152,8 +152,12 @@ análisis automático van en la misma columna que Experimento y las firmas larga
 dos renglones. Cada flecha lleva su propio color, las palabras de las relaciones verticales van
 giradas y se quitó la nota de las coordenadas del ROI.
 
-Con los márgenes del documento, la letra de las clases queda en unos 3 pt en papel. Hay una
-versión en dos hojas ([clases_hojas.md](clases_hojas.md)) con letra de unos 4 pt.
+Con los márgenes del documento, la letra de las clases queda en unos 3 pt en papel. La versión
+en dos hojas se retiró el 14-oct.
+
+**14-oct (D-102):** `Conducta` pasa a enumeración con sus cuatro valores (nado activo, inmovilidad,
+escalamiento y conducta activa), porque en la base de datos deja de ser tabla y es el dominio
+`tipo_conducta`. `Segundo.conducta` es de tipo `Conducta`.
 
 El generador es `generadores/gen_clases_hojas.py` (opción `U`); ya no existe `gen_clases.py`.
 Los PNG se sacan con Edge sin ventana, al doble de resolución.

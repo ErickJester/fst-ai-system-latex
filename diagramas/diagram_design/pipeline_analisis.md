@@ -53,9 +53,9 @@ marca de duda, y tampoco «conducta activa». El recuadro de cada cilindro no se
 - **Los 300 s.** El pipeline procesa el video completo, con todo y sus errores. El recorte a
   los últimos 300 s, si lo hace el sistema, ocurre fuera del pipeline y no se dibuja.
 - **«Video anotado» y «medidas por cuadro».** Se quitaron del documento y de las figuras
-  (D-81): el código no los genera y ningún requisito los pide. El módulo 4 guarda tres
-  cosas: la conducta de cada segundo, los segundos por conducta de cada minuto y la copia del
-  video para revisión (H.264).
+  (D-81): el código no los genera y ningún requisito los pide. El módulo 4 guarda dos
+  cosas: la conducta de cada segundo y la copia del video para revisión (H.264). Los segundos por
+  conducta de cada minuto no se guardan (D-52): se calculan desde la conducta de cada segundo.
 
 ## Lo que no coincide con el documento
 

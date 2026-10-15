@@ -39,7 +39,7 @@ svg{display:block;width:1870px;height:1682px}
 <path d="M1430,621 L1490,621 L1490,1029 L1430,1029" fill="none" stroke-width="1.4" stroke="#2e8b57" marker-end="url(#cl-arr-19)"/>
 <path d="M1280,1068 L1280,1204" fill="none" stroke-width="1.4" stroke="#8e44ad" marker-start="url(#cl-dia-20)"/>
 <path d="M1430,582 L1600,582" fill="none" stroke-width="1.4" stroke="#c0392b" marker-end="url(#cl-arr-21)"/>
-<path d="M1430,1240 L1700,1240 L1700,1068" fill="none" stroke-width="1.4" stroke="#b8860b" marker-end="url(#cl-arr-22)"/>
+<path d="M1430,1240 L1700,1240 L1700,1119" fill="none" stroke-width="1.4" stroke="#b8860b" marker-end="url(#cl-arr-22)"/>
 <text x="420" y="249" text-anchor="start" class="m" fill="#2e8b57">1</text>
 <text x="546" y="50" text-anchor="end" class="m" fill="#2e8b57">0..*</text>
 <text x="248" y="648" text-anchor="start" class="m" fill="#8e44ad">1</text>
@@ -68,7 +68,7 @@ svg{display:block;width:1870px;height:1682px}
 <text x="1440" y="576" text-anchor="start" class="m" fill="#c0392b">1</text>
 <text x="1586" y="576" text-anchor="end" class="m" fill="#c0392b">0..*</text>
 <text x="1440" y="1234" text-anchor="start" class="m" fill="#b8860b">0..*</text>
-<text x="1708" y="1085" text-anchor="start" class="m" fill="#b8860b">0..1</text>
+<text x="1708" y="1136" text-anchor="start" class="m" fill="#b8860b">0..1</text>
 <g transform="rotate(-90 450 156)"><rect x="416" y="138" width="67" height="15" fill="#faf9f5"/><text x="450" y="150" text-anchor="middle" class="r" fill="#2e8b57">REGISTRA</text></g>
 <g transform="rotate(-90 240 675)"><rect x="214" y="657" width="52" height="15" fill="#faf9f5"/><text x="240" y="669" text-anchor="middle" class="r" fill="#8e44ad">RECIBE</text></g>
 <g transform="rotate(-90 480 416)"><rect x="450" y="398" width="60" height="15" fill="#faf9f5"/><text x="480" y="410" text-anchor="middle" class="r" fill="#c0392b">ORIGINA</text></g>
@@ -233,7 +233,7 @@ svg{display:block;width:1870px;height:1682px}
 <text x="1280.0" y="1226" text-anchor="middle" class="nm">Segundo</text>
 <line x1="1130" y1="1236" x2="1430" y2="1236" stroke="#1a1a1a"/>
 <text x="1142" y="1253" class="a">- segundo: Integer</text>
-<text x="1142" y="1270" class="a">- conducta: String</text>
+<text x="1142" y="1270" class="a">- conducta: Conducta</text>
 <text x="1142" y="1287" class="a">- origen: String</text>
 <line x1="1130" y1="1299" x2="1430" y2="1299" stroke="#1a1a1a"/>
 <text x="1142" y="1316" class="a">+ corregir(conducta, origen): void</text>
@@ -247,10 +247,14 @@ svg{display:block;width:1870px;height:1682px}
 <text x="1612" y="683" class="a">- h: Integer</text>
 <text x="1612" y="700" class="a">- yAgua: Integer</text>
 <text x="1612" y="717" class="a">- yFondo: Integer</text>
-<rect x="1600" y="1007" width="200" height="61" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
-<text x="1700.0" y="1029" text-anchor="middle" class="nm">Conducta</text>
+<rect x="1600" y="1007" width="200" height="112" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1700.0" y="1020" text-anchor="middle" class="st">«enumeración»</text>
+<text x="1700.0" y="1035" text-anchor="middle" class="nm">Conducta</text>
 <line x1="1600" y1="1039" x2="1800" y2="1039" stroke="#1a1a1a"/>
-<text x="1612" y="1056" class="a">- nombre: String</text>
+<text x="1612" y="1056" class="a">nado activo</text>
+<text x="1612" y="1073" class="a">inmovilidad</text>
+<text x="1612" y="1090" class="a">escalamiento</text>
+<text x="1612" y="1107" class="a">conducta activa</text>
 <g transform="translate(40,1646)" class="lg">
 <path d="M0,0 L8,-6 L16,0 L8,6 Z" fill="#1a1a1a"/><line x1="16" y1="0" x2="44" y2="0" stroke="#1a1a1a"/><text x="54" y="3">COMPOSICIÓN</text>
 <line x1="190" y1="0" x2="218" y2="0" stroke="#6b6b6b"/><path d="M212,-4 L218,0 L212,4" fill="none" stroke="#6b6b6b"/><text x="228" y="3">ASOCIACIÓN</text>

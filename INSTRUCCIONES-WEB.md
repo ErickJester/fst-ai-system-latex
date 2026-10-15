@@ -429,7 +429,7 @@ Mientras alguna tanda siga en error, el experimento sigue en `error`.
 
 ## 5. Modelo de datos (PostgreSQL)
 
-13 tablas. Esta es la única versión vigente.
+12 tablas. Esta es la única versión vigente.
 
 Fuentes del modelo (solo consulta; si difieren de esta guía, manda esta guía):
 - Grafo relacional vigente: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\grafo_relacional_3_vigente.puml`
@@ -459,7 +459,6 @@ erDiagram
   VIDEO ||--o{ OBSERVACION : tiene
   ESPECIMEN ||--o| OBSERVACION : aparece
   OBSERVACION ||--|{ SEGUNDO : "un renglón por segundo"
-  CONDUCTA ||--o{ SEGUNDO : "conducta"
 
   USUARIO { varchar10 idInstitucional PK
             varchar nombre
@@ -501,10 +500,9 @@ erDiagram
   OBSERVACION { int idObservacion PK
                 int idEspecimen FK
                 int idVideo FK }
-  CONDUCTA { varchar nombre PK }
   SEGUNDO { int idObservacion PK
             smallint segundo PK
-            varchar conducta FK
+            tipo_conducta conducta
             origen_segundo origen }
   ADMINISTRADOR { varchar10 idInstitucional PK }
   REPORTE { int idReporte PK
@@ -552,9 +550,11 @@ ejemplo «Tanda A · Espécimen 2».
 | `etapa_analisis` | `preprocesamiento`, `cilindros`, `clasificacion` |
 | `nivel_clasif_analisis` | `preciso`, `agrupado` |
 | `origen_segundo` | `maquina`, `confirmada`, `corregida`, `dudosa` |
+| `tipo_conducta` | `nado activo`, `inmovilidad`, `escalamiento`, `conducta activa` |
 
-`CONDUCTA` es tabla y no dominio. Valores iniciales: `nado activo`, `inmovilidad`,
-`escalamiento` y `conducta activa`. Los totales por minuto no tienen tabla: se calculan desde `SEGUNDO`
+`CONDUCTA` no es tabla sino el dominio cerrado `tipo_conducta` (D-102): `nado activo`,
+`inmovilidad`, `escalamiento` y `conducta activa`; no hay tabla ni datos semilla de conductas.
+Los totales por minuto no tienen tabla: se calculan desde `SEGUNDO`
 (el minuto sale del número de segundo; D-52).
 
 `SEGUNDO` guarda la conducta de cada espécimen en cada segundo analizado (hasta 300 por
@@ -1334,8 +1334,7 @@ Cada paso termina con algo que se puede probar.
 
 1. **Docker Compose con `db` y `backend`** que arrancan (parte del Anexo C). Prueba:
    `docker compose up` y un endpoint de salud responde.
-2. **Base de datos:** usa el SQL del Anexo B (dominios, 13 tablas, restricciones
-   y datos semilla de `CONDUCTA`). El administrador inicial no va en el SQL: lo crea el
+2. **Base de datos:** usa el SQL del Anexo B (dominios, 12 tablas y restricciones). El administrador inicial no va en el SQL: lo crea el
    comando `flask crear-admin` (sección 11, punto 7).
    Pruébalo contra un PostgreSQL real y corrige lo que falle.
 3. **Autenticación:** login, logout, cambio de contraseña, cambio obligatorio en el primer
@@ -1455,7 +1454,7 @@ rectangle "Docker: worker\n(lo desarrolla otra persona)" as C_WK #FEF9E7 {
 
 rectangle "Capa de datos" as DATOS #F4F6F7 {
   rectangle "Docker: db" as C_DB #EBF5FB {
-    database "PostgreSQL\n\nEsquema relacional\n(13 tablas)" as DB
+    database "PostgreSQL\n\nEsquema relacional\n(12 tablas)" as DB
   }
   rectangle "Volumen videos_reportes\n(compartido)" as C_FS #EAEDED {
     folder "Videos .mp4 / .mov originales\nCopia del video para revision (H.264)\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF\nArchivos de pausa (imagen fija y recuadros)" as FS
@@ -1567,7 +1566,7 @@ package "Servicios" as SERV {
 }
 
 package "Acceso a datos" {
-  [Modelos SQLAlchemy\\n13 tablas] as m
+  [Modelos SQLAlchemy\\n12 tablas] as m
 }
 
 database "PostgreSQL" as db
@@ -1649,6 +1648,7 @@ skinparam arrow {
 '   etapa_analisis         IN ('preprocesamiento','cilindros','clasificacion')
 '   nivel_clasif_analisis  IN ('preciso','agrupado')
 '   origen_segundo         IN ('maquina','confirmada','corregida','dudosa')
+'   tipo_conducta          IN ('nado activo','inmovilidad','escalamiento','conducta activa')
 ' Todas las llaves foraneas: ON UPDATE NO ACTION ON DELETE NO ACTION.
 
 entity USUARIO {
@@ -1750,15 +1750,11 @@ entity OBSERVACION {
   UK (idEspecimen, idVideo)
 }
 
-entity CONDUCTA {
-  * nombre : varchar(n) <<PK>>
-}
-
 entity SEGUNDO {
   * idObservacion : integer <<PK>> <<FK>>
   * segundo : smallint <<PK>>
   --
-  conducta : varchar(n) <<FK>> (nulo = "no se ve")
+  conducta : tipo_conducta (nulo = "no se ve")
   origen : origen_segundo
   ..
   CK segundo BETWEEN 1 AND 300
@@ -1811,7 +1807,6 @@ VIDEO          "1" --o "0..4" OBSERVACION                : idVideo
 ESPECIMEN      "1" --o "0..1" OBSERVACION                : idEspecimen
 
 OBSERVACION    "1" --o "1..300" SEGUNDO                 : idObservacion
-CONDUCTA       "0..1" --o "0..*" SEGUNDO                : conducta
 @enduml
 ```
 
@@ -1948,12 +1943,15 @@ package P4_Resultados_y_reportes {
   class Observacion {
     +calcularBloques() : List<String>
   }
-  class Conducta {
-    -nombre : String
+  enum Conducta {
+    nado activo
+    inmovilidad
+    escalamiento
+    conducta activa
   }
   class Segundo {
     -segundo : Integer
-    -conducta : String
+    -conducta : Conducta
     -origen : String
     +corregir(conducta, origen) : void
   }
@@ -3212,6 +3210,9 @@ CREATE DOMAIN nivel_clasif_analisis AS varchar(8)
 CREATE DOMAIN origen_segundo AS varchar(16)
   CHECK (VALUE IN ('maquina', 'confirmada', 'corregida', 'dudosa'));
 
+CREATE DOMAIN tipo_conducta AS varchar(16)
+  CHECK (VALUE IN ('nado activo', 'inmovilidad', 'escalamiento', 'conducta activa'));
+
 -- ------------------------------------------------------------
 --  Usuarios
 -- ------------------------------------------------------------
@@ -3313,18 +3314,13 @@ CREATE TABLE observacion (
   CONSTRAINT uq_observacion UNIQUE (idespecimen, idvideo)
 );
 
-CREATE TABLE conducta (
-  nombre varchar(30) PRIMARY KEY
-);
-
 -- Una fila por espécimen y por segundo. Es lo que se revisa y corrige en la pantalla
 -- de revisión; los totales por minuto no se guardan: se calculan desde esta tabla.
 CREATE TABLE segundo (
   idobservacion  integer        NOT NULL
     REFERENCES observacion (idobservacion) ON UPDATE NO ACTION ON DELETE NO ACTION,
   segundo        smallint       NOT NULL CHECK (segundo BETWEEN 1 AND 300),
-  conducta       varchar(30)                              -- nula = no decidio o "no se ve"
-    REFERENCES conducta (nombre) ON UPDATE NO ACTION ON DELETE NO ACTION,
+  conducta       tipo_conducta,                           -- nula = no decidio o "no se ve"
   origen         origen_segundo NOT NULL DEFAULT 'maquina',
   PRIMARY KEY (idobservacion, segundo)
 );
@@ -3362,17 +3358,12 @@ CREATE TABLE notificacion (
 CREATE INDEX ix_experimento_usuario   ON experimento (idinstitucional);
 CREATE INDEX ix_analisis_estado       ON analisis (estado);       -- el worker hace polling por aqui
 CREATE INDEX ix_observacion_video     ON observacion (idvideo);
-CREATE INDEX ix_segundo_conducta      ON segundo (conducta);
 CREATE INDEX ix_notificacion_usuario  ON notificacion (idinstitucional, leido);
 CREATE INDEX ix_notificacion_experim  ON notificacion (idexperimento);
-CREATE INDEX ix_segundo_conducta      ON segundo (conducta);
 
 -- ------------------------------------------------------------
 --  Datos semilla
 -- ------------------------------------------------------------
-INSERT INTO conducta (nombre) VALUES
-  ('nado activo'), ('inmovilidad'), ('escalamiento'), ('conducta activa');
-
 -- El administrador inicial NO se inserta aqui: no hay contrasena que poner en un SQL.
 -- Lo crea el comando `flask crear-admin` con los valores del .env (seccion 11, punto 7).
 
