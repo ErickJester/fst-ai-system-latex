@@ -36,7 +36,7 @@ BASE   = r"C:\Users\ID634\Desktop\proyectos\latexFST\fst-ai-system-latex"
 PPTX_IN  = os.path.join(BASE, "docs", "Presentacion_TT_B066_v17.pptx")
 PPTX_OUT = os.path.join(BASE, "docs", "Presentacion_B066_Defensa.pptx")
 DIAG     = os.path.join(BASE, "diagramas")
-MERMAID  = os.path.join(BASE, "figures", "mermaid")
+MERMAID  = os.path.join(BASE, "figures", "diagramas")
 
 def img(*parts):
     """Devuelve la ruta de una imagen. Prefiere DIAG, cae a MERMAID."""

@@ -1,6 +1,6 @@
 # Arquitectura de software por capas
 
-![Arquitectura por capas](arquitectura_capas.png)
+![Arquitectura por capas](../../figures/diagramas/arquitectura_capas.png)
 
 Archivo interactivo: [arquitectura_capas.html](arquitectura_capas.html) (se abre en el navegador).
 Versión en PlantUML del documento: [`../arquitectura_software.puml`](../arquitectura_software.puml).

@@ -1,6 +1,6 @@
 # Diagrama de clases completo (16 clases)
 
-![Clases](clases_completo.png)
+![Clases](../../figures/diagramas/clases_completo.png)
 
 Archivo interactivo: [clases_completo.html](clases_completo.html) (ocupa toda la altura
 de la pantalla y se desliza en horizontal).

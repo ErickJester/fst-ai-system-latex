@@ -32,7 +32,7 @@ abreviaturas y dudas.
 | A-1 | Caps. 2, 3 y 4; glosario; abreviaturas; figura del pipeline | **CLA-04:** CLAHE, fondo por **mediana** (`fst_auto` usa percentil 10) y línea de agua con EMA, que el pipeline real no hace. En los caps. 2 y 3 toca **solo** esos párrafos: el resto es de Vanesa | Código de `fst_auto` |
 | A-8 | Cap. 5: ~293-303 | El párrafo del DER conceptual dice que incluye `ADMINISTRADOR`, `REPORTE` y `NOTIFICACION`; `esquema_conceptual.tex` no las dibuja | Contradicción figura–texto |
 | A-9b | Cap. 5 fuera de casos de uso: 242, 245, 248, 340, 371, 543, 601, 2435, 2504, 2645 | Citas internas «D-XX» que el lector no puede resolver (las de las fichas son de Vanesa) | Agentes §3 |
-| A-13 | `figures/mermaid/seq_perfil.png` | Mermaid de mayo sin fuente: «obtiene nombre, correo y **rol**» y `USUARIO` no tiene rol. Rehacer en PlantUML | Modelo vigente |
+| A-13 | `figures/diagramas/seq_perfil.png` | Mermaid de mayo sin fuente: «obtiene nombre, correo y **rol**» y `USUARIO` no tiene rol. Rehacer en PlantUML | Modelo vigente |
 | A-15 | `esquema_fisico.puml:24-25` y `:90-92` | Encabezado viejo («16 relaciones, 74 atributos, 17 FK») y «tres valores en modo completo, dos en degradado» (son cuatro conductas). El PNG entra al cap. 5 | Modelo vigente |
 
 ## 3. 🟡 Media
@@ -63,7 +63,7 @@ abreviaturas y dudas.
 | M-26 | `esquema_fisico.puml` (notas) | Nombres de función (`fn_sincronizar_grupo_especimen()`) e historial de sesión dentro de la figura; regla de lenguaje natural |
 | M-27 | `esquema_fisico.puml`, `esquema_conceptual.tex` | `PRESENTA` dibujada (2,4) pero siempre guarda 4 filas; el conceptual dice «todas fuertes» y `Segundo` no tiene identificador propio. **Depende de D-52** |
 | M-28 | `seq_gestion_usuarios.puml:46,75` | `/admin/usuarios` contra `/admin/users` de la API |
-| M-29 | `figures/mermaid/seq_notificaciones.png`, `seq_cambio_pass_inv.png` | Mermaid de mayo sin fuente: revisar y rehacer en PlantUML |
+| M-29 | `figures/diagramas/seq_notificaciones.png`, `seq_cambio_pass_inv.png` | Mermaid de mayo sin fuente: revisar y rehacer en PlantUML |
 | M-32 | `seq_*` | Falta la transición preprocesamiento → error; el fallo de apertura del video aparece después de la detección |
 | M-33 | Cap. 2, tabla comparativa | Texto contra tabla en «abierto / DL». **Depende de B-1** |
 
