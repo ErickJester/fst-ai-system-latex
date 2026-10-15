@@ -71,10 +71,11 @@
     medidas y reentrenada con clips del FST. \\[5pt]
 
   \textbf{Cola de tareas}
-  & Estructura de datos FIFO que desacopla la recepción de solicitudes de análisis
-    del procesamiento efectivo. El worker consulta la cola periódicamente y toma
-    un trabajo a la vez, lo que permite procesar múltiples videos de forma
-    secuencial sin bloquear el servidor web. \\[5pt]
+  & Lista de análisis pendientes que desacopla la recepción de solicitudes del
+    procesamiento efectivo. En este sistema no es un servicio aparte: es la propia
+    tabla de análisis, que el worker consulta cada cierto tiempo (\textit{polling})
+    para tomar el más antiguo en estado «en cola». Atiende un video a la vez, sin
+    bloquear el servidor web. \\[5pt]
 
   \textbf{Conducta de escalamiento}
   & (\textit{Climbing / escape attempts}.) Comportamiento en el FST caracterizado
@@ -90,13 +91,6 @@
   \textbf{Contorno}
   & Curva que delimita los bordes de un objeto en una imagen binarizada. \\[5pt]
 
-  \textbf{Corticosterona}
-  & Principal glucocorticoide en roedores, secretado por las glándulas suprarrenales
-    en respuesta al estrés. Sus niveles plasmáticos se elevan significativamente
-    durante el FST y constituyen un biomarcador del eje hipotálamo-hipófisis-adrenal. \\[5pt]
-
-
-  % ── D ──────────────────────────────────────────────────────────────
   \textbf{Data augmentation}
   & (Aumento de datos.) Técnica que incrementa artificialmente el tamaño del
     conjunto de entrenamiento aplicando transformaciones geométricas (rotación,
@@ -114,12 +108,6 @@
     sus dependencias en unidades aisladas y reproducibles. El sistema se
     despliega como cuatro contenedores orquestados: frontend, backend, worker y
     base de datos. \\[5pt]
-
-  \textbf{Dopaminérgico}
-  & Relativo al sistema de neurotransmisión mediado por dopamina. Fármacos que
-    potencian la actividad dopaminérgica pueden modificar el patrón de conductas
-    en el FST, aunque su efecto es menos selectivo que el de la fluoxetina sobre el
-    tiempo de nado activo. \\[5pt]
 
   % ── E ──────────────────────────────────────────────────────────────
   \textbf{Entropía cruzada}

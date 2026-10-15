@@ -22,7 +22,8 @@ cls('Usuario', [
     '- idInstitucional: String', '- nombre: String', '- apellidos: String', '- correo: String',
     '- contrasenaHash: String', '- activo: Boolean', '- cambioRequerido: Boolean'], [
     '+ iniciarSesion(correo, contrasena): String', '+ cerrarSesion(token): void',
-    '+ cambiarContrasena(nueva): void', '+ crearExperimento(datos): Experimento',
+    '+ cambiarContrasena(nueva): void', '+ recuperarContrasena(correo): void', '+ actualizarPerfil(datos): void',
+    '+ consultarDashboard(): List<Experimento>', '+ crearExperimento(datos): Experimento',
     '+ subirVideo(idTanda, sesion, archivo): Video', '+ eliminarExperimento(id): void',
     '+ descargarReporte(idExperimento, formato): Reporte', '+ reiniciarAnalisis(idAnalisis): void',
     '+ ajustarRecuadro(idAnalisis, cilindro, recuadro): void', '+ cancelarAnalisisEnPausa(idAnalisis): void'])
@@ -56,6 +57,8 @@ cls('Reporte', ['- id: Integer', '- formato: String', '- ruta: String', '- fecha
     ['+ generar(experimento, formato): void', '+ descargar(): File'])
 cls('Observacion', [], ['+ calcularBloques(): List<String>'])
 cls('Conducta', ['nado activo', 'inmovilidad', 'escalamiento', 'conducta activa'], stereo='enumeración')
+cls('Estadisticas', ['- conducta: Conducta', '- media: Decimal', '- desviacionEstandar: Decimal',
+                     '- varianza: Decimal', '- n: Integer'], stereo='derivada')
 cls('Segundo', ['- segundo: Integer', '- conducta: Conducta', '- origen: String'], ['+ corregir(conducta, origen): void'])
 
 def partir(linea, limite=44):
@@ -197,7 +200,7 @@ def hoja2():
 def hojaU():
     xs, w = columnas([['Administrador', 'Usuario', 'Notificacion', 'Reporte'],
                       ['Experimento', 'Grupo', 'Tanda', 'Analisis', 'Worker', 'PipelineAnalisis'],
-                      ['Especimen', 'Video', 'Observacion', 'Segundo'], ['ROI', 'Conducta']],
+                      ['Especimen', 'Video', 'Observacion', 'Segundo', 'Estadisticas'], ['ROI', 'Conducta']],
                      [150, 230, 170])
     Y = lambda n, v: C[n].__setitem__('y', v)
     Y('Administrador', 40)
@@ -216,6 +219,7 @@ def hojaU():
     Y('PipelineAnalisis', C['Worker']['y'] + h('Worker') + 76)
     Y('ROI', C['Especimen']['y'])
     Y('Conducta', C['Observacion']['y'])
+    Y('Estadisticas', C['Grupo']['y'] + 10)
     BM = max(c['y'] + c['h'] for c in C.values())
     R1, R2 = BM + 22, BM + 48
     gA = lambda off: xs[0] + w[0] + off
@@ -263,8 +267,13 @@ def hojaU():
     edge([R('Especimen', 16), L('ROI', 16)], ASSOC, '1', '0..*', 'SE DELIMITA CON')
     sg = C['Segundo']
     edge([R('Segundo', 36), (B('Conducta')[0], sg['y'] + 36), B('Conducta')], ASSOC, '0..*', '0..1', 'SE CLASIFICA COMO', role_seg=0)
+    est = y('Estadisticas')
+    edge([R('Experimento', 60), (gB(40), y('Experimento') + 60), (gB(40), est + 25), L('Estadisticas', 25)], DEP, role='CALCULA', role_seg=1)
+    edge([R('Grupo', 40), (gB(70), y('Grupo') + 40), (gB(70), est + 70), L('Estadisticas', 70)], DEP)
+    eb = est + C['Estadisticas']['h'] + 26
+    edge([R('Tanda', 36), (gB(100), y('Tanda') + 36), (gB(100), eb), (B('Estadisticas')[0], eb), B('Estadisticas')], DEP)
     return ('Diagrama de clases del sistema',
-            'Las 16 clases del sistema con sus relaciones: usuarios, experimentos, video, pipeline de análisis y resultados.')
+            'Las 17 clases del sistema con sus relaciones: usuarios, experimentos, video, pipeline de análisis y resultados.')
 
 hoja = sys.argv[1]
 titulo, desc = {'1': hoja1, '2': hoja2, 'U': hojaU}[hoja]()

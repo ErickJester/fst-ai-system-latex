@@ -109,7 +109,7 @@ RF-09 & Carga de video
       & El sistema debe permitir subir uno o dos videos por tanda: Día~1
         (sesión de habituación, 20~min) y Día~2 (sesión post-tratamiento, 5~min). Cada
         tanda debe tener al menos un video: el Día~1 es opcional y, si una tanda solo
-        tiene el Día~1, su experimento queda «en espera del Día~2». El pipeline analiza, como máximo, los últimos
+        tiene el Día~1, su experimento queda «en espera del Día~2». El \textit{pipeline} analiza, como máximo, los últimos
         300~segundos del video de Día~2 (si dura menos, lo analiza completo; el resto
         se descarta). El video de Día~1 solo confirma que la sesión de habituación
         existe: el sistema lo guarda y no lo analiza (ver RN-03 y RN-12). Al subir el
@@ -143,7 +143,7 @@ RF-12 & Carga de video
 
 % ── Análisis conductual ────────────────────────────────────
 RF-13 & Análisis conductual
-      & El pipeline de análisis debe ejecutar tres etapas secuenciales:
+      & El \textit{pipeline} de análisis debe ejecutar tres etapas secuenciales:
         preprocesamiento del video (decodificación, alineación de la cámara y
         modelo de fondo),
         localización de los cilindros y clasificación de conductas. Cada etapa
@@ -152,7 +152,7 @@ RF-13 & Análisis conductual
 \hline
 RF-14 & Análisis conductual
       & El sistema debe detectar automáticamente la posición de los cilindros (de dos
-        a cuatro) en el encuadre. Si no los encuentra, el pipeline se detiene y
+        a cuatro) en el encuadre. Si no los encuentra, el \textit{pipeline} se detiene y
         genera un reporte de diagnóstico.
       & Alta & Sistema \\
 \hline
@@ -437,7 +437,7 @@ RNF-11 & Escalabilidad
 \hline
 RNF-12 & Mantenibilidad
        & El código debe estar documentado y separado en módulos independientes
-         (backend, pipeline de análisis de video, frontend), siguiendo PEP~8 en Python y ESLint
+         (\textit{backend}, \textit{pipeline} de análisis de video, \textit{frontend}), siguiendo PEP~8 en Python y ESLint
          en JavaScript.
        & Revisión de calidad de código en cada cierre de bloque de
          implementación. \\
@@ -476,9 +476,8 @@ ajustarse en la fase de validación (TT-II).
 \begin{itemize}
   \item \textbf{F1 mínimo por conducta: $\geq 85$\,\%.}
         En la investigación conductual con roedores, la práctica estándar para
-        validar un sistema automatizado es comparar su clasificación contra la
-        anotación manual de analistas entrenados y exigir que la concordancia
-        alcance o supere el nivel de acuerdo típico entre dos evaluadores humanos
+        validar un sistema automatizado es exigir que su acuerdo con la codificación
+        humana alcance el nivel de acuerdo típico entre dos evaluadores
         \cite{slattery2012,della_valle2025,nandi2021_dbscorer}. Ese nivel de
         acuerdo entre humanos oscila entre el 80 y el 90\,\% en la codificación
         de conductas del FST, dependiendo de la experiencia del evaluador y de
@@ -487,6 +486,8 @@ ajustarse en la fase de validación (TT-II).
         la variabilidad aceptada en su laboratorio es del 85\,\%, valor que se
         ubica en ese rango y que es consistente con los umbrales reportados en
         sistemas automatizados comparables \cite{nandi2021_dbscorer,meng2024_dsaan}.
+        El F1 se calcula contra las etiquetas del conjunto de prueba propio, hechas
+        por el equipo con su etiquetador, y el 85\,\% se toma como la meta de calidad.
         El F1 por conducta se evaluará sobre el conjunto de prueba de la fase de
         validación en TT-II. El umbral se exige a las cuatro conductas, incluida la
         conducta activa (ver RN-13): como es la clase a la que el sistema manda los
@@ -617,7 +618,7 @@ RN-10 & La interfaz rechaza cualquier archivo que no sea \texttt{.mp4} o
       & Evita consumir recursos con archivos incompatibles. Los videos reales del
         laboratorio son \texttt{.mov}. Ver RF-08, RF-10. \\
 \hline
-RN-11 & Si el video no se puede abrir o el pipeline no encuentra los cilindros, se
+RN-11 & Si el video no se puede abrir o el \textit{pipeline} no encuentra los cilindros, se
         detiene y el sistema genera automáticamente un reporte de diagnóstico
         descargable que indica el motivo del fallo. Los videos en que sí se
         encuentran continúan el análisis de forma normal.
@@ -718,7 +719,7 @@ agrupan en cuatro áreas.
 \hline
 \endfoot
 
-OpenCV 4.x \cite{bradski2000}
+OpenCV 4.x \cite{bradski2008}
     & Biblioteca estándar para procesamiento de imágenes y video en Python. Incluye
       detección de puntos característicos, alineación de imágenes, sustracción de
       fondo, morfología y regiones conexas.
@@ -808,11 +809,11 @@ Etiquetador del equipo
 Flask (Python) \cite{grinberg2018}
     & Microframework ligero para APIs REST. Extensiones para JWT
       (Flask-JWT-Extended), ORM (SQLAlchemy) y tareas asíncronas.
-    & Suficiente para el tamaño del prototipo. Integra el pipeline de análisis de video sin
+    & Suficiente para el tamaño del prototipo. Integra el \textit{pipeline} de análisis de video sin
       necesitar un framework más pesado. \\
 \hline
 React.js + Vite
-    & Framework frontend basado en componentes. Vite reduce los tiempos de
+    & Framework \textit{frontend} basado en componentes. Vite reduce los tiempos de
       compilación durante el desarrollo.
     & Adecuado para la barra de progreso en tiempo real y la interfaz reactiva
       que requiere el sistema. \\
@@ -822,7 +823,7 @@ PostgreSQL
     & Cubre los patrones de acceso del sistema y se integra con SQLAlchemy. \\
 \hline
 Docker + Docker Compose \cite{merkel2014}
-    & Empaqueta todos los servicios (backend, frontend, base de datos, worker) en
+    & Empaqueta todos los servicios (\textit{backend}, \textit{frontend}, base de datos, worker) en
       contenedores y los levanta con un solo comando.
     & Cumple el atributo de portabilidad de la ISO/IEC~25010:2011
       \cite{iso25010}. El laboratorio no instala nada más allá de Docker. \\
@@ -859,7 +860,7 @@ Para cada riesgo se documenta una acción concreta de mitigación.
 % ---- NIVEL ALTO (rojo) ----
 R-01 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
      & Videos con reflejos, iluminación variable o especímenes de pelaje claro que
-       hacen fallar el pipeline (no se encuentran los cilindros, ver RN-11).
+       hacen fallar el \textit{pipeline} (no se encuentran los cilindros, ver RN-11).
      & Definir con el laboratorio los requisitos mínimos de calidad de video.
        El sistema deduce el fondo y la posición de los cilindros de cada video, sin
        parámetros fijados a mano para un encuadre; si aun así no se encuentran los
@@ -887,7 +888,7 @@ R-03 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf
 R-04 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
      & El tiempo de análisis de un video de 5~min supera lo que el laboratorio
        puede asumir en su flujo de trabajo.
-     & Medir tiempos por etapa del pipeline. Evaluar reducción de resolución o
+     & Medir tiempos por etapa del \textit{pipeline}. Evaluar reducción de resolución o
        uso de GPU. El umbral aceptable de tiempo se define con el laboratorio
        durante la fase de pruebas (ver los criterios de aceptación operativa). \\
 \hline
@@ -958,7 +959,7 @@ elimina dependencias de hardware específico en el laboratorio.
 
 \subsubsection{Simulación, modelado y pruebas}
 
-Antes de la implementación completa del sistema, el pipeline de análisis se probó con
+Antes de la implementación completa del sistema, el \textit{pipeline} de análisis se probó con
 videos del laboratorio: localiza de forma automática los cilindros y la línea de agua
 en grabaciones de distintos días y encuadres, con vista lateral y de dos a cuatro
 cilindros simultáneos. Esa prueba reduce el riesgo técnico de la etapa de localización
@@ -971,7 +972,7 @@ etapa con el dataset disponible.
 
 \subsubsection{Evaluación de compatibilidad e integración}
 
-El prototipo tiene una arquitectura modular que separa el pipeline de análisis de video
+El prototipo tiene una arquitectura modular que separa el \textit{pipeline} de análisis de video
 (Python, OpenCV, scikit-learn y PyTorch) de la plataforma web (Flask, React, PostgreSQL) mediante una
 cola de tareas asíncrona. Esa separación permite desarrollar y probar cada módulo de
 forma independiente y facilita la integración progresiva conforme avanza el desarrollo.

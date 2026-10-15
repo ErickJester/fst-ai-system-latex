@@ -1840,6 +1840,9 @@ package P1_Autenticacion_y_usuarios {
     +iniciarSesion(correo, contrasena) : String
     +cerrarSesion(token) : void
     +cambiarContrasena(nueva) : void
+    +recuperarContrasena(correo) : void
+    +actualizarPerfil(datos) : void
+    +consultarDashboard() : List<Experimento>
     +crearExperimento(datos) : Experimento
     +subirVideo(idTanda, sesion, archivo) : Video
     +eliminarExperimento(id) : void
@@ -1865,17 +1868,20 @@ package P2_Experimentos_y_carga_de_video {
     -notas : String
     +validarNombreUnico() : Boolean
     +consultarEstado() : String
+    +compararGrupos() : List<Estadisticas>
   }
   class Grupo {
     -id : Integer
     -etiqueta : String
     -tipo : String
     -tratamiento : String
+    +calcularEstadisticas() : Estadisticas
   }
   class Tanda {
     -id : Integer
     -ordinal : Integer
     -nCilindros : Integer
+    +calcularEstadisticas() : Estadisticas
   }
   class Especimen {
     -id : Integer
@@ -1940,6 +1946,13 @@ package P3_Pipeline_de_analisis_conductual {
 }
 
 package P4_Resultados_y_reportes {
+  class Estadisticas <<derivada>> {
+    -conducta : Conducta
+    -media : Decimal
+    -desviacionEstandar : Decimal
+    -varianza : Decimal
+    -n : Integer
+  }
   class Observacion {
     +calcularBloques() : List<String>
   }
@@ -2002,6 +2015,9 @@ Video       "1" --> "0..4" Observacion : contiene
 Observacion "1" *--> "1..300" Segundo  : "se etiqueta en"
 
 Experimento "1"    --> "0..*" Reporte      : origina
+Experimento ..> Estadisticas : calcula
+Grupo       ..> Estadisticas : calcula
+Tanda       ..> Estadisticas : calcula
 Experimento "0..1" --> "0..*" Notificacion : origina
 @enduml
 ```
@@ -2697,6 +2713,15 @@ w -> fs: revisa el espacio libre del disco\n(aviso al 80 %, limpieza al 90 %, D-
 w -> db: marca el análisis como "procesando"
 
 w -> fs: lee el archivo de video de la tanda
+
+alt no se pudo abrir el video (RN-11)
+  w -> db: deja la etapa en "preprocesamiento"
+  w -> w: genera el reporte de diagnóstico PDF
+  w -> fs: guarda el PDF de diagnóstico
+  w -> db: guarda rutaDiagnostico
+  w -> db: marca el análisis como "error" y fija fechaAnalisis\n(no se reinicia desde la pantalla de error, RN-04)
+  w -> db: crea la notificación de error en el análisis
+else el video se abre
 fs --> w: video listo para procesar
 
 w -> db: actualiza la etapa a "preprocesamiento"
@@ -2724,12 +2749,13 @@ alt se hallaron los tubos
     w -> db: marca el análisis como "completado",\ncon su nivel de clasificación y fechaAnalisis
     w -> db: crea la notificación de análisis terminado
   end
-else no se pudo abrir el video, no se hallaron los tubos\no falló algo imprevisto en el pipeline (D-88)
+else no se hallaron los tubos\no falló algo imprevisto en el pipeline (D-88)
   w -> w: genera el reporte de diagnóstico PDF
   w -> fs: guarda el PDF de diagnóstico
   w -> db: guarda rutaDiagnostico
   w -> db: marca el análisis como "error" y fija fechaAnalisis\n(no se reinicia desde la pantalla de error, RN-04)
   w -> db: crea la notificación de error en el análisis
+end
 end
 @enduml
 ```

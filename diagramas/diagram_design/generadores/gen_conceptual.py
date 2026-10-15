@@ -106,8 +106,12 @@ for k, d in N.items():
     lines = partir(d['lab'])
     if d['t'] == 'ent':
         out.append(f'<rect x="{x-w/2:.0f}" y="{y-h/2:.0f}" width="{w}" height="{h}" rx="3" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.4"/>')
+        if k == 'segundo':   # entidad debil (M-27): doble borde
+            out.append(f'<rect x="{x-w/2+4:.0f}" y="{y-h/2+4:.0f}" width="{w-8}" height="{h-8}" rx="2" fill="none" stroke="#1a1a1a" stroke-width="1.1"/>')
     elif d['t'] == 'rel':
         out.append(f'<polygon points="{x:.0f},{y-h/2:.0f} {x+w/2:.0f},{y:.0f} {x:.0f},{y+h/2:.0f} {x-w/2:.0f},{y:.0f}" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1.2"' + (' stroke-dasharray="4,3"' if k == 'agrupa' else '') + '/>')
+        if k == 'etiqueta':  # interrelacion identificadora: doble linea
+            out.append(f'<polygon points="{x:.0f},{y-h/2+5:.0f} {x+w/2-10:.0f},{y:.0f} {x:.0f},{y+h/2-5:.0f} {x-w/2+10:.0f},{y:.0f}" fill="none" stroke="#1a1a1a" stroke-width="1"/>')
     else:
         out.append(f'<ellipse cx="{x:.0f}" cy="{y:.0f}" rx="{w/2}" ry="{h/2}" fill="#faf9f5" stroke="#1a1a1a" stroke-dasharray="4,3" stroke-width="1.2"/>')
     cls = 'nm' if d['t'] == 'ent' else 'rl'
@@ -128,6 +132,7 @@ leg = f'''<g transform="translate(40,{ly})" class="lg">
 <polygon points="150,0 163,-8 176,0 163,8" fill="#ece7d8" stroke="#1a1a1a"/><text x="186" y="3">INTERRELACIÓN</text>
 <text x="340" y="3" style="font-weight:600;fill:#000">(mín,máx)</text><text x="410" y="3">CARDINALIDAD</text>
 <polygon points="540,0 553,-8 566,0 553,8" fill="#ece7d8" stroke="#1a1a1a" stroke-dasharray="3,2"/><text x="576" y="3">INTERRELACIÓN DERIVADA</text>
+<rect x="800" y="-8" width="26" height="16" rx="2" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.4"/><rect x="803" y="-5" width="20" height="10" rx="1" fill="none" stroke="#1a1a1a"/><text x="836" y="3">ENTIDAD DÉBIL</text>
 </g>'''
 svg = f'''<svg viewBox="0 0 {W} {H}" role="img" aria-labelledby="co-title co-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="co-title">Esquema conceptual</title>

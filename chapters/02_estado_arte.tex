@@ -19,11 +19,9 @@ de entrenamiento represente las condiciones reales de uso.
 
 Los videos del laboratorio colaborador tienen características que complican las cosas:
 grabación con cámara web, variaciones de iluminación entre sesiones, y
-especímenes de pelaje claro con poco contraste frente al cilindro. El sistema no garantiza robustez
-ante todas esas condiciones desde el inicio; evaluar qué tan bien funciona con los videos
-disponibles es parte del trabajo de desarrollo. La hipótesis es que los videos son
-suficientemente buenos para que el sistema funcione, pero eso se confirma o se ajusta
-durante las pruebas.
+especímenes de pelaje claro con poco contraste frente al cilindro. El sistema se entrena
+y se prueba con esos mismos videos, de modo que aprende las condiciones reales del
+laboratorio, y su robustez ante ellas se mide durante la validación.
 
 % -----------------------------------------------------------
 \section{Trabajos similares}
@@ -322,7 +320,6 @@ al FST (ezTrack y DBscorer) no usan aprendizaje profundo ni tienen interfaz web;
 los abiertos que sí lo usan (DeepLabCut y YOLO-Behaviour) tampoco ofrecen plataforma web
 ni clasifican las tres conductas de forma directa. De los de aprendizaje profundo,
 solo el 3D-RCNN clasifica las tres conductas, pero no tiene plataforma web ni reporta
-métricas de tiempo de análisis. El sistema propuesto busca cubrir los cinco criterios y
-documentar explícitamente los atributos de calidad de la ISO/IEC~25010:2011
-\cite{iso25010}, con la salvedad de que el desempeño real dependerá de la calidad de
-los videos del laboratorio.
+métricas de tiempo de análisis. El sistema propuesto cubrirá los cinco criterios y
+documentará explícitamente los atributos de calidad de la ISO/IEC~25010:2011
+\cite{iso25010}.

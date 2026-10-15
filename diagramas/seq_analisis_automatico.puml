@@ -35,7 +35,8 @@
 '    el Worker etiqueta el analisis como "preciso" o "agrupado" segun
 '    la capacidad del modelo activo (RN-13, F1 >= 85% por conducta) --
 '    esto no se calcula por video, es una propiedad conocida del
-'    modelo/configuracion en uso (idConfig), no una decision en vivo.
+'    modelo en uso (una constante del pipeline, D-51), no una decision
+'    en vivo.
 '  - Los nombres de etapa vienen de D-16, revisado el 5-oct: preproce-
 '    samiento, cilindros, clasificacion. La etapa de seguimiento se
 '    quito porque el pipeline real no usa tracker (un especimen por
@@ -73,6 +74,15 @@ w -> fs: revisa el espacio libre del disco\n(aviso al 80 %, limpieza al 90 %, D-
 w -> db: marca el análisis como "procesando"
 
 w -> fs: lee el archivo de video de la tanda
+
+alt no se pudo abrir el video (RN-11)
+  w -> db: deja la etapa en "preprocesamiento"
+  w -> w: genera el reporte de diagnóstico PDF (ver CU-08)
+  w -> fs: guarda el PDF de diagnóstico
+  w -> db: guarda la ruta del PDF (rutaDiagnostico) y marca el análisis como "error"\n(no se reinicia desde la pantalla de error, RN-04)
+  w -> db: crea la notificación de error en el análisis
+  w -> w: envía también el aviso por correo\n(si el envío falla, el aviso queda en el panel)
+else el video se abre
 fs --> w: video listo para procesar
 
 w -> db: actualiza la etapa a "preprocesamiento"
@@ -106,13 +116,15 @@ alt se hallaron los cilindros
     w -> db: crea la notificación de análisis terminado
     w -> w: envía también el aviso por correo\n(si el envío falla, el aviso queda en el panel)
   end
-else no se pudo abrir el video, no se hallaron los cilindros (RN-11)\no falló algo imprevisto en el pipeline (D-88)
+else no se hallaron los cilindros (RN-11)\no falló algo imprevisto en el pipeline (D-88)
   w -> w: genera el reporte de diagnóstico PDF (ver CU-08)
   w -> fs: guarda el PDF de diagnóstico
   w -> db: guarda la ruta del PDF (rutaDiagnostico)
   w -> db: marca el análisis como "error" y fija fechaAnalisis\n(no se reinicia desde la pantalla de error, RN-04)
   w -> db: crea la notificación de error en el análisis
   w -> w: envía también el aviso por correo\n(si el envío falla, el aviso queda en el panel)
+end
+
 end
 
 @enduml

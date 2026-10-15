@@ -20,6 +20,9 @@ package P1_Autenticacion_y_usuarios {
     +iniciarSesion(correo, contrasena) : String
     +cerrarSesion(token) : void
     +cambiarContrasena(nueva) : void
+    +recuperarContrasena(correo) : void
+    +actualizarPerfil(datos) : void
+    +consultarDashboard() : List<Experimento>
     +crearExperimento(datos) : Experimento
     +subirVideo(idTanda, sesion, archivo) : Video
     +eliminarExperimento(id) : void
@@ -45,17 +48,20 @@ package P2_Experimentos_y_carga_de_video {
     -notas : String
     +validarNombreUnico() : Boolean
     +consultarEstado() : String
+    +compararGrupos() : List<Estadisticas>
   }
   class Grupo {
     -id : Integer
     -etiqueta : String
     -tipo : String
     -tratamiento : String
+    +calcularEstadisticas() : Estadisticas
   }
   class Tanda {
     -id : Integer
     -ordinal : Integer
     -nCilindros : Integer
+    +calcularEstadisticas() : Estadisticas
   }
   class Especimen {
     -id : Integer
@@ -120,6 +126,13 @@ package P3_Pipeline_de_analisis_conductual {
 }
 
 package P4_Resultados_y_reportes {
+  class Estadisticas <<derivada>> {
+    -conducta : Conducta
+    -media : Decimal
+    -desviacionEstandar : Decimal
+    -varianza : Decimal
+    -n : Integer
+  }
   class Observacion {
     +calcularBloques() : List<String>
   }
@@ -182,5 +195,8 @@ Video       "1" --> "0..4" Observacion : contiene
 Observacion "1" *--> "1..300" Segundo  : "se etiqueta en"
 
 Experimento "1"    --> "0..*" Reporte      : origina
+Experimento ..> Estadisticas : calcula
+Grupo       ..> Estadisticas : calcula
+Tanda       ..> Estadisticas : calcula
 Experimento "0..1" --> "0..*" Notificacion : origina
 @enduml

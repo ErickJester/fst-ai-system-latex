@@ -68,7 +68,7 @@ actor "Investigador\n(navegador web)" as INV
 ' ═══════════════════════════════════════════════════════════
 
 rectangle "Docker: frontend" as C_FE #E3F2FD {
-  rectangle "React.js + Vite\n\nInterfaz del investigador\nFormularios de experimento\nVisualizacion de resultados\nDescarga de reportes (PDF / CSV / XLSX)" as FE #EBF5FB
+  rectangle "React.js + Vite\n\nInterfaz del investigador\nFormularios de experimento\nVisualización de resultados\nDescarga de reportes (PDF / CSV / XLSX)" as FE #EBF5FB
 }
 
 ' ═══════════════════════════════════════════════════════════
@@ -76,7 +76,7 @@ rectangle "Docker: frontend" as C_FE #E3F2FD {
 ' ═══════════════════════════════════════════════════════════
 
 rectangle "Docker: backend" as C_BE #E8F8F5 {
-  rectangle "Flask + SQLAlchemy + Flask-JWT-Extended\n\nAPI REST (JSON)\nAutenticacion con JWT\nValidación de archivos .mp4 y .mov\nEncolado de tareas de analisis" as BE #F0FBF8
+  rectangle "Flask + SQLAlchemy + Flask-JWT-Extended\n\nAPI REST (JSON)\nAutenticación con JWT\nValidación de archivos .mp4 y .mov\nEncolado de tareas de analisis" as BE #F0FBF8
 }
 
 ' ═══════════════════════════════════════════════════════════
@@ -98,7 +98,7 @@ rectangle "Capa de datos" as DATOS #F4F6F7 {
   }
 
   rectangle "Volumen compartido" as C_FS #EAEDED {
-    folder "Sistema de archivos local\n\nVideos originales (.mp4 y .mov)\nCopia del video para revisión (H.264)\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF" as FS
+    folder "Sistema de archivos local\n\nVideos originales (.mp4 y .mov)\nCopia del video para revisión (H.264)\nReportes PDF / CSV / XLSX\nReportes de diagnóstico PDF" as FS
   }
 
   rectangle "Volumen de modelos" as C_MD #F5EEF8 {

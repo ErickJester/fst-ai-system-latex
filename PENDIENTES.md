@@ -1,18 +1,18 @@
 # Pendientes del documento — capítulos 1 a 5
 
-**Verificado contra el LaTeX el 2026-10-05**, ítem por ítem. Reemplaza como lista de
+**Lista de Erick revisada ítem por ítem contra el repositorio el 2026-10-14**; la de Vanesa, sin revisar desde el 2026-10-05. Reemplaza como lista de
 trabajo a `CORRECCIONES.md` (25-ago), `errores/0X/errores.md` (2-sep),
 `errores/REVISION-AGENTES-2026-10-03.md` y los bloques B–D de `CAMBIOS-CAP5.md`. Esos
 archivos se conservan como evidencia (citas de la entrevista y motivos).
 
-**Pendiente del 6-oct:** el LaTeX (cap. 1, 4 y 5 y apéndice D) todavía dice que se analizan los últimos 300 s sin aclarar que es un máximo sin mínimo, que la CNN analiza el video completo y que el worker recorta y renumera después, ni que el Día 1 solo confirma el video de habituación (D-54, resuelto del todo).
+**Resuelto (11-oct):** D-54 (máximo de 300 s sin mínimo, la CNN analiza el video completo y el worker recorta y renumera, y el Día 1 solo confirma el video de habituación) ya está en los caps. 1, 4 y 5 y en el apéndice D.
 
 El trabajo está repartido en dos listas:
 
 | Lista | Quién | Ítems |
 |-------|-------|-------|
-| [`PENDIENTES-VANESA.md`](PENDIENTES-VANESA.md) | Vanesa | 13 🔴 · 17 🟡 · 4 🟢 · 4 ❓ · 1 🔒 |
-| [`PENDIENTES-ERICK.md`](PENDIENTES-ERICK.md) | Erick | 5 🔴 · 19 🟡 · 6 🟢 · 3 ❓ · 4 🔒 |
+| [`PENDIENTES-VANESA.md`](PENDIENTES-VANESA.md) | Vanesa | todo ✅ (al 14-oct) |
+| [`PENDIENTES-ERICK.md`](PENDIENTES-ERICK.md) | Erick | todo ✅ (al 14-oct) |
 
 ---
 
@@ -57,7 +57,7 @@ una están en `errores/preguntas-doctor.md` §6 (el número D-XX). **Si algo de 
 choca con lo que vas a escribir, gana esta lista**; si crees que está mal, no la cambies:
 anótalo como pregunta (ver «Reglas de contenido», abajo).
 
-> **Vigente al 2026-10-11.** Cuando una decisión nueva cambie algo de aquí, Erick actualiza
+> **Vigente al 2026-10-14** (las decisiones D-78 y D-90 a D-103 y D-52 están en el bloque «Decisiones del 13 y 14-oct», abajo). Cuando una decisión nueva cambie algo de aquí, Erick actualiza
 > esta sección en el mismo commit en que la registra; si no, la lista se vuelve vieja como
 > los trackers.
 
@@ -155,7 +155,7 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
   `corregida` y `dudosa` (D-80).
 - Se quitan el **video anotado** y las **medidas por cuadro**; el módulo 4 deja tres salidas (D-81).
 - El **worker** ejecuta las tareas diarias: borrado de videos a 30 días, aviso de vencimiento y vigilancia del
-  disco (D-82). D-78 (si la red entrega probabilidades) sigue pendiente.
+  disco (D-82).
 
 **Decisiones del 12-oct, segunda parte (D-83 a D-89)**
 
@@ -168,6 +168,15 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
   archivo del volumen. Ajustan y cancelan quien subió el video o un Administrador (igual que el reinicio).
 - **Para el laboratorio (Q-H):** cuántas personas usan el sistema a la vez; hoy el requisito dice 4 y el usuario
   mencionó 10 como exageración.
+
+**Decisiones del 13 y 14-oct (D-52, D-78, D-90 a D-103)**
+
+- **La red entrega solo la conducta de cada segundo** (D-78): sin probabilidades, sin umbral de confianza. El usuario debe saber que el resultado no es 100 % exacto. **Cuatro salidas** (D-94); F1 ≥ 85 % **para las cuatro conductas**, incluida la activa (D-91).
+- El panel de administración no muestra el modelo del clasificador (D-90). RNF-03 sin la cifra del 95 % (D-98). La ISO/IEC 25010 se cita solo con «atributos» (D-95).
+- **Resultados por tanda o por grupo completo** (D-93): se ven y se descargan las estadísticas (media, desviación estándar y varianza) de la vista elegida, calculadas y no guardadas (RF-31). `Grupo agrupa Espécimen` es una interrelación derivada (D-92).
+- **Modelo de datos (D-52, D-102):** sin `INTERVALO` ni `PRESENTA`; los totales por minuto se calculan desde `SEGUNDO`. `CONDUCTA` ya no es tabla: es el dominio `tipo_conducta`. Son **12 tablas, 57 atributos y 13 llaves foráneas**. CU-27 «Recalcular totales por minuto» se fundió en CU-26 y el antiguo CU-28 es CU-27 (D-101).
+- **Diagrama de clases:** `Conducta` es enumeración y se agregó la clase derivada `Estadisticas` (D-103). Las dos hojas se retiraron.
+- **Imágenes:** todas salen de `figures/` (`diagramas/`, `mockups/`, `logos/`); lo viejo está en `figures/_sin_uso/`.
 
 ## Reglas de contenido
 
@@ -196,4 +205,4 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
 
 - **DOC-02:** no hay capítulo de conclusiones (caps. 6–8 comentados en `main.tex`).
 - **D-51 sin aplicar:** comentario de `seq_analisis_automatico.puml` y cap. 6. (Artifacts e `INSTRUCCIONES-WEB.md` ya se actualizaron el 5-oct.)
-- Archivos huérfanos con el modelo viejo que no entran al documento (`ciclo_vida_experimento.puml`, `seq_analisis.png`, `seq_registro.png`, `figures/diagramas/clases.png`, `casos_uso.png`, `cu_*.png` de `diagramas/`).
+- Archivos huérfanos con el modelo viejo que no entran al documento (`ciclo_vida_experimento.puml` y las imágenes de `figures/_sin_uso/`, como `seq_analisis.png`, `seq_registro.png` y `clases.png`).
