@@ -4,43 +4,94 @@ Sistema web para analizar videos de la prueba de nado forzado (FST, por sus sigl
 inglés) del Laboratorio de Bioquímica Estructural, Sección de Posgrado, ENMyH-IPN.
 Proyecto TT 2026-B066, ESCOM-IPN.
 
+> **Rutas de archivos: léelo primero.** Cada vez que esta guía habla de un diagrama, cita su
+> archivo `.puml` con una ruta completa de **la laptop del usuario**, por ejemplo
+> `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\estados_analisis.puml`.
+> **Esas rutas no existirán en tu equipo: cámbialas por el lugar donde tengas el repositorio.**
+> Solo cambia la parte inicial `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex`; lo que sigue
+> (`\diagramas\guia_web\nombre.puml`) es relativo al repositorio y es igual en cualquier equipo.
+> Los mismos diagramas están escritos completos en el Anexo A: si no tienes los archivos,
+> cópialos de ahí. **Todas** las rutas que cita esta guía (diagramas, maquetas, decisiones,
+> capítulos del documento, apéndices y el código de referencia del pipeline) son de esa laptop y
+> se cambian igual. El código de referencia vive en otro repositorio hermano
+> (`C:\Users\Samsung\Desktop\proyectos\fst_auto`): ajústalo por separado.
+
 **Este archivo es el único contexto que tienes.** Todo lo que necesitas (reglas, datos,
-diagramas, pantallas) está aquí. No busques ni esperes otros documentos. Si algo falta,
-pregunta al usuario; no lo inventes.
+diagramas, pantallas) está aquí. Los archivos que esta guía cita (diagramas y decisiones) son
+solo de consulta: no los necesitas para construir ni debes esperar otros documentos. Si algo
+falta, pregunta al usuario; no lo inventes.
 
 ---
 
 ## 0. Cómo usar este archivo
 
 1. Construye en el orden de la sección 12.
-2. Lo marcado **[ABIERTO]** no está decidido. Pregunta al usuario o déjalo configurable y
-   anótalo en tu resumen final.
+2. Lo marcado **[ABIERTO]** no está decidido, pero **cada punto abierto trae un valor por
+   defecto**: úsalo, no te detengas y anótalo en tu resumen final.
 3. Lo marcado **[PROPUESTA]** lo sugiere este documento y nadie lo ha aprobado. Puedes
    cambiarlo si hay razón técnica, pero dilo.
 4. El usuario tiene TDAH. Responde corto, empieza por la acción, numera los pasos y
    termina con una sola cosa que pueda hacer ahora.
-5. Los diagramas completos en código PlantUML están en el **Anexo A (sección 13)**. Los
-   diagramas Mermaid del cuerpo son vistas rápidas; si hay diferencia, manda el anexo.
+5. Los diagramas completos en código PlantUML están en el **Anexo A (sección 13)** y cada uno
+   está guardado como archivo en `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web` (cambia la ruta, ver la nota del inicio).
+   Los diagramas Mermaid del cuerpo son vistas rápidas, y cada uno cita su archivo `.puml`; si
+   hay diferencia, manda el anexo.
 6. El SQL completo está en el **Anexo B (sección 14)** y la base de Docker (compose,
-   Dockerfiles, nginx y variables) en el **Anexo C (sección 15)**. Ninguno está probado.
+   Dockerfiles, nginx y variables) en el **Anexo C (sección 15)**. Ninguno está probado:
+   pruébalos en cuanto levantes `db` y corrige lo que falle.
+7. **Etiquetas como `D-79`, `RN-17`, `RF-12` o `R-04`.** Son referencias internas del equipo
+   a decisiones y requisitos:
+   - Las **decisiones `D-xx`** están registradas, con su fecha y su estado, en el archivo
+     `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\errores\preguntas-doctor.md` (sección 6). Las **preguntas para el laboratorio** (`Q-A`, `Q-H`...) están
+     en las secciones 1 y 2 de ese mismo archivo.
+   - Los **requisitos y reglas del documento** (`RF-xx`, `RNF-xx` y `RN-xx`) están en
+     `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\chapters\04_analisis.tex`.
+   - **No necesitas abrirlos para construir:** cada regla está escrita completa donde aparece.
+     Sirven para ver el origen de una decisión o para citarla en tus comentarios. Las únicas que
+     consultas por su número dentro de esta guía son las `R-xx` de la sección 7.
+   - Esas rutas son de la laptop del usuario: cámbialas como se explica en la nota del inicio.
+8. **Vocabulario.**
+   - **Espécimen:** cada sujeto de prueba del experimento. En la interfaz nunca se escribe
+     "rata" ni "animal" (sección 9.8).
+   - **Cilindro** (o **tubo**): el recipiente individual donde nada un espécimen. El
+     pipeline dice «cilindro»; la pantalla de revisión muestra «Tubo 1», «Tubo 2»... Son lo mismo.
+   - **Tanda:** un grupo de 2 a 4 especímenes grabados juntos en un mismo video.
+   - **Día 1 y Día 2:** las dos sesiones de grabación. El **Día 1** (20 min) es de
+     habituación: el video se sube y se guarda, pero **no se analiza**. El **Día 2** (5 min)
+     es la prueba y es el que se analiza.
+   - **Conducta:** lo que hace el espécimen en un segundo: nado activo, inmovilidad,
+     escalamiento o conducta activa (no inmóvil, sin decidir entre nado y escalamiento).
+   - **Pipeline y worker.** El **pipeline** es el código que convierte un video en la
+     conducta de cada segundo (visión por computadora y una red neuronal). El **worker** es el
+     programa que corre siempre en su propio contenedor: toma análisis de la cola, llama al
+     pipeline y hace todo lo que lo rodea (estados, pausas, guardar resultados,
+     notificaciones, correos y tareas programadas). **Tú no construyes ninguno de los dos:**
+     construyes un `worker_fake` que cumple el mismo contrato con datos inventados (sección 4).
+9. Si algo falta o parece contradictorio, pregunta al usuario antes de decidir.
 
 ## 1. Qué se construye y qué no
 
 **Se construye:** frontend (React), backend (Flask), base de datos (PostgreSQL),
-orquestación (Docker Compose) y las tareas programadas.
+orquestación (Docker Compose) y un **worker simulado** (`worker_fake`).
 
-**No se construye:** el análisis de video ni el clasificador de conductas. Eso es el
-**worker**, lo hace otra persona. Para ti el worker es una caja negra con un contrato
-claro (sección 4). Para probar, escribe un **worker simulado** (`worker_fake`) que cumpla
-ese contrato con datos inventados.
+**No se construye:** el análisis de video ni el clasificador de conductas (el **pipeline**),
+ni el **worker** real. Eso lo hace otra persona. Para ti el worker es una caja negra con un
+contrato claro (sección 4). Escribe el `worker_fake` para probar todo el sistema: cumple ese
+contrato con datos inventados, incluidos el camino de error, la pausa y las tareas programadas.
+
+Las **tareas programadas** (borrado de videos, aviso de vencimiento y vigilancia del disco)
+las ejecuta el worker (D-82). Como el worker real aún no existe, impleméntalas dentro de
+`worker_fake`, en un módulo propio, con la lógica de la sección 8: el worker real las
+traerá igual.
 
 Quién usa el sistema:
 - **Investigador:** sube videos y consulta resultados.
 - **Administrador:** todo lo del investigador, más gestionar cuentas y ver el estado del
   sistema.
 
-Máximo 4 usuarios trabajando al mismo tiempo. El uso simultáneo estricto no se requiere:
-los análisis se encolan y se procesan uno por uno.
+Máximo 4 usuarios trabajando en el mismo periodo (cifra declarada por el laboratorio, aún
+por confirmar). El uso simultáneo estricto no se requiere: los análisis se encolan y el worker
+los procesa **uno por uno**, en orden de llegada (D-85).
 
 Qué es un experimento, en una frase: un laboratorio prueba una sustancia o tratamiento en
 tres tipos de grupos de especímenes (control, referencia y tratamiento experimental),
@@ -53,24 +104,46 @@ saber cuánto tiempo pasa cada espécimen nadando, inmóvil o escalando.
 |---|---|---|
 | `frontend` | React.js + Vite | Interfaz. Habla con el backend solo por API REST (JSON). |
 | `backend` | Flask + SQLAlchemy + Flask-JWT-Extended | API REST, autenticación, validación de archivos, crea los análisis "en cola". |
-| `worker` | Python (lo hace otra persona) | Toma análisis en cola, los procesa, escribe resultados. |
+| `worker` | Python. El real lo construye otra persona; tú construyes `worker_fake` | Toma análisis en cola, los procesa, escribe resultados, avisa y ejecuta las tareas programadas. |
 | `db` | PostgreSQL | Todos los datos. Los videos NO se guardan aquí. |
 | `mailhog` (solo desarrollo) | MailHog | Servidor de correo falso para ver los mensajes sin enviar nada (sección 11, punto 2). |
 
 Volúmenes:
-- `videos_reportes` (compartido backend y worker): videos `.mp4` y `.mov`, videos anotados,
-  reportes PDF/CSV/XLSX y reportes de diagnóstico PDF.
+- `videos_reportes` (compartido backend y worker): videos `.mp4` y `.mov`, la copia del
+  video para revisión (H.264), reportes PDF/CSV/XLSX y reportes de diagnóstico PDF.
+  No se guardan videos anotados ni medidas por cuadro (D-81).
 - `modelos` (solo lectura, solo para el worker): modelos entrenados.
 - `pgdata`: datos de PostgreSQL.
 
-Despliegue: todo se levanta con `docker compose up`. El laboratorio no instala nada más
-que Docker. Debe funcionar en el servidor institucional de la ESCOM y en al menos un
-entorno más. No hay Redis ni cola de mensajes: **la cola es la tabla `ANALISIS`**
-(polling).
+**Disposición de `videos_reportes` [PROPUESTA].** Todas las rutas que se guardan en la base
+(`VIDEO.archivo`, `ANALISIS.rutaDiagnostico`, `REPORTE.ruta`) son **relativas a la raíz del
+volumen**. En los contenedores el volumen está en `/data/archivos` (Anexo C).
 
-Disponibilidad objetivo: 24/7, 95 % mensual. Navegadores: Chrome, Firefox y Edge en sus
-versiones actuales, sin instalar nada en el equipo del usuario. Solo escritorio, no hay
-versión móvil.
+```
+videos_reportes/
+  videos/{idVideo}.{mp4|mov}          video original (lo guarda el backend)
+  analisis/{idAnalisis}/
+    web.mp4                           copia H.264 para revisión (la crea el worker al terminar)
+    cajas.json                        recuadros de los tubos, para destacarlos en la revisión
+    diagnostico.pdf                   reporte de diagnóstico (solo si el análisis terminó en error)
+    pausa.json, pausa.jpg             datos e imagen fija de una pausa (sección 4.3)
+  reportes/{idExperimento}/           reportes de resultados PDF, CSV y XLSX
+  worker/ultima_corrida_tareas.txt    fecha de la última corrida de las tareas programadas
+```
+
+Al borrar un video (a los 30 días o por falta de disco) se borran el original y `web.mp4`;
+`cajas.json` y `diagnostico.pdf` se conservan con los resultados. La carpeta `analisis/{id}/`
+completa se borra al eliminar el experimento.
+
+Empaquetado: todo se levanta con `docker compose up`. El laboratorio no instala nada más
+que Docker. Docker es solo la herramienta de empaquetado (D-73): esta guía no trata servidores
+ni producción (D-62). Debe arrancar igual en al menos dos equipos con Docker. No hay Redis
+ni cola de mensajes: **la cola es la tabla `ANALISIS`** (polling).
+
+Navegadores: Chrome, Firefox y Edge en sus versiones actuales, sin instalar nada en el
+equipo del usuario. Solo escritorio, no hay versión móvil. El documento del proyecto (requisitos en
+`C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\chapters\04_analisis.tex`) pide disponibilidad 24/7 con 95 % mensual, pero cómo se logra (servidores, producción) **queda
+fuera de esta guía** (D-62): no agregues redundancia, monitoreo ni alta disponibilidad.
 
 Rendimiento: las operaciones interactivas (abrir el dashboard, filtrar, abrir resultados)
 responden en 3 s o menos en el 95 % de los casos. El tiempo de procesamiento del video no
@@ -86,13 +159,20 @@ solo para dimensionar disco; no pongas límites en el código con estas cifras.
 - `JWT_EXPIRES_HOURS` (por defecto 168, una semana) y `JWT_SECRET`.
 - `DATABASE_URL` o sus partes (host, puerto, usuario, contraseña, nombre).
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`.
-- `MAX_UPLOAD_MB` (límite de tamaño de video, sin valor definido todavía).
+- `MAX_UPLOAD_MB` (límite de tamaño de video; el valor real no está definido, por defecto 2048).
 - `DISK_ALERT_PERCENT=80` y `DISK_CLEANUP_PERCENT=90`.
 - `RESET_LINK_MINUTES` (vigencia del enlace de recuperar contraseña, por defecto 60).
+- Para el worker (y `worker_fake`): `WORKER_POLL_SECONDS` (cada cuánto busca análisis en
+  cola, por defecto 5), `WORKER_DAILY_HOUR` (hora de las tareas programadas, por defecto 3,
+  es decir las 3 a. m.) y `PAUSE_TIMEOUT_MINUTES` (por defecto 5).
+- Para crear el primer administrador (sección 11, punto 7): `ADMIN_ID`, `ADMIN_NOMBRE`,
+  `ADMIN_APELLIDOS`, `ADMIN_CORREO` y `ADMIN_PASSWORD`.
+
+Versión completa en PlantUML (Anexo A.1): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\arquitectura_software.puml`
 
 ```mermaid
 flowchart TB
-  INV([Investigador / Administrador<br/>navegador]) -->|HTTPS| FE
+  INV([Investigador / Administrador<br/>navegador]) --> FE
   subgraph Docker
     FE[frontend<br/>React + Vite] -->|API REST JSON + JWT| BE[backend<br/>Flask + SQLAlchemy]
     BE -->|INSERT análisis estado = en cola| DB[(db<br/>PostgreSQL)]
@@ -109,103 +189,260 @@ flowchart TB
 web/
   docker-compose.yml
   .env.example
-  backend/        app Flask, modelos SQLAlchemy, rutas, tareas programadas
+  backend/        app Flask, modelos SQLAlchemy, rutas
   frontend/       app React + Vite
-  worker_fake/    simulador del worker para pruebas
+  worker_fake/    simulador del worker (contrato de la sección 4) con las tareas programadas
+                  (sección 8) en un módulo propio, para que el worker real las reutilice
   db/init/        SQL de creación (dominios, tablas, restricciones, semillas)
 ```
 
 ## 4. Contrato con el worker
 
 El backend y el worker no se llaman entre sí. Se comunican **solo a través de la base de
-datos y del volumen**.
+datos y del volumen** (disposición del volumen en la sección 2). Esta sección es la
+especificación de lo que hace el worker real y de lo que debe imitar tu `worker_fake`.
 
-**Lo que hace el backend al subir un video válido:**
-1. Guarda el archivo en `videos_reportes`.
+### 4.1 Lo que hace el backend al subir un video válido
+1. Guarda el archivo en el volumen (`videos/{idVideo}.{extensión}`).
 2. Guarda grupo (si es nuevo), tanda (nueva o existente) y video.
-3. Crea una fila en `ANALISIS` con `estado = 'en cola'` y el `idVideo` del video.
-4. Responde al frontend y el frontend redirige a la pantalla de progreso.
+3. **Solo si la sesión es el Día 2** (D-71), crea una fila en `ANALISIS` con
+   `estado = 'en cola'`, el `idVideo` del video y estos **valores de arranque** (D-79):
+   `etapa = 'preprocesamiento'`, `nivelClasif = 'preciso'` y `fechaAnalisis` = la fecha de
+   encolado. Las tres columnas son NOT NULL; el worker las reemplaza. El video del **Día 1 se
+   guarda y no se analiza**: no tiene `ANALISIS` ni `OBSERVACION`.
+4. Responde al frontend. Con un video del Día 2, el frontend redirige a la pantalla de
+   progreso; con uno del Día 1, muestra que el video quedó guardado y que no se analiza.
 
-**Lo que hace el worker (tú lo simulas con `worker_fake`):**
-1. Cada cierto tiempo busca un `ANALISIS` con `estado = 'en cola'`.
-2. Lo pasa a `procesando` y va actualizando `etapa` en este orden:
-   `preprocesamiento`, `cilindros`, `clasificacion`.
-3. La CNN analiza el **video completo**; después el worker se queda con los **últimos 300 segundos** de cada espécimen (de final a inicio) y descarta el principio, donde a veces aparecen personas. Es un máximo, sin mínimo: si el video dura menos, se quedan todos los segundos. Renumera las filas de 1 a 300 antes de guardarlas (D-54).
-   Ya no existe un umbral de confianza de detección. Si no puede abrir el video o no
-   encuentra los tubos: genera el PDF de diagnóstico, llena `rutaDiagnostico`, pasa a
-   `error` y crea una `NOTIFICACION` de tipo `error del pipeline`. No hay reintento ni
-   intervención humana en esta versión (sección 11, punto 14).
-4. Si todo sale bien, por cada espécimen:
-   - escribe una `OBSERVACION` del video;
-   - escribe **una fila en `SEGUNDO` por cada segundo analizado** (hasta 300), con
-     `conducta` (nula si el worker no decidió ese segundo o "no se ve") y `origen = 'maquina'`;
-   - escribe los 5 `INTERVALO` (minutos 1 a 5) y, en `PRESENTA`, **una fila por cada
-     una de las cuatro conductas**, incluso con 0 segundos, con el conteo de segundos de
-     ese minuto. Un mismo análisis puede mezclar las cuatro conductas.
+### 4.2 Lo que hace el worker (tú lo simulas con `worker_fake`)
+1. **Al arrancar (D-84)** reencola los análisis que quedaron en `procesando` sin nadie
+   trabajando en ellos (el worker se apagó a media análisis): los pasa a `en cola` con
+   `etapa = 'preprocesamiento'` y empiezan de cero. También revisa que cada análisis
+   `en pausa` tenga su archivo de pausa (sección 4.3); si no lo tiene, lo cancela.
+2. **Toma un análisis a la vez** (D-85). Cada cierto tiempo (`WORKER_POLL_SECONDS`) busca el
+   análisis `en cola` **más antiguo** (menor `fechaAnalisis`; si empatan, menor `idAnalisis`).
+   Los demás esperan en `en cola`. **Antes de empezar cada análisis revisa el disco**
+   (sección 8, D-86).
+3. Lo pasa a `procesando` y va actualizando `etapa` en este orden: `preprocesamiento`,
+   `cilindros`, `clasificacion`.
+4. **Camino de error.** Si no puede abrir el video o no encuentra los cilindros: genera el
+   PDF de diagnóstico, llena `rutaDiagnostico`, pasa a `error` y crea una `NOTIFICACION` de
+   tipo `error del pipeline`. No hay reintento: el investigador no puede reiniciar un
+   análisis en `error` (R-04). Lo mismo vale para cualquier **fallo imprevisto** del pipeline
+   (D-88): el worker lo atrapa, pasa el análisis a `error` con el PDF de diagnóstico (con el
+   mensaje técnico) y la notificación `error del pipeline`, y sigue con el siguiente análisis
+   sin apagarse. Ya no existe un umbral de confianza de detección.
+5. Si todo sale bien, escribe los resultados (sección 4.4) y pasa a `completado`.
 
-   Después guarda `nivelClasif` (sección 11, punto 15), genera los archivos auxiliares
-   (puntos 16 y 17 de la sección 11), pasa a `completado` y crea una `NOTIFICACION` de
-   tipo `analisis completado`.
-5. Al pasar a `completado` o a `error`, fija `fechaAnalisis = ahora`. Sin esa fecha el
-   borrado a los 30 días nunca se dispara, y la base rechaza un `completado` sin ella.
+Diagrama de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_analisis_automatico.puml` (Anexo A.9).
 
-**Umbral de decisión.** El worker acepta una conducta para un segundo cuando su
-probabilidad llega a **0.80**. Es una **constante del worker**: no se guarda en la base de
-datos, no se configura desde la interfaz y el backend no la conoce. Lo mismo pasa con el
-archivo del modelo entrenado. Antes existían las tablas `MODELO` y `CONFIGURACION` para
-guardarlos; **ya no existen** (ningún requisito permite cambiar el modelo ni el umbral).
+### 4.3 Pausa, ajuste y cancelación (RN-17, D-59, D-67, D-89)
+Durante la clasificación, si en un segundo no se ve al espécimen, ese segundo queda como
+"no se ve" (conducta nula). Quien lo nota es el **pipeline** (la segmentación contra el
+fondo), no la red neuronal, que solo entrega la conducta. Si pasan **tres segundos seguidos**
+así en un cilindro:
 
-**De dónde salen los segundos.** La CNN por segundo deja `X_cnnseg.csv`, con las mismas columnas que el `X_segundos.csv` del etiquetador: `especimen` (1 a 4, la posición en el cuadro), `segundo`, `inicio_s`, `tiempo`, `clase`, `confianza`, `p_escalamiento`, `p_inmovilidad`, `p_nado` y `ventana_s`; la columna `clase` del CSV es la conducta. Y `X_cnnseg_resumen.csv`, con los segundos por conducta de cada minuto (`especimen`, `minuto`, `nado`, `inmovilidad`, `escalamiento`, `activa`, `sin_decidir`). El worker lo convierte en filas de `SEGUNDO` (solo `conducta`; la base no guarda `confianza` ni las `p_*`) y de `PRESENTA`. La conducta vale `nado`, `inmovilidad`, `escalamiento`, `activa` o vacío si no decidió; el worker traduce `nado` a `nado activo` y `activa` a `conducta activa`, y el vacío queda como `conducta` nula. `especimen` se enlaza con `ESPECIMEN.numeroCilindro`. El CSV trae un segundo por cada segundo del video completo: el worker toma las **últimas 300 filas** de cada espécimen (todas, si hay menos) y las renumera de 1 a 300 para que coincidan con el video recortado que ve el usuario (D-54). Las hojas manuales `X_seg.csv` solo entrenan la CNN y no entran a la base (D-53).
+1. El pipeline guarda una **imagen fija** del video original en el **segundo central** de
+   esos tres (el segundo 2 de 3), con el recuadro actual de cada cilindro, y escribe el
+   archivo de pausa (abajo).
+2. El worker pasa el análisis a `en pausa` (**primero el archivo, después el estado**) y crea
+   la `NOTIFICACION` `analisis en pausa`. Luego **suelta el video** y atiende el siguiente de
+   la cola: la pausa no bloquea a los demás.
+3. El usuario ve esa imagen y tiene dos botones: **Ajustar y continuar** y **Cancelar
+   análisis** (sección 9.4). Pueden usarlos quien subió el video y el Administrador.
+4. Si ajusta, el backend agrega el recuadro nuevo al archivo de pausa (coordenadas del video
+   original) y pasa el análisis de `en pausa` a `en cola`, **solo si todavía está `en pausa`**.
+   Conserva su `fechaAnalisis`, así que queda **por delante** de los análisis que llegaron
+   después.
+5. Cuando el worker lo retoma, el pipeline convierte el recuadro a las coordenadas del video
+   estabilizado, reemplaza la geometría de **ese cilindro** y continúa **desde el segundo de
+   la pausa**, revisando de nuevo esos tres segundos. Los segundos anteriores de ese cilindro
+   quedan medidos con el recuadro original.
+6. Si el usuario cancela, o pasan **5 minutos** (`PAUSE_TIMEOUT_MINUTES`) sin respuesta, el
+   análisis pasa a `cancelado`. El backend (al cancelar el usuario) y el worker (al vencer el
+   plazo) cambian el estado solo si sigue `en pausa`; el segundo que llegue no hace nada. Solo
+   la cancelación por falta de respuesta crea la `NOTIFICACION` `analisis cancelado`. El
+   worker revisa las pausas vencidas en cada vuelta de la cola, así que la cancelación puede
+   tardar un poco más de 5 minutos.
+
+Un mismo cilindro puede pausarse más de una vez en el mismo análisis.
+
+**Archivo de pausa (D-89).** No hay tabla ni columna nueva: la pausa vive en el volumen
+compartido, en `videos_reportes/analisis/{idAnalisis}/`, con dos archivos: `pausa.jpg` (la
+imagen fija) y `pausa.json`:
+
+```json
+{
+  "version": 1,
+  "cilindro": 2,
+  "desde_segundo": 142,
+  "instante_imagen_s": 143.5,
+  "imagen": "pausa.jpg",
+  "hora_pausa": "2026-10-12T19:40:00-06:00",
+  "recuadros": [{"cilindro": 1, "x0": 245, "y0": 483, "x1": 577, "y1": 927}],
+  "ajuste": null
+}
+```
+
+Al ajustar, el backend llena `"ajuste": {"cilindro": 2, "x0": .., "y0": .., "x1": .., "y1": ..,
+"hora": ".."}`. Las coordenadas están en píxeles de la imagen fija, que es un fotograma del
+video original. Cuatro reglas:
+- **(a)** el worker escribe primero el archivo y después el estado;
+- **(b)** el estado de la base es el árbitro: todo cambio se hace con la condición "solo si
+  sigue `en pausa`";
+- **(c)** las tareas programadas y el borrado de un experimento eliminan esta carpeta;
+- **(d)** el backend lee este archivo para mostrar la imagen, el recuadro y el tiempo que
+  queda (`hora_pausa` + 5 minutos).
+
+**En `worker_fake`:** para simular una pausa, escribe un `pausa.jpg` cualquiera (por ejemplo
+una imagen gris de 1280×720) y un `pausa.json` con valores inventados; luego prueba las tres
+salidas: el usuario ajusta (el análisis vuelve a `en cola` y el worker lo termina), el usuario
+cancela y pasan los 5 minutos. Dispara la pausa con un archivo cuyo nombre contenga `pausa`.
+
+Diagrama de secuencia de la pausa: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_pausa_y_ajuste.puml` (Anexo A.9).
+
+### 4.4 Lo que escribe el worker al terminar bien
+La red neuronal analiza el **video completo**; después el worker se queda con los **últimos
+300 segundos** de cada espécimen (de final a inicio) y descarta el principio, donde a veces
+aparecen personas. Es un máximo, sin mínimo: si el video dura menos, se quedan todos los
+segundos. Renumera las filas de 1 a 300 antes de guardarlas (D-54). Por cada espécimen:
+- una `OBSERVACION` del video;
+- **una fila en `SEGUNDO` por cada segundo analizado** (hasta 300), con `conducta` (nula si el
+  worker no decidió ese segundo o "no se ve") y `origen = 'maquina'`;
+
+Los totales por minuto no se guardan: se calculan desde `SEGUNDO` (D-52). Un mismo
+análisis puede mezclar las cuatro conductas.
 
 En cada instante un espécimen está en exactamente una conducta: nado activo, inmovilidad,
-escalamiento o conducta activa (no inmóvil, sin decidir entre nado y escalamiento). Por
-eso, en un intervalo de un minuto, la suma de segundos de sus conductas no pasa de 60. Si
-hay segundos en los que el espécimen no se ve, la suma queda por debajo de 60.
+escalamiento o conducta activa. Por eso, en un intervalo de un minuto, la suma de segundos de
+sus conductas no pasa de 60; si hay segundos en los que el espécimen no se ve, queda por
+debajo de 60.
 
-**El backend nunca escribe `estado`, `etapa` ni `nivelClasif` salvo al crear el análisis
-en cola.**
+Después guarda `nivelClasif` (sección 11, punto 15), genera la copia H.264 y el archivo de
+recuadros (sección 11, puntos 16 y 17), pasa a `completado` y crea una `NOTIFICACION` de tipo
+`analisis completado`. Al pasar a `completado` o a `error`, **reemplaza** `fechaAnalisis` por
+`ahora` (al encolar valía la fecha de encolado, D-79): el borrado a los 30 días cuenta desde
+esa fecha y solo mira análisis en estado `completado`.
 
-Estados válidos de un análisis (`estado_analisis`): `en cola`, `procesando`,
-`completado`, `error`. No hay transición de regreso (regla R-04).
+Cada `NOTIFICACION` que el worker crea se envía **también por correo** al destinatario
+(sección 11, punto 2). Si el envío falla, el aviso queda en el panel y el análisis no se detiene.
+
+### 4.5 Tareas programadas (D-82, D-86)
+Las ejecuta el worker, no el backend: **una vez al día, a una hora fija de madrugada**
+(`WORKER_DAILY_HOUR`, por ejemplo las 3 a. m.), el borrado de videos vencidos, el aviso de
+vencimiento y la vigilancia del disco (sección 8). Si hay un análisis en curso, esperan a que
+termine. Si el worker estaba apagado a esa hora, las corre al arrancar; para no repetirlas el
+mismo día, guarda la fecha de la última corrida en `worker/ultima_corrida_tareas.txt`. El disco
+se revisa también antes de empezar cada análisis. Estas tareas son parte del worker.
+
+Diagrama de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_tareas_programadas.puml` (Anexo A.11).
+
+### 4.6 Reiniciar un análisis (lo hace el backend, D-60, D-68)
+El investigador que subió el video (o un Administrador) puede reiniciar un análisis
+**`completado`** desde la pantalla de revisión (sección 9.7). El backend, en una sola
+transacción: **borra el resultado anterior** (las `OBSERVACION` de ese video con sus
+`SEGUNDO`) *al empezar* el nuevo, no al terminar; borra los reportes
+guardados del experimento para que se regeneren; y deja el análisis en `en cola` con los
+valores de arranque de `etapa`, `nivelClasif` y `fechaAnalisis` (D-79). El worker lo toma como
+cualquier otro. No se puede reiniciar un análisis en `error`, `en pausa`, `cancelado` ni en
+curso.
+
+### 4.7 Quién escribe `estado`, `etapa` y `nivelClasif`
+**El backend nunca escribe `estado`, `etapa` ni `nivelClasif` salvo al crear el análisis en
+cola o al reiniciarlo, con sus valores de arranque (D-79, D-68), y en la pausa: pasar un
+análisis de `en pausa` a `en cola` (ajustar) o a `cancelado` (cancelar), siempre con la
+condición "solo si sigue `en pausa`" (D-89).** Todo lo demás lo escribe el worker.
+
+### 4.8 Estados
+Estados válidos de un análisis (`estado_analisis`): `en cola`, `procesando`, `en pausa`,
+`completado`, `error` y `cancelado`. Hay tres transiciones de regreso a `en cola`: el reinicio
+de un análisis `completado` (R-04), el ajuste del recuadro de uno `en pausa` (R-15, D-89) y el
+reencolado de los `procesando` huérfanos al arrancar el worker (D-84). `error` y `cancelado`
+son finales.
+
+Versión completa en PlantUML (Anexo A.6): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\estados_analisis.puml`
 
 ```mermaid
 stateDiagram-v2
-  [*] --> en_cola: video validado y guardado
+  [*] --> en_cola: video del Día 2 validado y guardado
   en_cola --> procesando: el worker toma la tarea
   state procesando {
     [*] --> preprocesamiento
     preprocesamiento --> cilindros
     cilindros --> clasificacion
   }
-  cilindros --> error: no se pudo abrir el video o no se hallaron los tubos
+  preprocesamiento --> error: no se pudo abrir el video
+  cilindros --> error: no se hallaron los cilindros
   clasificacion --> completado
+  clasificacion --> en_pausa: 3 s seguidos sin ver al espécimen (RN-17)
+  en_pausa --> en_cola: el usuario ajustó el recuadro del cilindro (vuelve al frente de la cola)
+  en_pausa --> cancelado: el usuario canceló o pasaron 5 minutos sin respuesta
+  procesando --> en_cola: el worker se apagó a media análisis (se reencola al arrancar)
+  completado --> en_cola: el investigador reinició el análisis (R-04)
   completado --> [*]
   error --> [*]
+  cancelado --> [*]
 ```
 
 El estado de un **experimento** no se guarda: se calcula a partir de los análisis de
-todas sus tandas, con precedencia `error` > `procesando` > `en cola` > `completado`.
-Un experimento sin videos se muestra como "sin videos".
+todas sus tandas, con precedencia `error` > `cancelado` > `en pausa` > `procesando` >
+`en cola` > `completado`. Un experimento sin videos se muestra como "sin videos"; uno que solo
+tiene videos del Día 1 (que no se analizan, D-71) se muestra como "en espera del Día 2" (D-83).
+
+Versión completa en PlantUML (Anexo A.6): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\estados_experimento.puml`
 
 ```mermaid
 stateDiagram-v2
   [*] --> sin_videos: se creó el experimento
-  sin_videos --> en_cola: se subió el primer video
+  sin_videos --> en_espera_dia2: solo se subió video del Día 1
+  sin_videos --> en_cola: se subió un video del Día 2
+  en_espera_dia2 --> en_cola: se subió un video del Día 2
   en_cola --> procesando: el worker empezó alguna tanda
   procesando --> completado: todas las tandas terminaron sin error
   procesando --> error: alguna tanda terminó en error
+  procesando --> en_pausa: alguna tanda quedó en pausa (RN-17)
+  en_pausa --> en_cola: el usuario ajustó el recuadro
+  en_pausa --> cancelado: el usuario canceló o pasaron 5 minutos sin respuesta
   completado --> en_cola: se agregó una tanda nueva
 ```
 
 Mientras alguna tanda siga en error, el experimento sigue en `error`.
 
+### 4.9 Notas para quien construya el worker real
+- **Umbral de decisión.** El worker acepta una conducta para un segundo cuando su
+  probabilidad llega a **0.80**. Es una **constante del worker**: no se guarda en la base de
+  datos, no se configura desde la interfaz y el backend no la conoce. Lo mismo pasa con el
+  archivo del modelo entrenado. Antes existían las tablas `MODELO` y `CONFIGURACION` para
+  guardarlos; **ya no existen** (ningún requisito permite cambiar el modelo ni el umbral).
+- **De dónde salen los segundos.** La red por segundo deja un `X_cnnseg.csv` con una fila por
+  espécimen y segundo (`especimen` de 1 a 4, la posición en el cuadro; `segundo`; `clase`, que
+  es la conducta; y columnas de probabilidad que la base **no** guarda) y un
+  `X_cnnseg_resumen.csv` con los segundos por conducta de cada minuto. El worker convierte el primero
+  en filas de `SEGUNDO` (solo `conducta`) y no guarda el resumen: los totales por minuto se
+  calculan desde `SEGUNDO` (D-52). La conducta vale `nado`,
+  `inmovilidad`, `escalamiento`, `activa` o vacío si no decidió; el worker traduce `nado` a
+  `nado activo` y `activa` a `conducta activa`, y el vacío queda como `conducta` nula.
+  `especimen` se enlaza con `ESPECIMEN.numeroCilindro`. El CSV trae un segundo por cada segundo
+  del video completo: el worker toma las **últimas 300 filas** de cada espécimen (todas, si hay
+  menos) y las renumera de 1 a 300 para que coincidan con el video recortado que ve el usuario
+  (D-54). Las hojas manuales `X_seg.csv` solo entrenan la red y no entran a la base (D-53).
+- **Código de referencia del pipeline** (otro repositorio, solo consulta): `C:\Users\Samsung\Desktop\proyectos\fst_auto\etiquetar.py` y `C:\Users\Samsung\Desktop\proyectos\fst_auto\lib.py` (preprocesamiento, localización de cilindros y medidas por fotograma), `C:\Users\Samsung\Desktop\proyectos\fst_auto\segundos.py` (regla de conducta por segundo) y `C:\Users\Samsung\Desktop\proyectos\fst_auto\cnn\probar_seg.py` (la red por segundo, que deja `X_cnnseg.csv`).
+
 ## 5. Modelo de datos (PostgreSQL)
 
-15 tablas. Esta es la única versión vigente.
+12 tablas. Esta es la única versión vigente.
+
+Fuentes del modelo (solo consulta; si difieren de esta guía, manda esta guía):
+- Grafo relacional vigente: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\grafo_relacional_3_vigente.puml`
+- Esquema físico del documento: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\esquema_fisico.puml`
+- Estado del diseño de la base de datos: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\DISENO-BD.md`
+- Diccionario de datos: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\back\apendice_D.tex`
 
 **Jerarquía:** un experimento tiene grupos; un grupo tiene tandas; una tanda tiene
-especímenes y hasta dos videos (Día 1 y Día 2); un video tiene un análisis y, por cada
-espécimen, una observación con 5 intervalos y sus segundos por conducta.
+especímenes y hasta dos videos (Día 1 y Día 2); un video **del Día 2** tiene un análisis y, por
+cada espécimen, una observación y una fila por cada segundo analizado. El video del
+Día 1 no tiene análisis ni observaciones (D-71).
+
+Versión completa en PlantUML (Anexo A.4): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\esquema_fisico.puml`
 
 ```mermaid
 erDiagram
@@ -218,14 +455,10 @@ erDiagram
   GRUPO ||--|{ TANDA : tiene
   TANDA ||--|{ ESPECIMEN : tiene
   TANDA ||--|{ VIDEO : "1 o 2"
-  VIDEO ||--|| ANALISIS : "idVideo UNIQUE"
+  VIDEO ||--o| ANALISIS : "idVideo UNIQUE (solo Día 2)"
   VIDEO ||--o{ OBSERVACION : tiene
-  ESPECIMEN ||--|{ OBSERVACION : aparece
-  OBSERVACION ||--|{ INTERVALO : "5 por observación"
-  INTERVALO ||--|{ PRESENTA : tiene
-  CONDUCTA ||--o{ PRESENTA : "se presenta"
+  ESPECIMEN ||--o| OBSERVACION : aparece
   OBSERVACION ||--|{ SEGUNDO : "un renglón por segundo"
-  CONDUCTA ||--o{ SEGUNDO : "conducta"
 
   USUARIO { varchar10 idInstitucional PK
             varchar nombre
@@ -261,22 +494,15 @@ erDiagram
              int idVideo FK
              estado_analisis estado
              etapa_analisis etapa
-             nivel_clasif nivelClasif
+             nivel_clasif_analisis nivelClasif
              timestamptz fechaAnalisis
              text rutaDiagnostico }
   OBSERVACION { int idObservacion PK
                 int idEspecimen FK
                 int idVideo FK }
-  INTERVALO { int idIntervalo PK
-              int idObservacion FK
-              smallint minuto }
-  CONDUCTA { varchar nombre PK }
-  PRESENTA { int idIntervalo PK
-             varchar conducta PK
-             numeric segundos }
   SEGUNDO { int idObservacion PK
             smallint segundo PK
-            varchar conducta FK
+            tipo_conducta conducta
             origen_segundo origen }
   ADMINISTRADOR { varchar10 idInstitucional PK }
   REPORTE { int idReporte PK
@@ -297,8 +523,8 @@ erDiagram
 antes, si el disco pasa del 90 %). La fila de `VIDEO` se conserva porque los resultados la
 referencian. `SEGUNDO.conducta` también admite nulo: el worker no decidió ese segundo o el espécimen no se ve.
 
-No se guarda el número de rata del laboratorio (D-55): un espécimen se distingue por su
-posición en el cuadro, `ESPECIMEN.numeroCilindro`. Como ese número se repite en cada tanda de
+No se guarda el número con que el laboratorio identifica a cada espécimen (D-55): un
+espécimen se distingue por su posición en el cuadro, `ESPECIMEN.numeroCilindro`. Como ese número se repite en cada tanda de
 un grupo, la interfaz, los resultados y los reportes lo muestran junto con la tanda, por
 ejemplo «Tanda A · Espécimen 2».
 
@@ -309,7 +535,7 @@ ejemplo «Tanda A · Espécimen 2».
 - **Todas** las llaves foráneas son `ON UPDATE NO ACTION ON DELETE NO ACTION`. La base
   rechaza el borrado en vez de propagarlo. Por eso `USUARIO.activo` existe: dar de baja
   sin borrar. Para borrar un experimento, la aplicación debe borrar de las hojas hacia
-  arriba: `SEGUNDO`, `PRESENTA`, `INTERVALO`, `OBSERVACION`, `ANALISIS`, `VIDEO`, `ESPECIMEN`,
+  arriba: `SEGUNDO`, `OBSERVACION`, `ANALISIS`, `VIDEO`, `ESPECIMEN`,
   `TANDA`, `GRUPO`, `REPORTE`, `NOTIFICACION`, `EXPERIMENTO`.
 - Contraseñas con **bcrypt + sal**. Nunca texto plano.
 
@@ -319,24 +545,25 @@ ejemplo «Tanda A · Espécimen 2».
 | `tipo_grupo` | `control`, `referencia`, `tratamiento experimental` |
 | `sesion_video` | `Dia 1`, `Dia 2` |
 | `formato_reporte` | `CSV`, `XLSX`, `PDF` |
-| `tipo_notificacion` | `analisis completado`, `error del pipeline`, `alerta de disco`, `video borrado` |
-| `estado_analisis` | `en cola`, `procesando`, `completado`, `error` |
+| `tipo_notificacion` | `analisis completado`, `error del pipeline`, `analisis en pausa`, `analisis cancelado`, `alerta de disco`, `video borrado` |
+| `estado_analisis` | `en cola`, `procesando`, `en pausa`, `completado`, `error`, `cancelado` |
 | `etapa_analisis` | `preprocesamiento`, `cilindros`, `clasificacion` |
 | `nivel_clasif_analisis` | `preciso`, `agrupado` |
-| `origen_segundo` | `maquina`, `humano_confirma`, `humano_corrige`, `humano_duda`, `sin_revisar`, `humano_ciego` |
+| `origen_segundo` | `maquina`, `confirmada`, `corregida`, `dudosa` |
+| `tipo_conducta` | `nado activo`, `inmovilidad`, `escalamiento`, `conducta activa` |
 
-`CONDUCTA` es tabla y no dominio. Valores iniciales: `nado activo`, `inmovilidad`,
-`escalamiento` y `conducta activa`. Cada intervalo (`INTERVALO`) tiene en `PRESENTA` una
-fila por cada una de las cuatro conductas, **incluso con 0 segundos** (en el diseño la
-cardinalidad se declara 2..4, pero en la práctica son siempre 4).
+`CONDUCTA` no es tabla sino el dominio cerrado `tipo_conducta` (D-102): `nado activo`,
+`inmovilidad`, `escalamiento` y `conducta activa`; no hay tabla ni datos semilla de conductas.
+Los totales por minuto no tienen tabla: se calculan desde `SEGUNDO`
+(el minuto sale del número de segundo; D-52).
 
 `SEGUNDO` guarda la conducta de cada espécimen en cada segundo analizado (hasta 300 por
-observación). Es la fuente de la pantalla de revisión; `PRESENTA` es su resumen por minuto
-y se recalcula cada vez que el usuario guarda correcciones. Valores de `origen`:
-`maquina`, `humano_confirma`, `humano_corrige`, `humano_duda` (el usuario dejó el segundo
-vacío a propósito), `sin_revisar` y `humano_ciego` (revisión "desde cero", que no muestra la
-conducta del sistema). `conducta` nula significa que el segundo no tiene conducta: la
-máquina no pudo decidir, o el usuario lo marcó "dudosa" (`humano_duda`). La conducta del
+observación). Es la fuente de la pantalla de revisión; de él salen también los totales y el
+desglose por minuto, que no se guardan (D-52). Valores de `origen` (cuatro,
+D-80): `maquina` (la puso el sistema, sin revisar), `confirmada` (el usuario vio el segundo y dejó la
+conducta del sistema), `corregida` (la cambió) y `dudosa` (el segundo queda vacío porque el
+usuario lo marcó como dudoso). `conducta` nula significa que el segundo no tiene conducta: el
+pipeline no pudo decidir o no vio al espécimen, o el usuario lo marcó como dudoso (`origen = 'dudosa'`). La conducta del
 sistema no se conserva aparte: al corregir se reemplaza, y `origen` dice que el segundo fue revisado.
 
 ### Restricciones que la base debe hacer cumplir
@@ -344,7 +571,6 @@ sistema no se conserva aparte: al corregir se reemplaza, y `origen` dice que el 
   resultado anterior, no hay historial.
 - `GRUPO`: `UNIQUE (idExperimento, etiqueta)`. `TANDA`: `UNIQUE (idGrupo, ordinal)`.
 - `VIDEO`: `UNIQUE (idTanda, sesion)`. `OBSERVACION`: `UNIQUE (idEspecimen, idVideo)`.
-- `INTERVALO`: `UNIQUE (idObservacion, minuto)`.
 - `ESPECIMEN`: `UNIQUE (idTanda, numeroCilindro)`.
 - `EXPERIMENTO.nombre` es `UNIQUE` en todo el sistema.
 - `ANALISIS.rutaDiagnostico` solo se llena cuando `estado = 'error'`.
@@ -355,7 +581,8 @@ sistema no se conserva aparte: al corregir se reemplaza, y `origen` dice que el 
 - `GRUPO` tiene **1 o más tandas** (la tanda B y siguientes son opcionales).
 - `TANDA` tiene de **2 a 4 especímenes** (ese es el rango de `nCilindros`) y de 1 a 2 videos.
 - `GRUPO` tiene **2 o más especímenes**, sin tope.
-- `VIDEO` tiene de 2 a 4 observaciones (una por espécimen) y un análisis.
+- Un `VIDEO` del **Día 2** tiene de 2 a 4 observaciones (una por espécimen) y un análisis; uno
+  del **Día 1** no tiene ninguno de los dos (D-71). Un `ESPECIMEN` tiene 0 o 1 observación.
 
 El mínimo de 2 por grupo se da cuando el grupo tiene una sola tanda (la A) con 2
 especímenes. Cualquier total de 2 en adelante se puede repartir en tandas de 2 a 4 (por
@@ -364,13 +591,16 @@ especímenes por grupo es lo habitual como mínimo útil, pero el equipo decidi�
 mínimo estructural en 2: no obligues a 6.
 
 Las cardinalidades mínimas no se pueden forzar con `FOREIGN KEY`: valídalas en la
-aplicación al guardar y no pongas `CHECK` de conteo en la base.
+aplicación al guardar y no pongas `CHECK` de conteo en la base. Tampoco puede la base
+impedir un `ANALISIS` para un video del Día 1: el backend simplemente no lo crea.
 
 ## 6. API REST
 
 Reglas generales:
 - Todo requiere JWT, salvo `POST /auth/login` y `POST /auth/recover`.
 - Respuesta JSON con tres campos: `data` (resultado), `error` (mensaje) y `status` (código HTTP).
+  Las rutas que devuelven un archivo (reportes, PDF de diagnóstico, imagen de la pausa, video de
+  revisión) devuelven el archivo tal cual, sin ese envoltorio.
 - Errores de login con mensaje **genérico**, sin decir si falló el correo o la contraseña (R-01).
 
 | Método | Ruta | Descripción | Acceso |
@@ -392,7 +622,7 @@ Reglas generales:
 | GET | `/experiments/{id}/report/xlsx` | Descarga XLSX | Investigador |
 | GET | `/admin/users` | Lista usuarios (filtros: rol, estado) | Admin |
 | POST | `/admin/users` | Crea cuenta con contraseña temporal | Admin |
-| PATCH | `/admin/users/{id}` | Modifica datos o desactiva cuenta | Admin |
+| PATCH | `/admin/users/{id}` | Modifica datos (incluido el rol de Investigador o Administrador) o desactiva cuenta. Rechaza con 409 desactivar la última cuenta de Administrador activa o quitarle el rol (R-16) | Admin |
 | GET | `/admin/system` | Métricas: disco y cola | Admin |
 
 **Importante:** el rol Administrador es un permiso de **backend**. Ocultar la sección en
@@ -406,13 +636,105 @@ Estos nombres los propone este documento; confírmalos con el usuario:
 |---|---|
 | Completar la recuperación de contraseña con el enlace | `POST /auth/reset` |
 | Actualizar nombre y correo del perfil propio | `PATCH /users/me` |
-| Eliminar un experimento | `DELETE /experiments/{id}` |
+| Eliminar un experimento (rechaza con 409 si algún análisis está `procesando` o `en pausa`; los `en cola` salen de la cola) | `DELETE /experiments/{id}` |
+| Ver la pausa de un análisis (imagen fija, recuadro actual y tiempo que queda) | `GET /experiments/{id}/analyses/{idAnalisis}/pause` y `GET .../pause/image` |
+| Ajustar el recuadro de un cilindro y continuar (quien subió el video o un Administrador; 409 si ya no está `en pausa`) | `POST /experiments/{id}/analyses/{idAnalisis}/pause/adjust` |
+| Cancelar un análisis en pausa (quien subió el video o un Administrador; 409 si ya no está `en pausa`) | `POST /experiments/{id}/analyses/{idAnalisis}/cancel` |
 | Listar y marcar notificaciones como leídas | `GET /notifications`, `PATCH /notifications/{id}` |
 | Descargar el PDF de diagnóstico de un análisis | `GET /experiments/{id}/analyses/{idAnalisis}/diagnostic` |
 | Sugerir grupos con nombre parecido y la siguiente tanda | `GET /experiments/{id}/groups?q=` |
+| Bloques de 5 s de los especímenes (se calculan al pedirlos, no se guardan) | `GET /experiments/{id}/results/blocks` |
 | Datos de la pantalla de revisión: especímenes, etiquetas por segundo y recuadros de los tubos | `GET /experiments/{id}/analyses/{idAnalisis}/review` |
 | Video para la pantalla de revisión (con soporte de `Range`, para poder adelantar y retroceder) | `GET /experiments/{id}/analyses/{idAnalisis}/video` |
-| Guardar las correcciones por segundo | `PUT /experiments/{id}/analyses/{idAnalisis}/segundos` |
+| Guardar las correcciones por segundo (solo quien subió el video o un Administrador, D-57) | `PUT /experiments/{id}/analyses/{idAnalisis}/segundos` |
+| Reiniciar un análisis `completado`: borra el resultado anterior y lo vuelve a encolar (solo quien subió el video o un Administrador; D-60, D-68) | `POST /experiments/{id}/analyses/{idAnalisis}/restart` |
+
+### 6.1 Formas de las peticiones y respuestas [PROPUESTA]
+Si el backend y el frontend los construyen sesiones distintas, **esta sección es el contrato
+entre ambos**: no cambies un nombre de campo sin avisar. Todos los ejemplos van dentro del
+envoltorio `data` de la sección 6. Los nombres de campo van en `camelCase` y los de las
+conductas, tal como se guardan en la base.
+
+**Iniciar sesión.** `POST /auth/login`, cuerpo `{"correo": "...", "contrasena": "..."}`.
+`data`: `{"token": "...", "rol": "Investigador" | "Administrador", "nombre": "...",
+"cambioRequerido": false}`. Credenciales malas: 401 con mensaje genérico.
+
+**Lista de experimentos.** `GET /experiments?estado=&fecha=&tratamiento=&pagina=1`. `data`:
+```json
+{"pagina": 1, "total": 12, "items": [
+  {"idExperimento": 7, "nombre": "Exp. A", "fecha": "2026-10-01", "nGrupos": 3,
+   "estado": "completado", "avisoVencimiento": {"fechaBorrado": "2026-11-12"}}]}
+```
+`estado` vale `sin videos`, `en espera del Día 2`, `en cola`, `procesando`, `en pausa`,
+`completado`, `error` o `cancelado`; `avisoVencimiento` es `null` si ningún video vence en
+menos de 7 días.
+
+**Detalle de un experimento.** `GET /experiments/{id}`. `data`:
+```json
+{"idExperimento": 7, "nombre": "Exp. A", "fecha": "2026-10-01", "notas": "", "estado": "completado",
+ "grupos": [{"idGrupo": 1, "etiqueta": "Control", "tipo": "control", "tratamiento": "Salina",
+   "tandas": [{"idTanda": 1, "ordinal": 1, "letra": "A", "nCilindros": 4,
+     "videos": [{"idVideo": 1, "sesion": "Dia 2", "duracion": 300.0,
+                 "videoDisponible": true, "idAnalisis": 1}]}]}]}
+```
+
+**Subir un video.** `POST /experiments/{id}/groups/{grupo}/videos`, `multipart/form-data` con
+`archivo`, `sesion` (`Dia 1` o `Dia 2`), `tipo` y `tratamiento` (solo si el grupo es nuevo),
+`nCilindros` (solo si la tanda es nueva) y `ordinal` (la tanda confirmada; si falta se usa la
+siguiente). Respuesta 201: `{"idVideo": 1, "idAnalisis": 1, "estadoAnalisis": "en cola"}`; con un
+video del Día 1, `idAnalisis` y `estadoAnalisis` son `null`. Rechazos: 422 con
+`{"error": "mensaje claro"}` (formato, orientación vertical, no reproducible) y 409 si la tanda
+ya tiene un video de esa sesión.
+
+**Progreso.** `GET /experiments/{id}/status`. `data`:
+```json
+{"analisis": [{"idAnalisis": 1, "tanda": "Control · A", "sesion": "Dia 2",
+   "estado": "procesando", "etapa": "cilindros", "porcentaje": 67,
+   "pausa": null, "diagnosticoDisponible": false}]}
+```
+`porcentaje` es 0 en cola, 33, 67 o 100 por etapa y 100 al completarse. Con el análisis en pausa,
+`pausa` es `{"cilindro": 2, "segundosRestantes": 221}`.
+
+**Resultados.** `GET /experiments/{id}/results`. `data`:
+```json
+{"especimenes": [{"tanda": "Control · A", "ordinal": 1, "numeroCilindro": 2,
+   "nivelClasif": "preciso", "revisado": false,
+   "totales": {"nado activo": {"segundos": 60, "porcentaje": 20.0},
+               "inmovilidad": {"segundos": 180, "porcentaje": 60.0},
+               "escalamiento": {"segundos": 60, "porcentaje": 20.0},
+               "conducta activa": {"segundos": 0, "porcentaje": 0.0}}}]}
+```
+`results/byminute` devuelve lo mismo con una lista `minutos` (`minuto` 1 a 5 y los segundos de cada
+conducta) por espécimen; `results/groups`, el promedio por conducta de cada grupo, los
+especímenes con dato faltante y un aviso si el grupo mezcla niveles `preciso` y `agrupado`;
+`results/blocks`, para cada espécimen su lista de bloques con la conducta mayoritaria y sus cinco
+segundos. `revisado` es verdadero si algún `origen` del espécimen no es `maquina`.
+
+**Pausa.** `GET /experiments/{id}/analyses/{idAnalisis}/pause`. `data`:
+```json
+{"cilindro": 2, "desdeSegundo": 142, "segundosRestantes": 221, "ancho": 1920, "alto": 1080,
+ "recuadros": [{"cilindro": 1, "x0": 245, "y0": 483, "x1": 577, "y1": 927}]}
+```
+`.../pause/image` devuelve el JPG. `POST .../pause/adjust` recibe
+`{"cilindro": 2, "x0": 250, "y0": 480, "x1": 580, "y1": 930}` en píxeles de la imagen;
+`POST .../cancel` no lleva cuerpo. Los dos responden 200, o 409 si el análisis ya no está `en pausa`.
+
+**Revisión.** `GET /experiments/{id}/analyses/{idAnalisis}/review`. `data`:
+```json
+{"puedeCorregir": true, "videoUrl": "/experiments/7/analyses/1/video",
+ "especimenes": [{"numeroCilindro": 1, "tanda": "Control · A",
+   "recuadro": {"x0": 245, "y0": 483, "x1": 577, "y1": 927},
+   "segundos": [{"segundo": 1, "conducta": "nado activo", "origen": "maquina"},
+                {"segundo": 2, "conducta": null, "origen": "dudosa"}]}]}
+```
+`PUT .../segundos` recibe solo los segundos que cambiaron:
+`{"especimenes": [{"numeroCilindro": 1, "segundos": [{"segundo": 12, "conducta": "inmovilidad",
+"origen": "corregida"}]}]}`. Responde 200; los totales por minuto no se guardan, se calculan desde `SEGUNDO`.
+
+**Usuarios (administración).** `GET /admin/users?rol=&estado=` devuelve una lista de
+`{"idInstitucional", "nombre", "apellidos", "correo", "rol", "activo", "nExperimentos"}`;
+`POST /admin/users` recibe `{"idInstitucional", "nombre", "apellidos", "correo"}` y devuelve la
+contraseña temporal **una sola vez**: `{"passwordTemporal": "..."}`.
 
 ## 7. Reglas de negocio que el backend debe cumplir
 
@@ -421,17 +743,19 @@ Estos nombres los propone este documento; confírmalos con el usuario:
 | R-01 | Credenciales incorrectas: mensaje genérico, sin decir si falló el correo o la contraseña. |
 | R-02 | Un video pertenece a exactamente una tanda. No se reutiliza en otra. |
 | R-03 | Una tanda tiene como máximo 2 videos: Día 1 (20 min) y Día 2 (5 min). Ambos son opcionales individualmente. Solo el Día 2 se analiza; el Día 1 solo confirma que existe el video de habituación (D-54). |
-| R-04 | El análisis lo inicia el sistema solo. El investigador **no puede** iniciar, pausar, cancelar ni reiniciar un análisis. No pongas botón de cancelar ni de reiniciar. Lo que sí puede hacer, **cuando el análisis termina**, es corregir las etiquetas por segundo (R-14). |
-| R-05 | Los videos se borran 30 días después de un análisis exitoso. Irreversible. Aviso con 7 días o más de anticipación. |
+| R-04 | El análisis lo inicia el sistema solo. El investigador **no puede** iniciar ni pausar un análisis; solo el sistema lo pausa (R-15). Sí puede **cancelarlo únicamente cuando está `en pausa`**, con el botón «Cancelar análisis» de la pantalla de pausa (D-89); no pongas botón de cancelar ni de pausar en ningún otro lugar. Lo que sí puede hacer, **cuando el análisis termina**, es corregir las etiquetas por segundo (R-14) y **reiniciar el análisis** desde la pantalla de revisión (D-60): el resultado anterior se borra al empezar el nuevo (D-68). |
+| R-05 | Los videos se borran 30 días después de un análisis exitoso. Irreversible. Aviso con 7 días o más de anticipación. Excepción: si el disco pasa del 90 %, se borran antes los más antiguos (sección 8). |
 | R-06 | Resultados y reportes se conservan para siempre, aunque el video ya no exista. |
 | R-07 | Todos los investigadores activos pueden ver los experimentos de cualquier otro. El administrador además modifica y desactiva cuentas. |
-| R-08 | Borrar un experimento es permanente (se van video, resultados y reportes). Pide confirmación explícita. |
-| R-09 | Solo se aceptan archivos `.mp4` y `.mov`. La validación de formato ocurre **en el cliente** antes de subir, y el backend la repite. También valida que el video sea reproducible y que esté **en horizontal** (ancho mayor que alto): un video girado (vertical) **no se puede procesar** y se rechaza con un mensaje claro. No hay opción de rotar. |
-| R-10 | **Eliminada.** Ya no hay umbral de confianza de detección de cilindros, y nada la sustituye en esta versión (sección 11, punto 14). |
+| R-08 | Borrar un experimento es permanente (se van video, resultados y reportes). Pide confirmación explícita. Solo lo borra quien lo creó o un Administrador (los demás reciben 403). Se rechaza con 409 si algún análisis está `procesando` o `en pausa`; los que están `en cola` salen de la cola al borrarlo (D-87). |
+| R-09 | Solo se aceptan archivos `.mp4` y `.mov`. La **extensión** se comprueba **en la interfaz** antes de subir, y el backend la repite. La **orientación** y la **reproducibilidad** las valida **el servidor** al recibir el video (D-64): debe ser reproducible y estar **en horizontal** (ancho mayor que alto); un video girado (vertical) **no se puede procesar** y se rechaza con un mensaje claro. No hay opción de rotar. |
+| R-10 | **Eliminada.** Ya no hay umbral de confianza de detección de cilindros, y nada la sustituye en esta versión. |
 | R-11 | **Eliminada (D-44).** No hay comparación Día 1 vs Día 2. Se comparan los grupos entre sí con el Día 2; el Día 1 solo sirve para verificar que los especímenes llegaron igual de estresados. |
 | R-12 | Cuando el clasificador sabe que el espécimen no está inmóvil pero no decide entre nado y escalamiento, esos segundos se guardan como "conducta activa", una cuarta conducta. Un mismo análisis puede mezclar las cuatro. Los reportes deben mostrarla como una columna más. En los bloques de 5 s también resuelve el empate entre nado activo y escalamiento (sección 9.5). |
 | R-13 | De cada video se guardan y se muestran como máximo los **últimos 300 s** (de final a inicio), sin mínimo. La CNN analiza el video completo y el worker descarta el principio, donde a veces aparecen personas, y renumera de 1 a 300 (D-54). |
-| R-14 | Solo se puede revisar un análisis en estado `completado`. Al revisar, el usuario corrige las etiquetas segundo a segundo; cada corrección queda en `SEGUNDO` con `origen` `humano_confirma`, `humano_corrige` o `humano_duda`, y al guardar el backend **recalcula `INTERVALO` y `PRESENTA`** de esos especímenes dentro de la misma transacción. La conducta que puso el sistema se reemplaza al corregir; `origen` conserva que el segundo fue revisado. |
+| R-14 | Solo se puede revisar un análisis en estado `completado`. Al revisar, el usuario corrige las etiquetas segundo a segundo; cada corrección queda en `SEGUNDO` con `origen` `confirmada`, `corregida` o `dudosa`, y al guardar el backend solo actualiza `SEGUNDO`: los totales por minuto no se guardan, se calculan desde `SEGUNDO` (D-52). La conducta que puso el sistema se reemplaza al corregir; `origen` conserva que el segundo fue revisado. **Solo corrigen el investigador que subió el video y el Administrador** (D-57). Corregir etiquetas no cambia el modelo ni el video: si lo que cambia es el video o el modelo, es un análisis nuevo (reinicio, R-04). El video que se reproduce es la copia H.264 que el worker genera al terminar (D-58). |
+| R-15 | Si en un segundo no se ve al espécimen, ese segundo se registra como "no se ve". Tres segundos seguidos así dejan el análisis `en pausa`, se guarda una imagen fija de ese instante, se avisa al usuario con una notificación `analisis en pausa` y se le pide ajustar el recuadro del cilindro. El worker atiende mientras tanto el siguiente análisis. Con el ajuste, el análisis vuelve al frente de la cola y continúa desde el segundo de la pausa. Si el usuario cancela, o no responde en 5 minutos, el análisis pasa a `cancelado` (con notificación `analisis cancelado` solo si fue por falta de respuesta) (RN-17, D-59, D-67, D-89). |
+| R-16 | Siempre debe existir al menos un Administrador activo: el backend rechaza desactivar la última cuenta de Administrador activa o quitarle el rol (RN-16, D-61, D-72). El Administrador sí puede cambiar el rol de una cuenta desde el panel de administración. |
 
 Otras decisiones tomadas:
 - **Progreso:** el backend calcula el porcentaje por análisis como **un tercio fijo por
@@ -444,10 +768,11 @@ Otras decisiones tomadas:
   viejo que el último análisis del experimento, se regenera y se reemplaza; si sigue
   vigente, se devuelve el guardado.
 - **Contenido de los reportes:** CSV y XLSX con datos por espécimen y desglose por minuto
-  (columnas `Tiempo (min:seg)`, `Nado`, `Escalamiento`, `Inmovilidad`, `Conducta activa`, una fila por
-  minuto) más estadísticas por grupo: media, desviación estándar y varianza del tiempo de
+  (columnas `Grupo`, `Tanda`, `Espécimen`, `Tiempo (min:seg)`, `Nado`, `Escalamiento`, `Inmovilidad`,
+  `Conducta activa`, una fila por espécimen y por minuto) más estadísticas por grupo: media, desviación estándar y varianza del tiempo de
   cada conducta entre los especímenes de cada grupo (agregando todas sus tandas). El PDF
-  es un resumen ejecutivo, distinto del PDF de diagnóstico.
+  es el **reporte de resultados** (D-76), distinto del **reporte de diagnóstico** (el que se
+  genera cuando un análisis termina en error).
 - **Cuentas:** no existe autorregistro ni formulario público. Solo el administrador crea
   cuentas con identificador institucional (propuesta, sección 11 punto 12), nombre,
   apellidos y correo (de cualquier dominio, D-46); el sistema genera la contraseña temporal. Se pone
@@ -462,29 +787,35 @@ Otras decisiones tomadas:
 
 ## 8. Tareas programadas (cron)
 
-Las ejecuta el *worker*, no el backend.
+Las ejecuta el **worker** (D-82), no el backend, **una vez al día a una hora fija de madrugada**
+(D-86). Si el worker estaba apagado a esa hora, las corre al arrancar.
 
 | Tarea | Frecuencia | Qué hace |
 |---|---|---|
-| Borrar videos vencidos | Diaria | Elimina el archivo del video 30 días después de `ANALISIS.fechaAnalisis` si `estado = completado`. La fila de `VIDEO` se conserva y su `archivo` queda en nulo. |
+| Borrar videos vencidos | Diaria | Elimina el archivo del video (y su copia `web.mp4`) 30 días después de `ANALISIS.fechaAnalisis` si `estado = completado`. La fila de `VIDEO` se conserva y su `archivo` queda en nulo. También borra las carpetas de pausa (`pausa.json`, `pausa.jpg`) que hayan quedado huérfanas. |
 | Aviso de vencimiento | Diaria | Marca los videos a menos de 7 días del borrado para que el dashboard los muestre con nombre del experimento y fecha exacta. |
-| Vigilar disco | Periódica | Al superar **80 %**, crea `NOTIFICACION` tipo `alerta de disco` para el administrador. Al superar **90 %**, borra los videos más antiguos (deja `VIDEO.archivo` en nulo) y crea una `NOTIFICACION` tipo `video borrado` para el investigador de cada experimento afectado. |
+| Vigilar disco | Diaria y antes de cada análisis | Al superar **80 %**, crea `NOTIFICACION` tipo `alerta de disco` para el administrador. Al superar **90 %**, borra los videos más antiguos (deja `VIDEO.archivo` en nulo) y crea una `NOTIFICACION` tipo `video borrado` para el investigador de cada experimento afectado. |
 
 La fecha de borrado se **deriva** (`fechaAnalisis + 30 días`). No hay columna para ella y
-no se debe crear.
+no se debe crear. En `worker_fake`, estas tres tareas viven en un módulo aparte y se pueden
+disparar a mano para probarlas sin esperar a la madrugada.
 
 ## 9. Frontend
 
-Siete pantallas. Estilo sobrio, para escritorio, todo en español. El objetivo es que una
+Siete pantallas (la de progreso incluye la vista de pausa). Estilo sobrio, para escritorio, todo en español. El objetivo es que una
 persona sin conocimientos de programación cree un experimento, suba un video, espere y
 descargue el reporte sin ayuda. La meta es que 9 de cada 10 personas lo logren sin
-asistencia. **No hay mockups: los esquemas de abajo son tu referencia.** Cada pantalla
-tiene varios estados; impleméntalos todos.
+asistencia. Cada pantalla cita su **maqueta v2** (HTML e imagen). Las maquetas son anteriores a algunas
+decisiones del 11 y 12 de octubre: no muestran la pantalla de pausa, el rol editable de las cuentas,
+las notificaciones nuevas ni los cambios de la revisión. **Si difieren de esta guía, mandan los
+esquemas y las reglas de esta guía**; la maqueta sirve para el estilo visual y la disposición.
+Cada pantalla tiene varios estados; impleméntalos todos. Capturas de los estados: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\estados`.
 
 Estructura común: barra superior con el nombre del sistema, notificaciones (campana) y
 menú de usuario con "Cerrar sesión" accesible desde cualquier pantalla.
 
 ### 9.1 Inicio de sesión
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\login.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\login.png`). Cambio de contraseña obligatorio: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\primer-acceso.html`.
 Estados: normal; error genérico de credenciales. Incluye enlace "Recuperar contraseña".
 
 ```
@@ -504,7 +835,10 @@ Estados: normal; error genérico de credenciales. Incluye enlace "Recuperar cont
 Si la cuenta tiene `cambioRequerido = true`, tras entrar obliga a cambiar la contraseña
 antes de continuar.
 
+Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_login.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_logout.puml` (Anexo A.8).
+
 ### 9.2 Dashboard
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\experimentos.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\experimentos.png`). Detalle de un experimento: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\experimento.html`.
 Estados: con experimentos; vacío ("Aún no hay experimentos" y botón de crear); con aviso de
 video por vencer.
 
@@ -523,10 +857,12 @@ video por vencer.
 ```
 
 Lista **todos** los experimentos del laboratorio (de cualquier investigador). El estado se
-calcula (sección 4). El filtro por tratamiento muestra los experimentos que tengan al
+calcula (sección 4.8) y se muestra como «Sin videos», «En espera del Día 2», «En cola»,
+«Procesando», «En pausa», «Completado», «Con error» o «Cancelado». El filtro por tratamiento muestra los experimentos que tengan al
 menos un grupo con ese tratamiento. "Eliminar" pide confirmación explícita (R-08).
 
 ### 9.3 Crear experimento
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\cargar-video.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\cargar-video.png`). Grupo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\grupo.html`.
 Se hace en pasos, porque subir un video puede tardar varios minutos y así se puede corregir
 el nombre o la fecha sin volver a subir nada, y agregar tandas después.
 
@@ -541,10 +877,11 @@ Paso 2: Grupo, tanda y video   (se repite por cada tanda)
   Especímenes en esta tanda: [ 2 a 4 ]
   Sesión*  (o) Día 1   ( ) Día 2
   Archivo*  [Elegir .mp4 o .mov] [=======>      ] 45 %   <- progreso de subida
-  [Subir y analizar]            [+ Agregar otra tanda]   [Terminar]
+  [Subir]                       [+ Agregar otra tanda]   [Terminar]
 
 Paso 3: Confirmación
-  "Video almacenado. El análisis está en cola." -> redirige a Progreso
+  Día 2: "Video almacenado. El análisis está en cola." -> redirige a Progreso
+  Día 1: "Video del Día 1 almacenado. No se analiza." -> vuelve al experimento
 ```
 
 Reglas del paso 2:
@@ -554,16 +891,41 @@ Reglas del paso 2:
   primera tanda es la "A" y se piden tipo (control, referencia o tratamiento
   experimental) y tratamiento.
 - Rechaza en el cliente cualquier archivo que no sea `.mp4` o `.mov`, con un mensaje
-  específico, antes de subir. También rechaza un video en vertical (alto mayor que ancho),
-  que se puede detectar en el navegador al cargar los metadatos; el backend lo repite.
+  específico, antes de subir. La orientación (un video en vertical, con alto mayor que ancho) y
+  la reproducibilidad **no se validan en el navegador**: las valida el servidor al recibir el
+  archivo (D-64) y la interfaz muestra su mensaje de rechazo.
+- El video del **Día 1** se sube y se guarda, pero no se analiza (D-71): no hay redirección a
+  Progreso; el experimento queda «En espera del Día 2» hasta que se suba uno del Día 2.
 - Muestra errores de validación por campo (campos obligatorios vacíos).
 - Estados: vacío, lleno, subiendo, error de formato, errores de campo, éxito.
 
+Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_experimento.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_carga_video.puml` (Anexo A.9).
+
 ### 9.4 Progreso del análisis
-Estados: analizando; completado; error (no se pudo abrir el video o no se hallaron los
-tubos). ~~Esta pantalla cambiará si se adopta el análisis en pantalla con intervención
-humana~~ **Resuelto por la sección 11, punto 14:** en esta versión no hay análisis en
-pantalla ni intervención humana, así que la pantalla se queda como está.
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\progreso.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\progreso.png`).
+Estados: analizando; en pausa (el sistema no vio al espécimen y espera al usuario); completado;
+error (no se pudo abrir el video o no se hallaron los tubos); cancelado (el usuario canceló o no
+respondió en 5 minutos). En pausa se muestra la **pantalla de pausa** (RN-17, D-59, D-89; maqueta `mockups/v2/pausa.html`, imagen `figures/mockups/v2/pausa.png`):
+
+```
++-------------------------------------------------------------+
+| EN PAUSA: no se ve al espécimen del cilindro 2 (segundo 142) |
+| Tiempo que queda para responder: 3:41                        |
+| +-------------------------------+                            |
+| |  imagen fija del instante;    |                            |
+| |  recuadro que se arrastra     |                            |
+| +-------------------------------+                            |
+| [Ajustar y continuar]        [Cancelar análisis]             |
++-------------------------------------------------------------+
+```
+
+El recuadro se arrastra y se redimensiona sobre la imagen; «Ajustar y continuar» envía sus
+coordenadas en píxeles de la imagen. Si el plazo ya venció, el backend responde 409 y la
+pantalla avisa que el análisis ya se canceló.
+
+A la pantalla de pausa se llega desde la notificación «análisis en pausa» o desde la
+pantalla de progreso. Pide sus datos a `GET .../pause` (sección 6.1) y los vuelve a pedir cada
+pocos segundos para actualizar el tiempo que queda.
 
 ```
 +-------------------------------------------------------------+
@@ -578,10 +940,13 @@ pantalla ni intervención humana, así que la pantalla se queda como está.
 +-------------------------------------------------------------+
 ```
 
-- Consulta el backend cada **3 a 5 segundos** mientras haya análisis en cola o procesando.
+- Consulta el backend cada **3 a 5 segundos** mientras haya análisis en cola, procesando o en pausa.
 - Una barra por video. Cada etapa vale un tercio.
-- **Sin botón de cancelar ni de reiniciar** (R-04). El análisis sigue aunque se cierre la
-  pestaña.
+- **Sin botón de cancelar ni de reiniciar** en la pantalla de progreso (R-04); «Cancelar
+  análisis» existe solo en la pantalla de pausa. El reinicio está solo
+  en la pantalla de revisión (9.7). El análisis sigue aunque se cierre la pestaña.
+- **En pausa:** muestra la pantalla de pausa de arriba. **Cancelado:** muestra que se canceló,
+  por falta de respuesta o porque el usuario lo canceló.
 - En error: el mensaje se **arma a partir de `etapa`** del análisis (no hay columna de
   código ni de descripción de error). Los errores definidos son: el video no se pudo abrir
   y no se hallaron los tubos. Debajo, el botón del PDF de diagnóstico. Si el PDF aún no
@@ -589,16 +954,21 @@ pantalla ni intervención humana, así que la pantalla se queda como está.
 - No hay "log de ejecución": ninguna tabla lo guarda (sección 11, punto 10).
 - Al completarse, habilita "Ver resultados" y "Revisar segundo a segundo" (sección 9.7).
 
+Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_consulta_progreso.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_pausa_y_ajuste.puml` (Anexo A.9).
+
 ### 9.5 Resultados
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\resultados.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\resultados.png`).
 Cuatro pestañas: por espécimen, comparación entre grupos (Día 2), línea de tiempo por
 minuto y bloques de 5 s. En la de bloques, cada bloque muestra la conducta con más segundos
 y, al abrirlo, sus cinco segundos, para notar las conductas breves.
+
+**Grupo completo o una tanda (RF-19, D-93).** Arriba de las pestañas hay un selector «Ver»: el investigador elige los resultados del **grupo completo**, con todas sus tandas, o los de **una sola tanda**. No hace falta un endpoint nuevo: `GET /experiments/{id}/results` ya devuelve cada espécimen con su `tanda`, y el frontend filtra por grupo o por tanda. En el grupo completo cada espécimen se rotula con su tanda («Tanda A · Espécimen 2»), la tabla suma sus especímenes y los renglones de media, desviación estándar y varianza (RF-31) se calculan sobre los especímenes que se ven: en el grupo completo son las del grupo y en una tanda, las de esa tanda. El reporte descargable (`report/csv` y `report/xlsx`) las incluye para esa misma vista: recibe como parámetro el grupo (`?grupo={idGrupo}`) o la tanda (`?tanda={idTanda}`), y el nombre del archivo dice cuál es. `results/groups` devuelve, además del promedio, la desviación estándar y la varianza por conducta de cada grupo, con todas sus tandas. El nombre del archivo exportado dice si es del grupo o de la tanda. Se llega desde el detalle del grupo (`mockups/v2/grupo.html`), que tiene el botón «Ver resultados del grupo completo» y, en cada tanda, «Ver resultados de esta tanda». El grupo completo reúne solo las tandas con análisis completado; las demás se señalan como faltantes (RN-12).
 
 Los bloques **no usan la CNN**: la CNN solo clasifica cada segundo, y el bloque se calcula por mayoría sobre esos cinco segundos (3 de nado activo y 2 de inmovilidad dan nado activo). Reglas del bloque (D-53):
 - Gana la conducta con más segundos. Si nado activo y escalamiento empatan (por ejemplo 2 y 2), el bloque es **conducta activa**.
 - Con 2 de inmovilidad y 2 de nado activo, decide el quinto segundo: si es escalamiento, el bloque es conducta activa; si es "no se ve", también es conducta activa, con el matiz de abajo.
 - Un bloque cuyos cinco segundos son "no se ve" se muestra como **conducta activa con un matiz** que avisa que el modelo no pudo ver bien esa parte del video.
-- Los fragmentos "no se ve" también se marcan en el PDF final que se entrega al cliente.
+- Los fragmentos "no se ve" también se marcan en el **reporte de resultados** en PDF que se entrega al terminar.
 
 ```
 +-------------------------------------------------------------+
@@ -624,7 +994,10 @@ Los bloques **no usan la CNN**: la CNN solo clasifica cada segundo, y el bloque 
   breve que lo explique.
 - Descargas en PDF, CSV y XLSX.
 
+Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_consulta_resultados.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_descarga_reportes.puml` (Anexo A.10).
+
 ### 9.6 Panel de administración (solo administrador)
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\admin.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\admin.png`). Perfil propio (menú de usuario): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\perfil.html`.
 Estados: vista de métricas; alerta de disco elevado; cola de análisis activa; modal de
 crear usuario; modal de editar usuario.
 
@@ -642,16 +1015,21 @@ crear usuario; modal de editar usuario.
 +-------------------------------------------------------------+
 Modal "Crear cuenta":  Identificador institucional*, Nombre*, Apellidos*, Correo*  [Crear]
    (el identificador institucional en el formulario quedó decidido, sección 11, punto 12)
-Modal "Editar cuenta": datos editables + interruptor Activo/Inactivo [Guardar]
+Modal "Editar cuenta": datos editables + rol (Investigador / Administrador) + interruptor Activo/Inactivo [Guardar]
+  Si es la última cuenta de Administrador activa, desactivarla o quitarle el rol se rechaza
+  con el aviso "debe existir al menos un Administrador activo" (R-16).
 ```
 
 Al crear una cuenta, el sistema envía la contraseña temporal por correo y **además** la
 muestra una sola vez en pantalla al administrador, como respaldo (D-45, sección 11, punto 2).
 
+Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_cuenta.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_gestion_usuarios.puml` (Anexo A.8).
+
 ### 9.7 Revisión segundo a segundo
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\revision.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\revision.png`). Prototipo de la herramienta de revisión de la que sale esta pantalla (otro repositorio, solo consulta): `C:\Users\Samsung\Desktop\proyectos\fst_auto\revisor_segundos.html`.
 Se abre **solo cuando el análisis está `completado`**, desde Progreso o Resultados
-(regla R-14). Es una versión web de una herramienta de revisión que ya existe como página
-suelta; aquí lee y guarda en el servidor en vez de usar archivos locales. Tema oscuro,
+(regla R-14), y **solo para el investigador que subió el video y el Administrador**
+(D-57); cualquier otro usuario recibe 403. Lee y guarda en el servidor. Tema oscuro,
 pantalla completa. Se revisa **un espécimen a la vez**, con el video corriendo.
 
 ```
@@ -682,27 +1060,36 @@ Cómo funciona:
 - **Con el video corriendo**, la tecla cambia la etiqueta **desde 0.4 s antes** (lo que
   tarda una persona en reaccionar) hasta el siguiente cambio de color. **En pausa**, la
   tecla cambia **solo el segundo donde estás**, para corregir con precisión.
-- **Teclas:** `1` nado, `2` inmovilidad, `3` escalamiento, `4` conducta activa, `0` "no se
-  ve". `Espacio` pausa. `←` `→` un segundo, `Shift` + flecha cinco. `R` vuelve 3 s.
+- **Teclas:** `1` nado, `2` inmovilidad, `3` escalamiento, `4` conducta activa, `0` dudosa
+  (deja el segundo sin conducta). `Espacio` pausa. `←` `→` un segundo, `Shift` + flecha cinco. `R` vuelve 3 s.
   `Tab` cambia de tubo. `Ctrl+Z` deshace. `Ctrl+S` guarda.
 - **"Visto"** son los segundos que el cabezal ya dejó atrás a velocidad 2x o menos. Solo lo
-  visto se guarda como `humano_confirma` (coincide con la conducta del sistema) o `humano_corrige`
-  (la cambiaste). Lo pintado hacia adelante sin verlo queda `sin_revisar`. Un segundo que
-  dejas vacío a propósito queda `humano_duda`.
-- **Modo "desde cero"** (opcional): oculta la conducta del sistema (cartel, colores de la
-  línea de tiempo y contadores); lo que marques queda `humano_ciego`.
-- **Recuadro del tubo:** viene del archivo `analisis_{idAnalisis}_cajas.json` (sección 11,
-  punto 17). Es solo para destacar visualmente al espécimen; no se puede mover.
+  visto se guarda como `confirmada` (coincide con la conducta del sistema) o `corregida`
+  (la cambiaste). Lo pintado hacia adelante sin verlo no se guarda como revisado: se
+  descarta al guardar y esos segundos conservan la conducta y el origen `maquina` que puso
+  el sistema (D-80: ya no existe `sin_revisar`). Un segundo que dejas vacío a propósito
+  queda `dudosa`.
+- No hay modo de revisión "desde cero" que oculte la conducta del sistema: se quitó con
+  el valor `humano_ciego` (D-80).
+- **Recuadro del tubo:** viene del archivo `analisis/{idAnalisis}/cajas.json` (secciones 2 y 11,
+  punto 17). Aquí es solo para destacar visualmente al espécimen; no se mueve. Ajustar un
+  recuadro solo ocurre en la pantalla de pausa (sección 9.4).
+- **Reiniciar el análisis (D-60, D-68):** botón "Reiniciar el análisis" con confirmación
+  ("se borrará el resultado actual"). Llama a `POST .../restart` (sección 6); al empezar se
+  borra el resultado anterior y el análisis vuelve a "en cola". Solo aparece si el análisis
+  está `completado`.
 - **Borrador:** mientras revisas, el avance se guarda en el navegador; al pulsar "Guardar"
-  se manda al servidor (`PUT .../segundos`), que actualiza `SEGUNDO` y recalcula los
-  totales por minuto.
+  se manda al servidor (`PUT .../segundos`), que actualiza `SEGUNDO`; los totales por
+  minuto se calculan desde `SEGUNDO`.
 - **Resumen:** una tabla con los segundos por conducta de cada espécimen antes de guardar.
 - Nombres en pantalla: "Nado", "Inmovilidad", "Escalamiento", "Activa", "Dudosa". En la
   base: `nado activo`, `inmovilidad`, `escalamiento`, `conducta activa` y nulo. "Dudosa"
-  guarda `conducta` nula con `origen = 'humano_duda'`; no existe un botón aparte de "No se
+  guarda `conducta` nula con `origen = 'dudosa'`; no existe un botón aparte de "No se
   ve".
-- En la base los reportes dicen si el análisis tuvo revisión humana (algún `origen` que
-  empiece con `humano`).
+- En la base los reportes dicen si el análisis tuvo revisión humana (algún `origen`
+  distinto de `maquina`).
+
+Diagrama de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_revision_segundos.puml` (Anexo A.9).
 
 ### 9.8 Textos de la interfaz (reglas)
 - Di **"espécimen"**. Nunca "rata" ni "animal" en ningún texto visible.
@@ -715,6 +1102,8 @@ Cómo funciona:
 ## 10. Secuencias clave
 
 **Carga de video:**
+
+Versión completa en PlantUML (Anexo A.9): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_carga_video.puml`
 
 ```mermaid
 sequenceDiagram
@@ -737,13 +1126,20 @@ sequenceDiagram
   else archivo válido
     API->>FS: guarda el archivo
     API->>DB: guarda grupo si es nuevo, tanda y video
-    API->>DB: crea análisis con estado en cola
-    API-->>UI: video almacenado, análisis en cola
-    UI-->>I: redirige a la pantalla de progreso
+    alt la sesión es el Día 2
+      API->>DB: crea análisis con estado en cola
+      API-->>UI: video almacenado, análisis en cola
+      UI-->>I: redirige a la pantalla de progreso
+    else la sesión es el Día 1
+      API-->>UI: video almacenado; el Día 1 no se analiza
+      UI-->>I: avisa que el video quedó guardado
+    end
   end
 ```
 
 **Consulta de progreso (polling cada 3 a 5 s):**
+
+Versión completa en PlantUML (Anexo A.9): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_consulta_progreso.puml`
 
 ```mermaid
 sequenceDiagram
@@ -761,12 +1157,18 @@ sequenceDiagram
   end
   alt algún análisis en error
     UI-->>I: mensaje armado con la etapa y botón de diagnóstico
+  else algún análisis en pausa
+    UI-->>I: pantalla de pausa: imagen, tiempo que queda, Ajustar y continuar, Cancelar análisis
+  else algún análisis cancelado
+    UI-->>I: avisa que se canceló
   else algún análisis completado
     UI-->>I: habilita resultados
   end
 ```
 
 **Descarga de reporte:**
+
+Versión completa en PlantUML (Anexo A.10): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_descarga_reportes.puml`
 
 ```mermaid
 sequenceDiagram
@@ -795,6 +1197,8 @@ sequenceDiagram
 
 **Crear cuenta (solo administrador):**
 
+Versión completa en PlantUML (Anexo A.8): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_cuenta.puml`
+
 ```mermaid
 sequenceDiagram
   actor A as Administrador
@@ -819,6 +1223,10 @@ sequenceDiagram
   end
 ```
 
+Las demás secuencias (inicio y cierre de sesión, cambio y recuperación de contraseña, gestión
+de usuarios, perfil, crear y eliminar experimento, pausa y ajuste del recuadro, revisión segundo
+a segundo, resultados, notificaciones y tareas programadas) están en el Anexo A, A.8 a A.11.
+
 ## 11. Decisiones abiertas y resueltas
 
 1. ~~Cierre de sesión~~ **Resuelto (usuario, 3-oct-2026).** El sistema no maneja datos
@@ -831,7 +1239,8 @@ sequenceDiagram
    aplicación); no depende de un servidor del IPN. Se configura con las variables `SMTP_*`
    (servidor, puerto, usuario, contraseña, remitente). Se envían:
    - **Notificaciones:** cada `NOTIFICACION` que el sistema crea (`analisis completado`,
-     `error del pipeline`, `alerta de disco`, `video borrado`) se manda también por correo a su
+     `error del pipeline`, `analisis en pausa`, `analisis cancelado`, `alerta de disco`,
+     `video borrado`) se manda también por correo a su
      destinatario, como copia del aviso. La campanita no cambia. No se agregan tablas ni
      columnas: el correo sale de `USUARIO.correo`.
    - **Contraseña temporal:** al crear una cuenta se envía por correo **y** se muestra una
@@ -841,33 +1250,40 @@ sequenceDiagram
    Si el envío falla, la operación **no** se detiene: el aviso queda en la campanita y la
    contraseña temporal ya se mostró en pantalla. En desarrollo usa MailHog para ver los
    mensajes sin enviar nada. El correo de una cuenta puede ser de **cualquier dominio**
-   (D-46). **[ABIERTO]** Qué otras notificaciones agregar: el usuario las definirá después;
-   no implementes otras por tu cuenta.
+   (D-46). **[ABIERTO]** Qué otras notificaciones agregar: el usuario las definirá después.
+   **Por defecto:** implementa solo las seis de la lista; no agregues otras.
 3. ~~Quién crea las filas de `MODELO` y `CONFIGURACION`~~ **Sin objeto (usuario,
    5-oct-2026).** Las dos tablas y la columna `ANALISIS.idConfig` se eliminaron: ningún
    requisito permite cambiar el modelo ni el umbral. El modelo entrenado y el umbral de
    decisión (0.80) son constantes del worker (sección 4). Al encolar, el backend solo
    necesita el `idVideo`.
-4. **Valor de `etapa` mientras el análisis está `en cola`: [PROPUESTA]** es nulo. Así
-   está en el SQL del Anexo B. El usuario no lo ha confirmado.
+4. ~~Valor de `etapa` mientras el análisis está `en cola`~~ **Resuelto (usuario,
+   12-oct-2026, D-79).** `etapa`, `nivelClasif` y `fechaAnalisis` siguen NOT NULL y el
+   backend les pone un valor de arranque al encolar (`preprocesamiento`, `preciso` y la
+   fecha de encolado); el worker los reemplaza.
 5. **[ABIERTO] Tamaño máximo de video.** No está definido. Dejar el límite configurable
-   (`MAX_UPLOAD_MB`).
+   (`MAX_UPLOAD_MB`). **Por defecto:** `MAX_UPLOAD_MB=2048` en `.env.example`, el mismo valor
+   en `client_max_body_size` de nginx, y el backend rechaza con 413 lo que lo exceda.
 6. ~~Cardinalidades de especímenes~~ **Resuelto** (sección 5): 2 a 4 por tanda, 2 o más
    por grupo, 1 o más tandas por grupo.
-7. **[ABIERTO] Usuario administrador inicial:** hace falta una semilla en la base, porque
-   no hay autorregistro. Pregunta al usuario qué nombre y correo usar.
+7. **[ABIERTO] Usuario administrador inicial:** hace falta crearlo, porque no hay
+   autorregistro. **Por defecto:** un comando `flask crear-admin` que lee `ADMIN_ID`,
+   `ADMIN_NOMBRE`, `ADMIN_APELLIDOS`, `ADMIN_CORREO` y `ADMIN_PASSWORD` del `.env`, guarda el
+   hash bcrypt, pone `cambioRequerido = true` e inserta la fila en `ADMINISTRADOR`. Los valores
+   reales los pone el usuario: no inventes ninguno ni los escribas en el SQL.
 8. ~~Conteo de conductas~~ **Resuelto (RF-18).** No hay duración mínima: cada segundo
-   recibe una conducta y ninguna se descarta por durar poco. `INTERVALO` y `PRESENTA` no
-   cambian: `PRESENTA` cuenta los segundos de cada conducta en cada minuto.
+   recibe una conducta y ninguna se descarta por durar poco. Los totales por minuto
+   se calculan contando los segundos de cada conducta en `SEGUNDO`.
 9. ~~"Último acceso" de cada usuario~~ **Resuelto (usuario, 3-oct-2026).** Se quita:
    la lista de administración no muestra último acceso y `USUARIO` no lleva esa columna.
 10. **[ABIERTO] Log de ejecución del análisis.** Se quería un registro expandible en la
     pantalla de progreso, pero ninguna tabla guarda mensajes del worker. Por ahora la
     interfaz solo muestra la etapa actual. Lo mismo aplica a un código de error: se arma
-    a partir de `etapa`.
+    a partir de `etapa`. **Por defecto:** no implementes el log.
 11. ~~Quién puede eliminar un experimento~~ **Resuelto (usuario, 3-oct-2026).** Solo quien
     lo creó o un administrador; cualquier otro investigador recibe 403. Se rechaza con 409
-    si algún análisis del experimento está `procesando` (esta parte sigue como propuesta).
+    si algún análisis del experimento está `procesando` o `en pausa` (D-87); los que están
+    `en cola` salen de la cola al eliminarlo.
 12. ~~De dónde sale el identificador institucional de una cuenta nueva~~ **Resuelto
     (usuario, 3-oct-2026).** El administrador lo escribe en el formulario de crear cuenta,
     junto con nombre, apellidos y correo. La contraseña temporal la genera el sistema
@@ -877,15 +1293,16 @@ sequenceDiagram
     5-oct-2026).** `VIDEO.archivo` admite nulo: al borrar el video, la tarea programada lo
     deja en nulo. Nulo significa "el video ya se borró"; la interfaz lo usa para saber que
     ya no se puede reproducir. La fila de `VIDEO` se conserva.
-14. ~~Análisis en pantalla con intervención humana~~ **Resuelto para esta versión (usuario,
-    3-oct-2026).** **No hay vista en vivo, ni procesamiento a la velocidad del video, ni
-    intervención mientras corre el análisis.** El análisis corre en segundo plano a su
-    propio ritmo (el algoritmo actual hace tres pasadas sobre el video completo, así que
-    tarda más que el video; cada video de 5 min tarda unos 10 min). **Solo al final**, cuando
-    el análisis termina, el usuario abre la pantalla de revisión segundo a segundo
-    (sección 9.7) y puede corregir las etiquetas. Quedan **diferidas** y **no debes
-    implementar**: la vista en tiempo real, detener el análisis cuando se pierde el tubo,
-    y el recuadro manipulable.
+14. ~~Análisis en pantalla con intervención humana~~ **Resuelto (usuario, 3-oct-2026,
+    actualizado el 11-oct con D-59, D-60, D-67 y D-68).** Sigue sin haber vista en vivo ni
+    procesamiento a la velocidad del video: el análisis corre en segundo plano a su propio
+    ritmo (cada video de 5 min tarda unos 10 min). **Lo único que interrumpe el análisis es la
+    pausa por espécimen que no se ve (R-15):** a los 3 s seguidos sin verlo, el análisis pasa a
+    `en pausa`, se avisa al usuario y se espera 5 minutos a que ajuste el recuadro del
+    cilindro; sin respuesta, se cancela. Al final, el usuario abre la pantalla de revisión
+    (sección 9.7), puede corregir las etiquetas y puede reiniciar el análisis. Sigue
+    **diferido**, y no debes implementar, la vista en tiempo real. La pantalla de pausa, el
+    archivo donde se guarda el ajuste y el flujo completo quedaron definidos en D-89 (sección 4).
 15. ~~Significado de `ANALISIS.nivelClasif`~~ **Resuelto (usuario, 3-oct-2026).** Se
     queda. `agrupado` si algún segundo quedó como conducta activa; `preciso` si ninguno. La
     interfaz solo lo usa para avisar.
@@ -893,19 +1310,23 @@ sequenceDiagram
     la propuesta. Los `.mov` del iPhone suelen venir
     en un códec (HEVC) que Chrome y Firefox no reproducen. Al terminar el
     análisis, el worker genera con `ffmpeg`, recortando con recodificación para que el corte sea exacto, una copia en H.264 de los últimos 300 s (todo el video si dura menos)
-    (`analisis_{idAnalisis}_web.mp4`, en el volumen `videos_reportes`) y la pantalla de
+    (`analisis/{idAnalisis}/web.mp4`, en el volumen `videos_reportes`) y la pantalla de
     revisión reproduce esa copia. En `worker_fake`, simplemente copia o enlaza el original.
     Esa copia también se borra con el video a los 30 días.
 17. **Dónde se guardan los recuadros de los tubos. Resuelto (usuario, 3-oct-2026):** se
     queda la propuesta. La pantalla de revisión
     dibuja un recuadro sobre el video para destacar el tubo del espécimen que se revisa.
     Esos datos no tienen tabla. El worker los escribe en un archivo del volumen
-    (`analisis_{idAnalisis}_cajas.json`) y el backend lo entrega a la pantalla. No se
+    (`analisis/{idAnalisis}/cajas.json`) y el backend lo entrega a la pantalla. No se
     cambia la base de datos por esto.
-18. **[ABIERTO] Quién puede corregir y cómo cuenta.** **[PROPUESTA]** Quien creó el
-    experimento o un administrador. Al guardar correcciones se recalculan los totales por
-    minuto y los reportes se regeneran (ya lo hacen cuando hay datos nuevos). Los reportes
-    indican si hubo revisión humana. El usuario no lo ha confirmado.
+18. ~~Quién puede corregir y cómo cuenta~~ **Resuelto (usuario, 11-oct-2026, D-57).**
+    Corrige el investigador que subió el video y el Administrador. Corregir no mejora el
+    modelo; si cambia el video o el modelo, es un análisis nuevo (reinicio, R-04). Al guardar
+    los totales por minuto reflejan los cambios (se calculan desde `SEGUNDO`) y los reportes se regeneran. **[ABIERTO]** Si los
+    reportes usan las correcciones y marcan que fueron revisadas (D-57 lo deja sin aclarar).
+    **Por defecto:** los reportes usan los datos actuales de `SEGUNDO` (con las
+    correcciones) e indican si el análisis tuvo revisión humana (algún `origen` distinto de
+    `maquina`).
 
 ## 12. Orden de construcción sugerido [PROPUESTA]
 
@@ -913,45 +1334,65 @@ Cada paso termina con algo que se puede probar.
 
 1. **Docker Compose con `db` y `backend`** que arrancan (parte del Anexo C). Prueba:
    `docker compose up` y un endpoint de salud responde.
-2. **Base de datos:** usa el SQL del Anexo B (dominios, 15 tablas, restricciones
-   y datos semilla de `CONDUCTA`). Falta el administrador
-   inicial (sección 11, punto 7).
+2. **Base de datos:** usa el SQL del Anexo B (dominios, 12 tablas y restricciones). El administrador inicial no va en el SQL: lo crea el
+   comando `flask crear-admin` (sección 11, punto 7).
    Pruébalo contra un PostgreSQL real y corrige lo que falle.
 3. **Autenticación:** login, logout, cambio de contraseña, cambio obligatorio en el primer
    ingreso, recuperación. Bcrypt. JWT de larga duración y configurable (sección 11,
    punto 1). Verificación de rol en `/admin/*`.
 4. **Administración de usuarios** (crear, editar, desactivar, listar con filtros).
 5. **Experimentos y carga de video:** crear experimento, sugerir tanda, subir `.mp4` o `.mov`,
-   validar, guardar, crear el análisis en cola.
-6. **`worker_fake`:** simula el contrato de la sección 4, con un caso exitoso y uno de
-   error (por ejemplo, un archivo cuyo nombre contenga la palabra `falla`).
+   validar, guardar y, si la sesión es el Día 2, crear el análisis en cola (el Día 1 solo se guarda).
+6. **`worker_fake`:** simula el contrato de la sección 4: toma un análisis a la vez, con un
+   caso exitoso, uno de error (un archivo cuyo nombre contenga la palabra `falla`) y uno de
+   pausa (nombre con `pausa`, con sus tres salidas: ajuste, cancelación y vencimiento); al
+   arrancar reencola los análisis `procesando` huérfanos.
 7. **Progreso y resultados:** endpoint de estado con porcentaje, resultados por espécimen,
    desglose por minuto, comparación entre grupos (Día 2) y bloques de 5 s.
 8. **Reportes:** CSV, XLSX, PDF con regeneración por vigencia, y PDF de diagnóstico.
-   **Revisión segundo a segundo:** las tres rutas de la sección 6, el recálculo de
-   `PRESENTA` y la pantalla 9.7 (después de tener resultados y reportes funcionando).
-9. **Tareas programadas:** borrado a 30 días, aviso a 7 días, vigilancia de disco.
-10. **Frontend:** primero inicio de sesión y dashboard, luego crear experimento, progreso,
-    resultados y administración.
+   **Revisión segundo a segundo:** las rutas de revisión, video, guardar y reiniciar de la
+   sección 6, el cálculo de los totales por minuto y la pantalla 9.7 (después de tener resultados y reportes funcionando).
+9. **Tareas programadas** (las ejecuta el worker, D-82; impleméntalas en `worker_fake`, en un
+   módulo aparte, sección 8): borrado a 30 días, aviso a 7 días, vigilancia de disco.
+10. **Frontend:** primero inicio de sesión y dashboard, luego crear experimento, progreso (con
+    la pantalla de pausa), resultados y administración.
 11. **Pruebas:** 4 sesiones simultáneas con un análisis en cola sin pasar de 3 s; los tres
-    navegadores; despliegue limpio con solo Docker en una segunda máquina.
+    navegadores; arranque limpio con solo Docker en una segunda máquina.
 
 ### Criterios de aceptación mínimos
 - `docker compose up` en una máquina limpia deja todo funcionando.
 - Un administrador puede crear una cuenta y esa cuenta debe cambiar la contraseña al entrar.
 - Subir un `.mp4` o `.mov` en horizontal crea un análisis `en cola`; el `worker_fake` lo lleva a `completado`
   y la pantalla de progreso lo refleja sin recargar.
-- Subir un archivo que no es `.mp4` ni `.mov`, o un video en vertical, se rechaza en el
-  cliente.
+- Subir un archivo que no es `.mp4` ni `.mov` se rechaza en el cliente; un video en vertical o que
+  no se puede reproducir lo rechaza el servidor (D-64).
+- Un Administrador no puede desactivarse ni quitarse el rol si es el último Administrador activo
+  (R-16).
 - Un investigador que no es administrador recibe 403 en `/admin/*` aunque conozca la URL.
 - Un reporte vuelve a generarse cuando hay un análisis más nuevo que el guardado.
-- No existe ningún botón para cancelar o reiniciar un análisis.
+- Repetibilidad (RNF-14, D-74): analizar varias veces el mismo video debe dar el mismo resultado,
+  con una variación máxima de entre el 5 y el 10 %. La prueba la hace quien construye el
+  clasificador (TT-II); el backend solo debe conservar, sin alterarlos, los resultados que
+  escribe el worker.
+- «Cancelar análisis» solo existe en la pantalla de pausa, y el reinicio solo aparece en la
+  pantalla de revisión de un análisis `completado`; ambos, para quien subió el video o un
+  Administrador.
+- Subir un video del Día 1 lo guarda sin crear análisis, y el experimento muestra «En espera del
+  Día 2» hasta que se suba uno del Día 2.
+- Con dos análisis en cola, el worker procesa uno a la vez y en orden de llegada.
+- Si el `worker_fake` se apaga con un análisis `procesando`, al arrancar lo reencola y lo termina.
+- Una pausa se puede ajustar (el análisis vuelve a la cola, por delante de los más nuevos, y
+  termina), cancelar o dejar vencer a los 5 minutos; ajustar o cancelar cuando ya no está `en
+  pausa` responde 409.
+- Eliminar un experimento con un análisis `procesando` o `en pausa` responde 409; con uno `en
+  cola`, lo borra y lo saca de la cola.
 
 
 ## 13. Anexo A: diagramas en código PlantUML
 
-Cada bloque empieza con `@startuml nombre` y termina con `@enduml`. Guarda cada uno como
-`nombre.puml` y genéralo con:
+Cada bloque empieza con `@startuml nombre` y termina con `@enduml`, y va precedido de la ruta
+de su archivo `nombre.puml` (carpeta `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web`; cambia la ruta, ver la nota del
+inicio). Si no tienes los archivos, guarda cada bloque como `nombre.puml` y genéralo con:
 
 ```
 java -jar plantuml.jar -tpng -o salida nombre.puml
@@ -964,7 +1405,7 @@ los demás describen el diseño ya acordado.
 
 Índice:
 - A.1 Arquitectura de software
-- A.2 Despliegue con Docker [PROPUESTA]
+- A.2 Contenedores con Docker [PROPUESTA]
 - A.3 Módulos del backend [PROPUESTA]
 - A.4 Esquema físico de la base de datos
 - A.5 Diagrama de clases
@@ -976,6 +1417,8 @@ los demás describen el diseño ya acordado.
 - A.11 Tareas programadas [PROPUESTA]
 
 ### A.1 Arquitectura de software
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\arquitectura_software.puml`
 
 ```plantuml
 @startuml arquitectura_software
@@ -1002,19 +1445,19 @@ rectangle "Docker: frontend" as C_FE #E3F2FD {
 }
 
 rectangle "Docker: backend" as C_BE #E8F8F5 {
-  rectangle "Flask + SQLAlchemy + Flask-JWT-Extended\n\nAPI REST (JSON)\nAutenticacion con JWT\nValidacion de archivos .mp4 / .mov\nEncolado de analisis\nTareas programadas (cron)" as BE #F0FBF8
+  rectangle "Flask + SQLAlchemy + Flask-JWT-Extended\n\nAPI REST (JSON)\nAutenticacion con JWT\nValidacion de archivos .mp4 / .mov\nEncolado de analisis" as BE #F0FBF8
 }
 
 rectangle "Docker: worker\n(lo desarrolla otra persona)" as C_WK #FEF9E7 {
-  rectangle "Pipeline de analisis conductual\n\nToma analisis en cola (polling)\nProcesa el video\nEscribe los resultados" as WK #FFFEF2
+  rectangle "Pipeline de analisis conductual\n\nToma analisis en cola (polling), uno a la vez\nAl arrancar reencola los que quedaron a medias\nProcesa el video (se pausa si no ve al espécimen)\nEscribe los resultados\nTareas programadas (cron, una vez al día)\nVigila el disco antes de cada análisis" as WK #FFFEF2
 }
 
 rectangle "Capa de datos" as DATOS #F4F6F7 {
   rectangle "Docker: db" as C_DB #EBF5FB {
-    database "PostgreSQL\n\nEsquema relacional\n(15 tablas)" as DB
+    database "PostgreSQL\n\nEsquema relacional\n(12 tablas)" as DB
   }
   rectangle "Volumen videos_reportes\n(compartido)" as C_FS #EAEDED {
-    folder "Videos .mp4 / .mov originales\nVideos anotados\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF" as FS
+    folder "Videos .mp4 / .mov originales\nCopia del video para revision (H.264)\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF\nArchivos de pausa (imagen fija y recuadros)" as FS
   }
   rectangle "Volumen modelos\n(solo lectura, solo worker)" as C_MD #F5EEF8 {
     folder "Modelos entrenados" as MD
@@ -1023,7 +1466,7 @@ rectangle "Capa de datos" as DATOS #F4F6F7 {
 
 rectangle "Docker: mailhog\n(solo desarrollo)" as C_ML #FDEDEC
 
-INV  -down->  FE  : "HTTPS"
+INV  -down->  FE  : "navegador"
 FE   -down->  BE  : "API REST\n(JSON + JWT)"
 BE   -down->  DB  : "encola el analisis\n(INSERT, estado = en cola)"
 WK   -->      DB  : "toma la siguiente tarea\n(polling periodico)\ny escribe los resultados"
@@ -1031,13 +1474,16 @@ WK   -->      FS  : "guarda archivos\ngenerados"
 BE   -->      FS  : "guarda videos y reportes,\nlee y sirve archivos"
 WK   -->      MD  : "carga los modelos\nal iniciar"
 BE   -->      C_ML : "SMTP (solo desarrollo)"
+WK   -->      C_ML : "SMTP (solo desarrollo)"
 @enduml
 ```
 
-### A.2 Despliegue con Docker [PROPUESTA]
+### A.2 Contenedores con Docker [PROPUESTA]
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\contenedores_docker.puml`
 
 ```plantuml
-@startuml despliegue_docker
+@startuml contenedores_docker
 !theme plain
 skinparam defaultFontName Arial
 skinparam shadowing false
@@ -1045,7 +1491,7 @@ skinparam BackgroundColor White
 
 actor "Usuario\n(navegador)" as U
 
-node "Servidor (docker compose up)" {
+node "docker compose up" {
   node "frontend\nReact (build) servido por nginx\npuerto 80" as fe
   node "backend\nFlask con gunicorn\npuerto 5000 (interno)" as be
   node "worker\nPython" as wk
@@ -1056,7 +1502,7 @@ node "Servidor (docker compose up)" {
   folder "volumen pgdata" as vp
 }
 
-U --> fe : HTTP/HTTPS
+U --> fe : navegador
 fe --> be : /api  (proxy inverso)
 be --> db : SQL
 wk --> db : SQL (polling)
@@ -1065,6 +1511,7 @@ wk --> vf : lee y escribe
 wk --> vm : lee
 db --> vp : datos
 be ..> ml : SMTP (solo desarrollo)
+wk ..> ml : SMTP (solo desarrollo)
 
 note bottom of be
   depende de: db
@@ -1073,10 +1520,19 @@ note bottom of be
   DISK_ALERT_PERCENT, DISK_CLEANUP_PERCENT,
   RESET_LINK_MINUTES
 end note
+
+note bottom of wk
+  depende de: db
+  variables: DATABASE_URL, ARCHIVOS_DIR, MODELOS_DIR, SMTP_*,
+  DISK_ALERT_PERCENT, DISK_CLEANUP_PERCENT,
+  WORKER_POLL_SECONDS, WORKER_DAILY_HOUR, PAUSE_TIMEOUT_MINUTES
+end note
 @enduml
 ```
 
 ### A.3 Módulos del backend [PROPUESTA]
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\modulos_backend.puml`
 
 ```plantuml
 @startuml modulos_backend
@@ -1110,7 +1566,7 @@ package "Servicios" as SERV {
 }
 
 package "Acceso a datos" {
-  [Modelos SQLAlchemy\n15 tablas] as m
+  [Modelos SQLAlchemy\\n12 tablas] as m
 }
 
 database "PostgreSQL" as db
@@ -1147,6 +1603,8 @@ end note
 ```
 
 ### A.4 Esquema físico de la base de datos
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\esquema_fisico.puml`
 
 ```plantuml
 @startuml esquema_fisico
@@ -1185,11 +1643,12 @@ skinparam arrow {
 '   tipo_grupo             IN ('control','referencia','tratamiento experimental')
 '   sesion_video           IN ('Dia 1','Dia 2')
 '   formato_reporte        IN ('CSV','XLSX','PDF')
-'   tipo_notificacion      IN ('analisis completado','error del pipeline','alerta de disco','video borrado')
-'   estado_analisis        IN ('en cola','procesando','completado','error')
+'   tipo_notificacion      IN ('analisis completado','error del pipeline','analisis en pausa','analisis cancelado','alerta de disco','video borrado')
+'   estado_analisis        IN ('en cola','procesando','en pausa','completado','error','cancelado')
 '   etapa_analisis         IN ('preprocesamiento','cilindros','clasificacion')
 '   nivel_clasif_analisis  IN ('preciso','agrupado')
-'   origen_segundo         IN ('maquina','humano_confirma','humano_corrige','humano_duda','sin_revisar','humano_ciego')
+'   origen_segundo         IN ('maquina','confirmada','corregida','dudosa')
+'   tipo_conducta          IN ('nado activo','inmovilidad','escalamiento','conducta activa')
 ' Todas las llaves foraneas: ON UPDATE NO ACTION ON DELETE NO ACTION.
 
 entity USUARIO {
@@ -1249,8 +1708,8 @@ entity ESPECIMEN {
 }
 note bottom of ESPECIMEN
   D-55: el especimen se distingue por su posicion en el
-  cuadro (numeroCilindro). No se guarda el numero de rata
-  del laboratorio.
+  cuadro (numeroCilindro). No se guarda el numero con que
+  el laboratorio identifica al especimen.
 end note
 
 entity VIDEO {
@@ -1277,6 +1736,7 @@ entity ANALISIS {
 }
 note bottom of ANALISIS
   idVideo UNIQUE: un video, un analisis vigente.
+  Solo los videos del Dia 2 tienen analisis (D-71).
   Reanalizar reemplaza el resultado, no hay historial.
   rutaDiagnostico solo se llena si estado = 'error'.
 end note
@@ -1290,36 +1750,11 @@ entity OBSERVACION {
   UK (idEspecimen, idVideo)
 }
 
-entity INTERVALO {
-  * idIntervalo : integer <<PK>>
-  --
-  idObservacion : integer <<FK>>
-  minuto : smallint
-  ..
-  UK (idObservacion, minuto)
-}
-
-entity CONDUCTA {
-  * nombre : varchar(n) <<PK>>
-}
-
-entity PRESENTA {
-  * idIntervalo : integer <<PK>> <<FK>>
-  * conducta : varchar(n) <<PK>> <<FK>>
-  --
-  segundos : numeric(p,s)
-}
-note bottom of PRESENTA
-  Resumen por minuto. Una fila por cada una de las
-  cuatro conductas, incluso con 0 segundos. Se recalcula
-  desde SEGUNDO cada vez que el usuario guarda correcciones.
-end note
-
 entity SEGUNDO {
   * idObservacion : integer <<PK>> <<FK>>
   * segundo : smallint <<PK>>
   --
-  conducta : varchar(n) <<FK>> (nulo = "no se ve")
+  conducta : tipo_conducta (nulo = "no se ve")
   origen : origen_segundo
   ..
   CK segundo BETWEEN 1 AND 300
@@ -1366,16 +1801,12 @@ GRUPO          "1" --o "1..*" TANDA                     : idGrupo
 TANDA          "1" --o "2..4" ESPECIMEN                 : idTanda
 TANDA          "1" --o "1..2" VIDEO                     : idTanda
 
-VIDEO          "1" --o "1"    ANALISIS                  : idVideo (UK)
-VIDEO          "1" --o "2..4" OBSERVACION                : idVideo
+VIDEO          "1" --o "0..1" ANALISIS                  : idVideo (UK)
+VIDEO          "1" --o "0..4" OBSERVACION                : idVideo
 
-ESPECIMEN      "1" --o "1..2" OBSERVACION                : idEspecimen
+ESPECIMEN      "1" --o "0..1" OBSERVACION                : idEspecimen
 
-OBSERVACION    "1" --o "5"    INTERVALO                 : idObservacion
-INTERVALO      "1" --o "2..4" PRESENTA                  : idIntervalo
-CONDUCTA       "1" --o "0..*" PRESENTA                  : conducta
 OBSERVACION    "1" --o "1..300" SEGUNDO                 : idObservacion
-CONDUCTA       "0..1" --o "0..*" SEGUNDO                : conducta
 @enduml
 ```
 
@@ -1383,6 +1814,8 @@ CONDUCTA       "0..1" --o "0..*" SEGUNDO                : conducta
 
 El paquete P3 (worker y pipeline) lo desarrolla otra persona; se incluye para ver cómo se
 relaciona con el resto. El backend implementa los paquetes P1, P2, P4 y P5.
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\clases.puml`
 
 ```plantuml
 @startuml clases
@@ -1411,12 +1844,16 @@ package P1_Autenticacion_y_usuarios {
     +subirVideo(idTanda, sesion, archivo) : Video
     +eliminarExperimento(id) : void
     +descargarReporte(idExperimento, formato) : Reporte
+    +reiniciarAnalisis(idAnalisis) : void
+    +ajustarRecuadro(idAnalisis, cilindro, recuadro) : void
+    +cancelarAnalisisEnPausa(idAnalisis) : void
   }
   class Administrador {
     +crearCuentaUsuario(datos) : Usuario
     +desactivarCuentaUsuario(id) : void
     +listarUsuarios() : List<Usuario>
     +monitorearSistema() : void
+    +modificarCuentaUsuario(id, datos) : void
   }
 }
 
@@ -1450,7 +1887,8 @@ package P2_Experimentos_y_carga_de_video {
     -archivo : String
     -duracion : Float
     -fechaCarga : DateTime
-    +validarFormatoMp4() : Boolean
+    +validarFormato() : Boolean
+    +validarOrientacion() : Boolean
     +validarReproducible() : Boolean
     +estaProximaEliminacion(dias) : Boolean
   }
@@ -1460,22 +1898,38 @@ package P3_Pipeline_de_analisis_conductual {
   class Worker <<control>> {
     +procesarCola() : void
     +borrarVideosExpirados() : void
+    +avisarVencimientos() : void
+    +vigilarDisco() : void
+    +reencolarHuerfanos() : void
+    +cancelarPausasVencidas() : void
   }
   class PipelineAnalisis <<control>> {
-    -UMBRAL_DECISION : Float = 0.80
     +preprocesarVideo(video) : void
     +detectarCilindros() : List<ROI>
-    +clasificarConducta(especimen, frame) : String
+    +clasificarConducta(especimen, roi, segundo) : String
     +generarReporte(experimento, tipo) : Reporte
-    +actualizarProgreso(idAnalisis, pct, etapa) : void
+    +actualizarProgreso(idAnalisis, etapa) : void
     +marcarError(idAnalisis, mensaje) : void
+    +pausarAnalisis(idAnalisis) : void
+    +guardarImagenPausa(idAnalisis, cilindro, segundo) : void
+    +aplicarAjusteRecuadro(idAnalisis) : void
+    +cancelarAnalisis(idAnalisis) : void
+    +generarCopiaRevision(video) : void
   }
   class ROI {
+    -numeroCilindro : Integer
     -x : Integer
     -y : Integer
     -w : Integer
     -h : Integer
+    -yAgua : Integer
+    -yFondo : Integer
   }
+  note right of ROI
+    Coordenadas del video ya estabilizado.
+    Objeto del pipeline: no se guarda
+    en la base de datos.
+  end note
   class Analisis {
     -id : Integer
     -estado : String
@@ -1487,19 +1941,17 @@ package P3_Pipeline_de_analisis_conductual {
 
 package P4_Resultados_y_reportes {
   class Observacion {
+    +calcularBloques() : List<String>
   }
-  class Intervalo {
-    -minuto : Integer
-  }
-  class Conducta {
-    -nombre : String
-  }
-  class PRESENTA {
-    -segundos : Float
+  enum Conducta {
+    nado activo
+    inmovilidad
+    escalamiento
+    conducta activa
   }
   class Segundo {
     -segundo : Integer
-    -conducta : String
+    -conducta : Conducta
     -origen : String
     +corregir(conducta, origen) : void
   }
@@ -1533,23 +1985,21 @@ Grupo       "1" *--> "1..*" Tanda     : "se graba en"
 Tanda       "1" *--> "2..4" Especimen : aloja
 Tanda       "1" *--> "1..2" Video     : produce
 
-Analisis "1" --> "1" Video            : procesa
+Analisis "0..1" --> "1" Video            : procesa
 
 Worker ..> PipelineAnalisis : invoca
 Worker ..> Analisis         : procesa
 Worker ..> Video            : elimina
-PipelineAnalisis ..> ROI         : crea
+PipelineAnalisis ..> "2..4" ROI  : crea
+Especimen "1" --> "0..*" ROI     : "se delimita con"
 PipelineAnalisis ..> Video       : procesa
 PipelineAnalisis ..> Analisis    : actualiza
 PipelineAnalisis ..> Observacion : origina
-PipelineAnalisis ..> PRESENTA    : genera
+PipelineAnalisis ..> Segundo      : genera
 
-Especimen   "1" --> "1..2" Observacion : "aparece en"
-Video       "1" --> "2..4" Observacion : contiene
-Observacion "1" *--> "5"   Intervalo   : "se divide en"
+Especimen   "1" --> "0..1" Observacion : "aparece en"
+Video       "1" --> "0..4" Observacion : contiene
 Observacion "1" *--> "1..300" Segundo  : "se etiqueta en"
-Intervalo "2..4" -- "0..*" Conducta : presenta
-(Intervalo, Conducta) .. PRESENTA
 
 Experimento "1"    --> "0..*" Reporte      : origina
 Experimento "0..1" --> "0..*" Notificacion : origina
@@ -1557,6 +2007,8 @@ Experimento "0..1" --> "0..*" Notificacion : origina
 ```
 
 ### A.6 Estados del análisis y del experimento
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\estados_analisis.puml`
 
 ```plantuml
 @startuml estados_analisis
@@ -1570,12 +2022,21 @@ state procesando {
   cilindros --> clasificacion
 }
 en_cola --> procesando : el Worker tomó la tarea\n(polling)
-cilindros --> error : [no se pudo abrir el video\no no se hallaron los tubos]\nse generó el reporte de\ndiagnostico
+preprocesamiento --> error : [no se pudo abrir el video] (RN-11)
+cilindros --> error : [no se hallaron los cilindros] (RN-11)\nse generó el reporte de\ndiagnóstico
 clasificacion --> completado : se completaron las\ntres etapas
+clasificacion --> en_pausa : [3 s seguidos sin ver\nal espécimen] se avisó al usuario (RN-17)
+en_pausa --> en_cola : el usuario ajustó el recuadro\n(vuelve al frente de la cola\ny continúa desde la pausa)
+en_pausa --> cancelado : el usuario canceló o no\nrespondió en 5 minutos (RN-17)
+procesando --> en_cola : el Worker se apagó a media\nanálisis; al arrancar lo reencola
+completado --> en_cola : el investigador reinició\nel análisis (RN-04)
 completado --> [*]
 error --> [*]
+cancelado --> [*]
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\estados_experimento.puml`
 
 ```plantuml
 @startuml estados_experimento
@@ -1583,17 +2044,24 @@ error --> [*]
 skinparam defaultFontName Arial
 skinparam shadowing false
 ' El estado del experimento NO se guarda: se calcula a partir de los
-' analisis de todas sus tandas. Precedencia: error > procesando > en cola > completado.
+' analisis de todas sus tandas. Precedencia: error > cancelado > en pausa > procesando > en cola > completado.
 [*] --> sin_videos : se creó el experimento
-sin_videos --> en_cola : se subió y encoló\nel primer video
+sin_videos --> en_espera_dia2 : solo se subió video\ndel Día 1
+sin_videos --> en_cola : se subió y encoló\nun video del Día 2
+en_espera_dia2 --> en_cola : se subió y encoló\nun video del Día 2
 en_cola --> procesando : el Worker empezó a\nprocesar alguna tanda
 procesando --> completado : todas las tandas\nterminaron sin error
 procesando --> error : alguna tanda\nterminó en error
+procesando --> en_pausa : alguna tanda quedó\nen pausa (RN-17)
+en_pausa --> en_cola : el usuario ajustó\nel recuadro
+en_pausa --> cancelado : el usuario canceló o\n5 min sin respuesta
 completado --> en_cola : se agregó una tanda\nnueva
 @enduml
 ```
 
 ### A.7 Casos de uso
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\cu_vision_general.puml`
 
 ```plantuml
 @startuml cu_vision_general
@@ -1626,6 +2094,8 @@ ADMIN --> P5
 WRK --> P3 : ejecuta pipeline
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\cu_paquete1.puml`
 
 ```plantuml
 @startuml cu_paquete1
@@ -1667,6 +2137,8 @@ UC17 ..> UC15a : <<include>>
 @enduml
 ```
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\cu_paquete2.puml`
+
 ```plantuml
 @startuml cu_paquete2
 !pragma layout smetana
@@ -1696,11 +2168,13 @@ SYS --> UC25
 SYS --> UC26
 UC22 ..> UC23 : <<include>>
 UC23 ..> UC24 : <<include>>
-UC24 ..> UC25 : <<include>>
+UC25 ..> UC22 : <<extend>>\n[el video es de la\nsesión del Día 2]
 UC26 ..> UC24 : <<extend>>\n[no reproducible]
 UC26 ..> UC24 : <<extend>>\n[formato invalido]
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\cu_paquete3.puml`
 
 ```plantuml
 @startuml cu_paquete3
@@ -1722,6 +2196,9 @@ rectangle "Plataforma Web FST - Paquete 3" {
   usecase "Clasificar conducta" as UC34
   usecase "Monitorear progreso" as UC35
   usecase "Reportar error de pipeline" as UC36
+  usecase "Pausar el análisis\n(y cancelarlo si no\nhay respuesta)" as UC37
+  usecase "Ajustar el recuadro\ndel cilindro y continuar" as UC38
+  usecase "Cancelar el análisis\nen pausa" as UC39
 }
 WRK --> UC30
 INV --> UC35
@@ -1729,8 +2206,15 @@ UC30 ..> UC31 : <<include>>
 UC30 ..> UC32 : <<include>>
 UC30 ..> UC34 : <<include>>
 UC36 ..> UC32 : <<extend>>\n[no se hallaron los tubos]
+INV --> UC38
+INV --> UC39
+UC37 ..> UC30 : <<extend>>\n[3 s seguidos sin ver\nal espécimen]
+UC38 ..> UC37 : <<extend>>\n[el análisis está en pausa]
+UC39 ..> UC37 : <<extend>>\n[el análisis está en pausa]
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\cu_paquete4.puml`
 
 ```plantuml
 @startuml cu_paquete4
@@ -1758,6 +2242,8 @@ UC42 ..> UC41 : <<extend>>\n[solicita desglose]
 UC45 ..> UC46 : <<include>>
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\cu_paquete5.puml`
 
 ```plantuml
 @startuml cu_paquete5
@@ -1808,6 +2294,8 @@ programada del backend** (sección 8 y A.11).
 
 ### A.8 Secuencias: autenticación y cuentas
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_login.puml`
+
 ```plantuml
 @startuml seq_login
 !theme plain
@@ -1841,6 +2329,8 @@ end
 @enduml
 ```
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_logout.puml`
+
 ```plantuml
 @startuml seq_logout
 !theme plain
@@ -1859,6 +2349,8 @@ ui -> ui: borra el token del navegador
 ui --> u: muestra la pantalla de inicio de sesión
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_cambiar_contrasena.puml`
 
 ```plantuml
 @startuml seq_cambiar_contrasena
@@ -1897,6 +2389,8 @@ end
 @enduml
 ```
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_recuperar_contrasena.puml`
+
 ```plantuml
 @startuml seq_recuperar_contrasena
 !theme plain
@@ -1933,6 +2427,8 @@ else enlace válido
 end
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_cuenta.puml`
 
 ```plantuml
 @startuml seq_crear_cuenta
@@ -1979,6 +2475,8 @@ end
 @enduml
 ```
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_gestion_usuarios.puml`
+
 ```plantuml
 @startuml seq_gestion_usuarios
 !theme plain
@@ -2011,15 +2509,15 @@ else sí está en ADMINISTRADOR
   alt crear cuenta nueva
     ui --> admin: abre el formulario de "Crear cuenta"\n(ver seq_crear_cuenta)
   else editar o desactivar cuenta
-    admin -> ui: cambia datos, o selecciona un usuario\ny confirma la desactivación
-    ui -> api: PATCH /admin/users/{id} {datos, o activo: false}
-    api -> db: si este usuario es Administrador y se desactiva,\n¿cuántos Administradores activos quedarían?
+    admin -> ui: cambia datos o rol, o selecciona un usuario\ny confirma la desactivación
+    ui -> api: PATCH /admin/users/{id} {datos, rol, o activo: false}
+    api -> db: si este usuario es Administrador y se desactiva\no pierde el rol, ¿cuántos Administradores activos quedarían?
     db --> api: cantidad restante (o "no aplica")
     alt quedarían 0 Administradores activos
       api --> ui: rechaza la desactivación
       ui --> admin: muestra la advertencia\n"debe existir al menos un Administrador activo"
     else se puede aplicar el cambio
-      api -> db: actualiza USUARIO (activo = false si se desactiva)
+      api -> db: actualiza USUARIO (datos o activo = false)\ny agrega o quita su fila en ADMINISTRADOR si cambia el rol
       db --> api: confirma la actualización
       api --> ui: 200 OK
       ui --> admin: la tabla refleja el cambio
@@ -2028,6 +2526,8 @@ else sí está en ADMINISTRADOR
 end
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_perfil.puml`
 
 ```plantuml
 @startuml seq_perfil
@@ -2066,6 +2566,8 @@ end note
 
 ### A.9 Secuencias: experimentos, carga y análisis
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_experimento.puml`
+
 ```plantuml
 @startuml seq_crear_experimento
 !theme plain
@@ -2093,6 +2595,8 @@ else el nombre es único
 end
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_carga_video.puml`
 
 ```plantuml
 @startuml seq_carga_video
@@ -2144,13 +2648,21 @@ else el archivo es válido
   api -> db: guarda el grupo, si es nuevo
   api -> db: guarda la tanda, nueva o existente
   api -> db: guarda el video, con su tanda y su sesión
-  api -> db: crea el análisis del video, con estado "en cola"
-  db --> api: confirma que todo quedó guardado
-  api --> ui: 201, video almacenado, análisis en cola
-  ui --> inv: confirmación, y redirección a la pantalla de progreso
+  alt la sesión es el Día 2
+    api -> db: crea el análisis del video, con estado "en cola"
+    db --> api: confirma que todo quedó guardado
+    api --> ui: 201, video almacenado, análisis en cola
+    ui --> inv: confirmación, y redirección a la pantalla de progreso
+  else la sesión es el Día 1 (habituación)
+    db --> api: confirma que todo quedó guardado
+    api --> ui: 201, video almacenado; el Día 1 no se analiza
+    ui --> inv: confirmación de que el video quedó guardado
+  end
 end
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_analisis_automatico.puml`
 
 ```plantuml
 @startuml seq_analisis_automatico
@@ -2167,11 +2679,21 @@ database "Base de datos" as db
 note over w, db
   Esto lo hace el worker (lo desarrolla otra persona).
   Aqui sirve como contrato: tu worker_fake debe
-  escribir en la base exactamente estos cambios.
+  escribir en la base exactamente estos cambios
+  (el detalle completo esta en la seccion 4).
 end note
 
-w -> db: revisa la tabla de análisis, buscando uno en cola\n(polling periódico)
+== Al arrancar el Worker ==
+
+w -> db: busca los análisis que quedaron "procesando" sin nadie\ntrabajando en ellos (el Worker se apagó a media análisis)
+w -> db: los pasa a "en cola" con la etapa "preprocesamiento":\nempiezan de cero (D-84)
+w -> db: revisa que cada análisis "en pausa" tenga su archivo de pausa;\nsi no lo tiene, lo cancela
+
+== Un análisis a la vez ==
+
+w -> db: revisa la tabla de análisis, buscando el más antiguo en cola\n(polling periódico; se atiende uno a la vez, D-85)
 db --> w: siguiente análisis en cola, si hay alguno
+w -> fs: revisa el espacio libre del disco\n(aviso al 80 %, limpieza al 90 %, D-86)
 w -> db: marca el análisis como "procesando"
 
 w -> fs: lee el archivo de video de la tanda
@@ -2186,23 +2708,33 @@ w -> w: localiza los cilindros y la línea de agua (sobre el video completo)
 alt se hallaron los tubos
   w -> db: actualiza la etapa a "clasificación"
   w -> w: clasifica la conducta de cada espécimen, segundo a segundo\n(nado, inmovilidad, escalamiento o conducta activa)
+  alt pasan tres segundos seguidos sin ver al espécimen (RN-17)
+    w -> fs: guarda una imagen fija del segundo central de esos tres\ny el archivo de pausa
+    w -> db: marca el análisis como "en pausa"
+    w -> db: crea la notificación de análisis en pausa
+    w -> w: suelta el video y atiende el siguiente de la cola\n(el ajuste, la cancelación y la reanudación están\nen seq_pausa_y_ajuste)
+  else se clasificó todo el video
 
-  loop por cada espécimen detectado en el video
-    w -> db: guarda su observación de este video
-    w -> db: guarda sus 5 intervalos, con los segundos\npor conducta de cada uno
+    loop por cada espécimen detectado en el video
+      w -> db: guarda su observación de este video
+      w -> db: guarda una etiqueta por cada segundo analizado (SEGUNDO)
+    end
+
+    w -> fs: guarda la copia del video recortada a lo analizado,\nen un formato que el navegador reproduce (H.264, D-58)
+    w -> db: marca el análisis como "completado",\ncon su nivel de clasificación y fechaAnalisis
+    w -> db: crea la notificación de análisis terminado
   end
-
-  w -> db: marca el análisis como "completado",\ncon su nivel de clasificación y fechaAnalisis
-  w -> db: crea la notificación de análisis terminado
-else no se pudo abrir el video o no se hallaron los tubos
+else no se pudo abrir el video, no se hallaron los tubos\no falló algo imprevisto en el pipeline (D-88)
   w -> w: genera el reporte de diagnóstico PDF
   w -> fs: guarda el PDF de diagnóstico
   w -> db: guarda rutaDiagnostico
-  w -> db: marca el análisis como "error" y fija fechaAnalisis\n(el investigador no puede reiniciarlo)
+  w -> db: marca el análisis como "error" y fija fechaAnalisis\n(no se reinicia desde la pantalla de error, RN-04)
   w -> db: crea la notificación de error en el análisis
 end
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_consulta_progreso.puml`
 
 ```plantuml
 @startuml seq_consulta_progreso
@@ -2220,7 +2752,7 @@ participant "Archivos" as fs
 
 inv -> ui: abre la pantalla de progreso del experimento\n(o llega redirigido tras subir un video)
 
-loop cada 3 a 5 segundos, mientras haya análisis en cola o procesando
+loop cada 3 a 5 segundos, mientras haya análisis en cola, procesando o en pausa
   ui -> api: GET /experiments/{id}/status
   api -> db: busca los análisis de este experimento\n(vía sus grupos, tandas y videos)
   db --> api: cada análisis, con su estado y su etapa
@@ -2231,6 +2763,10 @@ end
 
 alt algún análisis llegó a "completado"
   ui -> inv: habilita el acceso a los resultados
+else algún análisis quedó "en pausa"
+  ui -> inv: avisa que el sistema no vio al espécimen,\nmuestra el tiempo que queda de los 5 minutos\ny los botones "Ajustar y continuar" y "Cancelar análisis"\n(ver seq_pausa_y_ajuste y RN-17)
+else algún análisis quedó "cancelado"
+  ui -> inv: muestra que el análisis se canceló, por falta de respuesta\no porque el usuario lo canceló (RN-17)
 else algún análisis llegó a "error"
   ui -> inv: muestra el mensaje armado con la etapa,\ny habilita la descarga del reporte de diagnóstico
   inv -> ui: selecciona la descarga del reporte de diagnóstico
@@ -2251,6 +2787,88 @@ else algún análisis llegó a "error"
 end
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_pausa_y_ajuste.puml`
+
+```plantuml
+@startuml seq_pausa_y_ajuste
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
+
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant "Archivos" as fs
+participant Worker as w
+
+== El Worker pausa el análisis ==
+
+w -> w: ve tres segundos seguidos sin el espécimen en un cilindro (RN-17)
+w -> fs: guarda una imagen fija del segundo central de esos tres,\ncon el recuadro actual de cada cilindro
+w -> fs: escribe el archivo de pausa: cilindro, segundo,\nhora de la pausa y recuadros
+w -> db: marca el análisis como "en pausa"
+w -> db: crea la notificación de análisis en pausa
+w -> w: suelta el video y atiende el siguiente de la cola
+
+== El usuario abre la pausa ==
+
+inv -> ui: abre la notificación
+ui -> api: pide los datos de la pausa de ese análisis
+api -> db: lee el análisis y su estado
+api -> fs: lee el archivo de pausa y la imagen fija
+api --> ui: imagen, recuadro actual y tiempo que queda de los 5 minutos
+ui --> inv: muestra la imagen con el recuadro, el tiempo que queda\ny los botones "Ajustar y continuar" y "Cancelar análisis"
+
+alt el usuario ajusta el recuadro
+  inv -> ui: arrastra el recuadro y pulsa "Ajustar y continuar"
+  ui -> api: envía el cilindro y el recuadro nuevo
+  api -> fs: agrega el recuadro nuevo al archivo de pausa
+  api -> db: pasa el análisis a "en cola", solo si todavía está "en pausa"\n(conserva su fecha de encolado)
+  alt el análisis seguía en pausa
+    db --> api: confirma
+    api --> ui: confirma
+    ui --> inv: avisa que el análisis continuará en cuanto el sistema esté libre
+  else ya no estaba en pausa (se canceló)
+    db --> api: no cambió nada
+    api --> ui: ya no se puede ajustar
+    ui --> inv: avisa que el análisis ya se canceló
+  end
+else el usuario cancela el análisis
+  inv -> ui: pulsa "Cancelar análisis"
+  ui -> api: pide cancelar el análisis
+  api -> db: pasa el análisis a "cancelado", solo si todavía está "en pausa"
+  api --> ui: confirma, o avisa que ya no estaba en pausa
+  ui --> inv: muestra el análisis como cancelado
+end
+
+== El Worker retoma el análisis ajustado ==
+
+w -> db: toma el análisis en cola más antiguo\n(el ajustado queda por delante de los que llegaron después)
+w -> fs: lee el archivo de pausa
+w -> w: convierte el recuadro nuevo a las coordenadas del video estabilizado\ny reemplaza la geometría de ese cilindro
+w -> db: marca el análisis como "procesando"
+w -> w: vuelve a revisar esos tres segundos y continúa\ndesde el segundo de la pausa
+
+== Si pasan 5 minutos sin respuesta ==
+
+loop en cada vuelta de la cola
+  w -> db: busca los análisis "en pausa"
+  w -> fs: lee la hora de pausa de cada uno
+  opt pasaron más de 5 minutos
+    w -> db: pasa el análisis a "cancelado", solo si todavía está "en pausa"
+    w -> db: crea la notificación de análisis cancelado
+  end
+end
+
+@enduml
+```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_eliminar_experimento.puml`
 
 ```plantuml
 @startuml seq_eliminar_experimento
@@ -2273,12 +2891,12 @@ api -> db: lee el experimento, su dueño y el estado de sus análisis
 db --> api: datos
 alt el usuario no es quien lo creó ni es Administrador
   api --> ui: 403
-else algún análisis del experimento está "procesando"
-  api --> ui: 409, "Espera a que termine el análisis"
+else algún análisis del experimento está "procesando" o "en pausa"
+  api --> ui: 409, "Espera a que termine el análisis o cancélalo"
 else se puede eliminar
-  api -> db: borra en orden, de las hojas hacia arriba:\nSEGUNDO, PRESENTA, INTERVALO, OBSERVACION, ANALISIS,\nVIDEO, ESPECIMEN, TANDA, GRUPO,\nREPORTE, NOTIFICACION, EXPERIMENTO\n(todo en una sola transacción)
+  api -> db: borra en orden, de las hojas hacia arriba:\nSEGUNDO, OBSERVACION, ANALISIS,\nVIDEO, ESPECIMEN, TANDA, GRUPO,\nREPORTE, NOTIFICACION, EXPERIMENTO\n(todo en una sola transacción)
   db --> api: confirma
-  api -> fs: borra los videos, reportes y diagnósticos del experimento
+  api -> fs: borra los videos, reportes, diagnósticos y carpetas de pausa del experimento
   api --> ui: 200 OK
   ui --> u: quita el experimento del dashboard
 end
@@ -2288,6 +2906,8 @@ note over api, db
 end note
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_revision_segundos.puml`
 
 ```plantuml
 @startuml seq_revision_segundos
@@ -2305,7 +2925,7 @@ participant "Archivos" as fs
 
 u -> ui: en Progreso o Resultados elige\n"Revisar segundo a segundo"
 ui -> api: GET /experiments/{id}/analyses/{idAnalisis}/review
-api -> db: ¿el análisis está "completado" y el usuario puede revisarlo?
+api -> db: ¿el análisis está "completado" y el usuario lo subió o es Administrador? (D-57)
 db --> api: sí / no
 alt no está completado o el usuario no tiene permiso
   api --> ui: 409 o 403
@@ -2313,20 +2933,26 @@ alt no está completado o el usuario no tiene permiso
 else se puede revisar
   api -> db: especímenes, observaciones y etiquetas de SEGUNDO
   db --> api: filas por espécimen y por segundo
-  api -> fs: lee analisis_{idAnalisis}_cajas.json
+  api -> fs: lee analisis/{idAnalisis}/cajas.json
   fs --> api: recuadros de los tubos
   api --> ui: 200 OK {duración, especímenes, etiquetas, recuadros}
   ui -> api: GET .../video (con Range)
-  api -> fs: lee analisis_{idAnalisis}_web.mp4
+  api -> fs: lee analisis/{idAnalisis}/web.mp4
   api --> ui: 206 Partial Content
   loop el usuario revisa un espécimen a la vez
     u -> ui: pulsa 1 a 4 o 0, pausa o mueve la línea de tiempo
     ui -> ui: guarda un borrador en el navegador
   end
+  opt el usuario elige "Reiniciar el análisis" (RN-04, D-60)
+    ui -> api: POST .../restart
+    api -> db: [transacción] borra el resultado anterior\n(observaciones y segundos de ese video)
+    api -> db: [transacción] deja el análisis "en cola"\ncon sus valores de arranque
+    api --> ui: 202 Accepted
+    ui --> u: vuelve a la pantalla de progreso
+  end
   u -> ui: Guardar (Ctrl+S)
   ui -> api: PUT .../segundos\n{cambios: [{numeroCilindro, segundo, conducta, origen}]}
   api -> db: [transacción] actualiza SEGUNDO\n(conducta y origen)
-  api -> db: [transacción] recalcula INTERVALO y PRESENTA\nde los especímenes tocados (4 filas por intervalo)
   api -> db: [transacción] actualiza nivelClasif\n(agrupado si queda algún segundo como conducta activa)
   api -> db: borra los reportes guardados del experimento\npara que se regeneren con los datos nuevos
   api -> fs: borra los archivos de esos reportes
@@ -2342,6 +2968,8 @@ end note
 ```
 
 ### A.10 Secuencias: resultados, reportes y notificaciones
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_consulta_resultados.puml`
 
 ```plantuml
 @startuml seq_consulta_resultados
@@ -2365,7 +2993,7 @@ loop por cada grupo
   api -> db: busca los especímenes del grupo, vía sus tandas
   api -> db: para cada espécimen, busca su observación\ndel video con sesión "Día 2"
   alt el espécimen ya tiene su Día 2 analizado
-    api -> db: suma los segundos por conducta\nde los 5 intervalos de esa observación
+    api -> db: cuenta los segundos de cada conducta\\nen los segundos de esa observación
     db --> api: segundos de nado activo, inmovilidad, escalamiento y conducta activa
   else el Día 2 de ese espécimen no tiene resultado\n(análisis en cola, procesando, con error, o sin subir)
     api -> api: marca al espécimen como dato faltante\npara este grupo
@@ -2385,6 +3013,8 @@ ui -> inv: muestra la comparación de los grupos\n(solo Día 2), con los especí
 inv -> ui: puede pedir el reporte descargable
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_descarga_reportes.puml`
 
 ```plantuml
 @startuml seq_descarga_reportes
@@ -2424,9 +3054,10 @@ note right of api
   desglose por minuto) más estadísticas por grupo:
   media, desviación estándar y varianza por conducta,
   entre los especímenes de cada uno de los tres grupos.
-  Columnas: Tiempo (min:seg), Nado, Escalamiento,
-  Inmovilidad, Conducta activa. Una fila por minuto.
-  PDF: resumen ejecutivo, documento distinto del
+  Columnas: Grupo, Tanda, Espécimen, Tiempo (min:seg), Nado,
+  Escalamiento, Inmovilidad, Conducta activa. Una fila por
+  espécimen y por minuto.
+  PDF: reporte de resultados, documento distinto del
   reporte de diagnóstico.
 end note
 
@@ -2434,6 +3065,8 @@ api --> ui: archivo listo
 ui --> inv: descarga inmediata en el navegador
 @enduml
 ```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_notificaciones.puml`
 
 ```plantuml
 @startuml seq_notificaciones
@@ -2472,6 +3105,8 @@ ui --> u: abre el experimento relacionado, si lo hay
 
 ### A.11 Tareas programadas [PROPUESTA]
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_tareas_programadas.puml`
+
 ```plantuml
 @startuml seq_tareas_programadas
 !theme plain
@@ -2487,10 +3122,11 @@ participant "Archivos" as fs
 job -> db: análisis con estado "completado" cuya fechaAnalisis\nsea de hace 30 días o más
 db --> job: lista de videos vencidos
 loop por cada video vencido
-  job -> fs: borra el archivo del video (si todavía existe)
+  job -> fs: borra el archivo del video y su copia web.mp4 (si todavía existen)
+  job -> db: deja VIDEO.archivo en nulo
 end
+job -> fs: borra las carpetas de pausa (pausa.json, pausa.jpg) que hayan quedado huérfanas
 note right of job
-  VIDEO.archivo no se modifica.
   Resultados y reportes se conservan.
 end note
 
@@ -2503,23 +3139,28 @@ note right of job
   fecha exacta de vencimiento).
 end note
 
-== Cada hora (por ejemplo): vigilar el disco ==
+== Una vez al día, y antes de cada análisis: vigilar el disco ==
 job -> fs: mide el porcentaje de uso del disco
 fs --> job: porcentaje
 alt uso >= DISK_CLEANUP_PERCENT (90 %)
   loop mientras el uso siga >= 90 %
     job -> db: video más antiguo cuyo archivo todavía exista
-    job -> fs: borra el archivo
-    job -> db: crea NOTIFICACION "alerta de disco" para\nquien creó ese experimento
+    job -> fs: borra el archivo del video y su copia web.mp4
+    job -> db: deja VIDEO.archivo en nulo
+    job -> db: crea NOTIFICACION "video borrado" para\nquien creó ese experimento
   end
 else uso >= DISK_ALERT_PERCENT (80 %)
   job -> db: crea NOTIFICACION "alerta de disco"\npara cada Administrador activo\n(si no hay ya una sin leer)
 end
+
+== Al terminar la corrida diaria ==
+job -> fs: guarda la fecha de hoy en worker/ultima_corrida_tareas.txt\n(para no repetir las tareas el mismo día)
 @enduml
 ```
 
 ## 14. Anexo B: SQL completo (PostgreSQL)
 
+Diagrama del modelo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\esquema_fisico.puml` (Anexo A.4).
 Guárdalo como `db/init/001_esquema.sql`. El contenedor `db` lo ejecuta **solo la primera
 vez**, cuando el volumen `pgdata` está vacío. Para volver a aplicarlo hay que borrar el
 volumen (`docker compose down -v`), lo que **destruye todos los datos**.
@@ -2554,11 +3195,11 @@ CREATE DOMAIN formato_reporte AS varchar(4)
   CHECK (VALUE IN ('CSV', 'XLSX', 'PDF'));
 
 CREATE DOMAIN tipo_notificacion AS varchar(32)
-  CHECK (VALUE IN ('analisis completado', 'error del pipeline', 'alerta de disco',
-                   'video borrado'));
+  CHECK (VALUE IN ('analisis completado', 'error del pipeline', 'analisis en pausa',
+                   'analisis cancelado', 'alerta de disco', 'video borrado'));
 
 CREATE DOMAIN estado_analisis AS varchar(10)
-  CHECK (VALUE IN ('en cola', 'procesando', 'completado', 'error'));
+  CHECK (VALUE IN ('en cola', 'procesando', 'en pausa', 'completado', 'error', 'cancelado'));
 
 CREATE DOMAIN etapa_analisis AS varchar(16)
   CHECK (VALUE IN ('preprocesamiento', 'cilindros', 'clasificacion'));
@@ -2567,8 +3208,10 @@ CREATE DOMAIN nivel_clasif_analisis AS varchar(8)
   CHECK (VALUE IN ('preciso', 'agrupado'));
 
 CREATE DOMAIN origen_segundo AS varchar(16)
-  CHECK (VALUE IN ('maquina', 'humano_confirma', 'humano_corrige', 'humano_duda',
-                   'sin_revisar', 'humano_ciego'));
+  CHECK (VALUE IN ('maquina', 'confirmada', 'corregida', 'dudosa'));
+
+CREATE DOMAIN tipo_conducta AS varchar(16)
+  CHECK (VALUE IN ('nado activo', 'inmovilidad', 'escalamiento', 'conducta activa'));
 
 -- ------------------------------------------------------------
 --  Usuarios
@@ -2631,6 +3274,8 @@ CREATE TABLE especimen (
 
 -- ------------------------------------------------------------
 --  Video y análisis
+--  Solo los videos del Dia 2 tienen analisis (D-71). La base no puede
+--  forzarlo: el backend simplemente no crea ANALISIS para el Dia 1.
 -- ------------------------------------------------------------
 CREATE TABLE video (
   idvideo     integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -2648,16 +3293,13 @@ CREATE TABLE analisis (
   idvideo          integer NOT NULL
     REFERENCES video (idvideo) ON UPDATE NO ACTION ON DELETE NO ACTION,
   estado           estado_analisis       NOT NULL DEFAULT 'en cola',
-  etapa            etapa_analisis,                     -- nula mientras esta en cola [PROPUESTA]
-  nivelclasif      nivel_clasif_analisis,
-  fechaanalisis    timestamptz,                        -- la fija el worker al terminar
+  etapa            etapa_analisis        NOT NULL DEFAULT 'preprocesamiento',  -- valor de arranque (D-79); el worker la actualiza
+  nivelclasif      nivel_clasif_analisis NOT NULL DEFAULT 'preciso',           -- valor de arranque (D-79); el worker lo fija
+  fechaanalisis    timestamptz           NOT NULL DEFAULT now(),               -- fecha de encolado; el worker la reemplaza al terminar
   rutadiagnostico  text,
   CONSTRAINT uq_analisis_video UNIQUE (idvideo),       -- un video, un analisis vigente
   CONSTRAINT ck_analisis_diagnostico
-    CHECK (rutadiagnostico IS NULL OR estado = 'error'),
-  CONSTRAINT ck_analisis_completado                    -- [PROPUESTA] hace cumplir el contrato del worker
-    CHECK (estado <> 'completado'
-           OR (fechaanalisis IS NOT NULL AND nivelclasif IS NOT NULL))
+    CHECK (rutadiagnostico IS NULL OR estado = 'error')
 );
 
 -- ------------------------------------------------------------
@@ -2672,35 +3314,13 @@ CREATE TABLE observacion (
   CONSTRAINT uq_observacion UNIQUE (idespecimen, idvideo)
 );
 
-CREATE TABLE intervalo (
-  idintervalo    integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  idobservacion  integer  NOT NULL
-    REFERENCES observacion (idobservacion) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  minuto         smallint NOT NULL CHECK (minuto BETWEEN 1 AND 5),
-  CONSTRAINT uq_intervalo UNIQUE (idobservacion, minuto)
-);
-
-CREATE TABLE conducta (
-  nombre varchar(30) PRIMARY KEY
-);
-
-CREATE TABLE presenta (
-  idintervalo  integer     NOT NULL
-    REFERENCES intervalo (idintervalo) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  conducta     varchar(30) NOT NULL
-    REFERENCES conducta (nombre) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  segundos     numeric(6,2) NOT NULL CHECK (segundos >= 0 AND segundos <= 60),
-  PRIMARY KEY (idintervalo, conducta)
-);
-
 -- Una fila por espécimen y por segundo. Es lo que se revisa y corrige en la pantalla
--- de revisión; PRESENTA es su resumen por minuto y se recalcula al guardar.
+-- de revisión; los totales por minuto no se guardan: se calculan desde esta tabla.
 CREATE TABLE segundo (
   idobservacion  integer        NOT NULL
     REFERENCES observacion (idobservacion) ON UPDATE NO ACTION ON DELETE NO ACTION,
   segundo        smallint       NOT NULL CHECK (segundo BETWEEN 1 AND 300),
-  conducta       varchar(30)                              -- nula = no decidio o "no se ve"
-    REFERENCES conducta (nombre) ON UPDATE NO ACTION ON DELETE NO ACTION,
+  conducta       tipo_conducta,                           -- nula = no decidio o "no se ve"
   origen         origen_segundo NOT NULL DEFAULT 'maquina',
   PRIMARY KEY (idobservacion, segundo)
 );
@@ -2738,33 +3358,26 @@ CREATE TABLE notificacion (
 CREATE INDEX ix_experimento_usuario   ON experimento (idinstitucional);
 CREATE INDEX ix_analisis_estado       ON analisis (estado);       -- el worker hace polling por aqui
 CREATE INDEX ix_observacion_video     ON observacion (idvideo);
-CREATE INDEX ix_presenta_conducta     ON presenta (conducta);
 CREATE INDEX ix_notificacion_usuario  ON notificacion (idinstitucional, leido);
 CREATE INDEX ix_notificacion_experim  ON notificacion (idexperimento);
-CREATE INDEX ix_segundo_conducta      ON segundo (conducta);
 
 -- ------------------------------------------------------------
 --  Datos semilla
 -- ------------------------------------------------------------
-INSERT INTO conducta (nombre) VALUES
-  ('nado activo'), ('inmovilidad'), ('escalamiento'), ('conducta activa');
-
--- Administrador inicial: [ABIERTO] nombre, correo e identificador institucional.
--- No lo insertes con una contrasena inventada. Crea el hash con bcrypt desde Python
--- (por ejemplo, con un comando `flask crear-admin`) y descomenta:
--- INSERT INTO usuario (idinstitucional, nombre, apellidos, correo, contrasenahash, cambiorequerido)
--- VALUES ('XXXXXXXXXX', 'Nombre', 'Apellidos', 'correo@ejemplo.com', '<hash bcrypt>', true);
--- INSERT INTO administrador (idinstitucional) VALUES ('XXXXXXXXXX');
+-- El administrador inicial NO se inserta aqui: no hay contrasena que poner en un SQL.
+-- Lo crea el comando `flask crear-admin` con los valores del .env (seccion 11, punto 7).
 
 COMMIT;
 ```
 
 Notas para quien implementa el worker o consulta por polling:
-- Para que dos workers no tomen la misma tarea, usa
-  `SELECT ... FROM analisis WHERE estado = 'en cola' ORDER BY idanalisis LIMIT 1 FOR UPDATE SKIP LOCKED`.
-- El worker debe fijar `fechaanalisis = now()` al pasar a `completado` o `error`. La
-  restricción `ck_analisis_completado` rechaza un `completado` sin `fechaanalisis`,
-  y `nivelclasif`.
+- Hoy hay un solo worker y analiza un video a la vez (D-85); aun así, toma la tarea con
+  `SELECT ... FROM analisis WHERE estado = 'en cola' ORDER BY fechaanalisis, idanalisis LIMIT 1 FOR UPDATE SKIP LOCKED`
+  (el orden por `fechaanalisis` es lo que deja un análisis ajustado, o reiniciado, por delante o detrás de
+  los demás según su fecha; D-89).
+- El worker debe reemplazar `fechaanalisis` por `now()` al pasar a `completado` o `error`
+  (al encolar vale la fecha de encolado, D-79). Las tres columnas son NOT NULL, así que la
+  base ya no necesita una restricción aparte para el `completado`.
 - Para borrar un experimento hay que seguir el orden de la sección 5, porque todas las
   llaves foráneas rechazan el borrado en cascada.
 
@@ -2833,6 +3446,7 @@ services:
   worker:
     build: ./worker_fake            # reemplazar por la imagen del worker real
     restart: unless-stopped
+    env_file: .env                  # SMTP_*, DISK_*, WORKER_*, PAUSE_TIMEOUT_MINUTES
     environment:
       DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       ARCHIVOS_DIR: /data/archivos
@@ -2880,8 +3494,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 EXPOSE 5000
-# Un solo proceso con varios hilos: las tareas programadas (borrado, aviso, disco)
-# corren dentro del backend y no deben duplicarse. Timeout largo por las subidas de video.
+# Un solo proceso con varios hilos. Las tareas programadas (borrado, aviso, disco) ya no
+# corren aqui: las ejecuta el worker (D-82). Timeout largo por las subidas de video.
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "8", \
      "--timeout", "600", "app:create_app()"]
 ```
@@ -2941,16 +3555,25 @@ server {
 ```dockerfile
 FROM python:3.12-slim
 WORKDIR /app
-RUN pip install --no-cache-dir psycopg2-binary
-COPY worker_fake.py .
+RUN pip install --no-cache-dir psycopg2-binary pillow
+COPY . .
 CMD ["python", "worker_fake.py"]
 ```
 
-`worker_fake.py` implementa el contrato de la sección 4: cada pocos segundos toma un
-análisis `en cola` (con `FOR UPDATE SKIP LOCKED`), recorre las tres etapas con una pausa
-entre cada una, y termina en `completado` (escribiendo observaciones, intervalos y
-segundos inventados) o en `error` si el nombre del archivo contiene la palabra `falla`
-(para probar el camino de error).
+`worker_fake.py` implementa el contrato de la sección 4 con datos inventados:
+- al arrancar reencola los análisis `procesando` huérfanos y revisa las pausas sin archivo;
+- cada `WORKER_POLL_SECONDS` toma **un** análisis `en cola` (el más antiguo, con
+  `FOR UPDATE SKIP LOCKED`), revisa el disco, recorre las tres etapas con una pausa entre cada una
+  y termina en `completado` (escribiendo observaciones y segundos inventados, la copia
+  `web.mp4` copiando el original y `cajas.json`), en `error` si el nombre del archivo contiene la
+  palabra `falla`, o en `en pausa` si contiene `pausa` (escribe `pausa.jpg` con Pillow y
+  `pausa.json`, y atiende el siguiente análisis);
+- en cada vuelta revisa las pausas: si hay un `ajuste` en `pausa.json` y el estado volvió a
+  `en cola`, lo termina; si pasaron `PAUSE_TIMEOUT_MINUTES`, lo cancela;
+- crea las `NOTIFICACION` y envía el correo (a MailHog en desarrollo);
+- el módulo `tareas_programadas.py` ejecuta, a la hora `WORKER_DAILY_HOUR` o al arrancar si se
+  perdió la corrida, el borrado de videos vencidos, el aviso de vencimiento y la vigilancia del
+  disco (sección 8). Debe poder dispararse a mano para las pruebas.
 
 ### .env.example
 
@@ -2976,6 +3599,18 @@ SMTP_FROM=no-reply@fst.local
 MAX_UPLOAD_MB=2048
 DISK_ALERT_PERCENT=80
 DISK_CLEANUP_PERCENT=90
+
+# Worker
+WORKER_POLL_SECONDS=5
+WORKER_DAILY_HOUR=3
+PAUSE_TIMEOUT_MINUTES=5
+
+# Primer administrador (flask crear-admin); pon valores reales, no los de ejemplo
+ADMIN_ID=
+ADMIN_NOMBRE=
+ADMIN_APELLIDOS=
+ADMIN_CORREO=
+ADMIN_PASSWORD=
 ```
 
 `MAX_UPLOAD_MB=2048` es un valor de ejemplo; el tamaño máximo real no está definido
@@ -2983,5 +3618,5 @@ DISK_CLEANUP_PERCENT=90
 
 ---
 
-Última actualización: 5 de octubre de 2026. Si algo de este archivo parece contradictorio
+Última actualización: 12 de octubre de 2026. Si algo de este archivo parece contradictorio
 o incompleto, pregunta al usuario antes de decidir.

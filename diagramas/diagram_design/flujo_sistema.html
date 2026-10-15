@@ -6,7 +6,7 @@
 html,body{height:100%;margin:0;background:#faf9f5}
 body{overflow-x:auto;overflow-y:hidden}
 svg{display:block;height:100vh;width:auto}
-</style></head><body><svg viewBox="0 10 1700 710" role="img" aria-labelledby="fl-title fl-desc" xmlns="http://www.w3.org/2000/svg">
+</style></head><body><svg viewBox="0 10 1720 710" role="img" aria-labelledby="fl-title fl-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="fl-title">Flujo general del sistema</title>
 <desc id="fl-desc">Del video subido por el investigador al análisis en cola, las tres etapas del pipeline, los resultados y los reportes, con el entrenamiento del modelo fuera de línea.</desc>
 <defs><marker id="f-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#444" stroke-width="1.2"/></marker></defs>
@@ -51,13 +51,15 @@ svg{display:block;height:100vh;width:auto}
 <text x="345.0" y="302" text-anchor="middle" class="nm">Backend</text>
 <text x="345.0" y="320" text-anchor="middle" class="a">valida formato y orientación</text>
 <text x="345.0" y="334" text-anchor="middle" class="a">y guarda el video</text>
-<rect x="480" y="282" width="170" height="54" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<rect x="480" y="282" width="170" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
 <text x="565.0" y="302" text-anchor="middle" class="nm">Se encola el análisis</text>
 <text x="565.0" y="320" text-anchor="middle" class="a">estado «en cola»</text>
-<rect x="690" y="282" width="170" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="565.0" y="334" text-anchor="middle" class="a">Día 1: solo se guarda</text>
+<rect x="690" y="282" width="170" height="82" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
 <text x="775.0" y="302" text-anchor="middle" class="nm">Worker</text>
-<text x="775.0" y="320" text-anchor="middle" class="a">toma la tarea</text>
-<text x="775.0" y="334" text-anchor="middle" class="a">(consulta periódica)</text>
+<text x="775.0" y="320" text-anchor="middle" class="a">toma la más antigua,</text>
+<text x="775.0" y="334" text-anchor="middle" class="a">un video a la vez</text>
+<text x="775.0" y="348" text-anchor="middle" class="a">(consulta periódica)</text>
 <rect x="900" y="240" width="520" height="150" rx="8" fill="#f1eee5" stroke="#6b6b6b" stroke-dasharray="6,4"/>
 <text x="914" y="258" class="st">PIPELINE DE ANÁLISIS · DENTRO DEL WORKER</text>
 <rect x="915" y="282" width="150" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
@@ -78,27 +80,37 @@ svg{display:block;height:100vh;width:auto}
 <path d="M860,326 L915,326" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
 <path d="M1065,326 L1085,326" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
 <path d="M1235,326 L1255,326" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
+<rect x="1455" y="282" width="215" height="110" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1562.5" y="302" text-anchor="middle" class="nm">En pausa</text>
+<text x="1562.5" y="320" text-anchor="middle" class="a">3 s seguidos sin ver al espécimen:</text>
+<text x="1562.5" y="334" text-anchor="middle" class="a">guarda una imagen fija y avisa;</text>
+<text x="1562.5" y="348" text-anchor="middle" class="a">el usuario ajusta el recuadro o</text>
+<text x="1562.5" y="362" text-anchor="middle" class="a">cancela. Continúa desde ahí; sin</text>
+<text x="1562.5" y="376" text-anchor="middle" class="a">respuesta en 5 min, se cancela</text>
+<path d="M1405,326 L1455,326" fill="none" stroke="#6b6b6b" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#f-arr)"/>
 <path d="M1330,124 L1330,282" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
 <rect x="1284" y="191" width="91" height="11" fill="#faf9f5"/><text x="1330" y="200" text-anchor="middle" class="r">MODELO ENTRENADO</text>
-<rect x="915" y="440" width="290" height="82" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<rect x="915" y="440" width="290" height="96" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
 <text x="1060.0" y="460" text-anchor="middle" class="nm">Si falla</text>
 <text x="1060.0" y="478" text-anchor="middle" class="a">el video no se abre o no se encuentran</text>
-<text x="1060.0" y="492" text-anchor="middle" class="a">los cilindros: el análisis pasa a «error»</text>
-<text x="1060.0" y="506" text-anchor="middle" class="a">con reporte de diagnóstico y aviso</text>
+<text x="1060.0" y="492" text-anchor="middle" class="a">los cilindros (o cualquier fallo imprevisto):</text>
+<text x="1060.0" y="506" text-anchor="middle" class="a">pasa a «error» con reporte de diagnóstico</text>
+<text x="1060.0" y="520" text-anchor="middle" class="a">y aviso; el worker sigue con el siguiente</text>
 <path d="M1065,390 L1065,440" fill="none" stroke="#6b6b6b" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#f-arr)"/>
 <rect x="1083" y="411" width="34" height="11" fill="#faf9f5"/><text x="1100" y="420" text-anchor="middle" class="r">FALLA</text>
 <rect x="1235" y="440" width="190" height="82" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
 <text x="1330.0" y="460" text-anchor="middle" class="nm">Resultados</text>
 <text x="1330.0" y="478" text-anchor="middle" class="a">conducta de cada segundo,</text>
 <text x="1330.0" y="492" text-anchor="middle" class="a">tiempos por minuto,</text>
-<text x="1330.0" y="506" text-anchor="middle" class="a">video anotado</text>
+<text x="1330.0" y="506" text-anchor="middle" class="a">copia H.264 para revisión</text>
 <path d="M1330,390 L1330,440" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
 <rect x="1366" y="411" width="34" height="11" fill="#faf9f5"/><text x="1370" y="420" text-anchor="start" class="r">ÉXITO</text>
-<rect x="1235" y="580" width="190" height="82" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<rect x="1235" y="580" width="190" height="96" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
 <text x="1330.0" y="600" text-anchor="middle" class="nm">Investigador</text>
 <text x="1330.0" y="618" text-anchor="middle" class="a">consulta y revisa segundo</text>
 <text x="1330.0" y="632" text-anchor="middle" class="a">a segundo; los totales</text>
 <text x="1330.0" y="646" text-anchor="middle" class="a">por minuto se recalculan</text>
+<text x="1330.0" y="660" text-anchor="middle" class="a">puede reiniciar el análisis</text>
 <path d="M1330,522 L1330,580" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#f-arr)"/>
 <rect x="985" y="580" width="190" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
 <text x="1080.0" y="600" text-anchor="middle" class="nm">Reportes</text>

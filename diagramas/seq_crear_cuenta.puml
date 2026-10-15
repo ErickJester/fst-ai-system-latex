@@ -70,7 +70,7 @@ api -> db: ¿el idInstitucional de la sesión está en ADMINISTRADOR?
 db --> api: sí / no
 
 alt no está en ADMINISTRADOR
-  api --> ui: 403, no autorizado
+  api --> ui: rechaza la petición: no autorizado
   ui --> admin: muestra el error, no crea la cuenta
 else sí está en ADMINISTRADOR
   api -> db: ¿el identificador institucional o el correo\nya están registrados?

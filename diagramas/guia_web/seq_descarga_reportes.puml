@@ -1,0 +1,46 @@
+@startuml seq_descarga_reportes
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
+actor "Investigador / Administrador" as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant "Archivos" as fs
+
+inv -> ui: selecciona el formato de descarga\n(CSV, XLSX o PDF), desde resultados o el dashboard
+ui -> api: GET /experiments/{id}/report/{formato}
+api -> db: busca si ya hay un reporte guardado\nen ese formato para este experimento
+db --> api: reporte guardado, si existe, con su fecha de generación
+api -> db: busca la fecha del análisis más reciente del experimento
+db --> api: fecha del último análisis completado
+
+alt no hay un reporte guardado en ese formato
+  api -> api: genera el archivo con los datos actuales
+  api -> fs: guarda el archivo generado
+  api -> db: registra el reporte nuevo (ruta, formato, fecha de generación)
+else el reporte guardado es más viejo que el último análisis
+  api -> api: regenera el archivo con los datos actuales
+  api -> fs: reemplaza el archivo guardado
+  api -> db: actualiza la ruta y la fecha de generación del reporte
+else el reporte guardado sigue vigente
+  api -> fs: recupera el archivo ya guardado
+end
+
+note right of api
+  CSV / XLSX: datos por espécimen (tiempo total y
+  desglose por minuto) más estadísticas por grupo:
+  media, desviación estándar y varianza por conducta,
+  entre los especímenes de cada uno de los tres grupos.
+  Columnas: Tiempo (min:seg), Nado, Escalamiento,
+  Inmovilidad, Conducta activa. Una fila por minuto.
+  PDF: reporte de resultados, documento distinto del
+  reporte de diagnóstico.
+end note
+
+api --> ui: archivo listo
+ui --> inv: descarga inmediata en el navegador
+@enduml

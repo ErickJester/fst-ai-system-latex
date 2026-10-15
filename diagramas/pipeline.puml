@@ -11,9 +11,12 @@
 '  - Sin modulo de seguimiento (CLA-02, 5-oct): un especimen por
 '    cilindro, asi que no hay tracker. Las etapas son las de D-16
 '    revisado: preprocesamiento, cilindros, clasificacion.
-'  - Clasificacion: rasgos + gradient boosting con la regla de tres
-'    pasos y la ventana deslizante de 4 s. La R(2+1)D-18 aparece
-'    como candidata en evaluacion; cual queda se decide en TT-II.
+'  - Clasificacion (D-66): la red de fusion R(2+1)D-18 es el clasificador:
+'    recibe el clip de 16 cuadros de una ventana de 4 s y una rama de
+'    medidas (15 rasgos y 7 reglas); entrega solo la conducta de cada
+'    segundo, una de cuatro (D-78, D-94): sin probabilidades ni regla
+'    de confianza. El gradient boosting es
+'    el etiquetador del equipo y aporta los 15 rasgos.
 '  - Preprocesamiento segun fst_auto (CLA-04, 5-oct): sin correccion
 '    de contraste; fondo por percentil 10, no por mediana.
 '
@@ -56,29 +59,17 @@ partition "2. Localización de los cilindros" {
 
 partition "3. Clasificación de conducta" {
   :Separa al espécimen del fondo\ndentro de su cilindro\n(diferencia y brillo, región más grande);
-  :Mide quince rasgos de movimiento,\npostura y trayectoria;
-  :Para cada segundo, toma una ventana de 4 s\ncentrada en él y la red de fusión estima\nla probabilidad de cada conducta;
-  note right
-    Red R(2+1)D-18 sobre clips de
-    16 cuadros, fusionada con una
-    rama de medidas (quince rasgos
-    y siete reglas de observación).
-    Se evalúa en TT-II con F1
-    por conducta.
-  end note
-  :Si no ve al espécimen durante tres segundos\nseguidos, pone el análisis en pausa y pide\nun ajuste (sin respuesta en 5 minutos,\nse cancela);
-  if (¿Una conducta supera el umbral de confianza?) then (sí)
-    :Asigna esa conducta;
-  elseif (¿Nado y escalamiento juntos lo superan?) then (sí)
-    :Asigna conducta activa;
-  else (no)
-    :Asigna la más probable\ny la marca como dudosa;
+  if (¿Pasan 3 s seguidos sin ver\nal espécimen en un cilindro?) then (sí)
+    :Guarda una imagen fija de ese instante\ny avisa al worker, que deja el análisis\nen pausa hasta que el usuario ajuste\nel recuadro o lo cancele;
+    stop
   endif
+  :Mide quince rasgos de movimiento, postura\ny trayectoria y siete reglas de observación\n(pataleo bajo el agua y cambios sobre\nla línea de agua);
+  :Para cada segundo, toma una ventana de 4 s\ncentrada en él y arma el clip de 16 cuadros\ndel cilindro;
+  :La red de fusión R(2+1)D-18 recibe el clip\ny las medidas y asigna al segundo una de las\ncuatro conductas: nado activo, inmovilidad,\nescalamiento o conducta activa;
 }
 
 partition "4. Resultados" {
-  :Se queda con los últimos 300 s del video\n(como máximo; si dura menos, todo)\ny renumera sus segundos de 1 a 300;
-  :Guarda la conducta de cada segundo,\nlos segundos por conducta de cada minuto,\nlos recuadros de los cilindros y la copia\nreproducible del video (H.264);
+  :Guarda la conducta de cada segundo\y la copia del video para revisión (H.264);
 }
 stop
 

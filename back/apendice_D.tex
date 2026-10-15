@@ -7,7 +7,7 @@
 \chapter{Diccionario de datos}
 \label{ap:diccionario}
 
-Este apéndice describe cada columna de las 15 tablas del esquema físico
+Este apéndice describe cada columna de las 12 tablas del esquema físico
 (Figura~\ref{fig:er}), implementado en PostgreSQL. Para cada columna se indica su
 tipo, si admite nulo, las restricciones que hace cumplir la base de datos y qué
 guarda.
@@ -29,12 +29,10 @@ escribir el DDL.
 
 \section*{Dominios cerrados}
 
-Ocho columnas toman sus valores de una lista fija, declarada como dominio
+Nueve columnas toman sus valores de una lista fija, declarada como dominio
 (\texttt{CREATE DOMAIN} con una condición \texttt{CHECK}). La Tabla~\ref{tab:dominios}
-los reúne. \texttt{CONDUCTA} no es un dominio sino una tabla, para que las demás
-tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
-\texttt{nado activo}, \texttt{inmovilidad}, \texttt{escalamiento} y
-\texttt{conducta activa}.
+los reúne. Las conductas son uno de ellos: \texttt{SEGUNDO.conducta} toma una de
+cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 
 {\footnotesize\singlespacing
 \begin{longtable}{|>{\raggedright}p{3.4cm}|>{\raggedright}p{2.2cm}|>{\raggedright\arraybackslash}p{7.8cm}|}
@@ -56,13 +54,15 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{tipo\_\allowbreak{}notificacion} & \texttt{varchar(32)} & \texttt{analisis completado}, \texttt{error del pipeline}, \texttt{analisis en pausa}, \texttt{analisis cancelado}, \texttt{alerta de disco}, \texttt{video borrado} \\
 \hline
-\texttt{estado\_\allowbreak{}analisis} & \texttt{varchar(10)} & \texttt{en cola}, \texttt{procesando}, \texttt{en pausa}, \texttt{cancelado}, \texttt{completado}, \texttt{error} \\
+\texttt{estado\_\allowbreak{}analisis} & \texttt{varchar(10)} & \texttt{en cola}, \texttt{procesando}, \texttt{en pausa}, \texttt{completado}, \texttt{error}, \texttt{cancelado} \\
 \hline
 \texttt{etapa\_\allowbreak{}analisis} & \texttt{varchar(16)} & \texttt{preprocesamiento}, \texttt{cilindros}, \texttt{clasificacion} \\
 \hline
 \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & \texttt{varchar(8)} & \texttt{preciso} si ningún segundo del análisis quedó como conducta activa; \texttt{agrupado} si al menos uno quedó así \\
 \hline
-\texttt{origen\_\allowbreak{}segundo} & \texttt{varchar(16)} & \texttt{maquina}: conducta puesta por el sistema, sin revisar. \texttt{humano\_\allowbreak{}confirma}: el usuario vio el segundo y dejó la conducta del sistema. \texttt{humano\_\allowbreak{}corrige}: el usuario vio el segundo y la cambió. \texttt{humano\_\allowbreak{}duda}: el usuario lo marcó como dudoso y quedó sin conducta \\
+\texttt{origen\_\allowbreak{}segundo} & \texttt{varchar(16)} & \texttt{maquina}: conducta puesta por el sistema, sin revisar. \texttt{confirmada}: el usuario vio el segundo y dejó la conducta del sistema. \texttt{corregida}: el usuario vio el segundo y la cambió. \texttt{dudosa}: el segundo quedó sin conducta porque el usuario lo marcó como dudoso \\
+\hline
+\texttt{tipo\_\allowbreak{}conducta} & \texttt{varchar(16)} & \texttt{nado activo}, \texttt{inmovilidad}, \texttt{escalamiento}, \texttt{conducta activa}. La última se usa cuando el clasificador no distingue entre nado y escalamiento \\
 \hline
 \end{longtable}
 }
@@ -156,7 +156,7 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{idTanda} & \texttt{integer} & No & FK $\to$ TANDA; UK (idTanda, sesion) & Tanda grabada en el video \\
 \hline
-\texttt{sesion} & \texttt{sesion\_\allowbreak{}video} & No & Dominio; UK (idTanda, sesion) & Día 1 o Día 2. Una tanda tiene como máximo un video por día, y el Día 1 es opcional \\
+\texttt{sesion} & \texttt{sesion\_\allowbreak{}video} & No & Dominio; UK (idTanda, sesion) & Día 1 o Día 2. Una tanda tiene como máximo un video por día, y el Día 1 es opcional; el del Día 1 se guarda sin análisis \\
 \hline
 \texttt{archivo} & \texttt{text} & Sí & & Ruta del archivo de video (\texttt{.mp4} o \texttt{.mov}) en el servidor. Es nula cuando el video ya se borró (RF-25, RN-05); la fila se conserva porque los resultados la referencian \\
 \hline
@@ -169,15 +169,15 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{idAnalisis} & \texttt{integer} & No & PK & Identificador subrogado \\
 \hline
-\texttt{idVideo} & \texttt{integer} & No & FK $\to$ VIDEO; UK & Video analizado. Es único: un video tiene un solo análisis vigente y un análisis nuevo reemplaza al anterior \\
+\texttt{idVideo} & \texttt{integer} & No & FK $\to$ VIDEO; UK & Video analizado, siempre del Día 2: el video del Día 1 se guarda sin análisis. Es único: un video tiene un solo análisis vigente y un análisis nuevo, o un reinicio, reemplaza al anterior \\
 \hline
-\texttt{estado} & \texttt{estado\_\allowbreak{}analisis} & No & Dominio & En cola, procesando, en pausa (el sistema no ve al espécimen y espera un ajuste), cancelado (sin respuesta en 5 minutos), completado o error. El \textit{worker} toma de la cola los análisis en estado \texttt{en cola} \\
+\texttt{estado} & \texttt{estado\_\allowbreak{}analisis} & No & Dominio & En cola, procesando, en pausa (el sistema no ve al espécimen y espera al usuario), completado, error o cancelado (el usuario no respondió en 5 minutos). El \textit{worker} toma de la cola los análisis en estado \texttt{en cola} \\
 \hline
-\texttt{etapa} & \texttt{etapa\_\allowbreak{}analisis} & Sí & Dominio & Nula mientras está en cola. Etapa del pipeline en curso o, si hubo error, la etapa donde se detuvo. Con ella se arma el mensaje de error \\
+\texttt{etapa} & \texttt{etapa\_\allowbreak{}analisis} & No & Dominio & Etapa del pipeline en curso o, si hubo error, la etapa donde se detuvo. Con ella se arma el mensaje de error. Al encolar el análisis el backend le pone el valor de arranque \texttt{preprocesamiento}; el \textit{worker} la actualiza en cada etapa \\
 \hline
-\texttt{nivelClasif} & \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & Sí & Dominio & Nulo hasta que el \textit{worker} lo fija. Preciso o agrupado. La interfaz lo usa para avisar en los resultados \\
+\texttt{nivelClasif} & \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & No & Dominio & Preciso o agrupado. La interfaz lo usa para avisar en los resultados. Al encolar el análisis el backend le pone el valor de arranque \texttt{preciso}; el \textit{worker} lo fija al clasificar \\
 \hline
-\texttt{fechaAnalisis} & \texttt{timestamptz} & Sí & & Momento del análisis; la fija el \textit{worker} al terminar \\
+\texttt{fechaAnalisis} & \texttt{timestamptz} & No & & Momento del análisis. Al encolar el análisis vale la fecha de encolado; el \textit{worker} la reemplaza al terminar (completado o error), y desde esa fecha se cuentan los 30 días del borrado de videos \\
 \hline
 \texttt{rutaDiagnostico} & \texttt{text} & Sí & & Ruta del reporte de diagnóstico en PDF. Solo tiene valor cuando el estado es \texttt{error} \\
 \hline
@@ -188,41 +188,18 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{idEspecimen} & \texttt{integer} & No & FK $\to$ ESPECIMEN; UK (idEspecimen, idVideo) & Espécimen observado \\
 \hline
-\texttt{idVideo} & \texttt{integer} & No & FK $\to$ VIDEO; UK (idEspecimen, idVideo) & Video del Día~2 en que se le observó. Cada video analizado tiene de 2 a 4 observaciones, una por espécimen; el video del Día~1 no tiene observaciones \\
-\hline
-% ---------------- INTERVALO ----------------
-\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{INTERVALO}: cada minuto de una observación} \\
-\hline
-\texttt{idIntervalo} & \texttt{integer} & No & PK & Identificador subrogado \\
-\hline
-\texttt{idObservacion} & \texttt{integer} & No & FK $\to$ OBSERVACION; UK (idObservacion, minuto) & Observación a la que pertenece el minuto \\
-\hline
-\texttt{minuto} & \texttt{smallint} & No & UK (idObservacion, minuto) & Minuto del análisis, de 1 a 5 \\
-\hline
-% ---------------- CONDUCTA ----------------
-\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{CONDUCTA}: catálogo de conductas} \\
-\hline
-\texttt{nombre} & \texttt{varchar(n)} & No & PK & Nado activo, inmovilidad, escalamiento o conducta activa. La última se usa cuando el clasificador no distingue entre nado y escalamiento \\
+\texttt{idVideo} & \texttt{integer} & No & FK $\to$ VIDEO; UK (idEspecimen, idVideo) & Video en que se le observó. Cada video analizado (el del Día 2) tiene de 2 a 4 observaciones, una por espécimen; el del Día 1 no tiene ninguna \\
 \hline
 % ---------------- SEGUNDO ----------------
 \multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{SEGUNDO}: la conducta de un espécimen en cada segundo analizado} \\
 \hline
 \texttt{idObservacion} & \texttt{integer} & No & PK, FK $\to$ OBSERVACION & Espécimen y video al que pertenece el segundo \\
 \hline
-\texttt{segundo} & \texttt{smallint} & No & PK; CK entre 1 y 300 & Posición del segundo dentro de la ventana analizada (1 a 300), tras recortar los últimos 300 segundos \\
+\texttt{segundo} & \texttt{smallint} & No & PK; CK entre 1 y 300 & Posición del segundo dentro de la ventana analizada (1 a 300), tras recortar los últimos 300 segundos. El minuto del análisis sale de este número y no se guarda \\
 \hline
-\texttt{conducta} & \texttt{varchar(n)} & Sí & FK $\to$ CONDUCTA & Conducta vigente del segundo, que el usuario puede corregir en la revisión. Queda nula si el sistema no pudo decidir o si el usuario lo marcó como dudoso \\
+\texttt{conducta} & \texttt{tipo\_\allowbreak{}conducta} & Sí & Dominio & Conducta vigente del segundo, que el usuario puede corregir en la revisión. Queda nula si el sistema no pudo decidir o si el usuario lo marcó como dudoso \\
 \hline
 \texttt{origen} & \texttt{origen\_\allowbreak{}segundo} & No & Dominio & Quién puso la conducta vigente y cómo (Tabla~\ref{tab:dominios}) \\
-\hline
-% ---------------- PRESENTA ----------------
-\multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{PRESENTA}: segundos de cada conducta en cada minuto} \\
-\hline
-\texttt{idIntervalo} & \texttt{integer} & No & PK, FK $\to$ INTERVALO & Minuto resumido \\
-\hline
-\texttt{conducta} & \texttt{varchar(n)} & No & PK, FK $\to$ CONDUCTA & Conducta contada \\
-\hline
-\texttt{segundos} & \texttt{numeric(p,s)} & No & & Segundos que el espécimen pasó en esa conducta dentro del minuto. Hay una fila por conducta aunque valga 0. Se recalcula desde \texttt{SEGUNDO} cada vez que el usuario guarda correcciones, y de aquí salen los totales y el desglose por minuto \\
 \hline
 % ---------------- REPORTE ----------------
 \multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{REPORTE}: archivos exportados de un experimento} \\
@@ -246,7 +223,7 @@ tablas puedan referenciar cada conducta por llave foránea; sus cuatro filas son
 \hline
 \texttt{idExperimento} & \texttt{integer} & Sí & FK $\to$ EXPERIMENTO & Experimento del que trata el aviso. Es nulo en la alerta de disco, que no viene de ningún experimento \\
 \hline
-\texttt{tipo} & \texttt{tipo\_\allowbreak{}notificacion} & No & Dominio & Análisis completado, error del pipeline, análisis en pausa, análisis cancelado, alerta de disco o video borrado (el borrado adelantado de RN-05). Cada aviso también se envía por correo (RF-33) \\
+\texttt{tipo} & \texttt{tipo\_\allowbreak{}notificacion} & No & Dominio & Análisis completado, error del pipeline, análisis en pausa o cancelado (RN-17), alerta de disco o video borrado (el borrado adelantado de RN-05). Cada aviso también se envía por correo (RF-33) \\
 \hline
 \texttt{mensaje} & \texttt{text} & No & & Texto del aviso, con el detalle del caso \\
 \hline

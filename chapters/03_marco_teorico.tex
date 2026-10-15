@@ -9,9 +9,10 @@
 El FST produce videos de especímenes nadando en cilindros. Para analizarlos
 automáticamente hace falta entender qué conductas se observan y qué
 significan, cómo procesar las imágenes para detectar al espécimen, qué
-arquitectura puede clasificar esas conductas con pocos datos etiquetados
----una red convolucional espacio-temporal fusionada con medidas del espécimen---,
-cómo organizar todo eso
+arquitecturas pueden clasificar esas conductas con pocos datos etiquetados
+---una red convolucional espacio-temporal fusionada con medidas del espécimen, apoyada
+en un clasificador de \textit{gradient boosting} (potenciación del gradiente) sobre
+rasgos medidos---, cómo organizar todo eso
 en un sistema web que el laboratorio pueda usar y con qué métricas se evaluará.
 Lo que sigue cubre esos cinco bloques en ese orden.
 
@@ -36,7 +37,8 @@ inmovilidad en este test \cite{slattery2012}.
 
 \subsection{La prueba de nado forzado (FST)}
 
-La prueba de nado forzado fue propuesta por Porsolt et al.\ en 1977 \cite{porsolt1977}.
+La prueba de nado forzado fue propuesta por Porsolt et al.\ en 1977 \cite{porsolt1977} y
+descrita con detalle en ratas un año después \cite{porsolt1978}.
 Consiste en poner al espécimen en un cilindro con agua del que no puede salir y registrar
 cómo responde. Al principio intenta escapar; después de un rato empieza a flotar con
 movimientos mínimos. Esa conducta pasiva ---\textit{behavioral despair} o desesperanza
@@ -68,6 +70,14 @@ neurotransmisor distinto, lo que permite inferir el mecanismo de acción del fá
 evaluado. Un sistema que solo detecta si el espécimen se mueve o no pierde esa información
 \cite{della_valle2025}.
 
+El sistema añade una cuarta categoría, la \textit{conducta activa}, para los segundos en que
+sabe que el espécimen no está inmóvil pero no decide entre nado y escalamiento (RN-13). No
+es una categoría inventada para el sistema: la prueba original de Porsolt et al.\
+\cite{porsolt1977,porsolt1978} solo medía el tiempo de inmovilidad, de modo que todo lo que no era
+inmovilidad se tomaba como conducta activa, y fueron Detke et al.\ \cite{detke1995} quienes
+separaron lo activo en nado y escalamiento. Cuando el sistema no logra separar las dos, vuelve
+al nivel de Porsolt, que es una lectura aceptada de la prueba.
+
 \subsection{Protocolo del laboratorio colaborador}
 
 En el laboratorio de la ENMyH los especímenes se colocan individualmente en cilindros
@@ -84,10 +94,11 @@ las pruebas de validación.
 Un experimento compara tres o más grupos de especímenes, en promedio cuatro. Hay tres
 tipos de grupo ---control, referencia (fluoxetina) y tratamiento experimental--- y un tipo
 puede repetirse, por ejemplo con varias moléculas o dosis. Lo habitual es que cada grupo
-tenga de 6 a 8 especímenes, aunque no es una regla del protocolo. Como en una grabación
+tenga 8 especímenes, con 6 como mínimo y 12 como máximo frecuente, aunque no es una
+regla del protocolo. Como en una grabación
 caben de dos a cuatro cilindros, cada grupo se graba en una o más tandas de dos a cuatro
 especímenes. El laboratorio realiza de tres a cuatro experimentos por semestre y cada uno
-genera alrededor de ocho videos; estima entre 32 y 40 videos nuevos por semestre.
+genera alrededor de ocho videos.
 
 % ============================================================
 \section{Procesamiento de video para localizar al espécimen}
@@ -186,10 +197,9 @@ cuadro, no oscila entre cuadros y no necesita suavizado.
 \section{Redes neuronales y aprendizaje profundo}
 % ============================================================
 
-\subsection{\textit{Gradient boosting} sobre rasgos en el etiquetador}
+\subsection{Clasificador por \textit{gradient boosting} sobre rasgos}
 
-El etiquetador del equipo, que propone las etiquetas del conjunto de entrenamiento, no
-usa una red profunda. En el
+Este clasificador no usa una red profunda. En el
 \textit{gradient boosting} se entrena una secuencia de árboles de decisión
 pequeños, y cada árbol nuevo corrige el error que dejó el conjunto de los anteriores
 \cite{friedman2001}. Su entrada no es la imagen sino un vector de rasgos medidos sobre
@@ -197,9 +207,9 @@ el espécimen (movimiento, postura y trayectoria), y su salida es la probabilida
 cada conducta. La variante por histogramas agrupa los valores de cada rasgo en
 intervalos, lo que acelera el entrenamiento sin perder precisión de forma apreciable
 \cite{ke2017,pedregosa2011}. Requiere pocos datos etiquetados y sus decisiones se
-pueden rastrear hasta los rasgos que las causaron. El clasificador del sistema es la
-red de la sección siguiente, que se evalúa en TT-II con precisión, \textit{recall} y
-F1 por conducta.
+pueden rastrear hasta los rasgos que las causaron. En este proyecto propone las
+etiquetas del equipo, y sus quince rasgos son la entrada de la rama de medidas de la
+red de fusión, que es el clasificador del sistema.
 
 \subsection{Redes neuronales y CNN}
 
@@ -214,21 +224,23 @@ Adam \cite{kingma2014}, que ajusta la tasa de aprendizaje de cada parámetro
 individualmente usando estimaciones de primer y segundo momento del gradiente.
 
 Entrenar una CNN desde cero requiere conjuntos de datos etiquetados muy grandes, lo que
-no es viable con el \textit{dataset} (conjunto de datos) disponible. Para el clasificador, la
-solución es el \textit{transfer learning} (aprendizaje por transferencia).
+no es viable con el \textit{dataset} (conjunto de datos) disponible. Para la red de
+fusión, la solución es el \textit{transfer learning} (aprendizaje por transferencia).
 
 \subsection{\textit{Transfer learning} (aprendizaje por transferencia)}
 
 El \textit{transfer learning} \cite{pan2010} consiste en tomar una red ya entrenada con
-un conjunto grande de datos y adaptar sobre todo sus últimas capas para la tarea nueva. Para
+un conjunto grande de datos y adaptarla a la tarea nueva, en su forma más simple
+cambiando solo su última capa. Para
 imágenes, el conjunto de referencia es ImageNet (en su versión de preentrenamiento, más de
 un millón de imágenes de 1{,}000 clases); para video, Kinetics-400 (videos de 400 acciones humanas). Las capas
 anteriores ya detectan bordes, texturas, formas y patrones de movimiento; ese
 conocimiento se transfiere directamente al problema del FST. En la práctica se
-reemplaza la capa de clasificación original por una nueva con 3 salidas ---una por
-conducta--- y se re-entrena con los \textit{clips} (fragmentos de video) etiquetados de los videos del laboratorio. En el sistema, la salida de la red se fusiona
-con una rama de medidas del espécimen (quince rasgos y siete reglas de observación)
-antes de la capa de clasificación.
+reemplaza la capa de clasificación original por una nueva con 4 salidas ---una por
+conducta, incluida la conducta activa--- y se re-entrena con los \textit{clips} (fragmentos de video) etiquetados de los videos del laboratorio.
+En este proyecto la red parte de los pesos preentrenados, pero se ajusta completa, con un
+paso de aprendizaje pequeño, y se le añade una rama de medidas del espécimen antes de la
+capa de salida (ver «Clasificación de las tres conductas»).
 
 Este enfoque reduce los requerimientos de datos cuando el dominio de origen (ImageNet
 para imágenes, Kinetics-400 para video) y el de destino (recortes y clips de especímenes en el FST) comparten características visuales básicas
@@ -253,32 +265,36 @@ $\mathcal{F}(\mathbf{x}) = \mathcal{H}(\mathbf{x}) - \mathbf{x}$:
 
 Esto permite al gradiente fluir directamente hacia atrás sin atenuarse, lo que hace
 posible entrenar redes de 50, 101 o 152 capas. Para este proyecto interesa la versión
-de 18 capas, ResNet-18, porque es la base de la red que es el clasificador del sistema:
+de 18 capas, ResNet-18, porque es la base de la red del clasificador:
 la R(2+1)D-18 \cite{tran2018} conserva sus 18 capas y sus conexiones residuales, pero
 recibe clips de 16 fotogramas y separa cada convolución en una parte espacial, sobre
 cada fotograma, y una temporal, entre fotogramas. Así aprende patrones de movimiento
 que no se ven en un solo cuadro.
 
-\subsection{Clasificación de las tres conductas}
+\subsection{Clasificación de las cuatro conductas}
 
-La red recibe un clip de 16 fotogramas del cilindro de cada espécimen. La capa de
-salida produce tres valores de activación que la función \textit{softmax} convierte
-en probabilidades:
+La red recibe un clip de 16 fotogramas del cilindro de cada espécimen y, en paralelo,
+una rama de medidas procesa los quince rasgos del etiquetador y siete reglas de
+observación del pataleo y de la nariz; las dos ramas se unen antes de la capa de
+salida. Esa capa produce cuatro valores de activación que la función \textit{softmax}
+convierte en probabilidades:
 
 \begin{equation}
-    p_c = \frac{e^{z_c}}{\sum_{j=1}^{3} e^{z_j}}, \quad c \in \{\text{nado activo, inmovilidad, escalamiento}\}
+    p_c = \frac{e^{z_c}}{\sum_{j=1}^{4} e^{z_j}}, \quad c \in \{\text{nado activo, inmovilidad, escalamiento, conducta activa}\}
     \label{eq:softmax}
 \end{equation}
 
-El sistema no siempre asigna la conducta de mayor probabilidad: cuando ninguna conducta
-alcanza el umbral de confianza pero la suma de nado activo y escalamiento sí, registra
-\textit{conducta activa}, una cuarta conducta (véase la regla de negocio RN-13 en el Capítulo~4); si tampoco,
-asigna la más probable y marca el segundo como dudoso. Durante el entrenamiento, la función de
+El sistema asigna a cada segundo la conducta de mayor probabilidad; no aplica un umbral de
+confianza y la red entrega solo la conducta, no las probabilidades. La conducta activa es una
+de las cuatro clases: la red la elige cuando el espécimen no está inmóvil pero no distingue
+entre nado y escalamiento (véase la regla de negocio RN-13 en el Capítulo~4). El sistema no
+marca segundos como dudosos por sí mismo; esa marca la puede poner el usuario al revisar.
+Durante el entrenamiento, la función de
 pérdida es la entropía cruzada categórica, que penaliza fuertemente predicciones
 incorrectas con alta confianza:
 
 \begin{equation}
-    \mathcal{L} = -\sum_{c=1}^{3} y_c \log p_c
+    \mathcal{L} = -\sum_{c=1}^{4} y_c \log p_c
     \label{eq:crossentropy}
 \end{equation}
 
@@ -344,8 +360,7 @@ motor de base de datos sin modificar el código de la aplicación.
 La evaluación del sistema se basa en métricas que cubren los atributos de calidad
 definidos en la norma ISO/IEC~25010:2011 \cite{iso25010}: \textit{functional
 correctness} (precisión de las predicciones), \textit{time behaviour} (tiempo de
-procesamiento) y \textit{usability} (facilidad de uso para el investigador), más la
-repetibilidad que fijó el laboratorio (RNF-14).
+procesamiento) y \textit{usability} (facilidad de uso para el investigador).
 
 \subsection{Precisión, \textit{recall} y F1 por conducta}
 
@@ -365,15 +380,21 @@ Para cada conducta $c$ se calculan:
 donde, para el clasificador, cada conducta es una clase y $VP_c$, $FP_c$ y $FN_c$ son los verdaderos positivos, falsos positivos y falsos
 negativos de la clase $c$ respectivamente. El F1 es útil cuando las clases están
 desbalanceadas, que es esperable en el FST donde la inmovilidad suele dominar en los
-primeros experimentos. La meta de F1 aplica a las tres conductas directas (nado
-activo, inmovilidad y escalamiento); la conducta activa se reporta, pero no se exige.
+primeros experimentos.
 
-\subsection{Repetibilidad}
-
-El laboratorio considera la repetibilidad su criterio principal: el mismo video
-analizado varias veces debe producir el mismo resultado, con una variabilidad máxima
-de entre 5 y 10\,\%. Se mide analizando varias veces el mismo video y comparando los
-tiempos por conducta de cada corrida (RNF-14).
+El F1 se calcula para cada una de las cuatro conductas del clasificador: nado,
+inmovilidad, escalamiento y conducta activa (RN-13). Cada una es una clase y el conjunto
+de prueba se etiqueta con las mismas cuatro. La conducta activa, que la prueba de Porsolt
+et al.\ ya aceptaba como lo que no es inmovilidad, no se deja fuera de la
+medición por ser la más ambigua, sino por esa misma razón: es la clase a la que el
+sistema manda los segundos en que no distingue entre nado y escalamiento. Si no se
+midiera, esos segundos dejarían de contar como error en las otras dos y su F1 saldría
+más alto de lo que el sistema realmente acierta. Con la conducta activa dentro de la
+medición, los dos extremos se penalizan: si el sistema le manda segundos que una persona
+sí distingue, bajan su precisión y el \textit{recall} de la conducta que se omitió; si decide
+nado o escalamiento donde la persona vio ambigüedad, baja su \textit{recall} y la precisión
+de la conducta que eligió. La meta de F1 $\geq 85$\,\% (RNF-02) se aplica por igual a las
+cuatro.
 
 \subsection{Tiempo de análisis}
 
@@ -381,3 +402,13 @@ El tiempo de procesamiento de un video de 5 minutos se mide en segundos de cómp
 cualquier otra relación con la duración del video es opcional. El umbral
 aceptable se define con el laboratorio durante la fase de pruebas y validación (TT-II), conforme al atributo de
 \textit{time behaviour} de la ISO/IEC~25010:2011 \cite{iso25010}.
+
+\subsection{Repetibilidad}
+
+El laboratorio fijó un criterio propio, además de los tres atributos anteriores: que
+el mismo video, analizado varias veces, produzca siempre el mismo resultado
+(ver RNF-14). Se mide analizando el mismo video repetidas veces y comparando, para cada
+conducta, los segundos que obtiene cada análisis; la diferencia máxima aceptada es de
+entre el 5 y el 10\,\%, según lo declarado por el investigador colaborador. Este criterio
+y los tres atributos de la ISO/IEC~25010:2011 son los cuatro criterios de aceptación de
+la validación en TT-II.

@@ -1,0 +1,24 @@
+@startuml cu_paquete4
+!pragma layout smetana
+title Plataforma Web FST\nPaquete 4 - Resultados y reportes
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor White
+  BorderColor DarkSlateGray
+}
+actor "Investigador" as INV
+rectangle "Plataforma Web FST - Paquete 4" {
+  usecase "Consultar resultados por especimen" as UC41
+  usecase "Desglosar por minuto" as UC42
+  usecase "Comparar grupos en Dia 2" as UC43
+  usecase "Descargar reporte PDF" as UC45
+  usecase "Generar archivo de reporte" as UC46
+}
+INV --> UC41
+INV --> UC43
+INV --> UC45
+UC42 ..> UC41 : <<extend>>\n[solicita desglose]
+UC45 ..> UC46 : <<include>>
+@enduml

@@ -9,7 +9,7 @@ Versión en PlantUML del documento: [`../arquitectura_software.puml`](../arquite
 
 Qué tecnología vive en cada capa del sistema y cómo se comunican las capas. Es la
 vista de **estructura**: responde «¿de qué está hecho el sistema?». La vista de
-**dónde corre** (servidor, navegador, correo) está en [despliegue.md](despliegue.md).
+**cómo se empaqueta en contenedores** (Docker Compose, navegador, correo) está en [contenedores.md](contenedores.md).
 
 | Capa | Contenedor | Tecnología | Qué hace |
 |------|------------|------------|----------|
@@ -30,8 +30,8 @@ vista de **estructura**: responde «¿de qué está hecho el sistema?». La vist
   al final a «completado» o «error». **No hay una cola de mensajes aparte** (ni Redis ni
   Celery): la cola es la tabla.
 - **Backend → volumen compartido:** lee y sirve al frontend los archivos generados.
-- **Worker → volumen compartido:** guarda videos anotados, reportes y reportes de
-  diagnóstico.
+- **Worker → volumen compartido:** guarda la copia del video para revisión (H.264), los
+  reportes y los reportes de diagnóstico.
 - **Worker → volumen de modelos:** carga el archivo del clasificador al iniciar el
   contenedor. El volumen es de solo lectura para el worker.
 
@@ -73,3 +73,18 @@ pedirlo aparte.
 ```bash
 python diagramas/diagram_design/generadores/gen_capas.py diagramas/diagram_design/arquitectura_capas.html
 ```
+
+## Actualización del 12-oct (rama `decisiones-11oct`)
+
+- El volumen compartido incluye ahora la copia del video para revisión (H.264) que genera el
+  worker (cap. 5, «Módulo 4»).
+- Las tareas diarias (borrado de videos a los 30 días, aviso de vencimiento y vigilancia del
+  disco) las ejecuta el worker (D-82), y así figuran en la capa 3.
+- La capa 3 ya no dice «en evaluación» en la R(2+1)D-18: dice «clasificador de conducta»,
+  porque el documento describe un sistema ya hecho (D-66).
+
+## Actualización del 12-oct (D-84 a D-89)
+
+La capa del worker dice que atiende la cola de a un video, retoma pendientes al arrancar, maneja
+las pausas y hace las tareas diarias a la madrugada. El volumen compartido incluye lo de la
+pausa (recuadros, imagen y datos).

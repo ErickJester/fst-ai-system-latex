@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Esquema de la base de datos</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:#faf9f5}
+svg{display:block;width:924px;height:906px}
+</style></head><body><svg viewBox="0 0 924 906" role="img" aria-labelledby="es-title es-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="es-title">Esquema de la base de datos</title>
+<desc id="es-desc">Las 12 tablas de la base de datos PostgreSQL con sus columnas, tipos, llaves primarias, foráneas y únicas, y las 13 llaves foráneas con su cardinalidad.</desc>
+<defs>
+<marker id="es-arr-0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#1b6fb0" stroke-width="1.5"/></marker><marker id="es-arr-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#2e8b57" stroke-width="1.5"/></marker><marker id="es-arr-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#8e44ad" stroke-width="1.5"/></marker><marker id="es-arr-3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#c0392b" stroke-width="1.5"/></marker><marker id="es-arr-4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#b8860b" stroke-width="1.5"/></marker><marker id="es-arr-5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#16a085" stroke-width="1.5"/></marker><marker id="es-arr-6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#d35400" stroke-width="1.5"/></marker><marker id="es-arr-7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#e84393" stroke-width="1.5"/></marker><marker id="es-arr-8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#34495e" stroke-width="1.5"/></marker><marker id="es-arr-9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#6c8e00" stroke-width="1.5"/></marker><marker id="es-arr-10" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#0097a7" stroke-width="1.5"/></marker><marker id="es-arr-11" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#a0522d" stroke-width="1.5"/></marker><marker id="es-arr-12" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#5e35b1" stroke-width="1.5"/></marker><marker id="es-arr-13" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#c2185b" stroke-width="1.5"/></marker><marker id="es-arr-14" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#00796b" stroke-width="1.5"/></marker><marker id="es-arr-15" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#f57c00" stroke-width="1.5"/></marker><marker id="es-arr-16" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#455a64" stroke-width="1.5"/></marker>
+</defs>
+<style>
+.a{font:400 9px 'Geist Mono',monospace;fill:#1a1a1a}
+.ty{font:400 9px 'Geist Mono',monospace;fill:#6b6b6b}
+.b{font:600 8px 'Geist Mono',monospace}
+.nm{font:600 12px Geist,sans-serif;fill:#1a1a1a}
+.m{font:600 10px 'Geist Mono',monospace;fill:#000}
+</style>
+<path d="M364,95 L320,95 L320,81 L280,81" fill="none" stroke="#1b6fb0" stroke-width="1.4" marker-end="url(#es-arr-0)"/>
+<path d="M70,387 L36,387 L36,165 L70,165" fill="none" stroke="#2e8b57" stroke-width="1.4" marker-end="url(#es-arr-1)"/>
+<path d="M175,228 L175,182" fill="none" stroke="#8e44ad" stroke-width="1.4" marker-end="url(#es-arr-2)"/>
+<path d="M280,575 L320,575 L320,123 L364,123" fill="none" stroke="#c0392b" stroke-width="1.4" marker-end="url(#es-arr-3)"/>
+<path d="M280,401 L342,401 L342,137 L364,137" fill="none" stroke="#b8860b" stroke-width="1.4" marker-end="url(#es-arr-4)"/>
+<path d="M664,95 L614,95 L614,81 L564,81" fill="none" stroke="#16a085" stroke-width="1.4" marker-end="url(#es-arr-5)"/>
+<path d="M779,214 L779,172" fill="none" stroke="#d35400" stroke-width="1.4" marker-end="url(#es-arr-6)"/>
+<path d="M564,255 L664,255" fill="none" stroke="#e84393" stroke-width="1.4" marker-end="url(#es-arr-7)"/>
+<path d="M779,378 L779,332" fill="none" stroke="#34495e" stroke-width="1.4" marker-end="url(#es-arr-8)"/>
+<path d="M779,570 L779,524" fill="none" stroke="#6c8e00" stroke-width="1.4" marker-end="url(#es-arr-9)"/>
+<path d="M564,419 L664,419" fill="none" stroke="#0097a7" stroke-width="1.4" marker-end="url(#es-arr-10)"/>
+<path d="M464,350 L464,304" fill="none" stroke="#a0522d" stroke-width="1.4" marker-end="url(#es-arr-11)"/>
+<path d="M664,799 L609,799 L609,391 L564,391" fill="none" stroke="#5e35b1" stroke-width="1.4" marker-end="url(#es-arr-12)"/>
+<text x="356" y="90" text-anchor="end" class="m">0..*</text>
+<text x="288" y="76" text-anchor="start" class="m">1</text>
+<text x="62" y="382" text-anchor="end" class="m">0..*</text>
+<text x="62" y="160" text-anchor="end" class="m">1</text>
+<text x="181" y="220" text-anchor="start" class="m">0..1</text>
+<text x="181" y="193" text-anchor="start" class="m">1</text>
+<text x="288" y="570" text-anchor="start" class="m">0..*</text>
+<text x="356" y="118" text-anchor="end" class="m">1</text>
+<text x="288" y="396" text-anchor="start" class="m">0..*</text>
+<text x="356" y="132" text-anchor="end" class="m">0..1</text>
+<text x="656" y="90" text-anchor="end" class="m">3..*</text>
+<text x="572" y="76" text-anchor="start" class="m">1</text>
+<text x="785" y="206" text-anchor="start" class="m">1..*</text>
+<text x="785" y="183" text-anchor="start" class="m">1</text>
+<text x="572" y="250" text-anchor="start" class="m">2..4</text>
+<text x="656" y="250" text-anchor="end" class="m">1</text>
+<text x="785" y="370" text-anchor="start" class="m">1..2</text>
+<text x="785" y="343" text-anchor="start" class="m">1</text>
+<text x="785" y="562" text-anchor="start" class="m">0..1</text>
+<text x="785" y="535" text-anchor="start" class="m">1</text>
+<text x="572" y="414" text-anchor="start" class="m">0..4</text>
+<text x="656" y="414" text-anchor="end" class="m">1</text>
+<text x="470" y="342" text-anchor="start" class="m">0..1</text>
+<text x="470" y="315" text-anchor="start" class="m">1</text>
+<text x="656" y="794" text-anchor="end" class="m">1..300</text>
+<text x="572" y="386" text-anchor="start" class="m">1</text>
+<rect x="70" y="40" width="210" height="142" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="175.0" y="61" text-anchor="middle" class="nm">USUARIO</text>
+<line x1="70" y1="72" x2="280" y2="72" stroke="#1a1a1a"/>
+<text x="78" y="86" class="b" fill="#d9532c">PK</text>
+<text x="112" y="86" class="a">idInstitucional</text>
+<text x="270" y="86" text-anchor="end" class="ty">varchar(10)</text>
+<text x="112" y="100" class="a">nombre</text>
+<text x="270" y="100" text-anchor="end" class="ty">varchar(n)</text>
+<text x="112" y="114" class="a">apellidos</text>
+<text x="270" y="114" text-anchor="end" class="ty">varchar(n)</text>
+<text x="78" y="128" class="b" fill="#6b6b6b">UK</text>
+<text x="112" y="128" class="a">correo</text>
+<text x="270" y="128" text-anchor="end" class="ty">varchar(n)</text>
+<text x="112" y="142" class="a">contrasenaHash</text>
+<text x="270" y="142" text-anchor="end" class="ty">varchar(n)</text>
+<text x="112" y="156" class="a">activo</text>
+<text x="270" y="156" text-anchor="end" class="ty">boolean</text>
+<text x="112" y="170" class="a">cambioRequerido</text>
+<text x="270" y="170" text-anchor="end" class="ty">boolean</text>
+<rect x="70" y="228" width="210" height="58" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="175.0" y="249" text-anchor="middle" class="nm">ADMINISTRADOR</text>
+<line x1="70" y1="260" x2="280" y2="260" stroke="#1a1a1a"/>
+<text x="78" y="274" class="b" fill="#d9532c">PK FK</text>
+<text x="112" y="274" class="a">idInstitucional</text>
+<text x="270" y="274" text-anchor="end" class="ty">varchar(10)</text>
+<rect x="70" y="332" width="210" height="142" rx="6" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1"/>
+<text x="175.0" y="353" text-anchor="middle" class="nm">NOTIFICACION</text>
+<line x1="70" y1="364" x2="280" y2="364" stroke="#1a1a1a"/>
+<text x="78" y="378" class="b" fill="#d9532c">PK</text>
+<text x="112" y="378" class="a">idNotificacion</text>
+<text x="270" y="378" text-anchor="end" class="ty">integer</text>
+<text x="78" y="392" class="b" fill="#1a1a1a">FK</text>
+<text x="112" y="392" class="a">idInstitucional</text>
+<text x="270" y="392" text-anchor="end" class="ty">varchar(10)</text>
+<text x="78" y="406" class="b" fill="#1a1a1a">FK</text>
+<text x="112" y="406" class="a">idExperimento</text>
+<text x="270" y="406" text-anchor="end" class="ty">integer · nulo</text>
+<text x="112" y="420" class="a">tipo</text>
+<text x="270" y="420" text-anchor="end" class="ty">tipo_notificacion</text>
+<text x="112" y="434" class="a">mensaje</text>
+<text x="270" y="434" text-anchor="end" class="ty">text</text>
+<text x="112" y="448" class="a">leido</text>
+<text x="270" y="448" text-anchor="end" class="ty">boolean</text>
+<text x="112" y="462" class="a">fechaCreacion</text>
+<text x="270" y="462" text-anchor="end" class="ty">timestamptz</text>
+<rect x="70" y="520" width="210" height="114" rx="6" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1"/>
+<text x="175.0" y="541" text-anchor="middle" class="nm">REPORTE</text>
+<line x1="70" y1="552" x2="280" y2="552" stroke="#1a1a1a"/>
+<text x="78" y="566" class="b" fill="#d9532c">PK</text>
+<text x="112" y="566" class="a">idReporte</text>
+<text x="270" y="566" text-anchor="end" class="ty">integer</text>
+<text x="78" y="580" class="b" fill="#1a1a1a">FK</text>
+<text x="112" y="580" class="a">idExperimento</text>
+<text x="270" y="580" text-anchor="end" class="ty">integer</text>
+<text x="112" y="594" class="a">formato</text>
+<text x="270" y="594" text-anchor="end" class="ty">formato_reporte</text>
+<text x="78" y="608" class="b" fill="#6b6b6b">UK</text>
+<text x="112" y="608" class="a">ruta</text>
+<text x="270" y="608" text-anchor="end" class="ty">text</text>
+<text x="112" y="622" class="a">fechaGeneracion</text>
+<text x="270" y="622" text-anchor="end" class="ty">timestamptz</text>
+<rect x="364" y="40" width="200" height="114" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="464.0" y="61" text-anchor="middle" class="nm">EXPERIMENTO</text>
+<line x1="364" y1="72" x2="564" y2="72" stroke="#1a1a1a"/>
+<text x="372" y="86" class="b" fill="#d9532c">PK</text>
+<text x="406" y="86" class="a">idExperimento</text>
+<text x="554" y="86" text-anchor="end" class="ty">integer</text>
+<text x="372" y="100" class="b" fill="#1a1a1a">FK</text>
+<text x="406" y="100" class="a">idInstitucional</text>
+<text x="554" y="100" text-anchor="end" class="ty">varchar(10)</text>
+<text x="372" y="114" class="b" fill="#6b6b6b">UK</text>
+<text x="406" y="114" class="a">nombre</text>
+<text x="554" y="114" text-anchor="end" class="ty">varchar(n)</text>
+<text x="406" y="128" class="a">fecha</text>
+<text x="554" y="128" text-anchor="end" class="ty">date</text>
+<text x="406" y="142" class="a">notas</text>
+<text x="554" y="142" text-anchor="end" class="ty">text · nulo</text>
+<rect x="364" y="200" width="200" height="104" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="464.0" y="221" text-anchor="middle" class="nm">ESPECIMEN</text>
+<line x1="364" y1="232" x2="564" y2="232" stroke="#1a1a1a"/>
+<text x="372" y="246" class="b" fill="#d9532c">PK</text>
+<text x="406" y="246" class="a">idEspecimen</text>
+<text x="554" y="246" text-anchor="end" class="ty">integer</text>
+<text x="372" y="260" class="b" fill="#1a1a1a">FK</text>
+<text x="406" y="260" class="a">idTanda</text>
+<text x="554" y="260" text-anchor="end" class="ty">integer</text>
+<text x="406" y="274" class="a">numeroCilindro</text>
+<text x="554" y="274" text-anchor="end" class="ty">smallint</text>
+<line x1="372" y1="284" x2="556" y2="284" stroke="#6b6b6b" stroke-dasharray="3,3"/>
+<text x="374" y="296" class="ty">UK (idTanda, numeroCilindro)</text>
+<rect x="364" y="350" width="200" height="104" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="464.0" y="371" text-anchor="middle" class="nm">OBSERVACION</text>
+<line x1="364" y1="382" x2="564" y2="382" stroke="#1a1a1a"/>
+<text x="372" y="396" class="b" fill="#d9532c">PK</text>
+<text x="406" y="396" class="a">idObservacion</text>
+<text x="554" y="396" text-anchor="end" class="ty">integer</text>
+<text x="372" y="410" class="b" fill="#1a1a1a">FK</text>
+<text x="406" y="410" class="a">idEspecimen</text>
+<text x="554" y="410" text-anchor="end" class="ty">integer</text>
+<text x="372" y="424" class="b" fill="#1a1a1a">FK</text>
+<text x="406" y="424" class="a">idVideo</text>
+<text x="554" y="424" text-anchor="end" class="ty">integer</text>
+<line x1="372" y1="434" x2="556" y2="434" stroke="#6b6b6b" stroke-dasharray="3,3"/>
+<text x="374" y="446" class="ty">UK (idEspecimen, idVideo)</text>
+<rect x="664" y="40" width="230" height="132" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="779.0" y="61" text-anchor="middle" class="nm">GRUPO</text>
+<line x1="664" y1="72" x2="894" y2="72" stroke="#1a1a1a"/>
+<text x="672" y="86" class="b" fill="#d9532c">PK</text>
+<text x="706" y="86" class="a">idGrupo</text>
+<text x="884" y="86" text-anchor="end" class="ty">integer</text>
+<text x="672" y="100" class="b" fill="#1a1a1a">FK</text>
+<text x="706" y="100" class="a">idExperimento</text>
+<text x="884" y="100" text-anchor="end" class="ty">integer</text>
+<text x="706" y="114" class="a">etiqueta</text>
+<text x="884" y="114" text-anchor="end" class="ty">varchar(n)</text>
+<text x="706" y="128" class="a">tipo</text>
+<text x="884" y="128" text-anchor="end" class="ty">tipo_grupo</text>
+<text x="706" y="142" class="a">tratamiento</text>
+<text x="884" y="142" text-anchor="end" class="ty">text</text>
+<line x1="672" y1="152" x2="886" y2="152" stroke="#6b6b6b" stroke-dasharray="3,3"/>
+<text x="674" y="164" class="ty">UK (idExperimento, etiqueta)</text>
+<rect x="664" y="214" width="230" height="118" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="779.0" y="235" text-anchor="middle" class="nm">TANDA</text>
+<line x1="664" y1="246" x2="894" y2="246" stroke="#1a1a1a"/>
+<text x="672" y="260" class="b" fill="#d9532c">PK</text>
+<text x="706" y="260" class="a">idTanda</text>
+<text x="884" y="260" text-anchor="end" class="ty">integer</text>
+<text x="672" y="274" class="b" fill="#1a1a1a">FK</text>
+<text x="706" y="274" class="a">idGrupo</text>
+<text x="884" y="274" text-anchor="end" class="ty">integer</text>
+<text x="706" y="288" class="a">ordinal</text>
+<text x="884" y="288" text-anchor="end" class="ty">smallint</text>
+<text x="706" y="302" class="a">nCilindros</text>
+<text x="884" y="302" text-anchor="end" class="ty">smallint</text>
+<line x1="672" y1="312" x2="886" y2="312" stroke="#6b6b6b" stroke-dasharray="3,3"/>
+<text x="674" y="324" class="ty">UK (idGrupo, ordinal)</text>
+<rect x="664" y="378" width="230" height="146" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="779.0" y="399" text-anchor="middle" class="nm">VIDEO</text>
+<line x1="664" y1="410" x2="894" y2="410" stroke="#1a1a1a"/>
+<text x="672" y="424" class="b" fill="#d9532c">PK</text>
+<text x="706" y="424" class="a">idVideo</text>
+<text x="884" y="424" text-anchor="end" class="ty">integer</text>
+<text x="672" y="438" class="b" fill="#1a1a1a">FK</text>
+<text x="706" y="438" class="a">idTanda</text>
+<text x="884" y="438" text-anchor="end" class="ty">integer</text>
+<text x="706" y="452" class="a">sesion</text>
+<text x="884" y="452" text-anchor="end" class="ty">sesion_video</text>
+<text x="706" y="466" class="a">archivo</text>
+<text x="884" y="466" text-anchor="end" class="ty">text · nulo</text>
+<text x="706" y="480" class="a">duracion</text>
+<text x="884" y="480" text-anchor="end" class="ty">numeric(p,s)</text>
+<text x="706" y="494" class="a">fechaCarga</text>
+<text x="884" y="494" text-anchor="end" class="ty">timestamptz</text>
+<line x1="672" y1="504" x2="886" y2="504" stroke="#6b6b6b" stroke-dasharray="3,3"/>
+<text x="674" y="516" class="ty">UK (idTanda, sesion)</text>
+<rect x="664" y="570" width="230" height="142" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="779.0" y="591" text-anchor="middle" class="nm">ANALISIS</text>
+<line x1="664" y1="602" x2="894" y2="602" stroke="#1a1a1a"/>
+<text x="672" y="616" class="b" fill="#d9532c">PK</text>
+<text x="706" y="616" class="a">idAnalisis</text>
+<text x="884" y="616" text-anchor="end" class="ty">integer</text>
+<text x="672" y="630" class="b" fill="#1a1a1a">FK UK</text>
+<text x="706" y="630" class="a">idVideo</text>
+<text x="884" y="630" text-anchor="end" class="ty">integer</text>
+<text x="706" y="644" class="a">estado</text>
+<text x="884" y="644" text-anchor="end" class="ty">estado_analisis</text>
+<text x="706" y="658" class="a">etapa</text>
+<text x="884" y="658" text-anchor="end" class="ty">etapa_analisis</text>
+<text x="706" y="672" class="a">nivelClasif</text>
+<text x="884" y="672" text-anchor="end" class="ty">nivel_clasif_analisis</text>
+<text x="706" y="686" class="a">fechaAnalisis</text>
+<text x="884" y="686" text-anchor="end" class="ty">timestamptz</text>
+<text x="706" y="700" class="a">rutaDiagnostico</text>
+<text x="884" y="700" text-anchor="end" class="ty">text · nulo</text>
+<rect x="664" y="758" width="230" height="118" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="779.0" y="779" text-anchor="middle" class="nm">SEGUNDO</text>
+<line x1="664" y1="790" x2="894" y2="790" stroke="#1a1a1a"/>
+<text x="672" y="804" class="b" fill="#d9532c">PK FK</text>
+<text x="706" y="804" class="a">idObservacion</text>
+<text x="884" y="804" text-anchor="end" class="ty">integer</text>
+<text x="672" y="818" class="b" fill="#d9532c">PK</text>
+<text x="706" y="818" class="a">segundo</text>
+<text x="884" y="818" text-anchor="end" class="ty">smallint</text>
+<text x="706" y="832" class="a">conducta</text>
+<text x="884" y="832" text-anchor="end" class="ty">tipo_conducta · nulo</text>
+<text x="706" y="846" class="a">origen</text>
+<text x="884" y="846" text-anchor="end" class="ty">origen_segundo</text>
+<line x1="672" y1="856" x2="886" y2="856" stroke="#6b6b6b" stroke-dasharray="3,3"/>
+<text x="674" y="868" class="ty">CK segundo entre 1 y 300</text>
+<rect x="70" y="680" width="210" height="108" rx="6" fill="#faf9f5" stroke="#6b6b6b" stroke-dasharray="4,3"/>
+<text x="80" y="698" class="b" fill="#d9532c">PK</text><text x="110" y="698" class="ty">llave primaria</text>
+<text x="80" y="712" class="b" fill="#1a1a1a">FK</text><text x="110" y="712" class="ty">llave foránea</text>
+<text x="80" y="726" class="b" fill="#6b6b6b">UK</text><text x="110" y="726" class="ty">valor único</text>
+<text x="80" y="740" class="b" fill="#6b6b6b">CK</text><text x="110" y="740" class="ty">restricción de valores</text>
+<line x1="80" y1="754" x2="104" y2="754" stroke="#6b6b6b" stroke-width="1.2"/><path d="M28,0" fill="none"/><path d="M99,750 L104,754 L99,758" fill="none" stroke="#6b6b6b" stroke-width="1.4"/><text x="110" y="757" class="ty">hijo → padre</text>
+<rect x="250" y="688" width="20" height="12" rx="3" fill="#ece7d8" stroke="#1a1a1a"/>
+<text x="270" y="712" text-anchor="end" class="ty">soporte</text>
+</svg></body></html>

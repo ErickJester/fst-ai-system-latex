@@ -52,10 +52,10 @@ marca de duda, y tampoco «conducta activa». El recuadro de cada cilindro no se
 
 - **Los 300 s.** El pipeline procesa el video completo, con todo y sus errores. El recorte a
   los últimos 300 s, si lo hace el sistema, ocurre fuera del pipeline y no se dibuja.
-- **«Video anotado».** Se quitó de lo que guarda el módulo 4 porque el código no lo genera.
-- **«Medidas por cuadro».** Se quitó: es un archivo interno del etiquetador, no una salida del
-  modelo, y el sistema no lo usa (el contrato de la CNN solo convierte la conducta de cada
-  segundo en filas de `SEGUNDO` y el resumen en `PRESENTA`; ver `DISENO-BD.md`).
+- **«Video anotado» y «medidas por cuadro».** Se quitaron del documento y de las figuras
+  (D-81): el código no los genera y ningún requisito los pide. El módulo 4 guarda dos
+  cosas: la conducta de cada segundo y la copia del video para revisión (H.264). Los segundos por
+  conducta de cada minuto no se guardan (D-52): se calculan desde la conducta de cada segundo.
 
 ## Lo que no coincide con el documento
 
@@ -68,12 +68,12 @@ Este diagrama sigue la descripción que se dio el 8-oct. El LaTeX todavía dice 
   y decide cada segundo. Sí coincide la mención de que la versión más reciente fusiona la red
   con una rama de medidas (quince rasgos y siete reglas) y los clips de 16 cuadros.
 - **RN-13 y RF-17.** Hablan de la conducta activa como cuarta conducta.
-- **Cap. 5, módulo 4 («cuatro salidas»).** Lista «video anotado» y «medidas por cuadro».
 - **`origen = dudosa`.** El documento marca los segundos dudosos con ese valor, que sale de la
   regla de umbral que aquí ya no existe.
-- **Cap. 5, inicio de la sección del pipeline** dice que analiza solo los últimos 300 s.
-- **`pipeline.puml`.** Sigue la versión anterior: rasgos con regla de tres pasos, la red como
-  candidata y el recorte a 300 s dentro del módulo 4.
+- **Cap. 5, inicio de la sección del pipeline:** ya corregido (12-oct). Dice que el pipeline
+  analiza el video completo y conserva los resultados de sus últimos 300 s.
+- **`pipeline.puml`.** Ya no tiene el recorte a 300 s (12-oct). Sigue con la rama de regla de
+  tres pasos y «dudosa», porque D-78 (si la red entrega probabilidades) está en pausa.
 
 Ningún otro archivo se modificó.
 
@@ -82,3 +82,32 @@ Ningún otro archivo se modificó.
 ```bash
 python diagramas/diagram_design/generadores/gen_pipeline.py diagramas/diagram_design/pipeline_analisis.html
 ```
+
+## Actualización del 12-oct (rama `decisiones-11oct`)
+
+- **Módulo 4:** se agregó la copia del video para revisión (H.264, recortada a lo analizado),
+  que el cap. 5 de la rama lista como una de las salidas.
+- **Pausa (RN-17):** cuadro punteado junto a la red: 3 s seguidos sin ver al espécimen
+  pausan el análisis; si el usuario ajusta el recuadro continúa, y si no responde en 5
+  minutos se cancela.
+- **D-66 ya está en el documento:** el cap. 5 de la rama presenta la red de fusión como el
+  clasificador, así que ya no choca con este diagrama en ese punto.
+- **Lo que sigue sin coincidir con el cap. 5 de la rama:**
+  - El módulo 3 aplica a la red una regla de tres pasos (umbral de confianza, conducta activa
+    y marca de duda). El diagrama solo muestra la conducta del segundo.
+  - `origen = dudosa` sigue saliendo de esa regla.
+
+## Nota del 12-oct (D-89)
+
+`pipeline.puml` (figura del cap. 5) ahora tiene, al inicio del módulo 3, la rama «¿Pasan 3 s seguidos sin
+ver al espécimen?»: guarda una imagen fija y avisa al worker para pausar el análisis. Esta versión HTML
+no la dibuja, porque su cuadrícula es fija; la pausa está en `seq_pausa_y_ajuste.puml` y en los diagramas
+de estados.
+
+## Actualización del 12-oct (D-84 a D-89)
+
+El cuadro «En pausa» ahora dice lo que define D-89: la que pierde al espécimen 3 s seguidos es
+la **segmentación del pipeline, no la red**; el pipeline guarda una imagen fija, el usuario
+ajusta el recuadro o cancela, el análisis continúa desde ese segundo y, sin respuesta en
+5 minutos, se cancela. La flecha punteada sale de la zona de la red solo porque la cuadrícula
+es fija; el flujo completo está en `../seq_pausa_y_ajuste.puml`.

@@ -1,18 +1,19 @@
 @startuml seq_notificaciones
 ' ================================================================
-'  Secuencia - Notificaciones
+'  Secuencia - Generación y consulta de notificaciones
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Cubre RF-33 (avisos en el panel y por correo) y CU-22 en lo que
-'  toca a la lectura del aviso. El Worker crea el aviso cuando un
-'  analisis termina, se detiene por error, queda en pausa o se
-'  cancela por falta de respuesta (RF-34); el backend crea los de
-'  disco y de video borrado (RN-05).
+'  Reemplaza a figures/mermaid/seq_notificaciones.png, que no tenia
+'  fuente en el repositorio y decia que el Worker "actualiza el
+'  estado del video como completado" (el estado es del ANALISIS).
 '
-'  Reemplaza a figures/mermaid/seq_notificaciones.png, un Mermaid
-'  de mayo sin fuente que actualizaba el estado "del video", sin
-'  correo ni avisos de error.
+'  Cubre RF-33 y D-45: el sistema crea una NOTIFICACION por cada
+'  aviso y, ademas, la envia por correo; si el envio falla, el aviso
+'  queda en el panel. Los tipos son los del dominio tipo_notificacion:
+'  analisis completado, error del pipeline, analisis en pausa,
+'  analisis cancelado, alerta de disco y video borrado. Las crea el
+'  Worker: durante el analisis y en sus tareas diarias (D-82).
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_notificaciones.puml
@@ -23,51 +24,34 @@ skinparam defaultFontName Arial
 skinparam defaultFontSize 11
 skinparam shadowing false
 skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
 
 participant Worker as w
 database "Base de datos" as db
-participant "Cuenta de correo" as mail
 participant Backend as api
 participant "Interfaz web" as ui
-actor Investigador as inv
+actor Usuario as u
 
-== El aviso se crea cuando el análisis cambia de estado ==
+== El sistema crea la notificación ==
 
-w -> db: crea el aviso para el investigador\n(análisis terminado, con error,\nen pausa o cancelado)
-db --> w: confirma
+w -> db: crea la notificación para el usuario que corresponde\n(análisis terminado, con error, en pausa o cancelado;\nalerta de disco; video borrado antes de tiempo)
+w -> w: envía también el aviso por correo\n(si el envío falla, el aviso queda en el panel)
 
-w -> mail: envía el mismo aviso por correo
+== El usuario la consulta ==
 
-alt el envío falla
-  note right of w
-    El aviso permanece en el panel
-    de notificaciones (RF-33).
-  end note
+loop al abrir la aplicación y luego cada 30 segundos
+  ui -> api: pide las notificaciones del usuario
+  api -> db: busca las notificaciones de ese usuario,\nlas más recientes primero
+  db --> api: lista (tipo, mensaje, leída o no, fecha)
+  api --> ui: lista de notificaciones
+  ui -> u: muestra el contador de no leídas en la barra superior
 end
 
-== El investigador consulta sus avisos ==
-
-inv -> ui: abre el sistema o recarga el dashboard
-ui -> api: solicita los avisos no leídos
-api -> db: busca los avisos no leídos del usuario
-db --> api: lista de avisos
-api --> ui: lista de avisos
-ui --> inv: muestra la insignia con el número de avisos
-
-inv -> ui: abre el panel de notificaciones
-ui --> inv: lista los avisos de análisis, errores y alertas
-
-inv -> ui: selecciona un aviso
-ui -> api: marca el aviso como leído
-api -> db: actualiza el aviso como leído
+u -> ui: abre el panel y elige una notificación
+ui -> api: marca la notificación como leída
+api -> db: actualiza la notificación como leída\n(solo si pertenece al usuario de la sesión)
 db --> api: confirma
-api --> ui: confirma la lectura
-ui --> inv: abre el experimento asociado al aviso
-
-note over api, db
-  Los avisos de alerta de disco (a los Administradores) y de video
-  borrado antes de tiempo (al investigador de cada experimento
-  afectado) los crea el backend con el mismo mecanismo.
-end note
+api --> ui: confirma
+ui --> u: abre el experimento relacionado, si lo hay
 
 @enduml

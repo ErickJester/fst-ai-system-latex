@@ -11,8 +11,8 @@ El trabajo está repartido en dos listas:
 
 | Lista | Quién | Ítems |
 |-------|-------|-------|
-| [`PENDIENTES-VANESA.md`](PENDIENTES-VANESA.md) | Vanesa | todo ✅ al 11-oct (antes: 13 🔴 · 17 🟡 · 4 🟢 · 4 ❓ · 1 🔒) |
-| [`PENDIENTES-ERICK.md`](PENDIENTES-ERICK.md) | Erick | abiertos al 11-oct: 0 🔴 · 14 🟡 · 5 🟢 · 3 ❓ · 3 🔒 (antes: 5 🔴 · 19 🟡 · 6 🟢 · 3 ❓ · 4 🔒) |
+| [`PENDIENTES-VANESA.md`](PENDIENTES-VANESA.md) | Vanesa | 13 🔴 · 17 🟡 · 4 🟢 · 4 ❓ · 1 🔒 |
+| [`PENDIENTES-ERICK.md`](PENDIENTES-ERICK.md) | Erick | 5 🔴 · 19 🟡 · 6 🟢 · 3 ❓ · 4 🔒 |
 
 ---
 
@@ -78,16 +78,18 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
   lateral**.
 
 **El análisis**
-- Arranca solo al terminar la carga; el investigador no lo inicia, pausa, cancela ni
-  reinicia (RN-04). Reanalizar **reemplaza** el resultado anterior (D-03).
+- Arranca solo al terminar la carga; el investigador no lo inicia, pausa ni cancela, pero
+  **sí puede reiniciarlo** desde la pantalla de revisión: se borra el resultado anterior
+  (RN-04, D-60, D-68). Solo el sistema pausa (3 s seguidos sin ver al espécimen) o cancela
+  (5 min sin respuesta del usuario) (RN-17, D-59, D-67). Reanalizar **reemplaza** el
+  resultado anterior (D-03).
 - Pipeline de **tres etapas**: preprocesamiento, localización de los cilindros y
   clasificación (D-16). **Sin YOLO, ByteTrack ni ningún *tracker***: un espécimen por
   cilindro, detectado por sustracción de fondo (CLA-02). YOLO solo aparece como trabajo
   revisado en el cap. 2.
-- **Clasificador: la red de fusión** (R(2+1)D-18 más una rama de medidas: quince rasgos y siete
-  reglas de observación; D-66). El *gradient boosting* sobre rasgos queda solo en el etiquetador
-  del equipo. La conducta activa se deriva con la regla de tres pasos. No escribir ResNet-50 ni
-  Random Forest, ni cifras de desempeño.
+- **Clasificador: la CNN de fusión** (R(2+1)D-18 más una rama de 22 medidas), que decide cada
+  segundo (D-66). El *gradient boosting* sobre rasgos es el etiquetador del equipo y aporta
+  los 15 rasgos. No escribir ResNet-50 ni Random Forest, ni cifras de desempeño.
 - **Cuatro conductas:** nado activo, inmovilidad, escalamiento y **conducta activa** (cuando
   no se distingue nado de escalamiento) (D-29, RN-13).
 - **Cada segundo recibe una conducta, sin duración mínima.** El sistema detecta conductas
@@ -100,7 +102,7 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
 - **Entrenamiento sin las anotaciones del laboratorio** (D-26, `CLAUDE.md`). Las etiquetas
   las generan los autores con el **etiquetador del equipo** (propone la conducta y ellos la
   revisan y corrigen); **BORIS ya no aparece** en el documento (D-56, 7-oct). Métricas:
-  precisión, *recall* y F1 por clase; **nunca** κ de Cohen, MAE ni «gold standard».
+  precisión, *recall* y F1 por conducta (D-65); **nunca** κ de Cohen, MAE ni «gold standard».
 
 **Los resultados**
 - Se comparan **grupos entre sí con el Día 2**. **No existe** comparación Día 1 contra
@@ -130,11 +132,42 @@ anótalo como pregunta (ver «Reglas de contenido», abajo).
 - **Validación del video:** la extensión se comprueba en la interfaz; la orientación y la reproducibilidad, en el
   servidor (D-64).
 - **F1 «por conducta»**; el tiempo de análisis se mide en segundos; el título de la portada no se cambia (D-65).
-- **Revisión, pausa y reinicio (D-68, aplica D-57 a D-60):** el Día 1 se sube para que el investigador confirme la
-  habituación y no se analiza (D-67). Si no se ve al espécimen en tres segundos seguidos, el análisis queda en pausa y
-  se notifica; si en 5 minutos no hay respuesta, se **cancela** (estado nuevo, con su mensaje). El recuadro ajustado no
-  se guarda. El investigador puede **reiniciar** y eso borra el resultado anterior (RN-04). El *worker* guarda la copia
-  reproducible H.264 y los recuadros, sin video anotado, y es quien borra los videos a los 30 días.
+- **D-57 a D-60** (revisión y corrección, copia H.264, pausa por «no se ve», reinicio del análisis por el
+  usuario): **aplicadas el 11-oct** en los caps. 4 y 5 junto con D-66 a D-77 (rama `decisiones-11oct`).
+
+**Decisiones del 11-oct (D-66 a D-77)**
+
+- **CNN de fusión como clasificador** (D-66). Pausa por «no se ve»: si pasan 5 min sin respuesta, el análisis
+  **se cancela** (D-67). **Reiniciar borra** el resultado anterior (D-68).
+- Los videos se **borran a los 30 días de forma automática por el sistema** (D-69). Fecha de portada y documento
+  técnico: «Fecha pendiente» (D-70).
+- **Día 1:** se sube, se guarda como video y **no se analiza**; `VIDEO–ANALISIS` pasa a (0,1) (D-71).
+- El Administrador **puede cambiar el rol** de una cuenta; RN-16 también prohíbe quitárselo al último (D-72).
+- **Docker:** solo herramienta de empaquetado (D-73). **Repetibilidad:** RNF-14 y cuarto criterio (D-74).
+  RNF-11 es diseño modular; validar otros paradigmas queda fuera (D-75).
+- Dos PDF: **reporte de resultados** y **reporte de diagnóstico** (D-76). Bloques de 5 s: el laboratorio usa
+  muestreo instantáneo cada 5 s; el sistema, la conducta predominante del periodo (D-77).
+
+**Decisiones del 12-oct (D-79 a D-82)**
+
+- `ANALISIS.etapa`, `nivelClasif` y `fechaAnalisis` siguen NOT NULL; el backend les pone un valor de arranque al
+  encolar y el worker los reemplaza (D-79). `SEGUNDO.origen` tiene cuatro valores: `maquina`, `confirmada`,
+  `corregida` y `dudosa` (D-80).
+- Se quitan el **video anotado** y las **medidas por cuadro**; el módulo 4 deja tres salidas (D-81).
+- El **worker** ejecuta las tareas diarias: borrado de videos a 30 días, aviso de vencimiento y vigilancia del
+  disco (D-82). D-78 (si la red entrega probabilidades) sigue pendiente.
+
+**Decisiones del 12-oct, segunda parte (D-83 a D-89)**
+
+- Un experimento con solo el Día 1 se muestra **«en espera del Día 2»** (D-83).
+- **Worker:** reencola solo los análisis huérfanos al arrancar (D-84); analiza **un video a la vez** (D-85); tareas
+  diarias **una vez al día de madrugada** y disco **antes de cada análisis** (D-86); eliminar un experimento se
+  rechaza con `procesando` o `en pausa` (D-87); un fallo imprevisto termina en `error` y el worker sigue (D-88).
+- **Pausa (D-89):** imagen fija del segundo central de los 3 s sin ver, el worker suelta el video, el usuario
+  ajusta o cancela, el análisis vuelve al frente de la cola y continúa desde la pausa. El recuadro vive en un
+  archivo del volumen. Ajustan y cancelan quien subió el video o un Administrador (igual que el reinicio).
+- **Para el laboratorio (Q-H):** cuántas personas usan el sistema a la vez; hoy el requisito dice 4 y el usuario
+  mencionó 10 como exageración.
 
 ## Reglas de contenido
 

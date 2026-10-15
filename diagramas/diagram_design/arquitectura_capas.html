@@ -49,7 +49,7 @@ svg{display:block;height:100vh;width:auto}
 <text x="242" y="362" class="a">Autenticación con JWT</text>
 <text x="242" y="376" class="a">Validación de los archivos de video</text>
 <text x="242" y="390" class="a">Encolado de las tareas de análisis</text>
-<rect x="800" y="456" width="560" height="126" rx="6" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/>
+<rect x="800" y="456" width="560" height="144" rx="6" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/>
 <text x="1080.0" y="470" text-anchor="middle" class="st">«contenedor»</text>
 <text x="1080.0" y="486" text-anchor="middle" class="nm">worker</text>
 <line x1="800" y1="496" x2="1360" y2="496" stroke="#d9532c"/>
@@ -58,9 +58,11 @@ svg{display:block;height:100vh;width:auto}
 <text x="814" y="532" class="a" style="font-weight:600">scikit-learn</text>
 <text x="930" y="532" class="a">Clasificador sobre rasgos</text>
 <text x="814" y="550" class="a" style="font-weight:600">PyTorch</text>
-<text x="930" y="550" class="a">R(2+1)D-18 (en evaluación)</text>
+<text x="930" y="550" class="a">R(2+1)D-18: clasificador de conducta</text>
 <text x="814" y="568" class="a" style="font-weight:600">Python</text>
-<text x="930" y="568" class="a">Consulta la cola · borra videos a los 30 días</text>
+<text x="930" y="568" class="a">Cola de a un video · retoma pendientes al arrancar · pausas</text>
+<text x="814" y="586" class="a" style="font-weight:600">Python</text>
+<text x="930" y="586" class="a">Tareas diarias a la madrugada: borrado, aviso, disco</text>
 <rect x="230" y="686" width="240" height="100" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
 <text x="350.0" y="700" text-anchor="middle" class="st">«contenedor»</text>
 <text x="350.0" y="716" text-anchor="middle" class="nm">Base de datos</text>
@@ -68,13 +70,14 @@ svg{display:block;height:100vh;width:auto}
 <text x="242" y="744" class="a">PostgreSQL</text>
 <text x="242" y="758" class="a">Cola de tareas: tabla ANALISIS</text>
 <text x="242" y="772" class="a">Esquema relacional (15 tablas)</text>
-<rect x="830" y="686" width="240" height="100" rx="6" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1"/>
+<rect x="830" y="686" width="240" height="114" rx="6" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1"/>
 <text x="950.0" y="700" text-anchor="middle" class="st">«volumen»</text>
 <text x="950.0" y="716" text-anchor="middle" class="nm">Volumen compartido</text>
 <line x1="830" y1="726" x2="1070" y2="726" stroke="#1a1a1a"/>
-<text x="842" y="744" class="a">Videos originales y anotados</text>
-<text x="842" y="758" class="a">Reportes PDF / CSV / XLSX</text>
-<text x="842" y="772" class="a">Reportes de diagnóstico</text>
+<text x="842" y="744" class="a">Videos originales</text>
+<text x="842" y="758" class="a">Copia H.264 para revisión</text>
+<text x="842" y="772" class="a">Recuadros, imagen y datos de la pausa</text>
+<text x="842" y="786" class="a">Reportes PDF / CSV / XLSX y diagnóstico</text>
 <rect x="1110" y="686" width="250" height="100" rx="6" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1"/>
 <text x="1235.0" y="700" text-anchor="middle" class="st">«volumen»</text>
 <text x="1235.0" y="716" text-anchor="middle" class="nm">Volumen de modelos</text>
@@ -89,12 +92,12 @@ svg{display:block;height:100vh;width:auto}
 <text x="360" y="560" class="r">ENCOLA ANÁLISIS</text>
 <path d="M600,404 L600,650 L880,650 L880,686" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#c-arr)"/>
 <rect x="684" y="635" width="112" height="11" fill="#efede4"/><text x="740" y="644" text-anchor="middle" class="r">LEE Y SIRVE ARCHIVOS</text>
-<path d="M840,582 L840,630 L606,630 A6,6 0 0 0 594,630 L410,630 L410,686" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#c-arr)"/>
+<path d="M840,600 L840,630 L606,630 A6,6 0 0 0 594,630 L410,630 L410,686" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#c-arr)"/>
 <rect x="650" y="615" width="169" height="11" fill="#efede4"/><text x="735" y="624" text-anchor="middle" class="r">TOMA TAREAS Y GUARDA RESULTADOS</text>
-<path d="M1020,582 L1020,686" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#c-arr)"/>
-<text x="1028" y="637.0" class="r">GUARDA ARCHIVOS</text>
-<path d="M1230,582 L1230,686" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#c-arr)"/>
-<text x="1238" y="637.0" class="r">CARGA AL INICIAR</text>
+<path d="M1020,600 L1020,686" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#c-arr)"/>
+<text x="1028" y="646.0" class="r">GUARDA ARCHIVOS</text>
+<path d="M1230,600 L1230,686" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#c-arr)"/>
+<text x="1238" y="646.0" class="r">CARGA AL INICIAR</text>
 <g transform="translate(40,850)" class="lg">
 <rect x="0" y="-8" width="22" height="14" rx="3" fill="#faf9f5" stroke="#1a1a1a"/><text x="30" y="3">CONTENEDOR DOCKER</text>
 <rect x="170" y="-8" width="22" height="14" rx="3" fill="#ece7d8" stroke="#1a1a1a"/><text x="200" y="3">VOLUMEN</text>

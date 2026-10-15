@@ -53,6 +53,33 @@ Marca aquí lo que termines (`✅`, fecha). Este archivo es solo tuyo: Erick no 
   `detke1995` y `craft2010`. En tus capítulos y casos de uso no hay nada que cambiar,
   salvo que algún texto tuyo hable de bloques por «último segundo»: debe decir «conducta
   con más segundos» y remitir a RN-15. **Haz `git pull`** antes de seguir.
+- **Tus respuestas a las preguntas de la auditoría del 11-oct difieren de las de Erick en
+  varios puntos: vale lo de Erick, y ya está aplicado** (commit `1818311`, rama
+  `decisiones-11oct`; las decisiones D-66 a D-77 están en `errores/preguntas-doctor.md` §6).
+  **No apliques tus versiones** en `accesos-login`:
+  - **Día 1:** se sube, se guarda y **no se analiza** (D-71). No se analizan sus primeros
+    5 min ni se retira lo de los últimos 300 s (D-54 se mantiene). `VIDEO–ANALISIS` queda en (0,1).
+  - **Pausa sin respuesta:** a los 5 min el análisis se **cancela** (D-67); no sigue con
+    «no se ve».
+  - **Reinicio:** el resultado anterior se **borra al empezar** el nuevo (D-68), no al terminar.
+  - **Fecha** de portada y documento técnico (archivos tuyos): «**Fecha pendiente**» (D-70),
+    no «Mayo 2026». Ya está cambiado en la rama.
+  - **Borrado a los 30 días:** lo hace el sistema, de forma automática (D-69), sin decir si
+    es el worker o el backend.
+  - **RN-15:** conserva a Craft y Detke y dice que la conducta predominante del periodo no
+    equivale al conteo por eventos del laboratorio (D-77).
+  - **Sin decidir todavía:** quitar «Grupo agrupa Espécimen» del conceptual (tu punto 22).
+  La rama `decisiones-11oct` parte de `accesos-login` y trae tus commits: al mezclarla se
+  conserva tu trabajo y se suman estos cambios.
+- **Cambios del 12-oct en tu zona de casos de uso** (D-81 y D-82; `errores/preguntas-doctor.md`
+  §6). Solo se tocó la ficha de **CU-14** (borrado automático de videos) y su diagrama:
+  el actor ahora es el **Worker** (era «Sistema»), porque el worker ejecuta las tareas diarias
+  de borrado, aviso de vencimiento y vigilancia del disco. En `cu_paquete5.puml` el actor pasa a
+  `:Worker:`. El paso 3 de CU-14 (mostrar el aviso en el *dashboard*) sigue siendo del Sistema.
+  Además, el cap. 5 («Módulo 4») ya no lista «video anotado» ni «medidas por cuadro», y
+  `SEGUNDO.origen` queda con cuatro valores; si algún texto tuyo menciona los otros dos
+  (`sin_revisar`, `humano_ciego`) o un modo de revisión «desde cero», quítalo. **Regenera
+  `cu_paquete5.png`** (no hay `plantuml.jar` en la máquina donde se hizo el cambio).
 - **Glosario y abreviaturas son de Erick.** Si necesitas una entrada nueva, anótala al
   final de este archivo y él la agrega.
 

@@ -1,16 +1,17 @@
 @startuml seq_perfil
 ' ================================================================
-'  Secuencia - Actualizar perfil propio
+'  Secuencia - Configuración de perfil del usuario
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Cubre CU-18 "Actualizar perfil propio" (RF-06). Cualquier usuario
-'  con sesion activa. El rol no se guarda en USUARIO (se deduce de
-'  ADMINISTRADOR), asi que el perfil no lo muestra ni lo edita.
-'  El cambio de contraseña sigue el flujo de seq_cambio_pass_inv.
+'  Reemplaza a figures/mermaid/seq_perfil.png, que no tenia fuente en
+'  el repositorio (era una imagen sin .puml) y mostraba un "rol" del
+'  usuario que el perfil no edita.
 '
-'  Reemplaza a figures/mermaid/seq_perfil.png, un Mermaid de mayo
-'  que "obtenia nombre, correo y rol" y omitia los apellidos.
+'  Cubre CU-18 "Actualizar perfil propio" (RF-06): nombre, apellidos
+'  y correo. El cambio de contraseña es un diagrama aparte
+'  (seq_cambio_pass_inv.puml). El correo no puede estar en uso por
+'  otra cuenta (USUARIO.correo es clave alterna).
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_perfil.puml
@@ -21,38 +22,44 @@ skinparam defaultFontName Arial
 skinparam defaultFontSize 11
 skinparam shadowing false
 skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
 
 actor Usuario as u
 participant "Interfaz web" as ui
 participant Backend as api
 database "Base de datos" as db
 
-u -> ui: abre la pantalla de perfil desde el menú de usuario
-ui -> api: solicita los datos de la cuenta con la sesión activa
-api -> db: busca nombre, apellidos y correo de la cuenta
-db --> api: datos de la cuenta
-api --> ui: datos de la cuenta
+u -> ui: abre su perfil desde el menú de usuario
+ui -> api: pide los datos del perfil\ncon la sesión del usuario
+api -> db: lee nombre, apellidos y correo del usuario
+db --> api: datos actuales
+api --> ui: datos del perfil
 ui --> u: muestra el formulario con los datos actuales\ny la opción de cambiar la contraseña
 
-u -> ui: modifica sus datos y confirma
-ui -> api: envía los datos actualizados
+u -> ui: modifica nombre, apellidos o correo y confirma
+ui -> api: envía los datos modificados
 
-api -> db: ¿el correo nuevo ya está registrado\nen otra cuenta?
-db --> api: sí / no
+alt el correo nuevo no tiene un formato válido
+  api --> ui: rechaza: el correo no es válido
+  ui --> u: muestra el error
+else el correo es válido
+  api -> db: ¿otra cuenta ya usa ese correo?
+  db --> api: sí / no
 
-alt el correo ya está registrado en otra cuenta
-  api --> ui: informa el conflicto
-  ui --> u: muestra el error, no guarda los cambios
-else el correo está disponible
-  api -> db: actualiza nombre, apellidos y correo de la cuenta
-  db --> api: confirma la actualización
-  api --> ui: confirma los cambios
-  ui --> u: muestra la confirmación del perfil actualizado
+  alt ya lo usa otra cuenta
+    api --> ui: informa el conflicto, no aplica el cambio
+    ui --> u: muestra el error
+  else el correo está libre
+    api -> db: actualiza nombre, apellidos y correo\ndel usuario de la sesión
+    db --> api: confirma
+    api --> ui: datos actualizados
+    ui --> u: muestra el perfil actualizado
+  end
 end
 
-note over u, db
-  Para cambiar la contraseña, el usuario sigue el flujo
-  de la secuencia de cambio de contraseña (CU-16).
+note over u, ui
+  El cambio de contraseña se hace aparte
+  (ver seq_cambio_pass_inv).
 end note
 
 @enduml

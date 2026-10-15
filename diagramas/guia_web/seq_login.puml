@@ -1,0 +1,30 @@
+@startuml seq_login
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+u -> ui: escribe correo y contraseña
+ui -> api: POST /auth/login {correo, contraseña}
+api -> db: busca el USUARIO por correo
+db --> api: usuario, o nada
+alt no existe, está inactivo (activo = false)\no la contraseña no coincide (bcrypt)
+  api --> ui: 401 con mensaje genérico\n"Credenciales incorrectas"
+  ui --> u: muestra el error, sin decir qué campo falló
+else credenciales válidas
+  api -> db: ¿el idInstitucional está en ADMINISTRADOR?
+  db --> api: sí / no
+  api -> api: genera el JWT con idInstitucional, rol\ny vencimiento (JWT_EXPIRES_HOURS)
+  api --> ui: 200 OK {token, rol, cambioRequerido}
+  alt cambioRequerido = true
+    ui --> u: obliga a cambiar la contraseña\nantes de continuar
+  else cambioRequerido = false
+    ui --> u: abre el dashboard
+  end
+end
+@enduml

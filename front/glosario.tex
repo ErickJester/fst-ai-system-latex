@@ -67,8 +67,8 @@
   & (\textit{Convolutional Neural Network} / Red Neuronal Convolucional.)
     Arquitectura de red profunda que aplica filtros convolucionales para extraer
     características espaciales jerárquicas de las imágenes. El clasificador de
-    conductas es una CNN espacio-temporal (R(2+1)D-18) reentrenada con clips del FST
-    y fusionada con una rama de medidas del espécimen. \\[5pt]
+    conductas es una CNN espacio-temporal (R(2+1)D-18) fusionada con una rama de
+    medidas y reentrenada con clips del FST. \\[5pt]
 
   \textbf{Cola de tareas}
   & Estructura de datos FIFO que desacopla la recepción de solicitudes de análisis
@@ -279,7 +279,7 @@
   & Función de activación que transforma un vector de puntuaciones en una
     distribución de probabilidad: $\sigma(z)_i = e^{z_i}/\sum_j e^{z_j}$.
     La capa final de la red convolucional aplica softmax para obtener la
-    probabilidad de cada conducta (inmovilidad, nado activo, escalamiento). \\[5pt]
+    probabilidad de cada conducta (inmovilidad, nado activo, escalamiento y conducta activa). \\[5pt]
 
   \textbf{Sustracción de fondo}
   & (\textit{Background subtraction}.) Técnica de segmentación que identifica

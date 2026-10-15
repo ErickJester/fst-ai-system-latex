@@ -1,0 +1,25 @@
+@startuml seq_crear_experimento
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+inv -> ui: escribe nombre, fecha y notas (opcional)
+ui -> api: POST /experiments {nombre, fecha, notas}\ncon el JWT del usuario
+api -> db: ¿ya existe un experimento con ese nombre?
+db --> api: sí / no
+alt el nombre ya existe
+  api --> ui: 409, "Ya existe un experimento con ese nombre"
+  ui --> inv: marca el campo nombre con el error
+else el nombre es único
+  api -> db: crea EXPERIMENTO con el idInstitucional del token
+  db --> api: idExperimento
+  api --> ui: 201 Created {idExperimento}
+  ui --> inv: pasa al paso 2 (grupo, tanda y video)
+end
+@enduml

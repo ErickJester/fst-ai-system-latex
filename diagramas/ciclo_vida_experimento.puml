@@ -1,4 +1,7 @@
 @startuml "Ciclo-De-Vida-Experimento-FST"
+' OBSOLETO (12-oct-2026): ninguna figura del documento lo usa y describe un modelo
+' anterior (botones de reinicio y estados que ya no existen). Lo vigente son
+' estados_analisis.puml y estados_experimento.puml. Se conserva solo como evidencia.
 title Máquina de Estados Global — Ciclo de Vida del Experimento FST\nPlataforma Web FST · TT 2026-B066
 
 ' ========= ESTILO ==========================================================
