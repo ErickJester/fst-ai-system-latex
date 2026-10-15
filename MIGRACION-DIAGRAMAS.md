@@ -173,7 +173,7 @@ diagrama de clases — todas construidas sobre las mismas 12 tablas).
 
 No dibujes nada de una sección sin haber contestado su checklist.
 
-### 3.1 DER conceptual (`fig:der` en el capítulo, hoy `figures/mermaid/entidadRelacion`)
+### 3.1 DER conceptual (`fig:der` en el capítulo, hoy `figures/diagramas/entidadRelacion`)
 
 **Estado:** 🟢 rehecho — [`diagramas/esquema_conceptual.tex`](diagramas/esquema_conceptual.tex).
 
@@ -217,7 +217,7 @@ Checklist de verificación (no de construcción, ya existe):
 > relacional; ese respaldo sigue siendo Codd/Elmasri-Navathe/Cardona, ya citados en
 > `chapters/05_diseno.tex`.
 
-### 3.2 Esquema físico / grafo relacional (`fig:er`, hoy `figures/mermaid/er2`)
+### 3.2 Esquema físico / grafo relacional (`fig:er`, hoy `figures/diagramas/er2`)
 
 **Estado:** 🟡 insumo listo, falta compilar e insertar el par de evidencia.
 

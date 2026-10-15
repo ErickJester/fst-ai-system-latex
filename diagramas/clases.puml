@@ -22,6 +22,9 @@ package P1_Autenticacion_y_usuarios {
     +iniciarSesion(correo, contrasena) : String
     +cerrarSesion(token) : void
     +cambiarContrasena(nueva) : void
+    +recuperarContrasena(correo) : void
+    +actualizarPerfil(datos) : void
+    +consultarDashboard() : List<Experimento>
     +crearExperimento(datos) : Experimento
     +subirVideo(idTanda, sesion, archivo) : Video
     +eliminarExperimento(id) : void
@@ -137,6 +140,19 @@ package P3_Pipeline_de_analisis_conductual {
 
 package P4_Resultados_y_reportes {
 
+  class Estadisticas <<derivada>> {
+    -conducta : Conducta
+    -media : Decimal
+    -desviacionEstandar : Decimal
+    -varianza : Decimal
+    -n : Integer
+  }
+  note right of Estadisticas
+    Resultado calculado al mostrar o
+    descargar (RF-31). No se guarda
+    en la base de datos.
+  end note
+
   class Observacion {
     +calcularBloques() : List<String>
   }
@@ -209,6 +225,9 @@ Observacion "1" *--> "1..300" Segundo : "se etiqueta en"
 Segundo "0..*" --> "0..1" Conducta : "se clasifica como"
 
 Experimento "1"    --> "0..*" Reporte      : origina
+Experimento ..> Estadisticas : calcula
+Grupo       ..> Estadisticas : calcula
+Tanda       ..> Estadisticas : calcula
 Experimento "0..1" --> "0..*" Notificacion : origina
 
 @enduml

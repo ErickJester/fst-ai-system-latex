@@ -1,6 +1,6 @@
 # Pipeline de análisis conductual
 
-![Pipeline](pipeline_analisis.png)
+![Pipeline](../../figures/diagramas/pipeline_analisis.png)
 
 Archivo interactivo: [pipeline_analisis.html](pipeline_analisis.html).
 

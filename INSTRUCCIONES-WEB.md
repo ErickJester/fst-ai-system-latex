@@ -809,13 +809,13 @@ asistencia. Cada pantalla cita su **maqueta v2** (HTML e imagen). Las maquetas s
 decisiones del 11 y 12 de octubre: no muestran la pantalla de pausa, el rol editable de las cuentas,
 las notificaciones nuevas ni los cambios de la revisión. **Si difieren de esta guía, mandan los
 esquemas y las reglas de esta guía**; la maqueta sirve para el estilo visual y la disposición.
-Cada pantalla tiene varios estados; impleméntalos todos. Capturas de los estados: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\estados`.
+Cada pantalla tiene varios estados; impleméntalos todos. Capturas de los estados: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\estados`.
 
 Estructura común: barra superior con el nombre del sistema, notificaciones (campana) y
 menú de usuario con "Cerrar sesión" accesible desde cualquier pantalla.
 
 ### 9.1 Inicio de sesión
-Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\login.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\login.png`). Cambio de contraseña obligatorio: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\primer-acceso.html`.
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\login.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\login.png`). Cambio de contraseña obligatorio: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\primer-acceso.html`.
 Estados: normal; error genérico de credenciales. Incluye enlace "Recuperar contraseña".
 
 ```
@@ -838,7 +838,7 @@ antes de continuar.
 Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_login.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_logout.puml` (Anexo A.8).
 
 ### 9.2 Dashboard
-Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\experimentos.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\experimentos.png`). Detalle de un experimento: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\experimento.html`.
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\experimentos.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\experimentos.png`). Detalle de un experimento: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\experimento.html`.
 Estados: con experimentos; vacío ("Aún no hay experimentos" y botón de crear); con aviso de
 video por vencer.
 
@@ -862,7 +862,7 @@ calcula (sección 4.8) y se muestra como «Sin videos», «En espera del Día 2�
 menos un grupo con ese tratamiento. "Eliminar" pide confirmación explícita (R-08).
 
 ### 9.3 Crear experimento
-Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\cargar-video.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\cargar-video.png`). Grupo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\grupo.html`.
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\cargar-video.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\cargar-video.png`). Grupo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\grupo.html`.
 Se hace en pasos, porque subir un video puede tardar varios minutos y así se puede corregir
 el nombre o la fecha sin volver a subir nada, y agregar tandas después.
 
@@ -902,10 +902,10 @@ Reglas del paso 2:
 Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_experimento.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_carga_video.puml` (Anexo A.9).
 
 ### 9.4 Progreso del análisis
-Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\progreso.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\progreso.png`).
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\progreso.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\progreso.png`).
 Estados: analizando; en pausa (el sistema no vio al espécimen y espera al usuario); completado;
 error (no se pudo abrir el video o no se hallaron los tubos); cancelado (el usuario canceló o no
-respondió en 5 minutos). En pausa se muestra la **pantalla de pausa** (RN-17, D-59, D-89; maqueta `mockups/v2/pausa.html`, imagen `figures/mockups/v2/pausa.png`):
+respondió en 5 minutos). En pausa se muestra la **pantalla de pausa** (RN-17, D-59, D-89; maqueta `mockups/v2/pausa.html`, imagen `figures/mockups/pausa.png`):
 
 ```
 +-------------------------------------------------------------+
@@ -957,7 +957,7 @@ pocos segundos para actualizar el tiempo que queda.
 Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_consulta_progreso.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_pausa_y_ajuste.puml` (Anexo A.9).
 
 ### 9.5 Resultados
-Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\resultados.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\resultados.png`).
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\resultados.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\resultados.png`).
 Cuatro pestañas: por espécimen, comparación entre grupos (Día 2), línea de tiempo por
 minuto y bloques de 5 s. En la de bloques, cada bloque muestra la conducta con más segundos
 y, al abrirlo, sus cinco segundos, para notar las conductas breves.
@@ -997,7 +997,7 @@ Los bloques **no usan la CNN**: la CNN solo clasifica cada segundo, y el bloque 
 Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_consulta_resultados.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_descarga_reportes.puml` (Anexo A.10).
 
 ### 9.6 Panel de administración (solo administrador)
-Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\admin.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\admin.png`). Perfil propio (menú de usuario): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\perfil.html`.
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\admin.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\admin.png`). Perfil propio (menú de usuario): `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\perfil.html`.
 Estados: vista de métricas; alerta de disco elevado; cola de análisis activa; modal de
 crear usuario; modal de editar usuario.
 
@@ -1026,7 +1026,7 @@ muestra una sola vez en pantalla al administrador, como respaldo (D-45, sección
 Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_cuenta.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_gestion_usuarios.puml` (Anexo A.8).
 
 ### 9.7 Revisión segundo a segundo
-Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\revision.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\v2\revision.png`). Prototipo de la herramienta de revisión de la que sale esta pantalla (otro repositorio, solo consulta): `C:\Users\Samsung\Desktop\proyectos\fst_auto\revisor_segundos.html`.
+Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\revision.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\revision.png`). Prototipo de la herramienta de revisión de la que sale esta pantalla (otro repositorio, solo consulta): `C:\Users\Samsung\Desktop\proyectos\fst_auto\revisor_segundos.html`.
 Se abre **solo cuando el análisis está `completado`**, desde Progreso o Resultados
 (regla R-14), y **solo para el investigador que subió el video y el Administrador**
 (D-57); cualquier otro usuario recibe 403. Lee y guarda en el servidor. Tema oscuro,
@@ -1840,6 +1840,9 @@ package P1_Autenticacion_y_usuarios {
     +iniciarSesion(correo, contrasena) : String
     +cerrarSesion(token) : void
     +cambiarContrasena(nueva) : void
+    +recuperarContrasena(correo) : void
+    +actualizarPerfil(datos) : void
+    +consultarDashboard() : List<Experimento>
     +crearExperimento(datos) : Experimento
     +subirVideo(idTanda, sesion, archivo) : Video
     +eliminarExperimento(id) : void
@@ -1865,17 +1868,20 @@ package P2_Experimentos_y_carga_de_video {
     -notas : String
     +validarNombreUnico() : Boolean
     +consultarEstado() : String
+    +compararGrupos() : List<Estadisticas>
   }
   class Grupo {
     -id : Integer
     -etiqueta : String
     -tipo : String
     -tratamiento : String
+    +calcularEstadisticas() : Estadisticas
   }
   class Tanda {
     -id : Integer
     -ordinal : Integer
     -nCilindros : Integer
+    +calcularEstadisticas() : Estadisticas
   }
   class Especimen {
     -id : Integer
@@ -1940,6 +1946,13 @@ package P3_Pipeline_de_analisis_conductual {
 }
 
 package P4_Resultados_y_reportes {
+  class Estadisticas <<derivada>> {
+    -conducta : Conducta
+    -media : Decimal
+    -desviacionEstandar : Decimal
+    -varianza : Decimal
+    -n : Integer
+  }
   class Observacion {
     +calcularBloques() : List<String>
   }
@@ -2002,6 +2015,9 @@ Video       "1" --> "0..4" Observacion : contiene
 Observacion "1" *--> "1..300" Segundo  : "se etiqueta en"
 
 Experimento "1"    --> "0..*" Reporte      : origina
+Experimento ..> Estadisticas : calcula
+Grupo       ..> Estadisticas : calcula
+Tanda       ..> Estadisticas : calcula
 Experimento "0..1" --> "0..*" Notificacion : origina
 @enduml
 ```
@@ -2697,6 +2713,15 @@ w -> fs: revisa el espacio libre del disco\n(aviso al 80 %, limpieza al 90 %, D-
 w -> db: marca el análisis como "procesando"
 
 w -> fs: lee el archivo de video de la tanda
+
+alt no se pudo abrir el video (RN-11)
+  w -> db: deja la etapa en "preprocesamiento"
+  w -> w: genera el reporte de diagnóstico PDF
+  w -> fs: guarda el PDF de diagnóstico
+  w -> db: guarda rutaDiagnostico
+  w -> db: marca el análisis como "error" y fija fechaAnalisis\n(no se reinicia desde la pantalla de error, RN-04)
+  w -> db: crea la notificación de error en el análisis
+else el video se abre
 fs --> w: video listo para procesar
 
 w -> db: actualiza la etapa a "preprocesamiento"
@@ -2724,12 +2749,13 @@ alt se hallaron los tubos
     w -> db: marca el análisis como "completado",\ncon su nivel de clasificación y fechaAnalisis
     w -> db: crea la notificación de análisis terminado
   end
-else no se pudo abrir el video, no se hallaron los tubos\no falló algo imprevisto en el pipeline (D-88)
+else no se hallaron los tubos\no falló algo imprevisto en el pipeline (D-88)
   w -> w: genera el reporte de diagnóstico PDF
   w -> fs: guarda el PDF de diagnóstico
   w -> db: guarda rutaDiagnostico
   w -> db: marca el análisis como "error" y fija fechaAnalisis\n(no se reinicia desde la pantalla de error, RN-04)
   w -> db: crea la notificación de error en el análisis
+end
 end
 @enduml
 ```
