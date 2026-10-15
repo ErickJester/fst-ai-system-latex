@@ -1,7 +1,7 @@
 # Pendientes de Vanesa — capítulos 1 a 3, preliminares y casos de uso
 
 Parte de [`PENDIENTES.md`](PENDIENTES.md), que tiene el reparto y las reglas de
-coordinación. **Verificado contra el LaTeX el 2026-10-05.** Los IDs (A-, M-, L-) son los
+coordinación. **Verificado contra el LaTeX el 2026-10-05; los ⏳ de la reauditoría del 11-oct, revisados el 14-oct.** Los IDs (A-, M-, L-) son los
 mismos de la lista original; la evidencia larga (citas de la entrevista) está en
 `errores/0X/errores.md` y `CORRECCIONES.md`.
 
@@ -124,7 +124,7 @@ Marca aquí lo que termines (`✅`, fecha). Este archivo es solo tuyo: Erick no 
 
 | # | Prioridad | Dónde | Qué hacer |
 |---|-----------|-------|-----------|
-| ⏳ A-14 (reabierto 11-oct: los nombres sí se unificaron; la fecha sigue en «Mayo 2026» y falta la fecha de entrega) | 🔴 | `portada.tex:73`, `documento_tecnico.tex:32` | Fecha «Mayo 2026» → la de entrega. Unificar los nombres entre los dos archivos (acentos y orden de apellidos: «Ángel Alí» contra «Angel Ali») |
+| ✅ A-14 (14-oct: nombres unificados y fecha «Diciembre 2026» en portada y documento técnico) | 🔴 | `portada.tex:73`, `documento_tecnico.tex:32` | Fecha «Mayo 2026» → la de entrega. Unificar los nombres entre los dos archivos (acentos y orden de apellidos: «Ángel Alí» contra «Angel Ali») |
 | ✅ A-2b (5-oct) | 🔴 | `resumen.tex:7` | Mismo cambio que A-2: tres analistas, se triplica |
 | ✅ M-4 (5-oct) | 🟡 | `resumen.tex:4` | «entre una y dos horas» → «entre una hora y media y dos horas» (como el cap. 1); expandir ISO e IEEE en su primera aparición |
 | ✅ L-4 (5-oct) | 🟢 | `referencias.bib:293` | Quitar el comentario sobrante «INSTRUCCIONES: Pegar estas entradas…» |
@@ -258,7 +258,8 @@ Aplicado el 2026-10-11, primer bloque (hallazgos con fuente que decide):
 - ✅ **Cap. 2:** C2-02 (YOLO definido al primer uso), C2-03 (Redmon 2016 y Ren 2017 en `referencias.bib`), C2-07.
 - ✅ **Cap. 3 y abreviaturas:** C3-11 (*worker*, *clips*, *recall*), C3-12 (notación) y siglas ACID, GMM y VP.
 - ✅ **Casos de uso:** DF-12 (fichas CU-11 y CU-12 movidas al Paquete 1) y DF-14 (CU-22 en vez de CU-21).
-- ⏳ **Sin aplicar de ese bloque:** DF-13, DF-16 y DF-19 (`cu_*.puml`: acentos y el `<<extend>>` del desglose) porque
+- ✅ **Revisado el 14-oct:** DF-13 (el desglose ya es paso de CU-09, sin `<<extend>>`), DF-16 (acentos en `cu_*.puml` y en `arquitectura_software.puml`) y DF-19 («tres etapas»; «dos actores principales» más el *Worker* como actor del sistema) están resueltos. C3-09 (claves `bradski2008` y `kingma2015`) y C3-13 (sección renombrada «Clasificación de conductas: rasgos y redes neuronales», aviso de que los cilindros se localizan después; el párrafo del clasificador ya concuerda con el cap. 5) aplicados el 14-oct.
+- (histórico) **Sin aplicar de ese bloque:** DF-13, DF-16 y DF-19 (`cu_*.puml`: acentos y el `<<extend>>` del desglose) porque
   hay que regenerar los PNG y este equipo no tiene `plantuml.jar`; C3-09 (renombrar claves del `.bib`) y C3-13
   (reestructurar la sección del clasificador del cap. 3), que cambian mucho texto sin una fuente que lo exija.
 - ⏳ **Para Erick:** RF-09, RN-03 y RF-19 (el Día 1 no se analiza), R-03, RNF-10 y el volumen de la factibilidad
@@ -277,6 +278,6 @@ Aplicado el 2026-10-11, primer bloque (hallazgos con fuente que decide):
 - ✅ **`.puml`** (fuente de las figuras): arquitectura (sin CLAHE, `_tracked`, solo `.mp4` ni SQL), esquema físico (sin
   `D-xx`, SQL ni «rata»), `estados_analisis`, `seq_consulta_progreso`, `seq_consulta_resultados` (cuatro conductas),
   `seq_crear_cuenta`, `seq_descarga_reportes` y `flujo_general`.
-- ⏳ **PNG sin regenerar:** las figuras de `figures/diagramas/` y `diagramas/clases.png` siguen mostrando lo anterior hasta
+- ✅ (14-oct, regenerados) **PNG sin regenerar:** las figuras de `figures/diagramas/` y `diagramas/clases.png` siguen mostrando lo anterior hasta
   regenerarlas con PlantUML (no hay `plantuml.jar` en este equipo).
-- ⏳ **Mockups** `experimento` y `experimentos` (`figures/mockups/`): hay que revisar que no pidan nombre y contraseña.
+- ✅ (14-oct, sin contraseña) **Mockups** `experimento` y `experimentos` (`figures/mockups/`): hay que revisar que no pidan nombre y contraseña.

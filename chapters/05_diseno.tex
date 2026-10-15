@@ -9,7 +9,7 @@
 Este capítulo describe las decisiones de diseño del sistema: cómo están organizados
 sus módulos, cómo se estructura la base de datos, cómo se comunican los componentes
 a través de la API REST, y cómo se ve la interfaz desde la perspectiva del investigador.
-También incluye el diseño del pipeline de análisis conductual: el flujo de procesamiento
+También incluye el diseño del \textit{pipeline} de análisis conductual: el flujo de procesamiento
 de video, la estrategia de separación por sujeto y la arquitectura del clasificador.
 
 Los diagramas de este capítulo siguen la notación \textit{Unified Modeling Language}
@@ -24,7 +24,7 @@ establece cómo describir una arquitectura de software mediante múltiples vista
 de los distintos actores del sistema.
 
 La decisión de diseño más importante fue separar el \textit{worker} (proceso de segundo
-plano) del \textit{backend} en un proceso independiente. La opción más simple habría sido ejecutar el pipeline dentro del mismo
+plano) del \textit{backend} en un proceso independiente. La opción más simple habría sido ejecutar el \textit{pipeline} dentro del mismo
 servidor Flask, pero eso significa bloquear todas las peticiones HTTP mientras un video
 de 5 minutos se procesa (el análisis cubre como máximo 300~s). El \textit{worker} resuelve ese problema a costa de mayor complejidad
 de operación: hace falta una cola de tareas, un proceso adicional y comunicación
@@ -37,8 +37,8 @@ tener varios análisis en cola al mismo tiempo.
 
 El sistema tiene una arquitectura cliente-servidor de tres capas (\textit{three-tier}:
 presentación, lógica de negocio y datos) separadas en
-contenedores Docker independientes: frontend, backend y base de datos. Un cuarto
-contenedor ---el worker--- ejecuta el pipeline de análisis de forma asíncrona, sin
+contenedores Docker independientes: \textit{frontend}, \textit{backend} y base de datos. Un cuarto
+contenedor ---el worker--- ejecuta el \textit{pipeline} de análisis de forma asíncrona, sin
 bloquear al servidor web mientras procesa los videos.
 
 La Figura~\ref{fig:arquitectura_software} muestra qué tecnología reside en cada
@@ -60,17 +60,17 @@ Las responsabilidades de cada componente son:
 
 \begin{itemize}
   \item \textbf{Frontend (React.js + Vite):} corre en el navegador del investigador.
-        Se comunica con el backend exclusivamente mediante la API REST usando JSON.
+        Se comunica con el \textit{backend} exclusivamente mediante la API REST usando JSON.
         No tiene acceso directo a la base de datos ni al sistema de archivos del
         servidor.
 
   \item \textbf{Backend (Flask):} expone la API REST, gestiona la autenticación con
         JWT, valida los archivos subidos, encola las tareas de análisis y devuelve
-        los resultados al frontend. Usa SQLAlchemy como ORM para interactuar con
+        los resultados al \textit{frontend}. Usa SQLAlchemy como ORM para interactuar con
         PostgreSQL.
 
   \item \textbf{Worker (Python):} proceso independiente que consume tareas de la
-        cola, ejecuta el pipeline completo de análisis (preprocesamiento, localización
+        cola, ejecuta el \textit{pipeline} completo de análisis (preprocesamiento, localización
         de los cilindros y clasificación) y escribe los resultados en la base de datos.
         Al correr en un proceso separado, el servidor web sigue respondiendo a
         otras peticiones mientras el video se procesa. Analiza un video a la vez, en
@@ -81,7 +81,7 @@ Las responsabilidades de cada componente son:
         revisa antes de empezar cada análisis.
 
         La cola de tareas no es un servicio aparte: es la propia tabla
-        \texttt{ANALISIS}. Cuando se sube un video válido, el backend crea un
+        \texttt{ANALISIS}. Cuando se sube un video válido, el \textit{backend} crea un
         registro con estado «en cola». El worker obtiene las tareas mediante
         \textit{polling} (consulta periódica): cada cierto tiempo consulta esa tabla,
         toma un análisis en cola, lo pasa a «procesando» y, al terminar, a
@@ -98,7 +98,7 @@ Las responsabilidades de cada componente son:
 
 La separación en contenedores empaqueta cada servicio con sus dependencias. La
 separación entre worker
-y backend también satisface el RF-12 y el RF-15 (análisis automático en segundo plano) y deja
+y \textit{backend} también satisface el RF-12 y el RF-15 (análisis automático en segundo plano) y deja
 al servidor web atendiendo peticiones mientras el worker procesa un video a la vez.
 
 La Figura~\ref{fig:flujo_sistema} muestra el flujo funcional del sistema: cómo
@@ -114,10 +114,10 @@ al clasificador de conducta.
 \end{sidewaysfigure}
 
 % -----------------------------------------------------------
-\section{Diseño del pipeline de análisis conductual}
+\section{Diseño del \textit{pipeline} de análisis conductual}
 % -----------------------------------------------------------
 
-El pipeline recibe un video del FST, analiza el video completo, conserva los resultados de sus últimos 300 segundos y produce
+El \textit{pipeline} recibe un video del FST, analiza el video completo, conserva los resultados de sus últimos 300 segundos y produce
 como salida los tiempos totales de cada conducta por espécimen y el desglose por minuto. Sigue el patrón arquitectónico de
 tubería y filtro (\textit{pipe and filter}) \cite{sommerville2011}: cada módulo es
 un filtro discreto que transforma los datos y los pasa al siguiente. Está organizado
@@ -129,14 +129,14 @@ muestra el flujo completo con las tecnologías de cada módulo.
 \begin{sidewaysfigure}
 \centering
 \includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/pipeline_analisis}
-\caption{Diagrama de flujo del pipeline de análisis conductual [autoría propia].}
+\caption{Diagrama de flujo del \textit{pipeline} de análisis conductual [autoría propia].}
 \label{fig:pipeline}
 \end{sidewaysfigure}
 
 \subsection{Módulo 1: Preprocesamiento}
 
-El preprocesamiento usa OpenCV \cite{bradski2000} para decodificar el video cuadro
-a cuadro; si el archivo no se puede abrir, el pipeline se detiene y genera el reporte
+El preprocesamiento usa OpenCV \cite{bradski2008} para decodificar el video cuadro
+a cuadro; si el archivo no se puede abrir, el \textit{pipeline} se detiene y genera el reporte
 de diagnóstico (ver RN-11). Después hace dos cosas, sin ningún parámetro escrito a
 mano para un video en particular:
 
@@ -190,7 +190,7 @@ escala lo hace pegado a la pared exterior. La geometría sale del mapa de ocupac
 no de un umbral sobre la imagen, porque objetos del laboratorio con el mismo tono que
 el aparato engañan a un umbral. Ninguna medida se escribe a mano: el sistema las
 deduce de cada video, así que funciona con grabaciones de distintos días, encuadres
-y resoluciones. Si no encuentra los cilindros, el pipeline se detiene y genera el
+y resoluciones. Si no encuentra los cilindros, el \textit{pipeline} se detiene y genera el
 reporte de diagnóstico (ver RN-11).
 
 Cada cilindro contiene un solo espécimen, así que no hace falta seguirlo de un
@@ -210,7 +210,7 @@ región de interés de cada cilindro, un píxel pertenece al espécimen si difie
 fondo en al menos 45 niveles de gris y, además, tiene un brillo de al menos 80, porque
 el espécimen es claro sobre agua oscura. De los píxeles que cumplen las dos
 condiciones se conserva la región conexa más grande, que es el espécimen
-\cite{bradski2000}. Antes de medir la postura se borra la cola con una erosión
+\cite{bradski2008}. Antes de medir la postura se borra la cola con una erosión
 morfológica; sin ese paso, las medidas de forma describirían la cola y no la
 verticalidad del cuerpo. La posición del espécimen es el centroide de esa región,
 suavizado con una mediana móvil de cinco mediciones, porque el centroide sin
@@ -259,7 +259,7 @@ conducta mayoritaria (RN-15), el resultado se presenta en la unidad de la técni
 muestreo por intervalos de la literatura.
 
 \paragraph{Conjunto de entrenamiento.} La red se entrena con segundos que el equipo
-marca a mano en la pantalla de revisión, sin usar las anotaciones del laboratorio.
+marca a mano en la pantalla de revisión.
 Las propuestas del clasificador sobre rasgos aceleran el etiquetado, pero una
 propuesta solo cuenta como etiqueta cuando el equipo la ha visto y confirmado;
 medir contra propuestas que nadie revisó sería medir al modelo contra sí mismo. La
@@ -275,7 +275,7 @@ la muestran como una cuarta columna (ver RN-13).
 
 \subsection{Módulo 4: Resultados}
 
-Al finalizar el análisis, el pipeline produce dos salidas:
+Al finalizar el análisis, el \textit{pipeline} produce dos salidas:
 
 \begin{itemize}
   \item \textbf{Etiqueta de cada segundo}: la conducta asignada a cada segundo
@@ -305,7 +305,7 @@ Craft et~al.\ \cite{craft2010} (ver RN-15).
 Cada análisis individual pasa por un conjunto fijo de estados,
 representado en el diagrama de estados de la Figura~\ref{fig:estados_analisis}.
 Al encolarse, el análisis inicia en \texttt{en cola}; cuando el Worker lo toma,
-pasa a \texttt{procesando} y avanza por las tres etapas del pipeline (preprocesamiento,
+pasa a \texttt{procesando} y avanza por las tres etapas del \textit{pipeline} (preprocesamiento,
 cilindros, clasificación). Si no se puede abrir
 el video o no se encuentran los cilindros (RN-11), el análisis termina en
 \texttt{error} y se genera el reporte de diagnóstico; si las tres
@@ -319,7 +319,7 @@ pasa a \texttt{cancelado} (RN-17). El investigador no puede iniciar ni pausar un
 análisis, y solo puede cancelarlo mientras está en pausa, pero sí reiniciarlo desde la
 pantalla de revisión: el resultado anterior se borra y el análisis vuelve a
 \texttt{en cola} (RN-04). Si el Worker se apaga a media análisis, al arrancar
-reencola los que quedaron en \texttt{procesando} y los empieza de nuevo, y cancela los \texttt{en pausa} que ya no tengan su archivo de pausa. Si el pipeline falla por un motivo imprevisto (falta de memoria o un error de código), el Worker lo atrapa, pasa el análisis a \texttt{error} con su reporte de diagnóstico y sigue con el siguiente de la cola, sin reintentar.
+reencola los que quedaron en \texttt{procesando} y los empieza de nuevo, y cancela los \texttt{en pausa} que ya no tengan su archivo de pausa. Si el \textit{pipeline} falla por un motivo imprevisto (falta de memoria o un error de código), el Worker lo atrapa, pasa el análisis a \texttt{error} con su reporte de diagnóstico y sigue con el siguiente de la cola, sin reintentar.
 
 \begin{figure}[H]
 \centering
@@ -348,7 +348,7 @@ Los cilindros se graban en una sola toma lateral. La asignación de cada ROI a u
 espécimen usa su posición horizontal en el encuadre: se ordena de izquierda a
 derecha, produciendo una numeración consistente entre sesiones mientras el
 encuadre no cambie. Si no se
-encuentran los cilindros esperados de la tanda, el pipeline se detiene y genera el
+encuentran los cilindros esperados de la tanda, el \textit{pipeline} se detiene y genera el
 reporte de diagnóstico (ver RN-11); no se entregan resultados parciales.
 
 % -----------------------------------------------------------
@@ -368,7 +368,7 @@ sistema: un usuario crea experimentos; cada experimento se organiza en grupos
 (control, referencia, tratamiento); cada grupo se graba en una o más tandas de
 hasta cuatro especímenes; cada tanda tiene uno o dos videos (Día~1 y/o Día~2); y
 cada video del Día~2 se procesa mediante un análisis que produce observaciones de
-conducta por espécimen, mientras que el video del Día~1 se guarda sin análisis (\textbf{OBSERVACION}, \textbf{SEGUNDO} y \textbf{CONDUCTA}). La figura muestra las entidades del dominio experimental; el subtipo
+conducta por espécimen, mientras que el video del Día~1 se guarda sin análisis (\textbf{OBSERVACION}, \textbf{SEGUNDO} y \textbf{CONDUCTA}). La figura muestra las entidades del dominio experimental, todas fuertes salvo \textbf{SEGUNDO}, que es débil porque solo se identifica junto con su observación (doble borde); el subtipo
 \textbf{ADMINISTRADOR} (un usuario con permisos adicionales) y las entidades
 \textbf{REPORTE} y \textbf{NOTIFICACION}, derivadas del experimento, aparecen en el esquema
 físico.
@@ -383,7 +383,7 @@ físico.
 A partir del DER se derivó el esquema físico aplicando las reglas de conversión
 al modelo relacional: cada entidad se convierte en una tabla, cada relación se
 implementa mediante claves foráneas, y se agregan las columnas de control que
-necesita el pipeline (\texttt{ANALISIS.estado}, \texttt{ANALISIS.etapa}) junto
+necesita el \textit{pipeline} (\texttt{ANALISIS.estado}, \texttt{ANALISIS.etapa}) junto
 con la marca de tiempo propia de cada tabla (\texttt{fechaCarga},
 \texttt{fechaCreacion}, \texttt{fechaAnalisis}, \texttt{fechaGeneracion}). La
 Figura~\ref{fig:er} muestra el resultado.
@@ -437,13 +437,13 @@ Las tablas están organizadas en cuatro grupos funcionales:
 
 \textbf{Análisis.}
 \begin{itemize}
-  \item \textbf{ANALISIS}: ejecución del pipeline sobre un video del Día~2. Registra
+  \item \textbf{ANALISIS}: ejecución del \textit{pipeline} sobre un video del Día~2. Registra
         estado, etapa actual, nivel de clasificación (preciso o agrupado) y,
         cuando falla, la ruta al reporte de diagnóstico (ver RN-11).
 \end{itemize}
 
 El modelo del clasificador no se guarda en la base de datos: ningún requisito
-permite cambiarlo, así que es una constante del pipeline y se describe en la
+permite cambiarlo, así que es una constante del \textit{pipeline} y se describe en la
 clasificación de conducta (módulo 3).
 
 \textbf{Resultados, reportes y notificaciones.}
@@ -660,7 +660,7 @@ verbos HTTP se usan con su significado (\texttt{GET} consulta, \texttt{POST} cre
 \texttt{PATCH} modifica solo los campos que se envían y \texttt{DELETE} elimina). No
 llega al nivel~3, en el que cada respuesta incluye enlaces a las acciones siguientes
 (\textit{hypermedia as the engine of application state}, HATEOAS), porque el único
-cliente de la API es el propio frontend, que ya conoce las rutas, y ningún requisito
+cliente de la API es el propio \textit{frontend}, que ya conoce las rutas, y ningún requisito
 lo pide. El
 cliente es una aplicación de una sola página (\textit{single-page application}, SPA):
 el navegador la carga una vez y después pide datos a la API sin recargar la página.
@@ -806,9 +806,9 @@ consultar los experimentos del laboratorio desde el \textit{dashboard} del paque
 
 \subsection{Paquete 3: Análisis conductual}
 
-Describe la interacción del investigador con el pipeline: monitorear el avance
+Describe la interacción del investigador con el \textit{pipeline}: monitorear el avance
 del análisis por etapas y descargar el reporte de diagnóstico cuando el análisis termina
-en error (ver RN-11). El pipeline lo ejecuta el \textit{Worker} de forma autónoma;
+en error (ver RN-11). El \textit{pipeline} lo ejecuta el \textit{Worker} de forma autónoma;
 el investigador solo observa.
 
 \begin{figure}[H]
@@ -1629,7 +1629,7 @@ caso de uso.
 \hline
 \textbf{Caso de Uso} & Monitorear progreso del análisis & \textbf{Identificador:} CU-07 \\
 \hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Investigador (solo observa) / \textit{Worker} \textsf{<<system>>} (ejecuta el pipeline)} \\
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Investigador (solo observa) / \textit{Worker} \textsf{<<system>>} (ejecuta el \textit{pipeline})} \\
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
 \hline
@@ -1637,11 +1637,11 @@ caso de uso.
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Tarea de análisis encolada; \textit{Worker} disponible para procesar; sesión activa del investigador.} \\
 \hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pipeline ejecutado por el \textit{Worker}; estado visible en pantalla del investigador; al completarse exitosamente, acceso a resultados habilitado; ante error, descarga de reporte de diagnóstico habilitada.} \\
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{\textit{Pipeline} ejecutado por el \textit{Worker}; estado visible en pantalla del investigador; al completarse exitosamente, acceso a resultados habilitado; ante error, descarga de reporte de diagnóstico habilitada.} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} ejecuta el pipeline de análisis conductual de forma autónoma en tres etapas secuenciales. El investigador consulta el avance por etapas y solo interviene cuando el análisis queda en pausa por no ver al espécimen (ver RN-04 y RN-17).} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} ejecuta el \textit{pipeline} de análisis conductual de forma autónoma en tres etapas secuenciales. El investigador consulta el avance por etapas y solo interviene cuando el análisis queda en pausa por no ver al espécimen (ver RN-04 y RN-17).} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} toma la tarea de la cola y ejecuta el pipeline completo. El frontend consulta periódicamente el estado y muestra la etapa activa y el porcentaje de avance. Al completarse, el \textit{Worker} registra los resultados y el sistema habilita el acceso a la pantalla de resultados. Si el pipeline falla, el \textit{Worker} genera el reporte de diagnóstico PDF.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} toma la tarea de la cola y ejecuta el \textit{pipeline} completo. El \textit{frontend} consulta periódicamente el estado y muestra la etapa activa y el porcentaje de avance. Al completarse, el \textit{Worker} registra los resultados y el sistema habilita el acceso a la pantalla de resultados. Si el \textit{pipeline} falla, el \textit{Worker} genera el reporte de diagnóstico PDF.} \\
 \hline
 \end{tabular}
 
@@ -1664,7 +1664,7 @@ caso de uso.
 \hline
 6 & Sistema & Actualiza periódicamente la barra de porcentaje y la etapa activa en la pantalla del investigador. \\
 \hline
-7 & \textit{Worker} & Registra los resultados en la base de datos al completar el pipeline y genera la copia del video recortada en H.264 para la revisión (ver CU-25). \\
+7 & \textit{Worker} & Registra los resultados en la base de datos al completar el \textit{pipeline} y genera la copia del video recortada en H.264 para la revisión (ver CU-25). \\
 \hline
 8 & Sistema & Notifica al investigador y habilita el acceso a la pantalla de resultados. \\
 \hline
@@ -1677,7 +1677,7 @@ caso de uso.
 \hline
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
-4 & El \textit{Worker} no puede abrir el video o no encuentra los cilindros (ver RN-11): detiene el pipeline, genera el reporte de diagnóstico PDF (ver CU-08) y actualiza el estado de la tarea a «error». El sistema muestra alerta con la descripción del error. El investigador no puede reiniciar el análisis desde esta pantalla (ver RN-04). \\
+4 & El \textit{Worker} no puede abrir el video o no encuentra los cilindros (ver RN-11): detiene el \textit{pipeline}, genera el reporte de diagnóstico PDF (ver CU-08) y actualiza el estado de la tarea a «error». El sistema muestra alerta con la descripción del error. El investigador no puede reiniciar el análisis desde esta pantalla (ver RN-04). \\
 \hline
 5 & Pasan tres segundos seguidos sin ver al espécimen (ver RN-17): el \textit{Worker} guarda una imagen fija del segundo central de esos tres, deja el análisis «en pausa» y atiende el siguiente de la cola, y el sistema notifica al usuario. El usuario mueve el recuadro del cilindro sobre esa imagen y pulsa «Ajustar y continuar»: el análisis vuelve al frente de la cola y, cuando el \textit{Worker} lo retoma, vuelve a revisar esos tres segundos y continúa desde ahí. \\
 \hline
@@ -1702,13 +1702,13 @@ caso de uso.
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-14, RF-16. Extiende: CU-07 (Monitorear progreso del análisis).} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Pipeline detenido por error (no se pudo abrir el video o no se encontraron los cilindros, ver RN-11); reporte PDF generado por el \textit{Worker}; sesión activa.} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{\textit{Pipeline} detenido por error (no se pudo abrir el video o no se encontraron los cilindros, ver RN-11); reporte PDF generado por el \textit{Worker}; sesión activa.} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Reporte PDF de diagnóstico descargado en el equipo del investigador.} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} genera automáticamente un PDF de diagnóstico cuando el pipeline falla porque no puede abrir el video o no encuentra los cilindros. El investigador descarga ese reporte para evaluar las condiciones de grabación.} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} genera automáticamente un PDF de diagnóstico cuando el \textit{pipeline} falla porque no puede abrir el video o no encuentra los cilindros. El investigador descarga ese reporte para evaluar las condiciones de grabación.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} genera y almacena el PDF de diagnóstico al detener el pipeline por error. El sistema pone disponible el botón de descarga en la pantalla de progreso. El investigador descarga el reporte para decidir si es necesario repetir la grabación.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} genera y almacena el PDF de diagnóstico al detener el \textit{pipeline} por error. El sistema pone disponible el botón de descarga en la pantalla de progreso. El investigador descarga el reporte para decidir si es necesario repetir la grabación.} \\
 \hline
 \end{tabular}
 
@@ -2308,7 +2308,7 @@ caso de uso.
 % -----------------------------------------------------------
 
 Los diagramas de secuencia \cite{omg_uml} describen el flujo de mensajes entre el
-frontend, el backend y el worker para los flujos principales del sistema, mostrando
+\textit{frontend}, el \textit{backend} y el worker para los flujos principales del sistema, mostrando
 el orden temporal de las interacciones entre componentes. Están organizados en
 cuatro grupos funcionales que corresponden a los paquetes de casos de uso: autenticación
 y gestión de usuarios, administración y perfil, notificaciones, y análisis de experimentos.
@@ -2321,7 +2321,7 @@ Estos diagramas cubren el ciclo de acceso al sistema. La creación de cuenta
 (Figura~\ref{fig:seq_registro}) la inicia el Administrador, que verifica su
 pertenencia a \texttt{ADMINISTRADOR} (ver CU-15) y crea la cuenta con contraseña
 temporal; no existe autorregistro. El inicio de sesión (Figura~\ref{fig:seq_login}) es idéntico
-para Investigador y Administrador: el backend valida las credenciales contra la base
+para Investigador y Administrador: el \textit{backend} valida las credenciales contra la base
 de datos y devuelve un token JWT; las credenciales incorrectas producen un error
 genérico sin revelar cuál campo falló (ver RN-01). El cierre de sesión
 (Figura~\ref{fig:seq_logout}) descarta el token en el navegador; el servidor no guarda tokens cancelados. El cambio de
@@ -2388,8 +2388,8 @@ activa y permite actualizar nombre, apellidos, correo electrónico y contraseña
 
 El sistema genera notificaciones de forma automática cuando un análisis finaliza
 (con o sin error), queda en pausa o se cancela, cuando el espacio en disco supera el umbral de alerta o cuando se borra un video por adelantado (ver
-RN-05, RN-11, RN-17, RNF-09). La Figura~\ref{fig:seq_notificaciones} muestra cómo el backend
-persiste la notificación y cómo el frontend la consulta en el siguiente ciclo de
+RN-05, RN-11, RN-17, RNF-09). La Figura~\ref{fig:seq_notificaciones} muestra cómo el \textit{backend}
+persiste la notificación y cómo el \textit{frontend} la consulta en el siguiente ciclo de
 actualización.
 
 \begin{figure}[H]
@@ -2406,11 +2406,11 @@ actualización.
 Estos diagramas cubren el flujo central del sistema. La carga de video
 (Figura~\ref{fig:seq_carga}) muestra cómo el investigador indica el grupo y
 tratamiento, confirma la tanda sugerida por el sistema (RF-09), sube el archivo y
-el backend lo valida, lo registra y encola el análisis. El análisis automático
-(Figura~\ref{fig:seq_analisis}) detalla la ejecución del pipeline por parte del
+el \textit{backend} lo valida, lo registra y encola el análisis. El análisis automático
+(Figura~\ref{fig:seq_analisis}) detalla la ejecución del \textit{pipeline} por parte del
 Worker: lectura del video, procesamiento en el módulo de visión por computadora y
 almacenamiento de resultados. La consulta de progreso (Figura~\ref{fig:seq_progreso})
-describe el mecanismo de \textit{polling} con el que el frontend verifica el
+describe el mecanismo de \textit{polling} con el que el \textit{frontend} verifica el
 estado del análisis, incluyendo el camino alternativo cuando el video no se puede
 procesar (no se abre o no se encuentran los cilindros, ver RN-11): el Worker genera
 el reporte de diagnóstico PDF y lo pone disponible para descarga, sin necesidad de
@@ -2434,7 +2434,7 @@ y CU-26), y los totales por minuto reflejan las correcciones porque se calculan 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/diagramas/seq_analisis_automatico}
-\caption{Secuencia: análisis automático (ejecución del pipeline por el Worker) [autoría propia].}
+\caption{Secuencia: análisis automático (ejecución del \textit{pipeline} por el Worker) [autoría propia].}
 \label{fig:seq_analisis}
 \end{figure}
 
@@ -2479,7 +2479,7 @@ y CU-26), y los totales por minuto reflejan las correcciones porque se calculan 
 
 El diagrama de clases \cite{omg_uml,iso42010} (Figura~\ref{fig:clases}) muestra
 las entidades principales del dominio y sus relaciones desde la perspectiva del
-backend. Las clases centrales del dominio experimental son \textbf{Usuario},
+\textit{backend}. Las clases centrales del dominio experimental son \textbf{Usuario},
 \textbf{Experimento}, \textbf{Grupo}, \textbf{Tanda}, \textbf{Especimen} y
 \textbf{Video}: un experimento se compone de varios grupos (control, referencia,
 tratamiento), cada grupo se graba en una o más tandas, cada tanda aloja de dos a
@@ -2487,12 +2487,12 @@ cuatro especímenes y produce uno o dos videos. \textbf{Administrador} hereda de
 \textbf{Usuario}: no es un tipo de usuario aparte, sino un usuario con
 permisos adicionales para gestionar cuentas y monitorear el sistema.
 
-El pipeline de análisis se modela con dos clases de control: \textbf{Worker}, que
+El \textit{pipeline} de análisis se modela con dos clases de control: \textbf{Worker}, que
 procesa la cola y elimina videos expirados, y \textbf{PipelineAnalisis}, que
 ejecuta las tres etapas del análisis (preprocesamiento, localización de los
 cilindros y clasificación) sobre cada \textbf{Video} y actualiza el \textbf{Analisis}
 correspondiente. El modelo del clasificador no es una clase del diagrama: es una
-constante del pipeline y no se registra por análisis.
+constante del \textit{pipeline} y no se registra por análisis.
 
 Los resultados de conducta se modelan con \textbf{Observacion} (un espécimen
 dentro de un video) y \textbf{Segundo} (la conducta de cada segundo analizado, que
@@ -2503,7 +2503,10 @@ Las estadísticas (RF-31) son datos derivados: no se guardan en la base de datos
 \textbf{Grupo} y \textbf{Tanda} las calculan con \texttt{calcularEstadisticas()}, que
 devuelve la media, la desviación estándar y la varianza del tiempo de cada conducta entre
 sus especímenes (el grupo, agregando todas sus tandas); \textbf{Experimento} reúne las de
-todos sus grupos con \texttt{compararGrupos()} para compararlos (RF-21).
+todos sus grupos con \texttt{compararGrupos()} para compararlos (RF-21). El resultado
+es un objeto de la clase \textbf{Estadisticas}, uno por conducta, con la conducta, la media,
+la desviación estándar, la varianza y el número de especímenes que entraron al cálculo
+(\texttt{n}); es una clase derivada y no tiene tabla.
 
 \begin{sidewaysfigure}
 \centering
@@ -2681,7 +2684,7 @@ nuevas más adelante sin repetir los datos del experimento.
 
 \subsection{Progreso del análisis}
 
-Muestra el estado actual del pipeline con las tres etapas (preprocesamiento,
+Muestra el estado actual del \textit{pipeline} con las tres etapas (preprocesamiento,
 localización de los cilindros y clasificación) y una barra de progreso en
 porcentaje. Si ocurre un error, muestra la descripción, según la etapa en que se
 detuvo, y el botón de descarga del reporte de diagnóstico (RF-16). Los errores previstos son dos: el video
@@ -2741,7 +2744,7 @@ descarga en PDF, CSV y XLSX.
   \begin{subfigure}[t]{0.293\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/mockups/estados/resultados_comparacion}
-    \caption{Comparación entre grupos en el Día~2 (RF-21).}
+    \caption{Comparación entre grupos en el Día~2 (RF-21), con todas sus tandas, sin importar la vista elegida.}
     \label{fig:ui_resultados_comparacion}
   \end{subfigure}
 
@@ -2749,7 +2752,7 @@ descarga en PDF, CSV y XLSX.
   \begin{subfigure}[t]{0.75\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/mockups/estados/resultados_bloques}
-    \caption{Bloques de 5~s con sus segundos (RF-18).}
+    \caption{Bloques de 5~s con sus segundos (RF-18), de la vista elegida en el selector.}
     \label{fig:ui_resultados_bloques}
   \end{subfigure}
 \caption{Pantalla de resultados del experimento [autoría propia].}
