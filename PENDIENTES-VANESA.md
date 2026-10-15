@@ -124,7 +124,7 @@ Marca aquí lo que termines (`✅`, fecha). Este archivo es solo tuyo: Erick no 
 
 | # | Prioridad | Dónde | Qué hacer |
 |---|-----------|-------|-----------|
-| ✅ A-14 (11-oct: los nombres se unificaron; la fecha se queda en «Mayo 2026» hasta que haya otra, D-70) | 🔴 | `portada.tex:73`, `documento_tecnico.tex:32` | Fecha «Mayo 2026» → la de entrega. Unificar los nombres entre los dos archivos (acentos y orden de apellidos: «Ángel Alí» contra «Angel Ali») |
+| ✅ A-14 (11-oct: los nombres se unificaron; la fecha dice «Fecha pendiente» hasta que haya la de entrega, D-70) | 🔴 | `portada.tex:73`, `documento_tecnico.tex:32` | Fecha «Mayo 2026» → la de entrega. Unificar los nombres entre los dos archivos (acentos y orden de apellidos: «Ángel Alí» contra «Angel Ali») |
 | ✅ A-2b (5-oct) | 🔴 | `resumen.tex:7` | Mismo cambio que A-2: tres analistas, se triplica |
 | ✅ M-4 (5-oct) | 🟡 | `resumen.tex:4` | «entre una y dos horas» → «entre una hora y media y dos horas» (como el cap. 1); expandir ISO e IEEE en su primera aparición |
 | ✅ L-4 (5-oct) | 🟢 | `referencias.bib:293` | Quitar el comentario sobrante «INSTRUCCIONES: Pegar estas entradas…» |
@@ -281,8 +281,10 @@ Aplicado el 2026-10-11, primer bloque (hallazgos con fuente que decide):
   regenerarlas con PlantUML (no hay `plantuml.jar` en este equipo).
 - ⏳ **Mockups** `experimento` y `experimentos` (`figures/mockups/v2/`): hay que revisar que no pidan nombre y contraseña.
 
-**Tercer bloque (11-oct): respuestas a PREGUNTAS.md, D-66 a D-70.** Aplicadas todas: red de fusión como clasificador, Día 1 sin
-análisis (VIDEO—ANALISIS 0..1), pausa por «no se ve» y cancelación a los 5 minutos, reinicio que borra el resultado anterior,
-copia H.264 del *worker* sin video anotado, columnas nulas del análisis, cuatro valores de `origen`, RN-16 ampliada,
-repetibilidad (RNF-14), PDF con nombre fijo, OE-6 y RNF-11 modulares, bloques de 5 s como resumen, volumen según la
-entrevista, DSAAN corregido y línea Grupo—Espécimen quitada del conceptual. Pendiente: nada de PREGUNTAS.md.
+**Tercer bloque (11-oct, ajustado tras el merge de `main` del 14-oct): respuestas a PREGUNTAS.md.** Lo aplicado quedó registrado con la
+numeración de `main` (D-66 a D-102 en `errores/preguntas-doctor.md`): red de fusión como clasificador (D-66), cancelación a los
+5 minutos (D-67), reinicio que borra el resultado anterior (D-68), borrado a los 30 días (D-69), «Fecha pendiente» (D-70), Día 1 sin
+análisis (D-71), RN-16 ampliada (D-72), repetibilidad RNF-14 (D-74), OE-6 y RNF-11 modulares (D-75), PDF con nombre fijo (D-76),
+cuatro valores de `origen` (D-80), copia H.264 sin video anotado (D-81) y flujo de la pausa (D-89). Donde `main` y nuestra rama
+diferían se dejó `main`: la meta de F1 aplica a las cuatro conductas (D-91), los atributos ISO quedan como «atributos» (D-95) y el
+texto de DSAAN no cambia (D-97). Pendiente: nada de PREGUNTAS.md.
