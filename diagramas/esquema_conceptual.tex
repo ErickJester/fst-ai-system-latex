@@ -15,14 +15,12 @@
 %  (2,3) (1,2) no son expresables en notacion de pata de gallo, que
 %  es la unica que PlantUML soporta para ER.
 %
-%  11 entidades - todas fuertes - y 12 interrelaciones
-%  (D-35, 3-oct: se agrego Segundo y sus dos interrelaciones).
-%  Los atributos NO se dibujan: son 34 y harian ilegible la figura.
-%  Van en el diccionario de datos (anexo). La unica excepcion es
-%  'segundos', atributo de la interrelacion 'presenta', porque es
-%  estructuralmente significativo: es el unico dato que el sistema
-%  mide, y colgar de una interrelacion es justo lo que justifica
-%  que 'presenta' sea N:M.
+%  10 entidades - todas fuertes - y 11 interrelaciones
+%  (D-35, 3-oct: se agrego Segundo y sus dos interrelaciones;
+%  D-52, 14-oct: se quitaron Intervalo y 'presenta' -- los segundos
+%  por conducta de cada minuto se calculan desde Segundo).
+%  Los atributos NO se dibujan: haran ilegible la figura. Van en el
+%  diccionario de datos (anexo).
 %
 %  Compilar:
 %      pdflatex -output-directory=build diagramas/esquema_conceptual.tex
@@ -45,6 +43,9 @@
                   minimum height=0.9cm, align=center, font=\small},
   rel/.style   = {draw, thick, diamond, aspect=2.4, inner sep=1.5pt,
                   align=center, font=\scriptsize},
+  % interrelacion derivada: no se guarda, se obtiene de otras dos (D-92)
+  reld/.style  = {draw, thick, dashed, diamond, aspect=2.4, inner sep=1.5pt,
+                  align=center, font=\scriptsize},
   att/.style   = {draw, thick, ellipse, minimum width=2.6cm,
                   minimum height=0.75cm, font=\scriptsize},
   lin/.style   = {draw, thick},
@@ -64,6 +65,7 @@
 \node[rel] (compone)   at ( 7.4,  -2.3) {compone};
 \node[ent] (grupo)     at ( 7.4,  -3.7) {Grupo};
 
+\node[reld] (agrupa)   at ( 3.6,  -5.1) {agrupa};
 \node[rel] (grabaen)   at (11.1,  -5.1) {se graba en};
 
 \node[ent] (especimen) at ( 3.6,  -6.5) {Espécimen};
@@ -79,17 +81,12 @@
 \node[rel] (contiene)  at (11.1, -10.6) {contiene};
 \node[ent] (observ)    at ( 7.4, -12.0) {Observación};
 
-\node[rel] (divide)    at ( 7.4, -13.4) {se divide en};
-\node[ent] (interv)    at ( 7.4, -14.8) {Intervalo};
-
-\node[rel] (presenta)  at (11.1, -14.8) {presenta};
-\node[ent] (conducta)  at (14.4, -14.8) {Conducta};
-\node[att] (segundos)  at (11.1, -16.4) {segundos};
+\node[ent] (conducta)  at (11.1, -14.8) {Conducta};
 
 % D-35 (3-oct): una etiqueta por especimen y por segundo
 \node[rel] (etiqueta)  at ( 3.6, -13.4) {se etiqueta\\en};
 \node[ent] (segundo)   at ( 3.6, -14.8) {Segundo};
-\node[rel] (clasifica) at ( 9.0, -18.2) {se clasifica\\como};
+\node[rel] (clasifica) at ( 7.4, -14.8) {se clasifica\\como};
 
 % ================================================================
 %  ARISTAS CON CARDINALIDAD (minimo,maximo)
@@ -107,7 +104,21 @@
 % -- Bus de salida del Grupo hacia sus dos ramas ----------------
 \coordinate (bus) at ($(grupo.south) + (0,-0.35)$);
 \draw[lin] (grupo.south) -- (bus);
+\draw[lin, dashed] (bus) -| (agrupa.north);
 \draw[lin] (bus) -| (grabaen.north);
+
+% -- Grupo agrupa Especimenes  (el hecho experimental) ----------
+% (2,N): un grupo puede tener una sola tanda con 2 especimenes;
+% sin tope superior (reunion 3-sep). Decision del equipo, 3-oct.
+% Antes era (6,N).
+% Interrelacion DERIVADA (D-92, 13-oct): el modelo relacional no la
+% guarda; el grupo de un espécimen se obtiene por su tanda (Grupo -
+% Tanda - Espécimen). Se conserva en el esquema porque la pantalla del
+% grupo y las estadisticas por grupo (RF-31) usan a todos sus
+% especimenes sin separarlos por tanda. Va punteada.
+\node[card, anchor=south east] at ($(agrupa.north) + (-0.10,0.05)$) {(2,N)};
+\draw[lin, dashed] (agrupa) -- node[card, right, pos=0.45] {(1,1)} (especimen);
+\node[font=\tiny\itshape, anchor=east] at ($(agrupa.west) + (-0.15,0)$) {derivada de Tanda};
 
 % -- Grupo se graba en Tandas  (la logistica de camara) ---------
 % (1,N): un grupo tiene al menos una tanda (la A); las demas
@@ -129,38 +140,23 @@
 \draw[lin] (produce) -- node[card, right, pos=0.45] {(1,1)} (video);
 
 % -- Video se procesa en Analisis -------------------------------
-% (0,1): el reanalisis reemplaza el resultado anterior, no se
-% conserva historial (D-03, reunion 3-sep). El video del Dia 1 no
-% se analiza.
+% (0,1): el video del Dia 1 no se analiza. El reanalisis reemplaza el
+% resultado anterior, no se conserva historial (D-03, reunion 3-sep).
 \draw[lin] (video) -- node[card, above, pos=0.35] {(0,1)} (procesa);
 \draw[lin] (procesa) -- node[card, above, pos=0.65] {(1,1)} (analisis);
 
 % -- Especimen aparece en Observaciones -------------------------
-% (0,1): una, la del Dia 2. El Dia 1 no se analiza.
+% (0,1): solo el video del Dia 2 se analiza; el del Dia 1 no tiene observacion.
 \draw[lin] (especimen) -- node[card, right, pos=0.60] {(0,1)} (aparece);
 \draw[lin] (aparece.south) |- node[card, above, pos=0.72] {(1,1)} (observ.west);
 
 % -- Video contiene Observaciones -------------------------------
-% (0,4): una por cilindro del encuadre en el video del Dia 2; el
-% video del Dia 1 no tiene observaciones.
+% (0,4): el video del Dia 1 no tiene; el del Dia 2 analizado tiene de 2 a 4, una por cilindro.
 \draw[lin] (video) -- node[card, right, pos=0.60] {(0,4)} (contiene);
 \draw[lin] (contiene.south) |- node[card, above, pos=0.72] {(1,1)} (observ.east);
 
-% -- Observacion se divide en Intervalos ------------------------
-% (5,5): el desglose es siempre de cinco minutos (P9).
-\draw[lin] (observ) -- node[card, right, pos=0.55] {(5,5)} (divide);
-\draw[lin] (divide) -- node[card, right, pos=0.45] {(1,1)} (interv);
-
-% -- Intervalo presenta Conductas -------------------------------
-% (4,4): hay cuatro conductas (nado activo, inmovilidad, escalamiento
-% y conducta activa, D-29); cada minuto registra de dos a cuatro.
-% Antes era (2,3).
-% (0,N) del lado Conducta: es un catalogo, puede no usarse.
-\draw[lin] (interv) -- node[card, above, pos=0.35] {(4,4)} (presenta);
-\draw[lin] (presenta) -- node[card, above, pos=0.65] {(0,N)} (conducta);
-
-% -- Atributo de la interrelacion -------------------------------
-\draw[lin, dashed] (presenta) -- (segundos);
+% (D-52, 14-oct: ya no hay Intervalo ni 'presenta'. Los segundos por
+% conducta de cada minuto se calculan desde Segundo.)
 
 % -- Observacion se etiqueta en Segundos (D-35) ------------------
 % (1,300): hasta 300 segundos analizados por observacion.
@@ -169,14 +165,14 @@
 
 % -- Segundo se clasifica como Conducta (D-35) -------------------
 % (0,1): el segundo puede quedar sin conducta ("no se ve").
-\draw[lin] (segundo.south) |- node[card, above, pos=0.75] {(0,1)} (clasifica.west);
-\draw[lin] (clasifica.east) -| node[card, above, pos=0.25] {(0,N)} (conducta.south);
+\draw[lin] (segundo.east) -- node[card, above, pos=0.5] {(0,1)} (clasifica.west);
+\draw[lin] (clasifica.east) -- node[card, above, pos=0.5] {(0,N)} (conducta.west);
 
 % ================================================================
 %  LEYENDA
 % ================================================================
 
-\begin{scope}[shift={(0.4,-19.6)}]
+\begin{scope}[shift={(0.4,-17.0)}]
   \node[draw, thick, rectangle, minimum width=0.85cm, minimum height=0.38cm]
         (lg1) at (0,0) {};
   \node[font=\tiny, anchor=west] at (0.5,0) {entidad};
@@ -185,9 +181,9 @@
         minimum height=0.38cm, inner sep=0pt] (lg2) at (0,-0.62) {};
   \node[font=\tiny, anchor=west] at (0.5,-0.62) {interrelación};
 
-  \node[draw, thick, ellipse, minimum width=0.85cm, minimum height=0.38cm]
-        (lg3) at (0,-1.24) {};
-  \node[font=\tiny, anchor=west] at (0.5,-1.24) {atributo de interrelación};
+  \node[draw, thick, dashed, diamond, aspect=2.2, minimum width=0.85cm,
+        minimum height=0.38cm, inner sep=0pt] (lg4) at (0,-1.24) {};
+  \node[font=\tiny, anchor=west] at (0.5,-1.24) {interrelación derivada};
 
   \node[font=\tiny\ttfamily, anchor=west] at (-0.42,-1.86) {(mín,máx)};
   \node[font=\tiny, anchor=west] at (0.5,-1.86) {cardinalidad};

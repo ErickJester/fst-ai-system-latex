@@ -33,7 +33,7 @@
 '    TRABAJOS, ANIMALES, SUJETOS, ROIS...) del contenedor de base de
 '    datos -- ya no existen (ver MIGRACION-DIAGRAMAS.md SS2). Se
 '    remite al diagrama de esquema físico en vez de repetir aquí las
-'    16 relaciones del modelo nuevo, para no duplicar mantenimiento
+'    15 relaciones del modelo nuevo, para no duplicar mantenimiento
 '    entre dos diagramas.
 '
 '  Generar:
@@ -84,7 +84,7 @@ rectangle "Docker: backend" as C_BE #E8F8F5 {
 ' ═══════════════════════════════════════════════════════════
 
 rectangle "Docker: worker" as C_WK #FEF9E7 {
-  rectangle "Pipeline de analisis conductual\n\nOpenCV         Preprocesamiento (registro de cámara y modelo de fondo)\nOpenCV         Localizacion de los cilindros\nPyTorch        Red de fusión R(2+1)D-18 con rasgos" as WK #FFFEF2
+  rectangle "Pipeline de analisis conductual\n\nOpenCV         Preprocesamiento (registro de cámara y modelo de fondo)\nOpenCV         Localizacion de los cilindros\nscikit-learn   Clasificador sobre rasgos\nPyTorch        R(2+1)D-18, clasificador de conducta\nUn análisis a la vez; al arrancar reencola los que\nquedaron a medias. Tareas diarias (de madrugada):\nborrado de videos, aviso de vencimiento y\nvigilancia del disco (también antes de cada análisis)" as WK #FFFEF2
 }
 
 ' ═══════════════════════════════════════════════════════════
@@ -98,7 +98,7 @@ rectangle "Capa de datos" as DATOS #F4F6F7 {
   }
 
   rectangle "Volumen compartido" as C_FS #EAEDED {
-    folder "Sistema de archivos local\n\nVideos originales (.mp4 y .mov)\nCopias reproducibles (H.264)\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF" as FS
+    folder "Sistema de archivos local\n\nVideos originales (.mp4 y .mov)\nCopia del video para revisión (H.264)\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF" as FS
   }
 
   rectangle "Volumen de modelos" as C_MD #F5EEF8 {
@@ -111,7 +111,7 @@ rectangle "Capa de datos" as DATOS #F4F6F7 {
 '  RELACIONES
 ' ═══════════════════════════════════════════════════════════
 
-INV  -down->  FE  : "HTTPS"
+INV  -down->  FE  : "navegador web"
 FE   -down->  BE  : "API REST\n(JSON + JWT)"
 BE   -down->  DB  : "encola tarea de analisis\n(estado «en cola»)"
 WK   -->      DB  : "toma la siguiente tarea\n(polling periodico)\ny escribe los resultados"

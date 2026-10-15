@@ -186,7 +186,8 @@ Diseñar, desarrollar y validar un prototipo de sistema web con visión por comp
 y aprendizaje supervisado que automatice la detección y cuantificación de las conductas
 de la prueba de nado forzado en especímenes ---nado activo, inmovilidad, escalamiento y conducta activa--- con
 desempeño validado mediante métricas de clasificación estándar y cumpliendo los
-atributos de calidad de la norma ISO/IEC~25010:2011 \cite{iso25010}.
+atributos de calidad de la norma ISO/IEC~25010:2011 \cite{iso25010}, el modelo de
+calidad de producto de software de la ISO y la IEC.
 
 \subsection{Objetivos específicos (OE)}
 \begin{enumerate}[label=\textbf{OE-\arabic*.}, leftmargin=*, labelwidth=1.6cm, labelsep=0.4cm, align=left]
@@ -206,8 +207,9 @@ atributos de calidad de la norma ISO/IEC~25010:2011 \cite{iso25010}.
         clasificación estándar (precisión, \textit{recall} y F1 por conducta) sobre un
         conjunto de prueba independiente.
   \item Cuantificar la reducción de tiempo de análisis respecto al proceso manual, y
-        dejar un diseño modular del \textit{pipeline} que pueda reconfigurarse para otro
-        paradigma conductual; su validación con otros paradigmas queda fuera del alcance.
+        diseñar el módulo de clasificación de forma modular, dejando documentado qué
+        tendría que cambiar en el \textit{pipeline} si el laboratorio quisiera aplicarlo
+        a otro paradigma conductual, sin validarlo con otros paradigmas.
 \end{enumerate}
 
 \section{Justificación}
@@ -243,15 +245,12 @@ conductas del FST (y la conducta activa cuando no distingue entre nado y escalam
 
 En cuanto a calidad del software, el sistema se diseña para cumplir atributos concretos
 de la ISO/IEC~25010:2011 \cite{iso25010}: \textit{functional correctness} (corrección
-funcional, subcaracterística de la adecuación funcional), que mide el desempeño del
-clasificador con métricas de clasificación estándar sobre el conjunto de prueba;
-\textit{time behaviour} (desempeño temporal, subcaracterística de la eficiencia de
-desempeño), que establece que el análisis debe terminar en un tiempo asumible en el
-flujo de trabajo; y \textit{usability} (usabilidad), característica que garantiza que
-un investigador sin conocimientos de programación puede operar el sistema sin ayuda
-técnica. A esos tres se suma la repetibilidad que fijó el laboratorio (RNF-14): el
-mismo video analizado varias veces debe dar el mismo resultado. Esos cuatro criterios
-son los de aceptación de la validación final.
+funcional), que mide el desempeño del clasificador con métricas de clasificación
+estándar sobre el conjunto de prueba; \textit{time behaviour} (desempeño temporal), que establece que el análisis
+debe terminar en un tiempo asumible en el flujo de trabajo; y \textit{usability}
+(usabilidad), que garantiza que un investigador sin conocimientos de programación puede
+operar el sistema sin ayuda técnica. Esos tres atributos, junto con la repetibilidad que
+fijó el laboratorio, son los cuatro criterios de aceptación de la validación final.
 
 
 \section{Alcance del proyecto}
@@ -279,7 +278,7 @@ son los de aceptación de la validación final.
         El buceo se clasifica como nado activo. Cada segundo recibe
         una conducta, sin duración mínima, lo que permite registrar conductas breves
         de unos dos segundos; los resultados también se agrupan en bloques de cinco
-        segundos, como en el análisis manual.
+        segundos, cada uno con su conducta predominante.
         Cuando el clasificador sabe que el espécimen no está inmóvil pero no decide
         entre nado activo y escalamiento, ese segundo se registra como conducta
         activa, una cuarta conducta.
@@ -292,18 +291,17 @@ son los de aceptación de la validación final.
 
   \item \textbf{Reportes y exportaciones:} si el análisis falla, un reporte de
         diagnóstico en PDF indica en qué etapa se detuvo y por qué; exportación de
-        datos en CSV y en XLSX con columnas
+        datos en CSV y en XLSX con columnas Grupo, Tanda, Espécimen,
         Tiempo (min:seg), Nado activo, Escalamiento, Inmovilidad y Conducta activa,
-        desglosadas por espécimen y por minuto.
+        desglosadas por espécimen y por minuto, y con la media, la desviación
+        estándar y la varianza de la tanda o del grupo que se descarga.
 
   \item \textbf{Revisión segundo a segundo:} cuando el análisis termina, el usuario
         puede abrir una pantalla con el video y una línea de tiempo por espécimen,
         coloreada por conducta, y corregir la etiqueta de cada segundo. Cada segundo
         guarda su origen (del sistema, confirmado, corregido o dudoso), y los totales
-        por minuto se recalculan al guardar las correcciones. Si el análisis no ve a un
-        espécimen durante tres segundos seguidos, queda en pausa y pide al investigador
-        ajustar el recuadro del cilindro; si no responde en cinco minutos, se cancela.
-        El investigador puede reiniciar un análisis, lo que borra el resultado anterior.
+        por minuto se calculan siempre desde esas etiquetas, así que reflejan las
+        correcciones.
 
   \item \textbf{Plataforma web:} interfaz accesible desde el navegador con creación
         de cuenta de usuario por parte del administrador, carga de videos, cola de
@@ -328,8 +326,9 @@ son los de aceptación de la validación final.
         humanos.
 
   \item \textbf{Video del día~1:} la sesión del día~1 dura 20~minutos y es de
-        habituación. El sistema no la analiza ni conserva recortes de ella; el análisis de
-        esos 20~min queda fuera del alcance de este prototipo.
+        habituación. El sistema guarda su video como constancia, pero no lo analiza ni
+        conserva recortes de ella; el análisis de esos 20~min queda fuera del alcance de
+        este prototipo.
 
   \item \textbf{Corrección de calidad de video por el usuario:} el sistema no corrige las
         condiciones desfavorables del video (reflejos, pelaje claro, contraste
@@ -356,10 +355,10 @@ son los de aceptación de la validación final.
         NOM-062-ZOO-1999 \cite{nom062}; este sistema únicamente analiza los videos
         resultantes.
 
-  \item \textbf{Otros paradigmas conductuales:} el sistema está diseñado y entrenado
-        específicamente para el FST con especímenes. No se garantiza su funcionamiento con
-        otras pruebas conductuales ni con otras especies. El diseño es modular para poder
-        reconfigurarlo, pero validarlo con otros paradigmas queda fuera del alcance.
+  \item \textbf{Otros paradigmas conductuales:} el módulo de clasificación se diseña de
+        forma modular, pero el sistema se entrena y valida específicamente para el FST con
+        especímenes. No se garantiza su funcionamiento con otras pruebas conductuales ni
+        con otras especies, y validarlo con otros paradigmas queda fuera del alcance.
 \end{itemize}
 
 \section{Metodología}

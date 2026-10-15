@@ -13,7 +13,15 @@
 '  modelado como subtipo -- si el usuario no aparece aqui, es
 '  investigador simple.
 '
-'  15 relaciones - 63 atributos - 17 llaves foraneas.
+'  12 relaciones - 57 atributos - 13 llaves foraneas.
+'  (D-102, 14-oct: CONDUCTA deja de ser relacion y pasa a dominio
+'   cerrado tipo_conducta -- solo SEGUNDO la referenciaba, son cuatro
+'   valores fijos y no tiene atributos propios. Baja de 13 a 12
+'   relaciones, de 58 a 57 atributos y de 14 a 13 llaves foraneas)
+'  (D-52, 14-oct: se quitaron INTERVALO y PRESENTA -- los segundos por
+'   conducta de cada minuto se calculan desde SEGUNDO, no se guardan.
+'   Baja de 15 a 13 relaciones, de 64 (con rutaDiagnostico) a 58 atributos y de 17 a 14
+'   llaves foraneas)
 '  (D-55, 6-oct: se quito ESPECIMEN.numeroRata -- el sistema no
 '   necesita identificar a cada rata por su numero del laboratorio;
 '   el espécimen se distingue por su posicion, numeroCilindro.
@@ -54,7 +62,7 @@
 '                         instancia (modulo 1, RN-11), no plantilla.
 '                         Si algun dia se vuelven plantilla pura,
 '                         el texto debe mudarse a un catalogo
-'                         TIPO_NOTIFICACION, como CONDUCTA.
+'                         TIPO_NOTIFICACION.
 '  ruta -> formato        en REPORTE. Si se cumple (la extension del
 '                         archivo), pero 'ruta' es clave candidata,
 '                         asi que no viola BCNF.
@@ -66,6 +74,14 @@
 '  Se reemplaza: un video tiene como mucho un analisis vigente. Al
 '  reanalizar, el resultado nuevo sustituye al anterior, no se
 '  conserva historial. VIDEO--ANALISIS baja de (1,N) a (1,1).
+'
+'  ---- D-71 (11-oct): el Dia 1 se sube y se guarda, pero no se analiza ----
+'  VIDEO--ANALISIS pasa de (1,1) a (0,1); VIDEO--OBSERVACION de (2,4) a
+'  (0,4) y ESPECIMEN--OBSERVACION de (1,2) a (0,1). Solo el Dia 2 tiene
+'  analisis y de 2 a 4 observaciones.
+'  D-79 (12-oct): etapa, nivelClasif y fechaAnalisis siguen NOT NULL; el
+'  backend les pone un valor de arranque al encolar. D-80 (12-oct): origen
+'  de SEGUNDO tiene cuatro valores. Ninguno cambia las columnas.
 '
 
 '  Generar:
@@ -164,11 +180,12 @@ class VIDEO {
 class ANALISIS {
   <u>idAnalisis</u>
   --
-  idVideo   [FK]
+  idVideo   [FK] [AK]
   estado
   etapa
   nivelClasif
   fechaAnalisis
+  rutaDiagnostico   (nulo)
 }
 
 class OBSERVACION {
@@ -178,29 +195,11 @@ class OBSERVACION {
   idVideo   [FK] [AK]
 }
 
-class INTERVALO {
-  <u>idIntervalo</u>
-  --
-  idObservacion   [FK] [AK]
-  minuto   [AK]
-}
-
-class CONDUCTA {
-  <u>nombre</u>
-}
-
-class PRESENTA {
-  <u>idIntervalo</u>   [FK]
-  <u>conducta</u>   [FK]
-  --
-  segundos
-}
-
 class SEGUNDO {
   <u>idObservacion</u>   [FK]
   <u>segundo</u>
   --
-  conducta   [FK] (nulo)
+  conducta   (nulo)
   origen
 }
 
@@ -244,12 +243,8 @@ TANDA          "1" --o "1..2" VIDEO
 VIDEO          "1" --o "0..1" ANALISIS
 ESPECIMEN      "1" --o "0..1" OBSERVACION
 VIDEO          "1" --o "0..4" OBSERVACION
-OBSERVACION    "1" --o "5"    INTERVALO
-INTERVALO      "1" --o "4"    PRESENTA
-CONDUCTA       "1" --o "0..*" PRESENTA
 ' D-54: 300 es un maximo, sin minimo (los ultimos 300 s del video)
 OBSERVACION    "1" --o "1..300" SEGUNDO
-CONDUCTA       "0..1" --o "0..*" SEGUNDO
 EXPERIMENTO    "1" --o "0..*" REPORTE
 USUARIO        "1" --o "0..*" NOTIFICACION
 EXPERIMENTO    "0..1" --o "0..*" NOTIFICACION

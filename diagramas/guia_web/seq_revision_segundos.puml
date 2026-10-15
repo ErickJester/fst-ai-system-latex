@@ -1,0 +1,55 @@
+@startuml seq_revision_segundos
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant "Archivos" as fs
+
+u -> ui: en Progreso o Resultados elige\n"Revisar segundo a segundo"
+ui -> api: GET /experiments/{id}/analyses/{idAnalisis}/review
+api -> db: ¿el análisis está "completado" y el usuario lo subió o es Administrador? (D-57)
+db --> api: sí / no
+alt no está completado o el usuario no tiene permiso
+  api --> ui: 409 o 403
+  ui --> u: muestra el motivo
+else se puede revisar
+  api -> db: especímenes, observaciones y etiquetas de SEGUNDO
+  db --> api: filas por espécimen y por segundo
+  api -> fs: lee analisis/{idAnalisis}/cajas.json
+  fs --> api: recuadros de los tubos
+  api --> ui: 200 OK {duración, especímenes, etiquetas, recuadros}
+  ui -> api: GET .../video (con Range)
+  api -> fs: lee analisis/{idAnalisis}/web.mp4
+  api --> ui: 206 Partial Content
+  loop el usuario revisa un espécimen a la vez
+    u -> ui: pulsa 1 a 4 o 0, pausa o mueve la línea de tiempo
+    ui -> ui: guarda un borrador en el navegador
+  end
+  opt el usuario elige "Reiniciar el análisis" (RN-04, D-60)
+    ui -> api: POST .../restart
+    api -> db: [transacción] borra el resultado anterior\n(observaciones y segundos de ese video)
+    api -> db: [transacción] deja el análisis "en cola"\ncon sus valores de arranque
+    api --> ui: 202 Accepted
+    ui --> u: vuelve a la pantalla de progreso
+  end
+  u -> ui: Guardar (Ctrl+S)
+  ui -> api: PUT .../segundos\n{cambios: [{numeroCilindro, segundo, conducta, origen}]}
+  api -> db: [transacción] actualiza SEGUNDO\n(conducta y origen)
+  api -> db: [transacción] actualiza nivelClasif\n(agrupado si queda algún segundo como conducta activa)
+  api -> db: borra los reportes guardados del experimento\npara que se regeneren con los datos nuevos
+  api -> fs: borra los archivos de esos reportes
+  db --> api: confirma
+  api --> ui: 200 OK
+  ui --> u: confirma que se guardó
+end
+note over api, db
+  Quién puede corregir y el recálculo de nivelClasif
+  son propuestas, aún no aprobadas.
+end note
+@enduml

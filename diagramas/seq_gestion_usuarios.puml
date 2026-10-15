@@ -49,7 +49,7 @@ api -> db: ¿el idInstitucional de la sesión está en ADMINISTRADOR?
 db --> api: sí / no
 
 alt no está en ADMINISTRADOR
-  api --> ui: 403, no autorizado
+  api --> ui: rechaza la petición: no autorizado
   ui --> admin: muestra el error, no abre el panel
 else sí está en ADMINISTRADOR
   api -> db: consulta los usuarios (nombre, correo, activo)
@@ -68,14 +68,23 @@ else sí está en ADMINISTRADOR
     end ref
     ui --> admin: la tabla se actualiza con la cuenta nueva
 
-  else editar datos de una cuenta
+  else editar datos de una cuenta, incluido su rol
 
-    admin -> ui: modifica los datos de un usuario y confirma
+    admin -> ui: modifica los datos o el rol de un usuario y confirma
     ui -> api: solicita guardar los cambios de la cuenta
-    api -> db: actualiza los datos de la cuenta
-    db --> api: confirma la actualización
-    api --> ui: confirma los cambios
-    ui --> admin: la tabla muestra los datos actualizados
+
+    api -> db: si el cambio le quita el rol de Administrador,\n¿cuántos Administradores activos quedarían después?
+    db --> api: cantidad restante (o "no aplica" si el rol no cambia)
+
+    alt quedarían 0 Administradores activos
+      api --> ui: rechaza el cambio
+      ui --> admin: muestra la advertencia\n"debe existir al menos un Administrador activo"
+    else se puede guardar
+      api -> db: actualiza los datos y el rol de la cuenta
+      db --> api: confirma la actualización
+      api --> ui: confirma los cambios
+      ui --> admin: la tabla muestra los datos actualizados
+    end
 
   else desactivar cuenta
 

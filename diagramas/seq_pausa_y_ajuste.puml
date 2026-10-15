@@ -1,0 +1,105 @@
+@startuml seq_pausa_y_ajuste
+' ================================================================
+'  Secuencia - Pausa del análisis por espécimen que no se ve,
+'  ajuste del recuadro del cilindro y cancelación
+'  Base de datos FST | TT 2026-B066 | ESCOM-IPN
+'  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
+' ----------------------------------------------------------------
+'  Fuente nueva (12-oct). Cubre RN-17 y las decisiones D-59, D-67
+'  y D-89: el Worker pausa el análisis, el usuario ajusta el
+'  recuadro sobre una imagen fija o cancela, y el análisis vuelve al
+'  frente de la cola y continúa desde el segundo de la pausa.
+'
+'  Detalles que fija D-89:
+'  - Quien nota que no se ve al espécimen es el pipeline (la
+'    segmentación contra el fondo), no la red: la red solo entrega
+'    la conducta de cada segundo.
+'  - La imagen fija es un fotograma del video original, tomado en el
+'    segundo central de los tres que no se vieron.
+'  - El recuadro no vive en la base de datos: va en el archivo de
+'    pausa del volumen compartido (no hay tabla ni columna nueva).
+'  - El Worker suelta el video en pausa y atiende el siguiente de la
+'    cola. El análisis ajustado conserva su fecha de encolado, así
+'    que queda por delante de los que llegaron después.
+'  - El Worker escribe primero el archivo y después el estado. El
+'    estado de la base es el árbitro: backend y Worker lo cambian
+'    solo si el análisis sigue "en pausa".
+'
+'  Generar:
+'      java -jar plantuml.jar -tpng diagramas/seq_pausa_y_ajuste.puml
+' ================================================================
+
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam BoxPadding 10
+
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant "Archivos" as fs
+participant Worker as w
+
+== El Worker pausa el análisis ==
+
+w -> w: ve tres segundos seguidos sin el espécimen en un cilindro (RN-17)
+w -> fs: guarda una imagen fija del segundo central de esos tres,\ncon el recuadro actual de cada cilindro
+w -> fs: escribe el archivo de pausa: cilindro, segundo,\nhora de la pausa y recuadros
+w -> db: marca el análisis como "en pausa"
+w -> db: crea la notificación de análisis en pausa
+w -> w: suelta el video y atiende el siguiente de la cola
+
+== El usuario abre la pausa ==
+
+inv -> ui: abre la notificación
+ui -> api: pide los datos de la pausa de ese análisis
+api -> db: lee el análisis y su estado
+api -> fs: lee el archivo de pausa y la imagen fija
+api --> ui: imagen, recuadro actual y tiempo que queda de los 5 minutos
+ui --> inv: muestra la imagen con el recuadro, el tiempo que queda\ny los botones "Ajustar y continuar" y "Cancelar análisis"
+
+alt el usuario ajusta el recuadro
+  inv -> ui: arrastra el recuadro y pulsa "Ajustar y continuar"
+  ui -> api: envía el cilindro y el recuadro nuevo
+  api -> fs: agrega el recuadro nuevo al archivo de pausa
+  api -> db: pasa el análisis a "en cola", solo si todavía está "en pausa"\n(conserva su fecha de encolado)
+  alt el análisis seguía en pausa
+    db --> api: confirma
+    api --> ui: confirma
+    ui --> inv: avisa que el análisis continuará en cuanto el sistema esté libre
+  else ya no estaba en pausa (se canceló)
+    db --> api: no cambió nada
+    api --> ui: ya no se puede ajustar
+    ui --> inv: avisa que el análisis ya se canceló
+  end
+else el usuario cancela el análisis
+  inv -> ui: pulsa "Cancelar análisis"
+  ui -> api: pide cancelar el análisis
+  api -> db: pasa el análisis a "cancelado", solo si todavía está "en pausa"
+  api --> ui: confirma, o avisa que ya no estaba en pausa
+  ui --> inv: muestra el análisis como cancelado
+end
+
+== El Worker retoma el análisis ajustado ==
+
+w -> db: toma el análisis en cola más antiguo\n(el ajustado queda por delante de los que llegaron después)
+w -> fs: lee el archivo de pausa
+w -> w: convierte el recuadro nuevo a las coordenadas del video estabilizado\ny reemplaza la geometría de ese cilindro
+w -> db: marca el análisis como "procesando"
+w -> w: vuelve a revisar esos tres segundos y continúa\ndesde el segundo de la pausa
+
+== Si pasan 5 minutos sin respuesta ==
+
+loop en cada vuelta de la cola
+  w -> db: busca los análisis "en pausa"
+  w -> fs: lee la hora de pausa de cada uno
+  opt pasaron más de 5 minutos
+    w -> db: pasa el análisis a "cancelado", solo si todavía está "en pausa"
+    w -> db: crea la notificación de análisis cancelado
+  end
+end
+
+@enduml

@@ -18,7 +18,7 @@ rectangle "Plataforma Web FST - Paquete 2" {
 }
 INV --> CU04
 INV --> CU05
-CU05 ..> CU19 : <<include>>
+CU19 ..> CU05 : <<extend>>\n[el video es de la\nsesión del Día 2]
 CU20 ..> CU05 : <<extend>>\n[formato invalido, video vertical\no video no reproducible]
 CU07 ..> CU05 : <<extend>>\n[el investigador consulta\nel avance]
 @enduml

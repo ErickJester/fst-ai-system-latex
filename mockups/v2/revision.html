@@ -62,7 +62,7 @@
     <div style="display:flex;align-items:flex-end;gap:24px">
       <div style="flex:1">
         <h2 style="margin:0 0 9px">Revisión segundo a segundo · Referencia, Tanda A</h2>
-        <div class="num" style="font-size:12.5px;color:var(--muted-2)">Fluoxetina 10 mg/kg · Día 2, 300 s de evaluación · analizado 24 feb 2026, 15:02 · modelo clf-cascada v2.1</div>
+        <div class="num" style="font-size:12.5px;color:var(--muted-2)">Fluoxetina 10 mg/kg · Día 2, 300 s de evaluación · analizado 24 feb 2026, 15:02</div>
       </div>
       <div style="display:flex;gap:8px">
         <a class="btn btn-secondary" href="resultados.html">Volver a resultados</a>
@@ -361,7 +361,7 @@ function pintar() {
     : 'Ningún segundo está como conducta activa. Si marcas alguno, al guardar el análisis pasa a nivel <strong>agrupado</strong>.';
   const n = totalCorr(), conCorr = ESPECIMENES.filter(e => corregidos(e)).length;
   $('estado').innerHTML = S.guardado
-    ? '<div class="ok-bar"><strong>Correcciones guardadas.</strong> Se recalcularon los totales por minuto de los especímenes corregidos y quedó registrado el origen de cada segundo. Los reportes del experimento se regeneran con los datos nuevos.</div>'
+    ? '<div class="ok-bar"><strong>Correcciones guardadas.</strong> Quedó registrado el origen de cada segundo corregido y los totales por minuto ya reflejan los cambios. Los reportes del experimento se regeneran con los datos nuevos.</div>'
     : n || recuperado
       ? '<div class="note-bar" style="display:flex;align-items:center;gap:14px"><span style="flex:1"><strong>Borrador sin guardar</strong> · ' + n + (n === 1 ? ' segundo corregido' : ' segundos corregidos') + ' en ' + conCorr + (conCorr === 1 ? ' espécimen' : ' especímenes') + '. El avance vive en este navegador hasta que elijas «Guardar correcciones».</span><button type="button" class="linkbtn" id="btnDescartar" style="font-size:12px">Descartar borrador</button></div>'
       : '<div class="hint">Cada segundo ya trae la conducta que puso el sistema. Se revisa un espécimen a la vez; las correcciones se guardan al elegir «Guardar correcciones».</div>';

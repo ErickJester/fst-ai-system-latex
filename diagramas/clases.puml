@@ -26,6 +26,9 @@ package P1_Autenticacion_y_usuarios {
     +subirVideo(idTanda, sesion, archivo) : Video
     +eliminarExperimento(id) : void
     +descargarReporte(idExperimento, formato) : Reporte
+    +reiniciarAnalisis(idAnalisis) : void
+    +ajustarRecuadro(idAnalisis, cilindro, recuadro) : void
+    +cancelarAnalisisEnPausa(idAnalisis) : void
   }
 
   class Administrador {
@@ -33,6 +36,7 @@ package P1_Autenticacion_y_usuarios {
     +desactivarCuentaUsuario(id) : void
     +listarUsuarios() : List<Usuario>
     +monitorearSistema() : void
+    +modificarCuentaUsuario(id, datos) : void
   }
 }
 
@@ -45,6 +49,7 @@ package P2_Experimentos_y_carga_de_video {
     -notas : String
     +validarNombreUnico() : Boolean
     +consultarEstado() : String
+    +compararGrupos() : List<Estadisticas>
   }
 
   class Grupo {
@@ -52,12 +57,14 @@ package P2_Experimentos_y_carga_de_video {
     -etiqueta : String
     -tipo : String
     -tratamiento : String
+    +calcularEstadisticas() : Estadisticas
   }
 
   class Tanda {
     -id : Integer
     -ordinal : Integer
     -nCilindros : Integer
+    +calcularEstadisticas() : Estadisticas
   }
 
   class Especimen {
@@ -69,7 +76,7 @@ package P2_Experimentos_y_carga_de_video {
     -id : Integer
     -sesion : String
     -archivo : String
-    -duracion : Float
+    -duracion : Decimal
     -fechaCarga : DateTime
     +validarFormato() : Boolean
     +validarOrientacion() : Boolean
@@ -83,6 +90,10 @@ package P3_Pipeline_de_analisis_conductual {
   class Worker <<control>> {
     +procesarCola() : void
     +borrarVideosExpirados() : void
+    +avisarVencimientos() : void
+    +vigilarDisco() : void
+    +reencolarHuerfanos() : void
+    +cancelarPausasVencidas() : void
   }
 
   class PipelineAnalisis <<control>> {
@@ -90,8 +101,13 @@ package P3_Pipeline_de_analisis_conductual {
     +detectarCilindros() : List<ROI>
     +clasificarConducta(especimen, roi, segundo) : String
     +generarReporte(experimento, tipo) : Reporte
-    +actualizarProgreso(idAnalisis, pct, etapa) : void
+    +actualizarProgreso(idAnalisis, etapa) : void
     +marcarError(idAnalisis, mensaje) : void
+    +pausarAnalisis(idAnalisis) : void
+    +guardarImagenPausa(idAnalisis, cilindro, segundo) : void
+    +aplicarAjusteRecuadro(idAnalisis) : void
+    +cancelarAnalisis(idAnalisis) : void
+    +generarCopiaRevision(video) : void
   }
 
   class ROI {
@@ -115,6 +131,7 @@ package P3_Pipeline_de_analisis_conductual {
     -etapa : String
     -nivelClasif : String
     -fechaAnalisis : DateTime
+    -rutaDiagnostico : String
   }
 }
 
@@ -124,20 +141,16 @@ package P4_Resultados_y_reportes {
     +calcularBloques() : List<String>
   }
 
-  class Intervalo {
-    -minuto : Integer
+  enum Conducta {
+    nado activo
+    inmovilidad
+    escalamiento
+    conducta activa
   }
 
-  class Conducta {
-    -nombre : String
-  }
-
-  class PRESENTA {
-    -segundos : Float
-  }
   class Segundo {
     -segundo : Integer
-    -conducta : String
+    -conducta : Conducta
     -origen : String
     +corregir(conducta, origen) : void
   }
@@ -174,7 +187,7 @@ Grupo       "1" *--> "1..*" Tanda     : "se graba en"
 Tanda       "1" *--> "2..4" Especimen : aloja
 Tanda       "1" *--> "1..2" Video     : produce
 
-Analisis "0..1" --> "1" Video          : procesa
+Analisis "0..1" --> "1" Video            : procesa
 
 Worker ..> PipelineAnalisis : invoca
 Worker ..> Analisis         : procesa
@@ -185,17 +198,15 @@ Especimen "1" --> "0..*" ROI     : "se delimita con"
 PipelineAnalisis ..> Video       : procesa
 PipelineAnalisis ..> Analisis    : actualiza
 PipelineAnalisis ..> Observacion : origina
-PipelineAnalisis ..> PRESENTA    : genera
+PipelineAnalisis ..> Segundo      : genera
 
 Especimen   "1" --> "0..1" Observacion : "aparece en"
 Video       "1" --> "0..4" Observacion : contiene
-Observacion "1" *--> "5"   Intervalo   : "se divide en"
 
 ' D-54: 300 es un maximo, sin minimo (los ultimos 300 s del video;
 ' si dura menos, se guardan todos sus segundos).
 Observacion "1" *--> "1..300" Segundo : "se etiqueta en"
-Intervalo "0..*" -- "4" Conducta : presenta
-(Intervalo, Conducta) .. PRESENTA
+Segundo "0..*" --> "0..1" Conducta : "se clasifica como"
 
 Experimento "1"    --> "0..*" Reporte      : origina
 Experimento "0..1" --> "0..*" Notificacion : origina

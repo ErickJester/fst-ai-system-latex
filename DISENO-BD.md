@@ -186,7 +186,7 @@ conceptual estaba prohibido.
 ## 4. Dónde está el trabajo hecho
 
 Tres artifacts publicados. **Son la fuente de verdad del diseño**, por encima del LaTeX.
-**Actualizados el 2026-10-06** con las decisiones de octubre (D-28 a D-55): Conceptual https://claude.ai/artifact/Y7uJ7Mje7CyDxppJYzzXkh · Lógico https://claude.ai/artifact/FJtL6wbw4K7wYYWJTYmrLP · Físico https://claude.ai/artifact/972fCkz4K4U7fQrPRR3qyH. Las celdas de «Estado» y las URLs de la tabla de abajo son de septiembre y quedan como anteriores; las vigentes son las de esta línea.
+**Vigentes: los enlaces de la tabla de abajo** (confirmado por el usuario, 14-oct-2026). Un juego anterior de enlaces, que antes se marcaba como «actualizado el 2026-10-06» y que ya no es el vigente, se deja solo como referencia: Conceptual https://claude.ai/artifact/Y7uJ7Mje7CyDxppJYzzXkh · Lógico https://claude.ai/artifact/FJtL6wbw4K7wYYWJTYmrLP · Físico https://claude.ai/artifact/972fCkz4K4U7fQrPRR3qyH. Las celdas de «Estado» de la tabla de abajo son de septiembre. **Aclaración (14-oct):** los dos juegos de enlaces apuntan a los mismos tres artifacts (`fc01fd30…` es `Y7uJ7…`, `73df37d9…` es `FJtL6…` y `41a09816…` es `972fCk…`); el 14-oct se actualizaron los tres con D-52 y las decisiones desde el 6-oct.
 
 | Artifact | URL | Cubre | Estado |
 |----------|-----|-------|--------|
@@ -221,11 +221,12 @@ Usuario ──registra──> Experimento
                                 └── Tanda    (fuerte · ordinal)    nCilindros ∈ {2,3,4}  (D-28)
                                       ├── Espécimen  (fuerte · numeroCilindro dentro de la tanda; sin número de rata, D-55)
                                       └── Video      (fuerte · sesión ∈ {Día 1, Día 2}, Día 1 opcional)
-                                                └── Análisis  (1,1 — un video, un análisis vigente · D-03/D-24)
+                                                └── Análisis  (0,1 — solo el video del Día 2 se analiza; un análisis vigente · D-03/D-24/D-71)
 
      Observación (fuerte, asociativa) = Espécimen ──aparece en──> Video
-           └── Intervalo (fuerte · minuto 1..5)
-                 └──presenta──> Conducta     [ segundos ]  ← el único dato medido del sistema
+           └──se etiqueta en──> Segundo (una fila por segundo, 1..300) ──se clasifica como──> Conducta
+                 (D-52, 14-oct: ya no hay Intervalo ni «presenta»; los segundos por conducta
+                  de cada minuto se calculan desde Segundo)
 
      + 4 relaciones de soporte del sistema, añadidas en la reconciliación del 6-sep
        (no las nombra el laboratorio): Modelo, Configuración, Reporte, Notificación
@@ -254,8 +255,8 @@ en el esquema lógico definitivo.
    tanda. Es el error que el libro documenta en §2.5.3 con el ejemplo de las audiciones
    que no generan grabación. La agregación cierra primero el par válido y clasifica
    después.
-4. **Todo el sistema mide un solo dato:** `segundos`, en la interrelación *presenta*.
-   Los otros 26 atributos son estructura para ubicarlo o metadato del análisis. Los
+4. **Todo el sistema mide un solo dato:** la conducta de cada segundo (`SEGUNDO`; hasta el
+   14-oct eran los `segundos` de *presenta*, ver D-52). Los demás atributos son estructura para ubicarlo o metadato del análisis. Los
    totales y los estadísticos de grupo se **derivan**, no se almacenan (actividad 6:
    sin redundancia).
 
@@ -263,7 +264,81 @@ en el esquema lógico definitivo.
 
 ## 5. Estado actual
 
-### Cambios del 6-oct-2026 (D-53, D-54, D-55) — leer antes que todo lo de abajo
+### Cambios del 11-oct-2026 (D-66 a D-77) — leer antes que todo lo de abajo
+
+Aplicados en la rama `decisiones-11oct` (caps. 1 a 5, apéndice D, `esquema_fisico.puml`,
+`grafo_relacional_3_vigente.puml`, `clases.puml`, `esquema_conceptual.tex`, `estados_*.puml`,
+`seq_revision_segundos.puml`, `seq_analisis_automatico.puml` y `cu_paquete5.puml`). Los PNG
+**no están regenerados**. Detalle de cada decisión en `errores/preguntas-doctor.md` §6.
+
+| Cambio | Detalle |
+|---|---|
+| **Día 1 (D-71)** | El video se sube, se guarda como `VIDEO` y no se analiza. `VIDEO–ANALISIS` pasa de (1,1) a **(0,1)**; `VIDEO–OBSERVACION` de (2,4) a **(0,4)**; `ESPECIMEN–OBSERVACION` de (1,2) a **(0,1)**. Solo el Día 2 tiene análisis y de 2 a 4 observaciones |
+| **Estados nuevos (D-59, D-67)** | `estado_analisis` suma **`en pausa`** y **`cancelado`**, y `tipo_notificacion` suma `analisis en pausa` y `analisis cancelado` (siguen siendo ocho dominios). 3 s seguidos «no se ve» dejan el análisis en pausa y se avisa al usuario; 5 min sin respuesta lo cancelan (RN-17) |
+| **Reiniciar (D-60, D-68)** | El usuario reinicia el análisis desde la pantalla de revisión: se borra el resultado anterior y el análisis vuelve a `en cola` (RN-04). Corrige solo el investigador que subió el video o el Administrador (D-57, RN-14) |
+| **Copia H.264 (D-58)** | El worker la genera al terminar el análisis; no es columna ni tabla. No se decidió si se guarda el recuadro ajustado por el usuario |
+| **Rol (D-72)** | RN-16 también prohíbe quitar el rol de Administrador a la última cuenta activa |
+| **Borrado a 30 días (D-69, D-82)** | Lo hace el sistema de forma automática, y desde el 12-oct lo ejecuta **el worker** (CU-14 vuelve a nombrarlo) junto con el aviso de vencimiento y la vigilancia del disco |
+| **Clasificador (D-66)** | La CNN de fusión; el *gradient boosting* es el etiquetador |
+| **Dos PDF (D-76)** | «reporte de resultados» y «reporte de diagnóstico» |
+
+**No se aplicó** (sin confirmación): `PRESENTA` en (4,4), que ya no tiene objeto porque D-52 quita la tabla, y quitar el modelo del panel de administración.
+Las columnas de `ANALISIS` y los valores de `SEGUNDO.origen` se resolvieron el 12-oct (abajo).
+
+### Cambios del 14-oct-2026 (D-102): `CONDUCTA` pasa a dominio
+
+Solo `SEGUNDO.conducta` la referenciaba desde D-52, son cuatro valores fijos (D-29) y no tiene atributos propios.
+Deja de ser tabla y es el noveno dominio cerrado, `tipo_conducta`. El conceptual no cambia (`Conducta` sigue siendo
+entidad); en el diagrama de clases es una enumeración.
+
+| Cambio | Detalle |
+|---|---|
+| **Cifras vigentes** | **12 relaciones**, **57 atributos** y **13 llaves foráneas**, en BCNF (antes 13, 58 y 14) |
+| **Dominios** | **Nueve**: se suma `tipo_conducta` (`nado activo`, `inmovilidad`, `escalamiento`, `conducta activa`) |
+| **SQL** | `CREATE DOMAIN tipo_conducta`; se quitan `CREATE TABLE conducta`, la llave foránea de `segundo.conducta`, los datos semilla y el índice `ix_segundo_conducta` (que además aparecía dos veces) |
+| **Aplicado** | `grafo_relacional_3_vigente.puml`, `esquema_fisico.puml`, `clases.puml` y su HTML/PNG, `esquema_bd` (HTML/PNG), cap. 5 y apéndice D (ejemplo de 2FN, tabla de normalización, tabla de dominios y diccionario), `INSTRUCCIONES-WEB.md` y `diagramas/guia_web/` |
+
+### Cambios del 14-oct-2026 (D-52): se quitan `INTERVALO` y `PRESENTA`
+
+Detalle en `errores/preguntas-doctor.md` §6. Los segundos por conducta de cada minuto no se guardan:
+se calculan al mostrarlos, contando las filas de `SEGUNDO` de cada conducta (el minuto sale del número
+de segundo). Es el mismo principio de las estadísticas de grupo (D-93) y de los bloques de 5 s.
+
+| Cambio | Detalle |
+|---|---|
+| **Cifras vigentes** | **13 relaciones**, esquema lógico y físico con **58 atributos y 14 llaves foráneas** (antes 64 y 17, contando `rutaDiagnostico`, que el grafo lógico ya incluye desde M-24) |
+| **Corregir una etiqueta** | Solo toca `SEGUNDO`. Ya no hay que recalcular nada, así que **CU-27 «Recalcular totales por minuto» se fundió en CU-26** y el antiguo CU-28 pasó a ser CU-27 |
+| **Resultados y reportes** | Cuentan `SEGUNDO` por observación y conducta; el CSV/XLSX por minuto sale de la misma cuenta |
+| **Índice** | `ix_presenta_conducta` pasa a `ix_segundo_conducta` sobre `SEGUNDO (conducta)` |
+| **Borrado de un experimento** | El orden de las hojas hacia arriba empieza en `SEGUNDO` y sigue en `OBSERVACION` |
+| **Aplicado** | `grafo_relacional_3_vigente.puml`, `esquema_fisico.puml`, `clases.puml`, `esquema_conceptual.tex` (10 entidades y 11 interrelaciones), `seq_consulta_resultados`, `seq_revision_segundos` y `seq_analisis_automatico`, con sus PNG y HTML; cap. 1, 4 y 5 y apéndice D (13 tablas); `INSTRUCCIONES-WEB.md` (modelo, SQL del Anexo B y diagramas del Anexo A) y `diagramas/guia_web/` |
+
+### Cambios del 12-oct-2026 (D-79 a D-82)
+
+Detalle de cada decisión en `errores/preguntas-doctor.md` §6. D-78 sigue pendiente (si la red entrega
+probabilidades); mientras tanto el backend funciona igual en los dos casos.
+
+| Cambio | Detalle |
+|---|---|
+| **Columnas de `ANALISIS` (D-79)** | `etapa`, `nivelClasif` y `fechaAnalisis` **siguen NOT NULL**. Al encolar el backend les pone un valor de arranque (`preprocesamiento`, `preciso` y la fecha de encolado) y el worker los reemplaza; el borrado a 30 días cuenta desde la `fechaAnalisis` final y solo mira análisis `completado`. Apéndice D e `INSTRUCCIONES-WEB.md` actualizados; el esquema no cambia |
+| **`SEGUNDO.origen` (D-80)** | **Cuatro valores**, con los nombres del cap. 5: `maquina`, `confirmada`, `corregida` y `dudosa` (ya no llevan el prefijo «humano_»; `maquina` equivale a «del sistema»). Se quitan `sin_revisar` y `humano_ciego` del apéndice D, del físico y de `INSTRUCCIONES-WEB.md` (también el modo de revisión «desde cero») |
+| **Video anotado y medidas por cuadro (D-81)** | Se quitan del documento y de las figuras. El pipeline produce tres salidas: tiempos por conducta, etiqueta de cada segundo y copia H.264 para revisión |
+| **Pausa, cancelación, reinicio y revisión (D-57 a D-60, D-67, D-68)** | Ya estaban en los capítulos y el apéndice D; el 12-oct se propagaron a `INSTRUCCIONES-WEB.md`: estados `en pausa` y `cancelado` (dominios, SQL y diagramas de estados), notificaciones `analisis en pausa` y `analisis cancelado`, regla R-15, reinicio (`POST .../restart`), solo corrige quien subió el video o el Administrador, y la copia H.264 en la secuencia del worker. **Abierto:** cómo llega y si se guarda el ajuste del recuadro durante la pausa |
+| **Tareas diarias (D-82)** | Borrado de videos a 30 días, aviso de vencimiento y vigilancia del disco: las ejecuta el worker (CU-14, cap. 5, `cu_paquete5.puml` e `INSTRUCCIONES-WEB.md`). Resuelto el 12-oct: las escribe quien construye el worker, y el contrato de la sección 4 de `INSTRUCCIONES-WEB.md` ya las incluye (horario y disco en D-86) |
+
+### Cambios del 12-oct-2026 (D-83 a D-89): el modelo de datos no cambia
+
+Detalle en `errores/preguntas-doctor.md` §6. **Ninguna de estas decisiones agrega tablas ni columnas**:
+
+| Decisión | Qué hace y por qué no toca el modelo |
+|---|---|
+| **Experimento «en espera del Día 2» (D-83)** | Estado derivado de los análisis (no se guarda): un experimento que solo tiene videos del Día 1 |
+| **Reencolado al arrancar, un análisis a la vez, fallos imprevistos (D-84, D-85, D-88)** | Solo usan los estados que ya existen (`en cola`, `procesando`, `error`) |
+| **Tareas diarias y disco (D-86)** | Una vez al día de madrugada y antes de cada análisis; la fecha de la última corrida va en un archivo del volumen, no en la base |
+| **Eliminar durante un análisis (D-87)** | Regla del backend: 409 si hay `procesando` o `en pausa` |
+| **Pausa y ajuste del recuadro (D-89)** | El recuadro, la imagen fija y la hora de la pausa viven en `pausa.json` y `pausa.jpg` del volumen. Los cambios de estado `en pausa` → `en cola` o `cancelado` usan los valores que ya tiene `estado_analisis`; el estado de la base es el árbitro |
+
+### Cambios del 6-oct-2026 (D-53, D-54, D-55)
 
 Principio del usuario: **la base de datos es para el usuario final.** La red neuronal (CNN) debe
 estar terminada antes de salir a producción, así que no se guarda nada cuyo único uso sea
@@ -277,7 +352,7 @@ mejorarla. Detalle en `errores/preguntas-doctor.md` §6.
 | **Bloques de 5 s sin la CNN** | La CNN solo clasifica segundos; el bloque se calcula por mayoría de sus cinco segundos. Si nado activo y escalamiento empatan, es conducta activa; con 2 de inmovilidad y 2 de nado decide el quinto segundo (escalamiento o «no se ve» dan conducta activa). Un bloque de «no se ve» se muestra como conducta activa con un matiz, y el PDF final marca esos fragmentos. No cambia el modelo |
 | **Últimos 300 s, no los primeros** | D-54: al inicio de algunos videos aparecen personas. Es un **máximo, sin mínimo**: si el video dura menos, se analiza todo. La CNN analiza el video completo; el worker conserva las últimas 300 filas de cada espécimen, las renumera de 1 a 300 y recorta el video a esos mismos segundos (el segundo N cae en el instante N − 1 del video recortado, que es el que ve el usuario). El Día 1 solo confirma que existe el video de habituación y no se analiza. `INTERVALO` y `SEGUNDO` no cambian |
 | **Se mantiene `ANALISIS.rutaDiagnostico`** | Se había propuesto quitarla y se revirtió el mismo día (D-23, D-42) |
-| **Contrato del CSV de la CNN** | El worker convierte `X_cnnseg.csv` en filas de `SEGUNDO` (solo `conducta`; no guarda `confianza` ni `p_*`) y `X_cnnseg_resumen.csv` en `PRESENTA`. `especimen` (1 a 4) se enlaza con `numeroCilindro`. Las hojas manuales `X_seg.csv` solo entrenan la CNN y no entran a la base |
+| **Contrato del CSV de la CNN** | El worker convierte `X_cnnseg.csv` en filas de `SEGUNDO` (solo `conducta`; no guarda `confianza` ni `p_*`) y no guarda `X_cnnseg_resumen.csv` (D-52: los totales por minuto se calculan desde `SEGUNDO`). `especimen` (1 a 4) se enlaza con `numeroCilindro`. Las hojas manuales `X_seg.csv` solo entrenan la CNN y no entran a la base |
 
 **Cifras vigentes (6-oct):** **15 relaciones**; esquema lógico con **63 atributos y 17 llaves
 foráneas**; esquema físico con **64 atributos** (más `rutaDiagnostico`) y **17 llaves foráneas**:
@@ -291,7 +366,7 @@ y los tres artifacts (Conceptual, Lógico y Físico, con D-28 a D-55; URLs en §
 **D-54 quedó resuelto del todo (6-oct, más tarde):** máximo de 300 s sin mínimo; la CNN sobre el video
 completo, con recorte y renumeración posteriores; el Día 1 solo confirma el video de habituación. Está
 aplicado en los tres artifacts, `pipeline.puml`, `seq_analisis_automatico.puml` y `esquema_fisico.puml`.
-**Sin decidir:** D-52. **Falta actualizar el LaTeX** (cap. 1, 4 y 5 y apéndice D) con esta última
+**D-52** se resolvió el 14-oct (ver arriba). **Falta actualizar el LaTeX** (cap. 1, 4 y 5 y apéndice D) con esta última
 resolución de D-54. **Sin aplicar:** el
 comentario de `seq_analisis_automatico.puml` sobre `idConfig` y el cap. 6 (comentado en
 `main.tex`).
@@ -485,7 +560,9 @@ Además de las de `CLAUDE.md`, que aplican siempre:
 Resuelta por D-03 (equipo, 2026-09-13): al reanalizar un video, el resultado nuevo **reemplaza**
 al anterior. Por eso `VIDEO — ANALISIS` queda en (1,1), reforzado con `UNIQUE (idVideo)` (D-24), y
 `OBSERVACION` sigue colgando de `VIDEO` sin cambios. P-08 y D-03 eran una sola decisión con dos
-nombres. Si D-60 (el usuario puede reiniciar el análisis) se aplica, hay que revisar esta nota.
+nombres. Con D-71 el video del Día 1 no tiene análisis, así que `VIDEO — ANALISIS` pasa a (0,1). D-60 y
+D-68 (el usuario puede reiniciar el análisis) no cambian esta nota: reiniciar **borra** el resultado
+anterior y deja el análisis `en cola`; sigue habiendo un solo análisis vigente por video.
 
 ### Ya corregido — `GRUPO.tratamiento` sin nulo
 

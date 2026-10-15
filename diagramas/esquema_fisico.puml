@@ -5,7 +5,11 @@
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
 '  Figura 5.5 de chapters/05_diseno.tex
-'  Gestor: PostgreSQL (D-11) - 15 tablas, 17 llaves foraneas
+'  Gestor: PostgreSQL (D-11) - 12 tablas, 13 llaves foraneas
+'  (14-oct: D-102 quita la tabla CONDUCTA; pasa a ser el dominio
+'   cerrado tipo_conducta)
+'  (14-oct: D-52 quita INTERVALO y PRESENTA; los segundos por
+'   conducta de cada minuto se calculan desde SEGUNDO)
 '  (6-oct: D-55 quita ESPECIMEN.numeroRata y, con ella, el idGrupo
 '   redundante y su disparador (D-04 queda sin objeto). D-53 renombra
 '   SEGUNDO.clase como conducta)
@@ -27,7 +31,7 @@
 '
 '  ---- Fuentes ----
 '  Estructura  : diagramas/grafo_relacional_3_vigente.puml
-'                (15 relaciones, 63 atributos, 17 FK, BCNF)
+'                (12 relaciones, 57 atributos, 13 FK, BCNF)
 '  Tipos y DDL : artifact "Diseno Fisico FST" (13-sep) - actividades
 '                1 a 6 de la etapa fisica, todas resueltas
 '  Decisiones  : errores/preguntas-doctor.md - D-02, D-04, D-08,
@@ -35,11 +39,11 @@
 '
 '  ---- Que agrega esta etapa sobre el grafo logico ----
 '  1. Tipos concretos de PostgreSQL por dominio (ver tabla abajo).
-'  2. Ocho dominios cerrados via CREATE DOMAIN + CHECK (D-14 a D-17
-'     mas los tres ya cerrados en la etapa logica).
+'  2. Nueve dominios cerrados via CREATE DOMAIN + CHECK (D-14 a D-17
+'     mas los tres ya cerrados en la etapa logica, y tipo_conducta, D-102).
 '  3. D-04 (13-sep) agregaba ESPECIMEN.idGrupo como redundancia; D-55
 '     (6-oct) la retira junto con numeroRata. El fisico y el logico
-'     tienen las mismas 17 llaves foraneas.
+'     tienen las mismas llaves foraneas (13 desde D-102).
 '  4. D-24 (15-sep, esta sesion): ANALISIS.idVideo se declara UNIQUE
 '     para forzar estructuralmente la cardinalidad (1,1) de D-03.
 '     Kendall & Kendall p.425 respalda la "clave unica" como
@@ -65,33 +69,37 @@
 '  Contadores cortos -> smallint
 '  Booleano          -> boolean
 '
-'  ---- Los ocho dominios cerrados (CREATE DOMAIN ... CHECK) ----
+'  ---- Los nueve dominios cerrados (CREATE DOMAIN ... CHECK) ----
+'  tipo_conducta           varchar(16) IN ('nado activo',
+'                          'inmovilidad','escalamiento',
+'                          'conducta activa')                [D-29, D-102]
 '  tipo_grupo             varchar(24) IN ('control','referencia',
 '                          'tratamiento experimental')
 '  sesion_video            varchar(6) IN ('Dia 1','Dia 2')
 '                          (el Dia 1 solo confirma que existe el video de
-'                          habituacion; no se analiza, D-54)
+'                          habituacion; se guarda y no se analiza, D-54)
 '  formato_reporte         varchar(4) IN ('CSV','XLSX','PDF')
 '  tipo_notificacion      varchar(32) IN ('analisis completado',
 '                          'error del pipeline','analisis en pausa',
 '                          'analisis cancelado','alerta de disco',
 '                          'video borrado')                     [D-51]
 '  estado_analisis        varchar(10) IN ('en cola','procesando',
-'                          'en pausa','cancelado','completado',
-'                          'error')                             [D-15]
+'                          'en pausa','completado','error',
+'                          'cancelado')                         [D-15]
 '  etapa_analisis         varchar(16) IN ('preprocesamiento',
 '                          'cilindros','clasificacion')         [D-16]
 '  nivel_clasif_analisis   varchar(8) IN ('preciso','agrupado')  [D-17]
-'  origen_segundo         varchar(16) IN ('maquina','humano_confirma',
-'                          'humano_corrige','humano_duda')      [D-35]
+'  origen_segundo         varchar(16) IN ('maquina','confirmada',
+'                          'corregida','dudosa')                [D-35]
 '
 '  ---- Todas las FK: ON UPDATE NO ACTION ON DELETE NO ACTION ----
 '  La base de datos rechaza el borrado en vez de propagarlo - por
 '  eso USUARIO.activo (D-10) existe: dar de baja sin poder borrar.
 '
-'  ---- CONDUCTA sigue siendo tabla, no dominio cerrado ----
-'  Su extension puede crecer (hoy son cuatro conductas) - un dominio
-'  cerrado no puede expresar eso.
+'  ---- CONDUCTA ya no es tabla (D-102, 14-oct) ----
+'  Solo SEGUNDO.conducta la usaba, son cuatro valores fijos y no
+'  tiene atributos propios: es el dominio cerrado tipo_conducta.
+'  Si algun dia cambian las conductas, se modifica el dominio.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/esquema_fisico.puml
@@ -207,24 +215,32 @@ entity VIDEO {
   ..
   UK (idTanda, sesion)
 }
+note bottom of VIDEO
+  El video del Día 1 se guarda y no se analiza: no
+  tiene análisis ni observaciones. El archivo queda
+  nulo cuando el video se borra.
+end note
 
 entity ANALISIS {
   * idAnalisis : integer <<PK>>
   --
   idVideo : integer <<FK>> <<UK>>
   estado : estado_analisis
-  etapa : etapa_analisis (nulo hasta que el worker la fija)
-  nivelClasif : nivel_clasif_analisis (nulo hasta que el worker lo fija)
-  fechaAnalisis : timestamptz (nulo hasta que el worker la fija)
+  etapa : etapa_analisis
+  nivelClasif : nivel_clasif_analisis
+  fechaAnalisis : timestamptz
   rutaDiagnostico : text (nulo salvo error)
 }
 note bottom of ANALISIS
   idVideo es único: un video tiene un solo análisis
   vigente, y el reanálisis reemplaza al anterior.
   rutaDiagnostico solo se llena si el estado es
-  «error», igual que VIDEO.archivo. No hay columna de
-  confianza ni de configuración: el modelo y el umbral
-  son constantes del pipeline. Los recuadros de los
+  «error». Al encolar el análisis, etapa, nivelClasif y
+  fechaAnalisis llevan un valor de arranque
+  (preprocesamiento, preciso y la fecha de encolado) que
+  el worker reemplaza. No hay columna de confianza ni de
+  configuración: el modelo y el umbral son constantes
+  del pipeline. Los recuadros de los
   tubos van en un archivo cuyo nombre sale del id del
   análisis; no se guarda su ruta.
 end note
@@ -238,36 +254,11 @@ entity OBSERVACION {
   UK (idEspecimen, idVideo)
 }
 
-entity INTERVALO {
-  * idIntervalo : integer <<PK>>
-  --
-  idObservacion : integer <<FK>>
-  minuto : smallint
-  ..
-  UK (idObservacion, minuto)
-}
-
-entity CONDUCTA {
-  * nombre : varchar(n) <<PK>>
-}
-
-entity PRESENTA {
-  * idIntervalo : integer <<PK>> <<FK>>
-  * conducta : varchar(n) <<PK>> <<FK>>
-  --
-  segundos : numeric(p,s)
-}
-note bottom of PRESENTA
-  Resumen por minuto: una fila por cada una de las
-  cuatro conductas, incluso con 0 segundos. Se recalcula
-  desde SEGUNDO cuando el usuario guarda correcciones.
-end note
-
 entity SEGUNDO {
   * idObservacion : integer <<PK>> <<FK>>
   * segundo : smallint <<PK>>
   --
-  conducta : varchar(n) <<FK>> (nulo = "no se ve")
+  conducta : tipo_conducta (nulo = "no se ve")
   origen : origen_segundo
   ..
   CK segundo entre 1 y 300
@@ -275,7 +266,7 @@ entity SEGUNDO {
 note bottom of SEGUNDO
   Una fila por espécimen y por segundo analizado.
   Es lo que el usuario revisa y corrige al terminar el
-  analisis. origen dice si la conducta la puso la maquina
+  analisis. origen dice si la conducta la puso el sistema
   o la reviso el usuario. conducta es nula si el sistema
   no clasificó el segundo. Hay hasta 300 segundos por
   observacion, los ultimos 300 del video; si el video dura
@@ -336,11 +327,6 @@ VIDEO          "1" --o "0..4" OBSERVACION                : idVideo
 
 ESPECIMEN      "1" --o "0..1" OBSERVACION                : idEspecimen
 
-OBSERVACION    "1" --o "5"    INTERVALO                 : idObservacion
-INTERVALO      "1" --o "4"    PRESENTA                  : idIntervalo
-CONDUCTA       "1" --o "0..*" PRESENTA                  : conducta
-
 OBSERVACION    "1" --o "1..300" SEGUNDO                 : idObservacion
-CONDUCTA       "0..1" --o "0..*" SEGUNDO                : conducta
 
 @enduml

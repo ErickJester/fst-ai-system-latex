@@ -1,4 +1,7 @@
 @startuml relacional
+' OBSOLETO (12-oct-2026): conserva el modelo descartado (SUJETOS, ROIS, CONFIGURACIONES,
+' TRABAJOS, ANIMALES...). El modelo vigente es grafo_relacional_3_vigente.puml y el fisico,
+' esquema_fisico.puml. Se conserva solo como evidencia.
 ' ============================================================
 '  Diagrama Relacional — Base de datos FST
 '  TT 2026-B066 | ESCOM-IPN

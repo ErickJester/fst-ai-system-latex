@@ -34,14 +34,14 @@ intentado resolver el mismo problema o uno parecido, y qué resultados reportaro
 
 \subsection{DSAAN: clasificación sin umbral en el FST}
 
-Meng et al.\ \cite{meng2024_dsaan} propusieron DSAAN (\textit{Dual-Stream Activity
-Analysis Network}), un método sin umbral manual para ratones con dos ramas: una extrae
-información espacial a partir de pocos cuadros y la otra información temporal a partir
-de mapas de diferencias entre cuadros, y juntas determinan el estado del ratón, es decir,
-si está inmóvil o no.
+Meng et al.\ \cite{meng2024_dsaan} propusieron DSAAN (Dual-Stream Attention-Augmented
+Network), un método con dos ramas paralelas que procesan apariencia y movimiento del
+espécimen por separado y luego combinan esa información para clasificar el estado
+cuadro a cuadro. La arquitectura procesa diferencias entre cuadros consecutivos (flujo de
+movimiento) en paralelo con la imagen original (apariencia), y un módulo de atención
+pondera la contribución de cada rama según el cuadro.
 
-Con apenas 94 imágenes etiquetadas alcanzó un 88.7\,\% de precisión al identificar la
-inmovilidad en el FST.
+Con apenas 94 imágenes etiquetadas alcanzó un 88.7\,\% de precisión en la clasificación.
 El método fue validado en condiciones controladas; los autores no reportan el
 comportamiento del sistema con variaciones de iluminación o reflejos del agua, que son
 condiciones habituales en el laboratorio colaborador.
@@ -78,12 +78,12 @@ la pose.
 
 \subsection{YOLO-Behaviour: detección directa de la conducta}
 
-Chan et al.\ \cite{chan2025_yolo} presentaron un marco para cuantificar conductas animales
-en video con YOLOv8 (\textit{You Only Look Once}, «solo se mira una vez»). En lugar de detectar primero al animal y clasificarlo después, entrenan
+Chan et al.\ \cite{chan2025_yolo} presentaron un marco para cuantificar la conducta de distintas especies
+en video con YOLOv8 (\textit{You Only Look Once}, «solo se mira una vez»). En lugar de detectar primero al individuo y clasificarlo después, entrenan
 el detector para que encuentre la conducta misma: quien anota dibuja recuadros alrededor de
 la conducta visible en cuadros sueltos (por ejemplo, un ave que alimenta a sus crías) y el
 modelo los detecta en cada cuadro del video. La ventaja práctica es que necesita pocas
-anotaciones y se ha aplicado a animales y escenarios muy distintos. Su alcance son las
+anotaciones y se ha aplicado a especies y escenarios muy distintos. Su alcance son las
 conductas visualmente distintas en una imagen fija.
 
 El FST plantea otro problema: el nado, la inmovilidad y el escalamiento se distinguen sobre
@@ -200,8 +200,6 @@ Esta sección revisa los enfoques de \textit{machine learning} (aprendizaje auto
 (aprendizaje profundo, DL) que son viables
 para clasificar las tres conductas del FST (nado, inmovilidad, escalamiento) dado el
 tamaño del \textit{dataset} (conjunto de datos) disponible y las condiciones de grabación del laboratorio.
-El sistema añade la \textit{conducta activa} cuando no puede decidir entre nado activo y
-escalamiento (cap.~5).
 
 \subsection{Clasificadores clásicos sobre descriptores de movimiento}
 
@@ -216,10 +214,11 @@ Para el FST, un descriptor útil es la relación entre el área de movimiento y 
 vertical del centroide: el escalamiento produce movimiento en la mitad superior del
 cilindro mientras que el nado se distribuye en toda la superficie del agua. Esa
 diferencia es capturable con descriptores simples, como la verticalidad del cuerpo y la
-posición del centroide respecto de la línea de agua. Este proyecto usa ese camino en
-su etiquetador, que con un clasificador de \textit{gradient boosting} (potenciación
-del gradiente) sobre quince rasgos del espécimen propone etiquetas para el
-entrenamiento (cap.~5).
+posición del centroide respecto de la línea de agua. Este proyecto
+usa ese camino para etiquetar y para medir: un clasificador de
+\textit{gradient boosting} (potenciación del gradiente) sobre quince rasgos del
+espécimen propone las etiquetas del equipo y aporta esos rasgos a la rama de medidas
+de la red de fusión que describe la sección siguiente (cap.~5).
 
 \subsection{Redes convolucionales con \textit{transfer learning} (aprendizaje por transferencia)}
 
@@ -228,7 +227,9 @@ imágenes. Entrenar una CNN desde cero requiere conjuntos de datos etiquetados m
 lo cual no es viable con el dataset disponible. La solución es el \textit{transfer
 learning} \cite{pan2010}: se toma una red preentrenada en ImageNet (más de un millón
 de imágenes de 1{,}000 clases) y se reemplaza solo la última capa de clasificación por
-una nueva con 3 salidas, una por conducta. Las capas anteriores ya saben detectar bordes,
+una nueva con 4 salidas: una por cada conducta del FST (nado, inmovilidad y escalamiento) y
+una cuarta para la conducta activa, que el sistema añade para los segundos en que no distingue
+entre nado y escalamiento. Las capas anteriores ya saben detectar bordes,
 texturas y formas generales, y eso se aprovecha directamente.
 
 ResNet \cite{he2016} es una de las arquitecturas más usadas para ese fin. Sus
@@ -249,9 +250,8 @@ de inferencia que las 2D, lo que puede ser una limitación en hardware sin GPU.
 
 Este proyecto usa la R(2+1)D-18 \cite{tran2018}, una ResNet-18 para video que
 separa cada convolución 3D en una espacial y una temporal, preentrenada con videos de
-acciones humanas, como clasificador del sistema. La fusiona con una rama de medidas del
-espécimen (quince rasgos y siete reglas de observación) y la evalúa en TT-II con F1 por
-conducta (cap.~5).
+acciones humanas, fusionada con una rama de medidas del espécimen. Es el clasificador
+del sistema, y su desempeño se evalúa en TT-II con F1 por conducta (cap.~5).
 
 % -----------------------------------------------------------
 \section{Criterios de calidad para la evaluación del sistema}
@@ -259,12 +259,11 @@ conducta (cap.~5).
 
 La norma ISO/IEC~25010:2011 \cite{iso25010} define los modelos de calidad para sistemas
 y software, y establece atributos medibles que permiten verificar si un sistema cumple
-sus objetivos. Para este proyecto, las características y subcaracterísticas
-relevantes de la norma son:
+sus objetivos. Para este proyecto, los atributos relevantes son:
 
 \begin{itemize}
   \item \textbf{\textit{Functional correctness}:} los resultados del sistema deben clasificar
-        correctamente las tres conductas del FST. Se evalúa con métricas de
+        correctamente las tres conductas del FST y la conducta activa. Se evalúa con métricas de
         clasificación estándar: precisión, \textit{recall} y F1 por conducta.
   \item \textbf{\textit{Time behaviour}:} el tiempo de análisis de un video de 5~minutos debe
         ser aceptable para el flujo de trabajo del laboratorio. Se mide en segundos de

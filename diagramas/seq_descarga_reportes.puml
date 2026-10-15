@@ -17,7 +17,7 @@
 '    -- media, desviacion estandar y varianza por conducta -- que
 '    RF-31 exige incluir "junto con los datos individuales" en el
 '    mismo archivo descargable.
-'  - Contenido de PDF: "resumen ejecutivo" (RF-22, ultima oracion) --
+'  - Contenido de PDF: "reporte de resultados" (RF-22, D-76) --
 '    un documento distinto del reporte de diagnostico de CU-08 (ese
 '    es solo para analisis en estado "error").
 '  - Alcance de las estadisticas de grupo: RF-31 las describe "a
@@ -78,10 +78,9 @@ note right of api
   por minuto, RF-19/RF-20/RF-22) más las estadísticas
   de grupo -- media, desviación estándar y varianza por
   conducta, entre los especímenes de cada uno de los
-  grupos del experimento (RF-31, adaptado: sin
-  cruzar experimentos, ver encabezado).
+  grupos del experimento (RF-31).
 
-  PDF: resumen ejecutivo (RF-22), documento distinto
+  PDF: reporte de resultados (RF-22), documento distinto
   del reporte de diagnóstico de CU-08.
 end note
 

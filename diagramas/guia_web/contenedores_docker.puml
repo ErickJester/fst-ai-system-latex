@@ -1,0 +1,45 @@
+@startuml contenedores_docker
+!theme plain
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam BackgroundColor White
+
+actor "Usuario\n(navegador)" as U
+
+node "docker compose up" {
+  node "frontend\nReact (build) servido por nginx\npuerto 80" as fe
+  node "backend\nFlask con gunicorn\npuerto 5000 (interno)" as be
+  node "worker\nPython" as wk
+  database "db\nPostgreSQL\npuerto 5432 (interno)" as db
+  node "mailhog (solo desarrollo)\nSMTP 1025 / web 8025" as ml
+  folder "volumen videos_reportes\n/data/archivos" as vf
+  folder "volumen modelos (solo lectura)\n/data/modelos" as vm
+  folder "volumen pgdata" as vp
+}
+
+U --> fe : navegador
+fe --> be : /api  (proxy inverso)
+be --> db : SQL
+wk --> db : SQL (polling)
+be --> vf : lee y escribe
+wk --> vf : lee y escribe
+wk --> vm : lee
+db --> vp : datos
+be ..> ml : SMTP (solo desarrollo)
+wk ..> ml : SMTP (solo desarrollo)
+
+note bottom of be
+  depende de: db
+  variables: JWT_SECRET, JWT_EXPIRES_HOURS,
+  DATABASE_URL, SMTP_*, MAX_UPLOAD_MB,
+  DISK_ALERT_PERCENT, DISK_CLEANUP_PERCENT,
+  RESET_LINK_MINUTES
+end note
+
+note bottom of wk
+  depende de: db
+  variables: DATABASE_URL, ARCHIVOS_DIR, MODELOS_DIR, SMTP_*,
+  DISK_ALERT_PERCENT, DISK_CLEANUP_PERCENT,
+  WORKER_POLL_SECONDS, WORKER_DAILY_HOUR, PAUSE_TIMEOUT_MINUTES
+end note
+@enduml

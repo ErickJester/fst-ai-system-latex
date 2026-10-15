@@ -17,7 +17,7 @@
 
   <div class="page" style="padding-bottom:34px">
     <h3 style="margin:0 0 8px">Análisis en curso</h3>
-    <p class="lead" style="margin:0 0 22px;max-width:600px">El <em>pipeline</em> (cadena de procesamiento) atiende un trabajo a la vez. El orden lo fija el sistema al momento de la carga: no hay iniciar, pausar, cancelar ni reiniciar desde aquí.</p>
+    <p class="lead" style="margin:0 0 22px;max-width:600px">El <em>pipeline</em> (cadena de procesamiento) atiende un trabajo a la vez. El orden lo fija el sistema al momento de la carga: no hay iniciar, pausar ni reiniciar desde aquí. Solo cuando el sistema deja un análisis en pausa se puede ajustar el recuadro o cancelarlo.</p>
 
     <div style="border:2px solid var(--color-text)">
       <div style="padding:18px 20px;border-bottom:2px solid var(--color-divider)">
@@ -93,6 +93,36 @@
       </div>
     </div>
 
+    <div style="border:2px solid var(--color-accent);margin-top:18px">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--color-divider)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="nd" style="font-size:15px">Compuesto CSR-14 · Experimental B · Tanda A</div>
+          <div style="flex:1"></div>
+          <span class="tag tag-accent" style="white-space:nowrap;background:var(--color-accent-100);color:var(--color-accent-700)">En pausa</span>
+        </div>
+        <div class="num" style="font-size:12px;margin-top:4px;color:color-mix(in srgb,var(--color-text) 60%,transparent)">Día 2 · 5 min · pausa en el segundo 142 · queda 3:41</div>
+      </div>
+      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:13px;line-height:1.55">El sistema no vio al espécimen del cilindro 2 durante tres segundos seguidos y espera tu respuesta. Si pasan 5 minutos sin respuesta, el análisis se cancela.</div>
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:14px">
+          <a class="btn btn-primary" href="pausa.html">Ajustar o cancelar</a>
+          <span class="hint">Se avisó con una notificación en el sistema.</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="border:2px solid var(--color-accent);margin-top:18px">
+      <div style="padding:16px 20px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="nd" style="font-size:15px">Compuesto CSR-14 · Referencia · Tanda B</div>
+          <div style="flex:1"></div>
+          <span class="tag tag-accent" style="white-space:nowrap;background:var(--color-accent-800);color:var(--color-bg)">Cancelado</span>
+        </div>
+        <div class="num" style="font-size:12px;margin-top:4px;color:color-mix(in srgb,var(--color-text) 60%,transparent)">Día 2 · 5 min · cancelado en el segundo 87</div>
+        <div style="font-size:13px;line-height:1.55;margin-top:12px">Pasaron 5 minutos en pausa sin respuesta y el sistema canceló el análisis. No se guardó ningún resultado de esta tanda.</div>
+      </div>
+    </div>
+
     <div class="k" style="margin:26px 0 12px" id="colaK"></div>
     <table class="table"><tbody id="cola"></tbody></table>
     <p class="hint" style="margin:14px 0 0">Al terminar cada trabajo llega una notificación en el sistema con el enlace a resultados. Si un video falla, el trabajo se marca con la causa y la cola sigue con el siguiente.</p>
@@ -109,8 +139,7 @@
   ];
   const cola = [
     { n: '1', nombre: 'Compuesto CSR-14 · Experimental A · Tanda B', dia: 'Día 2', estado: 'Procesando', tagClass: 'tag-accent' },
-    { n: '2', nombre: 'Compuesto CSR-14 · Control · Tanda B', dia: 'Día 2', estado: 'En cola', tagClass: 'tag-outline' },
-    { n: '3', nombre: 'Compuesto CSR-14 · Experimental B · Tanda A', dia: 'Día 2', estado: 'En cola', tagClass: 'tag-outline' }
+    { n: '2', nombre: 'Compuesto CSR-14 · Control · Tanda B', dia: 'Día 2', estado: 'En cola', tagClass: 'tag-outline' }
   ];
 
   $('barra').innerHTML = etapas.map(s => {

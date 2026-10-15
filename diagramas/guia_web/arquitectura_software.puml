@@ -1,0 +1,55 @@
+@startuml arquitectura_software
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+skinparam BackgroundColor White
+skinparam ArrowColor      #2C3E50
+skinparam ArrowThickness  1.5
+skinparam ArrowFontSize   9
+skinparam ArrowFontColor  #2C3E50
+skinparam RectangleBorderThickness 2
+skinparam RectangleBorderColor     #AAAAAA
+skinparam DatabaseBorderColor      #AAAAAA
+skinparam FolderBorderColor        #AAAAAA
+
+top to bottom direction
+
+actor "Investigador /\nAdministrador\n(navegador web)" as INV
+
+rectangle "Docker: frontend" as C_FE #E3F2FD {
+  rectangle "React.js + Vite\n\nInterfaz del usuario\nFormularios de experimento\nVisualizacion de resultados\nDescarga de reportes (PDF / CSV / XLSX)" as FE #EBF5FB
+}
+
+rectangle "Docker: backend" as C_BE #E8F8F5 {
+  rectangle "Flask + SQLAlchemy + Flask-JWT-Extended\n\nAPI REST (JSON)\nAutenticacion con JWT\nValidacion de archivos .mp4 / .mov\nEncolado de analisis" as BE #F0FBF8
+}
+
+rectangle "Docker: worker\n(lo desarrolla otra persona)" as C_WK #FEF9E7 {
+  rectangle "Pipeline de analisis conductual\n\nToma analisis en cola (polling), uno a la vez\nAl arrancar reencola los que quedaron a medias\nProcesa el video (se pausa si no ve al espécimen)\nEscribe los resultados\nTareas programadas (cron, una vez al día)\nVigila el disco antes de cada análisis" as WK #FFFEF2
+}
+
+rectangle "Capa de datos" as DATOS #F4F6F7 {
+  rectangle "Docker: db" as C_DB #EBF5FB {
+    database "PostgreSQL\n\nEsquema relacional\n(12 tablas)" as DB
+  }
+  rectangle "Volumen videos_reportes\n(compartido)" as C_FS #EAEDED {
+    folder "Videos .mp4 / .mov originales\nCopia del video para revision (H.264)\nReportes PDF / CSV / XLSX\nReportes de diagnostico PDF\nArchivos de pausa (imagen fija y recuadros)" as FS
+  }
+  rectangle "Volumen modelos\n(solo lectura, solo worker)" as C_MD #F5EEF8 {
+    folder "Modelos entrenados" as MD
+  }
+}
+
+rectangle "Docker: mailhog\n(solo desarrollo)" as C_ML #FDEDEC
+
+INV  -down->  FE  : "navegador"
+FE   -down->  BE  : "API REST\n(JSON + JWT)"
+BE   -down->  DB  : "encola el analisis\n(INSERT, estado = en cola)"
+WK   -->      DB  : "toma la siguiente tarea\n(polling periodico)\ny escribe los resultados"
+WK   -->      FS  : "guarda archivos\ngenerados"
+BE   -->      FS  : "guarda videos y reportes,\nlee y sirve archivos"
+WK   -->      MD  : "carga los modelos\nal iniciar"
+BE   -->      C_ML : "SMTP (solo desarrollo)"
+WK   -->      C_ML : "SMTP (solo desarrollo)"
+@enduml

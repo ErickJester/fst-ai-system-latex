@@ -7,44 +7,18 @@
 '  Reemplaza a docs/diagramas.pdf pagina 2 / figures/mermaid/arquitectura.png
 '  (no habia .puml/.mmd fuente, solo la imagen renderizada).
 '
-'  Que corrige, con fuente:
-'  El bloque viejo "Referencia y validacion" encadenaba: Anotacion
-'  experta (conjunto de prueba) -> Dataset de referencia ->
-'  Entrenamiento del modelo -> Modelo entrenado. Eso alimenta el
-'  entrenamiento con la anotacion experta que se guardo como
-'  "conjunto de prueba" -- exactamente lo contrario de la estrategia
-'  ya acordada por el equipo: el clasificador se entrena con CLIPS
-'  INEQUIVOCOS de conducta, y los reportes BORIS (anotacion experta)
-'  se usan SOLO COMO PRUEBA, nunca para entrenar -- para no
-'  sobreajustar a los patrones de un solo anotador. Ademas, ese
-'  "Dataset de referencia" alimentando el entrenamiento es la misma
-'  figura de "gold standard" que CLAUDE.md marca como eliminada
-'  (prohibicion vigente, 2026-04-30, provisional).
-'
-'  Primera corrección (insuficiente): separar clips -> entrenamiento
-'  de BORIS -> conjunto de prueba -> evaluación seguía sin resolver
-'  el problema de fondo -- BORIS es la anotación manual del Dr.
-'  Sandino, y compararse contra ella para sacar F1 ES un gold
-'  standard con otro nombre, aunque ya no se llame así.
-'
-'  Corrección real: la prohibición vigente de CLAUDE.md dice que el
-'  clasificador se entrena "sin usar las anotaciones manuales del
-'  Dr. Sandino" y que F1 se mide sobre un "conjunto de prueba
-'  PROPIO" -- ni siquiera la prueba usa BORIS. Por eso este diagrama
-'  ya NO tiene ningún bloque de "Reportes BORIS" ni "anotación
-'  experta": tanto el entrenamiento como la prueba salen de los
-'  mismos clips inequívocos (un recorte held-out de esos clips sirve
-'  de conjunto de prueba propio). Únicamente el modelo entrenado
-'  (nunca el conjunto de prueba) alimenta el análisis de conducta en
-'  vivo.
+'  El clasificador se entrena con clips inequivocos de conducta
+'  etiquetados por el equipo (con el etiquetador del equipo) y se
+'  prueba con un conjunto de prueba propio: ni para entrenar ni para
+'  probar se usan las anotaciones del Dr. Sandino. El bloque de
+'  entrenamiento y evaluacion es fuera de linea, antes de usar el
+'  sistema, y no es parte del flujo por video; solo el modelo
+'  entrenado (nunca el conjunto de prueba) alimenta la clasificacion.
 '
 '  Sigue marcado "provisional" porque la pregunta abierta de
-'  CLAUDE.md ("¿es académicamente aceptable presentar TT-II con solo
-'  F1 sobre conjunto de prueba propio?") no está confirmada con el
-'  Dr. Sandino todavía.
-'
-'  El resto del diagrama (Sistema web, Analisis de conducta,
-'  Almacenamiento) no cambia de fondo respecto del viejo.
+'  CLAUDE.md ("¿es academicamente aceptable presentar TT-II con solo
+'  F1 sobre conjunto de prueba propio?") no esta confirmada con el
+'  Dr. Sandino todavia.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/flujo_general.puml
