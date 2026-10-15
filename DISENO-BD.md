@@ -395,7 +395,7 @@ de las secciones de abajo (16 o 17 relaciones) son anteriores.
 tabla de normalización, diagrama de clases, CU de creación del análisis); apéndice D
 (tablas, nota de unicidad, frase del tipo `numeric`, conteo 17 → 15);
 `grafo_relacional_3_vigente.puml`, `esquema_fisico.puml` y `clases.puml`, con
-`figures/mermaid/esquema_fisico.png` y `diagramas/clases.png`.
+`figures/diagramas/esquema_fisico.png` y `diagramas/clases.png`.
 **También aplicado (5-oct):** `INSTRUCCIONES-WEB.md` (cuerpo, anexo A y anexo B) y los tres
 artifacts (con D-28 a D-51; URLs en §4). **Sin aplicar:** el comentario de
 `seq_analisis_automatico.puml` sobre `idConfig` y el cap. 6

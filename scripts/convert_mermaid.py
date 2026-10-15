@@ -13,7 +13,7 @@ from mermaid import Mermaid
 
 REPO     = Path(__file__).resolve().parent.parent
 TEX_FILE = REPO / "chapters" / "05_diseno.tex"
-OUT_DIR  = REPO / "figures" / "mermaid"
+OUT_DIR  = REPO / "figures" / "diagramas"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 def render_mermaid_ink(code: str, out: Path) -> bool:
@@ -76,7 +76,7 @@ for m in matches:
     label    = label_match.group(1)
     name     = label.replace("fig:", "")
     png_path = OUT_DIR / f"{name}.png"
-    rel_path = f"figures/mermaid/{name}"
+    rel_path = f"figures/diagramas/{name}"
 
     print(f"  Rendering {label} ...", end=" ", flush=True)
     ok = render(diagram_code, png_path)

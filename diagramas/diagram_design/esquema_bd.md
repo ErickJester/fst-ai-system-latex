@@ -1,6 +1,6 @@
 # Esquema de la base de datos
 
-![Esquema de la base de datos](esquema_bd.png)
+![Esquema de la base de datos](../../figures/diagramas/esquema_bd.png)
 
 Archivo interactivo: [esquema_bd.html](esquema_bd.html) (se abre en el navegador y se desliza
 en horizontal).

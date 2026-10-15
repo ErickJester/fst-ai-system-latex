@@ -4,7 +4,7 @@
 # en la raiz del repositorio).
 REPO_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 PUML_DIR="$REPO_DIR/diagramas/puml"
-OUT_DIR="$REPO_DIR/figures/mermaid"
+OUT_DIR="$REPO_DIR/figures/diagramas"
 JAR="${PLANTUML_JAR:-$REPO_DIR/plantuml.jar}"
 
 for f in cu_vision_general cu_paquete1 cu_paquete2 cu_paquete3 cu_paquete4 cu_paquete5; do

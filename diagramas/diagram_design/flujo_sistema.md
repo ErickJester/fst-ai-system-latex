@@ -1,6 +1,6 @@
 # Flujo general del sistema
 
-![Flujo del sistema](flujo_sistema.png)
+![Flujo del sistema](../../figures/diagramas/flujo_sistema.png)
 
 Archivo interactivo: [flujo_sistema.html](flujo_sistema.html).
 Versión en PlantUML del documento: [`../flujo_general.puml`](../flujo_general.puml).

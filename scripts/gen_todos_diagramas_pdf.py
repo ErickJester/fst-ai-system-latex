@@ -22,7 +22,7 @@ OUT = REPO / "docs" / "todos_los_diagramas.pdf"
 
 RE_IMG = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}")
 RE_CAP = re.compile(r"\\caption\{(.+?)\}", re.S)
-EXCLUIR = ("figures/mockups/", "logos/")
+EXCLUIR = ("figures/mockups/", "figures/logos/")
 
 
 def limpiar(cap: str) -> str:

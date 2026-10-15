@@ -1,6 +1,6 @@
-# Diagrama de clases completo (16 clases)
+# Diagrama de clases completo (17 clases)
 
-![Clases](clases_completo.png)
+![Clases](../../figures/diagramas/clases_completo.png)
 
 Archivo interactivo: [clases_completo.html](clases_completo.html) (ocupa toda la altura
 de la pantalla y se desliza en horizontal).
@@ -10,7 +10,7 @@ Fuente de los datos: [`../clases.puml`](../clases.puml).
 
 Es una prueba de cómo se vería el diagrama de clases con el estilo de la skill
 *diagram-design*, **rompiendo a propósito su regla de máximo 7 clases por diagrama**. La
-skill recomienda partirlo por paquete; aquí están las 16 clases y las 23 relaciones en una
+skill recomienda partirlo por paquete; aquí están las 17 clases y las 26 relaciones en una
 sola vista.
 
 ## Zonas del diagrama
@@ -174,3 +174,5 @@ no se guardan (`../../DISENO-BD.md`, sección 4).
 
 `Estadisticas` es un valor que se calcula y se devuelve; no es una clase de la base de datos.
 Falta pasar estos métodos a `../clases.puml`, que todavía no los tiene.
+
+**14-oct (D-103):** se agrega la clase `Estadisticas` («derivada», sin tabla), que devuelven `Grupo.calcularEstadisticas()`, `Tanda.calcularEstadisticas()` y `Experimento.compararGrupos()`. Guarda, por conducta, la media, la desviación estándar, la varianza y el número de especímenes (`n`). Tres dependencias punteadas «calcula» la unen con `Experimento`, `Grupo` y `Tanda`.

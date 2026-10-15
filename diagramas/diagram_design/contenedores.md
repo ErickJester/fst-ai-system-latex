@@ -1,6 +1,6 @@
 # Diagrama de contenedores
 
-![Contenedores](contenedores.png)
+![Contenedores](../../figures/diagramas/contenedores.png)
 
 Archivo interactivo: [contenedores.html](contenedores.html) (se abre en el navegador y se
 desliza en horizontal).

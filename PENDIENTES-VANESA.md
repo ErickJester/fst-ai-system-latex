@@ -1,7 +1,7 @@
 # Pendientes de Vanesa — capítulos 1 a 3, preliminares y casos de uso
 
 Parte de [`PENDIENTES.md`](PENDIENTES.md), que tiene el reparto y las reglas de
-coordinación. **Verificado contra el LaTeX el 2026-10-05.** Los IDs (A-, M-, L-) son los
+coordinación. **Verificado contra el LaTeX el 2026-10-05; los ⏳ de la reauditoría del 11-oct, revisados el 14-oct.** Los IDs (A-, M-, L-) son los
 mismos de la lista original; la evidencia larga (citas de la entrevista) está en
 `errores/0X/errores.md` y `CORRECCIONES.md`.
 
@@ -22,7 +22,7 @@ Marca aquí lo que termines (`✅`, fecha). Este archivo es solo tuyo: Erick no 
   - `chapters/01_introduccion.tex`, `chapters/02_estado_arte.tex`, `chapters/03_marco_teorico.tex`
   - `front/resumen.tex`, `front/portada.tex`, `front/documento_tecnico.tex`
   - `bib/referencias.bib` y la configuración de `biblatex` en `preamble.tex`
-  - `diagramas/puml/cu_*.puml`, `diagramas/puml/gen_pngs.sh` y `figures/mermaid/cu_*.png`
+  - `diagramas/puml/cu_*.puml`, `diagramas/puml/gen_pngs.sh` y `figures/diagramas/cu_*.png`
   - En `chapters/05_diseno.tex`, **solo** la sección «Diseño de casos de uso» (de
     `\section{Diseño de casos de uso}` a justo antes de `\section{Diagramas de secuencia}`,
     hoy líneas 693–2333)
@@ -124,7 +124,7 @@ Marca aquí lo que termines (`✅`, fecha). Este archivo es solo tuyo: Erick no 
 
 | # | Prioridad | Dónde | Qué hacer |
 |---|-----------|-------|-----------|
-| ✅ A-14 (11-oct: los nombres se unificaron; la fecha dice «Fecha pendiente» hasta que haya la de entrega, D-70) | 🔴 | `portada.tex:73`, `documento_tecnico.tex:32` | Fecha «Mayo 2026» → la de entrega. Unificar los nombres entre los dos archivos (acentos y orden de apellidos: «Ángel Alí» contra «Angel Ali») |
+| ✅ A-14 (14-oct: nombres unificados y fecha «Diciembre 2026» en portada y documento técnico) | 🔴 | `portada.tex:73`, `documento_tecnico.tex:32` | Fecha «Mayo 2026» → la de entrega. Unificar los nombres entre los dos archivos (acentos y orden de apellidos: «Ángel Alí» contra «Angel Ali») |
 | ✅ A-2b (5-oct) | 🔴 | `resumen.tex:7` | Mismo cambio que A-2: tres analistas, se triplica |
 | ✅ M-4 (5-oct) | 🟡 | `resumen.tex:4` | «entre una y dos horas» → «entre una hora y media y dos horas» (como el cap. 1); expandir ISO e IEEE en su primera aparición |
 | ✅ L-4 (5-oct) | 🟢 | `referencias.bib:293` | Quitar el comentario sobrante «INSTRUCCIONES: Pegar estas entradas…» |
@@ -141,7 +141,7 @@ Marca aquí lo que termines (`✅`, fecha). Este archivo es solo tuyo: Erick no 
 ## 6. Casos de uso: diagramas y fichas del cap. 5
 
 Diagramas en `diagramas/puml/cu_*.puml`; el LaTeX incluye los PNG de
-`figures/mermaid/cu_*.png`. Genera con PlantUML 1.2026.8 (la versión con la que se
+`figures/diagramas/cu_*.png`. Genera con PlantUML 1.2026.8 (la versión con la que se
 verificó todo) y revisa la imagen antes de comitear.
 
 **Regla de oro:** cada `<<include>>` o `<<extend>>` del diagrama aparece también en la fila
@@ -258,7 +258,8 @@ Aplicado el 2026-10-11, primer bloque (hallazgos con fuente que decide):
 - ✅ **Cap. 2:** C2-02 (YOLO definido al primer uso), C2-03 (Redmon 2016 y Ren 2017 en `referencias.bib`), C2-07.
 - ✅ **Cap. 3 y abreviaturas:** C3-11 (*worker*, *clips*, *recall*), C3-12 (notación) y siglas ACID, GMM y VP.
 - ✅ **Casos de uso:** DF-12 (fichas CU-11 y CU-12 movidas al Paquete 1) y DF-14 (CU-22 en vez de CU-21).
-- ⏳ **Sin aplicar de ese bloque:** DF-13, DF-16 y DF-19 (`cu_*.puml`: acentos y el `<<extend>>` del desglose) porque
+- ✅ **Revisado el 14-oct:** DF-13 (el desglose ya es paso de CU-09, sin `<<extend>>`), DF-16 (acentos en `cu_*.puml` y en `arquitectura_software.puml`) y DF-19 («tres etapas»; «dos actores principales» más el *Worker* como actor del sistema) están resueltos. C3-09 (claves `bradski2008` y `kingma2015`) y C3-13 (sección renombrada «Clasificación de conductas: rasgos y redes neuronales», aviso de que los cilindros se localizan después; el párrafo del clasificador ya concuerda con el cap. 5) aplicados el 14-oct.
+- (histórico) **Sin aplicar de ese bloque:** DF-13, DF-16 y DF-19 (`cu_*.puml`: acentos y el `<<extend>>` del desglose) porque
   hay que regenerar los PNG y este equipo no tiene `plantuml.jar`; C3-09 (renombrar claves del `.bib`) y C3-13
   (reestructurar la sección del clasificador del cap. 3), que cambian mucho texto sin una fuente que lo exija.
 - ⏳ **Para Erick:** RF-09, RN-03 y RF-19 (el Día 1 no se analiza), R-03, RNF-10 y el volumen de la factibilidad
@@ -277,13 +278,13 @@ Aplicado el 2026-10-11, primer bloque (hallazgos con fuente que decide):
 - ✅ **`.puml`** (fuente de las figuras): arquitectura (sin CLAHE, `_tracked`, solo `.mp4` ni SQL), esquema físico (sin
   `D-xx`, SQL ni «rata»), `estados_analisis`, `seq_consulta_progreso`, `seq_consulta_resultados` (cuatro conductas),
   `seq_crear_cuenta`, `seq_descarga_reportes` y `flujo_general`.
-- ⏳ **PNG sin regenerar:** las figuras de `figures/mermaid/` y `diagramas/clases.png` siguen mostrando lo anterior hasta
+- ✅ (14-oct, regenerados) **PNG sin regenerar:** las figuras de `figures/diagramas/` y `diagramas/clases.png` siguen mostrando lo anterior hasta
   regenerarlas con PlantUML (no hay `plantuml.jar` en este equipo).
-- ⏳ **Mockups** `experimento` y `experimentos` (`figures/mockups/v2/`): hay que revisar que no pidan nombre y contraseña.
+- ✅ (14-oct, sin contraseña) **Mockups** `experimento` y `experimentos` (`figures/mockups/`): hay que revisar que no pidan nombre y contraseña.
 
 **Tercer bloque (11-oct, ajustado tras el merge de `main` del 14-oct): respuestas a PREGUNTAS.md.** Lo aplicado quedó registrado con la
 numeración de `main` (D-66 a D-102 en `errores/preguntas-doctor.md`): red de fusión como clasificador (D-66), cancelación a los
-5 minutos (D-67), reinicio que borra el resultado anterior (D-68), borrado a los 30 días (D-69), «Fecha pendiente» (D-70), Día 1 sin
+5 minutos (D-67), reinicio que borra el resultado anterior (D-68), borrado a los 30 días (D-69), fecha «Diciembre 2026» (D-70), Día 1 sin
 análisis (D-71), RN-16 ampliada (D-72), repetibilidad RNF-14 (D-74), OE-6 y RNF-11 modulares (D-75), PDF con nombre fijo (D-76),
 cuatro valores de `origen` (D-80), copia H.264 sin video anotado (D-81) y flujo de la pausa (D-89). Donde `main` y nuestra rama
 diferían se dejó `main`: la meta de F1 aplica a las cuatro conductas (D-91), los atributos ISO quedan como «atributos» (D-95) y el

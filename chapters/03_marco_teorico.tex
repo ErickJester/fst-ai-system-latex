@@ -108,7 +108,7 @@ genera alrededor de ocho videos.
 
 Un video se trata como una secuencia de matrices de números. Cada cuadro
 (\textit{frame}) es una imagen BGR de tres canales (azul, verde, rojo), que es la
-convención de OpenCV \cite{bradski2000}. Un video de 5 minutos a 30 cuadros por segundo (FPS, \textit{frames per second}) equivale a
+convención de OpenCV \cite{bradski2008}. Un video de 5 minutos a 30 cuadros por segundo (FPS, \textit{frames per second}) equivale a
 9{,}000 cuadros. Cada píxel tiene un valor entero entre 0 y 255 por canal; la
 representación completa de un cuadro de resolución $W \times H$ ocupa $W \times H
 \times 3$ bytes.
@@ -168,8 +168,8 @@ de al menos 80. La primera detecta lo que cambió respecto al aparato vacío; la
 aprovecha que el espécimen es claro sobre agua oscura. Los dos umbrales son fijos, no se
 recalculan en cada cuadro.
 
-De los píxeles que cumplen ambas condiciones se conserva, dentro de cada cilindro, la
-región conexa más grande \cite{bradski2000}. Como cada cilindro contiene un solo
+De los píxeles que cumplen ambas condiciones se conserva, dentro de cada cilindro (que se
+localiza en la sección siguiente), la región conexa más grande \cite{bradski2008}. Como cada cilindro contiene un solo
 espécimen, esa región es el espécimen: no hace falta asociar detecciones entre cuadros
 para saber a quién pertenece cada una.
 
@@ -194,7 +194,7 @@ Como la línea de agua se mide una sola vez, sobre el modelo de fondo y no cuadr
 cuadro, no oscila entre cuadros y no necesita suavizado.
 
 % ============================================================
-\section{Redes neuronales y aprendizaje profundo}
+\section{Clasificación de conductas: rasgos y redes neuronales}
 % ============================================================
 
 \subsection{Clasificador por \textit{gradient boosting} sobre rasgos}
@@ -220,7 +220,7 @@ características de bajo nivel; las más profundas las combinan para reconocer f
 complejas. Al final, capas completamente conectadas producen las probabilidades de clase.
 
 Los pesos se aprenden durante el entrenamiento con retropropagación y el optimizador
-Adam \cite{kingma2014}, que ajusta la tasa de aprendizaje de cada parámetro
+Adam \cite{kingma2015}, que ajusta la tasa de aprendizaje de cada parámetro
 individualmente usando estimaciones de primer y segundo momento del gradiente.
 
 Entrenar una CNN desde cero requiere conjuntos de datos etiquetados muy grandes, lo que
@@ -302,8 +302,7 @@ donde $y_c = 1$ si la etiqueta correcta es la clase $c$ y 0 en caso contrario. L
 etiquetas las generan los autores del proyecto con el etiquetador del equipo, que
 propone la conducta y ellos la revisan y corrigen, con base en criterios de
 conducta descritos por escrito a partir de la documentación del protocolo
-experimental; el laboratorio no proporcionó registros conductuales propios que
-pudieran usarse como referencia.
+experimental.
 
 % ============================================================
 \section{Arquitectura del sistema web}

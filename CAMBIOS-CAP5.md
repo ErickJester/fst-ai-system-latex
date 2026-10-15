@@ -39,7 +39,7 @@ Los cuatro compilan y su render está verificado.
 
 | Archivo | Qué es | Sustituye a |
 |---------|--------|-------------|
-| [`diagramas/esquema_conceptual.tex`](diagramas/esquema_conceptual.tex) | ER conceptual, TikZ, notación Chen con cardinalidades (mín,máx) | `figures/mermaid/entidadRelacion.png` |
+| [`diagramas/esquema_conceptual.tex`](diagramas/esquema_conceptual.tex) | ER conceptual, TikZ, notación Chen con cardinalidades (mín,máx) | `figures/diagramas/entidadRelacion.png` |
 | [`diagramas/grafo_relacional_1_inicial.puml`](diagramas/grafo_relacional_1_inicial.puml) | Esquema Lógico Preliminar · 11 rel · 46 attr · 12 FK | — (no existía) |
 | [`diagramas/grafo_relacional_2_laboratorio.puml`](diagramas/grafo_relacional_2_laboratorio.puml) | Esquema Lógico Definitivo · 11 rel · 46 attr · 11 FK · BCNF | `diagramas/relacional.puml` |
 | [`diagramas/grafo_relacional_3_vigente.puml`](diagramas/grafo_relacional_3_vigente.puml) | Esquema reconciliado con las tablas de sistema · 15 rel · 71 attr · 16 FK · BCNF | base para `esquema_fisico.puml` |
@@ -104,7 +104,7 @@ Falta: sustituirla por `esquema_conceptual.pdf` y reescribir el pie.
 
 **Ubicación:** `:267`–`:272` · **Estado:** Bloqueado (ver C-02 y C-03)
 
-`figures/mermaid/er2.png` viene de `diagramas/esquema_fisico.puml`, con las 12 tablas
+`figures/diagramas/er2.png` viene de `diagramas/esquema_fisico.puml`, con las 12 tablas
 viejas. El punto de partida para rehacerlo es `grafo_relacional_3_vigente.puml`, más los
 tipos PostgreSQL y las columnas de auditoría, que son de la etapa física.
 
