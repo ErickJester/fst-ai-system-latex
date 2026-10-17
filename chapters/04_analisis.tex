@@ -437,8 +437,8 @@ RNF-11 & Escalabilidad
 \hline
 RNF-12 & Mantenibilidad
        & El código debe estar documentado y separado en módulos independientes
-         (\textit{backend}, \textit{pipeline} de análisis de video, \textit{frontend}), siguiendo PEP~8 en Python y ESLint
-         en JavaScript.
+         (\textit{backend}, \textit{pipeline} de análisis de video, \textit{frontend}), siguiendo PEP~8 en Python, las convenciones estándar de Java en el
+         \textit{backend} y ESLint en JavaScript.
        & Revisión de calidad de código en cada cierre de bloque de
          implementación. \\
 \hline
@@ -806,11 +806,14 @@ Etiquetador del equipo
 \hline
 \endfoot
 
-Flask (Python) \cite{grinberg2018}
-    & Microframework ligero para APIs REST. Extensiones para JWT
-      (Flask-JWT-Extended), ORM (SQLAlchemy) y tareas asíncronas.
-    & Suficiente para el tamaño del prototipo. Integra el \textit{pipeline} de análisis de video sin
-      necesitar un framework más pesado. \\
+Spring Boot (Java) \cite{springboot_ref}
+    & Marco para construir APIs REST en Java. Incluye autenticación y autorización
+      (Spring Security), persistencia con Spring Data JPA e Hibernate (ORM),
+      documentación de la API (Swagger), validaciones y envío de correo.
+    & El equipo lo conoce de clase y el \textit{backend} sigue esa misma estructura
+      (controladores, servicios y repositorios). El \textit{pipeline} corre en el
+      \textit{worker}, un proceso aparte, así que el lenguaje del \textit{backend} no
+      limita al análisis de video. \\
 \hline
 React.js + Vite
     & Framework \textit{frontend} basado en componentes. Vite reduce los tiempos de
@@ -820,7 +823,7 @@ React.js + Vite
 \hline
 PostgreSQL
     & Base de datos relacional con transacciones ACID y código abierto.
-    & Cubre los patrones de acceso del sistema y se integra con SQLAlchemy. \\
+    & Cubre los patrones de acceso del sistema y se integra con JPA e Hibernate. \\
 \hline
 Docker + Docker Compose \cite{merkel2014}
     & Empaqueta todos los servicios (\textit{backend}, \textit{frontend}, base de datos, worker) en
@@ -939,7 +942,7 @@ implementar el prototipo de forma eficiente y sostenible \cite{pressman2014}.
 \subsubsection{Evaluación de recursos actuales y brechas tecnológicas}
 
 El equipo de desarrollo cuenta con experiencia en las herramientas del stack tecnológico
-seleccionado ---Python, OpenCV, PyTorch, Flask y React--- adquirida en cursos de la
+seleccionado ---Python, OpenCV, PyTorch, Java con Spring Boot y React--- adquirida en cursos de la
 carrera en la ESCOM. Todas las herramientas son de código abierto, están bien
 documentadas y tienen comunidades activas que reducen el riesgo de incompatibilidades.
 
@@ -973,7 +976,7 @@ etapa con el dataset disponible.
 \subsubsection{Evaluación de compatibilidad e integración}
 
 El prototipo tiene una arquitectura modular que separa el \textit{pipeline} de análisis de video
-(Python, OpenCV, scikit-learn y PyTorch) de la plataforma web (Flask, React, PostgreSQL) mediante una
+(Python, OpenCV, scikit-learn y PyTorch) de la plataforma web (Spring Boot, React, PostgreSQL) mediante una
 cola de tareas asíncrona. Esa separación permite desarrollar y probar cada módulo de
 forma independiente y facilita la integración progresiva conforme avanza el desarrollo.
 
@@ -1093,7 +1096,7 @@ Conectividad e infraestructura (internet y electricidad durante el desarrollo,
       12~meses)
     & \$4{,}500 \\
 \hline
-Herramientas de desarrollo (Python, Flask, React, PostgreSQL, Docker, OpenCV,
+Herramientas de desarrollo (Python, Java, Spring Boot, React, PostgreSQL, Docker, OpenCV,
       scikit-learn, PyTorch)
     & \$0 --- distribución bajo licencias de código abierto sin costo para uso
       académico. \\
@@ -1210,8 +1213,9 @@ manejo de especímenes de laboratorio en investigación biomédica.
 
 Cada herramienta del \textit{stack} tecnológico se distribuye bajo una licencia que
 permite su uso, modificación y distribución en contextos académicos sin costo:
-PSF (Python), BSD-3-Clause (Flask, scikit-learn y PyTorch), MIT (React), PostgreSQL
-License (PostgreSQL) y Apache~2.0 (Docker y OpenCV).
+PSF (Python), GPL~v2 con la excepción \textit{Classpath} (OpenJDK, que ejecuta Java),
+BSD-3-Clause (scikit-learn y PyTorch), MIT (React), PostgreSQL License (PostgreSQL) y
+Apache~2.0 (Spring Boot, Docker y OpenCV).
 El código fuente, los modelos entrenados y la documentación
 producidos durante el TT son obra intelectual del equipo desarrollador y quedan
 amparados por la Ley Federal del Derecho de Autor (LFDA).
@@ -1253,7 +1257,7 @@ el caso para el que fue construido.
 \subsection{Mantenibilidad del sistema}
 
 El sistema se entrega como prototipo funcional. Para mantenerlo hace falta conocimiento
-básico de Python y Docker. La documentación técnica de este documento y el
+básico de Python, Java y Docker. La documentación técnica de este documento y el
 \texttt{README} del repositorio están diseñados para que cualquiera que retome el
 proyecto pueda entenderlo sin el equipo original. Las herramientas principales (OpenCV,
-PyTorch, Flask, React, PostgreSQL) tienen desarrollo activo y comunidades grandes.
+PyTorch, Spring Boot, React, PostgreSQL) tienen desarrollo activo y comunidades grandes.

@@ -8,8 +8,8 @@ def box(name, stereo, title, lines, x, y, w, kind='cont'):
 # ---- Contenido tomado de los capitulos 1-5 (ver notas en el mensaje) ----
 box('nav', 'dispositivo', 'Equipo del investigador', ['Navegador web:', 'Chrome · Firefox · Edge'], 40, 300, 200, 'ext')
 box('fe', 'contenedor', 'frontend', ['React.js + Vite', 'Interfaz del investigador', 'Descarga de reportes (PDF, CSV, XLSX)'], 410, 120, 260)
-box('be', 'contenedor', 'backend', ['Flask + SQLAlchemy + JWT', 'API REST (JSON)', 'Valida los archivos de video', 'Encola las tareas de análisis'], 410, 300, 260)
-box('db', 'contenedor', 'db', ['PostgreSQL', 'Cola de tareas: tabla ANALISIS', 'Esquema relacional (15 tablas)'], 750, 120, 230)
+box('be', 'contenedor', 'backend', ['Spring Boot (Java) + Spring Data JPA + JWT', 'API REST (JSON)', 'Valida los archivos de video', 'Encola las tareas de análisis'], 410, 300, 260)
+box('db', 'contenedor', 'db', ['PostgreSQL', 'Cola de tareas: tabla ANALISIS', 'Esquema relacional (12 tablas)'], 750, 120, 230)
 box('wk', 'contenedor', 'worker', ['Python · OpenCV · scikit-learn · PyTorch', 'Pipeline de análisis conductual', 'Consulta la cola; un video a la vez', 'Al arrancar, retoma lo que quedó a medias', 'Diarias (madrugada): borra videos a 30 días,', 'avisa del vencimiento y vigila el disco', 'Revisa el disco antes de cada análisis', 'Clasificador sobre rasgos: sin GPU'], 1060, 300, 280)
 box('vc', 'volumen', 'Volumen compartido', ['Videos originales', 'Copia del video para revisión (H.264)', 'Por análisis: recuadros, imagen y datos', 'de la pausa y reporte de diagnóstico', 'Reportes PDF / CSV / XLSX'], 750, 500, 230, 'vol')
 box('vm', 'volumen', 'Volumen de modelos', ['Solo lectura para el worker', 'Archivo del clasificador de conducta'], 1060, 500, 280, 'vol')

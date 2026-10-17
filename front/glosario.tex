@@ -40,7 +40,7 @@
   \textbf{API REST}
   & Interfaz de programación de aplicaciones que sigue las restricciones
     arquitectónicas REST (\textit{Representational State Transfer}). En el
-    sistema propuesto, la API Flask expone los recursos del backend (experimentos,
+    sistema propuesto, la API construida con Spring Boot expone los recursos del backend (experimentos,
     videos, resultados) mediante peticiones HTTP estándar (GET, POST, PATCH, DELETE)
     e intercambia datos en formato JSON. \\[5pt]
 
@@ -198,8 +198,8 @@
   \textbf{ORM}
   & (\textit{Object-Relational Mapping}.) Técnica que abstrae las operaciones de
     base de datos relacional mediante objetos del lenguaje de programación. El
-    backend utiliza SQLAlchemy como ORM para interactuar con PostgreSQL sin
-    escribir SQL directamente en la lógica de negocio. \\[5pt]
+    backend utiliza Hibernate, a través de Spring Data JPA, como ORM para interactuar
+    con PostgreSQL sin escribir SQL directamente en la lógica de negocio. \\[5pt]
 
   \textbf{Overfitting}
   & (Sobreajuste.) Fenómeno en el que un modelo aprende el ruido del conjunto de
