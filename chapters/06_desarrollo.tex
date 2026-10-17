@@ -227,3 +227,18 @@ Capítulo~5 y lo construido.
 %   se sustituyó por un simulador mientras se termina el pipeline; y lo
 %   que surja. Esta sección es la que más luce ante los sinodales.
 % [ESTADO] Mantenerla al día mientras avanza la construcción.
+
+El cambio de mayor alcance respecto al Capítulo~5 es el del \textit{backend}: el diseño inicial lo
+ubicaba en Flask y se construyó con Spring Boot. Las razones son las que explica la
+Tabla~\ref{tab:herr_web} del Capítulo~4: el equipo conoce el marco por los cursos de la carrera, el
+ecosistema de Spring integra en un solo lugar la autenticación, el acceso a datos, las validaciones, la
+documentación de la API y el correo, y la elección no limita al \textit{pipeline}, que corre en un
+\textit{worker} independiente en Python.
+
+El cambio tuvo un costo: el repositorio combina ahora dos lenguajes, Java en el \textit{backend} y
+Python en el \textit{worker} y el \textit{pipeline}, lo que suma herramientas y complejidad de
+mantenimiento. Para contenerlo, los dos lados se comunican solo a través de la base de datos y de un
+volumen compartido, el contrato entre ambos quedó fijado en una guía de construcción común, y un
+\textit{worker} simulado permite probar el \textit{backend} sin esperar al \textit{pipeline} real.
+
+% [PENDIENTE: agregar aquí las demás diferencias entre diseño y construcción que surjan]

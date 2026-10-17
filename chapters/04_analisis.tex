@@ -834,6 +834,17 @@ Docker + Docker Compose \cite{merkel2014}
 
 \end{longtable}
 
+\noindent\textbf{Cambio respecto al diseño original.} En el diseño inicial el \textit{backend}
+se construiría con Flask; durante el desarrollo se sustituyó por Spring Boot por tres razones.
+Primera, el equipo conoce el marco por los cursos de la carrera, y el \textit{backend} reutiliza su
+estructura en capas (controladores, servicios y repositorios), lo que reduce el riesgo de aprendizaje.
+Segunda, Spring Boot integra en un solo ecosistema lo que en Flask había que ensamblar con extensiones
+por separado: autenticación con JWT, acceso a datos con un ORM, validaciones, documentación de la API y
+envío de correo. Tercera, la elección no limita el análisis de video: el \textit{pipeline} corre en un
+proceso independiente (el \textit{worker}, en Python) que se comunica con el \textit{backend} solo a
+través de la base de datos y de un volumen compartido, de modo que cada parte usa el lenguaje que mejor
+le corresponde. El cambio mantuvo el modelo de datos y el contrato de la API.
+
 % -----------------------------------------------------------
 \section{Análisis de riesgos}
 % -----------------------------------------------------------
