@@ -1,391 +1,229 @@
 \chapter{Desarrollo}
 
+% =====================================================================
+% ESQUELETO DEL CAPÍTULO 6 (armado el 17-oct-2026)
+%
+% Qué es este capítulo: el capítulo 5 dice QUÉ se va a construir; este
+% dice CÓMO SE CONSTRUYÓ DE VERDAD. Cada sección se escribe sobre lo ya
+% implementado y se verifica contra el código. Si algo aún no existe se
+% dice «pendiente»; no se describe como hecho.
+%
+% Convención de las notas:
+%   [QUÉ VA]  lo que debe contar la sección
+%   [FUENTE]  de dónde se saca (repositorio y archivo)
+%   [ESTADO]  qué hay hoy en el código al 17-oct-2026
+%   [ENLAZA]  requisito o sección del documento con la que debe poder
+%             rastrearse (RF, RNF, RN, CU, D-xx)
+%
+% Reglas: «espécimen» (nunca rata ni animal); sin «inteligencia
+% artificial»; sin κ, MAE ni gold standard; fragmentos de código solo
+% si explican una decisión; el código completo, si acaso, va en un
+% apéndice. El backend es Spring Boot, no Flask (D-105).
+%
+% Repositorios de donde sale la información:
+%   fst-ai-system     backend (rama poc/backend-spring), frontend
+%                     (rama feat/frontend-v2-servicios), worker_fake
+%   fst-etiquetador   etiquetador, conjunto de entrenamiento y red
+%                     (carpeta cnn/)
+%
+% Texto anterior de este capítulo (diseño viejo con YOLO y ByteTrack):
+% docs/borradores/06_desarrollo_anterior_tracker.tex
+% =====================================================================
+
+Este capítulo describe cómo se construyó el sistema: las herramientas y
+versiones que se usaron, la implementación de cada uno de sus componentes
+y las diferencias que aparecieron entre lo diseñado en el
+Capítulo~5 y lo construido.
+
+% [PENDIENTE: agregar la lectura de las secciones cuando el capítulo esté
+%  escrito, y cambiar «Capítulo~5» por un \ref si se agrega una etiqueta
+%  al capítulo de diseño]
+
+% ---------------------------------------------------------------------
 \section{Entorno de desarrollo}
-% [PENDIENTE: detallar versiones: Python 3.11, OpenCV 4.x, Node.js, etc.]
-
-\section{Implementaci\'{o}n del m\'{o}dulo de seguimiento (tracker.py)}
-
-\subsection{Representación de imágenes y video}
-
-Para el módulo de seguimiento, un video se trata como una secuencia de matrices de
-números. Cada cuadro (\textit{frame}) es una imagen BGR de tres canales (azul, verde,
-rojo), que es la convención de OpenCV. Un video de 5 minutos a 30 FPS equivale a
-procesar 9{,}000 cuadros de forma secuencial.
-
-\subsection{Modelo de fondo y sustracción}
-
-El primer paso del pipeline es construir un modelo del fondo: una imagen de referencia
-del cilindro sin la rata. Se calcula como la mediana píxel a píxel de los primeros
-60 cuadros del video. Usar la mediana en vez del promedio evita que una rata inmóvil
-al inicio ``contamine'' el modelo. Después, en cada cuadro se calcula la diferencia
-absoluta contra esa referencia; los píxeles que cambiaron significativamente son el
-primer plano (la rata).
-
-Este enfoque es más simple que métodos adaptativos como el modelo de mezcla gaussiana
-(GMM) \cite{zivkovic2004}, pero es suficiente para este caso de uso: la cámara es fija
-y el fondo no cambia durante el experimento.
-
-\subsection{Umbralización y limpieza morfológica}
-
-La imagen de diferencias se convierte a binario con el método de Otsu \cite{otsu1979},
-que calcula automáticamente el umbral óptimo a partir del histograma de intensidades.
-Después se aplica una apertura morfológica (erosión seguida de dilatación) para
-eliminar ruido pequeño y rellenar huecos en la región detectada.
-
-\subsection{Detección de contornos y selección de candidatos}
-
-Sobre la imagen binaria limpia se extraen los contornos con \texttt{findContours} de
-OpenCV \cite{suzuki1985}. De cada contorno se obtiene el área, el rectángulo envolvente
-(\textit{bounding box}) y el centroide. Con esas propiedades se filtra cuál de los
-candidatos detectados corresponde a la rata y cuál es ruido, usando restricciones de
-área mínima y máxima calibradas para el tamaño esperado del espécimen dentro de cada
-cilindro.
-
-Para verificar consistencia entre cuadros consecutivos se usa la métrica IoU
-(\textit{Intersection over Union}): la relación entre el área de intersección y el
-área de unión de dos rectángulos. Un IoU cercano a 1 indica que la detección actual
-coincide con la del cuadro anterior; si baja demasiado se activa el respaldo del
-tracker CSRT.
-
-\subsection{Estimación de la línea de agua}
-
-La superficie del agua puede generar reflejos que hacen que la rata aparezca
-duplicado desde la vista lateral. Para mitigar ese efecto, el sistema estima en cada
-cuadro la posición vertical de la línea del agua: analiza el perfil de intensidad
-promedio por filas dentro de cada ROI e identifica la fila con el cambio más brusco.
-Como esa estimación oscila por ruido entre cuadros, se estabiliza con un promedio
-móvil exponencial (EMA, véase ecuación~\ref{eq:ema} del capítulo de marco teórico),
-donde $\tilde{y}_t$ es la estimación del cuadro actual, $\hat{y}_{t-1}$ el valor
-suavizado anterior y $\alpha \in (0,1)$ controla la velocidad de respuesta. Esta
-lógica está encapsulada en la clase \texttt{WaterlineSmoother}. Su efectividad depende
-de las condiciones del video y se evaluará durante las pruebas de validación.
-
-\subsection{Arquitectura de clases del módulo de seguimiento}
-
-El módulo \texttt{tracker.py} organiza la lógica de seguimiento en dos clases
-principales y una función de procesamiento de alto nivel.
-
-\textbf{WaterlineSmoother} encapsula la estimación de la línea de agua descrita en la
-sección anterior. Mantiene internamente el valor suavizado $\hat{y}_{t-1}$ y expone un
-único método que recibe la estimación cruda del cuadro actual y devuelve el valor
-filtrado por EMA (ecuación~\ref{eq:ema}).
-
-\textbf{YoloTracker} encapsula la integración con Ultralytics YOLOv8 en modo
-\textit{track}. Al instanciarse carga el modelo (\texttt{weights/rat.pt}) y configura
-ByteTrack \cite{zhang2022_bytetrack} como algoritmo de seguimiento a través del
-archivo \texttt{bytetrack.yaml} que Ultralytics incluye en su distribución. Su método
-principal, \texttt{track()}, invoca \texttt{model.track()} con el parámetro
-\texttt{persist=True} para mantener la continuidad de identidades entre cuadros
-consecutivos. Si Ultralytics no está disponible en el entorno ---por ausencia de GPU o
-del paquete--- la clase reporta \texttt{available=False} y el pipeline cae
-automáticamente al detector clásico (sustracción de fondo con Otsu).
-
-La función \texttt{process\_video()} integra ambas clases con la lógica de gating
-físico (restricciones de tamaño, posición respecto a la línea de agua y velocidad
-máxima entre cuadros), la política de congelación de posición (\textit{freeze}) con
-decaimiento de confianza, y el mecanismo de re-adquisición con umbral de confianza
-reducido para ROIs en recuperación. En la práctica, el pipeline sigue la jerarquía:
-ByteTrack (vía \texttt{YoloTracker})
-$\rightarrow$ detector clásico
-$\rightarrow$ posición congelada.
-
-% ════════════════════════════════════════════════════════════
-%  FRAGMENTO 1 — WaterlineSmoother
-% ════════════════════════════════════════════════════════════
-
-\subsubsection{Clase \texttt{WaterlineSmoother}}
-
-El Listado~\ref{lst:waterline} muestra la implementación de
-\texttt{WaterlineSmoother}. La clase encapsula dos responsabilidades: detectar
-la fila de píxeles con mayor variación de intensidad dentro de la ROI (línea
-del agua cruda) y suavizarla con EMA para evitar saltos bruscos entre cuadros.
-
-\begin{lstlisting}[
-  style=python,
-  caption={Clase \texttt{WaterlineSmoother} en \texttt{tracker.py}.},
-  label={lst:waterline}
-]
-class WaterlineSmoother:
-    """Estima y suaviza la línea del agua dentro de una ROI.
-
-    Parámetros
-    ----------
-    alpha : float
-        Factor de suavizado EMA (0 < alpha < 1).
-        Valores bajos = más suave; valores altos = más reactivo.
-    """
-
-    def __init__(self, alpha: float = 0.1):
-        self.alpha = alpha
-        self._smoothed: float | None = None   # valor suavizado anterior
-
-    def update(self, roi_gray: np.ndarray) -> int:
-        """Devuelve la fila estimada de la línea del agua (coordenada y).
-
-        Parámetros
-        ----------
-        roi_gray : np.ndarray
-            Subimagen en escala de grises correspondiente a un cilindro.
-
-        Retorna
-        -------
-        int
-            Coordenada y de la línea del agua dentro de la ROI.
-        """
-        # Perfil de intensidad promedio por fila
-        row_mean = roi_gray.mean(axis=1)          # shape: (H,)
-
-        # Gradiente vertical: dónde cambia más la intensidad
-        gradient = np.abs(np.diff(row_mean))      # shape: (H-1,)
-        raw_y = float(np.argmax(gradient))
-
-        # Primera llamada: inicializar con la estimación cruda
-        if self._smoothed is None:
-            self._smoothed = raw_y
-        else:
-            # Ecuación EMA: ŷ_t = alpha * y_t + (1 - alpha) * ŷ_{t-1}
-            self._smoothed = (
-                self.alpha * raw_y
-                + (1.0 - self.alpha) * self._smoothed
-            )
-
-        return int(round(self._smoothed))
-\end{lstlisting}
-
-Los puntos clave del listado son:
-
-\begin{itemize}
-    \item \textbf{Líneas 19--20.} El perfil de intensidad por fila
-    (\texttt{row\_mean}) reduce la imagen 2D a un vector 1D, eliminando
-    variaciones horizontales irrelevantes.
-
-    \item \textbf{Líneas 23--24.} \texttt{np.diff} calcula la diferencia
-    entre filas consecutivas; \texttt{argmax} localiza la fila con el cambio
-    más brusco, que corresponde a la transición agua--rata.
-
-    \item \textbf{Líneas 27--33.} La actualización EMA corresponde
-    directamente a la ecuación~\ref{eq:ema} del capítulo de marco teórico,
-    con $\alpha = 0.1$ como valor por defecto.
-\end{itemize}
-
-
-% ════════════════════════════════════════════════════════════
-%  FRAGMENTO 2 — YoloTracker
-% ════════════════════════════════════════════════════════════
-
-\subsubsection{Clase \texttt{YoloTracker}}
-
-El Listado~\ref{lst:yolotracker} muestra la clase que integra YOLOv8 en modo
-\textit{track} con ByteTrack. El diseño aísla la dependencia de Ultralytics
-en un único punto: si la biblioteca no está disponible, el atributo
-\texttt{available} indica al pipeline que debe usar el detector clásico.
-
-\begin{lstlisting}[
-  style=python,
-  caption={Clase \texttt{YoloTracker} en \texttt{tracker.py}.},
-  label={lst:yolotracker}
-]
-class YoloTracker:
-    """Envuelve YOLOv8 en modo track (ByteTrack) para seguimiento de rata.
-
-    Si Ultralytics no está instalado, ``available`` es False y el
-    pipeline cae automáticamente al detector clásico.
-    """
-
-    WEIGHTS = Path("weights/rat.pt")
-    TRACKER_CFG = "bytetrack.yaml"   # incluido en Ultralytics
-
-    def __init__(self):
-        self.available = False
-        self._model = None
-        try:
-            from ultralytics import YOLO
-            if not self.WEIGHTS.exists():
-                raise FileNotFoundError(
-                    f"Pesos no encontrados: {self.WEIGHTS}"
-                )
-            self._model = YOLO(str(self.WEIGHTS))
-            self.available = True
-        except Exception as exc:          # ImportError o FileNotFoundError
-            warnings.warn(
-                f"YoloTracker no disponible: {exc}. "
-                "Se usará el detector clásico como respaldo."
-            )
-
-    def track(
-        self,
-        frame: np.ndarray,
-        roi: tuple[int, int, int, int],
-        conf: float = 0.25,
-    ) -> list[dict]:
-        """Ejecuta detección + seguimiento ByteTrack sobre una ROI.
-
-        Parámetros
-        ----------
-        frame : np.ndarray
-            Cuadro completo en BGR.
-        roi : tuple[int, int, int, int]
-            Región de interés (x, y, w, h) en píxeles del cuadro.
-        conf : float
-            Umbral mínimo de confianza para reportar una detección.
-
-        Retorna
-        -------
-        list[dict]
-            Lista de detecciones; cada elemento contiene:
-            ``{'id': int, 'bbox': [x,y,w,h], 'conf': float}``.
-            Lista vacía si no se detectó ningún objeto.
-        """
-        if not self.available:
-            return []
-
-        x, y, w, h = roi
-        crop = frame[y:y+h, x:x+w]
-
-        # persist=True mantiene el mismo ID entre cuadros consecutivos
-        results = self._model.track(
-            crop,
-            tracker=self.TRACKER_CFG,
-            persist=True,
-            conf=conf,
-            verbose=False,
-        )
-
-        detections = []
-        if results and results[0].boxes is not None:
-            for box in results[0].boxes:
-                track_id = int(box.id) if box.id is not None else -1
-                bx, by, bw, bh = box.xywh[0].tolist()
-                detections.append({
-                    "id":   track_id,
-                    "bbox": [x + int(bx - bw/2),   # convertir a coords
-                             y + int(by - bh/2),   # del cuadro completo
-                             int(bw), int(bh)],
-                    "conf": float(box.conf),
-                })
-        return detections
-\end{lstlisting}
-
-Los puntos clave del listado son:
-
-\begin{itemize}
-    \item \textbf{Líneas 11--23.} El bloque \texttt{try/except} aísla la
-    dependencia de Ultralytics. Si la importación falla (por ejemplo, en un
-    entorno sin GPU o sin la biblioteca instalada), el objeto queda en estado
-    \texttt{available = False} sin lanzar una excepción que interrumpa el
-    pipeline.
-
-    \item \textbf{Líneas 41--43.} El cuadro completo se recorta a la ROI
-    antes de pasarlo al detector. Esto reduce la carga computacional y evita
-    que el modelo detecte ratas de otros cilindros dentro del mismo cuadro.
-
-    \item \textbf{Línea 46.} \texttt{persist=True} es el parámetro que activa
-    la continuidad de identidades entre cuadros en Ultralytics: ByteTrack
-    recuerda qué ID asignó a cada trayectoria en el cuadro anterior y lo
-    mantiene en el cuadro actual.
-
-    \item \textbf{Líneas 55--62.} Las coordenadas del bounding box se
-    devuelven en el sistema de referencia del cuadro completo (no de la ROI),
-    para que el resto del pipeline pueda trabajar siempre en el mismo espacio
-    de coordenadas.
-\end{itemize}
-
-
-% ════════════════════════════════════════════════════════════
-%  FRAGMENTO 3 — Jerarquía de fallback en process_video()
-% ════════════════════════════════════════════════════════════
-
-\subsubsection{Jerarquía de respaldo en \texttt{process\_video()}}
-
-El Listado~\ref{lst:fallback} muestra el núcleo del bucle de procesamiento
-por cuadro dentro de \texttt{process\_video()}. Implementa la jerarquía de
-tres niveles descrita en la sección de marco teórico: ByteTrack como
-primera opción, detector clásico como respaldo y congelamiento de posición
-como último recurso.
-
-\begin{lstlisting}[
-  style=python,
-  caption={Bucle principal de seguimiento en \texttt{process\_video()}.
-           Se omiten las partes de gating físico y escritura de resultados
-           para centrarse en la jerarquía de respaldo.},
-  label={lst:fallback}
-]
-for frame_idx, frame in enumerate(video_frames(cap)):
-
-    for roi_id, roi in enumerate(rois):
-        det = None
-
-        # -- Nivel 1: ByteTrack (vía YoloTracker) --
-        if yolo_tracker.available:
-            hits = yolo_tracker.track(frame, roi, conf=CONF_HIGH)
-            if hits:
-                det = hits[0]                 # exactamente 1 rata por ROI
-                freeze_counter[roi_id] = 0   # reiniciar contador de freeze
-
-        # -- Nivel 2: detector clásico (sustracción de fondo + Otsu) --
-        if det is None:
-            bbox_classic = classic_detect(frame, roi, bg_model)
-            if bbox_classic is not None and iou(
-                bbox_classic, last_bbox[roi_id]
-            ) > IOU_MIN:
-                det = {"bbox": bbox_classic, "conf": CONF_CLASSIC,
-                       "id": roi_id}
-                freeze_counter[roi_id] = 0
-
-        # -- Nivel 3: congelamiento con decaimiento de confianza --
-        if det is None:
-            freeze_counter[roi_id] += 1
-            decay = CONF_FREEZE_INIT * (
-                CONF_FREEZE_DECAY ** freeze_counter[roi_id]
-            )
-            det = {
-                "bbox": last_bbox[roi_id],
-                "conf": max(decay, CONF_FREEZE_MIN),
-                "id":   roi_id,
-            }
-
-        # Actualizar estado y aplicar gating físico
-        last_bbox[roi_id] = det["bbox"]
-        waterline_y[roi_id] = wl_smoothers[roi_id].update(
-            _crop_gray(frame, roi)
-        )
-        frame_results[roi_id].append(det)
-\end{lstlisting}
-
-Los puntos clave del listado son:
-
-\begin{itemize}
-    \item \textbf{Líneas 5--9.} Si \texttt{YoloTracker} está disponible y
-    produce al menos una detección, se toma la primera (ya que hay exactamente
-    una rata por ROI) y se reinicia el contador de \textit{freeze}.
-
-    \item \textbf{Líneas 12--19.} El detector clásico solo se usa si
-    ByteTrack no produjo resultado. La condición \texttt{iou > IOU\_MIN}
-    actúa como \textit{gating} geográfico: si la detección clásica aparece
-    demasiado lejos de la última posición conocida, se descarta como
-    artefacto (reflejo o ruido morfológico).
-
-    \item \textbf{Líneas 22--31.} El congelamiento asigna la última posición
-    conocida con una confianza que decrece exponencialmente cada cuadro
-    ($\texttt{conf} = c_0 \cdot \gamma^{k}$, donde $k$ es el número de
-    cuadros congelados). Esto permite que el clasificador de conducta posterior
-    descarte las predicciones de muy baja confianza, en lugar de tratarlas
-    como detecciones válidas.
-
-    \item \textbf{Líneas 34--38.} La línea del agua se actualiza en cada
-    cuadro usando \texttt{WaterlineSmoother}, independientemente del nivel
-    de respaldo que haya producido la detección.
-\end{itemize}
-
-\section{Implementaci\'{o}n del clasificador de conducta}
-% [PENDIENTE: pendiente Sprint 4 --- arquitectura del clasificador,
-%   proceso de fine-tuning, conjunto de entrenamiento y anotaci\'{o}n con el etiquetador del equipo]
-
-\section{Implementaci\'{o}n del backend (Flask)}
-% [PENDIENTE: endpoints implementados, modelo de datos SQLAlchemy]
-
-\section{Implementaci\'{o}n del frontend (React + Vite)}
-% [PENDIENTE: vistas implementadas, comunicaci\'{o}n con API]
-
-\section{Integraci\'{o}n y despliegue con Docker Compose}
-% [PENDIENTE: descripci\'{o}n del docker-compose.yml y servicios definidos]
+
+\subsection{Herramientas y versiones}
+% [QUÉ VA] Una tabla componente / tecnología / versión / para qué se usa.
+% [FUENTE] backend-spring/pom.xml y Dockerfile; frontend/package.json y
+%   Dockerfile; fst-etiquetador/requirements.txt; docker-compose.yml.
+% [ESTADO] Verificado en el código:
+%   - Backend: Java 21, Spring Boot 4.1.1, Maven 3.9, Spring Data JPA
+%     (Hibernate), springdoc 3.1.1 (Swagger), spring-boot-starter-mail,
+%     iText 5.5.13.3 (PDF), Lombok.
+%   - Base de datos: PostgreSQL 16.
+%   - Frontend: Node 22, React 18.3, Vite 8, React Router 7, Axios.
+%   - Pruebas del frontend: Vitest, Testing Library, axe-core.
+%   - Etiquetador: Python 3.9 o superior, OpenCV 4.8 o superior,
+%     scikit-learn 1.9, NumPy 2, pandas 2.
+%   - Falta anotar: versión de PyTorch y de las bibliotecas de la red
+%     (carpeta cnn/), y las de ffmpeg cuando se agregue al backend.
+% [ENLAZA] Tabla de herramientas del cap. 4; D-105 (backend).
+
+\subsection{Organización del trabajo y control de versiones}
+% [QUÉ VA] Cómo trabaja el equipo: repositorios, ramas, revisiones por
+%   sprint, y cómo se reparten las zonas (Ángel Alí y Vanesa).
+% [FUENTE] Metodología y cronograma del cap. 1; historial de Git;
+%   PENDIENTES.md (reglas para no pisarse).
+% [ESTADO] Por redactar.
+
+% ---------------------------------------------------------------------
+\section{Pipeline de análisis de video}
+% [QUÉ VA] El código que convierte un video en la conducta de cada
+%   segundo. Reemplaza a la antigua sección «módulo de seguimiento
+%   (tracker.py)», que describía un diseño con YOLO que ya no se usa.
+% [FUENTE] fst-etiquetador/lib.py y etiquetar.py (preprocesamiento,
+%   fondo, geometría de los cilindros, rasgos).
+% [ESTADO] El worker real todavía no existe en fst-ai-system (el
+%   servicio worker del compose es un simulador, ver más abajo). Lo que
+%   existe es el código del etiquetador, de donde sale el pipeline.
+%   Confirmar con Erick qué parte ya es el pipeline definitivo.
+
+\subsection{Preprocesamiento: registro y modelo de fondo}
+% [QUÉ VA] Estabilización del cuadro, fondo del video y cómo se usa.
+% [ENLAZA] RF-13 a RF-18 (Análisis conductual); módulo 1 del cap. 5.
+
+\subsection{Localización de los cilindros}
+% [QUÉ VA] Cómo se deducen las paredes, la línea de agua y el suelo, sin
+%   medidas escritas a mano; qué ocurre cuando no se hallan los cilindros
+%   (reporte de diagnóstico, RN-11).
+% [ENLAZA] RN-11; estado «error» del análisis.
+
+\subsection{Detección de un espécimen que no se ve y pausa}
+% [QUÉ VA] Quién lo detecta (el pipeline, no la red), a los tres segundos
+%   seguidos, imagen fija del segundo central, archivo de pausa.
+% [ENLAZA] RN-17, D-59, D-67, D-89.
+
+\subsection{Salidas del módulo}
+% [QUÉ VA] Recorte a los últimos 300 s con renumeración, copia H.264 para
+%   la revisión y archivo de recuadros (cajas.json); lo que se guarda en
+%   la base y lo que va al volumen.
+% [ENLAZA] D-54, D-58, D-69, D-81; sección de formatos del cap. 5.
+
+% ---------------------------------------------------------------------
+\section{Clasificador de conducta}
+
+\subsection{El etiquetador y el conjunto de entrenamiento}
+% [QUÉ VA] Cómo se fabricó el conjunto de entrenamiento: el etiquetador
+%   con \textit{gradient boosting} sobre rasgos, la revisión humana en
+%   el navegador (revisor.html) y el criterio de las definiciones
+%   operativas. Cuántos videos, espécimenes y segundos etiquetados.
+% [FUENTE] fst-etiquetador/README.md, COMO_USARLO.md, entrenar.py,
+%   revisor.html, carpeta etiquetas/.
+% [ESTADO] Hay código y etiquetas; falta anotar las cifras finales.
+% [ENLAZA] Sección del clasificador del cap. 3; D-66.
+
+\subsection{La red de fusión}
+% [QUÉ VA] R(2+1)D-18 sobre clips de 16 cuadros fusionada con la rama de
+%   medidas; qué entrada recibe, qué entrega (la conducta de cada
+%   segundo, D-78) y por qué se escogió.
+% [FUENTE] fst-etiquetador/cnn/fst_cnn_seg.py y probar_seg.py.
+% [ESTADO] Hay código; el F1 final depende del entrenamiento (pendiente
+%   B-1 de Erick).
+% [ENLAZA] D-66, D-78, D-94; RNF-02 (F1 por conducta).
+
+\subsection{Entrenamiento y salida}
+% [QUÉ VA] Cómo se entrena, con qué hardware, cuánto tarda y cómo se
+%   convierte la salida (X_cnnseg.csv) en filas de SEGUNDO.
+% [ESTADO] Por redactar con Erick; las cifras de desempeño van en el
+%   capítulo 7, no aquí.
+
+% ---------------------------------------------------------------------
+\section{Backend (Spring Boot)}
+% [QUÉ VA] Cómo está hecha la API: organización, modelo de datos, rutas,
+%   autenticación, carga de video, reportes y correo.
+% [FUENTE] fst-ai-system, rama poc/backend-spring, carpeta
+%   backend-spring/ (README.md y CHECKLIST.md).
+% [ESTADO] En construcción: 18 de 128 casillas del checklist al 15-oct.
+%   Describir SOLO lo que exista cuando se escriba, e indicar lo
+%   pendiente. Hoy hay: /health, CORS, CRUD de experimentos y PDF de
+%   resultados.
+% [ENLAZA] D-105 (cambio de Flask a Spring Boot).
+
+\subsection{Estructura del proyecto}
+% [QUÉ VA] Paquetes controller, service, repository, domain y utilerias
+%   (la misma estructura de la práctica de clase), y por qué.
+% [FUENTE] backend-spring/src/main/java/com/ipn/mx/fst/.
+
+\subsection{Modelo de datos y esquema}
+% [QUÉ VA] Las 12 entidades JPA, el SQL de creación como fuente del
+%   esquema y \texttt{ddl-auto=validate}: Hibernate solo comprueba que
+%   las entidades coinciden con las tablas.
+% [FUENTE] backend-spring/db/init/001_esquema.sql; domain/*.java;
+%   application.properties.
+% [ENLAZA] Apéndice D (diccionario de datos); modelo físico del cap. 5.
+
+\subsection{Rutas de la API}
+% [QUÉ VA] Tabla de rutas: cuáles están implementadas y cuáles siguen
+%   pendientes frente al contrato de la guía; documentación con Swagger.
+% [ESTADO] Implementadas: experimentos (crear, listar, actualizar,
+%   borrar sin hijos) y PDF de resultados. Pendientes: autenticación,
+%   administración, carga de video, progreso, resultados, revisión, CSV
+%   y XLSX, notificaciones.
+% [ENLAZA] Tabla de rutas del cap. 5; RF-xx correspondientes.
+
+\subsection{Autenticación y roles}
+% [QUÉ VA] JWT de larga duración, contraseñas con bcrypt, verificación
+%   del rol Administrador en cada ruta /admin/*.
+% [ESTADO] Pendiente (Spring Security). Escribir al implementarlo.
+% [ENLAZA] RN-01, RN-16, D-61, D-72.
+
+\subsection{Carga y validación de video}
+% [QUÉ VA] Extensión, orientación y reproducibilidad; cómo se encola el
+%   análisis solo para el Día 2.
+% [ESTADO] Pendiente.
+% [ENLAZA] CU-05, D-64, D-71.
+
+\subsection{Reportes y correo}
+% [QUÉ VA] PDF con iText, CSV y XLSX; vigencia del reporte guardado;
+%   envío de notificaciones por correo.
+% [ESTADO] PDF de resultados hecho; correo por SMTP hecho como
+%   demostración; CSV y XLSX pendientes.
+% [ENLAZA] RF-20 a RF-22, D-76, D-45.
+
+% ---------------------------------------------------------------------
+\section{Worker simulado}
+% [QUÉ VA] Por qué existe un simulador, qué contrato de la guía cumple
+%   (toma un análisis a la vez, error, pausa, tareas diarias) y cómo se
+%   probó el sistema con él.
+% [FUENTE] fst-ai-system, rama poc/backend-spring, carpeta worker_fake/
+%   (worker_fake.py, tareas_programadas.py, simular_carga.py).
+% [ESTADO] Hecho; casos de prueba por palabra clave (falla, pausa).
+% [ENLAZA] Contrato con el worker (sección 4 de la guía); D-82, D-84,
+%   D-85, D-88, D-89.
+
+% ---------------------------------------------------------------------
+\section{Frontend (React y Vite)}
+
+\subsection{Estructura y conexión con la API}
+% [QUÉ VA] Organización de la aplicación, cómo desenvuelve la respuesta
+%   {data, error, status} y el «interruptor por parte» que permite
+%   conectar el backend una ruta a la vez.
+% [FUENTE] fst-ai-system, rama feat/frontend-v2-servicios, carpeta
+%   frontend/src y CHECKLIST.md; PARA_VANESA_API.md.
+% [ESTADO] Pantallas hechas con datos simulados; conexión al backend
+%   en curso.
+
+\subsection{Pantallas construidas}
+% [QUÉ VA] Las siete pantallas (inicio de sesión, dashboard, crear
+%   experimento, progreso con pausa, resultados, administración y
+%   revisión segundo a segundo) y su relación con las maquetas v2.
+% [ENLAZA] Sección de interfaz del cap. 5; figuras de figures/mockups/.
+
+% ---------------------------------------------------------------------
+\section{Integración y empaquetado con Docker Compose}
+% [QUÉ VA] Servicios (db, backend, worker, frontend, mailhog), volúmenes
+%   (videos_reportes, modelos, pgdata), variables de entorno y cómo se
+%   levanta todo con un solo comando. Docker es solo la herramienta de
+%   empaquetado (D-62, D-73); no se habla de servidores ni producción.
+% [FUENTE] backend-spring/docker-compose.yml, Dockerfile y .env.example;
+%   docker-compose.yml de la raíz de fst-ai-system.
+% [ESTADO] El compose del backend levanta db, backend, worker y mailhog;
+%   falta probarlo completo y unir el frontend.
+
+% ---------------------------------------------------------------------
+\section{Diferencias entre el diseño y lo construido}
+% [QUÉ VA] Lista corta de lo que cambió respecto al capítulo 5 y por
+%   qué: el backend pasó de Flask a Spring Boot (D-105); el worker real
+%   se sustituyó por un simulador mientras se termina el pipeline; y lo
+%   que surja. Esta sección es la que más luce ante los sinodales.
+% [ESTADO] Mantenerla al día mientras avanza la construcción.
