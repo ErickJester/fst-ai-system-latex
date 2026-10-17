@@ -46,7 +46,7 @@ out.append('<text x="380" y="58" text-anchor="middle" class="nm">Investigador (n
 # Capa 1
 plain(230, 118, 300, ['React.js + Vite', 'Formularios de experimento', 'Visualización de resultados', 'Descarga de reportes (PDF, CSV, XLSX)'], 'frontend', 'contenedor')
 # Capa 2
-plain(230, 276, 420, ['Flask + SQLAlchemy + Flask-JWT-Extended', 'API REST (JSON)', 'Autenticación con JWT', 'Validación de los archivos de video', 'Encolado de las tareas de análisis'], 'backend', 'contenedor')
+plain(230, 276, 420, ['Spring Boot (Java) + Spring Data JPA + Spring Security', 'API REST (JSON)', 'Autenticación con JWT', 'Validación de los archivos de video', 'Encolado de las tareas de análisis'], 'backend', 'contenedor')
 # Capa 3: worker (pieza clave)
 wx, wy, ww = 800, 456, 560
 rows = [('OpenCV', 'Preprocesamiento y localización de cilindros'),
@@ -65,7 +65,7 @@ for i, (a, b) in enumerate(rows):
     out.append(f'<text x="{wx+130}" y="{yy}" class="a">{esc(b)}</text>')
 wbot = wy + wh
 # Capa 4
-dbb = plain(230, 686, 240, ['PostgreSQL', 'Cola de tareas: tabla ANALISIS', 'Esquema relacional (15 tablas)'], 'Base de datos', 'contenedor')
+dbb = plain(230, 686, 240, ['PostgreSQL', 'Cola de tareas: tabla ANALISIS', 'Esquema relacional (12 tablas)'], 'Base de datos', 'contenedor')
 plain(830, 686, 240, ['Videos originales', 'Copia H.264 para revisión', 'Recuadros, imagen y datos de la pausa', 'Reportes PDF / CSV / XLSX y diagnóstico'], 'Volumen compartido', 'volumen', fill='#ece7d8')
 plain(1110, 686, 250, ['Solo lectura para el worker', 'Archivo del clasificador', 'de conducta'], 'Volumen de modelos', 'volumen', fill='#ece7d8')
 
@@ -102,7 +102,7 @@ legend = '''<g transform="translate(40,850)" class="lg">
 
 svg = f'''<svg viewBox="0 6 {W} {H-6}" role="img" aria-labelledby="ca-title ca-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="ca-title">Arquitectura de software por capas</title>
-<desc id="ca-desc">Cuatro capas: presentación (React), lógica de negocio (Flask), procesamiento asíncrono (worker con OpenCV, scikit-learn y PyTorch) y datos (PostgreSQL y dos volúmenes).</desc>
+<desc id="ca-desc">Cuatro capas: presentación (React), lógica de negocio (Spring Boot), procesamiento asíncrono (worker con OpenCV, scikit-learn y PyTorch) y datos (PostgreSQL y dos volúmenes).</desc>
 <defs><marker id="c-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#1a1a1a" stroke-width="1.2"/></marker></defs>
 <style>
 .a{{font:400 9px 'Geist Mono',monospace;fill:#1a1a1a}}

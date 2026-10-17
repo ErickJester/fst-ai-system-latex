@@ -29,7 +29,7 @@ institucional ESCOM»; se renombró el 12-oct.
 Dentro de Docker Compose:
 
 - **frontend:** React.js + Vite.
-- **backend:** Flask + SQLAlchemy + JWT. Valida los videos y encola los análisis.
+- **backend:** Spring Boot (Java) + Spring Data JPA + JWT. Valida los videos y encola los análisis.
 - **worker:** pipeline de análisis (OpenCV, scikit-learn, PyTorch). Consulta la cola
   periódicamente y ejecuta las tareas diarias (borrado de videos a los 30 días, aviso de
   vencimiento y vigilancia del disco; D-82). El clasificador sobre rasgos corre en

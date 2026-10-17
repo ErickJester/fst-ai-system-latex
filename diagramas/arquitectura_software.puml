@@ -76,7 +76,7 @@ rectangle "Docker: frontend" as C_FE #E3F2FD {
 ' ═══════════════════════════════════════════════════════════
 
 rectangle "Docker: backend" as C_BE #E8F8F5 {
-  rectangle "Flask + SQLAlchemy + Flask-JWT-Extended\n\nAPI REST (JSON)\nAutenticación con JWT\nValidación de archivos .mp4 y .mov\nEncolado de tareas de analisis" as BE #F0FBF8
+  rectangle "Spring Boot (Java) + Spring Data JPA + Spring Security\n\nAPI REST (JSON)\nAutenticación con JWT\nValidación de archivos .mp4 y .mov\nEncolado de tareas de analisis" as BE #F0FBF8
 }
 
 ' ═══════════════════════════════════════════════════════════

@@ -14,9 +14,9 @@ vista de **estructura**: responde «¿de qué está hecho el sistema?». La vist
 | Capa | Contenedor | Tecnología | Qué hace |
 |------|------------|------------|----------|
 | 1. Presentación | `frontend` | React.js + Vite | Formularios de experimento, visualización de resultados, descarga de reportes (PDF, CSV, XLSX) |
-| 2. Lógica de negocio | `backend` | Flask + SQLAlchemy + Flask-JWT-Extended | API REST (JSON), autenticación con JWT, validación de los archivos de video, encolado de las tareas de análisis |
+| 2. Lógica de negocio | `backend` | Spring Boot (Java) + Spring Data JPA + Spring Security | API REST (JSON), autenticación con JWT, validación de los archivos de video, encolado de las tareas de análisis |
 | 3. Procesamiento asíncrono | `worker` | Python, OpenCV, scikit-learn, PyTorch | Ejecuta el pipeline: preprocesamiento, localización de los cilindros y clasificación de conducta |
-| 4. Datos | `db` + 2 volúmenes | PostgreSQL, sistema de archivos | Esquema relacional (15 tablas), videos y reportes (volumen compartido), modelo entrenado (volumen de modelos) |
+| 4. Datos | `db` + 2 volúmenes | PostgreSQL, sistema de archivos | Esquema relacional (12 tablas), videos y reportes (volumen compartido), modelo entrenado (volumen de modelos) |
 
 ## Cómo leer las flechas
 

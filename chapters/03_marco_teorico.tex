@@ -311,9 +311,9 @@ experimental.
 \subsection{Arquitectura cliente-servidor y API REST}
 
 El sistema tiene tres capas: el frontend (React.js) corre en el navegador del
-investigador, el backend (Flask) gestiona la lógica de negocio a través de una API
+investigador, el backend (Spring Boot) gestiona la lógica de negocio a través de una API
 REST, y la base de datos (PostgreSQL) persiste los datos. Esta separación permite que
-frontend y backend evolucionen de forma independiente \cite{grinberg2018}.
+frontend y backend evolucionen de forma independiente.
 
 La API REST usa semántica HTTP estándar: \texttt{GET} para consultar,
 \texttt{POST} para crear, \texttt{PUT}/\texttt{PATCH} para actualizar y
@@ -349,8 +349,9 @@ con soporte para transacciones ACID (\textit{Atomicity, Consistency, Isolation,
 Durability}), que garantizan que las operaciones de escritura son seguras incluso ante
 fallos del sistema. En una base de datos relacional, la información se organiza en tablas
 relacionadas entre sí mediante llaves. Las consultas se abstraen con
-SQLAlchemy como ORM (\textit{Object-Relational Mapping}, mapeo objeto-relacional), lo que permite cambiar el
-motor de base de datos sin modificar el código de la aplicación.
+la especificación \textit{Jakarta Persistence} (JPA), que Hibernate implementa como ORM
+(\textit{Object-Relational Mapping}, mapeo objeto-relacional), lo que evita escribir SQL
+directamente en la lógica de negocio.
 
 % ============================================================
 \section{Métricas de evaluación}

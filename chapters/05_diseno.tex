@@ -25,7 +25,7 @@ de los distintos actores del sistema.
 
 La decisión de diseño más importante fue separar el \textit{worker} (proceso de segundo
 plano) del \textit{backend} en un proceso independiente. La opción más simple habría sido ejecutar el \textit{pipeline} dentro del mismo
-servidor Flask, pero eso significa bloquear todas las peticiones HTTP mientras un video
+servidor del \textit{backend}, pero eso significa ocupar al servidor web mientras un video
 de 5 minutos se procesa (el análisis cubre como máximo 300~s). El \textit{worker} resuelve ese problema a costa de mayor complejidad
 de operación: hace falta una cola de tareas, un proceso adicional y comunicación
 entre procesos. Esa complejidad extra está justificada porque el laboratorio puede
@@ -43,7 +43,7 @@ bloquear al servidor web mientras procesa los videos.
 
 La Figura~\ref{fig:arquitectura_software} muestra qué tecnología reside en cada
 contenedor y cómo se comunican entre sí. Se distinguen cuatro grupos: la capa de
-presentación (React.js + Vite), la lógica de negocio (Flask + SQLAlchemy), el
+presentación (React.js + Vite), la lógica de negocio (Spring Boot + Spring Data JPA), el
 procesamiento asíncrono (OpenCV, scikit-learn y PyTorch) y la capa de datos
 (PostgreSQL, sistema de archivos y volumen de modelos entrenados). El archivo del
 clasificador de conducta reside en un volumen Docker dedicado que el worker monta al
@@ -64,10 +64,10 @@ Las responsabilidades de cada componente son:
         No tiene acceso directo a la base de datos ni al sistema de archivos del
         servidor.
 
-  \item \textbf{Backend (Flask):} expone la API REST, gestiona la autenticación con
+  \item \textbf{Backend (Spring Boot):} expone la API REST, gestiona la autenticación con
         JWT, valida los archivos subidos, encola las tareas de análisis y devuelve
-        los resultados al \textit{frontend}. Usa SQLAlchemy como ORM para interactuar con
-        PostgreSQL.
+        los resultados al \textit{frontend}. Usa Spring Data JPA, con Hibernate como ORM,
+        para interactuar con PostgreSQL.
 
   \item \textbf{Worker (Python):} proceso independiente que consume tareas de la
         cola, ejecuta el \textit{pipeline} completo de análisis (preprocesamiento, localización
@@ -654,7 +654,7 @@ FNBC &
 \section{Diseño de la API REST}
 % -----------------------------------------------------------
 
-La API REST sigue las convenciones HTTP estándar \cite{grinberg2018}. Es una API de
+La API REST sigue las convenciones HTTP estándar. Es una API de
 nivel~2 del modelo de madurez de Richardson: cada recurso tiene su propia ruta y los
 verbos HTTP se usan con su significado (\texttt{GET} consulta, \texttt{POST} crea,
 \texttt{PATCH} modifica solo los campos que se envían y \texttt{DELETE} elimina). No
