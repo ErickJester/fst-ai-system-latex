@@ -71,7 +71,7 @@ falta, pregunta al usuario; no lo inventes.
 
 ## 1. Qué se construye y qué no
 
-**Se construye:** frontend (React), backend (Flask), base de datos (PostgreSQL),
+**Se construye:** frontend (React), backend (Spring Boot, D-105), base de datos (PostgreSQL),
 orquestación (Docker Compose) y un **worker simulado** (`worker_fake`).
 
 **No se construye:** el análisis de video ni el clasificador de conductas (el **pipeline**),
@@ -103,7 +103,7 @@ saber cuánto tiempo pasa cada espécimen nadando, inmóvil o escalando.
 | Contenedor | Tecnología | Responsabilidad |
 |---|---|---|
 | `frontend` | React.js + Vite | Interfaz. Habla con el backend solo por API REST (JSON). |
-| `backend` | Flask + SQLAlchemy + Flask-JWT-Extended | API REST, autenticación, validación de archivos, crea los análisis "en cola". |
+| `backend` | Spring Boot (Java 21) + Spring Data JPA + Spring Security | API REST, autenticación, validación de archivos, crea los análisis "en cola". |
 | `worker` | Python. El real lo construye otra persona; tú construyes `worker_fake` | Toma análisis en cola, los procesa, escribe resultados, avisa y ejecuta las tareas programadas. |
 | `db` | PostgreSQL | Todos los datos. Los videos NO se guardan aquí. |
 | `mailhog` (solo desarrollo) | MailHog | Servidor de correo falso para ver los mensajes sin enviar nada (sección 11, punto 2). |
@@ -174,7 +174,7 @@ Versión completa en PlantUML (Anexo A.1): `C:\Users\Samsung\Desktop\proyectos\f
 flowchart TB
   INV([Investigador / Administrador<br/>navegador]) --> FE
   subgraph Docker
-    FE[frontend<br/>React + Vite] -->|API REST JSON + JWT| BE[backend<br/>Flask + SQLAlchemy]
+    FE[frontend<br/>React + Vite] -->|API REST JSON + JWT| BE[backend<br/>Spring Boot + JPA]
     BE -->|INSERT análisis estado = en cola| DB[(db<br/>PostgreSQL)]
     WK[worker<br/>fuera de tu alcance] -->|polling: toma el siguiente en cola<br/>y escribe resultados| DB
     BE <-->|lee y escribe archivos| FS[/volumen videos_reportes/]
@@ -189,7 +189,7 @@ flowchart TB
 web/
   docker-compose.yml
   .env.example
-  backend/        app Flask, modelos SQLAlchemy, rutas
+  backend/        app Spring Boot (controller, service, repository, domain), entidades JPA, rutas
   frontend/       app React + Vite
   worker_fake/    simulador del worker (contrato de la sección 4) con las tareas programadas
                   (sección 8) en un módulo propio, para que el worker real las reutilice
@@ -1267,7 +1267,7 @@ a segundo, resultados, notificaciones y tareas programadas) están en el Anexo A
 6. ~~Cardinalidades de especímenes~~ **Resuelto** (sección 5): 2 a 4 por tanda, 2 o más
    por grupo, 1 o más tandas por grupo.
 7. **[ABIERTO] Usuario administrador inicial:** hace falta crearlo, porque no hay
-   autorregistro. **Por defecto:** un comando `flask crear-admin` que lee `ADMIN_ID`,
+   autorregistro. **Por defecto:** un comando de un solo uso (`crear-admin`) que lee `ADMIN_ID`,
    `ADMIN_NOMBRE`, `ADMIN_APELLIDOS`, `ADMIN_CORREO` y `ADMIN_PASSWORD` del `.env`, guarda el
    hash bcrypt, pone `cambioRequerido = true` e inserta la fila en `ADMINISTRADOR`. Los valores
    reales los pone el usuario: no inventes ninguno ni los escribas en el SQL.
@@ -1335,7 +1335,7 @@ Cada paso termina con algo que se puede probar.
 1. **Docker Compose con `db` y `backend`** que arrancan (parte del Anexo C). Prueba:
    `docker compose up` y un endpoint de salud responde.
 2. **Base de datos:** usa el SQL del Anexo B (dominios, 12 tablas y restricciones). El administrador inicial no va en el SQL: lo crea el
-   comando `flask crear-admin` (sección 11, punto 7).
+   comando `crear-admin` (sección 11, punto 7).
    Pruébalo contra un PostgreSQL real y corrige lo que falle.
 3. **Autenticación:** login, logout, cambio de contraseña, cambio obligatorio en el primer
    ingreso, recuperación. Bcrypt. JWT de larga duración y configurable (sección 11,
@@ -1445,7 +1445,7 @@ rectangle "Docker: frontend" as C_FE #E3F2FD {
 }
 
 rectangle "Docker: backend" as C_BE #E8F8F5 {
-  rectangle "Flask + SQLAlchemy + Flask-JWT-Extended\n\nAPI REST (JSON)\nAutenticacion con JWT\nValidacion de archivos .mp4 / .mov\nEncolado de analisis" as BE #F0FBF8
+  rectangle "Spring Boot + Spring Data JPA + Spring Security\n\nAPI REST (JSON)\nAutenticacion con JWT\nValidacion de archivos .mp4 / .mov\nEncolado de analisis" as BE #F0FBF8
 }
 
 rectangle "Docker: worker\n(lo desarrolla otra persona)" as C_WK #FEF9E7 {
@@ -1493,7 +1493,7 @@ actor "Usuario\n(navegador)" as U
 
 node "docker compose up" {
   node "frontend\nReact (build) servido por nginx\npuerto 80" as fe
-  node "backend\nFlask con gunicorn\npuerto 5000 (interno)" as be
+  node "backend\nSpring Boot (Java 21)\npuerto 8080 (interno)" as be
   node "worker\nPython" as wk
   database "db\nPostgreSQL\npuerto 5432 (interno)" as db
   node "mailhog (solo desarrollo)\nSMTP 1025 / web 8025" as ml
@@ -1542,7 +1542,7 @@ skinparam shadowing false
 skinparam componentStyle rectangle
 left to right direction
 
-package "Rutas (blueprints Flask)" {
+package "Rutas (controladores Spring)" {
   [auth\n/auth/*] as r_auth
   [users\n/users/me] as r_users
   [admin\n/admin/*] as r_admin
@@ -1566,7 +1566,7 @@ package "Servicios" as SERV {
 }
 
 package "Acceso a datos" {
-  [Modelos SQLAlchemy\\n12 tablas] as m
+  [Entidades JPA\\n12 tablas] as m
 }
 
 database "PostgreSQL" as db
@@ -3196,7 +3196,7 @@ Cosas que debes saber antes de usarlo:
   lo que falle.
 - Los nombres de columna del modelo (`idInstitucional`, `nCilindros`) quedan en
   **minúsculas** en PostgreSQL porque no van entre comillas (`idinstitucional`,
-  `ncilindros`). En SQLAlchemy declara las columnas en minúsculas.
+  `ncilindros`). En las entidades JPA declara las columnas en minúsculas (en `@Column`).
 - Los tamaños de `varchar(n)` y `numeric(p,s)` que el modelo dejaba abiertos los elegí yo
   **[PROPUESTA]**; cámbialos si hace falta.
 - Las restricciones marcadas `[PROPUESTA]` no estaban en el diseño original; son refuerzos
@@ -3391,7 +3391,7 @@ CREATE INDEX ix_notificacion_experim  ON notificacion (idexperimento);
 --  Datos semilla
 -- ------------------------------------------------------------
 -- El administrador inicial NO se inserta aqui: no hay contrasena que poner en un SQL.
--- Lo crea el comando `flask crear-admin` con los valores del .env (seccion 11, punto 7).
+-- Lo crea el comando `crear-admin` con los valores del .env (seccion 11, punto 7).
 
 COMMIT;
 ```
@@ -3417,7 +3417,7 @@ Estructura esperada:
 web/
   docker-compose.yml
   .env                  (copia de .env.example; no se sube al repositorio)
-  backend/   Dockerfile  requirements.txt  ...
+  backend/   Dockerfile  pom.xml  src/  ...
   frontend/  Dockerfile  nginx.conf  package.json  ...
   worker_fake/ Dockerfile  worker_fake.py
   db/init/   001_esquema.sql
@@ -3459,7 +3459,8 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      DB_HOST: db
+      DB_PORT: "5432"
       ARCHIVOS_DIR: /data/archivos
     depends_on:
       db:
@@ -3467,7 +3468,7 @@ services:
     volumes:
       - videos_reportes:/data/archivos
     expose:
-      - "5000"
+      - "8080"
 
   worker:
     build: ./worker_fake            # reemplazar por la imagen del worker real
@@ -3507,27 +3508,31 @@ volumes:
 ### backend/Dockerfile
 
 ```dockerfile
-FROM python:3.12-slim
+# Etapa 1: compila el jar con Maven. Primero solo el pom.xml, para que Docker guarde en caché
+# las dependencias y no las vuelva a descargar cada vez que cambia el código.
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /app
+COPY pom.xml .
+RUN mvn -q dependency:go-offline
+COPY src src
+RUN mvn -q package -DskipTests
 
-# ffmpeg sirve para comprobar que un .mp4 o .mov es reproducible y está en horizontal (ffprobe)
+# Etapa 2: solo el JRE y el jar. ffmpeg sirve para comprobar que un .mp4 o .mov es
+# reproducible y está en horizontal (ffprobe).
+FROM eclipse-temurin:21-jre
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ffmpeg \
  && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-
-EXPOSE 5000
-# Un solo proceso con varios hilos. Las tareas programadas (borrado, aviso, disco) ya no
-# corren aqui: las ejecuta el worker (D-82). Timeout largo por las subidas de video.
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "8", \
-     "--timeout", "600", "app:create_app()"]
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8080
+# Las tareas programadas (borrado, aviso, disco) no corren aqui: las ejecuta el worker (D-82).
+# El tamaño máximo de subida lo fija MAX_UPLOAD_MB (spring.servlet.multipart.max-file-size).
+ENTRYPOINT ["java", "-jar", "app.jar"]
 ```
 
-`app:create_app()` supone que el paquete se llama `app` y tiene una función fábrica
-`create_app`. Cámbialo si estructuras el código distinto.
+El Dockerfile real del proyecto (`backend-spring/Dockerfile`) tiene la etapa 1 y la etapa 2 sin
+`ffmpeg`; agrégalo cuando exista la carga de video.
 
 ### frontend/Dockerfile
 
@@ -3559,9 +3564,9 @@ server {
   client_max_body_size 2g;
 
   # El frontend llama a /api/...; nginx quita el prefijo y lo manda al backend.
-  # Ejemplo: /api/auth/login  ->  http://backend:5000/auth/login
+  # Ejemplo: /api/auth/login  ->  http://backend:8080/auth/login
   location /api/ {
-    proxy_pass http://backend:5000/;
+    proxy_pass http://backend:8080/;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_read_timeout 600s;
@@ -3631,7 +3636,7 @@ WORKER_POLL_SECONDS=5
 WORKER_DAILY_HOUR=3
 PAUSE_TIMEOUT_MINUTES=5
 
-# Primer administrador (flask crear-admin); pon valores reales, no los de ejemplo
+# Primer administrador (comando crear-admin); pon valores reales, no los de ejemplo
 ADMIN_ID=
 ADMIN_NOMBRE=
 ADMIN_APELLIDOS=

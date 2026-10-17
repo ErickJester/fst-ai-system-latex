@@ -5,7 +5,7 @@ skinparam shadowing false
 skinparam componentStyle rectangle
 left to right direction
 
-package "Rutas (blueprints Flask)" {
+package "Rutas (controladores Spring)" {
   [auth\n/auth/*] as r_auth
   [users\n/users/me] as r_users
   [admin\n/admin/*] as r_admin
@@ -29,7 +29,7 @@ package "Servicios" as SERV {
 }
 
 package "Acceso a datos" {
-  [Modelos SQLAlchemy\\n12 tablas] as m
+  [Entidades JPA\\n12 tablas] as m
 }
 
 database "PostgreSQL" as db

@@ -22,7 +22,7 @@ rectangle "Docker: frontend" as C_FE #E3F2FD {
 }
 
 rectangle "Docker: backend" as C_BE #E8F8F5 {
-  rectangle "Flask + SQLAlchemy + Flask-JWT-Extended\n\nAPI REST (JSON)\nAutenticacion con JWT\nValidacion de archivos .mp4 / .mov\nEncolado de analisis" as BE #F0FBF8
+  rectangle "Spring Boot + Spring Data JPA + Spring Security\n\nAPI REST (JSON)\nAutenticacion con JWT\nValidacion de archivos .mp4 / .mov\nEncolado de analisis" as BE #F0FBF8
 }
 
 rectangle "Docker: worker\n(lo desarrolla otra persona)" as C_WK #FEF9E7 {

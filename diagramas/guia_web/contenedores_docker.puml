@@ -8,7 +8,7 @@ actor "Usuario\n(navegador)" as U
 
 node "docker compose up" {
   node "frontend\nReact (build) servido por nginx\npuerto 80" as fe
-  node "backend\nFlask con gunicorn\npuerto 5000 (interno)" as be
+  node "backend\nSpring Boot (Java 21)\npuerto 8080 (interno)" as be
   node "worker\nPython" as wk
   database "db\nPostgreSQL\npuerto 5432 (interno)" as db
   node "mailhog (solo desarrollo)\nSMTP 1025 / web 8025" as ml
