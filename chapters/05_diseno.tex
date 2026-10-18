@@ -672,9 +672,12 @@ tiene los permisos del Investigador más los de gestión de cuentas. Las respues
 JSON con una estructura consistente: campo \texttt{data} para el resultado,
 \texttt{error} para mensajes de error y \texttt{status} para el código HTTP.
 
-La Tabla~\ref{tab:api} describe los endpoints principales agrupados por recurso.
+La Tabla~\ref{tab:api} describe los endpoints principales agrupados por recurso. En la columna
+de acceso, «Autor o Admin» significa quien subió el video del análisis o un Administrador, y
+«Creador o Admin» significa quien creó el experimento o un Administrador; los demás reciben un
+error 403.
 
-\begin{longtable}{|p{1.4cm}|p{5.8cm}|p{4.8cm}|p{1.6cm}|}
+\begin{longtable}{|p{1.75cm}|p{5.55cm}|p{4.7cm}|p{1.6cm}|}
 \caption{Endpoints principales de la API REST.
 \label{tab:api}}\\
 \hline
@@ -697,6 +700,10 @@ POST   & \path{/auth/recover}  & Envía enlace de recuperación por correo. & P�
 \hline
 PATCH  & \path{/auth/password} & Cambia la contraseña del usuario autenticado. & Autenti\-cado \\
 \hline
+POST   & \path{/auth/reset}    & Completa la recuperación: recibe el enlace firmado enviado por correo y la contraseña nueva. & Público \\
+\hline
+PATCH  & \path{/users/me}      & Actualiza el nombre, los apellidos y el correo del perfil propio. & Autenti\-cado \\
+\hline
 
 % --- Experimentos ---
 GET    & \path{/experiments}         & Lista todos los experimentos del laboratorio (ver RN-08). & Investiga\-dor \\
@@ -705,11 +712,27 @@ POST   & \path{/experiments}         & Crea un experimento con sus metadatos. & 
 \hline
 GET    & \path{/experiments/{id}}    & Devuelve detalle y estado de un experimento. & Investiga\-dor \\
 \hline
+DELETE & \path{/experiments/{id}}    & Elimina el experimento con sus grupos, videos, resultados y reportes (ver RN-09). Se rechaza con error 409 si algún análisis está procesando o en pausa; los que están en cola salen de la cola. & Creador o Admin \\
+\hline
+GET    & \path{/experiments/{id}/groups?q=} & Sugiere los grupos del experimento con nombre parecido y la siguiente tanda, para confirmarla al subir un video. & Investiga\-dor \\
+\hline
 
 % --- Videos y análisis ---
 POST   & \path{/experiments/{id}/groups/{grupo}/videos}  & Sube un video (Día~1 o Día~2) a una tanda del grupo indicado (se crea la tanda si no existe) y, si es el del Día~2, encola el análisis. & Investiga\-dor \\
 \hline
 GET    & \path{/experiments/{id}/status}  & Devuelve el progreso del análisis en porcentaje. & Investiga\-dor \\
+\hline
+GET    & \path{/experiments/{id}/analyses/{idAnalisis}/diagnostic} & Descarga el reporte de diagnóstico en PDF de un análisis que terminó en error (ver RN-11). & Investiga\-dor \\
+\hline
+GET    & \path{/experiments/{id}/analyses/{idAnalisis}/pause} & Devuelve los datos de una pausa: cilindro, segundo, recuadros y tiempo que queda para responder (ver RN-17). & Investiga\-dor \\
+\hline
+GET    & \path{/experiments/{id}/analyses/{idAnalisis}/pause/image} & Entrega la imagen fija del instante en que no se vio al espécimen. & Investiga\-dor \\
+\hline
+POST   & \path{/experiments/{id}/analyses/{idAnalisis}/pause/adjust} & Ajusta el recuadro de un cilindro y devuelve el análisis a la cola para que continúe. Error 409 si ya no está en pausa. & Autor o Admin \\
+\hline
+POST   & \path{/experiments/{id}/analyses/{idAnalisis}/cancel} & Cancela un análisis que está en pausa. Error 409 si ya no está en pausa. & Autor o Admin \\
+\hline
+POST   & \path{/experiments/{id}/analyses/{idAnalisis}/restart} & Reinicia un análisis completado: borra el resultado anterior y lo vuelve a encolar (ver RN-04). & Autor o Admin \\
 \hline
 
 % --- Resultados ---
@@ -718,6 +741,8 @@ GET    & \path{/experiments/{id}/results}          & Devuelve los resultados por
 GET    & \path{/experiments/{id}/results/byminute} & Devuelve el desglose temporal por minuto. & Investiga\-dor \\
 \hline
 GET    & \path{/experiments/{id}/results/groups} & Devuelve la comparación entre grupos con el Día~2: el promedio por espécimen de cada grupo (RF-21). & Investiga\-dor \\
+\hline
+GET    & \path{/experiments/{id}/results/blocks} & Devuelve, para cada espécimen, los bloques de 5~s con su conducta mayoritaria y sus cinco segundos; se calculan al pedirlos (ver RN-15). & Investiga\-dor \\
 \hline
 
 % --- Reportes ---
@@ -733,7 +758,13 @@ GET    & \path{/experiments/{id}/analyses/{idAnalisis}/review}   & Devuelve los 
 \hline
 GET    & \path{/experiments/{id}/analyses/{idAnalisis}/video}    & Entrega el video de la revisión por partes, para poder adelantar y retroceder. & Investiga\-dor \\
 \hline
-PUT    & \path{/experiments/{id}/analyses/{idAnalisis}/segundos} & Guarda las correcciones por segundo. & Investiga\-dor \\
+PUT    & \path{/experiments/{id}/analyses/{idAnalisis}/segundos} & Guarda las correcciones por segundo de un análisis completado (ver RN-14). & Autor o Admin \\
+\hline
+
+% --- Notificaciones ---
+GET    & \path{/notifications}      & Lista las notificaciones del usuario, las más recientes primero. & Autenti\-cado \\
+\hline
+PATCH  & \path{/notifications/{id}} & Marca una notificación como leída. & Autenti\-cado \\
 \hline
 
 % --- Administración ---
