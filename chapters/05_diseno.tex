@@ -24,9 +24,9 @@ establece cómo describir una arquitectura de software mediante múltiples vista
 de los distintos actores del sistema.
 
 La decisión de diseño más importante fue separar el \textit{worker} (proceso de segundo
-plano) del \textit{backend} en un proceso independiente. La opción más simple habría sido ejecutar el \textit{pipeline} dentro del mismo
-servidor del \textit{backend}, pero eso significa ocupar al servidor web mientras un video
-de 5 minutos se procesa (el análisis cubre como máximo 300~s). El \textit{worker} resuelve ese problema a costa de mayor complejidad
+plano) del \textit{backend} en un proceso independiente. La opción más simple habría sido que el \textit{backend} invocara el \textit{pipeline}
+directamente y esperara su resultado dentro de la misma petición, pero eso significa ocupar al
+servidor web mientras un video de 5 minutos se procesa (el análisis cubre como máximo 300~s). El \textit{worker} resuelve ese problema a costa de mayor complejidad
 de operación: hace falta una cola de tareas, un proceso adicional y comunicación
 entre procesos. Esa complejidad extra está justificada porque el laboratorio puede
 tener varios análisis en cola al mismo tiempo.
@@ -86,7 +86,7 @@ Las responsabilidades de cada componente son:
         \textit{polling} (consulta periódica): cada cierto tiempo consulta esa tabla,
         toma un análisis en cola, lo pasa a «procesando» y, al terminar, a
         «completado» o «error». Se eligió este enfoque en lugar de un sistema de
-        colas de mensajes dedicado (como Celery con RabbitMQ o Redis) porque evita
+        colas de mensajes dedicado (como RabbitMQ o Redis) porque evita
         un contenedor y una dependencia más; con el volumen del laboratorio, de
         hasta cuatro usuarios trabajando en el mismo período, la base de datos basta como cola.
 
