@@ -13,7 +13,9 @@
 '  modelado como subtipo -- si el usuario no aparece aqui, es
 '  investigador simple.
 '
-'  12 relaciones - 57 atributos - 13 llaves foraneas.
+'  12 relaciones - 58 atributos - 13 llaves foraneas.
+'  (D-114, 20-oct: VIDEO.nombreOriginal, nombre del archivo como lo subio el
+'   usuario, solo para mostrar; nulo en videos anteriores. Sube de 57 a 58 atributos)
 '  (D-102, 14-oct: CONDUCTA deja de ser relacion y pasa a dominio
 '   cerrado tipo_conducta -- solo SEGUNDO la referenciaba, son cuatro
 '   valores fijos y no tiene atributos propios. Baja de 13 a 12
@@ -173,6 +175,7 @@ class VIDEO {
   idTanda   [FK] [AK]
   sesion   [AK]
   archivo   (nulo)
+  nombreOriginal   (nulo)
   duracion
   fechaCarga
 }
