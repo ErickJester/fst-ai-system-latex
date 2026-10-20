@@ -110,15 +110,15 @@ Documentación & \LaTeX, Biber y PlantUML & --- & Este documento, su bibliograf�
 
 El trabajo se reparte en tres repositorios de Git alojados en GitHub: el de este documento, el de la
 aplicación (\textit{backend}, \textit{frontend} y simulador del \textit{worker}) y el del etiquetador
-y el conjunto de entrenamiento. En cada uno, la rama principal (\texttt{main}) no recibe cambios
-directos: cada tarea se hace en una rama propia y entra a la principal mediante una solicitud de
-integración (\textit{pull request}) que revisa la otra persona del equipo. Esa regla evita que dos
-personas modifiquen el mismo archivo al mismo tiempo, y por eso las listas de pendientes del
-documento se repartieron por archivo y no por tema.
+y el conjunto de entrenamiento. Como describe la metodología del Capítulo~1, cada integrante
+trabaja en ramas propias y las dos líneas de trabajo se sincronizan en las revisiones de cada
+\textit{sprint}, cuando los cambios se integran a la rama principal. Para evitar que dos personas
+modifiquen el mismo archivo al mismo tiempo, las listas de pendientes del documento se repartieron por
+archivo y no por tema.
 
-Antes de integrar, cada cambio debe compilar: el documento sin errores ni referencias rotas, y el
-\textit{frontend} con sus pruebas. Los mensajes de cada cambio describen lo que se hizo y por qué, de
-modo que el historial de Git sirve también como registro de las decisiones del proyecto.
+Se busca que cada cambio compile antes de integrarse: el documento sin errores ni referencias rotas, y el
+\textit{frontend} con sus pruebas automáticas. Los mensajes de cada cambio describen lo que se hizo y por
+qué, de modo que el historial de Git sirve también como registro de las decisiones del proyecto.
 
 % ---------------------------------------------------------------------
 \section{Pipeline de análisis de video}
@@ -339,8 +339,8 @@ Los valores por omisión están en el archivo de ejemplo de variables (Sección~
 % [ESTADO] Revisado el 19-oct-2026: 117 pruebas pasan y ESLint no reporta avisos.
 
 El \textit{frontend} es una aplicación de una sola página (\textit{single-page application}) escrita
-con React y compilada con Vite. Tiene catorce pantallas, que cubren las siete del diseño del
-Capítulo~5 con sus variantes (por ejemplo, la recuperación de contraseña o el primer acceso), y unas
+con React y compilada con Vite. Tiene catorce pantallas, que cubren las del diseño de interfaz del
+Capítulo~5 y sus variantes (por ejemplo, la recuperación de contraseña o el primer acceso), y unas
 7\,500 líneas de código y pruebas. Se construyó a partir de las maquetas de la segunda versión del
 diseño de interfaz, que mandan en lo visual: si una pantalla se aparta de su maqueta, se documenta el
 motivo.
