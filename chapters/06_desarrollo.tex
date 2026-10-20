@@ -116,7 +116,7 @@ aplicación (\textit{backend}, \textit{frontend} y \textit{worker}) y el del eti
 y el conjunto de entrenamiento. Como describe la metodología del Capítulo~1, cada integrante
 trabaja en ramas propias y las dos líneas de trabajo se sincronizan en las revisiones de cada
 \textit{sprint}, cuando los cambios se integran a la rama principal. Para evitar que dos personas
-modifiquen el mismo archivo al mismo tiempo, las listas de pendientes del documento se repartieron por
+modifiquen el mismo archivo al mismo tiempo, las listas de tareas del documento se repartieron por
 archivo y no por tema.
 
 Se busca que cada cambio compile antes de integrarse: el documento sin errores ni referencias rotas, y el
@@ -373,35 +373,35 @@ las de salud y token de video.
 
 \begin{longtable}{|p{3.0cm}|p{10.4cm}|}
 \caption{Rutas del \textit{backend}.
-\label{tab:ch6_back_rutas}}\
+\label{tab:ch6_back_rutas}}\\
 \hline
-\textbf{Grupo} & \textbf{Rutas} \
+\textbf{Grupo} & \textbf{Rutas} \\
 \hline
 \endfirsthead
 \hline
-\textbf{Grupo} & \textbf{Rutas} \
+\textbf{Grupo} & \textbf{Rutas} \\
 \hline
 \endhead
 \hline
 \endfoot
 
-Salud y acceso & \path{/health}; \path{/auth/login}; \path{/auth/logout}; \path{/auth/recover}; \path{/auth/reset}; \path{/auth/password}; \path{/users/me} \
+Salud y acceso & \path{/health}; \path{/auth/login}; \path{/auth/logout}; \path{/auth/recover}; \path{/auth/reset}; \path{/auth/password}; \path{/users/me} \\
 \hline
-Experimentos & \path{/experiments} (consultar y crear); \path{/experiments/{id}} (consultar y eliminar); \path{/experiments/{id}/groups} \
+Experimentos & \path{/experiments} (consultar y crear); \path{/experiments/{id}} (consultar y eliminar); \path{/experiments/{id}/groups} \\
 \hline
-Carga de video & \path{/experiments/{id}/groups/{grupo}/videos} \
+Carga de video & \path{/experiments/{id}/groups/{grupo}/videos} \\
 \hline
-Progreso y resultados & \path{/experiments/{id}/status}; \path{/experiments/{id}/results}; \path{/experiments/{id}/results/byminute}; \path{/experiments/{id}/results/groups}; \path{/experiments/{id}/results/blocks}; \path{/experiments/{id}/analyses/{idAnalisis}/diagnostic} \
+Progreso y resultados & \path{/experiments/{id}/status}; \path{/experiments/{id}/results}; \path{/experiments/{id}/results/byminute}; \path{/experiments/{id}/results/groups}; \path{/experiments/{id}/results/blocks}; \path{/experiments/{id}/analyses/{idAnalisis}/diagnostic} \\
 \hline
-Pausa y reinicio & \path{/experiments/{id}/analyses/{idAnalisis}/pause}; \path{.../pause/image}; \path{.../pause/adjust}; \path{.../cancel}; \path{.../restart} \
+Pausa y reinicio & \path{/experiments/{id}/analyses/{idAnalisis}/pause}; \path{.../pause/image}; \path{.../pause/adjust}; \path{.../cancel}; \path{.../restart} \\
 \hline
-Revisión & \path{/experiments/{id}/analyses/{idAnalisis}/review}; \path{.../video-token}; \path{.../video}; \path{.../segundos} \
+Revisión & \path{/experiments/{id}/analyses/{idAnalisis}/review}; \path{.../video-token}; \path{.../video}; \path{.../segundos} \\
 \hline
-Reportes & \path{/experiments/{id}/report/pdf}; \path{/experiments/{id}/report/csv}; \path{/experiments/{id}/report/xlsx} \
+Reportes & \path{/experiments/{id}/report/pdf}; \path{/experiments/{id}/report/csv}; \path{/experiments/{id}/report/xlsx} \\
 \hline
-Notificaciones & \path{/notifications} (consultar); \path{/notifications/{id}} (marcar como leída) \
+Notificaciones & \path{/notifications} (consultar); \path{/notifications/{id}} (marcar como leída) \\
 \hline
-Administración & \path{/admin/users} (consultar y crear); \path{/admin/users/{id}} (modificar); \path{/admin/system} \
+Administración & \path{/admin/users} (consultar y crear); \path{/admin/users/{id}} (modificar); \path{/admin/system} \\
 \hline
 \end{longtable}
 
