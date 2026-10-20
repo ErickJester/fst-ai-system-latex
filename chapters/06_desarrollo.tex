@@ -43,28 +43,82 @@ Capítulo~5 y lo construido.
 \section{Entorno de desarrollo}
 
 \subsection{Herramientas y versiones}
-% [QUÉ VA] Una tabla componente / tecnología / versión / para qué se usa.
-% [FUENTE] backend-spring/pom.xml y Dockerfile; frontend/package.json y
-%   Dockerfile; fst-etiquetador/requirements.txt; docker-compose.yml.
-% [ESTADO] Verificado en el código:
-%   - Backend: Java 21, Spring Boot 4.1.1, Maven 3.9, Spring Data JPA
-%     (Hibernate), springdoc 3.1.1 (Swagger), spring-boot-starter-mail,
-%     iText 5.5.13.3 (PDF), Lombok.
-%   - Base de datos: PostgreSQL 16.
-%   - Frontend: Node 22, React 18.3, Vite 8, React Router 7, Axios.
-%   - Pruebas del frontend: Vitest, Testing Library, axe-core.
-%   - Etiquetador: Python 3.9 o superior, OpenCV 4.8 o superior,
-%     scikit-learn 1.9, NumPy 2, pandas 2.
-%   - Falta anotar: versión de PyTorch y de las bibliotecas de la red
-%     (carpeta cnn/), y las de ffmpeg cuando se agregue al backend.
-% [ENLAZA] Tabla de herramientas del cap. 4; D-105 (backend).
+% [FUENTE] backend-spring/pom.xml y Dockerfile; frontend/package.json y Dockerfile;
+%   worker_fake/requirements.txt y Dockerfile; fst-etiquetador/requirements.txt.
+% [PENDIENTE] Versión de PyTorch y de las bibliotecas de la red (carpeta cnn/ del etiquetador).
+
+La Tabla~\ref{tab:ch6_versiones} reúne las herramientas con las que se construyó el sistema y la
+versión de cada una, tomadas de los archivos de configuración de los proyectos (\texttt{pom.xml},
+\texttt{package.json}, \texttt{requirements.txt} y los \texttt{Dockerfile}). Las versiones del
+\textit{frontend} y del etiquetador son las mínimas con las que se construyó cada uno; las
+demás son las fijadas en la configuración.
+
+\begin{longtable}{|p{2.75cm}|p{3.2cm}|p{2.1cm}|p{5.35cm}|}
+\caption{Herramientas y versiones del entorno de desarrollo.
+\label{tab:ch6_versiones}}\\
+\hline
+\textbf{Componente} & \textbf{Herramienta} & \textbf{Versión} & \textbf{Para qué se usa} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Componente} & \textbf{Herramienta} & \textbf{Versión} & \textbf{Para qué se usa} \\
+\hline
+\endhead
+\hline
+\endfoot
+
+\textit{Backend} & Java (Eclipse Temurin) & 21 & Lenguaje y entorno de ejecución del \textit{backend}. \\
+\hline
+\textit{Backend} & Spring Boot & 4.1.1 & Marco de la API REST: capa web, acceso a datos con JPA, validaciones y correo. \\
+\hline
+\textit{Backend} & Maven & 3.9 & Construcción del proyecto y de sus dependencias. \\
+\hline
+\textit{Backend} & springdoc-openapi & 3.1.1 & Documentación interactiva de la API (Swagger). \\
+\hline
+\textit{Backend} & iText & 5.5.13.3 & Generación del reporte de resultados en PDF. \\
+\hline
+\textit{Backend} & Lombok & la de Spring Boot & Reduce el código repetitivo de las clases de dominio. \\
+\hline
+Datos & PostgreSQL & 16 & Base de datos relacional; también es la cola de análisis. \\
+\hline
+Correo (desarrollo) & MailHog & 1.0.1 & Servidor de correo de prueba: muestra los mensajes sin enviarlos. \\
+\hline
+\textit{Worker} simulado & Python & 3.12 & Lenguaje del simulador del \textit{worker}. \\
+\hline
+\textit{Worker} simulado & psycopg2-binary, Pillow & 2.9.10 y 11.1.0 & Conexión a PostgreSQL; imágenes y PDF de diagnóstico. \\
+\hline
+\textit{Frontend} & Node.js & 22 & Entorno de ejecución para compilar y servir la interfaz. \\
+\hline
+\textit{Frontend} & React y React Router & 18.3 y 7 & Interfaz basada en componentes y navegación entre pantallas. \\
+\hline
+\textit{Frontend} & Vite y Axios & 8 y 1.20 & Compilación con recarga en caliente; llamadas a la API. \\
+\hline
+\textit{Frontend} (pruebas) & Vitest, Testing Library, axe-core y ESLint & 5, 16, 4.10 y 9 & Pruebas de los servicios y las pantallas, accesibilidad y calidad del código. \\
+\hline
+Etiquetador & Python y OpenCV & 3.9 o más y 4.8 o más & Procesamiento de video para proponer la conducta de cada espécimen. \\
+\hline
+Etiquetador & NumPy, pandas y scikit-learn & 2.0, 2.0 y 1.9 & Rasgos, tablas y clasificador sobre rasgos. \\
+\hline
+Empaquetado & Docker y Docker Compose & --- & Contenedores de los servicios. \\
+\hline
+Documentación & \LaTeX, Biber y PlantUML & --- & Este documento, su bibliografía y los diagramas. \\
+\hline
+\end{longtable}
 
 \subsection{Organización del trabajo y control de versiones}
-% [QUÉ VA] Cómo trabaja el equipo: repositorios, ramas, revisiones por
-%   sprint, y cómo se reparten las zonas (Ángel Alí y Vanesa).
-% [FUENTE] Metodología y cronograma del cap. 1; historial de Git;
-%   PENDIENTES.md (reglas para no pisarse).
-% [ESTADO] Por redactar.
+% [FUENTE] Metodología del cap. 1; PENDIENTES.md; historial de Git.
+
+El trabajo se reparte en tres repositorios de Git alojados en GitHub: el de este documento, el de la
+aplicación (\textit{backend}, \textit{frontend} y simulador del \textit{worker}) y el del etiquetador
+y el conjunto de entrenamiento. En cada uno, la rama principal (\texttt{main}) no recibe cambios
+directos: cada tarea se hace en una rama propia y entra a la principal mediante una solicitud de
+integración (\textit{pull request}) que revisa la otra persona del equipo. Esa regla evita que dos
+personas modifiquen el mismo archivo al mismo tiempo, y por eso las listas de pendientes del
+documento se repartieron por archivo y no por tema.
+
+Antes de integrar, cada cambio debe compilar: el documento sin errores ni referencias rotas, y el
+\textit{frontend} con sus pruebas. Los mensajes de cada cambio describen lo que se hizo y por qué, de
+modo que el historial de Git sirve también como registro de las decisiones del proyecto.
 
 % ---------------------------------------------------------------------
 \section{Pipeline de análisis de video}
@@ -182,14 +236,101 @@ Capítulo~5 y lo construido.
 
 % ---------------------------------------------------------------------
 \section{Worker simulado}
-% [QUÉ VA] Por qué existe un simulador, qué contrato de la guía cumple
-%   (toma un análisis a la vez, error, pausa, tareas diarias) y cómo se
-%   probó el sistema con él.
-% [FUENTE] fst-ai-system, rama poc/backend-spring, carpeta worker_fake/
-%   (worker_fake.py, tareas_programadas.py, simular_carga.py).
-% [ESTADO] Hecho; casos de prueba por palabra clave (falla, pausa).
-% [ENLAZA] Contrato con el worker (sección 4 de la guía); D-82, D-84,
-%   D-85, D-88, D-89.
+% [FUENTE] fst-ai-system, rama poc/backend-spring, carpeta worker_fake/ (README.md,
+%   worker_fake.py, tareas_programadas.py, simular_carga.py, comun.py).
+
+El \textit{worker} real, que ejecuta el \textit{pipeline} de análisis, todavía no está integrado a la
+aplicación. Para construir y probar el resto del sistema sin esperarlo, se desarrolló un simulador
+(\texttt{worker\_fake}) que cumple el mismo contrato que el real: se comunica con el \textit{backend}
+solo a través de la base de datos y del volumen de archivos compartido. La diferencia es que no
+analiza ningún video: inventa las conductas de cada segundo. Cuando exista el \textit{worker} real,
+lo sustituirá con la misma base y el mismo volumen, sin tocar el \textit{backend}.
+
+El simulador está escrito en Python y se compone de cuatro archivos
+(Tabla~\ref{tab:ch6_worker_archivos}).
+
+\begin{longtable}{|p{3.6cm}|p{9.8cm}|}
+\caption{Archivos del simulador del \textit{worker}.
+\label{tab:ch6_worker_archivos}}\\
+\hline
+\textbf{Archivo} & \textbf{Qué hace} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Archivo} & \textbf{Qué hace} \\
+\hline
+\endhead
+\hline
+\endfoot
+
+\texttt{worker\_fake.py} & El ciclo principal: al arrancar reencola los análisis que quedaron a medias, revisa las pausas vencidas, toma un análisis a la vez y lo lleva a completado, error o pausa. \\
+\hline
+\texttt{tareas\_programadas.py} & Las tareas diarias: borrado de videos a los 30 días, limpieza de pausas huérfanas, aviso de vencimiento y vigilancia del disco. Está en un módulo aparte para que el \textit{worker} real lo reutilice. \\
+\hline
+\texttt{simular\_carga.py} & Hace lo que hará el \textit{backend} cuando existan la carga de video y la pantalla de pausa: encolar un video, ajustar o cancelar una pausa y consultar el estado. \\
+\hline
+\texttt{comun.py} & Lo que comparten los demás: configuración desde variables de entorno, conexión a la base, rutas del volumen y envío de avisos. \\
+\hline
+\end{longtable}
+
+\subsection{Funcionamiento}
+
+La cola es la propia tabla \texttt{ANALISIS}. Cada cierto tiempo (cinco segundos por omisión) el
+simulador busca el análisis en cola más antiguo y lo toma con un bloqueo de fila
+(\texttt{FOR UPDATE SKIP LOCKED}), de modo que dos \textit{workers} no tomen el mismo. Procesa un
+análisis a la vez, en orden de llegada, y lo hace pasar por las tres etapas, preprocesamiento, cilindros y
+clasificación, con una pausa de unos segundos entre cada una para que la pantalla de progreso tenga
+algo que mostrar. Antes de empezar cada análisis revisa el espacio en disco.
+
+Según el resultado que se quiera probar, el simulador reconoce una palabra en el nombre del
+experimento, del grupo o del archivo (Tabla~\ref{tab:ch6_worker_casos}). Se usa el nombre del
+experimento porque el \textit{backend} guarda cada video como \texttt{videos/\{idVideo\}.mp4} y el nombre
+original no llega hasta el \textit{worker}.
+
+\begin{longtable}{|p{3.0cm}|p{10.4cm}|}
+\caption{Casos de prueba del simulador.
+\label{tab:ch6_worker_casos}}\\
+\hline
+\textbf{Palabra} & \textbf{Resultado} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Palabra} & \textbf{Resultado} \\
+\hline
+\endhead
+\hline
+\endfoot
+
+Ninguna & El análisis termina en completado: escribe las observaciones, 300 segundos por espécimen con conductas inventadas, la copia del video para revisión, el archivo de recuadros y el aviso. \\
+\hline
+\texttt{falla} & Termina en error en la etapa de cilindros, con su PDF de diagnóstico y el aviso correspondiente. \\
+\hline
+\texttt{pausa} & Queda en pausa durante la clasificación, como si no se viera a un espécimen: guarda la imagen fija y el archivo de pausa, avisa al usuario y sigue con el siguiente análisis de la cola. \\
+\hline
+\end{longtable}
+
+Una pausa tiene tres salidas, y el simulador reproduce las tres: si el usuario ajusta el recuadro, el
+análisis vuelve a la cola y el simulador lo termina; si lo cancela, queda cancelado; y si no
+responde en el plazo (cinco minutos por omisión), el simulador lo cancela por su cuenta y crea el
+aviso de falta de respuesta. Cualquier fallo imprevisto durante un análisis lo atrapa y lo pasa a
+error con su reporte de diagnóstico, sin detener el resto de la cola.
+
+\subsection{Tareas programadas}
+
+Las tareas diarias las ejecuta el \textit{worker}, no el \textit{backend}, una vez al día a una hora
+fija de madrugada (las 3 a.\,m. por omisión). Son tres: borrar los videos a los 30 días de terminado el
+análisis, avisar al investigador de los que están por vencer y vigilar el disco, que avisa al
+administrador al superar el 80\,\% y borra primero los videos más antiguos al superar el 90\,\%. Si
+el \textit{worker} estaba apagado a esa hora, las corre al arrancar, y para no repetirlas el mismo día
+guarda la fecha de la última corrida en el volumen. El módulo puede dispararse a mano, lo que permite
+probar el borrado y las alertas sin esperar a la madrugada ni llenar el disco.
+
+\subsection{Configuración}
+
+El simulador lee su configuración de las mismas variables de entorno que el resto del sistema: el
+intervalo de consulta de la cola, la hora de las tareas diarias, el plazo de la pausa, los umbrales de
+disco y la zona horaria. Solo algunas son propias del simulador, como los segundos que tarda cada etapa.
+Los valores por omisión están en el archivo de ejemplo de variables (Sección~\ref{sec:ch6_docker}).
 
 % ---------------------------------------------------------------------
 \section{Frontend (React y Vite)}
@@ -211,14 +352,78 @@ Capítulo~5 y lo construido.
 
 % ---------------------------------------------------------------------
 \section{Integración y empaquetado con Docker Compose}
-% [QUÉ VA] Servicios (db, backend, worker, frontend, mailhog), volúmenes
-%   (videos_reportes, modelos, pgdata), variables de entorno y cómo se
-%   levanta todo con un solo comando. Docker es solo la herramienta de
-%   empaquetado (D-62, D-73); no se habla de servidores ni producción.
-% [FUENTE] backend-spring/docker-compose.yml, Dockerfile y .env.example;
-%   docker-compose.yml de la raíz de fst-ai-system.
-% [ESTADO] El compose del backend levanta db, backend, worker y mailhog;
-%   falta probarlo completo y unir el frontend.
+\label{sec:ch6_docker}
+% [FUENTE] backend-spring/docker-compose.yml, Dockerfile, .env.example y db/init/;
+%   frontend/Dockerfile, Dockerfile.prod y nginx.conf.
+
+Docker es solo la herramienta con la que se empaqueta el sistema: cada servicio corre en su propio
+contenedor y todo se levanta con un solo comando, de modo que el laboratorio no necesita instalar más
+que Docker. Esta sección describe cómo está armado hoy; no trata servidores ni producción.
+
+\subsection{Servicios y volúmenes}
+
+El archivo de composición del \textit{backend} define cuatro servicios y tres volúmenes
+(Tabla~\ref{tab:ch6_servicios}).
+
+\begin{longtable}{|p{2.4cm}|p{4.2cm}|p{6.8cm}|}
+\caption{Servicios del archivo de composición del \textit{backend}.
+\label{tab:ch6_servicios}}\\
+\hline
+\textbf{Servicio} & \textbf{Imagen} & \textbf{Qué hace} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Servicio} & \textbf{Imagen} & \textbf{Qué hace} \\
+\hline
+\endhead
+\hline
+\endfoot
+
+\texttt{db} & \texttt{postgres:16-alpine} & Base de datos. Crea el esquema solo la primera vez, con los archivos de \texttt{db/init}, y publica el puerto 5433 de la máquina. Tiene una comprobación de salud para que los demás esperen a que esté lista. \\
+\hline
+\texttt{backend} & Construida con Maven y ejecutada sobre Java 21 & La API REST, en el puerto 8080. Arranca cuando la base está lista y comparte el volumen de archivos. \\
+\hline
+\texttt{worker} & Construida desde \texttt{worker\_fake}, con Python 3.12 & El simulador del \textit{worker}. Comparte la base y el volumen de archivos, y monta el volumen de modelos en solo lectura. \\
+\hline
+\texttt{mailhog} & \texttt{mailhog/mailhog:v1.0.1} & Servidor de correo de prueba, solo con el perfil de desarrollo: SMTP en el puerto 1025 y bandeja de mensajes en el 8025. \\
+\hline
+\end{longtable}
+
+Los volúmenes son \texttt{pgdata} (datos de PostgreSQL), \texttt{videos\_reportes} (videos, copias
+para revisión, archivos de pausa y reportes, compartido por el \textit{backend} y el \textit{worker}) y
+\texttt{modelos} (modelos entrenados, de solo lectura para el \textit{worker}). El \textit{backend} se
+construye en dos etapas: la primera compila el proyecto con Maven y la segunda conserva únicamente el
+entorno de ejecución de Java y el archivo compilado, lo que mantiene la imagen pequeña. El esquema de
+la base lo crea el archivo SQL, no el marco de persistencia, que solo comprueba al arrancar que las
+entidades coinciden con las tablas.
+
+\subsection{Configuración}
+
+Toda la configuración sale de variables de entorno que se copian de un archivo de ejemplo
+(\texttt{.env.example}) a un \texttt{.env} que no se sube al repositorio. Las variables se agrupan en
+la base de datos, el correo (con MailHog en desarrollo y una cuenta normal, como Gmail, en uso real), el
+límite de tamaño de los videos, el \textit{worker}, los umbrales de disco y la autenticación (firma y
+vigencia de los tokens, vigencia del enlace de recuperación y datos del primer administrador).
+Ningún valor secreto va escrito en el código.
+
+\subsection{Cómo se levanta}
+
+Con Docker encendido, basta copiar el archivo de variables y ejecutar
+\texttt{docker compose --profile dev up --build}. La API queda en el puerto 8080 con su
+documentación interactiva, y los correos de prueba se ven en el puerto 8025. Para empezar de cero
+se borran los volúmenes con \texttt{docker compose down -v}, lo que elimina los datos.
+
+\subsection{El \textit{frontend} y la composición completa}
+
+El \textit{frontend} tiene dos imágenes: una de desarrollo, que sirve la aplicación con Vite y recarga
+en caliente, y una de producción, que la compila y la sirve con nginx, el cual además reenvía las
+llamadas a la API y admite videos de hasta 2\,GB. \textbf{Estado actual:} el archivo de composición del
+\textit{backend} todavía no incluye al \textit{frontend}, y el archivo de composición de la raíz de la
+aplicación es el de la etapa con Flask, con el \textit{backend} en otro puerto. Falta unificarlos
+en un solo archivo que levante los cinco servicios; es lo que cerrará el criterio de que todo arranque
+con un solo comando.
+% [PENDIENTE] Cuando se unifiquen, reemplazar el párrafo de «Estado actual» por la descripción del
+%   archivo único y comprobar que arranca igual en al menos dos equipos con Docker.
 
 % ---------------------------------------------------------------------
 \section{Diferencias entre el diseño y lo construido}
