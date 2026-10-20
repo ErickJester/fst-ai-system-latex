@@ -58,7 +58,7 @@ inv -> ui: abre la notificación
 ui -> api: pide los datos de la pausa de ese análisis
 api -> db: lee el análisis y su estado
 api -> fs: lee el archivo de pausa y la imagen fija
-api --> ui: imagen, recuadro actual y tiempo que queda de los 5 minutos
+api --> ui: imagen, recuadro actual y tiempo que queda de las 72 horas
 ui --> inv: muestra la imagen con el recuadro, el tiempo que queda\ny los botones "Ajustar y continuar" y "Cancelar análisis"
 
 alt el usuario ajusta el recuadro
@@ -91,12 +91,12 @@ w -> w: convierte el recuadro nuevo a las coordenadas del video estabilizado\ny 
 w -> db: marca el análisis como "procesando"
 w -> w: vuelve a revisar esos tres segundos y continúa\ndesde el segundo de la pausa
 
-== Si pasan 5 minutos sin respuesta ==
+== Si pasan 72 horas sin respuesta ==
 
 loop en cada vuelta de la cola
   w -> db: busca los análisis "en pausa"
   w -> fs: lee la hora de pausa de cada uno
-  opt pasaron más de 5 minutos
+  opt pasaron más de 72 horas
     w -> db: pasa el análisis a "cancelado", solo si todavía está "en pausa"
     w -> db: crea la notificación de análisis cancelado
   end

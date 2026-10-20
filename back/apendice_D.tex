@@ -173,7 +173,7 @@ cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 \hline
 \texttt{idVideo} & \texttt{integer} & No & FK $\to$ VIDEO; UK & Video analizado, siempre del Día 2: el video del Día 1 se guarda sin análisis. Es único: un video tiene un solo análisis vigente y un análisis nuevo, o un reinicio, reemplaza al anterior \\
 \hline
-\texttt{estado} & \texttt{estado\_\allowbreak{}analisis} & No & Dominio & En cola, procesando, en pausa (el sistema no ve al espécimen y espera al usuario), completado, error o cancelado (el usuario no respondió en 5 minutos). El \textit{worker} toma de la cola los análisis en estado \texttt{en cola} \\
+\texttt{estado} & \texttt{estado\_\allowbreak{}analisis} & No & Dominio & En cola, procesando, en pausa (el sistema no ve al espécimen y espera al usuario), completado, error o cancelado (el usuario canceló, o nadie ajustó el recuadro en 72 horas). El \textit{worker} toma de la cola los análisis en estado \texttt{en cola} \\
 \hline
 \texttt{etapa} & \texttt{etapa\_\allowbreak{}analisis} & No & Dominio & Etapa del pipeline en curso o, si hubo error, la etapa donde se detuvo. Con ella se arma el mensaje de error. Al encolar el análisis el backend le pone el valor de arranque \texttt{preprocesamiento}; el \textit{worker} la actualiza en cada etapa \\
 \hline

@@ -103,7 +103,7 @@ out.append(f'<circle cx="{s3x}" cy="{R("v2")[1]}" r="3" fill="#1a1a1a"/>')
 arrow([R('s3'), (cnx - 40, R('s3')[1]), (cnx - 40, B('cnn')[1])])
 arrow([B('s2'), (B('s2')[0], 772), (cnx + 40, 772), (cnx + 40, B('cnn')[1])])
 arrow([R('cnn'), L('cond')])
-box('pausa', 4, 524, 'En pausa', ['la segmentación (no la red) pierde', 'al espécimen 3 s: guarda una imagen', 'fija; el usuario ajusta o cancela.', 'Continúa desde ahí; sin respuesta', 'en 5 min, se cancela'], dash=True)
+box('pausa', 4, 524, 'En pausa', ['la segmentación (no la red) pierde', 'al espécimen 3 s: guarda una imagen', 'fija; el usuario ajusta o cancela.', 'Continúa desde ahí; sin respuesta', 'en 72 h, se cancela'], dash=True)
 arrow([(cnx + 70, N['cnn']['y']), (cnx + 70, 524), L('pausa')], dashed=True, color='#6b6b6b')
 # ---- Modulo 4 (resultados) ----
 cy4 = 880

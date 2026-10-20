@@ -47,7 +47,7 @@ tab('TANDA', 2, [
     ('', 'nCilindros', 'smallint')], ['UK (idGrupo, ordinal)'])
 tab('VIDEO', 2, [
     ('PK', 'idVideo', 'integer'), ('FK', 'idTanda', 'integer'), ('', 'sesion', 'sesion_video'),
-    ('', 'archivo', 'text · nulo'), ('', 'duracion', 'numeric(p,s)'), ('', 'fechaCarga', 'timestamptz')],
+    ('', 'archivo', 'text · nulo'), ('', 'nombreOriginal', 'varchar(255) · nulo'), ('', 'duracion', 'numeric(p,s)'), ('', 'fechaCarga', 'timestamptz')],
     ['UK (idTanda, sesion)'])
 tab('ANALISIS', 2, [
     ('PK', 'idAnalisis', 'integer'), ('FK UK', 'idVideo', 'integer'), ('', 'estado', 'estado_analisis'),

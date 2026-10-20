@@ -119,7 +119,7 @@ def analisis():
     d.flecha([(1230, 237), (1230, 440)])
     d.etiqueta(['[3 s seguidos sin ver al espécimen]', 'se avisó al usuario (RN-17)'], 1242, 350, 'start')
     d.flecha([(1310, 465), (1470, 465)])
-    d.etiqueta(['el usuario canceló o no', 'respondió en 5 min (RN-17)'], 1390, 440)
+    d.etiqueta(['el usuario canceló o no', 'respondió en 72 h (RN-17)'], 1390, 440)
     d.flecha([(1230, 490), (1230, 620), (270, 620), (270, 237)])
     d.etiqueta(['el usuario ajustó el recuadro', 'vuelve al frente de la cola y continúa desde la pausa'], 750, 640)
     d.flecha([(900, 140), (900, 92), (310, 92), (310, 193)])
@@ -167,7 +167,7 @@ def experimento():
     d.flecha([(1240, 222), (1240, 380), (990, 380)])
     d.etiqueta(['alguna tanda quedó', 'en pausa (RN-17)'], 1252, 320, 'start')
     d.flecha([(830, 380), (680, 380)])
-    d.etiqueta(['el usuario canceló o', '5 min sin respuesta'], 755, 362)
+    d.etiqueta(['el usuario canceló o', '72 h sin respuesta'], 755, 362)
     d.nota(1440, 270, 250, ['error tiene precedencia: mientras',
                             'alguna tanda siga en error, el',
                             'experimento sigue en error',

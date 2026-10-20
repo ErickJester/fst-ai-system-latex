@@ -315,7 +315,7 @@ clasificación pasan tres segundos seguidos sin ver al espécimen, el análisis 
 \texttt{en pausa}, el Worker lo suelta para atender el siguiente de la cola y el
 sistema avisa al usuario; si este ajusta el recuadro del cilindro, el análisis
 vuelve a \texttt{en cola}, por delante de los que llegaron después, y continúa
-desde el segundo de la pausa. Si el usuario cancela, o no responde en 5~minutos,
+desde el segundo de la pausa. Si el usuario cancela, o nadie ajusta el recuadro en 72~horas (plazo configurable),
 pasa a \texttt{cancelado} (RN-17). El investigador no puede iniciar ni pausar un
 análisis, y solo puede cancelarlo mientras está en pausa, pero sí reiniciarlo desde la
 pantalla de revisión: el resultado anterior se borra y el análisis vuelve a
@@ -1716,7 +1716,7 @@ caso de uso.
 \hline
 5 & Pasan tres segundos seguidos sin ver al espécimen (ver RN-17): el \textit{Worker} guarda una imagen fija del segundo central de esos tres, deja el análisis «en pausa» y atiende el siguiente de la cola, y el sistema notifica al usuario. El usuario mueve el recuadro del cilindro sobre esa imagen y pulsa «Ajustar y continuar»: el análisis vuelve al frente de la cola y, cuando el \textit{Worker} lo retoma, vuelve a revisar esos tres segundos y continúa desde ahí. \\
 \hline
-5 & El usuario pulsa «Cancelar análisis» durante la pausa, o no responde en 5 minutos: el sistema cancela el análisis y actualiza el estado de la tarea a «cancelado»; si fue por falta de respuesta, lo notifica al usuario. \\
+5 & El usuario pulsa «Cancelar análisis» durante la pausa, o nadie ajusta el recuadro en 72 horas (plazo configurable): el sistema cancela el análisis, actualiza el estado de la tarea a «cancelado» y envía la notificación «análisis cancelado». \\
 \hline
 \end{tabular}
 
@@ -2794,7 +2794,7 @@ No hay botón de pausar durante el análisis: es el sistema quien decide cuándo
 Si pasan tres segundos seguidos sin ver al espécimen, el análisis queda en pausa,
 aparece una notificación y el usuario ve una imagen fija de ese instante, con los botones
 «Ajustar y continuar» (mueve el recuadro del cilindro sobre la imagen) y «Cancelar
-análisis»; si no responde en 5~minutos, el análisis se cancela (RN-17). Desde la pantalla de
+análisis»; el aviso llega también por correo, y si nadie ajusta el recuadro en 72~horas, el análisis se cancela (RN-17). Desde la pantalla de
 revisión el investigador sí puede reiniciar el análisis: el resultado anterior se
 borra y el análisis empieza de nuevo (RN-04).
 
@@ -2808,7 +2808,7 @@ borra y el análisis empieza de nuevo (RN-04).
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.75\textwidth]{figures/mockups/pausa}
-\caption{Pantalla de pausa: imagen fija del instante en que no se ve al espécimen, con el recuadro del cilindro que el usuario mueve, el tiempo que queda de los 5~minutos y los botones «Ajustar y continuar» y «Cancelar análisis» (RN-17) [autoría propia].}
+\caption{Pantalla de pausa: imagen fija del instante en que no se ve al espécimen, con el recuadro del cilindro que el usuario mueve, el tiempo que queda del plazo de la pausa y los botones «Ajustar y continuar» y «Cancelar análisis» (RN-17) [autoría propia].}
 \label{fig:ui_pausa}
 \end{figure}
 

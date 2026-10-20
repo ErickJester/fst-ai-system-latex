@@ -714,9 +714,12 @@ RN-17 & Si en un segundo no se ve al espécimen, ese segundo se registra como «
         avisa al usuario en el panel de notificaciones y le pide ajustar el recuadro del
         cilindro; con el ajuste, el sistema vuelve a revisar esos mismos tres segundos.
         El usuario también puede cancelar el análisis mientras está en pausa; si no
-        responde en 5~minutos, el análisis se cancela. Mientras el análisis espera, el
-        sistema atiende el siguiente video de la cola; el análisis ajustado vuelve al
-        frente de la cola y continúa desde el segundo de la pausa.
+        ajusta el recuadro en 72~horas (plazo configurable), el análisis pasa a
+        cancelado y el sistema envía la notificación «análisis cancelado». Mientras el
+        análisis espera, el sistema atiende el siguiente video de la cola; el análisis
+        ajustado vuelve al frente de la cola y continúa desde el segundo de la pausa. El
+        aviso de la pausa llega por correo y a la campanita de notificaciones, de modo
+        que el investigador no necesita estar frente a la computadora.
       & Evita entregar como resultado un tramo en que el sistema no vio al espécimen sin
         que el usuario pueda intervenir, y evita dejar un análisis esperando para siempre
         en la cola. Ver RN-04, RN-07, RF-15. \\
