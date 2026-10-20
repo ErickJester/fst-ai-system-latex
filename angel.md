@@ -3,6 +3,89 @@
 **Rama:** `accesos-login` (salió de `main` en `2fbd456`). **No se ha unido a `main`.**
 **Estado:** el documento compila sin errores ni avisos.
 
+## Actualización del 19-oct (léela primero)
+
+Esta sección resume lo que Vanesa y su Claude hicieron en la rama desde el 6-oct. Lo de abajo
+(secciones 1 a 6) es la revisión anterior y quedó como historia.
+
+**La rama ya tiene dentro `main` hasta `a9bcbcd`** (D-71 a D-103). Se integró dos veces. Donde
+`main` y la rama decían cosas distintas, **se dejó `main`**; por eso el pull request a `main`
+no debería traer conflictos.
+
+### A. Lo que cambió con el backend en Spring Boot (D-105)
+
+El backend dejó de ser Flask (rama `poc/backend-spring` de `fst-ai-system`). Quedó registrado como
+**D-105** en `errores/preguntas-doctor.md` y se propagó a:
+
+| Dónde | Qué cambió |
+|---|---|
+| `chapters/01_introduccion.tex` | Cronograma («Entorno Spring Boot / PostgreSQL / Docker»), párrafo del *stack* y una frase que remite a la Tabla de herramientas web del cap. 4 |
+| `chapters/03_marco_teorico.tex` | Arquitectura (backend en Spring Boot) y persistencia (JPA con Hibernate en lugar de SQLAlchemy) |
+| `chapters/04_analisis.tex` | Fila de Spring Boot y fila de iText 5 en la tabla de herramientas web; recuadro «Cambio respecto al diseño original» con las razones; RNF-12 (convenciones de Java); factibilidad, costos, licencias (OpenJDK, Spring Boot, iText) y mantenibilidad |
+| `chapters/05_diseno.tex` | Componentes (Spring Boot + Spring Data JPA) y dos frases que suponían un backend en Python (alternativa de invocar el *pipeline* en la misma petición; se quitó «Celery») |
+| `front/glosario.tex` | «API REST» y «ORM» |
+| `bib/referencias.bib` | Se agrega `springboot_ref` (documentación de Spring Boot 4.1.1); se quita `grinberg2018` (libro de Flask) y sus tres citas |
+| `INSTRUCCIONES-WEB.md` y `diagramas/guia_web/*.puml` | Tabla de contenedores, estructura del repositorio, comando `crear-admin` (antes `flask crear-admin`), Dockerfile del backend (Maven y JRE 21, con `ffmpeg`), puerto 8080 en compose y nginx |
+| Figuras | `arquitectura_capas.png` y `contenedores.png` regeneradas desde sus generadores (y se corrigió «15 tablas» por 12) |
+
+### B. Capítulo 6 (esqueleto)
+
+`chapters/06_desarrollo.tex` se reemplazó por un esqueleto; **sigue desactivado en `main.tex`**.
+Cada sección dice qué va, de qué archivo del código sale, su estado hoy y con qué RF, RN o CU
+se enlaza. El texto viejo (YOLO, ByteTrack, línea de agua) quedó en
+`docs/borradores/06_desarrollo_anterior_tracker.tex`. La sección «Diferencias entre el diseño y
+lo construido» ya lleva la justificación del cambio de Flask a Spring Boot y su costo (dos lenguajes).
+
+### C. Otros cambios
+
+- **Tabla de endpoints del cap. 5:** se agregaron 14 rutas (eliminar experimento, sugerir grupo y
+  tanda, pausa, ajustar, cancelar, reiniciar, diagnóstico, bloques, notificaciones, perfil y
+  recuperar contraseña) y los accesos «Autor o Admin» y «Creador o Admin».
+- **Figuras que se salían de la página:** `seq_carga_video` y `seq_analisis_automatico` ahora
+  tienen límite de altura.
+- **Bibliografía:** se quitaron 5 entradas que nadie citaba (`cryan2005`, `iso14064`,
+  `otsu1979`, `suzuki1985`, `zhang2022_bytetrack`). Las tres últimas las citaba el cap. 6 viejo;
+  si se reactiva ese capítulo hay que volver a agregarlas. **Esto corrige la nota de la
+  sección 2 de este archivo** («No se quitó `zhang2022_bytetrack`»).
+- **Licencia de iText:** el backend usa iText 5.5.13.3 para el PDF. Es AGPL v3 y está en fin de
+  vida (verificado en su repositorio oficial). Quedó dicho en el apartado de licencias del cap. 4.
+- **Mockups:** `mockups/v2/experimentos.html` ofrece «Eliminar…» por fila (solo creador o
+  Administrador); la captura `figures/mockups/experimentos.png` se regeneró. `main` ya tenía el
+  cambio de `experimento.html` (sin nombre ni contraseña, D-63).
+
+### D. Lo que se perdió al quedarse con `main` (por si no era lo deseado)
+
+- La meta de F1 vuelve a exigirse a **las cuatro conductas** (D-91); la rama tenía «no exige la activa».
+- Los atributos de la ISO/IEC 25010 quedan como «atributos» en los caps. 1 y 2 (D-95).
+- El texto de DSAAN queda como lo dejó `main` (D-97): «Attention-Augmented».
+- Se perdió la frase «estima entre 32 y 40 videos nuevos por semestre» del cap. 3. La cifra sigue en los
+  caps. 1 y 4 y en `front/resumen.tex`, así que no hay contradicción, pero el cap. 3 ya no la repite.
+- `PENDIENTES-ERICK.md` quedó como lo tiene `main`; no se tocó.
+
+### E. Lo que necesitamos que confirmes, Erick
+
+1. **Razones del cambio a Spring Boot.** Las del cap. 4 salen del README del backend («lo visto en
+   clase») y del código; no hay una decisión escrita. ¿Hubo otro motivo (escuela, directores, tiempo)?
+2. **La frase «el cambio mantuvo el modelo de datos y el contrato de la API»** (cap. 4). ¿Es cierta?
+3. **iText:** ¿se queda o se cambia (OpenPDF, PDFBox)? Si se cambia, la fila de la tabla y la frase de
+   licencias cambian juntas. Además, ¿qué biblioteca se usará para CSV y XLSX? No hay fila para ellas.
+4. **`PUT /experiments/{id}`** (editar nombre, fecha y notas) ya existe en el backend, pero no está en
+   la guía ni en los requisitos. ¿Es una funcionalidad real? Si lo es, falta el RF.
+5. **Reparto de responsabilidades del cap. 1** (líneas 379-385): dice que Ángel hace el sistema web y
+   Vanesa el *pipeline*. Los commits muestran que el backend y el etiquetador son de `ErickJester` y
+   el frontend de Vanesa. No se tocó; conviene decidir cuál es la versión que se presenta.
+6. **Avance del backend:** 18 de 128 casillas al 15-oct. ¿Cambia algo en el cronograma o en el
+   análisis de riesgos del cap. 4? Hoy no hay un riesgo que lo cubra.
+7. **Cap. 6:** ¿qué parte del *pipeline* y del clasificador ya es definitiva para describirla? Las
+   secciones de esas dos partes siguen vacías hasta que lo digas.
+
+### F. Dónde mirar
+
+`git log origin/main..origin/accesos-login` lista todos los commits. Los de esta actualización
+son los que dicen «Spring Boot», «capítulo 6», «iText», «tabla de endpoints» y «bibliografía».
+
+---
+
 **Actualización del 6-oct:** se incorporaron a esta rama los 5 commits nuevos de `main`
 (hasta `cd10710`: D-53, D-54, D-55, CLA-04). Hubo un solo conflicto, en el diagrama del
 paquete 4 (`cu_paquete4.puml` y su PNG). Se resolvió quedándose con los cambios de esta rama
