@@ -285,6 +285,20 @@ Aplicados en la rama `decisiones-11oct` (caps. 1 a 5, apéndice D, `esquema_fisi
 **No se aplicó** (sin confirmación): `PRESENTA` en (4,4), que ya no tiene objeto porque D-52 quita la tabla, y quitar el modelo del panel de administración.
 Las columnas de `ANALISIS` y los valores de `SEGUNDO.origen` se resolvieron el 12-oct (abajo).
 
+### Cambios del 20-oct-2026 (D-114): `VIDEO.nombreOriginal`
+
+Detalle en `errores/preguntas-doctor.md` §6. El nombre con que el usuario subió el video se perdía al
+guardarlo como `videos/{idVideo}.{ext}`; ahora se guarda para mostrarlo en Resultados, Revisión y el
+reporte PDF. Nunca se usa para armar rutas.
+
+| Cambio | Detalle |
+|---|---|
+| **Columna** | `VIDEO.nombreOriginal varchar(255)`, admite nulo (videos anteriores al 20-oct: «nombre no registrado») |
+| **Cifras vigentes** | **12 relaciones**, **58 atributos** y **13 llaves foráneas**, en BCNF (antes 12, 57 y 13) |
+| **Por qué en la tabla** | En un archivo del volumen quedaría fuera del respaldo de la base (D-18) y se perdería al borrar el video |
+| **Aplicado** | `grafo_relacional_3_vigente.puml`, `esquema_fisico.puml`, `clases.puml` y sus copias de `guia_web/`; `INSTRUCCIONES-WEB.md`; caps. 4, 5 y 6 y apéndice D |
+| **Sin aplicar** | Los HTML/PNG de `esquema_bd` y `clases_completo` (por decisión del usuario, solo se editan los `.puml`) y los artifacts |
+
 ### Cambios del 14-oct-2026 (D-102): `CONDUCTA` pasa a dominio
 
 Solo `SEGUNDO.conducta` la referenciaba desde D-52, son cuatro valores fijos (D-29) y no tiene atributos propios.

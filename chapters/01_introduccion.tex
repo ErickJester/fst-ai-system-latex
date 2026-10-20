@@ -299,7 +299,7 @@ fijó el laboratorio, son los cuatro criterios de aceptación de la validación 
   \item \textbf{Revisión segundo a segundo:} cuando el análisis termina, el usuario
         puede abrir una pantalla con el video y una línea de tiempo por espécimen,
         coloreada por conducta, y corregir la etiqueta de cada segundo. Cada segundo
-        guarda su origen (del sistema, confirmado, corregido o dudoso), y los totales
+        guarda su origen (del sistema, confirmado, corregido o «no se ve»), y los totales
         por minuto se calculan siempre desde esas etiquetas, así que reflejan las
         correcciones.
 
@@ -377,11 +377,11 @@ definidos antes de codificar, revisión del producto al cierre de cada bloque, y
 registro de ajustes para el siguiente ciclo.
 
 La responsabilidad de cada integrante está delimitada por frente técnico:
-Ángel Alí es responsable del sistema web e infraestructura (\textit{backend} (servidor),
-base de datos, \textit{frontend} (interfaz del navegador)); Vanesa es responsable de la
-cadena de análisis de video (\textit{pipeline}: preprocesamiento,
+Ángel Alí es responsable del \textit{backend} (servidor) con su base de datos y del
+\textit{pipeline} (el clasificador, el modelo y lo que lo rodea: preprocesamiento,
 localización de los cilindros, clasificación de conducta y evaluación del desempeño
-por conducta).
+por conducta); Vanesa es responsable del \textit{frontend} (interfaz del navegador) y del
+etiquetador, con el que se etiquetan los videos para entrenar el modelo.
 
 Las Tablas~\ref{tab:cronograma_angel} y~\ref{tab:cronograma_vanesa} muestran el
 cronograma mes a mes de cada integrante. La columna TT-I abarca febrero--junio
@@ -410,7 +410,10 @@ Caps.~1--3: introducción, estado del arte y marco teórico
 Cap.~4 Análisis: requerimientos funcionales y no funcionales, reglas de negocio y criterios de aceptación
   & & & $\bullet$ & $\bullet$ & & & & & & & & \\
 \hline
-Cap.~5 Diseño: arquitectura, base de datos, API REST, casos de uso, UML y \textit{wireframes} (bocetos de pantalla)
+Cap.~5 Diseño: arquitectura, base de datos, API REST, casos de uso y UML
+  & & & & $\bullet$ & $\bullet$ & & & & & & & \\
+\hline
+Cap.~5 Diseño del \textit{pipeline} de análisis de video: preprocesamiento, localización de los cilindros y clasificador
   & & & & $\bullet$ & $\bullet$ & & & & & & & \\
 \hline
 Revisiones mensuales con directores e investigador del laboratorio
@@ -421,20 +424,35 @@ Revisiones mensuales con directores e investigador del laboratorio
 Entorno Spring Boot\,/\,PostgreSQL\,/\,Docker, esquema de la base de datos y API REST
   & & & & & & $\bullet$ & $\bullet$ & & & & & \\
 \hline
+\textit{Baseline} (línea base): sustracción de fondo y curación de videos
+  & & & & & & $\bullet$ & & & & & & \\
+\hline
 Autenticación y control de acceso (\textit{JSON Web Token}, JWT, y roles)
   & & & & & & & $\bullet$ & & & & & \\
 \hline
-Vistas React.js: carga de video, \textit{dashboard} (panel de control) y seguimiento de progreso
+Entrenamiento del clasificador de conducta (nado activo, inmovilidad, escalamiento y conducta activa)
   & & & & & & & $\bullet$ & $\bullet$ & & & & \\
 \hline
-Integración \textit{frontend}--\textit{backend} y módulo de gestión de sesiones
+Integración del \textit{backend} con el \textit{frontend} y módulo de gestión de sesiones
   & & & & & & & & $\bullet$ & & & & \\
 \hline
-Visualización de resultados y generación de reportes PDF
+Ajuste de hiperparámetros y evaluación del clasificador
+  & & & & & & & & $\bullet$ & & & & \\
+\hline
+Generación de reportes PDF, CSV y XLSX
+  & & & & & & & & & $\bullet$ & & & \\
+\hline
+Generación de métricas por individuo y por sesión
   & & & & & & & & & $\bullet$ & & & \\
 \hline
 Integración del \textit{pipeline} de video con \textit{backend} $+$ pruebas unitarias y de sistema
   & & & & & & & & & $\bullet$ & $\bullet$ & & \\
+\hline
+Pruebas con distintas condiciones $+$ oclusiones y reflejos
+  & & & & & & & & & $\bullet$ & $\bullet$ & & \\
+\hline
+Reporte de métricas de clasificación por conducta (F1, precisión y \textit{recall})
+  & & & & & & & & & & $\bullet$ & & \\
 \hline
 Corrección de defectos y ajustes de rendimiento
   & & & & & & & & & & $\bullet$ & & \\
@@ -467,7 +485,7 @@ Caps.~1--3: antecedentes FST, técnicas de visión y modelos de aprendizaje auto
 Cap.~4 Análisis: conductas, métricas y protocolo de anotación
   & & & $\bullet$ & $\bullet$ & & & & & & & & \\
 \hline
-Cap.~5 Diseño del \textit{pipeline} de análisis de video: preprocesamiento, localización de los cilindros y clasificador
+Cap.~5 Diseño de la interfaz: pantallas y \textit{wireframes} (bocetos de pantalla)
   & & & & $\bullet$ & $\bullet$ & & & & & & & \\
 \hline
 Revisiones mensuales con directores e investigador del laboratorio
@@ -475,25 +493,19 @@ Revisiones mensuales con directores e investigador del laboratorio
 \hline
 \multicolumn{13}{|l|}{\textbf{TT-II --- Implementación, pruebas y validación (julio--enero)}} \\
 \hline
-\textit{Baseline} (línea base): sustracción de fondo y curación de videos
-  & & & & & & $\bullet$ & & & & & & \\
-\hline
 Anotación de conductas con el etiquetador del equipo y preparación de los rasgos o clips de entrada
   & & & & & & $\bullet$ & $\bullet$ & & & & & \\
 \hline
-Entrenamiento del clasificador de conducta (nado activo, inmovilidad, escalamiento y conducta activa)
+Vistas React.js: carga de video, \textit{dashboard} (panel de control) y seguimiento de progreso
   & & & & & & & $\bullet$ & $\bullet$ & & & & \\
 \hline
-Ajuste de hiperparámetros y evaluación del clasificador
+Integración del \textit{frontend} con el \textit{backend}
   & & & & & & & & $\bullet$ & & & & \\
 \hline
-Generación de métricas por individuo y por sesión
+Visualización de resultados
   & & & & & & & & & $\bullet$ & & & \\
 \hline
-Pruebas con distintas condiciones $+$ oclusiones y reflejos
-  & & & & & & & & & $\bullet$ & $\bullet$ & & \\
-\hline
-Reporte de métricas de clasificación por conducta (F1, precisión y \textit{recall})
+Pruebas de la interfaz y corrección de errores del \textit{frontend}
   & & & & & & & & & & $\bullet$ & & \\
 \hline
 Redacción de caps.\ resultados, manuales y material de defensa
@@ -511,6 +523,8 @@ Spring Boot, que sustituyó a Flask durante el desarrollo; la justificación del
 Tabla~\ref{tab:herr_web} del Capítulo~4.
 
 En la práctica, Ángel y Vanesa trabajan en ramas separadas del repositorio y se
-sincronizan en las revisiones semanales de cada \textit{sprint} (iteración). La integración entre los dos módulos
----el \textit{endpoint} (punto de acceso de la API) que recibe el video y el \textit{pipeline} que lo procesa--- se prueba de forma
-conjunta al cierre de cada \textit{sprint}, no se deja acumular para el final.
+sincronizan en las revisiones semanales de cada \textit{sprint} (iteración). La integración entre sus
+frentes ---el \textit{frontend} de Vanesa, que consume la API del \textit{backend} de Ángel, y el
+\textit{endpoint} (punto de acceso de la API) que recibe el video, que alimenta al \textit{pipeline} que
+lo procesa--- se prueba de forma conjunta al cierre de cada \textit{sprint}, no se deja acumular para el
+final.

@@ -243,8 +243,9 @@ cambios sobre la línea de agua. Entrega, para cada segundo, una de las cuatro c
 nado activo, inmovilidad, escalamiento o \textit{conducta activa}. La red toma la conducta
 de mayor probabilidad: no hay umbral de confianza y entrega solo la conducta, no las
 probabilidades. La conducta activa es la que elige cuando el espécimen no está inmóvil
-pero no distingue entre nado y escalamiento (ver RN-13). El sistema no marca segundos
-como dudosos por sí mismo: la marca «dudosa» la puede poner el usuario al revisar.
+pero no distingue entre nado y escalamiento (ver RN-13). El sistema solo deja sin
+conducta los segundos en que no se ve al espécimen (RN-17); el usuario puede dejar otros sin conducta al
+revisar, con la opción «no se ve».
 
 \paragraph{Decisión segundo a segundo.} Para decidir el segundo $k$, el sistema
 toma el clip y las medidas de una ventana de 4~s centrada en él (desde 1.5~s antes
@@ -429,7 +430,8 @@ Las tablas están organizadas en cuatro grupos funcionales:
         no guarda el número con que el laboratorio identifica a cada espécimen.
 
   \item \textbf{VIDEO}: uno o dos videos por tanda (Día~1 y/o Día~2), con
-        ruta de almacenamiento, duración y fecha de carga. La ruta queda vacía
+        ruta de almacenamiento, nombre original del archivo (solo para mostrarlo; puede
+        ser nulo en los videos anteriores a esa columna), duración y fecha de carga. La ruta queda vacía
         cuando el archivo ya se borró (ver RF-25, RN-05); la fila se conserva
         porque los resultados la referencian. El video del Día~1 se guarda como
         constancia de la sesión de habituación y no tiene análisis (ver RN-12).
@@ -460,7 +462,7 @@ clasificación de conducta (módulo 3).
 
   \item \textbf{SEGUNDO}: una fila por espécimen y por segundo analizado, con
         la conducta asignada (o ninguna, si el espécimen no se ve) y el origen
-        de esa conducta (del sistema, confirmada, corregida o dudosa). Es lo que el usuario revisa y
+        de esa conducta (del sistema, confirmada, corregida o «no se ve»). Es lo que el usuario revisa y
         corrige al terminar el análisis (ver RF-32). De esta tabla se calculan los
         tiempos totales y el desglose por minuto, que no se guardan.
 
@@ -1851,7 +1853,7 @@ caso de uso.
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador exportar los resultados del análisis en el formato de su preferencia.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador selecciona el formato de descarga; el sistema genera o recupera el archivo correspondiente con los datos del análisis y lo sirve al navegador de forma inmediata.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador selecciona el formato de descarga; el sistema genera o recupera el archivo correspondiente con los datos del análisis y lo sirve al navegador de forma inmediata. El reporte de resultados en PDF incluye los tiempos por espécimen y conducta, los fragmentos «no se ve» marcados, la tabla «Videos analizados» (el nombre original de cada video, o «nombre no registrado») y el aviso de que el resultado automático no es 100\,\% exacto y conviene revisarlo segundo a segundo (RF-22, RF-32).} \\
 \hline
 \end{tabular}
 
@@ -2027,7 +2029,7 @@ caso de uso.
 \hline
 \textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
 \hline
-1 & Inv. / Admin. & Pulsa la conducta correcta (nado, inmovilidad, escalamiento, conducta activa o «dudosa», que deja el segundo sin conducta). \\
+1 & Inv. / Admin. & Pulsa la conducta correcta (nado, inmovilidad, escalamiento, conducta activa o «no se ve», que deja el segundo sin conducta). \\
 \hline
 2 & Sistema & Aplica el cambio a los segundos correspondientes en un borrador y marca su origen como «corregida». \\
 \hline
@@ -2044,7 +2046,7 @@ caso de uso.
 \hline
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
-1 & El usuario deja un segundo sin conducta a propósito: queda marcado como «dudosa». \\
+1 & El usuario deja un segundo sin conducta a propósito: queda marcado como «no se ve». \\
 \hline
 4 & No se puede guardar: el borrador se conserva en el navegador y el sistema informa el error. \\
 \hline
@@ -2752,9 +2754,13 @@ por minuto (RF-20) y bloques de 5~s (RF-18), donde cada bloque muestra la conduc
 más segundos y, dentro, los cinco segundos que lo componen, para notar las conductas
 breves y presentar los bloques en la unidad de la literatura. La regla con que se decide
 la conducta de cada bloque es RN-15. Los fragmentos «no se ve» se marcan en pantalla y
-en el reporte de resultados.
+en el reporte de resultados. La pantalla muestra además un aviso de que el resultado automático no es
+100\,\% exacto y conviene revisarlo segundo a segundo (RF-32); el reporte de resultados en PDF lleva el
+mismo aviso (RF-22).
 Un selector en la parte superior permite ver el grupo completo, con todas sus tandas, o una
-sola tanda (RF-19); en el grupo completo, cada espécimen se rotula con su tanda. La vista por espécimen
+sola tanda (RF-19); en el grupo completo, cada espécimen se rotula con su tanda, y el encabezado de
+cada tanda indica el video del que salió con «Video: <nombre>» (el nombre original del archivo) o
+«nombre no registrado» si el video es anterior a esa columna. La vista por espécimen
 muestra el tiempo por conducta con media, desviación estándar y varianza de los especímenes que se ven (RF-19, RF-31; el reporte descargable las incluye para esa misma vista), el
 nivel de clasificación del análisis y la leyenda de conductas; en el panel lateral
 se compara la inmovilidad entre los grupos con los videos del Día~2 (RF-21). Esa
@@ -2793,7 +2799,8 @@ descarga en PDF, CSV y XLSX.
 \subsection{Revisión segundo a segundo}
 
 Se abre solo cuando el análisis está completado, desde la pantalla de progreso o
-desde la de resultados (RF-32, RN-14). Muestra el video, con el tubo del espécimen
+desde la de resultados (RF-32, RN-14). El encabezado indica el video con «Video: <nombre>»
+o «nombre no registrado». Muestra el video, con el tubo del espécimen
 que se revisa destacado, y una línea de tiempo por espécimen coloreada por
 conducta: una vista ampliada de 40~s alrededor del segundo actual y otra de los
 300~s completos. Cada segundo ya trae la conducta que puso el sistema; cuando

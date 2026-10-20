@@ -109,6 +109,7 @@ entity VIDEO {
   idTanda : integer <<FK>>
   sesion : sesion_video
   archivo : text (nulo = video borrado)
+  nombreOriginal : varchar(255) (nulo; solo para mostrar, D-114)
   duracion : numeric(p,s)
   fechaCarga : timestamptz
   ..

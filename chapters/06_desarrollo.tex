@@ -22,7 +22,7 @@
 %
 % Repositorios de donde sale la información:
 %   fst-ai-system     backend (rama poc/backend-spring), frontend
-%                     (rama feat/frontend-v2-servicios), worker_fake
+%                     (rama feat/frontend-v2-servicios), worker
 %   fst-etiquetador   etiquetador, conjunto de entrenamiento y red
 %                     (carpeta cnn/)
 %
@@ -31,9 +31,8 @@
 % =====================================================================
 
 Este capítulo describe cómo se construyó el sistema: las herramientas y
-versiones que se usaron, la implementación de cada uno de sus componentes
-y las diferencias que aparecieron entre lo diseñado en el
-Capítulo~5 y lo construido.
+versiones que se usaron y la implementación de cada uno de sus componentes,
+conforme a lo diseñado en el Capítulo~5.
 
 % [PENDIENTE: agregar la lectura de las secciones cuando el capítulo esté
 %  escrito, y cambiar «Capítulo~5» por un \ref si se agrega una etiqueta
@@ -44,7 +43,7 @@ Capítulo~5 y lo construido.
 
 \subsection{Herramientas y versiones}
 % [FUENTE] backend-spring/pom.xml y Dockerfile; frontend/package.json y Dockerfile;
-%   worker_fake/requirements.txt y Dockerfile; fst-etiquetador/requirements.txt.
+%   worker/requirements.txt y Dockerfile; fst-etiquetador/requirements.txt.
 % [PENDIENTE] Versión de PyTorch y de las bibliotecas de la red (carpeta cnn/ del etiquetador).
 
 La Tabla~\ref{tab:ch6_versiones} reúne las herramientas con las que se construyó el sistema y la
@@ -83,13 +82,13 @@ Datos & PostgreSQL & 16 & Base de datos relacional; también es la cola de anál
 \hline
 Correo (desarrollo) & MailHog & 1.0.1 & Servidor de correo de prueba: muestra los mensajes sin enviarlos. \\
 \hline
-\textit{Worker} (real y simulado) & Python & 3.12 & Lenguaje de los dos \textit{workers}. \\
+\textit{Worker} & Python & 3.12 & Lenguaje del \textit{worker}. \\
 \hline
-\textit{Worker} simulado & psycopg2-binary, Pillow & 2.9.10 y 11.1.0 & Conexión a PostgreSQL; imágenes y PDF de diagnóstico. \\
+\textit{Worker} & psycopg2-binary, Pillow & 2.9.10 y 11.1.0 & Conexión a PostgreSQL; imágenes y PDF de diagnóstico. \\
 \hline
-\textit{Worker} real & PyTorch y torchvision & sin versión fijada (para procesador) & Ejecutar la red entrenada que clasifica cada segundo. \\
+\textit{Worker} & PyTorch y torchvision & sin versión fijada (para procesador) & Ejecutar la red entrenada que clasifica cada segundo. \\
 \hline
-\textit{Worker} real & OpenCV; NumPy y pandas; scikit-learn & sin fijar; 2.0 o más; 1.9 & Procesamiento del video, medidas por espécimen y lectura de tablas. \\
+\textit{Worker} & OpenCV; NumPy y pandas; scikit-learn & sin fijar; 2.0 o más; 1.9 & Procesamiento del video, medidas por espécimen y lectura de tablas. \\
 \hline
 \textit{Frontend} & Node.js & 22 & Entorno de ejecución para compilar y servir la interfaz. \\
 \hline
@@ -113,7 +112,7 @@ Documentación & \LaTeX, Biber y PlantUML & --- & Este documento, su bibliograf�
 % [FUENTE] Metodología del cap. 1; PENDIENTES.md; historial de Git.
 
 El trabajo se reparte en tres repositorios de Git alojados en GitHub: el de este documento, el de la
-aplicación (\textit{backend}, \textit{frontend} y simulador del \textit{worker}) y el del etiquetador
+aplicación (\textit{backend}, \textit{frontend} y \textit{worker}) y el del etiquetador
 y el conjunto de entrenamiento. Como describe la metodología del Capítulo~1, cada integrante
 trabaja en ramas propias y las dos líneas de trabajo se sincronizan en las revisiones de cada
 \textit{sprint}, cuando los cambios se integran a la rama principal. Para evitar que dos personas
@@ -131,9 +130,7 @@ qué, de modo que el historial de Git sirve también como registro de las decisi
 %   (tracker.py)», que describía un diseño con YOLO que ya no se usa.
 % [FUENTE] fst-etiquetador/lib.py y etiquetar.py (preprocesamiento,
 %   fondo, geometría de los cilindros, rasgos).
-% [ESTADO] El worker real todavía no existe en fst-ai-system (el
-%   servicio worker del compose es un simulador, ver más abajo). Lo que
-%   existe es el código del etiquetador, de donde sale el pipeline.
+% [ESTADO] El código del etiquetador es de donde sale el pipeline.
 %   Confirmar con Erick qué parte ya es el pipeline definitivo.
 
 \subsection{Preprocesamiento: registro y modelo de fondo}
@@ -188,17 +185,26 @@ qué, de modo que el historial de Git sirve también como registro de las decisi
 % ---------------------------------------------------------------------
 \section{Backend (Spring Boot)}
 % [FUENTE] fst-ai-system, rama poc/backend-spring, carpeta backend-spring/ (src/, CHECKLIST.md,
-%   README.md, db/init/ y pom.xml). Estado revisado el 19-oct-2026 contra el código.
-% [ESTADO] En construcción: 70 de 147 casillas del checklist. Actualizar al avanzar.
+%   README.md, db/init/ y pom.xml). Revisado el 19-oct-2026 contra el código.
 
 El \textit{backend} es una API REST escrita en Java con Spring Boot (versiones en la
 Tabla~\ref{tab:ch6_versiones}). Sigue la estructura en capas de la práctica de clase y el contrato de la
 guía de construcción: las rutas, las formas de las respuestas y las reglas de negocio de los
-Capítulos~4 y~5. Según el registro del equipo, el 19 de octubre de 2026 estaban hechas 70 de las 147
-casillas de su lista de verificación. Está implementado el flujo central, desde el acceso hasta la
-revisión de un análisis, y faltan la administración de cuentas, la recuperación de contraseña, la
-pausa, los reportes en CSV y XLSX y el borrado completo de un experimento. Esta sección describe lo que
-existe y termina con lo que falta.
+Capítulos~4 y~5. Cubre desde el acceso hasta la revisión de un análisis, la administración de cuentas, la
+pausa, el reinicio y los reportes. Esta sección describe su estructura, su seguridad, sus servicios y sus
+rutas.
+
+\subsection{Elección del marco}
+
+Las razones para usar Spring Boot son las que explica la Tabla~\ref{tab:herr_web} del Capítulo~4: el
+equipo conoce el marco por los cursos de la carrera, el ecosistema de Spring integra en un solo lugar la
+autenticación, el acceso a datos, las validaciones, la documentación de la API y el correo, y la elección
+no limita al \textit{pipeline}, que corre en un \textit{worker} independiente en Python.
+
+La elección tiene un costo: el repositorio combina dos lenguajes, Java en el \textit{backend} y Python en
+el \textit{worker} y el \textit{pipeline}, lo que suma herramientas y complejidad de mantenimiento. Para
+contenerlo, los dos lados se comunican solo a través de la base de datos y de un volumen compartido, y el
+contrato entre ambos está fijado en una guía de construcción común.
 
 \subsection{Estructura del proyecto}
 
@@ -274,8 +280,12 @@ que conviene destacar son las siguientes.
         solo lectura y dura poco (dos horas por omisión).
 \end{itemize}
 
-El control de acceso por rol (verificar que la cuenta sea de un Administrador en cada ruta de
-administración) está diseñado, pero todavía no implementado, porque esas rutas no existen aún.
+El control de acceso por rol verifica en cada ruta de administración que la cuenta sea de un
+Administrador. Las operaciones que modifican un análisis (corregir, reiniciar, ajustar o cancelar una
+pausa) las puede hacer quien subió el video o un Administrador.
+
+La recuperación de contraseña envía por correo un enlace firmado, de vigencia configurable, con el que la
+persona escribe una contraseña nueva sin necesidad de iniciar sesión.
 
 \subsection{Respuestas y errores}
 
@@ -305,96 +315,102 @@ falla no queda ni archivo ni filas. El proceso es el siguiente:
         valores de arranque que da la tabla; el Día~1 se guarda sin análisis.
 \end{enumerate}
 
-Según el registro del equipo, se probó con un video de unos 940\,MB, que tardó unos dos minutos sin
-cargarse en memoria. Un archivo que pasa del tamaño máximo configurado se rechaza con 413.
+Con el video se guarda el nombre original del archivo, que sirve solo para mostrarlo en los
+resultados, la revisión y el reporte de resultados. El \textit{backend} lo sanea: conserva lo que sigue
+al último \texttt{/} o \texttt{\textbackslash}, quita los caracteres de control y los espacios a los
+lados, lo limita a 255 caracteres y, si queda vacío, lo guarda como nulo. Nunca se usa para armar rutas:
+el archivo se guarda siempre con el identificador del video.
+
+El archivo no se carga en memoria en ningún momento. Uno que pasa del tamaño máximo configurado se
+rechaza con 413.
 
 \subsection{Resultados, progreso y revisión}
 
 Todo se calcula al pedirlo, a partir de \texttt{SEGUNDO} y \texttt{ANALISIS}. El progreso de un análisis es
 cero en cola y cien al completarse; mientras corre, el \textit{backend} lee el avance que deja el
 \textit{worker} y, si no existe, usa el cálculo por etapas (33, 67 y 100\,\%). Los resultados por
-espécimen, por minuto y por grupo se obtienen con consultas agregadas; la comparación entre grupos
+espécimen, por minuto, por bloques de 5~s (RN-15) y por grupo se obtienen con consultas agregadas; la comparación entre grupos
 promedia en lugar de sumar, señala los especímenes con dato faltante y avisa si un grupo mezcla niveles de
 clasificación.
 
 La revisión segundo a segundo tiene tres piezas: la consulta del análisis (especímenes, etiqueta de cada
 segundo y recuadro de cada tubo, leído del archivo que escribe el \textit{worker}), la entrega del video
-con el token descrito arriba y el guardado de las correcciones, que solo actualiza \texttt{SEGUNDO}. Está
-implementada y se probó sin sesión; falta probarla con las cuentas reales.
+con el token descrito arriba y el guardado de las correcciones, que solo actualiza \texttt{SEGUNDO}.
+
+\subsection{Experimentos, pausa y reinicio}
+
+Eliminar un experimento borra sus grupos, videos, resultados y reportes (RN-09); se rechaza con 409 si
+algún análisis está procesando o en pausa, y los que están en cola salen de la cola. Las rutas de la pausa
+consultan sus datos, entregan la imagen fija, ajustan el recuadro de un cilindro, que devuelve el análisis
+a la cola para que continúe, o la cancelan; las dos últimas responden 409 si el análisis ya no está en
+pausa (RN-17); solo quien subió el video o un Administrador puede ajustar o cancelar. El reinicio de un análisis completado borra el resultado anterior y lo vuelve a encolar
+(RN-04).
+
+\subsection{Administración}
+
+Las rutas de administración listan, crean y modifican las cuentas, incluido su rol y su desactivación, y
+nunca dejan al sistema sin un Administrador activo. Una cuenta nueva se crea con contraseña temporal. La
+ruta de métricas del sistema devuelve el estado del disco y de la cola.
 
 \subsection{Reportes, notificaciones y correo}
 
 El reporte de resultados en PDF se genera con iText en memoria, con los minutos contados desde
-\texttt{SEGUNDO}, y se entrega para verlo en el navegador. Los reportes en CSV y XLSX, y guardar y regenerar
-los reportes según su vigencia, están pendientes; para XLSX todavía no se escoge la biblioteca.
+\texttt{SEGUNDO}, y se entrega para verlo en el navegador. Los reportes en CSV y XLSX contienen los datos
+del grupo completo o de una tanda; el XLSX se escribe con una biblioteca de hojas de cálculo. Los
+reportes se guardan, y al guardar correcciones de la revisión se eliminan los del experimento para que
+se regeneren con los datos nuevos (RN-14).
 
-Las notificaciones se consultan y se marcan como leídas con dos rutas. Solo las crea el \textit{worker}: el
-\textit{backend} no agrega otras. Existe un servicio de correo por SMTP, genérico, cuyo fallo no detiene la
-operación; falta que cada notificación se envíe también por correo.
+Las notificaciones se consultan y se marcan como leídas con dos rutas. Solo las crea el \textit{worker}.
+Un servicio de correo por SMTP, genérico, envía cada notificación también por correo; su fallo no detiene
+la operación.
 
-\subsection{Rutas implementadas}
+\subsection{Rutas}
 
-La Tabla~\ref{tab:ch6_back_rutas} lista las 24 rutas implementadas, que son un subconjunto de las del
-Capítulo~5.
+La Tabla~\ref{tab:ch6_back_rutas} lista las rutas del \textit{backend}, que son las del Capítulo~5 más
+las de salud y token de video.
 
 \begin{longtable}{|p{3.0cm}|p{10.4cm}|}
-\caption{Rutas del \textit{backend} implementadas al 19 de octubre de 2026.
-\label{tab:ch6_back_rutas}}\\
+\caption{Rutas del \textit{backend}.
+\label{tab:ch6_back_rutas}}\
 \hline
-\textbf{Grupo} & \textbf{Rutas} \\
+\textbf{Grupo} & \textbf{Rutas} \
 \hline
 \endfirsthead
 \hline
-\textbf{Grupo} & \textbf{Rutas} \\
+\textbf{Grupo} & \textbf{Rutas} \
 \hline
 \endhead
 \hline
 \endfoot
 
-Salud y acceso & \path{/health}; \path{/auth/login}; \path{/auth/logout}; \path{/auth/password}; \path{/users/me} \\
+Salud y acceso & \path{/health}; \path{/auth/login}; \path{/auth/logout}; \path{/auth/recover}; \path{/auth/reset}; \path{/auth/password}; \path{/users/me} \
 \hline
-Experimentos & \path{/experiments} (consultar y crear); \path{/experiments/{id}} (consultar, editar y eliminar, este último solo si el experimento no tiene grupos); \path{/experiments/{id}/groups} \\
+Experimentos & \path{/experiments} (consultar y crear); \path{/experiments/{id}} (consultar y eliminar); \path{/experiments/{id}/groups} \
 \hline
-Carga de video & \path{/experiments/{id}/groups/{grupo}/videos} \\
+Carga de video & \path{/experiments/{id}/groups/{grupo}/videos} \
 \hline
-Progreso y resultados & \path{/experiments/{id}/status}; \path{/experiments/{id}/results}; \path{/experiments/{id}/results/byminute}; \path{/experiments/{id}/results/groups}; \path{/experiments/{id}/analyses/{idAnalisis}/diagnostic} \\
+Progreso y resultados & \path{/experiments/{id}/status}; \path{/experiments/{id}/results}; \path{/experiments/{id}/results/byminute}; \path{/experiments/{id}/results/groups}; \path{/experiments/{id}/results/blocks}; \path{/experiments/{id}/analyses/{idAnalisis}/diagnostic} \
 \hline
-Revisión & \path{/experiments/{id}/analyses/{idAnalisis}/review}; \path{.../video-token}; \path{.../video}; \path{.../segundos} \\
+Pausa y reinicio & \path{/experiments/{id}/analyses/{idAnalisis}/pause}; \path{.../pause/image}; \path{.../pause/adjust}; \path{.../cancel}; \path{.../restart} \
 \hline
-Reportes & \path{/experiments/{id}/report/pdf} \\
+Revisión & \path{/experiments/{id}/analyses/{idAnalisis}/review}; \path{.../video-token}; \path{.../video}; \path{.../segundos} \
 \hline
-Notificaciones & \path{/notifications} (consultar); \path{/notifications/{id}} (marcar como leída) \\
+Reportes & \path{/experiments/{id}/report/pdf}; \path{/experiments/{id}/report/csv}; \path{/experiments/{id}/report/xlsx} \
+\hline
+Notificaciones & \path{/notifications} (consultar); \path{/notifications/{id}} (marcar como leída) \
+\hline
+Administración & \path{/admin/users} (consultar y crear); \path{/admin/users/{id}} (modificar); \path{/admin/system} \
 \hline
 \end{longtable}
 
-\subsection{Lo que falta}
-\label{sec:ch6_backend_falta}
-
-Quedan por construir: la recuperación de contraseña; la administración de cuentas y del sistema; el
-borrado completo de un experimento (hoy solo se rechaza si tiene grupos); las rutas de la pausa, que son
-consultar, ver la imagen, ajustar el recuadro y cancelar; el reinicio de un análisis; los bloques de
-5~s; los reportes en CSV y XLSX con su vigencia; y el envío por correo de cada notificación. El
-\textit{backend} todavía no tiene pruebas automáticas: lo verificado se probó a mano contra un PostgreSQL
-real, incluidos el esquema, las restricciones de la base y las respuestas de cada ruta.
-% [PENDIENTE] Actualizar esta lista y el conteo de casillas cada vez que Erick avance el backend.
-%   Cuando exista, agregar la subsección de administración y la de pausa.
-
 % ---------------------------------------------------------------------
-\section{Worker real y worker simulado}
-% [FUENTE] fst-ai-system, rama poc/backend-spring: worker/ (worker real), pipeline/ (copia del código
-%   de fst_auto) y worker_fake/ (simulador). Revisado el 19-oct-2026.
+\section{Worker}
+% [FUENTE] fst-ai-system, rama poc/backend-spring: worker/ y pipeline/ (copia del código de fst_auto).
 
 El \textit{backend} y el \textit{worker} no se llaman entre sí: se comunican solo a través de la base de
-datos y del volumen de archivos compartido. Por eso pueden existir dos \textit{workers} que cumplen el
-mismo contrato: uno real, que analiza el video con el modelo, y uno simulado, que inventa las conductas.
-Se usa uno u otro, nunca los dos a la vez, porque tomarían análisis de la misma cola y se los quitarían
-mutuamente.
-
-\subsection{Worker real}
-
-El \textit{worker} real hace lo mismo que el simulador (la misma cola, las mismas etapas y los mismos
-avisos, porque reutiliza su código), pero en lugar de inventar las conductas analiza el video con el
-modelo. Lo hace en tres etapas, que son las del ciclo de vida del análisis:
+datos y del volumen de archivos compartido. El \textit{worker} toma los análisis de la cola, analiza el
+video con el modelo y deja los resultados en la base y en el volumen. Lo hace en tres etapas, que son las
+del ciclo de vida del análisis:
 
 \begin{enumerate}
   \item \textbf{Preprocesamiento:} \texttt{ffprobe} abre el video y lo mide.
@@ -403,16 +419,37 @@ modelo. Lo hace en tres etapas, que son las del ciclo de vida del análisis:
   \item \textbf{Clasificación:} un segundo paso clasifica cada segundo con la red entrenada.
 \end{enumerate}
 
-El código del \textit{pipeline} vive en una carpeta aparte que es una copia, sin cambios, del proyecto en
-que se desarrolló (\texttt{fst\_auto}), con la versión del 18 de octubre de 2026. La regla es que ahí no se
-edita nada: si el modelo o el código cambian, se cambian en su proyecto de origen y se vuelven a copiar,
-anotando la versión nueva. Así el análisis del sistema da lo mismo que el análisis del laboratorio. Cada
-paso se lanza como un proceso aparte; uno que pasa de una hora se da por perdido.
+\subsection{Funcionamiento}
 
-Al terminar, el \textit{worker} guarda en \texttt{SEGUNDO} los últimos 300 segundos de cada espécimen,
-la copia del video para revisión, el archivo de recuadros y el aviso. La carpeta de trabajo del
-\textit{pipeline} (tablas, imagen de control y registro) se conserva para poder revisar a mano un
-análisis.
+La cola es la propia tabla \texttt{ANALISIS}. Cada cierto tiempo (cinco segundos por omisión) el
+\textit{worker} busca el análisis en cola más antiguo y lo toma con un bloqueo de fila
+(\texttt{FOR UPDATE SKIP LOCKED}), de modo que dos procesos no tomen el mismo. Procesa un análisis a la
+vez, en orden de llegada, y antes de empezar cada uno revisa el espacio en disco. Al arrancar reencola los
+análisis que quedaron a medias. Cualquier fallo imprevisto durante un análisis lo atrapa y lo pasa a
+error con su reporte de diagnóstico (RN-11), sin detener el resto de la cola.
+
+El código del \textit{pipeline} vive en una carpeta aparte que es una copia, sin cambios, del proyecto en
+que se desarrolló (\texttt{fst\_auto}). La regla es que ahí no se edita nada: si el modelo o el código
+cambian, se cambian en su proyecto de origen y se vuelven a copiar. Así el análisis del sistema es
+equivalente al del laboratorio (RNF-14). Cada paso se lanza como un proceso aparte; uno que pasa de una
+hora se da por perdido.
+
+Los tubos se numeran de izquierda a derecha y el espécimen $k$ del \textit{pipeline} es el de la tanda
+con el cilindro $k$. Al terminar, el \textit{worker} guarda en \texttt{SEGUNDO} los últimos 300 segundos
+de cada espécimen, la copia del video para revisión, el archivo de recuadros y el aviso. La carpeta de
+trabajo del \textit{pipeline} (tablas, imagen de control y registro) se conserva para poder revisar a
+mano un análisis.
+
+\subsection{Pausa y espécimen que no se ve}
+
+Si durante la clasificación un espécimen no se ve tres segundos seguidos (RN-17), el \textit{worker}
+pone el análisis en pausa: guarda la imagen fija del instante, crea el archivo de pausa, avisa al usuario
+y sigue con el siguiente análisis de la cola. La pausa tiene tres salidas. Si el usuario ajusta el
+recuadro, el análisis vuelve a la cola y el \textit{worker} lo termina; si lo cancela, queda cancelado;
+y si no responde en el plazo (cinco minutos por omisión), el \textit{worker} lo cancela por su cuenta y
+crea el aviso de falta de respuesta.
+
+\subsection{Avance, modelo y bibliotecas}
 
 \textbf{Avance medido desde afuera.} Como el código del \textit{pipeline} no se modifica, el progreso
 se calcula observándolo: con los marcadores que el \textit{pipeline} ya escribe en su registro, con la
@@ -423,95 +460,9 @@ que el \textit{backend} lee para mostrar el porcentaje.
 \textbf{El modelo y las bibliotecas.} El archivo del modelo entrenado (unos 125\,MB) no va en Git ni
 dentro de la imagen: vive en una carpeta aparte que se monta en el contenedor en solo lectura. La imagen
 instala PyTorch y torchvision en su versión para procesador, que pesa cientos de megabytes menos que la
-de tarjeta gráfica; no se fijó la versión de esas dos bibliotecas.
+de tarjeta gráfica.
 
-\textbf{Límites actuales.} Los tubos se numeran de izquierda a derecha y el espécimen $k$ del
-\textit{pipeline} es el de la tanda con el cilindro $k$. El modelo no detecta que el espécimen no se ve,
-así que la pausa del Capítulo~4 (RN-17) no está implementada en el \textit{worker} real: ningún análisis
-real pasa a «en pausa». Sí está implementada en el simulador.
-
-Según el registro del equipo, se probó con un video real del laboratorio: terminó en completado, con 300
-segundos por cada uno de los cuatro especímenes, la copia del video, los recuadros y el aviso; y con un
-archivo que no es video terminó en error, con su reporte de diagnóstico. El modelo ejecutado en el
-contenedor coincidió en el 95.75\,\% de los segundos con el mismo modelo ejecutado en la computadora de
-desarrollo; la diferencia nace al medir los fotogramas, antes de la red. Es un dato que importa para la
-repetibilidad (RNF-14).
-
-\subsection{Worker simulado}
-
-El simulador (\texttt{worker\_fake}) se desarrolló antes que el real, para construir y probar el
-resto del sistema sin esperar al \textit{pipeline}. No analiza ningún video: inventa las conductas de
-cada segundo. Se conserva porque es rápido y porque reproduce casos que el real no puede producir hoy,
-como la pausa, y se levanta solo con un perfil de composición aparte. Está escrito en Python y se compone
-de cuatro archivos (Tabla~\ref{tab:ch6_worker_archivos}).
-
-\begin{longtable}{|p{3.6cm}|p{9.8cm}|}
-\caption{Archivos del simulador del \textit{worker}.
-\label{tab:ch6_worker_archivos}}\\
-\hline
-\textbf{Archivo} & \textbf{Qué hace} \\
-\hline
-\endfirsthead
-\hline
-\textbf{Archivo} & \textbf{Qué hace} \\
-\hline
-\endhead
-\hline
-\endfoot
-
-\texttt{worker\_fake.py} & El ciclo principal: al arrancar reencola los análisis que quedaron a medias, revisa las pausas vencidas, toma un análisis a la vez y lo lleva a completado, error o pausa. \\
-\hline
-\texttt{tareas\_programadas.py} & Las tareas diarias: borrado de videos a los 30 días, limpieza de pausas huérfanas, aviso de vencimiento y vigilancia del disco. Está en un módulo aparte para que el \textit{worker} real lo reutilice. \\
-\hline
-\texttt{simular\_carga.py} & Hace lo que hará el \textit{backend} cuando existan la carga de video y la pantalla de pausa: encolar un video, ajustar o cancelar una pausa y consultar el estado. \\
-\hline
-\texttt{comun.py} & Lo que comparten los demás: configuración desde variables de entorno, conexión a la base, rutas del volumen y envío de avisos. \\
-\hline
-\end{longtable}
-
-\subsubsection{Funcionamiento}
-
-La cola es la propia tabla \texttt{ANALISIS}. Cada cierto tiempo (cinco segundos por omisión) el
-simulador busca el análisis en cola más antiguo y lo toma con un bloqueo de fila
-(\texttt{FOR UPDATE SKIP LOCKED}), de modo que dos \textit{workers} no tomen el mismo. Procesa un
-análisis a la vez, en orden de llegada, y lo hace pasar por las tres etapas, preprocesamiento, cilindros y
-clasificación, con una pausa de unos segundos entre cada una para que la pantalla de progreso tenga
-algo que mostrar. Antes de empezar cada análisis revisa el espacio en disco.
-
-Según el resultado que se quiera probar, el simulador reconoce una palabra en el nombre del
-experimento, del grupo o del archivo (Tabla~\ref{tab:ch6_worker_casos}). Se usa el nombre del
-experimento porque el \textit{backend} guarda cada video como \texttt{videos/\{idVideo\}.mp4} y el nombre
-original no llega hasta el \textit{worker}.
-
-\begin{longtable}{|p{3.0cm}|p{10.4cm}|}
-\caption{Casos de prueba del simulador.
-\label{tab:ch6_worker_casos}}\\
-\hline
-\textbf{Palabra} & \textbf{Resultado} \\
-\hline
-\endfirsthead
-\hline
-\textbf{Palabra} & \textbf{Resultado} \\
-\hline
-\endhead
-\hline
-\endfoot
-
-Ninguna & El análisis termina en completado: escribe las observaciones, 300 segundos por espécimen con conductas inventadas, la copia del video para revisión, el archivo de recuadros y el aviso. \\
-\hline
-\texttt{falla} & Termina en error en la etapa de cilindros, con su PDF de diagnóstico y el aviso correspondiente. \\
-\hline
-\texttt{pausa} & Queda en pausa durante la clasificación, como si no se viera a un espécimen: guarda la imagen fija y el archivo de pausa, avisa al usuario y sigue con el siguiente análisis de la cola. \\
-\hline
-\end{longtable}
-
-Una pausa tiene tres salidas, y el simulador reproduce las tres: si el usuario ajusta el recuadro, el
-análisis vuelve a la cola y el simulador lo termina; si lo cancela, queda cancelado; y si no
-responde en el plazo (cinco minutos por omisión), el simulador lo cancela por su cuenta y crea el
-aviso de falta de respuesta. Cualquier fallo imprevisto durante un análisis lo atrapa y lo pasa a
-error con su reporte de diagnóstico, sin detener el resto de la cola.
-
-\subsubsection{Tareas programadas}
+\subsection{Tareas programadas}
 
 Las tareas diarias las ejecuta el \textit{worker}, no el \textit{backend}, una vez al día a una hora
 fija de madrugada (las 3 a.\,m. por omisión). Son tres: borrar los videos a los 30 días de terminado el
@@ -519,20 +470,19 @@ análisis, avisar al investigador de los que están por vencer y vigilar el disc
 administrador al superar el 80\,\% y borra primero los videos más antiguos al superar el 90\,\%. Si
 el \textit{worker} estaba apagado a esa hora, las corre al arrancar, y para no repetirlas el mismo día
 guarda la fecha de la última corrida en el volumen. El módulo puede dispararse a mano, lo que permite
-probar el borrado y las alertas sin esperar a la madrugada ni llenar el disco.
+ejecutar el borrado y las alertas sin esperar a la madrugada ni llenar el disco.
 
-\subsubsection{Configuración}
+\subsection{Configuración}
 
-El simulador lee su configuración de las mismas variables de entorno que el resto del sistema: el
+El \textit{worker} lee su configuración de las mismas variables de entorno que el resto del sistema: el
 intervalo de consulta de la cola, la hora de las tareas diarias, el plazo de la pausa, los umbrales de
-disco y la zona horaria. Solo algunas son propias del simulador, como los segundos que tarda cada etapa.
-Los valores por omisión están en el archivo de ejemplo de variables (Sección~\ref{sec:ch6_docker}).
+disco y la zona horaria. Ningún valor secreto va escrito en el código.
 
 % ---------------------------------------------------------------------
 \section{Frontend (React y Vite)}
 % [FUENTE] fst-ai-system, rama feat/frontend-v2-servicios, carpeta frontend/ (src/, CHECKLIST.md,
 %   package.json, Dockerfile, Dockerfile.prod y nginx.conf).
-% [ESTADO] Revisado el 19-oct-2026: 117 pruebas pasan y ESLint no reporta avisos.
+% [ESTADO] Revisado el 19-oct-2026.
 
 El \textit{frontend} es una aplicación de una sola página (\textit{single-page application}) escrita
 con React y compilada con Vite. Tiene catorce pantallas, que cubren las del diseño de interfaz del
@@ -574,12 +524,9 @@ más importante es que las pantallas no importan datos: piden todo a una capa de
 \hline
 \end{longtable}
 
-\textbf{Capa de servicios y modo demostración.} Cada módulo de \texttt{services} puede responder de
-dos maneras: con datos de ejemplo que ya tienen la forma de la API, o llamando al \textit{backend}.
-Por omisión usa los datos de ejemplo (el «modo demostración», que muestra una franja en la pantalla);
-con la variable \texttt{VITE\_USE\_MOCKS} en falso, todo llama a la API. Además, otra variable permite
-conectar una parte a la vez, en el orden en que el \textit{backend} las va teniendo, de modo que
-las pantallas se pudieron construir y probar antes de que existieran las rutas.
+\textbf{Capa de servicios.} Cada módulo de \texttt{services} llama al \textit{backend} y entrega a las
+pantallas los datos con la forma que ellas necesitan, de modo que ninguna pantalla conoce las rutas de la
+API.
 
 \textbf{Cliente HTTP y sesión.} Las llamadas se hacen con Axios. El token JWT se guarda en el
 navegador y se envía en cada petición. Un interceptor desenvuelve la respuesta de la API, que llega con
@@ -627,7 +574,7 @@ Experimento y grupo & Ver el detalle de un experimento, sus grupos y tandas, y e
 \hline
 Nuevo experimento y carga de video & Crear el experimento y subir el video de una tanda. Rechaza en el navegador lo que no sea \texttt{.mp4} o \texttt{.mov} y avisa si supera el tamaño máximo, antes de subir. & CU-04, CU-05 \\
 \hline
-Progreso & Seguir las etapas del análisis, ver el mensaje del error y descargar el reporte de diagnóstico. No ofrece cancelar ni reiniciar. & CU-07, CU-08 \\
+Progreso & Seguir las etapas del análisis, ver el mensaje del error y descargar el reporte de diagnóstico. & CU-07, CU-08 \\
 \hline
 Pausa & Mostrar la imagen fija del instante en que no se vio al espécimen, con un recuadro que se arrastra y se redimensiona, el tiempo que queda para responder y los botones para ajustar y continuar o cancelar. & CU-07, RN-17 \\
 \hline
@@ -641,170 +588,6 @@ Administración & Ver el estado del disco y de la cola, y crear, editar, activar
 
 \subsection{Pruebas y calidad}
 
-El \textit{frontend} tiene 117 pruebas automáticas en siete archivos, escritas con Vitest y
-Testing Library: cubren la capa de servicios, las equivalencias del contrato, la lógica de las
-pantallas y la accesibilidad, que se comprueba con axe-core. Se ejecutaron el 19 de octubre de 2026 y
-todas pasaron; el análisis estático con ESLint no reportó avisos. Todas corren en modo
-demostración, es decir, sin \textit{backend}.
-
-\subsection{Estado de la conexión con el \textit{backend}}
-
-Con los datos de ejemplo, las pantallas funcionan de principio a fin. Según el \textit{checklist} del
-17 de octubre, 139 de las 167 casillas estaban hechas; las 28 pendientes incluyen probar cada pantalla
-contra el \textit{backend} real, comprobar la aplicación en Chrome, Firefox y Edge, y medir que abrir el
-\textit{dashboard}, filtrar y abrir resultados tarde 3 segundos o menos. Desde entonces el
-\textit{backend} implementó las rutas de sesión, experimentos, carga de video, progreso, resultados,
-revisión y notificaciones, y existe la versión portable que sirve la aplicación compilada sin datos de
-ejemplo, llamando a la API. Las pantallas que dependen de rutas todavía inexistentes, como la
-administración y la pausa, siguen funcionando solo con datos de ejemplo.
-% [PENDIENTE] Actualizar esta subsección con las pantallas que se prueben contra el backend real y con los
-%   resultados en cada navegador.
-
-% ---------------------------------------------------------------------
-\section{Integración y empaquetado con Docker Compose}
-\label{sec:ch6_docker}
-% [FUENTE] backend-spring/docker-compose.yml y Dockerfile; portable/ (docker-compose.yml, LEEME.md);
-%   worker/Dockerfile; frontend/Dockerfile.prod y nginx.conf. Revisado el 19-oct-2026.
-
-Docker es solo la herramienta con la que se empaqueta el sistema: cada servicio corre en su propio
-contenedor y todo se levanta con un solo comando, de modo que el laboratorio no necesita instalar más
-que Docker. Esta sección describe cómo está armado hoy; no trata servidores ni producción. Hay dos
-archivos de composición: el de desarrollo, que vive con el \textit{backend}, y el de la versión
-portable, que reúne el sistema completo.
-
-\subsection{Composición de desarrollo}
-
-El archivo de composición del \textit{backend} define cinco servicios y dos volúmenes
-(Tabla~\ref{tab:ch6_servicios}).
-
-\begin{longtable}{|p{2.4cm}|p{4.2cm}|p{6.8cm}|}
-\caption{Servicios de la composición de desarrollo.
-\label{tab:ch6_servicios}}\\
-\hline
-\textbf{Servicio} & \textbf{Imagen} & \textbf{Qué hace} \\
-\hline
-\endfirsthead
-\hline
-\textbf{Servicio} & \textbf{Imagen} & \textbf{Qué hace} \\
-\hline
-\endhead
-\hline
-\endfoot
-
-\texttt{db} & \texttt{postgres:16-alpine} & Base de datos. Crea el esquema solo la primera vez, con los archivos de \texttt{db/init}, y publica el puerto 5433 de la máquina. Tiene una comprobación de salud para que los demás esperen a que esté lista. \\
-\hline
-\texttt{backend} & Construida con Maven y ejecutada sobre Java 21 & La API REST, en el puerto 8084. Arranca cuando la base está lista y comparte el volumen de archivos. \\
-\hline
-\texttt{worker} & Construida desde la carpeta del \textit{worker} real, con Python 3.12 & El \textit{worker} que analiza los videos. Comparte la base y el volumen de archivos, y monta la carpeta del modelo en solo lectura. \\
-\hline
-\texttt{worker-fake} & Construida desde \texttt{worker\_fake}, con Python 3.12 & El simulador. Solo se levanta con el perfil \texttt{fake} y no debe correr junto al \textit{worker} real. \\
-\hline
-\texttt{mailhog} & \texttt{mailhog/mailhog:v1.0.1} & Servidor de correo de prueba, solo con el perfil de desarrollo: SMTP en el puerto 1025 y bandeja de mensajes en el 8025. \\
-\hline
-\end{longtable}
-
-Los volúmenes son \texttt{pgdata} (datos de PostgreSQL) y \texttt{videos\_reportes} (videos, copias para
-revisión, archivos de pausa y reportes, compartido por el \textit{backend} y el \textit{worker}). El modelo
-entrenado no es un volumen: es una carpeta del equipo que se monta de solo lectura en el \textit{worker}.
-El \textit{backend} se construye en dos etapas: la primera compila el proyecto con Maven y la segunda
-conserva únicamente el entorno de ejecución de Java, \texttt{ffmpeg} y el archivo compilado, lo que mantiene
-la imagen pequeña. El esquema de la base lo crea el archivo SQL, no el marco de persistencia, que solo
-comprueba al arrancar que las entidades coinciden con las tablas.
-
-\subsection{Configuración}
-
-Toda la configuración sale de variables de entorno que se copian de un archivo de ejemplo
-(\texttt{.env.example}) a un \texttt{.env} que no se sube al repositorio. Las variables se agrupan en
-la base de datos, el correo (con MailHog en desarrollo y una cuenta normal, como Gmail, en uso real), el
-límite de tamaño de los videos, el \textit{worker}, los umbrales de disco y la autenticación (firma y
-vigencia de los tokens, vigencia del enlace de recuperación y datos del primer administrador).
-Ningún valor secreto va escrito en el código.
-
-\subsection{Cómo se levanta}
-
-Con Docker encendido, basta copiar el archivo de variables y ejecutar
-\texttt{docker compose --profile dev up --build}. La API queda en el puerto 8084 con su
-documentación interactiva, y los correos de prueba se ven en el puerto 8025. Para empezar de cero
-se borran los volúmenes con \texttt{docker compose down -v}, lo que elimina los datos.
-
-\subsection{Versión portable}
-
-La versión portable es una carpeta que se lleva a otra computadora con Windows y Docker Desktop: con
-dar doble clic a un archivo de inicio, el sistema queda funcionando, y el navegador se abre en la página
-de la aplicación. Su archivo de composición reúne los cuatro servicios que hacen falta
-(Tabla~\ref{tab:ch6_portable}), con un proyecto de nombre propio para que sus contenedores y volúmenes no se
-mezclen con los de desarrollo.
-
-\begin{longtable}{|p{2.0cm}|p{11.4cm}|}
-\caption{Servicios de la versión portable.
-\label{tab:ch6_portable}}\\
-\hline
-\textbf{Servicio} & \textbf{Qué hace} \\
-\hline
-\endfirsthead
-\hline
-\textbf{Servicio} & \textbf{Qué hace} \\
-\hline
-\endhead
-\hline
-\endfoot
-
-\texttt{db} & PostgreSQL. Solo aplica el archivo del esquema, no la cuenta de prueba de desarrollo. \\
-\hline
-\texttt{api} & El \textit{backend}. Escucha en el puerto 8000 dentro de la red de contenedores, y nadie fuera de ella puede alcanzarlo. \\
-\hline
-\texttt{worker} & El \textit{worker} real, con el modelo montado en solo lectura. \\
-\hline
-\texttt{web} & La aplicación compilada, servida por nginx. Es el único servicio que publica un puerto (el 8088 por omisión): el navegador habla con nginx y este reenvía las llamadas de \texttt{/api/} al \textit{backend}, de modo que la página y la API comparten un solo origen. \\
-\hline
-\end{longtable}
-
-Los requisitos que declara son 16\,GB de memoria en la computadora, con al menos 8\,GB asignados a Docker (el
-análisis de un video usa hasta unos 3.5\,GB), 20\,GB de disco libres y conexión a internet la primera vez,
-porque descarga las imágenes. La primera construcción tarda de 20 a 40 minutos o más, según la conexión; las
-siguientes, menos de un minuto.
-
-\textbf{Estado.} Con esta versión el \textit{frontend}, el \textit{backend}, el \textit{worker} real y la
-base de datos se levantan con un solo comando. Falta comprobar que arranca igual en una segunda computadora
-limpia, que es parte de los criterios de aceptación.
-% [PENDIENTE] Registrar el resultado de la prueba en una segunda computadora cuando se haga. El archivo de
-%   composición de la raíz del repositorio de la aplicación todavía es el de la etapa con Flask.
-
-% ---------------------------------------------------------------------
-\section{Diferencias entre el diseño y lo construido}
-% [QUÉ VA] Lista corta de lo que cambió respecto al capítulo 5 y por
-%   qué: el backend pasó de Flask a Spring Boot (D-105); el worker real
-%   se sustituyó por un simulador mientras se termina el pipeline; y lo
-%   que surja. Esta sección es la que más luce ante los sinodales.
-% [ESTADO] Mantenerla al día mientras avanza la construcción.
-
-El cambio de mayor alcance respecto al Capítulo~5 es el del \textit{backend}: el diseño inicial lo
-ubicaba en Flask y se construyó con Spring Boot. Las razones son las que explica la
-Tabla~\ref{tab:herr_web} del Capítulo~4: el equipo conoce el marco por los cursos de la carrera, el
-ecosistema de Spring integra en un solo lugar la autenticación, el acceso a datos, las validaciones, la
-documentación de la API y el correo, y la elección no limita al \textit{pipeline}, que corre en un
-\textit{worker} independiente en Python.
-
-El cambio tuvo un costo: el repositorio combina ahora dos lenguajes, Java en el \textit{backend} y
-Python en el \textit{worker} y el \textit{pipeline}, lo que suma herramientas y complejidad de
-mantenimiento. Para contenerlo, los dos lados se comunican solo a través de la base de datos y de un
-volumen compartido, el contrato entre ambos quedó fijado en una guía de construcción común, y un
-\textit{worker} simulado permite probar el \textit{backend} sin esperar al \textit{pipeline} real.
-
-Hay otras diferencias entre lo diseñado y lo construido que conviene tener presentes:
-
-\begin{itemize}
-  \item \textbf{La pausa no existe en el \textit{worker} real.} El diseño prevé que el análisis se
-        pause cuando no se ve al espécimen durante tres segundos seguidos (RN-17), pero el modelo
-        empleado no detecta ese caso. La pausa está implementada solo en el simulador, y las rutas del
-        \textit{backend} para ajustar o cancelar una pausa todavía no existen.
-  \item \textbf{Quién subió un video.} La base no guarda quién subió cada video, así que, por ahora, el
-        sistema toma como tal al creador del experimento al decidir quién puede corregir o reiniciar un
-        análisis.
-  \item \textbf{El \textit{backend} está incompleto.} Implementa 24 rutas; las demás del Capítulo~5,
-        como la administración de cuentas, siguen pendientes (Sección~\ref{sec:ch6_backend_falta}).
-  \item \textbf{Un solo origen en la versión portable.} El navegador llama a \texttt{/api/} sobre el
-        mismo servidor que sirve la página, lo que simplifica la configuración de acceso entre
-        orígenes.
-\end{itemize}
-% [PENDIENTE: agregar aquí las demás diferencias entre diseño y construcción que surjan]
+El \textit{frontend} tiene pruebas automáticas escritas con Vitest y Testing Library: cubren la capa de
+servicios, las equivalencias del contrato, la lógica de las pantallas y la accesibilidad, que se comprueba
+con axe-core. El análisis estático con ESLint cuida la calidad del código.

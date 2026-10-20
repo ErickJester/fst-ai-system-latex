@@ -71,6 +71,7 @@ package P2_Experimentos_y_carga_de_video {
     -id : Integer
     -sesion : String
     -archivo : String
+    -nombreOriginal : String
     -duracion : Float
     -fechaCarga : DateTime
     +validarFormato() : Boolean
