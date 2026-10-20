@@ -221,8 +221,10 @@ RF-22 & Resultados
         conducta de los especímenes de esa descarga, sean los de una tanda o los del
         grupo completo (ver RF-31). Además se descargan, por
         separado y en PDF, el reporte de resultados (los tiempos por espécimen y
-        conducta, con los fragmentos en que el espécimen no se ve marcados) y el
-        reporte de diagnóstico (ver RN-11).
+        conducta, con los fragmentos en que el espécimen no se ve marcados; la
+        tabla «Videos analizados» con el nombre original de cada video; y el
+        aviso de que el resultado automático no es 100\,\% exacto y conviene
+        revisarlo segundo a segundo, ver RF-32) y el reporte de diagnóstico (ver RN-11).
       & Alta & Investigador \\
 \hline
 
@@ -263,6 +265,14 @@ RF-27 & Dashboard
       & El investigador debe poder eliminar un experimento propio desde el
         dashboard o desde su detalle; el Administrador puede eliminar cualquiera. La acción es
         permanente e irreversible y requiere un aviso de confirmación (ver RN-09).
+      & Media & Investigador / Admin \\
+\hline
+RF-34 & Dashboard
+      & El investigador debe poder eliminar una sola tanda de un grupo desde la pantalla
+        del grupo, con sus videos del Día~1 y del Día~2, su análisis, sus resultados y sus
+        especímenes, sin eliminar el experimento. Solo lo puede hacer quien creó el
+        experimento o un Administrador. La acción es permanente e irreversible y requiere
+        un aviso de confirmación (ver RN-18).
       & Media & Investigador / Admin \\
 \hline
 
@@ -306,7 +316,7 @@ RF-32 & Resultados
         segundos analizados en un formato compatible con el navegador (H.264). Solo
         el investigador que subió el video y el Administrador pueden corregir. Cada
         conducta guarda su origen
-        (del sistema, confirmada, corregida o dudosa). Los totales por minuto se calculan desde las
+        (del sistema, confirmada, corregida o «no se ve»). Los totales por minuto se calculan desde las
         etiquetas, así que reflejan las correcciones (ver RN-14).
       & Media & Investigador \\
 \hline
@@ -461,6 +471,14 @@ RNF-14 & Repetibilidad
        & Variación máxima de entre el 5 y el 10\,\% en los segundos de cada conducta
          entre análisis repetidos del mismo video, verificada en TT-II. \\
 \hline
+RNF-15 & Respaldo
+       & El sistema debe respaldar la base de datos completa (experimentos, resultados y
+         cuentas) una vez al día y conservar los últimos 7~respaldos. Este respaldo es
+         independiente del borrado de videos a los 30~días (RNF-08), que opera sobre
+         archivos de video y no sobre la base de datos.
+       & Tarea programada diaria. Al crear un respaldo nuevo, el sistema descarta el más
+         antiguo, de modo que siempre existen los 7~más recientes. \\
+\hline
 
 \end{longtable}
 
@@ -592,7 +610,7 @@ RN-06 & Los resultados y reportes (PDF, CSV y XLSX) se conservan indefinidamente
 \hline
 RN-07 & En cada segundo analizado, a cada espécimen se le asigna como máximo una
         conducta: nado activo, inmovilidad, escalamiento o conducta activa; un segundo
-        en que no se ve al espécimen o que se marca como dudoso queda sin conducta. No
+        en que no se ve al espécimen o que el usuario marca como «no se ve» al revisar queda sin conducta. No
         pueden coexistir dos conductas al mismo tiempo para el mismo espécimen.
       & El FST define estas conductas como mutuamente excluyentes
         \cite{armario2021}. Ver RF-17, RF-18. \\
@@ -610,6 +628,17 @@ RN-09 & Borrar un experimento es permanente e irreversible: se eliminan el video
         los que están en cola salen de la cola al borrarlo.
       & Previene borrados accidentales y que el sistema pierda los datos de un
         análisis que está usando. Ver RF-27. \\
+\hline
+RN-18 & Eliminar una tanda es permanente e irreversible: se eliminan sus videos del
+        Día~1 y del Día~2, su análisis, sus resultados y sus especímenes, y también los
+        reportes del experimento, porque sus resultados cambian. El grupo se conserva
+        aunque quede sin tandas, y la letra de la tanda queda libre para volver a
+        subirla. Antes de ejecutarlo, el sistema muestra un aviso de confirmación; no pide
+        nombre ni contraseña. Solo lo puede hacer quien creó el experimento o un
+        Administrador. No se puede eliminar una tanda mientras su análisis está
+        procesando o en pausa; si está en cola, sale de la cola al eliminarla.
+      & Mismas garantías que RN-09, aplicadas a una tanda. Permite corregir una tanda
+        subida por error sin perder el resto del experimento. Ver RF-34, RN-09. \\
 \hline
 RN-10 & La interfaz rechaza cualquier archivo que no sea \texttt{.mp4} o
         \texttt{.mov} antes de intentar subirlo al servidor. El servidor rechaza, al
@@ -932,6 +961,15 @@ R-08 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf
        (movimiento de patas delanteras hacia las paredes del cilindro). Si no se
        alcanza la precisión objetivo, registrar como ``conducta activa'' los
        segundos en que no se distinguen (ver RN-13). \\
+\hline
+R-09 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
+     & La integración entre el \textit{backend} en Java (Spring Boot) y el \textit{worker} en
+       Python resulta más compleja de lo esperado, porque los dos lados usan lenguajes y
+       herramientas distintos.
+     & El \textit{backend} y el \textit{worker} se comunican solo por la base de datos y el
+       volumen de archivos compartido, sin llamarse entre sí. El contrato entre ambos
+       (tablas, estados y formatos de archivo) se fija por escrito antes de construir cada
+       lado. \\
 \hline
 
 % ---- NIVEL BAJO (verde) ----

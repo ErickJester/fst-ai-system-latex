@@ -287,8 +287,9 @@ convierte en probabilidades:
 El sistema asigna a cada segundo la conducta de mayor probabilidad; no aplica un umbral de
 confianza y la red entrega solo la conducta, no las probabilidades. La conducta activa es una
 de las cuatro clases: la red la elige cuando el espécimen no está inmóvil pero no distingue
-entre nado y escalamiento (véase la regla de negocio RN-13 en el Capítulo~4). El sistema no
-marca segundos como dudosos por sí mismo; esa marca la puede poner el usuario al revisar.
+entre nado y escalamiento (véase la regla de negocio RN-13 en el Capítulo~4). El sistema solo
+deja sin conducta los segundos en que no se ve al espécimen; el usuario puede dejar otros sin conducta
+al revisar, con la opción «no se ve».
 Durante el entrenamiento, la función de
 pérdida es la entropía cruzada categórica, que penaliza fuertemente predicciones
 incorrectas con alta confianza:

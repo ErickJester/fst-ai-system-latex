@@ -243,8 +243,9 @@ cambios sobre la línea de agua. Entrega, para cada segundo, una de las cuatro c
 nado activo, inmovilidad, escalamiento o \textit{conducta activa}. La red toma la conducta
 de mayor probabilidad: no hay umbral de confianza y entrega solo la conducta, no las
 probabilidades. La conducta activa es la que elige cuando el espécimen no está inmóvil
-pero no distingue entre nado y escalamiento (ver RN-13). El sistema no marca segundos
-como dudosos por sí mismo: la marca «dudosa» la puede poner el usuario al revisar.
+pero no distingue entre nado y escalamiento (ver RN-13). El sistema solo deja sin
+conducta los segundos en que no se ve al espécimen (RN-17); el usuario puede dejar otros sin conducta al
+revisar, con la opción «no se ve».
 
 \paragraph{Decisión segundo a segundo.} Para decidir el segundo $k$, el sistema
 toma el clip y las medidas de una ventana de 4~s centrada en él (desde 1.5~s antes
@@ -429,7 +430,8 @@ Las tablas están organizadas en cuatro grupos funcionales:
         no guarda el número con que el laboratorio identifica a cada espécimen.
 
   \item \textbf{VIDEO}: uno o dos videos por tanda (Día~1 y/o Día~2), con
-        ruta de almacenamiento, duración y fecha de carga. La ruta queda vacía
+        ruta de almacenamiento, nombre original del archivo (solo para mostrarlo; puede
+        ser nulo en los videos anteriores a esa columna), duración y fecha de carga. La ruta queda vacía
         cuando el archivo ya se borró (ver RF-25, RN-05); la fila se conserva
         porque los resultados la referencian. El video del Día~1 se guarda como
         constancia de la sesión de habituación y no tiene análisis (ver RN-12).
@@ -460,7 +462,7 @@ clasificación de conducta (módulo 3).
 
   \item \textbf{SEGUNDO}: una fila por espécimen y por segundo analizado, con
         la conducta asignada (o ninguna, si el espécimen no se ve) y el origen
-        de esa conducta (del sistema, confirmada, corregida o dudosa). Es lo que el usuario revisa y
+        de esa conducta (del sistema, confirmada, corregida o «no se ve»). Es lo que el usuario revisa y
         corrige al terminar el análisis (ver RF-32). De esta tabla se calculan los
         tiempos totales y el desglose por minuto, que no se guardan.
 
@@ -718,6 +720,8 @@ PUT    & \path{/experiments/{id}}    & Actualiza el nombre, la fecha y las notas
 \hline
 DELETE & \path{/experiments/{id}}    & Elimina el experimento con sus grupos, videos, resultados y reportes (ver RN-09). Se rechaza con error 409 si algún análisis está procesando o en pausa; los que están en cola salen de la cola. & Creador o Admin \\
 \hline
+DELETE & \path{/experiments/{id}/tandas/{idTanda}} & Elimina la tanda con sus videos, análisis, resultados y especímenes, y los reportes del experimento; el grupo se conserva y la letra queda libre (ver RN-18). Se rechaza con error 409 si el análisis de la tanda está procesando o en pausa; si está en cola, sale de la cola. & Creador o Admin \\
+\hline
 GET    & \path{/experiments/{id}/groups?q=} & Sugiere los grupos del experimento con nombre parecido y la siguiente tanda, para confirmarla al subir un video. & Investiga\-dor \\
 \hline
 
@@ -873,7 +877,7 @@ RF-32 y RN-14).
 
 Reúne lo que el investigador ve al entrar (el \textit{dashboard} con la lista de
 experimentos, sus filtros y los avisos de expiración de video), la eliminación de
-experimentos, el borrado automático de videos y, para el Administrador, el listado de
+experimentos y de tandas, el borrado automático de videos y, para el Administrador, el listado de
 usuarios, el monitoreo del estado del sistema (uso de disco, cola de análisis y alertas
 de capacidad) y la gestión de los experimentos de todo el laboratorio.
 
@@ -1857,7 +1861,7 @@ caso de uso.
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador exportar los resultados del análisis en el formato de su preferencia.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador selecciona el formato de descarga; el sistema genera o recupera el archivo correspondiente con los datos del análisis y lo sirve al navegador de forma inmediata.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador selecciona el formato de descarga; el sistema genera o recupera el archivo correspondiente con los datos del análisis y lo sirve al navegador de forma inmediata. El reporte de resultados en PDF incluye los tiempos por espécimen y conducta, los fragmentos «no se ve» marcados, la tabla «Videos analizados» (el nombre original de cada video, o «nombre no registrado») y el aviso de que el resultado automático no es 100\,\% exacto y conviene revisarlo segundo a segundo (RF-22, RF-32).} \\
 \hline
 \end{tabular}
 
@@ -2033,7 +2037,7 @@ caso de uso.
 \hline
 \textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
 \hline
-1 & Inv. / Admin. & Pulsa la conducta correcta (nado, inmovilidad, escalamiento, conducta activa o «dudosa», que deja el segundo sin conducta). \\
+1 & Inv. / Admin. & Pulsa la conducta correcta (nado, inmovilidad, escalamiento, conducta activa o «no se ve», que deja el segundo sin conducta). \\
 \hline
 2 & Sistema & Aplica el cambio a los segundos correspondientes en un borrador y marca su origen como «corregida». \\
 \hline
@@ -2050,7 +2054,7 @@ caso de uso.
 \hline
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
-1 & El usuario deja un segundo sin conducta a propósito: queda marcado como «dudosa». \\
+1 & El usuario deja un segundo sin conducta a propósito: queda marcado como «no se ve». \\
 \hline
 4 & No se puede guardar: el borrador se conserva en el navegador y el sistema informa el error. \\
 \hline
@@ -2220,6 +2224,67 @@ caso de uso.
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
 3 & El investigador cancela el diálogo de confirmación: el sistema descarta la acción y regresa al \textit{dashboard} sin modificar ningún dato. \\
+\hline
+\end{tabular}
+
+\normalsize\bigskip
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\noindent\textbf{Eliminar tanda}
+
+\noindent\small
+\begin{tabular}{|p{2.8cm}|p{7.9cm}|p{4.0cm}|}
+\hline
+\textbf{Caso de Uso} & Eliminar tanda & \textbf{Identificador:} CU-28 \\
+\hline
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Investigador / Administrador} \\
+\hline
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
+\hline
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-34, RN-18} \\
+\hline
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; tanda existente en un experimento a nombre del investigador, o sesión de Administrador; el análisis de la tanda no está procesando ni en pausa.} \\
+\hline
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Tanda eliminada de forma permanente e irreversible con sus videos, análisis, resultados y especímenes, junto con los reportes del experimento; el grupo se conserva y la letra de la tanda queda libre (ver RN-18).} \\
+\hline
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador eliminar una sola tanda desde la pantalla del grupo sin eliminar el experimento. La acción es permanente, irreversible y requiere confirmación explícita.} \\
+\hline
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador selecciona «Eliminar tanda» en la pantalla del grupo. El sistema solicita confirmación explícita antes de proceder. Tras confirmar, elimina los videos de la tanda, su análisis, resultados y especímenes, y los reportes del experimento.} \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
+\hline
+\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
+\hline
+\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
+\hline
+1 & Investigador & Selecciona «Eliminar tanda» en la pantalla del grupo. \\
+\hline
+2 & Sistema & Muestra la confirmación «Se borrarán el video del Día 1, el del Día 2 y sus resultados. No se puede deshacer.» (ver RN-18). No pide nombre ni contraseña. \\
+\hline
+3 & Investigador & Confirma la eliminación. \\
+\hline
+4 & Sistema & Elimina los videos de la tanda, su análisis, resultados y especímenes de la base de datos y del almacenamiento, y los reportes del experimento. \\
+\hline
+5 & Sistema & Quita la tanda del grupo, que sigue existiendo, deja libre su letra y muestra confirmación de la operación. \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
+\hline
+\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
+\hline
+1 & El usuario no es quien creó el experimento ni es Administrador: el sistema rechaza la acción y no borra nada. \\
+\hline
+1 & El análisis de la tanda está procesando o en pausa: el sistema rechaza la eliminación y no borra nada. Si el análisis está en cola, sale de la cola y la eliminación continúa. \\
+\hline
+3 & El investigador cancela el diálogo de confirmación: el sistema descarta la acción y regresa a la pantalla del grupo sin modificar ningún dato. \\
 \hline
 \end{tabular}
 
@@ -2646,7 +2711,9 @@ El detalle de un experimento reúne sus grupos y el estado de cada tanda. Solo q
 creó el experimento o un administrador puede eliminarlo, y la acción solo pide
 confirmar con un aviso de «¿está seguro?» (RF-27, RN-09), sin nombre ni contraseña. El detalle de un grupo muestra
 sus tandas, los especímenes de cada una con el cilindro que ocuparon y los videos de
-Día~1 y Día~2 con su estado. Desde ahí se abren los resultados de una tanda o los del
+Día~1 y Día~2 con su estado. Cada tanda tiene el botón «Eliminar tanda», con la confirmación
+«Se borrarán el video del Día~1, el del Día~2 y sus resultados. No se puede deshacer.»
+(RF-34, RN-18); el grupo se conserva y la letra queda libre. Desde ahí se abren los resultados de una tanda o los del
 grupo completo, que reúne los análisis de todas sus tandas (RF-19).
 
 \begin{figure}[H]
@@ -2758,9 +2825,13 @@ por minuto (RF-20) y bloques de 5~s (RF-18), donde cada bloque muestra la conduc
 más segundos y, dentro, los cinco segundos que lo componen, para notar las conductas
 breves y presentar los bloques en la unidad de la literatura. La regla con que se decide
 la conducta de cada bloque es RN-15. Los fragmentos «no se ve» se marcan en pantalla y
-en el reporte de resultados.
+en el reporte de resultados. La pantalla muestra además un aviso de que el resultado automático no es
+100\,\% exacto y conviene revisarlo segundo a segundo (RF-32); el reporte de resultados en PDF lleva el
+mismo aviso (RF-22).
 Un selector en la parte superior permite ver el grupo completo, con todas sus tandas, o una
-sola tanda (RF-19); en el grupo completo, cada espécimen se rotula con su tanda. La vista por espécimen
+sola tanda (RF-19); en el grupo completo, cada espécimen se rotula con su tanda, y el encabezado de
+cada tanda indica el video del que salió con «Video: <nombre>» (el nombre original del archivo) o
+«nombre no registrado» si el video es anterior a esa columna. La vista por espécimen
 muestra el tiempo por conducta con media, desviación estándar y varianza de los especímenes que se ven (RF-19, RF-31; el reporte descargable las incluye para esa misma vista), el
 nivel de clasificación del análisis y la leyenda de conductas; en el panel lateral
 se compara la inmovilidad entre los grupos con los videos del Día~2 (RF-21). Esa
@@ -2799,7 +2870,8 @@ descarga en PDF, CSV y XLSX.
 \subsection{Revisión segundo a segundo}
 
 Se abre solo cuando el análisis está completado, desde la pantalla de progreso o
-desde la de resultados (RF-32, RN-14). Muestra el video, con el tubo del espécimen
+desde la de resultados (RF-32, RN-14). El encabezado indica el video con «Video: <nombre>»
+o «nombre no registrado». Muestra el video, con el tubo del espécimen
 que se revisa destacado, y una línea de tiempo por espécimen coloreada por
 conducta: una vista ampliada de 40~s alrededor del segundo actual y otra de los
 300~s completos. Cada segundo ya trae la conducta que puso el sistema; cuando

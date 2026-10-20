@@ -203,7 +203,11 @@ datos y del volumen** (disposición del volumen en la sección 2). Esta sección
 especificación de lo que hace el worker real y de lo que debe imitar tu `worker_fake`.
 
 ### 4.1 Lo que hace el backend al subir un video válido
-1. Guarda el archivo en el volumen (`videos/{idVideo}.{extensión}`).
+1. Guarda el archivo en el volumen (`videos/{idVideo}.{extensión}`). Guarda también en
+   `VIDEO.nombreOriginal` el nombre con que lo subió el usuario, saneado: sin la ruta del cliente
+   (lo que sigue al último `/` o `\`), sin caracteres de control ni espacios a los lados, máximo 255
+   caracteres (vacío → nulo), respetando mayúsculas, acentos y extensión. **Nunca se usa para
+   armar rutas** (D-114).
 2. Guarda grupo (si es nuevo), tanda (nueva o existente) y video.
 3. **Solo si la sesión es el Día 2** (D-71), crea una fila en `ANALISIS` con
    `estado = 'en cola'`, el `idVideo` del video y estos **valores de arranque** (D-79):
@@ -488,6 +492,7 @@ erDiagram
           int idTanda FK
           sesion_video sesion
           text archivo
+          varchar nombreOriginal
           numeric duracion
           timestamptz fechaCarga }
   ANALISIS { int idAnalisis PK
@@ -521,7 +526,10 @@ erDiagram
 
 `VIDEO.archivo` admite nulo: queda vacío cuando el video ya se borró (a los 30 días o
 antes, si el disco pasa del 90 %). La fila de `VIDEO` se conserva porque los resultados la
-referencian. `SEGUNDO.conducta` también admite nulo: el worker no decidió ese segundo o el espécimen no se ve.
+referencian. `VIDEO.nombreOriginal` (D-114) es el nombre del archivo como lo subió el usuario,
+solo para mostrarlo en Resultados, Revisión y el reporte PDF; es nulo en los videos subidos antes
+del 20-oct-2026, que la interfaz muestra como «nombre no registrado». Va en la tabla y no en un
+archivo del volumen para que entre en el respaldo de la base (D-18) y sobreviva al borrado del video. `SEGUNDO.conducta` también admite nulo: el worker no decidió ese segundo o el espécimen no se ve.
 
 No se guarda el número con que el laboratorio identifica a cada espécimen (D-55): un
 espécimen se distingue por su posición en el cuadro, `ESPECIMEN.numeroCilindro`. Como ese número se repite en cada tanda de
@@ -637,6 +645,7 @@ Estos nombres los propone este documento; confírmalos con el usuario:
 | Completar la recuperación de contraseña con el enlace | `POST /auth/reset` |
 | Actualizar nombre y correo del perfil propio | `PATCH /users/me` |
 | Eliminar un experimento (rechaza con 409 si algún análisis está `procesando` o `en pausa`; los `en cola` salen de la cola) | `DELETE /experiments/{id}` |
+| Eliminar una tanda con sus videos del Día 1 y del Día 2 y sus resultados; el grupo se conserva y la letra queda libre. Solo el creador del experimento o un Administrador (403); 409 si su análisis está `procesando` o `en pausa`; si está `en cola`, sale de la cola. Responde 204 (R-17, D-115) | `DELETE /experiments/{id}/tandas/{idTanda}` |
 | Ver la pausa de un análisis (imagen fija, recuadro actual y tiempo que queda) | `GET /experiments/{id}/analyses/{idAnalisis}/pause` y `GET .../pause/image` |
 | Ajustar el recuadro de un cilindro y continuar (quien subió el video o un Administrador; 409 si ya no está `en pausa`) | `POST /experiments/{id}/analyses/{idAnalisis}/pause/adjust` |
 | Cancelar un análisis en pausa (quien subió el video o un Administrador; 409 si ya no está `en pausa`) | `POST /experiments/{id}/analyses/{idAnalisis}/cancel` |
@@ -674,7 +683,7 @@ menos de 7 días.
 {"idExperimento": 7, "nombre": "Exp. A", "fecha": "2026-10-01", "notas": "", "estado": "completado",
  "grupos": [{"idGrupo": 1, "etiqueta": "Control", "tipo": "control", "tratamiento": "Salina",
    "tandas": [{"idTanda": 1, "ordinal": 1, "letra": "A", "nCilindros": 4,
-     "videos": [{"idVideo": 1, "sesion": "Dia 2", "duracion": 300.0,
+     "videos": [{"idVideo": 1, "sesion": "Dia 2", "nombreOriginal": "acu-yintang2.mp4", "duracion": 300.0,
                  "videoDisponible": true, "idAnalisis": 1}]}]}]}
 ```
 
@@ -698,6 +707,7 @@ ya tiene un video de esa sesión.
 **Resultados.** `GET /experiments/{id}/results`. `data`:
 ```json
 {"especimenes": [{"tanda": "Control · A", "ordinal": 1, "numeroCilindro": 2,
+   "nombreVideo": "acu-yintang2.mp4",
    "nivelClasif": "preciso", "revisado": false,
    "totales": {"nado activo": {"segundos": 60, "porcentaje": 20.0},
                "inmovilidad": {"segundos": 180, "porcentaje": 60.0},
@@ -708,7 +718,8 @@ ya tiene un video de esa sesión.
 conducta) por espécimen; `results/groups`, el promedio por conducta de cada grupo, los
 especímenes con dato faltante y un aviso si el grupo mezcla niveles `preciso` y `agrupado`;
 `results/blocks`, para cada espécimen su lista de bloques con la conducta mayoritaria y sus cinco
-segundos. `revisado` es verdadero si algún `origen` del espécimen no es `maquina`.
+segundos. `revisado` es verdadero si algún `origen` del espécimen no es `maquina`. `nombreVideo` es el
+`nombreOriginal` del video del Día 2 de su tanda (`null` si no se registró); `results/byminute` lo trae igual.
 
 **Pausa.** `GET /experiments/{id}/analyses/{idAnalisis}/pause`. `data`:
 ```json
@@ -721,7 +732,7 @@ segundos. `revisado` es verdadero si algún `origen` del espécimen no es `maqui
 
 **Revisión.** `GET /experiments/{id}/analyses/{idAnalisis}/review`. `data`:
 ```json
-{"puedeCorregir": true, "videoUrl": "/experiments/7/analyses/1/video",
+{"puedeCorregir": true, "videoUrl": "/experiments/7/analyses/1/video", "nombreVideo": "acu-yintang2.mp4",
  "especimenes": [{"numeroCilindro": 1, "tanda": "Control · A",
    "recuadro": {"x0": 245, "y0": 483, "x1": 577, "y1": 927},
    "segundos": [{"segundo": 1, "conducta": "nado activo", "origen": "maquina"},
@@ -756,6 +767,7 @@ contraseña temporal **una sola vez**: `{"passwordTemporal": "..."}`.
 | R-14 | Solo se puede revisar un análisis en estado `completado`. Al revisar, el usuario corrige las etiquetas segundo a segundo; cada corrección queda en `SEGUNDO` con `origen` `confirmada`, `corregida` o `dudosa`, y al guardar el backend solo actualiza `SEGUNDO`: los totales por minuto no se guardan, se calculan desde `SEGUNDO` (D-52). La conducta que puso el sistema se reemplaza al corregir; `origen` conserva que el segundo fue revisado. **Solo corrigen el investigador que subió el video y el Administrador** (D-57). Corregir etiquetas no cambia el modelo ni el video: si lo que cambia es el video o el modelo, es un análisis nuevo (reinicio, R-04). El video que se reproduce es la copia H.264 que el worker genera al terminar (D-58). |
 | R-15 | Si en un segundo no se ve al espécimen, ese segundo se registra como "no se ve". Tres segundos seguidos así dejan el análisis `en pausa`, se guarda una imagen fija de ese instante, se avisa al usuario con una notificación `analisis en pausa` y se le pide ajustar el recuadro del cilindro. El worker atiende mientras tanto el siguiente análisis. Con el ajuste, el análisis vuelve al frente de la cola y continúa desde el segundo de la pausa. Si el usuario cancela, o no responde en 5 minutos, el análisis pasa a `cancelado` (con notificación `analisis cancelado` solo si fue por falta de respuesta) (RN-17, D-59, D-67, D-89). |
 | R-16 | Siempre debe existir al menos un Administrador activo: el backend rechaza desactivar la última cuenta de Administrador activa o quitarle el rol (RN-16, D-61, D-72). El Administrador sí puede cambiar el rol de una cuenta desde el panel de administración. |
+| R-17 | Borrar una tanda es permanente: se van sus videos del Día 1 y del Día 2, su análisis, observaciones, segundos y especímenes, en una sola transacción de las hojas hacia arriba (`SEGUNDO` → `OBSERVACION` → `ANALISIS` → `VIDEO` → `ESPECIMEN` → `TANDA`), y después sus archivos (`videos/{idVideo}.*` y `analisis/{idAnalisis}/`). También se borran los `REPORTE` del experimento, porque sus resultados cambian. Las mismas garantías que R-08: confirmación explícita, solo quien creó el experimento o un Administrador (403 a los demás), 409 si su análisis está `procesando` o `en pausa`, y si está `en cola` sale de la cola. **El grupo se conserva** aunque quede sin tandas, y la letra (`ordinal`) queda libre para volver a subir. Sirve para corregir un video mal subido sin perder el resto del experimento (D-115). |
 
 Otras decisiones tomadas:
 - **Progreso:** el backend calcula el porcentaje por análisis como **un tercio fijo por
@@ -794,6 +806,7 @@ Las ejecuta el **worker** (D-82), no el backend, **una vez al día a una hora fi
 |---|---|---|
 | Borrar videos vencidos | Diaria | Elimina el archivo del video (y su copia `web.mp4`) 30 días después de `ANALISIS.fechaAnalisis` si `estado = completado`. La fila de `VIDEO` se conserva y su `archivo` queda en nulo. También borra las carpetas de pausa (`pausa.json`, `pausa.jpg`) que hayan quedado huérfanas. |
 | Aviso de vencimiento | Diaria | Marca los videos a menos de 7 días del borrado para que el dashboard los muestre con nombre del experimento y fecha exacta. |
+| Respaldar la base | Diaria | **[PENDIENTE de construir]** Respaldo completo de PostgreSQL con `pg_dump` (experimentos, resultados, cuentas); conserva los últimos 7 días y borra los más viejos (D-18). Es distinto del borrado de videos: esto respalda la base, no los archivos. |
 | Vigilar disco | Diaria y antes de cada análisis | Al superar **80 %**, crea `NOTIFICACION` tipo `alerta de disco` para el administrador. Al superar **90 %**, borra los videos más antiguos (deja `VIDEO.archivo` en nulo) y crea una `NOTIFICACION` tipo `video borrado` para el investigador de cada experimento afectado. |
 
 La fecha de borrado se **deriva** (`fechaAnalisis + 30 días`). No hay columna para ella y
@@ -899,7 +912,14 @@ Reglas del paso 2:
 - Muestra errores de validación por campo (campos obligatorios vacíos).
 - Estados: vacío, lleno, subiendo, error de formato, errores de campo, éxito.
 
-Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_experimento.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_carga_video.puml` (Anexo A.9).
+**Eliminar tanda (D-115, R-17).** En la pantalla del grupo, cada tanda tiene el botón
+«Eliminar tanda», visible solo para quien creó el experimento o un Administrador. Pide
+confirmación explícita con el texto «Se borrarán el video del Día 1, el del Día 2 y sus
+resultados. No se puede deshacer.». Si el análisis de la tanda está `procesando` o
+`en pausa`, muestra el motivo del 409 y no borra nada. Al terminar, la tanda desaparece del
+grupo, el grupo sigue en el experimento y su letra queda libre para subir de nuevo.
+
+Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_experimento.puml`, `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_carga_video.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_eliminar_tanda.puml` (Anexo A.9).
 
 ### 9.4 Progreso del análisis
 Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\progreso.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\progreso.png`).
@@ -961,6 +981,11 @@ Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\r
 Cuatro pestañas: por espécimen, comparación entre grupos (Día 2), línea de tiempo por
 minuto y bloques de 5 s. En la de bloques, cada bloque muestra la conducta con más segundos
 y, al abrirlo, sus cinco segundos, para notar las conductas breves.
+
+**Nombre del video (D-114).** El encabezado de cada tanda dice «Video: <nombre>» con el
+`nombreVideo` de la respuesta, o «nombre no registrado» si es `null`; en el grupo completo se ve uno
+por tanda. El reporte de resultados en PDF trae una tabla «Videos analizados» (Grupo · Tanda, nombre
+del video y duración). Siempre visible, no depende del modo desarrollador.
 
 **Grupo completo o una tanda (RF-19, D-93).** Arriba de las pestañas hay un selector «Ver»: el investigador elige los resultados del **grupo completo**, con todas sus tandas, o los de **una sola tanda**. No hace falta un endpoint nuevo: `GET /experiments/{id}/results` ya devuelve cada espécimen con su `tanda`, y el frontend filtra por grupo o por tanda. En el grupo completo cada espécimen se rotula con su tanda («Tanda A · Espécimen 2»), la tabla suma sus especímenes y los renglones de media, desviación estándar y varianza (RF-31) se calculan sobre los especímenes que se ven: en el grupo completo son las del grupo y en una tanda, las de esa tanda. El reporte descargable (`report/csv` y `report/xlsx`) las incluye para esa misma vista: recibe como parámetro el grupo (`?grupo={idGrupo}`) o la tanda (`?tanda={idTanda}`), y el nombre del archivo dice cuál es. `results/groups` devuelve, además del promedio, la desviación estándar y la varianza por conducta de cada grupo, con todas sus tandas. El nombre del archivo exportado dice si es del grupo o de la tanda. Se llega desde el detalle del grupo (`mockups/v2/grupo.html`), que tiene el botón «Ver resultados del grupo completo» y, en cada tanda, «Ver resultados de esta tanda». El grupo completo reúne solo las tandas con análisis completado; las demás se señalan como faltantes (RN-12).
 
@@ -1030,7 +1055,8 @@ Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\r
 Se abre **solo cuando el análisis está `completado`**, desde Progreso o Resultados
 (regla R-14), y **solo para el investigador que subió el video y el Administrador**
 (D-57); cualquier otro usuario recibe 403. Lee y guarda en el servidor. Tema oscuro,
-pantalla completa. Se revisa **un espécimen a la vez**, con el video corriendo.
+pantalla completa. Se revisa **un espécimen a la vez**, con el video corriendo. El encabezado
+muestra «Video: <nombre>» con `nombreVideo`, o «nombre no registrado» (D-114).
 
 ```
 +-------------------------------------------------------------------------+
@@ -1224,7 +1250,7 @@ sequenceDiagram
 ```
 
 Las demás secuencias (inicio y cierre de sesión, cambio y recuperación de contraseña, gestión
-de usuarios, perfil, crear y eliminar experimento, pausa y ajuste del recuadro, revisión segundo
+de usuarios, perfil, crear y eliminar experimento, eliminar tanda, pausa y ajuste del recuadro, revisión segundo
 a segundo, resultados, notificaciones y tareas programadas) están en el Anexo A, A.8 a A.11.
 
 ## 11. Decisiones abiertas y resueltas
@@ -1327,6 +1353,21 @@ a segundo, resultados, notificaciones y tareas programadas) están en el Anexo A
     **Por defecto:** los reportes usan los datos actuales de `SEGUNDO` (con las
     correcciones) e indican si el análisis tuvo revisión humana (algún `origen` distinto de
     `maquina`).
+19. **Nombre original del video. Resuelto (usuario, 20-oct-2026, D-114).** El backend guardaba
+    el archivo como `videos/{idVideo}.{ext}` y el nombre con que se subió se perdía, así que en
+    Resultados y en los reportes no se sabía de qué grabación salía cada resultado. Se agrega
+    `VIDEO.nombreOriginal varchar(255)`, con nulo: solo para mostrar, **nunca para armar rutas**.
+    Se descartó guardarlo en un archivo junto al video porque quedaría fuera del respaldo de la
+    base (D-18) y se perdería al borrar el video a los 30 días, mientras que los resultados se
+    conservan siempre. Los videos anteriores quedan en nulo («nombre no registrado») y no se
+    rellenan a mano. Ver §4.1, §5, §6.1, §9.5, §9.7 y los Anexos A y B.
+20. **Eliminar una tanda. Resuelto (usuario, 20-oct-2026, D-115).** Antes solo se podía borrar
+    el experimento entero (R-08). Si un video se subía mal, la tanda quedaba ocupada:
+    `UNIQUE (idTanda, sesion)` no deja subir otro video de esa sesión y la letra no se libera.
+    Pasó con `acu-yintang2`, registrado con 4 cilindros cuando tenía 3 especímenes. Ahora
+    `DELETE /experiments/{id}/tandas/{idTanda}` borra solo esa tanda, con las reglas de R-17.
+    El grupo se conserva. **No cambia el esquema:** las llaves siguen `NO ACTION` y el backend
+    borra en orden. Ver §6, §7, §9.3 y el Anexo A.9.
 
 ## 12. Orden de construcción sugerido [PROPUESTA]
 
@@ -1718,6 +1759,7 @@ entity VIDEO {
   idTanda : integer <<FK>>
   sesion : sesion_video
   archivo : text (nulo = video borrado)
+  nombreOriginal : varchar(255) (nulo; solo para mostrar, D-114)
   duracion : numeric(p,s)
   fechaCarga : timestamptz
   ..
@@ -1891,6 +1933,7 @@ package P2_Experimentos_y_carga_de_video {
     -id : Integer
     -sesion : String
     -archivo : String
+    -nombreOriginal : String
     -duracion : Float
     -fechaCarga : DateTime
     +validarFormato() : Boolean
@@ -2282,6 +2325,7 @@ rectangle "Plataforma Web FST - Paquete 5" {
   usecase "Avisar expiracion de video" as UC52
   usecase "Eliminar experimento" as UC53
   usecase "Confirmar eliminacion" as UC53a
+  usecase "Eliminar tanda" as UC59
   usecase "Borrar video automaticamente" as UC54
   usecase "Conservar resultados y reportes" as UC55
   usecase "Listar usuarios" as UC56
@@ -2291,6 +2335,7 @@ rectangle "Plataforma Web FST - Paquete 5" {
 }
 INV --> UC51
 INV --> UC53
+INV --> UC59
 ADMIN --> UC56
 ADMIN --> UC57
 ADMIN --> UC58
@@ -2300,6 +2345,7 @@ UC52 ..> UC51 : <<extend>>\n[video expira en < 7 dias]
 UC51a ..> UC51 : <<extend>>\n[aplica filtro]
 UC57a ..> UC57 : <<extend>>\n[disco > 80%]
 UC53 ..> UC53a : <<include>>
+UC59 ..> UC53a : <<include>>
 UC54 ..> UC55 : <<include>>
 @enduml
 ```
@@ -2933,6 +2979,44 @@ end note
 @enduml
 ```
 
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_eliminar_tanda.puml` (D-115, R-17)
+
+```plantuml
+@startuml seq_eliminar_tanda
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant "Archivos" as fs
+
+u -> ui: en la pantalla del grupo elige\n"Eliminar tanda"
+ui -> u: "Se borrarán el video del Día 1, el del Día 2\ny sus resultados. No se puede deshacer."
+u -> ui: confirma
+ui -> api: DELETE /experiments/{id}/tandas/{idTanda}
+api -> db: lee la tanda, el creador del experimento\ny el estado de su análisis
+db --> api: datos
+alt el usuario no creó el experimento ni es Administrador
+  api --> ui: 403
+else el análisis de la tanda está "procesando" o "en pausa"
+  api --> ui: 409, "Espera a que termine el análisis o cancélalo"
+else se puede eliminar
+  opt el análisis está "en cola"
+    api -> api: lo saca de la cola
+  end
+  api -> db: borra en orden, de las hojas hacia arriba:\nSEGUNDO, OBSERVACION, ANALISIS,\nVIDEO, ESPECIMEN, TANDA,\ny los REPORTE del experimento\n(todo en una sola transacción)
+  db --> api: confirma
+  api -> fs: borra los videos de la tanda\ny la carpeta de su análisis
+  api --> ui: 204 No Content
+  ui --> u: quita la tanda del grupo;\nel grupo se conserva y la letra queda libre
+end
+@enduml
+```
+
 Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_revision_segundos.puml`
 
 ```plantuml
@@ -3309,10 +3393,13 @@ CREATE TABLE video (
     REFERENCES tanda (idtanda) ON UPDATE NO ACTION ON DELETE NO ACTION,
   sesion      sesion_video NOT NULL,
   archivo     text,                         -- ruta dentro del volumen; nula cuando el video ya se borro
+  nombreoriginal varchar(255),              -- nombre como lo subio el usuario, solo para mostrar (D-114)
   duracion    numeric(8,2) NOT NULL CHECK (duracion > 0),    -- segundos
   fechacarga  timestamptz  NOT NULL DEFAULT now(),
   CONSTRAINT uq_video_sesion UNIQUE (idtanda, sesion)
 );
+-- En bases creadas antes del 20-oct-2026, el backend agrega la columna al arrancar:
+-- ALTER TABLE video ADD COLUMN IF NOT EXISTS nombreoriginal varchar(255);
 
 CREATE TABLE analisis (
   idanalisis       integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

@@ -1,0 +1,33 @@
+@startuml seq_eliminar_tanda
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant "Archivos" as fs
+
+u -> ui: en la pantalla del grupo elige\n"Eliminar tanda"
+ui -> u: "Se borrarán el video del Día 1, el del Día 2\ny sus resultados. No se puede deshacer."
+u -> ui: confirma
+ui -> api: DELETE /experiments/{id}/tandas/{idTanda}
+api -> db: lee la tanda, el creador del experimento\ny el estado de su análisis
+db --> api: datos
+alt el usuario no creó el experimento ni es Administrador
+  api --> ui: 403
+else el análisis de la tanda está "procesando" o "en pausa"
+  api --> ui: 409, "Espera a que termine el análisis o cancélalo"
+else se puede eliminar
+  opt el análisis está "en cola"
+    api -> api: lo saca de la cola
+  end
+  api -> db: borra en orden, de las hojas hacia arriba:\nSEGUNDO, OBSERVACION, ANALISIS,\nVIDEO, ESPECIMEN, TANDA,\ny los REPORTE del experimento\n(todo en una sola transacción)
+  db --> api: confirma
+  api -> fs: borra los videos de la tanda\ny la carpeta de su análisis
+  api --> ui: 204 No Content
+  ui --> u: quita la tanda del grupo;\nel grupo se conserva y la letra queda libre
+end
+@enduml
