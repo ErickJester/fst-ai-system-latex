@@ -84,7 +84,7 @@ end
 alt algún análisis llegó a "completado"
   ui -> inv: habilita el acceso a los resultados\n(ver seq_consulta_resultados.puml)
 else algún análisis quedó "en pausa"
-  ui -> inv: avisa que el sistema no vio al espécimen,\nmuestra el tiempo que queda de los 5 minutos\ny los botones "Ajustar y continuar" y "Cancelar análisis"\n(ver seq_pausa_y_ajuste.puml y RN-17)
+  ui -> inv: avisa que el sistema no vio al espécimen,\nmuestra el tiempo que queda de las 72 horas\ny los botones "Ajustar y continuar" y "Cancelar análisis"\n(ver seq_pausa_y_ajuste.puml y RN-17)
 else algún análisis quedó "cancelado"
   ui -> inv: muestra que el análisis se canceló, por falta de respuesta\no porque el usuario lo canceló (ver RN-17)
 else algún análisis llegó a "error"

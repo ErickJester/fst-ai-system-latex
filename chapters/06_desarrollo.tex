@@ -448,8 +448,8 @@ Si durante la clasificación un espécimen no se ve tres segundos seguidos (RN-1
 pone el análisis en pausa: guarda la imagen fija del instante, crea el archivo de pausa, avisa al usuario
 y sigue con el siguiente análisis de la cola. La pausa tiene tres salidas. Si el usuario ajusta el
 recuadro, el análisis vuelve a la cola y el \textit{worker} lo termina; si lo cancela, queda cancelado;
-y si no responde en el plazo (cinco minutos por omisión), el \textit{worker} lo cancela por su cuenta y
-crea el aviso de falta de respuesta.
+y si nadie ajusta el recuadro en el plazo (72 horas por omisión, configurable), el \textit{worker} lo
+cancela por su cuenta y crea la notificación «análisis cancelado». La espera no detiene al \textit{worker}, que atiende los demás análisis, y el aviso de la pausa llega por correo y a la campanita.
 
 \subsection{Avance, modelo y bibliotecas}
 
