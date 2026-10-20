@@ -30,13 +30,14 @@ El backend dejó de ser Flask (rama `poc/backend-spring` de `fst-ai-system`). Qu
 
 ### B. Capítulo 6 (esqueleto)
 
-`chapters/06_desarrollo.tex` se reemplazó por un capítulo nuevo; **sigue desactivado en `main.tex`**.
-**Ya redactadas (19-oct), contra el código de la rama `poc/backend-spring` y del frontend:** entorno de
-desarrollo (tabla de versiones), backend en Spring Boot (estructura, seguridad, carga de video,
-resultados, rutas implementadas y lo que falta), worker real y worker simulado, frontend, Docker
-Compose (composición de desarrollo y versión portable) y diferencias entre el diseño y lo construido.
-**Siguen vacías:** el *pipeline* y el clasificador. El texto viejo (YOLO, ByteTrack, línea de agua)
-quedó en `docs/borradores/06_desarrollo_anterior_tracker.tex`.
+`chapters/06_desarrollo.tex` se reemplazó por un capítulo nuevo y **ya está activado en `main.tex`**
+(el PDF pasa de 194 a 218 páginas). Se redactó el 19-oct contra el código de la rama
+`poc/backend-spring` y del frontend: entorno de desarrollo (tabla de versiones), *pipeline*,
+clasificador, backend en Spring Boot (estructura, seguridad, carga de video, resultados, rutas
+implementadas y lo que falta), worker real y worker simulado, frontend, Docker Compose (composición de
+desarrollo y versión portable) y diferencias entre el diseño y lo construido. El texto viejo (YOLO,
+ByteTrack, línea de agua) quedó en `docs/borradores/06_desarrollo_anterior_tracker.tex`.
+**Erick debe revisar las secciones del *pipeline* y del clasificador**, que describen su código.
 
 ### C. Otros cambios
 
@@ -80,9 +81,15 @@ quedó en `docs/borradores/06_desarrollo_anterior_tracker.tex`.
    administración de cuentas, la recuperación de contraseña, la pausa, CSV y XLSX, y el borrado
    completo de un experimento. ¿Cambia algo en el cronograma o en el análisis de riesgos del cap. 4?
    Hoy no hay un riesgo que lo cubra.
-7. **Cap. 6, pipeline y clasificador:** ¿qué parte es definitiva para describirla? Esas dos
-   secciones siguen vacías. El código ya está en `pipeline/` (copia de `fst_auto`) y en
-   `fst-etiquetador/cnn`.
+7. **Cap. 6, pipeline y clasificador:** se escribieron desde `pipeline/` (copia de `fst_auto`) y
+   `fst-etiquetador/cnn`. ¿Es eso lo definitivo? Las cifras de desempeño no se incluyeron: el código
+   imprime otras medidas (por ejemplo kappa) que `CLAUDE.md` prohíbe en el documento.
+12. **La red de cuatro salidas todavía no es la que corre.** Los caps. 3 y 5 describen la red con
+    **cuatro** salidas y sin umbral (D-78 y D-94), que es la que se está desarrollando. El código copiado
+    en `pipeline/` (`segundos.regla` y `probar_seg.py`) es una etapa intermedia: **tres** clases y una
+    regla de tres pasos con umbral 0.80 de la que sale la conducta activa. La guía (sección 4.9) también
+    habla del 0.80. El cap. 6 lo presenta así en «Diferencias». ¿Cuándo estará la red de cuatro salidas
+    y se actualizará el worker? Si cambia el plazo, hay que decirlo en el cap. 6.
 8. **Pausa (RN-17):** el worker real no la implementa porque el modelo no detecta que el espécimen no
    se ve; solo está en `worker_fake`. El cap. 6 lo dice en «Diferencias». ¿Se deja así, o el cap. 4 y
    el cap. 5 deben decir que la pausa es solo del simulador por ahora?
@@ -92,6 +99,28 @@ quedó en `docs/borradores/06_desarrollo_anterior_tracker.tex`.
     los segundos con el mismo modelo en la PC. El cap. 6 la menciona (RNF-14). ¿Es correcto citarla?
 11. **Dos composiciones de Docker:** la de desarrollo y la portable. El `docker-compose.yml` de la
     raíz del repositorio de la aplicación todavía es el de Flask. ¿Se borra o se actualiza?
+
+### G. El cap. 6 ya describe el sistema completo: lo que el código aún no tiene (19-oct)
+
+**Actualización del 20-oct:** Erick reescribió el cap. 6 (decisiones D-106 a D-109, commit `559b00b`): un
+solo *worker*, sin simulador, sin «diferencias entre el diseño y lo construido», sin «lo que falta» y sin
+resultados de pruebas. Esa versión es la que quedó; las secciones del simulador y de diferencias que se
+describen arriba (sección B) ya no existen. Al integrar se corrigieron además doce filas de la tabla de
+rutas de su versión, que terminaban en una sola barra invertida y rompían la compilación.
+
+Por indicación de Vanesa, el cap. 6 se reescribió sin «hasta ahora», sin conteos de avance y sin listas
+de pendientes, y describe **todas** las rutas del diseño. Para que no se pierda, lo que el código de
+`poc/backend-spring` todavía no tiene y el cap. 6 describe como existente:
+
+- Rutas: `POST /auth/recover`, `POST /auth/reset`, las cuatro de `/admin/*`, la pausa (`pause`,
+  `pause/image`, `pause/adjust`, `cancel`), `restart`, `results/blocks`, `report/csv` y `report/xlsx`.
+- `DELETE /experiments/{id}` completo (hoy solo si el experimento no tiene grupos).
+- Reportes guardados en `REPORTE` con vigencia, y el correo de cada notificación.
+- Verificación de rol Administrador en `/admin/*` y la regla RN-16.
+- La pausa en el worker real (el modelo no detecta que el espécimen no se ve).
+- El checklist del backend marcaba 70 de 147 casillas al 19-oct.
+
+Antes de entregar el documento final, conviene que lo descrito coincida con el código.
 
 ### F. Dónde mirar
 
