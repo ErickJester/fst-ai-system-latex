@@ -30,11 +30,13 @@ El backend dejó de ser Flask (rama `poc/backend-spring` de `fst-ai-system`). Qu
 
 ### B. Capítulo 6 (esqueleto)
 
-`chapters/06_desarrollo.tex` se reemplazó por un esqueleto; **sigue desactivado en `main.tex`**.
-Cada sección dice qué va, de qué archivo del código sale, su estado hoy y con qué RF, RN o CU
-se enlaza. El texto viejo (YOLO, ByteTrack, línea de agua) quedó en
-`docs/borradores/06_desarrollo_anterior_tracker.tex`. La sección «Diferencias entre el diseño y
-lo construido» ya lleva la justificación del cambio de Flask a Spring Boot y su costo (dos lenguajes).
+`chapters/06_desarrollo.tex` se reemplazó por un capítulo nuevo; **sigue desactivado en `main.tex`**.
+**Ya redactadas (19-oct), contra el código de la rama `poc/backend-spring` y del frontend:** entorno de
+desarrollo (tabla de versiones), backend en Spring Boot (estructura, seguridad, carga de video,
+resultados, rutas implementadas y lo que falta), worker real y worker simulado, frontend, Docker
+Compose (composición de desarrollo y versión portable) y diferencias entre el diseño y lo construido.
+**Siguen vacías:** el *pipeline* y el clasificador. El texto viejo (YOLO, ByteTrack, línea de agua)
+quedó en `docs/borradores/06_desarrollo_anterior_tracker.tex`.
 
 ### C. Otros cambios
 
@@ -74,10 +76,22 @@ lo construido» ya lleva la justificación del cambio de Flask a Spring Boot y s
 5. **Reparto de responsabilidades del cap. 1** (líneas 379-385): dice que Ángel hace el sistema web y
    Vanesa el *pipeline*. Los commits muestran que el backend y el etiquetador son de `ErickJester` y
    el frontend de Vanesa. No se tocó; conviene decidir cuál es la versión que se presenta.
-6. **Avance del backend:** 18 de 128 casillas al 15-oct. ¿Cambia algo en el cronograma o en el
-   análisis de riesgos del cap. 4? Hoy no hay un riesgo que lo cubra.
-7. **Cap. 6:** ¿qué parte del *pipeline* y del clasificador ya es definitiva para describirla? Las
-   secciones de esas dos partes siguen vacías hasta que lo digas.
+6. **Avance del backend:** 70 de 147 casillas al 19-oct (eran 18 de 128 el 15-oct). Faltan la
+   administración de cuentas, la recuperación de contraseña, la pausa, CSV y XLSX, y el borrado
+   completo de un experimento. ¿Cambia algo en el cronograma o en el análisis de riesgos del cap. 4?
+   Hoy no hay un riesgo que lo cubra.
+7. **Cap. 6, pipeline y clasificador:** ¿qué parte es definitiva para describirla? Esas dos
+   secciones siguen vacías. El código ya está en `pipeline/` (copia de `fst_auto`) y en
+   `fst-etiquetador/cnn`.
+8. **Pausa (RN-17):** el worker real no la implementa porque el modelo no detecta que el espécimen no
+   se ve; solo está en `worker_fake`. El cap. 6 lo dice en «Diferencias». ¿Se deja así, o el cap. 4 y
+   el cap. 5 deben decir que la pausa es solo del simulador por ahora?
+9. **Quién subió el video:** la base no lo guarda y el backend usa al creador del experimento
+   (`subidoPor`). El cap. 6 lo dice. ¿Hace falta una columna, o se deja así?
+10. **Cifra de repetibilidad:** el checklist anota que el modelo en Docker coincide en el 95.75 % de
+    los segundos con el mismo modelo en la PC. El cap. 6 la menciona (RNF-14). ¿Es correcto citarla?
+11. **Dos composiciones de Docker:** la de desarrollo y la portable. El `docker-compose.yml` de la
+    raíz del repositorio de la aplicación todavía es el de Flask. ¿Se borra o se actualiza?
 
 ### F. Dónde mirar
 
