@@ -334,21 +334,133 @@ Los valores por omisión están en el archivo de ejemplo de variables (Sección~
 
 % ---------------------------------------------------------------------
 \section{Frontend (React y Vite)}
+% [FUENTE] fst-ai-system, rama feat/frontend-v2-servicios, carpeta frontend/ (src/, CHECKLIST.md,
+%   package.json, Dockerfile, Dockerfile.prod y nginx.conf).
+% [ESTADO] Revisado el 19-oct-2026: 117 pruebas pasan y ESLint no reporta avisos.
+
+El \textit{frontend} es una aplicación de una sola página (\textit{single-page application}) escrita
+con React y compilada con Vite. Tiene catorce pantallas, que cubren las siete del diseño del
+Capítulo~5 con sus variantes (por ejemplo, la recuperación de contraseña o el primer acceso), y unas
+7\,500 líneas de código y pruebas. Se construyó a partir de las maquetas de la segunda versión del
+diseño de interfaz, que mandan en lo visual: si una pantalla se aparta de su maqueta, se documenta el
+motivo.
 
 \subsection{Estructura y conexión con la API}
-% [QUÉ VA] Organización de la aplicación, cómo desenvuelve la respuesta
-%   {data, error, status} y el «interruptor por parte» que permite
-%   conectar el backend una ruta a la vez.
-% [FUENTE] fst-ai-system, rama feat/frontend-v2-servicios, carpeta
-%   frontend/src y CHECKLIST.md; PARA_VANESA_API.md.
-% [ESTADO] Pantallas hechas con datos simulados; conexión al backend
-%   en curso.
+
+El código se organiza por función (Tabla~\ref{tab:ch6_front_carpetas}). La decisión de estructura
+más importante es que las pantallas no importan datos: piden todo a una capa de servicios.
+
+\begin{longtable}{|p{3.0cm}|p{10.4cm}|}
+\caption{Organización del código del \textit{frontend}.
+\label{tab:ch6_front_carpetas}}\\
+\hline
+\textbf{Carpeta} & \textbf{Qué contiene} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Carpeta} & \textbf{Qué contiene} \\
+\hline
+\endhead
+\hline
+\endfoot
+
+\texttt{pages} & Una pantalla por archivo: acceso, experimentos, carga de video, progreso, pausa, resultados, revisión y administración. \\
+\hline
+\texttt{components} & Piezas que varias pantallas comparten: la barra superior, el diálogo de eliminar experimento, el recuadro que se arrastra en la pantalla de pausa y la captura de errores. \\
+\hline
+\texttt{services} & La capa de acceso a datos: un módulo por parte del sistema (sesión, experimentos, videos, progreso, resultados, revisión, administración y notificaciones). \\
+\hline
+\texttt{hooks} & Comportamientos reutilizables, como las peticiones asíncronas y la consulta periódica. \\
+\hline
+\texttt{contexts} & La sesión de la cuenta. \\
+\hline
+\texttt{lib} & Las equivalencias entre los nombres del contrato de la API y los que usan las pantallas. \\
+\hline
+\end{longtable}
+
+\textbf{Capa de servicios y modo demostración.} Cada módulo de \texttt{services} puede responder de
+dos maneras: con datos de ejemplo que ya tienen la forma de la API, o llamando al \textit{backend}.
+Por omisión usa los datos de ejemplo (el «modo demostración», que muestra una franja en la pantalla);
+con la variable \texttt{VITE\_USE\_MOCKS} en falso, todo llama a la API. Además, otra variable permite
+conectar una parte a la vez, en el orden en que el \textit{backend} las va teniendo, de modo que
+las pantallas se pudieron construir y probar antes de que existieran las rutas.
+
+\textbf{Cliente HTTP y sesión.} Las llamadas se hacen con Axios. El token JWT se guarda en el
+navegador y se envía en cada petición. Un interceptor desenvuelve la respuesta de la API, que llega con
+los campos \texttt{data}, \texttt{error} y \texttt{status}, y maneja dos casos para todas las pantallas:
+un 401 con sesión (el token caducó) lleva al inicio de sesión con el aviso correspondiente, y un 403 (sin
+permiso para esa sección) lleva a la lista de experimentos. Las rutas se protegen según la cuenta: sin
+sesión se pide iniciar sesión, con una contraseña temporal solo se permite el primer acceso, y la
+administración queda reservada al Administrador. Cada pantalla se descarga la primera vez que se abre,
+para que la aplicación arranque más rápido.
+
+\textbf{Contrato con la API.} Los nombres de campo y las rutas siguen la guía de construcción, que es el
+contrato entre el \textit{backend} y el \textit{frontend}. Donde las pantallas usan otro nombre, el
+módulo \texttt{lib/contrato} traduce en los dos sentidos; por ejemplo, la letra de una tanda se
+convierte en el ordinal entero que guarda la base.
+
+\textbf{Progreso.} La pantalla de progreso consulta el estado del análisis cada 5 segundos mientras
+haya análisis activos y cada 30 si no los hay, sin que el usuario tenga que recargar.
 
 \subsection{Pantallas construidas}
-% [QUÉ VA] Las siete pantallas (inicio de sesión, dashboard, crear
-%   experimento, progreso con pausa, resultados, administración y
-%   revisión segundo a segundo) y su relación con las maquetas v2.
-% [ENLAZA] Sección de interfaz del cap. 5; figuras de figures/mockups/.
+
+La Tabla~\ref{tab:ch6_front_pantallas} resume qué hace cada pantalla y con qué caso de uso del
+Capítulo~5 se relaciona.
+
+\begin{longtable}{|p{3.2cm}|p{7.4cm}|p{2.8cm}|}
+\caption{Pantallas del \textit{frontend}.
+\label{tab:ch6_front_pantallas}}\\
+\hline
+\textbf{Pantalla} & \textbf{Qué permite} & \textbf{Caso de uso} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Pantalla} & \textbf{Qué permite} & \textbf{Caso de uso} \\
+\hline
+\endhead
+\hline
+\endfoot
+
+Acceso & Iniciar sesión con mensaje de error genérico, pedir el enlace de recuperación y restablecer la contraseña. En el primer acceso con contraseña temporal obliga a cambiarla. & CU-01, CU-03, CU-16 \\
+\hline
+Perfil & Actualizar nombre, apellidos, correo y contraseña de la cuenta propia. & CU-18 \\
+\hline
+Experimentos & Listar todos los experimentos del laboratorio con filtros, ver el aviso de videos por vencer y eliminar uno desde la lista con una confirmación, solo quien lo creó o un Administrador. & CU-22, CU-23 \\
+\hline
+Experimento y grupo & Ver el detalle de un experimento, sus grupos y tandas, y el estado de cada análisis. & CU-22 \\
+\hline
+Nuevo experimento y carga de video & Crear el experimento y subir el video de una tanda. Rechaza en el navegador lo que no sea \texttt{.mp4} o \texttt{.mov} y avisa si supera el tamaño máximo, antes de subir. & CU-04, CU-05 \\
+\hline
+Progreso & Seguir las etapas del análisis, ver el mensaje del error y descargar el reporte de diagnóstico. No ofrece cancelar ni reiniciar. & CU-07, CU-08 \\
+\hline
+Pausa & Mostrar la imagen fija del instante en que no se vio al espécimen, con un recuadro que se arrastra y se redimensiona, el tiempo que queda para responder y los botones para ajustar y continuar o cancelar. & CU-07, RN-17 \\
+\hline
+Resultados & Cuatro vistas (por espécimen, comparación entre grupos, por minuto y bloques de 5 s), selector de grupo completo o de una tanda, y descarga en PDF, CSV y XLSX. & CU-09, CU-10, CU-27 \\
+\hline
+Revisión segundo a segundo & Reproducir el video con una línea de tiempo coloreada por conducta y corregir la etiqueta de cada segundo con el teclado; el avance se guarda como borrador en el navegador hasta pulsar «Guardar». Permite reiniciar el análisis. & CU-25, CU-26 \\
+\hline
+Administración & Ver el estado del disco y de la cola, y crear, editar, activar y desactivar cuentas, incluido su rol, sin dejar al sistema sin Administrador activo. & CU-11, CU-12, CU-13, CU-17 \\
+\hline
+\end{longtable}
+
+\subsection{Pruebas y calidad}
+
+El \textit{frontend} tiene 117 pruebas automáticas en siete archivos, escritas con Vitest y
+Testing Library: cubren la capa de servicios, las equivalencias del contrato, la lógica de las
+pantallas y la accesibilidad, que se comprueba con axe-core. Se ejecutaron el 19 de octubre de 2026 y
+todas pasaron; el análisis estático con ESLint no reportó avisos. Todas corren en modo
+demostración, es decir, sin \textit{backend}.
+
+\subsection{Estado de la conexión con el \textit{backend}}
+
+Con los datos de ejemplo, las pantallas funcionan de principio a fin. Según el \textit{checklist} del
+17 de octubre, 139 de las 167 casillas estaban hechas; las 28 pendientes incluyen probar cada pantalla
+contra el \textit{backend} real (o contra el simulador del \textit{worker}), comprobar la aplicación en
+Chrome, Firefox y Edge, y medir que abrir el \textit{dashboard}, filtrar y abrir resultados tarde 3
+segundos o menos. Como el \textit{backend} implementa hasta ahora la gestión de experimentos y el
+reporte en PDF, esa conexión se irá completando conforme existan las demás rutas.
+% [PENDIENTE] Actualizar esta subsección con lo que se pruebe contra el backend real. Confirmar el
+%   puerto de la API: el .env.example del frontend apunta a 8084 y el compose del backend publica 8080.
 
 % ---------------------------------------------------------------------
 \section{Integración y empaquetado con Docker Compose}
