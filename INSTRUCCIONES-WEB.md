@@ -645,6 +645,7 @@ Estos nombres los propone este documento; confírmalos con el usuario:
 | Completar la recuperación de contraseña con el enlace | `POST /auth/reset` |
 | Actualizar nombre y correo del perfil propio | `PATCH /users/me` |
 | Eliminar un experimento (rechaza con 409 si algún análisis está `procesando` o `en pausa`; los `en cola` salen de la cola) | `DELETE /experiments/{id}` |
+| Eliminar una tanda con sus videos del Día 1 y del Día 2 y sus resultados; el grupo se conserva y la letra queda libre. Solo el creador del experimento o un Administrador (403); 409 si su análisis está `procesando` o `en pausa`; si está `en cola`, sale de la cola. Responde 204 (R-17, D-115) | `DELETE /experiments/{id}/tandas/{idTanda}` |
 | Ver la pausa de un análisis (imagen fija, recuadro actual y tiempo que queda) | `GET /experiments/{id}/analyses/{idAnalisis}/pause` y `GET .../pause/image` |
 | Ajustar el recuadro de un cilindro y continuar (quien subió el video o un Administrador; 409 si ya no está `en pausa`) | `POST /experiments/{id}/analyses/{idAnalisis}/pause/adjust` |
 | Cancelar un análisis en pausa (quien subió el video o un Administrador; 409 si ya no está `en pausa`) | `POST /experiments/{id}/analyses/{idAnalisis}/cancel` |
@@ -766,6 +767,7 @@ contraseña temporal **una sola vez**: `{"passwordTemporal": "..."}`.
 | R-14 | Solo se puede revisar un análisis en estado `completado`. Al revisar, el usuario corrige las etiquetas segundo a segundo; cada corrección queda en `SEGUNDO` con `origen` `confirmada`, `corregida` o `dudosa`, y al guardar el backend solo actualiza `SEGUNDO`: los totales por minuto no se guardan, se calculan desde `SEGUNDO` (D-52). La conducta que puso el sistema se reemplaza al corregir; `origen` conserva que el segundo fue revisado. **Solo corrigen el investigador que subió el video y el Administrador** (D-57). Corregir etiquetas no cambia el modelo ni el video: si lo que cambia es el video o el modelo, es un análisis nuevo (reinicio, R-04). El video que se reproduce es la copia H.264 que el worker genera al terminar (D-58). |
 | R-15 | Si en un segundo no se ve al espécimen, ese segundo se registra como "no se ve". Tres segundos seguidos así dejan el análisis `en pausa`, se guarda una imagen fija de ese instante, se avisa al usuario con una notificación `analisis en pausa` y se le pide ajustar el recuadro del cilindro. El worker atiende mientras tanto el siguiente análisis. Con el ajuste, el análisis vuelve al frente de la cola y continúa desde el segundo de la pausa. Si el usuario cancela, o no responde en 5 minutos, el análisis pasa a `cancelado` (con notificación `analisis cancelado` solo si fue por falta de respuesta) (RN-17, D-59, D-67, D-89). |
 | R-16 | Siempre debe existir al menos un Administrador activo: el backend rechaza desactivar la última cuenta de Administrador activa o quitarle el rol (RN-16, D-61, D-72). El Administrador sí puede cambiar el rol de una cuenta desde el panel de administración. |
+| R-17 | Borrar una tanda es permanente: se van sus videos del Día 1 y del Día 2, su análisis, observaciones, segundos y especímenes, en una sola transacción de las hojas hacia arriba (`SEGUNDO` → `OBSERVACION` → `ANALISIS` → `VIDEO` → `ESPECIMEN` → `TANDA`), y después sus archivos (`videos/{idVideo}.*` y `analisis/{idAnalisis}/`). También se borran los `REPORTE` del experimento, porque sus resultados cambian. Las mismas garantías que R-08: confirmación explícita, solo quien creó el experimento o un Administrador (403 a los demás), 409 si su análisis está `procesando` o `en pausa`, y si está `en cola` sale de la cola. **El grupo se conserva** aunque quede sin tandas, y la letra (`ordinal`) queda libre para volver a subir. Sirve para corregir un video mal subido sin perder el resto del experimento (D-115). |
 
 Otras decisiones tomadas:
 - **Progreso:** el backend calcula el porcentaje por análisis como **un tercio fijo por
@@ -910,7 +912,14 @@ Reglas del paso 2:
 - Muestra errores de validación por campo (campos obligatorios vacíos).
 - Estados: vacío, lleno, subiendo, error de formato, errores de campo, éxito.
 
-Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_experimento.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_carga_video.puml` (Anexo A.9).
+**Eliminar tanda (D-115, R-17).** En la pantalla del grupo, cada tanda tiene el botón
+«Eliminar tanda», visible solo para quien creó el experimento o un Administrador. Pide
+confirmación explícita con el texto «Se borrarán el video del Día 1, el del Día 2 y sus
+resultados. No se puede deshacer.». Si el análisis de la tanda está `procesando` o
+`en pausa`, muestra el motivo del 409 y no borra nada. Al terminar, la tanda desaparece del
+grupo, el grupo sigue en el experimento y su letra queda libre para subir de nuevo.
+
+Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_crear_experimento.puml`, `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_carga_video.puml` y `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_eliminar_tanda.puml` (Anexo A.9).
 
 ### 9.4 Progreso del análisis
 Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\progreso.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\progreso.png`).
@@ -1241,7 +1250,7 @@ sequenceDiagram
 ```
 
 Las demás secuencias (inicio y cierre de sesión, cambio y recuperación de contraseña, gestión
-de usuarios, perfil, crear y eliminar experimento, pausa y ajuste del recuadro, revisión segundo
+de usuarios, perfil, crear y eliminar experimento, eliminar tanda, pausa y ajuste del recuadro, revisión segundo
 a segundo, resultados, notificaciones y tareas programadas) están en el Anexo A, A.8 a A.11.
 
 ## 11. Decisiones abiertas y resueltas
@@ -1352,6 +1361,13 @@ a segundo, resultados, notificaciones y tareas programadas) están en el Anexo A
     base (D-18) y se perdería al borrar el video a los 30 días, mientras que los resultados se
     conservan siempre. Los videos anteriores quedan en nulo («nombre no registrado») y no se
     rellenan a mano. Ver §4.1, §5, §6.1, §9.5, §9.7 y los Anexos A y B.
+20. **Eliminar una tanda. Resuelto (usuario, 20-oct-2026, D-115).** Antes solo se podía borrar
+    el experimento entero (R-08). Si un video se subía mal, la tanda quedaba ocupada:
+    `UNIQUE (idTanda, sesion)` no deja subir otro video de esa sesión y la letra no se libera.
+    Pasó con `acu-yintang2`, registrado con 4 cilindros cuando tenía 3 especímenes. Ahora
+    `DELETE /experiments/{id}/tandas/{idTanda}` borra solo esa tanda, con las reglas de R-17.
+    El grupo se conserva. **No cambia el esquema:** las llaves siguen `NO ACTION` y el backend
+    borra en orden. Ver §6, §7, §9.3 y el Anexo A.9.
 
 ## 12. Orden de construcción sugerido [PROPUESTA]
 
@@ -2309,6 +2325,7 @@ rectangle "Plataforma Web FST - Paquete 5" {
   usecase "Avisar expiracion de video" as UC52
   usecase "Eliminar experimento" as UC53
   usecase "Confirmar eliminacion" as UC53a
+  usecase "Eliminar tanda" as UC59
   usecase "Borrar video automaticamente" as UC54
   usecase "Conservar resultados y reportes" as UC55
   usecase "Listar usuarios" as UC56
@@ -2318,6 +2335,7 @@ rectangle "Plataforma Web FST - Paquete 5" {
 }
 INV --> UC51
 INV --> UC53
+INV --> UC59
 ADMIN --> UC56
 ADMIN --> UC57
 ADMIN --> UC58
@@ -2327,6 +2345,7 @@ UC52 ..> UC51 : <<extend>>\n[video expira en < 7 dias]
 UC51a ..> UC51 : <<extend>>\n[aplica filtro]
 UC57a ..> UC57 : <<extend>>\n[disco > 80%]
 UC53 ..> UC53a : <<include>>
+UC59 ..> UC53a : <<include>>
 UC54 ..> UC55 : <<include>>
 @enduml
 ```
@@ -2957,6 +2976,44 @@ note over api, db
   Quién puede eliminar y qué pasa con un análisis
   en curso son propuestas, aún no aprobadas.
 end note
+@enduml
+```
+
+Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_eliminar_tanda.puml` (D-115, R-17)
+
+```plantuml
+@startuml seq_eliminar_tanda
+!theme plain
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant "Archivos" as fs
+
+u -> ui: en la pantalla del grupo elige\n"Eliminar tanda"
+ui -> u: "Se borrarán el video del Día 1, el del Día 2\ny sus resultados. No se puede deshacer."
+u -> ui: confirma
+ui -> api: DELETE /experiments/{id}/tandas/{idTanda}
+api -> db: lee la tanda, el creador del experimento\ny el estado de su análisis
+db --> api: datos
+alt el usuario no creó el experimento ni es Administrador
+  api --> ui: 403
+else el análisis de la tanda está "procesando" o "en pausa"
+  api --> ui: 409, "Espera a que termine el análisis o cancélalo"
+else se puede eliminar
+  opt el análisis está "en cola"
+    api -> api: lo saca de la cola
+  end
+  api -> db: borra en orden, de las hojas hacia arriba:\nSEGUNDO, OBSERVACION, ANALISIS,\nVIDEO, ESPECIMEN, TANDA,\ny los REPORTE del experimento\n(todo en una sola transacción)
+  db --> api: confirma
+  api -> fs: borra los videos de la tanda\ny la carpeta de su análisis
+  api --> ui: 204 No Content
+  ui --> u: quita la tanda del grupo;\nel grupo se conserva y la letra queda libre
+end
 @enduml
 ```
 

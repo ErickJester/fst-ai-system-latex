@@ -340,7 +340,9 @@ con el token descrito arriba y el guardado de las correcciones, que solo actuali
 \subsection{Experimentos, pausa y reinicio}
 
 Eliminar un experimento borra sus grupos, videos, resultados y reportes (RN-09); se rechaza con 409 si
-algún análisis está procesando o en pausa, y los que están en cola salen de la cola. Las rutas de la pausa
+algún análisis está procesando o en pausa, y los que están en cola salen de la cola. Eliminar una tanda
+borra sus videos, análisis, resultados y especímenes y los reportes del experimento, conserva el grupo y
+deja libre la letra de la tanda (RN-18), con el mismo 409. Las rutas de la pausa
 consultan sus datos, entregan la imagen fija, ajustan el recuadro de un cilindro, que devuelve el análisis
 a la cola para que continúe, o la cancelan; las dos últimas responden 409 si el análisis ya no está en
 pausa (RN-17); solo quien subió el video o un Administrador puede ajustar o cancelar. El reinicio de un análisis completado borra el resultado anterior y lo vuelve a encolar
@@ -570,7 +572,7 @@ Perfil & Actualizar nombre, apellidos, correo y contraseña de la cuenta propia.
 \hline
 Experimentos & Listar todos los experimentos del laboratorio con filtros, ver el aviso de videos por vencer y eliminar uno desde la lista con una confirmación, solo quien lo creó o un Administrador. & CU-22, CU-23 \\
 \hline
-Experimento y grupo & Ver el detalle de un experimento, sus grupos y tandas, y el estado de cada análisis. & CU-22 \\
+Experimento y grupo & Ver el detalle de un experimento, sus grupos y tandas, y el estado de cada análisis, y eliminar una tanda con una confirmación, solo quien creó el experimento o un Administrador. & CU-22, CU-28 \\
 \hline
 Nuevo experimento y carga de video & Crear el experimento y subir el video de una tanda. Rechaza en el navegador lo que no sea \texttt{.mp4} o \texttt{.mov} y avisa si supera el tamaño máximo, antes de subir. & CU-04, CU-05 \\
 \hline
