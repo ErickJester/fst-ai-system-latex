@@ -60,7 +60,7 @@ cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 \hline
 \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & \texttt{varchar(8)} & \texttt{preciso} si ningún segundo del análisis quedó como conducta activa; \texttt{agrupado} si al menos uno quedó así \\
 \hline
-\texttt{origen\_\allowbreak{}segundo} & \texttt{varchar(16)} & \texttt{maquina}: conducta puesta por el sistema, sin revisar. \texttt{confirmada}: el usuario vio el segundo y dejó la conducta del sistema. \texttt{corregida}: el usuario vio el segundo y la cambió. \texttt{dudosa}: el segundo quedó sin conducta porque el usuario lo marcó como dudoso \\
+\texttt{origen\_\allowbreak{}segundo} & \texttt{varchar(16)} & \texttt{maquina}: conducta puesta por el sistema, sin revisar. \texttt{confirmada}: el usuario vio el segundo y dejó la conducta del sistema. \texttt{corregida}: el usuario vio el segundo y la cambió. \texttt{dudosa}: el segundo quedó sin conducta porque el usuario lo marcó como «no se ve» \\
 \hline
 \texttt{tipo\_\allowbreak{}conducta} & \texttt{varchar(16)} & \texttt{nado activo}, \texttt{inmovilidad}, \texttt{escalamiento}, \texttt{conducta activa}. La última se usa cuando el clasificador no distingue entre nado y escalamiento \\
 \hline
@@ -160,6 +160,8 @@ cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 \hline
 \texttt{archivo} & \texttt{text} & Sí & & Ruta del archivo de video (\texttt{.mp4} o \texttt{.mov}) en el servidor. Es nula cuando el video ya se borró (RF-25, RN-05); la fila se conserva porque los resultados la referencian \\
 \hline
+\texttt{nombreOriginal} & \texttt{varchar(255)} & Sí & & Nombre del archivo tal como lo subió el usuario, con su extensión (por ejemplo, \texttt{acu-yintang2.mp4}). Solo sirve para mostrarlo en los resultados, la revisión y el reporte de resultados; nunca forma parte de la ruta del archivo. Es nulo en los videos subidos antes de que existiera la columna, que la interfaz muestra como «nombre no registrado» \\
+\hline
 \texttt{duracion} & \texttt{numeric(p,s)} & No & & Duración real del archivo cargado, en segundos \\
 \hline
 \texttt{fechaCarga} & \texttt{timestamptz} & No & & Momento en que terminó la carga \\
@@ -197,7 +199,7 @@ cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 \hline
 \texttt{segundo} & \texttt{smallint} & No & PK; CK entre 1 y 300 & Posición del segundo dentro de la ventana analizada (1 a 300), tras recortar los últimos 300 segundos. El minuto del análisis sale de este número y no se guarda \\
 \hline
-\texttt{conducta} & \texttt{tipo\_\allowbreak{}conducta} & Sí & Dominio & Conducta vigente del segundo, que el usuario puede corregir en la revisión. Queda nula si el sistema no pudo decidir o si el usuario lo marcó como dudoso \\
+\texttt{conducta} & \texttt{tipo\_\allowbreak{}conducta} & Sí & Dominio & Conducta vigente del segundo, que el usuario puede corregir en la revisión. Queda nula si el sistema no pudo decidir o si el usuario lo marcó como «no se ve» \\
 \hline
 \texttt{origen} & \texttt{origen\_\allowbreak{}segundo} & No & Dominio & Quién puso la conducta vigente y cómo (Tabla~\ref{tab:dominios}) \\
 \hline
