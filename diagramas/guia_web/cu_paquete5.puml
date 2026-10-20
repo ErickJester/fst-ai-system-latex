@@ -18,6 +18,7 @@ rectangle "Plataforma Web FST - Paquete 5" {
   usecase "Avisar expiracion de video" as UC52
   usecase "Eliminar experimento" as UC53
   usecase "Confirmar eliminacion" as UC53a
+  usecase "Eliminar tanda" as UC59
   usecase "Borrar video automaticamente" as UC54
   usecase "Conservar resultados y reportes" as UC55
   usecase "Listar usuarios" as UC56
@@ -27,6 +28,7 @@ rectangle "Plataforma Web FST - Paquete 5" {
 }
 INV --> UC51
 INV --> UC53
+INV --> UC59
 ADMIN --> UC56
 ADMIN --> UC57
 ADMIN --> UC58
@@ -36,5 +38,6 @@ UC52 ..> UC51 : <<extend>>\n[video expira en < 7 dias]
 UC51a ..> UC51 : <<extend>>\n[aplica filtro]
 UC57a ..> UC57 : <<extend>>\n[disco > 80%]
 UC53 ..> UC53a : <<include>>
+UC59 ..> UC53a : <<include>>
 UC54 ..> UC55 : <<include>>
 @enduml

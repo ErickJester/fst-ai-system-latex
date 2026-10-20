@@ -267,6 +267,14 @@ RF-27 & Dashboard
         permanente e irreversible y requiere un aviso de confirmación (ver RN-09).
       & Media & Investigador / Admin \\
 \hline
+RF-34 & Dashboard
+      & El investigador debe poder eliminar una sola tanda de un grupo desde la pantalla
+        del grupo, con sus videos del Día~1 y del Día~2, su análisis, sus resultados y sus
+        especímenes, sin eliminar el experimento. Solo lo puede hacer quien creó el
+        experimento o un Administrador. La acción es permanente e irreversible y requiere
+        un aviso de confirmación (ver RN-18).
+      & Media & Investigador / Admin \\
+\hline
 
 % ── Administración ─────────────────────────────────────────
 RF-28 & Administración
@@ -620,6 +628,17 @@ RN-09 & Borrar un experimento es permanente e irreversible: se eliminan el video
         los que están en cola salen de la cola al borrarlo.
       & Previene borrados accidentales y que el sistema pierda los datos de un
         análisis que está usando. Ver RF-27. \\
+\hline
+RN-18 & Eliminar una tanda es permanente e irreversible: se eliminan sus videos del
+        Día~1 y del Día~2, su análisis, sus resultados y sus especímenes, y también los
+        reportes del experimento, porque sus resultados cambian. El grupo se conserva
+        aunque quede sin tandas, y la letra de la tanda queda libre para volver a
+        subirla. Antes de ejecutarlo, el sistema muestra un aviso de confirmación; no pide
+        nombre ni contraseña. Solo lo puede hacer quien creó el experimento o un
+        Administrador. No se puede eliminar una tanda mientras su análisis está
+        procesando o en pausa; si está en cola, sale de la cola al eliminarla.
+      & Mismas garantías que RN-09, aplicadas a una tanda. Permite corregir una tanda
+        subida por error sin perder el resto del experimento. Ver RF-34, RN-09. \\
 \hline
 RN-10 & La interfaz rechaza cualquier archivo que no sea \texttt{.mp4} o
         \texttt{.mov} antes de intentar subirlo al servidor. El servidor rechaza, al

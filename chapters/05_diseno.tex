@@ -716,6 +716,8 @@ GET    & \path{/experiments/{id}}    & Devuelve detalle y estado de un experimen
 \hline
 DELETE & \path{/experiments/{id}}    & Elimina el experimento con sus grupos, videos, resultados y reportes (ver RN-09). Se rechaza con error 409 si algún análisis está procesando o en pausa; los que están en cola salen de la cola. & Creador o Admin \\
 \hline
+DELETE & \path{/experiments/{id}/tandas/{idTanda}} & Elimina la tanda con sus videos, análisis, resultados y especímenes, y los reportes del experimento; el grupo se conserva y la letra queda libre (ver RN-18). Se rechaza con error 409 si el análisis de la tanda está procesando o en pausa; si está en cola, sale de la cola. & Creador o Admin \\
+\hline
 GET    & \path{/experiments/{id}/groups?q=} & Sugiere los grupos del experimento con nombre parecido y la siguiente tanda, para confirmarla al subir un video. & Investiga\-dor \\
 \hline
 
@@ -869,7 +871,7 @@ RF-32 y RN-14).
 
 Reúne lo que el investigador ve al entrar (el \textit{dashboard} con la lista de
 experimentos, sus filtros y los avisos de expiración de video), la eliminación de
-experimentos, el borrado automático de videos y, para el Administrador, el listado de
+experimentos y de tandas, el borrado automático de videos y, para el Administrador, el listado de
 usuarios, el monitoreo del estado del sistema (uso de disco, cola de análisis y alertas
 de capacidad) y la gestión de los experimentos de todo el laboratorio.
 
@@ -2223,6 +2225,67 @@ caso de uso.
 
 \noindent\rule{\linewidth}{0.4pt}
 
+\noindent\textbf{Eliminar tanda}
+
+\noindent\small
+\begin{tabular}{|p{2.8cm}|p{7.9cm}|p{4.0cm}|}
+\hline
+\textbf{Caso de Uso} & Eliminar tanda & \textbf{Identificador:} CU-28 \\
+\hline
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Investigador / Administrador} \\
+\hline
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Primario} \\
+\hline
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-34, RN-18} \\
+\hline
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; tanda existente en un experimento a nombre del investigador, o sesión de Administrador; el análisis de la tanda no está procesando ni en pausa.} \\
+\hline
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Tanda eliminada de forma permanente e irreversible con sus videos, análisis, resultados y especímenes, junto con los reportes del experimento; el grupo se conserva y la letra de la tanda queda libre (ver RN-18).} \\
+\hline
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador eliminar una sola tanda desde la pantalla del grupo sin eliminar el experimento. La acción es permanente, irreversible y requiere confirmación explícita.} \\
+\hline
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El investigador selecciona «Eliminar tanda» en la pantalla del grupo. El sistema solicita confirmación explícita antes de proceder. Tras confirmar, elimina los videos de la tanda, su análisis, resultados y especímenes, y los reportes del experimento.} \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{10.0cm}|}
+\hline
+\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
+\hline
+\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
+\hline
+1 & Investigador & Selecciona «Eliminar tanda» en la pantalla del grupo. \\
+\hline
+2 & Sistema & Muestra la confirmación «Se borrarán el video del Día 1, el del Día 2 y sus resultados. No se puede deshacer.» (ver RN-18). No pide nombre ni contraseña. \\
+\hline
+3 & Investigador & Confirma la eliminación. \\
+\hline
+4 & Sistema & Elimina los videos de la tanda, su análisis, resultados y especímenes de la base de datos y del almacenamiento, y los reportes del experimento. \\
+\hline
+5 & Sistema & Quita la tanda del grupo, que sigue existiendo, deja libre su letra y muestra confirmación de la operación. \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{14.1cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
+\hline
+\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
+\hline
+1 & El usuario no es quien creó el experimento ni es Administrador: el sistema rechaza la acción y no borra nada. \\
+\hline
+1 & El análisis de la tanda está procesando o en pausa: el sistema rechaza la eliminación y no borra nada. Si el análisis está en cola, sale de la cola y la eliminación continúa. \\
+\hline
+3 & El investigador cancela el diálogo de confirmación: el sistema descarta la acción y regresa a la pantalla del grupo sin modificar ningún dato. \\
+\hline
+\end{tabular}
+
+\normalsize\bigskip
+
+\noindent\rule{\linewidth}{0.4pt}
+
 \noindent\textbf{Gestionar experimentos globales}
 
 \noindent\small
@@ -2642,7 +2705,9 @@ El detalle de un experimento reúne sus grupos y el estado de cada tanda. Solo q
 creó el experimento o un administrador puede eliminarlo, y la acción solo pide
 confirmar con un aviso de «¿está seguro?» (RF-27, RN-09), sin nombre ni contraseña. El detalle de un grupo muestra
 sus tandas, los especímenes de cada una con el cilindro que ocuparon y los videos de
-Día~1 y Día~2 con su estado. Desde ahí se abren los resultados de una tanda o los del
+Día~1 y Día~2 con su estado. Cada tanda tiene el botón «Eliminar tanda», con la confirmación
+«Se borrarán el video del Día~1, el del Día~2 y sus resultados. No se puede deshacer.»
+(RF-34, RN-18); el grupo se conserva y la letra queda libre. Desde ahí se abren los resultados de una tanda o los del
 grupo completo, que reúne los análisis de todas sus tandas (RF-19).
 
 \begin{figure}[H]
