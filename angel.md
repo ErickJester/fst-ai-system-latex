@@ -84,13 +84,12 @@ ByteTrack, línea de agua) quedó en `docs/borradores/06_desarrollo_anterior_tra
 7. **Cap. 6, pipeline y clasificador:** se escribieron desde `pipeline/` (copia de `fst_auto`) y
    `fst-etiquetador/cnn`. ¿Es eso lo definitivo? Las cifras de desempeño no se incluyeron: el código
    imprime otras medidas (por ejemplo kappa) que `CLAUDE.md` prohíbe en el documento.
-12. **La regla de decisión del clasificador no coincide con el cap. 5 (la más importante).** El
-    cap. 5 y el cap. 3 dicen que la red entrega directamente la conducta de mayor probabilidad, sin
-    umbral de confianza y con **cuatro** salidas (D-78 y D-94). El código copiado en `pipeline/`
-    (`segundos.regla` y `probar_seg.py`) tiene una red de **tres** clases y aplica una regla de tres
-    pasos con umbral 0.80 de la que sale la conducta activa. La guía (sección 4.9) también habla del
-    umbral 0.80. El cap. 6 lo declara en «Diferencias», pero hay que decidir cuál es la verdad y
-    corregir el documento o el código.
+12. **La red de cuatro salidas todavía no es la que corre.** Los caps. 3 y 5 describen la red con
+    **cuatro** salidas y sin umbral (D-78 y D-94), que es la que se está desarrollando. El código copiado
+    en `pipeline/` (`segundos.regla` y `probar_seg.py`) es una etapa intermedia: **tres** clases y una
+    regla de tres pasos con umbral 0.80 de la que sale la conducta activa. La guía (sección 4.9) también
+    habla del 0.80. El cap. 6 lo presenta así en «Diferencias». ¿Cuándo estará la red de cuatro salidas
+    y se actualizará el worker? Si cambia el plazo, hay que decirlo en el cap. 6.
 8. **Pausa (RN-17):** el worker real no la implementa porque el modelo no detecta que el espécimen no
    se ve; solo está en `worker_fake`. El cap. 6 lo dice en «Diferencias». ¿Se deja así, o el cap. 4 y
    el cap. 5 deben decir que la pausa es solo del simulador por ahora?

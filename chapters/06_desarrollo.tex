@@ -186,8 +186,8 @@ revisión (H.264) y el archivo de recuadros.
 \label{sec:ch6_clasificador}
 % [FUENTE] fst-ai-system, pipeline/cnn/ (fst_cnn.py, fst_cnn_seg.py, recortar_seg.py, probar_seg.py),
 %   pipeline/segundos.py y fst-etiquetador/ (README.md, entrenar.py, revisor.html). Revisado el 19-oct-2026.
-% [CONFIRMAR CON ERICK] La regla de decisión: el código usa un umbral de 0.80 y tres clases; el cap. 5 dice
-%   que no hay umbral y que la red tiene cuatro salidas. Ver «Diferencias entre el diseño y lo construido».
+% [ACLARADO 19-oct por la usuaria] La red tendrá cuatro salidas y sin umbral; el código actual (tres clases y
+%   umbral 0.80) es una etapa intermedia. Ver «Diferencias entre el diseño y lo construido».
 % [SIN CIFRAS] Las métricas de desempeño van en el capítulo 7; el código imprime otras medidas que el
 %   documento no usa (CLAUDE.md).
 
@@ -231,13 +231,18 @@ archivo. La validación se hace por video: cada video se predice con una red que
 segundos vecinos son casi el mismo clip y mezclarlos entre entrenamiento y prueba inflaría el resultado.
 Las cifras de desempeño de la red no se incluyen en este capítulo, que describe cómo se construyó.
 
-En el sistema la red solo predice, en procesador y sin descargar nada de internet. La salida son las
-probabilidades de cada clase para cada segundo. Para decidir la conducta de cada uno se aplica una regla de
-tres pasos con un umbral de confianza de 0.80: si la probabilidad más alta llega al umbral, esa es la
-conducta; si no, pero la suma de las probabilidades de nado y de escalamiento sí lo llega, el segundo se
-registra como \textit{conducta activa}; y en cualquier otro caso se toma la conducta más probable. El
-\textit{worker} traduce los nombres a los del dominio de la base (nado activo, inmovilidad, escalamiento y
-conducta activa) y marca el nivel del análisis como agrupado si algún segundo quedó como conducta activa.
+En el sistema la red solo predice, en procesador y sin descargar nada de internet. \textbf{La versión que
+ejecuta hoy el \textit{worker} es una etapa intermedia}: entrega las probabilidades de tres clases (nado,
+inmovilidad y escalamiento) para cada segundo, y la conducta se decide con una regla de tres pasos y un
+umbral de confianza de 0.80. Si la probabilidad más alta llega al umbral, esa es la conducta; si no, pero la
+suma de las probabilidades de nado y de escalamiento sí lo llega, el segundo se registra como
+\textit{conducta activa}; y en cualquier otro caso se toma la conducta más probable. El \textit{worker}
+traduce los nombres a los del dominio de la base (nado activo, inmovilidad, escalamiento y conducta activa)
+y marca el nivel del análisis como agrupado si algún segundo quedó como conducta activa.
+
+La red que describe el Capítulo~5, y que se está desarrollando, tiene cuatro salidas (nado activo,
+inmovilidad, escalamiento y conducta activa) y entrega directamente la conducta de mayor probabilidad, sin
+umbral. Cuando exista sustituirá a esta versión, y la conducta activa dejará de derivarse con una regla.
 
 % ---------------------------------------------------------------------
 \section{Backend (Spring Boot)}
@@ -854,11 +859,11 @@ Hay otras diferencias entre lo diseñado y lo construido que conviene tener pres
         pause cuando no se ve al espécimen durante tres segundos seguidos (RN-17), pero el modelo
         empleado no detecta ese caso. La pausa está implementada solo en el simulador, y las rutas del
         \textit{backend} para ajustar o cancelar una pausa todavía no existen.
-  \item \textbf{La regla de decisión del clasificador.} El Capítulo~5 describe que la red entrega
-        directamente la conducta de mayor probabilidad, sin umbral de confianza y con cuatro salidas. El
-        código actual del \textit{pipeline}, en cambio, tiene una red de tres clases y aplica la regla
-        de tres pasos con un umbral de 0.80 descrita en la Sección~\ref{sec:ch6_clasificador}, de donde
-        sale la conducta activa. Las dos descripciones deben reconciliarse.
+  \item \textbf{La red de cuatro salidas todavía no es la que corre.} El Capítulo~5 describe la red
+        que se está desarrollando, con cuatro salidas y sin umbral de confianza. La versión que ejecuta hoy
+        el \textit{worker} es una etapa anterior, con tres clases y la regla de tres pasos y umbral de 0.80
+        descrita en la Sección~\ref{sec:ch6_clasificador}, de donde sale la conducta activa. La red de
+        cuatro salidas sustituirá a esta versión cuando esté lista.
   \item \textbf{Quién subió un video.} La base no guarda quién subió cada video, así que, por ahora, el
         sistema toma como tal al creador del experimento al decidir quién puede corregir o reiniciar un
         análisis.
