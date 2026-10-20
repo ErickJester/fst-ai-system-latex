@@ -102,6 +102,12 @@ ByteTrack, línea de agua) quedó en `docs/borradores/06_desarrollo_anterior_tra
 
 ### G. El cap. 6 ya describe el sistema completo: lo que el código aún no tiene (19-oct)
 
+**Actualización del 20-oct:** Erick reescribió el cap. 6 (decisiones D-106 a D-109, commit `559b00b`): un
+solo *worker*, sin simulador, sin «diferencias entre el diseño y lo construido», sin «lo que falta» y sin
+resultados de pruebas. Esa versión es la que quedó; las secciones del simulador y de diferencias que se
+describen arriba (sección B) ya no existen. Al integrar se corrigieron además doce filas de la tabla de
+rutas de su versión, que terminaban en una sola barra invertida y rompían la compilación.
+
 Por indicación de Vanesa, el cap. 6 se reescribió sin «hasta ahora», sin conteos de avance y sin listas
 de pendientes, y describe **todas** las rutas del diseño. Para que no se pierda, lo que el código de
 `poc/backend-spring` todavía no tiene y el cap. 6 describe como existente:
