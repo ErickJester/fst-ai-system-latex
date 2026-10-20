@@ -126,64 +126,118 @@ qué, de modo que el historial de Git sirve también como registro de las decisi
 
 % ---------------------------------------------------------------------
 \section{Pipeline de análisis de video}
-% [QUÉ VA] El código que convierte un video en la conducta de cada
-%   segundo. Reemplaza a la antigua sección «módulo de seguimiento
-%   (tracker.py)», que describía un diseño con YOLO que ya no se usa.
-% [FUENTE] fst-etiquetador/lib.py y etiquetar.py (preprocesamiento,
-%   fondo, geometría de los cilindros, rasgos).
-% [ESTADO] El worker real todavía no existe en fst-ai-system (el
-%   servicio worker del compose es un simulador, ver más abajo). Lo que
-%   existe es el código del etiquetador, de donde sale el pipeline.
-%   Confirmar con Erick qué parte ya es el pipeline definitivo.
+% [FUENTE] fst-ai-system, rama poc/backend-spring, carpeta pipeline/ (copia de fst_auto, commit 9844e57):
+%   lib.py, etiquetar.py, segundos.py y cnn/. Revisado el 19-oct-2026 contra el código.
+% [CONFIRMAR CON ERICK] Que esta descripción coincide con lo que él considera el pipeline definitivo.
 
-\subsection{Preprocesamiento: registro y modelo de fondo}
-% [QUÉ VA] Estabilización del cuadro, fondo del video y cómo se usa.
-% [ENLAZA] RF-13 a RF-18 (Análisis conductual); módulo 1 del cap. 5.
+El \textit{pipeline} es el código que convierte un video en la conducta de cada segundo. Se desarrolló
+en un proyecto aparte a partir del etiquetador del equipo, y el \textit{worker} real lo ejecuta tal cual
+(Sección~\ref{sec:ch6_workers}). Se corre en dos pasos: el primero encuentra los cilindros y mide al
+espécimen de cada uno; el segundo clasifica cada segundo con la red entrenada. Los dos corren en
+procesador, sin tarjeta gráfica, y juntos tardan unos cinco a diez minutos por video.
+
+\subsection{Preprocesamiento: alineación y fondo}
+
+El primer paso empieza por dos etapas. Primero alinea los cuadros respecto a uno de referencia, para
+compensar que la cámara se desplace durante la grabación. Después modela el fondo, es decir, cómo se ve
+la escena sin el espécimen, y un mapa de las zonas del cuadro que el espécimen ocupa. Ningún dato de la
+geometría se escribe a mano: todo se deduce de cada video, lo que permite usarlo con grabaciones de
+distintos días, encuadres y resoluciones.
 
 \subsection{Localización de los cilindros}
-% [QUÉ VA] Cómo se deducen las paredes, la línea de agua y el suelo, sin
-%   medidas escritas a mano; qué ocurre cuando no se hallan los cilindros
-%   (reporte de diagnóstico, RN-11).
-% [ENLAZA] RN-11; estado «error» del análisis.
 
-\subsection{Detección de un espécimen que no se ve y pausa}
-% [QUÉ VA] Quién lo detecta (el pipeline, no la red), a los tres segundos
-%   seguidos, imagen fija del segundo central, archivo de pausa.
-% [ENLAZA] RN-17, D-59, D-67, D-89.
+A partir del mapa de ocupación el \textit{pipeline} deduce las paredes de cada cilindro, y a partir de los
+bordes horizontales del aparato vacío, la línea de agua y el fondo. El número de cilindros con espécimen
+se le indica al iniciar, y en el \textit{worker} sale del número de cilindros de la tanda. El paso guarda
+una imagen de control con las líneas dibujadas sobre los tubos: si no caen sobre el agua y el fondo de cada
+cilindro, ese video no sirve y hay que revisarlo. Cuando un paso del \textit{pipeline} falla, el
+\textit{worker} termina el análisis en error y genera el reporte de diagnóstico (RN-11).
+
+\subsection{Medidas del espécimen}
+
+Dentro del recuadro de cada cilindro, un píxel se considera del espécimen si difiere del fondo en al menos
+45 niveles de gris y además tiene un brillo de al menos 80, porque el espécimen es claro sobre agua oscura.
+De esos píxeles se conserva la región conexa más grande, y antes de medir la postura se borra la cola con
+una erosión morfológica, para que las medidas de forma describan el cuerpo. De cada cuadro se obtienen las
+medidas que después se agregan en los quince rasgos del Capítulo~5. Las distancias se expresan en largos de
+cuerpo, no en píxeles, y los tiempos en segundos, de modo que dos videos con encuadres distintos dan números
+comparables y el clasificador aprende la conducta y no el encuadre. Por omisión se analiza un fotograma de
+cada doce, y la separación entre las dos mediciones que se comparan (por ejemplo, para la energía de
+movimiento) se fija en tiempo y no en fotogramas, para que cambiar ese salto no altere los valores.
+
+\subsection{Pausa por espécimen que no se ve}
+
+El \textit{pipeline} copiado no detecta que el espécimen no se ve, por lo que la pausa del diseño (RN-17)
+no ocurre en el \textit{worker} real. El caso solo está implementado en el simulador. La diferencia se
+explica en la Sección~\ref{sec:ch6_diferencias}.
 
 \subsection{Salidas del módulo}
-% [QUÉ VA] Recorte a los últimos 300 s con renumeración, copia H.264 para
-%   la revisión y archivo de recuadros (cajas.json); lo que se guarda en
-%   la base y lo que va al volumen.
-% [ENLAZA] D-54, D-58, D-69, D-81; sección de formatos del cap. 5.
+
+El primer paso deja tres archivos: una tabla con el recuadro de cada cilindro por bloque, otra con las
+medidas de cada fotograma (para no tener que volver a leer el video) y la imagen de control. El segundo deja
+una tabla con una fila por espécimen y por segundo, con la conducta, su confianza y las probabilidades de
+cada clase, y un resumen con los segundos de cada conducta por minuto y en total. La base no guarda las
+probabilidades. Con esa salida el \textit{worker} se queda con los últimos 300 segundos de cada espécimen,
+los renumera de 1 a 300, escribe una fila de \texttt{SEGUNDO} por segundo y genera la copia del video para
+revisión (H.264) y el archivo de recuadros.
 
 % ---------------------------------------------------------------------
 \section{Clasificador de conducta}
+\label{sec:ch6_clasificador}
+% [FUENTE] fst-ai-system, pipeline/cnn/ (fst_cnn.py, fst_cnn_seg.py, recortar_seg.py, probar_seg.py),
+%   pipeline/segundos.py y fst-etiquetador/ (README.md, entrenar.py, revisor.html). Revisado el 19-oct-2026.
+% [CONFIRMAR CON ERICK] La regla de decisión: el código usa un umbral de 0.80 y tres clases; el cap. 5 dice
+%   que no hay umbral y que la red tiene cuatro salidas. Ver «Diferencias entre el diseño y lo construido».
+% [SIN CIFRAS] Las métricas de desempeño van en el capítulo 7; el código imprime otras medidas que el
+%   documento no usa (CLAUDE.md).
+
+El clasificador asigna una conducta a cada segundo de cada espécimen. Se construyó en dos etapas: primero
+una herramienta del equipo que propone etiquetas para fabricar el conjunto de entrenamiento y después una
+red neuronal entrenada con ese conjunto.
 
 \subsection{El etiquetador y el conjunto de entrenamiento}
-% [QUÉ VA] Cómo se fabricó el conjunto de entrenamiento: el etiquetador
-%   con \textit{gradient boosting} sobre rasgos, la revisión humana en
-%   el navegador (revisor.html) y el criterio de las definiciones
-%   operativas. Cuántos videos, espécimenes y segundos etiquetados.
-% [FUENTE] fst-etiquetador/README.md, COMO_USARLO.md, entrenar.py,
-%   revisor.html, carpeta etiquetas/.
-% [ESTADO] Hay código y etiquetas; falta anotar las cifras finales.
-% [ENLAZA] Sección del clasificador del cap. 3; D-66.
+
+El etiquetador es una herramienta propia del equipo. Recibe un video, deduce la geometría de los cilindros,
+mide al espécimen y, con un clasificador de \textit{gradient boosting} sobre los quince rasgos, propone la
+conducta de cada bloque de 5 segundos y también de cada segundo. Cada etiqueta lleva su confianza, y la
+revisión humana se hace en el navegador con una pantalla que abre el video y la propuesta.
+
+Para entrenar la red solo se usan los segundos que una persona vio y marcó en esa pantalla. Las
+propuestas de la máquina que nadie revisó no cuentan como etiqueta: medir contra ellas sería medir al modelo
+contra sí mismo. De cada espécimen etiquetado se guarda la película de su cilindro a cuatro cuadros por
+segundo, en gris y de $128 \times 96$ píxeles, en lugar de un clip por segundo, porque los clips de segundos
+vecinos se pisan en un 75\,\% y guardarlos por separado ocuparía dieciséis veces más. El clip de cada segundo
+se arma al vuelo.
 
 \subsection{La red de fusión}
-% [QUÉ VA] R(2+1)D-18 sobre clips de 16 cuadros fusionada con la rama de
-%   medidas; qué entrada recibe, qué entrega (la conducta de cada
-%   segundo, D-78) y por qué se escogió.
-% [FUENTE] fst-etiquetador/cnn/fst_cnn_seg.py y probar_seg.py.
-% [ESTADO] Hay código; el F1 final depende del entrenamiento (pendiente
-%   B-1 de Erick).
-% [ENLAZA] D-66, D-78, D-94; RNF-02 (F1 por conducta).
+
+La red es una convolucional tridimensional R(2+1)D-18, preentrenada con videos de acciones humanas
+(Kinetics-400), que se fusiona con una rama de medidas. Para decidir el segundo $k$ recibe un clip de 16
+fotogramas de una ventana de 4 segundos centrada en él (desde 1.5~s antes hasta 2.5~s después), normalizado
+por su propio brillo para que no dependa de la luz de cada video, y recibe también, en la rama de medidas,
+los quince rasgos del etiquetador calculados en esa misma ventana más siete medidas que imitan las reglas
+del observador: el pataleo trasero bajo el agua (su media, su máximo y qué tan abrupto es), el pataleo
+delantero, la razón entre ambos y los cambios en la franja justo encima de la línea de agua, donde un salto
+brusco apunta a escalamiento.
+
+La ventana avanza un segundo a la vez, de modo que cada segundo tiene su propia decisión y aparecen
+conductas de unos dos segundos que una decisión por bloques de cinco esconde. Una ventana más corta vería
+conductas más breves pero mediría con muy pocos datos; cuatro segundos es el punto de equilibrio.
 
 \subsection{Entrenamiento y salida}
-% [QUÉ VA] Cómo se entrena, con qué hardware, cuánto tarda y cómo se
-%   convierte la salida (X_cnnseg.csv) en filas de SEGUNDO.
-% [ESTADO] Por redactar con Erick; las cifras de desempeño van en el
-%   capítulo 7, no aquí.
+
+El entrenamiento se hace en un cuaderno de Google Colab, con GPU, y la red final se guarda en un solo
+archivo. La validación se hace por video: cada video se predice con una red que nunca lo vio, porque los
+segundos vecinos son casi el mismo clip y mezclarlos entre entrenamiento y prueba inflaría el resultado.
+Las cifras de desempeño de la red no se incluyen en este capítulo, que describe cómo se construyó.
+
+En el sistema la red solo predice, en procesador y sin descargar nada de internet. La salida son las
+probabilidades de cada clase para cada segundo. Para decidir la conducta de cada uno se aplica una regla de
+tres pasos con un umbral de confianza de 0.80: si la probabilidad más alta llega al umbral, esa es la
+conducta; si no, pero la suma de las probabilidades de nado y de escalamiento sí lo llega, el segundo se
+registra como \textit{conducta activa}; y en cualquier otro caso se toma la conducta más probable. El
+\textit{worker} traduce los nombres a los del dominio de la base (nado activo, inmovilidad, escalamiento y
+conducta activa) y marca el nivel del análisis como agrupado si algún segundo quedó como conducta activa.
 
 % ---------------------------------------------------------------------
 \section{Backend (Spring Boot)}
@@ -381,6 +435,7 @@ real, incluidos el esquema, las restricciones de la base y las respuestas de cad
 
 % ---------------------------------------------------------------------
 \section{Worker real y worker simulado}
+\label{sec:ch6_workers}
 % [FUENTE] fst-ai-system, rama poc/backend-spring: worker/ (worker real), pipeline/ (copia del código
 %   de fst_auto) y worker_fake/ (simulador). Revisado el 19-oct-2026.
 
@@ -772,6 +827,7 @@ limpia, que es parte de los criterios de aceptación.
 
 % ---------------------------------------------------------------------
 \section{Diferencias entre el diseño y lo construido}
+\label{sec:ch6_diferencias}
 % [QUÉ VA] Lista corta de lo que cambió respecto al capítulo 5 y por
 %   qué: el backend pasó de Flask a Spring Boot (D-105); el worker real
 %   se sustituyó por un simulador mientras se termina el pipeline; y lo
@@ -798,6 +854,11 @@ Hay otras diferencias entre lo diseñado y lo construido que conviene tener pres
         pause cuando no se ve al espécimen durante tres segundos seguidos (RN-17), pero el modelo
         empleado no detecta ese caso. La pausa está implementada solo en el simulador, y las rutas del
         \textit{backend} para ajustar o cancelar una pausa todavía no existen.
+  \item \textbf{La regla de decisión del clasificador.} El Capítulo~5 describe que la red entrega
+        directamente la conducta de mayor probabilidad, sin umbral de confianza y con cuatro salidas. El
+        código actual del \textit{pipeline}, en cambio, tiene una red de tres clases y aplica la regla
+        de tres pasos con un umbral de 0.80 descrita en la Sección~\ref{sec:ch6_clasificador}, de donde
+        sale la conducta activa. Las dos descripciones deben reconciliarse.
   \item \textbf{Quién subió un video.} La base no guarda quién subió cada video, así que, por ahora, el
         sistema toma como tal al creador del experimento al decidir quién puede corregir o reiniciar un
         análisis.

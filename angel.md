@@ -30,13 +30,14 @@ El backend dejó de ser Flask (rama `poc/backend-spring` de `fst-ai-system`). Qu
 
 ### B. Capítulo 6 (esqueleto)
 
-`chapters/06_desarrollo.tex` se reemplazó por un capítulo nuevo; **sigue desactivado en `main.tex`**.
-**Ya redactadas (19-oct), contra el código de la rama `poc/backend-spring` y del frontend:** entorno de
-desarrollo (tabla de versiones), backend en Spring Boot (estructura, seguridad, carga de video,
-resultados, rutas implementadas y lo que falta), worker real y worker simulado, frontend, Docker
-Compose (composición de desarrollo y versión portable) y diferencias entre el diseño y lo construido.
-**Siguen vacías:** el *pipeline* y el clasificador. El texto viejo (YOLO, ByteTrack, línea de agua)
-quedó en `docs/borradores/06_desarrollo_anterior_tracker.tex`.
+`chapters/06_desarrollo.tex` se reemplazó por un capítulo nuevo y **ya está activado en `main.tex`**
+(el PDF pasa de 194 a 218 páginas). Se redactó el 19-oct contra el código de la rama
+`poc/backend-spring` y del frontend: entorno de desarrollo (tabla de versiones), *pipeline*,
+clasificador, backend en Spring Boot (estructura, seguridad, carga de video, resultados, rutas
+implementadas y lo que falta), worker real y worker simulado, frontend, Docker Compose (composición de
+desarrollo y versión portable) y diferencias entre el diseño y lo construido. El texto viejo (YOLO,
+ByteTrack, línea de agua) quedó en `docs/borradores/06_desarrollo_anterior_tracker.tex`.
+**Erick debe revisar las secciones del *pipeline* y del clasificador**, que describen su código.
 
 ### C. Otros cambios
 
@@ -80,9 +81,16 @@ quedó en `docs/borradores/06_desarrollo_anterior_tracker.tex`.
    administración de cuentas, la recuperación de contraseña, la pausa, CSV y XLSX, y el borrado
    completo de un experimento. ¿Cambia algo en el cronograma o en el análisis de riesgos del cap. 4?
    Hoy no hay un riesgo que lo cubra.
-7. **Cap. 6, pipeline y clasificador:** ¿qué parte es definitiva para describirla? Esas dos
-   secciones siguen vacías. El código ya está en `pipeline/` (copia de `fst_auto`) y en
-   `fst-etiquetador/cnn`.
+7. **Cap. 6, pipeline y clasificador:** se escribieron desde `pipeline/` (copia de `fst_auto`) y
+   `fst-etiquetador/cnn`. ¿Es eso lo definitivo? Las cifras de desempeño no se incluyeron: el código
+   imprime otras medidas (por ejemplo kappa) que `CLAUDE.md` prohíbe en el documento.
+12. **La regla de decisión del clasificador no coincide con el cap. 5 (la más importante).** El
+    cap. 5 y el cap. 3 dicen que la red entrega directamente la conducta de mayor probabilidad, sin
+    umbral de confianza y con **cuatro** salidas (D-78 y D-94). El código copiado en `pipeline/`
+    (`segundos.regla` y `probar_seg.py`) tiene una red de **tres** clases y aplica una regla de tres
+    pasos con umbral 0.80 de la que sale la conducta activa. La guía (sección 4.9) también habla del
+    umbral 0.80. El cap. 6 lo declara en «Diferencias», pero hay que decidir cuál es la verdad y
+    corregir el documento o el código.
 8. **Pausa (RN-17):** el worker real no la implementa porque el modelo no detecta que el espécimen no
    se ve; solo está en `worker_fake`. El cap. 6 lo dice en «Diferencias». ¿Se deja así, o el cap. 4 y
    el cap. 5 deben decir que la pausa es solo del simulador por ahora?
