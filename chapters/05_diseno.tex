@@ -692,6 +692,8 @@ error 403.
 \endfoot
 
 % --- Autenticación ---
+GET    & \path{/health}       & Indica si el \textit{backend} está en funcionamiento. & Público \\
+\hline
 POST   & \path{/auth/login}    & Inicia sesión; devuelve token JWT. & Público \\
 \hline
 POST   & \path{/auth/logout}   & Cierra la sesión; el navegador descarta el token. & Autenti\-cado \\
@@ -711,6 +713,8 @@ GET    & \path{/experiments}         & Lista todos los experimentos del laborato
 POST   & \path{/experiments}         & Crea un experimento con sus metadatos. & Investiga\-dor \\
 \hline
 GET    & \path{/experiments/{id}}    & Devuelve detalle y estado de un experimento. & Investiga\-dor \\
+\hline
+PUT    & \path{/experiments/{id}}    & Actualiza el nombre, la fecha y las notas de un experimento; el creador no cambia. & Investiga\-dor \\
 \hline
 DELETE & \path{/experiments/{id}}    & Elimina el experimento con sus grupos, videos, resultados y reportes (ver RN-09). Se rechaza con error 409 si algún análisis está procesando o en pausa; los que están en cola salen de la cola. & Creador o Admin \\
 \hline
@@ -755,6 +759,8 @@ GET    & \path{/experiments/{id}/report/xlsx} & Descarga los datos en XLSX, del 
 
 % --- Revisión segundo a segundo ---
 GET    & \path{/experiments/{id}/analyses/{idAnalisis}/review}   & Devuelve los especímenes, las etiquetas de cada segundo y los recuadros de los cilindros de un análisis completado. & Investiga\-dor \\
+\hline
+POST   & \path{/experiments/{id}/analyses/{idAnalisis}/video-token} & Emite el token de solo lectura, de un solo análisis y de corta duración, con el que el navegador reproduce el video de la revisión. & Autor o Admin \\
 \hline
 GET    & \path{/experiments/{id}/analyses/{idAnalisis}/video}    & Entrega el video de la revisión por partes, para poder adelantar y retroceder. & Investiga\-dor \\
 \hline

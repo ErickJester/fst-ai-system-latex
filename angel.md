@@ -100,6 +100,22 @@ ByteTrack, línea de agua) quedó en `docs/borradores/06_desarrollo_anterior_tra
 11. **Dos composiciones de Docker:** la de desarrollo y la portable. El `docker-compose.yml` de la
     raíz del repositorio de la aplicación todavía es el de Flask. ¿Se borra o se actualiza?
 
+### G. El cap. 6 ya describe el sistema completo: lo que el código aún no tiene (19-oct)
+
+Por indicación de Vanesa, el cap. 6 se reescribió sin «hasta ahora», sin conteos de avance y sin listas
+de pendientes, y describe **todas** las rutas del diseño. Para que no se pierda, lo que el código de
+`poc/backend-spring` todavía no tiene y el cap. 6 describe como existente:
+
+- Rutas: `POST /auth/recover`, `POST /auth/reset`, las cuatro de `/admin/*`, la pausa (`pause`,
+  `pause/image`, `pause/adjust`, `cancel`), `restart`, `results/blocks`, `report/csv` y `report/xlsx`.
+- `DELETE /experiments/{id}` completo (hoy solo si el experimento no tiene grupos).
+- Reportes guardados en `REPORTE` con vigencia, y el correo de cada notificación.
+- Verificación de rol Administrador en `/admin/*` y la regla RN-16.
+- La pausa en el worker real (el modelo no detecta que el espécimen no se ve).
+- El checklist del backend marcaba 70 de 147 casillas al 19-oct.
+
+Antes de entregar el documento final, conviene que lo descrito coincida con el código.
+
 ### F. Dónde mirar
 
 `git log origin/main..origin/accesos-login` lista todos los commits. Los de esta actualización
