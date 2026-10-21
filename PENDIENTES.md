@@ -7,6 +7,17 @@ archivos se conservan como evidencia (citas de la entrevista y motivos).
 
 **Resuelto (11-oct):** D-54 (máximo de 300 s sin mínimo, la CNN analiza el video completo y el worker recorta y renumera, y el Día 1 solo confirma el video de habituación) ya está en los caps. 1, 4 y 5 y en el apéndice D.
 
+**Estado al 20-oct (Vanesa).** Las dos listas de abajo están cerradas. Lo que sigue abierto para
+entregar el documento completo:
+
+- Cap. 7 (pruebas y resultados) y cap. 8 (conclusiones): siguen de esqueleto y desactivados en `main.tex`.
+  El cap. 7 necesita las métricas finales del clasificador.
+- Apéndices A y B (instalación con Docker y esquema JSON): vacíos y desactivados.
+- Las 16 frases de «TT-II» de los caps. 1, 3, 4 y 5 (validación y pruebas «en TT-II») no concuerdan con
+  un documento que incluye el cap. 6. Hay que decidir su redacción con los directores.
+- Lo que el cap. 6 describe y el código aún no tiene: ver `angel.md`, sección G.
+- La red de cuatro salidas sustituirá a la versión de tres clases del `worker` (D-78 y D-94).
+
 El trabajo está repartido en dos listas:
 
 | Lista | Quién | Ítems |
