@@ -18,7 +18,7 @@ cilindros --> error : [no se hallaron los cilindros] (RN-11)\nse generó el repo
 clasificacion --> completado : se completaron las\ntres etapas
 clasificacion --> en_pausa : [3 s seguidos sin ver\nal espécimen] se avisó al usuario (RN-17)
 en_pausa --> en_cola : el usuario ajustó el recuadro\n(vuelve al frente de la cola\ny continúa desde la pausa)
-en_pausa --> cancelado : el usuario canceló o no\nrespondió en 5 minutos (RN-17)
+en_pausa --> cancelado : el usuario canceló o no\nrespondió en 72 horas (RN-17)
 procesando --> en_cola : el Worker se apagó a media\nanálisis; al arrancar lo reencola
 completado --> en_cola : el investigador reinició\nel análisis (RN-04)
 

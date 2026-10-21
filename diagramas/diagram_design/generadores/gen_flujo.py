@@ -54,7 +54,7 @@ arrow([(650, mid(a3)), (690, mid(a3))])
 arrow([(860, mid(a4)), (915, mid(a4))])
 arrow([(1065, mid(p1)), (1085, mid(p1))])
 arrow([(1235, mid(p2)), (1255, mid(p2))])
-pz = node(1455, Y, 215, 'En pausa', ['3 s seguidos sin ver al espécimen:', 'guarda una imagen fija y avisa;', 'el usuario ajusta el recuadro o', 'cancela. Continúa desde ahí; sin', 'respuesta en 5 min, se cancela'])
+pz = node(1455, Y, 215, 'En pausa', ['3 s seguidos sin ver al espécimen:', 'guarda una imagen fija y avisa;', 'el usuario ajusta el recuadro o', 'cancela. Continúa desde ahí; sin', 'respuesta en 72 h, se cancela'])
 arrow([(1405, mid(p3)), (1455, mid(p3))], dashed=True, color='#6b6b6b')
 # modelo -> clasificacion
 arrow([(1330, 56 + t4['h']), (1330, Y)])

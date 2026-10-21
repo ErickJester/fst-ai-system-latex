@@ -164,7 +164,7 @@ solo para dimensionar disco; no pongas límites en el código con estas cifras.
 - `RESET_LINK_MINUTES` (vigencia del enlace de recuperar contraseña, por defecto 60).
 - Para el worker (y `worker_fake`): `WORKER_POLL_SECONDS` (cada cuánto busca análisis en
   cola, por defecto 5), `WORKER_DAILY_HOUR` (hora de las tareas programadas, por defecto 3,
-  es decir las 3 a. m.) y `PAUSE_TIMEOUT_MINUTES` (por defecto 5).
+  es decir las 3 a. m.) y `PAUSE_TIMEOUT_HOURS` (plazo de la pausa, por defecto 72; D-112).
 - Para crear el primer administrador (sección 11, punto 7): `ADMIN_ID`, `ADMIN_NOMBRE`,
   `ADMIN_APELLIDOS`, `ADMIN_CORREO` y `ADMIN_PASSWORD`.
 
@@ -261,12 +261,15 @@ así en un cilindro:
    estabilizado, reemplaza la geometría de **ese cilindro** y continúa **desde el segundo de
    la pausa**, revisando de nuevo esos tres segundos. Los segundos anteriores de ese cilindro
    quedan medidos con el recuadro original.
-6. Si el usuario cancela, o pasan **5 minutos** (`PAUSE_TIMEOUT_MINUTES`) sin respuesta, el
+6. Si el usuario cancela, o pasan **72 horas** (`PAUSE_TIMEOUT_HOURS`, D-112) sin respuesta, el
    análisis pasa a `cancelado`. El backend (al cancelar el usuario) y el worker (al vencer el
    plazo) cambian el estado solo si sigue `en pausa`; el segundo que llegue no hace nada. Solo
    la cancelación por falta de respuesta crea la `NOTIFICACION` `analisis cancelado`. El
    worker revisa las pausas vencidas en cada vuelta de la cola, así que la cancelación puede
-   tardar un poco más de 5 minutos.
+   tardar unos segundos más de las 72 horas. El plazo es largo a propósito: la pausa no detiene
+   a nadie, el aviso llega por correo y un análisis cancelado no se puede reiniciar (hay que
+   volver a subir el video), así que el investigador no necesita quedarse frente a la PC. El
+   motivo de la cancelación no se guarda (D-112).
 
 Un mismo cilindro puede pausarse más de una vez en el mismo análisis.
 
@@ -295,12 +298,12 @@ video original. Cuatro reglas:
   sigue `en pausa`";
 - **(c)** las tareas programadas y el borrado de un experimento eliminan esta carpeta;
 - **(d)** el backend lee este archivo para mostrar la imagen, el recuadro y el tiempo que
-  queda (`hora_pausa` + 5 minutos).
+  queda (`hora_pausa` + `PAUSE_TIMEOUT_HOURS`).
 
 **En `worker_fake`:** para simular una pausa, escribe un `pausa.jpg` cualquiera (por ejemplo
 una imagen gris de 1280×720) y un `pausa.json` con valores inventados; luego prueba las tres
 salidas: el usuario ajusta (el análisis vuelve a `en cola` y el worker lo termina), el usuario
-cancela y pasan los 5 minutos. Dispara la pausa con un archivo cuyo nombre contenga `pausa`.
+cancela y vence el plazo (para probarlo, baja `PAUSE_TIMEOUT_HOURS` en el `.env`). Dispara la pausa con un archivo cuyo nombre contenga `pausa`.
 
 Diagrama de secuencia de la pausa: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_web\seq_pausa_y_ajuste.puml` (Anexo A.9).
 
@@ -379,7 +382,7 @@ stateDiagram-v2
   clasificacion --> completado
   clasificacion --> en_pausa: 3 s seguidos sin ver al espécimen (RN-17)
   en_pausa --> en_cola: el usuario ajustó el recuadro del cilindro (vuelve al frente de la cola)
-  en_pausa --> cancelado: el usuario canceló o pasaron 5 minutos sin respuesta
+  en_pausa --> cancelado: el usuario canceló o pasaron 72 horas sin respuesta
   procesando --> en_cola: el worker se apagó a media análisis (se reencola al arrancar)
   completado --> en_cola: el investigador reinició el análisis (R-04)
   completado --> [*]
@@ -405,7 +408,7 @@ stateDiagram-v2
   procesando --> error: alguna tanda terminó en error
   procesando --> en_pausa: alguna tanda quedó en pausa (RN-17)
   en_pausa --> en_cola: el usuario ajustó el recuadro
-  en_pausa --> cancelado: el usuario canceló o pasaron 5 minutos sin respuesta
+  en_pausa --> cancelado: el usuario canceló o pasaron 72 horas sin respuesta
   completado --> en_cola: se agregó una tanda nueva
 ```
 
@@ -570,8 +573,8 @@ observación). Es la fuente de la pantalla de revisión; de él salen también l
 desglose por minuto, que no se guardan (D-52). Valores de `origen` (cuatro,
 D-80): `maquina` (la puso el sistema, sin revisar), `confirmada` (el usuario vio el segundo y dejó la
 conducta del sistema), `corregida` (la cambió) y `dudosa` (el segundo queda vacío porque el
-usuario lo marcó como dudoso). `conducta` nula significa que el segundo no tiene conducta: el
-pipeline no pudo decidir o no vio al espécimen, o el usuario lo marcó como dudoso (`origen = 'dudosa'`). La conducta del
+usuario lo marcó como «no se ve»; el valor interno no se renombra, D-113). `conducta` nula significa que el segundo no tiene conducta: el
+pipeline no pudo decidir o no vio al espécimen, o el usuario lo marcó como «no se ve» (`origen = 'dudosa'`). La conducta del
 sistema no se conserva aparte: al corregir se reemplaza, y `origen` dice que el segundo fue revisado.
 
 ### Restricciones que la base debe hacer cumplir
@@ -765,7 +768,7 @@ contraseña temporal **una sola vez**: `{"passwordTemporal": "..."}`.
 | R-12 | Cuando el clasificador sabe que el espécimen no está inmóvil pero no decide entre nado y escalamiento, esos segundos se guardan como "conducta activa", una cuarta conducta. Un mismo análisis puede mezclar las cuatro. Los reportes deben mostrarla como una columna más. En los bloques de 5 s también resuelve el empate entre nado activo y escalamiento (sección 9.5). |
 | R-13 | De cada video se guardan y se muestran como máximo los **últimos 300 s** (de final a inicio), sin mínimo. La CNN analiza el video completo y el worker descarta el principio, donde a veces aparecen personas, y renumera de 1 a 300 (D-54). |
 | R-14 | Solo se puede revisar un análisis en estado `completado`. Al revisar, el usuario corrige las etiquetas segundo a segundo; cada corrección queda en `SEGUNDO` con `origen` `confirmada`, `corregida` o `dudosa`, y al guardar el backend solo actualiza `SEGUNDO`: los totales por minuto no se guardan, se calculan desde `SEGUNDO` (D-52). La conducta que puso el sistema se reemplaza al corregir; `origen` conserva que el segundo fue revisado. **Solo corrigen el investigador que subió el video y el Administrador** (D-57). Corregir etiquetas no cambia el modelo ni el video: si lo que cambia es el video o el modelo, es un análisis nuevo (reinicio, R-04). El video que se reproduce es la copia H.264 que el worker genera al terminar (D-58). |
-| R-15 | Si en un segundo no se ve al espécimen, ese segundo se registra como "no se ve". Tres segundos seguidos así dejan el análisis `en pausa`, se guarda una imagen fija de ese instante, se avisa al usuario con una notificación `analisis en pausa` y se le pide ajustar el recuadro del cilindro. El worker atiende mientras tanto el siguiente análisis. Con el ajuste, el análisis vuelve al frente de la cola y continúa desde el segundo de la pausa. Si el usuario cancela, o no responde en 5 minutos, el análisis pasa a `cancelado` (con notificación `analisis cancelado` solo si fue por falta de respuesta) (RN-17, D-59, D-67, D-89). |
+| R-15 | Si en un segundo no se ve al espécimen, ese segundo se registra como "no se ve". Tres segundos seguidos así dejan el análisis `en pausa`, se guarda una imagen fija de ese instante, se avisa al usuario con una notificación `analisis en pausa` y se le pide ajustar el recuadro del cilindro. El worker atiende mientras tanto el siguiente análisis. Con el ajuste, el análisis vuelve al frente de la cola y continúa desde el segundo de la pausa. Si el usuario cancela, o no responde en 72 horas (D-112), el análisis pasa a `cancelado` (con notificación `analisis cancelado` solo si fue por falta de respuesta) (RN-17, D-59, D-67, D-89). |
 | R-16 | Siempre debe existir al menos un Administrador activo: el backend rechaza desactivar la última cuenta de Administrador activa o quitarle el rol (RN-16, D-61, D-72). El Administrador sí puede cambiar el rol de una cuenta desde el panel de administración. |
 | R-17 | Borrar una tanda es permanente: se van sus videos del Día 1 y del Día 2, su análisis, observaciones, segundos y especímenes, en una sola transacción de las hojas hacia arriba (`SEGUNDO` → `OBSERVACION` → `ANALISIS` → `VIDEO` → `ESPECIMEN` → `TANDA`), y después sus archivos (`videos/{idVideo}.*` y `analisis/{idAnalisis}/`). También se borran los `REPORTE` del experimento, porque sus resultados cambian. Las mismas garantías que R-08: confirmación explícita, solo quien creó el experimento o un Administrador (403 a los demás), 409 si su análisis está `procesando` o `en pausa`, y si está `en cola` sale de la cola. **El grupo se conserva** aunque quede sin tandas, y la letra (`ordinal`) queda libre para volver a subir. Sirve para corregir un video mal subido sin perder el resto del experimento (D-115). |
 
@@ -925,12 +928,12 @@ Diagramas de secuencia: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\
 Maqueta v2: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\mockups\v2\progreso.html` (imagen: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\figures\mockups\progreso.png`).
 Estados: analizando; en pausa (el sistema no vio al espécimen y espera al usuario); completado;
 error (no se pudo abrir el video o no se hallaron los tubos); cancelado (el usuario canceló o no
-respondió en 5 minutos). En pausa se muestra la **pantalla de pausa** (RN-17, D-59, D-89; maqueta `mockups/v2/pausa.html`, imagen `figures/mockups/pausa.png`):
+respondió en 72 horas). En pausa se muestra la **pantalla de pausa** (RN-17, D-59, D-89; maqueta `mockups/v2/pausa.html`, imagen `figures/mockups/pausa.png`):
 
 ```
 +-------------------------------------------------------------+
 | EN PAUSA: no se ve al espécimen del cilindro 2 (segundo 142) |
-| Tiempo que queda para responder: 3:41                        |
+| Tiempo que queda para responder: 71 h 58 min                 |
 | +-------------------------------+                            |
 | |  imagen fija del instante;    |                            |
 | |  recuadro que se arrastra     |                            |
@@ -1073,7 +1076,7 @@ muestra «Video: <nombre>» con `nombreVideo`, o «nombre no registrado» (D-114
 |  Lupa (40 s)  ▓▓▓▓▓░░░░▓▓▓▓▓▓▓▓░░░▓▓▓▓      <- colores por conducta       |
 |  Tubo 1 (300 s)  ▓▓▓▓▓▓▓▓░░░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓      |
 |-------------------------------------------------------------------------|
-| [1 Nado][2 Inmovilidad][3 Escalamiento][4 Activa][0 Dudosa]              |
+| [1 Nado][2 Inmovilidad][3 Escalamiento][4 Activa][0 No se ve]            |
 | Velocidad: 0.5x 0.75x [1x] 1.5x 2x                                       |
 | Espacio pausa · ← → 1 s · Shift+flecha 5 s · R vuelve 3 s · Tab sig. tubo|
 | Ctrl+Z deshacer · Ctrl+S guardar · clic en la línea = ir a ese segundo   |
@@ -1086,15 +1089,15 @@ Cómo funciona:
 - **Con el video corriendo**, la tecla cambia la etiqueta **desde 0.4 s antes** (lo que
   tarda una persona en reaccionar) hasta el siguiente cambio de color. **En pausa**, la
   tecla cambia **solo el segundo donde estás**, para corregir con precisión.
-- **Teclas:** `1` nado, `2` inmovilidad, `3` escalamiento, `4` conducta activa, `0` dudosa
+- **Teclas:** `1` nado, `2` inmovilidad, `3` escalamiento, `4` conducta activa, `0` no se ve
   (deja el segundo sin conducta). `Espacio` pausa. `←` `→` un segundo, `Shift` + flecha cinco. `R` vuelve 3 s.
   `Tab` cambia de tubo. `Ctrl+Z` deshace. `Ctrl+S` guarda.
 - **"Visto"** son los segundos que el cabezal ya dejó atrás a velocidad 2x o menos. Solo lo
   visto se guarda como `confirmada` (coincide con la conducta del sistema) o `corregida`
   (la cambiaste). Lo pintado hacia adelante sin verlo no se guarda como revisado: se
   descarta al guardar y esos segundos conservan la conducta y el origen `maquina` que puso
-  el sistema (D-80: ya no existe `sin_revisar`). Un segundo que dejas vacío a propósito
-  queda `dudosa`.
+  el sistema (D-80: ya no existe `sin_revisar`). Un segundo que marcas como «No se ve»
+  queda con `origen = 'dudosa'`.
 - No hay modo de revisión "desde cero" que oculte la conducta del sistema: se quitó con
   el valor `humano_ciego` (D-80).
 - **Recuadro del tubo:** viene del archivo `analisis/{idAnalisis}/cajas.json` (secciones 2 y 11,
@@ -1108,10 +1111,10 @@ Cómo funciona:
   se manda al servidor (`PUT .../segundos`), que actualiza `SEGUNDO`; los totales por
   minuto se calculan desde `SEGUNDO`.
 - **Resumen:** una tabla con los segundos por conducta de cada espécimen antes de guardar.
-- Nombres en pantalla: "Nado", "Inmovilidad", "Escalamiento", "Activa", "Dudosa". En la
-  base: `nado activo`, `inmovilidad`, `escalamiento`, `conducta activa` y nulo. "Dudosa"
-  guarda `conducta` nula con `origen = 'dudosa'`; no existe un botón aparte de "No se
-  ve".
+- Nombres en pantalla: "Nado", "Inmovilidad", "Escalamiento", "Activa", "No se ve". En la
+  base: `nado activo`, `inmovilidad`, `escalamiento`, `conducta activa` y nulo. "No se ve"
+  guarda `conducta` nula con `origen = 'dudosa'` (el valor interno se queda así, D-113);
+  en pantalla nunca aparece la palabra "Dudosa".
 - En la base los reportes dicen si el análisis tuvo revisión humana (algún `origen`
   distinto de `maquina`).
 
@@ -1324,7 +1327,7 @@ a segundo, resultados, notificaciones y tareas programadas) están en el Anexo A
     procesamiento a la velocidad del video: el análisis corre en segundo plano a su propio
     ritmo (cada video de 5 min tarda unos 10 min). **Lo único que interrumpe el análisis es la
     pausa por espécimen que no se ve (R-15):** a los 3 s seguidos sin verlo, el análisis pasa a
-    `en pausa`, se avisa al usuario y se espera 5 minutos a que ajuste el recuadro del
+    `en pausa`, se avisa al usuario y se espera hasta 72 horas a que ajuste el recuadro del
     cilindro; sin respuesta, se cancela. Al final, el usuario abre la pantalla de revisión
     (sección 9.7), puede corregir las etiquetas y puede reiniciar el análisis. Sigue
     **diferido**, y no debes implementar, la vista en tiempo real. La pantalla de pausa, el
@@ -1423,7 +1426,7 @@ Cada paso termina con algo que se puede probar.
 - Con dos análisis en cola, el worker procesa uno a la vez y en orden de llegada.
 - Si el `worker_fake` se apaga con un análisis `procesando`, al arrancar lo reencola y lo termina.
 - Una pausa se puede ajustar (el análisis vuelve a la cola, por delante de los más nuevos, y
-  termina), cancelar o dejar vencer a los 5 minutos; ajustar o cancelar cuando ya no está `en
+  termina), cancelar o dejar vencer el plazo (72 horas); ajustar o cancelar cuando ya no está `en
   pausa` responde 409.
 - Eliminar un experimento con un análisis `procesando` o `en pausa` responde 409; con uno `en
   cola`, lo borra y lo saca de la cola.
@@ -1566,7 +1569,7 @@ note bottom of wk
   depende de: db
   variables: DATABASE_URL, ARCHIVOS_DIR, MODELOS_DIR, SMTP_*,
   DISK_ALERT_PERCENT, DISK_CLEANUP_PERCENT,
-  WORKER_POLL_SECONDS, WORKER_DAILY_HOUR, PAUSE_TIMEOUT_MINUTES
+  WORKER_POLL_SECONDS, WORKER_DAILY_HOUR, PAUSE_TIMEOUT_HOURS
 end note
 @enduml
 ```
@@ -2086,7 +2089,7 @@ cilindros --> error : [no se hallaron los cilindros] (RN-11)\nse generó el repo
 clasificacion --> completado : se completaron las\ntres etapas
 clasificacion --> en_pausa : [3 s seguidos sin ver\nal espécimen] se avisó al usuario (RN-17)
 en_pausa --> en_cola : el usuario ajustó el recuadro\n(vuelve al frente de la cola\ny continúa desde la pausa)
-en_pausa --> cancelado : el usuario canceló o no\nrespondió en 5 minutos (RN-17)
+en_pausa --> cancelado : el usuario canceló o no\nrespondió en 72 horas (RN-17)
 procesando --> en_cola : el Worker se apagó a media\nanálisis; al arrancar lo reencola
 completado --> en_cola : el investigador reinició\nel análisis (RN-04)
 completado --> [*]
@@ -2113,7 +2116,7 @@ procesando --> completado : todas las tandas\nterminaron sin error
 procesando --> error : alguna tanda\nterminó en error
 procesando --> en_pausa : alguna tanda quedó\nen pausa (RN-17)
 en_pausa --> en_cola : el usuario ajustó\nel recuadro
-en_pausa --> cancelado : el usuario canceló o\n5 min sin respuesta
+en_pausa --> cancelado : el usuario canceló o\n72 h sin respuesta
 completado --> en_cola : se agregó una tanda\nnueva
 @enduml
 ```
@@ -2836,7 +2839,7 @@ end
 alt algún análisis llegó a "completado"
   ui -> inv: habilita el acceso a los resultados
 else algún análisis quedó "en pausa"
-  ui -> inv: avisa que el sistema no vio al espécimen,\nmuestra el tiempo que queda de los 5 minutos\ny los botones "Ajustar y continuar" y "Cancelar análisis"\n(ver seq_pausa_y_ajuste y RN-17)
+  ui -> inv: avisa que el sistema no vio al espécimen,\nmuestra el tiempo que queda de las 72 horas\ny los botones "Ajustar y continuar" y "Cancelar análisis"\n(ver seq_pausa_y_ajuste y RN-17)
 else algún análisis quedó "cancelado"
   ui -> inv: muestra que el análisis se canceló, por falta de respuesta\no porque el usuario lo canceló (RN-17)
 else algún análisis llegó a "error"
@@ -2893,7 +2896,7 @@ inv -> ui: abre la notificación
 ui -> api: pide los datos de la pausa de ese análisis
 api -> db: lee el análisis y su estado
 api -> fs: lee el archivo de pausa y la imagen fija
-api --> ui: imagen, recuadro actual y tiempo que queda de los 5 minutos
+api --> ui: imagen, recuadro actual y tiempo que queda de las 72 horas
 ui --> inv: muestra la imagen con el recuadro, el tiempo que queda\ny los botones "Ajustar y continuar" y "Cancelar análisis"
 
 alt el usuario ajusta el recuadro
@@ -2926,12 +2929,12 @@ w -> w: convierte el recuadro nuevo a las coordenadas del video estabilizado\ny 
 w -> db: marca el análisis como "procesando"
 w -> w: vuelve a revisar esos tres segundos y continúa\ndesde el segundo de la pausa
 
-== Si pasan 5 minutos sin respuesta ==
+== Si pasan 72 horas sin respuesta ==
 
 loop en cada vuelta de la cola
   w -> db: busca los análisis "en pausa"
   w -> fs: lee la hora de pausa de cada uno
-  opt pasaron más de 5 minutos
+  opt pasaron más de 72 horas
     w -> db: pasa el análisis a "cancelado", solo si todavía está "en pausa"
     w -> db: crea la notificación de análisis cancelado
   end
@@ -3560,7 +3563,7 @@ services:
   worker:
     build: ./worker_fake            # reemplazar por la imagen del worker real
     restart: unless-stopped
-    env_file: .env                  # SMTP_*, DISK_*, WORKER_*, PAUSE_TIMEOUT_MINUTES
+    env_file: .env                  # SMTP_*, DISK_*, WORKER_*, PAUSE_TIMEOUT_HOURS
     environment:
       DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       ARCHIVOS_DIR: /data/archivos
@@ -3687,7 +3690,7 @@ CMD ["python", "worker_fake.py"]
   palabra `falla`, o en `en pausa` si contiene `pausa` (escribe `pausa.jpg` con Pillow y
   `pausa.json`, y atiende el siguiente análisis);
 - en cada vuelta revisa las pausas: si hay un `ajuste` en `pausa.json` y el estado volvió a
-  `en cola`, lo termina; si pasaron `PAUSE_TIMEOUT_MINUTES`, lo cancela;
+  `en cola`, lo termina; si pasaron `PAUSE_TIMEOUT_HOURS`, lo cancela;
 - crea las `NOTIFICACION` y envía el correo (a MailHog en desarrollo);
 - el módulo `tareas_programadas.py` ejecuta, a la hora `WORKER_DAILY_HOUR` o al arrancar si se
   perdió la corrida, el borrado de videos vencidos, el aviso de vencimiento y la vigilancia del
@@ -3721,7 +3724,7 @@ DISK_CLEANUP_PERCENT=90
 # Worker
 WORKER_POLL_SECONDS=5
 WORKER_DAILY_HOUR=3
-PAUSE_TIMEOUT_MINUTES=5
+PAUSE_TIMEOUT_HOURS=72
 
 # Primer administrador (comando crear-admin); pon valores reales, no los de ejemplo
 ADMIN_ID=
