@@ -34,7 +34,7 @@ cls('Grupo', ['- id: Integer', '- etiqueta: String', '- tipo: String', '- tratam
 cls('Tanda', ['- id: Integer', '- ordinal: Integer', '- nCilindros: Integer'],
     ['+ calcularEstadisticas(): Estadisticas'])
 cls('Especimen', ['- id: Integer', '- numeroCilindro: Integer'])
-cls('Video', ['- id: Integer', '- sesion: String', '- archivo: String', '- duracion: Decimal', '- fechaCarga: DateTime'],
+cls('Video', ['- id: Integer', '- sesion: String', '- archivo: String', '- nombreOriginal: String', '- duracion: Decimal', '- fechaCarga: DateTime'],
     ['+ validarFormato(): Boolean', '+ validarOrientacion(): Boolean', '+ validarReproducible(): Boolean',
      '+ estaProximaEliminacion(dias): Boolean'])
 cls('Analisis', ['- id: Integer', '- estado: String', '- etapa: String', '- nivelClasif: String',

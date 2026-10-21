@@ -36,9 +36,9 @@
       <div style="display:flex;align-items:center;gap:22px;border:2px solid var(--color-accent);padding:14px 18px;margin-bottom:18px">
         <div>
           <div class="k">Tiempo que queda para responder</div>
-          <div class="num nd tiempo" id="reloj">3:41</div>
+          <div class="num nd tiempo" id="reloj">71 h 58 min</div>
         </div>
-        <div class="hint" style="flex:1">Si pasan 5 minutos sin respuesta, el sistema cancela el análisis. Mientras tanto, la cola atiende el siguiente video.</div>
+        <div class="hint" style="flex:1">Si pasan 72 horas sin respuesta, el sistema cancela el análisis. Mientras tanto, la cola atiende el siguiente video.</div>
       </div>
 
       <div class="k" style="margin-bottom:8px">Imagen fija del instante · arrastra el recuadro hasta donde está el espécimen</div>
@@ -76,8 +76,8 @@
 <script>
   const $ = id => document.getElementById(id);
   // Cuenta regresiva de los 5 minutos (en el mockup arranca en 3:41).
-  let s = 221;
-  const pinta = () => { $('reloj').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+  let s = 71 * 3600 + 58 * 60;
+  const pinta = () => { $('reloj').textContent = Math.floor(s / 3600) + ' h ' + String(Math.floor(s % 3600 / 60)).padStart(2, '0') + ' min'; };
   pinta();
   const t = setInterval(() => { if (s > 0) { s--; pinta(); } else { clearInterval(t); cancelar(); } }, 1000);
 
