@@ -368,8 +368,8 @@ la operación.
 
 \subsection{Rutas}
 
-La Tabla~\ref{tab:ch6_back_rutas} lista las rutas del \textit{backend}, que son las del Capítulo~5 más
-las de salud y token de video.
+La Tabla~\ref{tab:ch6_back_rutas} lista las rutas del \textit{backend}, agrupadas por recurso. Su
+descripción y sus reglas de acceso están en la Tabla~\ref{tab:api} del Capítulo~5.
 
 \begin{longtable}{|p{3.0cm}|p{10.4cm}|}
 \caption{Rutas del \textit{backend}.
@@ -387,11 +387,11 @@ las de salud y token de video.
 
 Salud y acceso & \path{/health}; \path{/auth/login}; \path{/auth/logout}; \path{/auth/recover}; \path{/auth/reset}; \path{/auth/password}; \path{/users/me} \\
 \hline
-Experimentos & \path{/experiments} (consultar y crear); \path{/experiments/{id}} (consultar y eliminar); \path{/experiments/{id}/groups} \\
+Experimentos & \path{/experiments} (consultar y crear); \path{/experiments/{id}} (consultar, editar y eliminar); \path{/experiments/{id}/groups}; \path{/experiments/{id}/tandas/{idTanda}} (eliminar una tanda) \\
 \hline
 Carga de video & \path{/experiments/{id}/groups/{grupo}/videos} \\
 \hline
-Progreso y resultados & \path{/experiments/{id}/status}; \path{/experiments/{id}/results}; \path{/experiments/{id}/results/byminute}; \path{/experiments/{id}/results/groups}; \path{/experiments/{id}/results/blocks}; \path{/experiments/{id}/analyses/{idAnalisis}/diagnostic} \\
+Progreso y resultados & \path{/experiments/{id}/status}; \path{/experiments/{id}/results}; \path{/experiments/{id}/results/byminute}; \path{/experiments/{id}/results/groups}; \path{/experiments/{id}/results/blocks}; \path{/experiments/{id}/analyses/{idAnalisis}/control}; \path{/experiments/{id}/analyses/{idAnalisis}/diagnostic} \\
 \hline
 Pausa y reinicio & \path{/experiments/{id}/analyses/{idAnalisis}/pause}; \path{.../pause/image}; \path{.../pause/adjust}; \path{.../cancel}; \path{.../restart} \\
 \hline
