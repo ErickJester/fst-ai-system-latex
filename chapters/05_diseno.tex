@@ -730,6 +730,8 @@ POST   & \path{/experiments/{id}/groups/{grupo}/videos}  & Sube un video (Día~1
 \hline
 GET    & \path{/experiments/{id}/status}  & Devuelve el progreso del análisis en porcentaje. & Investiga\-dor \\
 \hline
+GET    & \path{/experiments/{id}/analyses/{idAnalisis}/control} & Entrega la imagen de control, con los tubos que encontró el \textit{pipeline}, para la pantalla de un análisis que terminó en error (ver RN-11). & Investiga\-dor \\
+\hline
 GET    & \path{/experiments/{id}/analyses/{idAnalisis}/diagnostic} & Descarga el reporte de diagnóstico en PDF de un análisis que terminó en error (ver RN-11). & Investiga\-dor \\
 \hline
 GET    & \path{/experiments/{id}/analyses/{idAnalisis}/pause} & Devuelve los datos de una pausa: cilindro, segundo, recuadros y tiempo que queda para responder (ver RN-17). & Investiga\-dor \\

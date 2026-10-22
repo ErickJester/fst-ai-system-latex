@@ -112,13 +112,35 @@ Por indicación de Vanesa, el cap. 6 se reescribió sin «hasta ahora», sin con
 de pendientes, y describe **todas** las rutas del diseño. Para que no se pierda, lo que el código de
 `poc/backend-spring` todavía no tiene y el cap. 6 describe como existente:
 
+**Estado al 21-oct** contra `poc/backend-spring` en `5c4d46c` (checklist: 72 de 150 casillas). El
+backend tiene 27 rutas y la tabla del cap. 5 documenta 40. Lo que falta en el código:
+
 - Rutas: `POST /auth/recover`, `POST /auth/reset`, las cuatro de `/admin/*`, la pausa (`pause`,
   `pause/image`, `pause/adjust`, `cancel`), `restart`, `results/blocks`, `report/csv` y `report/xlsx`.
-- `DELETE /experiments/{id}` completo (hoy solo si el experimento no tiene grupos).
+- `DELETE /experiments/{id}` completo: el checklist lo deja sin marcar y el código solo lo rechaza si
+  el experimento tiene grupos.
 - Reportes guardados en `REPORTE` con vigencia, y el correo de cada notificación.
 - Verificación de rol Administrador en `/admin/*` y la regla RN-16.
-- La pausa en el worker real (el modelo no detecta que el espécimen no se ve).
-- El checklist del backend marcaba 70 de 147 casillas al 19-oct.
+- La pausa en el worker real: el modelo no detecta que el espécimen no se ve, así que ningún análisis real
+  pasa a «en pausa» (`worker.py` solo atiende las pausas que ya existan).
+
+**Ya implementado desde el 20-oct (Erick):** `DELETE /experiments/{id}/tandas/{idTanda}` (D-115), el
+plazo de pausa de 72 horas (D-112), el botón «No se ve» (D-113), el nombre original del video (D-114), el
+respaldo diario de la base (D-18), `worker_fake` eliminado y el modo desarrollador.
+
+**Dos rutas del código que no estaban en las tablas (revisadas el 21-oct):**
+
+- `GET /experiments/{id}/analyses/{idAnalisis}/control` entrega la imagen de control del *pipeline* (los
+  tubos que encontró) para la pantalla de un análisis con error. **Se agregó** a la tabla del cap. 5 y a
+  la del cap. 6.
+- `GET /experiments/{id}/report/segundos` solo responde con `MODO_DESARROLLADOR` activo (404 si no): es la
+  salida cruda del modelo, con probabilidades y sin las correcciones de la revisión, en CSV o ZIP. **No se
+  documentó** porque es una ruta de depuración y no del producto. Su nombre se parece a `PUT .../segundos`
+  (las correcciones); si algún día se documenta, conviene distinguirlas. Pregunta para Erick: ¿se queda en
+  la versión final o se retira?
+
+Además se corrigió el cap. 6, que omitía `PUT /experiments/{id}` y la ruta de eliminar una tanda en su
+tabla de rutas.
 
 Antes de entregar el documento final, conviene que lo descrito coincida con el código.
 
