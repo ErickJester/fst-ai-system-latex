@@ -676,8 +676,8 @@ JSON con una estructura consistente: campo \texttt{data} para el resultado,
 
 La Tabla~\ref{tab:api} describe los endpoints principales agrupados por recurso. En la columna
 de acceso, «Autor o Admin» significa quien subió el video del análisis o un Administrador, y
-«Creador o Admin» significa quien creó el experimento o un Administrador; los demás reciben un
-error 403.
+«Creador o Admin» significa quien creó el experimento o un Administrador, y «Creador» significa
+solo quien creó el experimento; los demás reciben un error 403.
 
 \begin{longtable}{|p{1.75cm}|p{5.55cm}|p{4.7cm}|p{1.6cm}|}
 \caption{Endpoints principales de la API REST.
@@ -726,7 +726,7 @@ GET    & \path{/experiments/{id}/groups?q=} & Sugiere los grupos del experimento
 \hline
 
 % --- Videos y análisis ---
-POST   & \path{/experiments/{id}/groups/{grupo}/videos}  & Sube un video (Día~1 o Día~2) a una tanda del grupo indicado (se crea la tanda si no existe) y, si es el del Día~2, encola el análisis. & Investiga\-dor \\
+POST   & \path{/experiments/{id}/groups/{grupo}/videos}  & Sube un video (Día~1 o Día~2) a una tanda del grupo indicado (se crea la tanda si no existe) y, si es el del Día~2, encola el análisis. & Creador \\
 \hline
 GET    & \path{/experiments/{id}/status}  & Devuelve el progreso del análisis en porcentaje. & Investiga\-dor \\
 \hline
@@ -1459,9 +1459,9 @@ caso de uso.
 \hline
 2 & Sistema & Muestra el formulario de registro del experimento. \\
 \hline
-3 & Investigador & Completa: nombre único del experimento, fecha y notas opcionales. \\
+3 & Inv. / Admin. & Completa: nombre único del experimento, fecha y notas opcionales. \\
 \hline
-4 & Investigador & Confirma el registro. \\
+4 & Inv. / Admin. & Confirma el registro. \\
 \hline
 5 & Sistema & Valida los campos obligatorios (nombre único del experimento, según RF-11) y crea el registro en la base de datos. \\
 \hline
@@ -1497,7 +1497,7 @@ caso de uso.
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{RF-08, RF-09, RF-10, RF-12. Extendido por: CU-19 (Encolar análisis automático, solo si el video es del Día~2), CU-20 (Notificar rechazo de video) y CU-07 (Monitorear progreso del análisis).} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Experimento registrado (CU-04 completado); sesión activa; archivo a subir en formato \texttt{.mp4} o \texttt{.mov}.} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Experimento registrado (CU-04 completado) por quien sube el video, pues solo el creador del experimento sube sus videos; sesión activa; archivo a subir en formato \texttt{.mp4} o \texttt{.mov}.} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Archivo almacenado en el volumen compartido; si el video es del Día~2, tarea de análisis encolada automáticamente y el investigador en la pantalla de progreso; si es del Día~1, solo queda guardado.} \\
 \hline
