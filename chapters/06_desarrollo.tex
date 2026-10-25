@@ -92,6 +92,8 @@ Correo (desarrollo) & MailHog & 1.0.1 & Servidor de correo de prueba: muestra lo
 \hline
 \textit{Frontend} & Node.js & 22 & Entorno de ejecución para compilar y servir la interfaz. \\
 \hline
+\textit{Frontend} & nginx & 1.27-alpine & Sirve la interfaz compilada y reenvía \path{/api/} al \textit{backend}. \\
+\hline
 \textit{Frontend} & React y React Router & 18.3 y 7 & Interfaz basada en componentes y navegación entre pantallas. \\
 \hline
 \textit{Frontend} & Vite y Axios & 8 y 1.20 & Compilación con recarga en caliente; llamadas a la API. \\
@@ -278,6 +280,10 @@ que conviene destacar son las siguientes.
   \item \textbf{Video de la revisión.} La etiqueta de video del navegador no puede enviar cabeceras, así
         que esa ruta acepta un token de video, distinto del de sesión: sirve para un solo análisis, es de
         solo lectura y dura poco (dos horas por omisión).
+  \item \textbf{Enlace de recuperación.} Es un token firmado de tipo \texttt{reset}, con la vigencia de
+        \texttt{RESET\_LINK\_MINUTES}. Sirve una sola vez sin necesidad de una tabla nueva, porque lleva una
+        huella de la contraseña actual: al cambiarla, el enlace deja de servir. Un enlace de recuperación no
+        sirve como sesión, porque su tipo no es \texttt{sesion}.
 \end{itemize}
 
 El control de acceso por rol verifica en cada ruta de administración que la cuenta sea de un
@@ -341,7 +347,7 @@ con el token descrito arriba y el guardado de las correcciones, que solo actuali
 
 Eliminar un experimento borra sus grupos, videos, resultados y reportes (RN-09); se rechaza con 409 si
 algún análisis está procesando o en pausa, y los que están en cola salen de la cola. Eliminar una tanda
-borra sus videos, análisis, resultados y especímenes y los reportes del experimento, conserva el grupo y
+borra sus videos, análisis, resultados y especímenes y los reportes del experimento; si era la última tanda del grupo, borra también el grupo, y si le quedan otras, lo conserva y
 deja libre la letra de la tanda (RN-18), con el mismo 409. Las rutas de la pausa
 consultan sus datos, entregan la imagen fija, ajustan el recuadro de un cilindro, que devuelve el análisis
 a la cola para que continúe, o la cancelan; las dos últimas responden 409 si el análisis ya no está en
@@ -467,9 +473,12 @@ de tarjeta gráfica.
 \subsection{Tareas programadas}
 
 Las tareas diarias las ejecuta el \textit{worker}, no el \textit{backend}, una vez al día a una hora
-fija de madrugada (las 3 a.\,m. por omisión). Son tres: borrar los videos a los 30 días de terminado el
-análisis, avisar al investigador de los que están por vencer y vigilar el disco, que avisa al
-administrador al superar el 80\,\% y borra primero los videos más antiguos al superar el 90\,\%. Si
+fija de madrugada (las 3 a.\,m. por omisión). Son cinco: borrar los videos a los 30 días de terminado el
+análisis; vigilar el disco, que avisa al administrador al superar el 80\,\% y borra primero los videos más
+antiguos al superar el 90\,\%; respaldar la base con \texttt{pg\_dump} cada día y conservar los últimos siete
+respaldos; borrar las carpetas de pausa huérfanas, es decir, los archivos de pausa de los análisis que ya no
+están en pausa; y anotar en su log los videos que vencen en menos de siete días. Ese último aviso no lo crea el
+\textit{worker}: el \textit{backend} lo calcula al listar los experimentos (\texttt{avisoVencimiento}). Si
 el \textit{worker} estaba apagado a esa hora, las corre al arrancar, y para no repetirlas el mismo día
 guarda la fecha de la última corrida en el volumen. El módulo puede dispararse a mano, lo que permite
 ejecutar el borrado y las alertas sin esperar a la madrugada ni llenar el disco.

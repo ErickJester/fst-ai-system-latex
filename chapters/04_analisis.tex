@@ -617,7 +617,7 @@ RN-07 & En cada segundo analizado, a cada espécimen se le asigna como máximo u
 \hline
 RN-08 & Todos los investigadores con cuenta activa pueden consultar los experimentos
         y resultados de cualquier otro investigador del laboratorio, pero solo pueden
-        eliminar los propios. El Administrador puede además eliminar cualquier
+        editar y eliminar los propios. El Administrador puede además editar y eliminar cualquier
         experimento, y modificar y desactivar cuentas.
       & Definido en entrevista de levantamiento. Ver RF-04, RNF-04, RF-30. \\
 \hline
@@ -631,8 +631,7 @@ RN-09 & Borrar un experimento es permanente e irreversible: se eliminan el video
 \hline
 RN-18 & Eliminar una tanda es permanente e irreversible: se eliminan sus videos del
         Día~1 y del Día~2, su análisis, sus resultados y sus especímenes, y también los
-        reportes del experimento, porque sus resultados cambian. El grupo se conserva
-        aunque quede sin tandas, y la letra de la tanda queda libre para volver a
+        reportes del experimento, porque sus resultados cambian. Si era la última tanda del grupo, el grupo también se borra en la misma transacción; si le quedan otras tandas, el grupo se conserva. La letra de la tanda queda libre para volver a
         subirla. Antes de ejecutarlo, el sistema muestra un aviso de confirmación; no pide
         nombre ni contraseña. Solo lo puede hacer quien creó el experimento o un
         Administrador. No se puede eliminar una tanda mientras su análisis está

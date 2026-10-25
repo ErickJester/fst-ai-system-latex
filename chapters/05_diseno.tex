@@ -675,9 +675,9 @@ JSON con una estructura consistente: campo \texttt{data} para el resultado,
 \texttt{error} para mensajes de error y \texttt{status} para el código HTTP.
 
 La Tabla~\ref{tab:api} describe los endpoints principales agrupados por recurso. En la columna
-de acceso, «Autor o Admin» significa quien subió el video del análisis o un Administrador, y
+de acceso, «Creador o Admin» significa quien creó el experimento o un Administrador, y
 «Creador o Admin» significa quien creó el experimento o un Administrador, y «Creador» significa
-solo quien creó el experimento; los demás reciben un error 403.
+solo quien creó el experimento; los demás reciben un error 403. Un investigador que no es el creador del experimento ve las etiquetas de la revisión de sus análisis, pero no el video de la revisión.
 
 \begin{longtable}{|p{1.75cm}|p{5.55cm}|p{4.7cm}|p{1.6cm}|}
 \caption{Endpoints principales de la API REST.
@@ -716,11 +716,11 @@ POST   & \path{/experiments}         & Crea un experimento con sus metadatos. & 
 \hline
 GET    & \path{/experiments/{id}}    & Devuelve detalle y estado de un experimento. & Investiga\-dor \\
 \hline
-PUT    & \path{/experiments/{id}}    & Actualiza el nombre, la fecha y las notas de un experimento; el creador no cambia. & Investiga\-dor \\
+PUT    & \path{/experiments/{id}}    & Actualiza el nombre, la fecha y las notas de un experimento; el creador no cambia. & Creador o Admin \\
 \hline
 DELETE & \path{/experiments/{id}}    & Elimina el experimento con sus grupos, videos, resultados y reportes (ver RN-09). Se rechaza con error 409 si algún análisis está procesando o en pausa; los que están en cola salen de la cola. & Creador o Admin \\
 \hline
-DELETE & \path{/experiments/{id}/tandas/{idTanda}} & Elimina la tanda con sus videos, análisis, resultados y especímenes, y los reportes del experimento; el grupo se conserva y la letra queda libre (ver RN-18). Se rechaza con error 409 si el análisis de la tanda está procesando o en pausa; si está en cola, sale de la cola. & Creador o Admin \\
+DELETE & \path{/experiments/{id}/tandas/{idTanda}} & Elimina la tanda con sus videos, análisis, resultados y especímenes, y los reportes del experimento; si era la última tanda del grupo, el grupo también se borra, y si le quedan otras, el grupo se conserva; la letra queda libre (ver RN-18). Se rechaza con error 409 si el análisis de la tanda está procesando o en pausa; si está en cola, sale de la cola. & Creador o Admin \\
 \hline
 GET    & \path{/experiments/{id}/groups?q=} & Sugiere los grupos del experimento con nombre parecido y la siguiente tanda, para confirmarla al subir un video. & Investiga\-dor \\
 \hline
@@ -734,15 +734,15 @@ GET    & \path{/experiments/{id}/analyses/{idAnalisis}/control} & Entrega la ima
 \hline
 GET    & \path{/experiments/{id}/analyses/{idAnalisis}/diagnostic} & Descarga el reporte de diagnóstico en PDF de un análisis que terminó en error (ver RN-11). & Investiga\-dor \\
 \hline
-GET    & \path{/experiments/{id}/analyses/{idAnalisis}/pause} & Devuelve los datos de una pausa: cilindro, segundo, recuadros y tiempo que queda para responder (ver RN-17). & Investiga\-dor \\
+GET    & \path{/experiments/{id}/analyses/{idAnalisis}/pause} & Devuelve los datos de una pausa: cilindro, segundo, recuadros y tiempo que queda para responder (ver RN-17). & Creador o Admin \\
 \hline
-GET    & \path{/experiments/{id}/analyses/{idAnalisis}/pause/image} & Entrega la imagen fija del instante en que no se vio al espécimen. & Investiga\-dor \\
+GET    & \path{/experiments/{id}/analyses/{idAnalisis}/pause/image} & Entrega la imagen fija del instante en que no se vio al espécimen. & Creador o Admin \\
 \hline
-POST   & \path{/experiments/{id}/analyses/{idAnalisis}/pause/adjust} & Ajusta el recuadro de un cilindro y devuelve el análisis a la cola para que continúe. Error 409 si ya no está en pausa. & Autor o Admin \\
+POST   & \path{/experiments/{id}/analyses/{idAnalisis}/pause/adjust} & Ajusta el recuadro de un cilindro y devuelve el análisis a la cola para que continúe. Error 409 si ya no está en pausa. & Creador o Admin \\
 \hline
-POST   & \path{/experiments/{id}/analyses/{idAnalisis}/cancel} & Cancela un análisis que está en pausa. Error 409 si ya no está en pausa. & Autor o Admin \\
+POST   & \path{/experiments/{id}/analyses/{idAnalisis}/cancel} & Cancela un análisis que está en pausa. Error 409 si ya no está en pausa. & Creador o Admin \\
 \hline
-POST   & \path{/experiments/{id}/analyses/{idAnalisis}/restart} & Reinicia un análisis completado: borra el resultado anterior y lo vuelve a encolar (ver RN-04). & Autor o Admin \\
+POST   & \path{/experiments/{id}/analyses/{idAnalisis}/restart} & Reinicia un análisis completado: borra el resultado anterior y lo vuelve a encolar (ver RN-04). & Creador o Admin \\
 \hline
 
 % --- Resultados ---
@@ -766,11 +766,11 @@ GET    & \path{/experiments/{id}/report/xlsx} & Descarga los datos en XLSX, del 
 % --- Revisión segundo a segundo ---
 GET    & \path{/experiments/{id}/analyses/{idAnalisis}/review}   & Devuelve los especímenes, las etiquetas de cada segundo y los recuadros de los cilindros de un análisis completado. & Investiga\-dor \\
 \hline
-POST   & \path{/experiments/{id}/analyses/{idAnalisis}/video-token} & Emite el token de solo lectura, de un solo análisis y de corta duración, con el que el navegador reproduce el video de la revisión. & Autor o Admin \\
+POST   & \path{/experiments/{id}/analyses/{idAnalisis}/video-token} & Emite el token de solo lectura, de un solo análisis y de corta duración, con el que el navegador reproduce el video de la revisión. & Creador o Admin \\
 \hline
-GET    & \path{/experiments/{id}/analyses/{idAnalisis}/video}    & Entrega el video de la revisión por partes, para poder adelantar y retroceder. & Investiga\-dor \\
+GET    & \path{/experiments/{id}/analyses/{idAnalisis}/video}    & Entrega el video de la revisión por partes, para poder adelantar y retroceder. & Creador o Admin \\
 \hline
-PUT    & \path{/experiments/{id}/analyses/{idAnalisis}/segundos} & Guarda las correcciones por segundo de un análisis completado (ver RN-14). & Autor o Admin \\
+PUT    & \path{/experiments/{id}/analyses/{idAnalisis}/segundos} & Guarda las correcciones por segundo de un análisis completado (ver RN-14). & Creador o Admin \\
 \hline
 
 % --- Notificaciones ---
@@ -784,7 +784,9 @@ GET    & \path{/admin/users}        & Lista todos los usuarios (filtrable por ad
 \hline
 POST   & \path{/admin/users}        & Crea una cuenta de usuario con contraseña temporal. & Admin \\
 \hline
-PATCH  & \path{/admin/users/{id}}   & Modifica datos, cambia el rol o desactiva una cuenta. & Admin \\
+PATCH  & \path{/admin/users/{id}}   & Modifica datos, cambia el rol o desactiva una cuenta. El identificador institucional no se cambia (400). & Admin \\
+\hline
+POST   & \path{/admin/users/{id}/reset-temporal} & Genera una contraseña temporal nueva, la muestra una sola vez y la envía por correo; en el siguiente acceso la cuenta debe cambiarla. Sirve cuando no llega el correo de recuperación. & Admin \\
 \hline
 GET    & \path{/admin/system}       & Devuelve métricas del sistema: disco y cola. & Admin \\
 \hline
@@ -1339,7 +1341,7 @@ caso de uso.
 \hline
 2 & Sistema & Muestra la lista de usuarios con nombre, correo, si es administrador o investigador, y estado. \\
 \hline
-3 & Administrador & Selecciona la acción: (a) crear una cuenta nueva (ver CU-12); (b) editar datos de cuenta existente, incluido su rol de Investigador o Administrador; o (c) desactivar cuenta. \\
+3 & Administrador & Selecciona la acción: (a) crear una cuenta nueva (ver CU-12); (b) editar datos de cuenta existente, incluido su rol de Investigador o Administrador (el identificador institucional no se cambia); (c) desactivar cuenta; o (d) restablecer la contraseña temporal de una cuenta (ver flujo alterno 3a). \\
 \hline
 4 & Sistema & Aplica el cambio en la base de datos y muestra confirmación de la operación. \\
 \hline
@@ -1352,9 +1354,13 @@ caso de uso.
 \hline
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
+3a & El Administrador pide restablecer la contraseña temporal de una cuenta, por ejemplo cuando no llega el correo de recuperación: el sistema genera una contraseña temporal nueva, la muestra una sola vez al Administrador y la envía por correo a la cuenta; en el siguiente acceso, la cuenta debe cambiarla (ver CU-16). \\
+\hline
 4a & Intento de desactivar la última cuenta de Administrador activa, o de quitarle el rol: el sistema rechaza la acción y muestra advertencia de que debe existir al menos un Administrador activo en todo momento (ver RN-16). \\
 \hline
 4b & Al crear una cuenta nueva, el identificador institucional o el correo ya están registrados (ver CU-12): el sistema informa el conflicto y no crea el registro duplicado. \\
+\hline
+4c & Intento de cambiar el identificador institucional de una cuenta existente: el sistema rechaza la petición con error 400, porque el identificador es la llave de la cuenta. Si la cuenta se registró mal, el Administrador la desactiva y crea otra (ver CU-17 y CU-12). \\
 \hline
 \end{tabular}
 
@@ -2248,7 +2254,7 @@ caso de uso.
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Sesión activa; tanda existente en un experimento a nombre del investigador, o sesión de Administrador; el análisis de la tanda no está procesando ni en pausa.} \\
 \hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Tanda eliminada de forma permanente e irreversible con sus videos, análisis, resultados y especímenes, junto con los reportes del experimento; el grupo se conserva y la letra de la tanda queda libre (ver RN-18).} \\
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Tanda eliminada de forma permanente e irreversible con sus videos, análisis, resultados y especímenes, junto con los reportes del experimento; si era la última tanda del grupo, el grupo también se borra, y si le quedan otras, el grupo se conserva; la letra de la tanda queda libre (ver RN-18).} \\
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{Permite al investigador eliminar una sola tanda desde la pantalla del grupo sin eliminar el experimento. La acción es permanente, irreversible y requiere confirmación explícita.} \\
 \hline
@@ -2370,7 +2376,7 @@ caso de uso.
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} ejecuta diariamente, de forma automática, una tarea programada que elimina los archivos de video cuyo análisis fue exitoso hace 30 días o más, previa emisión de aviso al investigador.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{Worker} identifica los videos próximos a expirar (menos de 7 días) y emite avisos en el \textit{dashboard}. Al cumplirse los 30 días, elimina el archivo de video del almacenamiento, conservando los resultados y reportes asociados.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{12.4cm}|}{El \textit{backend} calcula, al listar los experimentos, los videos que expiran en menos de 7 días y muestra el aviso en el \textit{dashboard}; el \textit{Worker} solo anota esos videos en su log. Al cumplirse los 30 días, elimina el archivo de video del almacenamiento, conservando los resultados y reportes asociados.} \\
 \hline
 \end{tabular}
 
@@ -2468,7 +2474,7 @@ contraseña temporal.
 La gestión de usuarios (Figura~\ref{fig:seq_gestion_usuarios}) es exclusiva de
 quien pertenece a \texttt{ADMINISTRADOR} (ver CU-15): permite crear cuentas
 nuevas con contraseña temporal y desactivar cuentas existentes sin eliminarlas
-(ver RF-05, RF-07). La configuración de perfil
+(ver RF-05, RF-07). El identificador institucional de una cuenta no se modifica, y el Administrador puede restablecer la contraseña temporal de una cuenta cuando no llega el correo de recuperación (ver CU-11). La configuración de perfil
 (Figura~\ref{fig:seq_perfil}) está disponible para cualquier usuario con sesión
 activa y permite actualizar nombre, apellidos, correo electrónico y contraseña.
 
@@ -2715,7 +2721,7 @@ confirmar con un aviso de «¿está seguro?» (RF-27, RN-09), sin nombre ni cont
 sus tandas, los especímenes de cada una con el cilindro que ocuparon y los videos de
 Día~1 y Día~2 con su estado. Cada tanda tiene el botón «Eliminar tanda», con la confirmación
 «Se borrarán el video del Día~1, el del Día~2 y sus resultados. No se puede deshacer.»
-(RF-34, RN-18); el grupo se conserva y la letra queda libre. Desde ahí se abren los resultados de una tanda o los del
+(RF-34, RN-18); si era la única tanda del grupo, el grupo también se borra; si no, el grupo se conserva y la letra queda libre. Desde ahí se abren los resultados de una tanda o los del
 grupo completo, que reúne los análisis de todas sus tandas (RF-19).
 
 \begin{figure}[H]
