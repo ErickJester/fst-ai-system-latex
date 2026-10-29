@@ -54,7 +54,7 @@ RF-01 & Autenticación
       & Alta & Investigador / Admin \\
 \hline
 RF-02 & Autenticación
-      & El sistema debe cerrar la sesión del usuario descartando el token JWT activo
+      & El sistema debe cerrar la sesión del usuario descartando el \textit{token} (\textit{JSON Web Token}, JWT) activo
         en el navegador; el servidor no mantiene una lista de tokens cancelados y el
         token tiene una vigencia larga y configurable. La opción de cierre de sesión
         debe ser accesible desde el menú de usuario en todas las pantallas.
@@ -62,7 +62,7 @@ RF-02 & Autenticación
 \hline
 RF-03 & Autenticación
       & El sistema debe ofrecer recuperación de contraseña enviando un enlace de
-        restablecimiento al correo registrado.
+        restablecimiento al correo registrado; el enlace dura 60~minutos.
       & Media & Investigador \\
 \hline
 RF-04 & Autenticación
@@ -83,13 +83,14 @@ RF-05 & Gestión de usuarios
         Administrador) y desactivar cuentas de usuario desde el panel de administración.
         La creación requiere identificador institucional,
         nombre, apellidos y correo; el sistema genera una contraseña temporal que el
-        usuario cambia al primer ingreso. No se puede desactivar la última cuenta de
+        usuario cambia al primer ingreso y que recibe por correo. El identificador
+        institucional no se puede modificar después. No se puede desactivar la última cuenta de
         Administrador activa ni quitarle el rol (ver RN-16).
       & Alta & Admin \\
 \hline
 RF-06 & Gestión de usuarios
       & El Investigador debe poder actualizar su nombre, correo y contraseña desde
-        su perfil de usuario.
+        su perfil de usuario; el identificador institucional no es editable.
       & Media & Investigador \\
 \hline
 RF-07 & Gestión de usuarios
@@ -173,11 +174,13 @@ RF-16 & Análisis conductual
 \hline
 RF-17 & Análisis conductual
       & El sistema debe clasificar segundo a segundo la conducta de cada espécimen: nado
-        activo, inmovilidad o escalamiento \cite{armario2021}. Cuando sabe que el
-        espécimen no está inmóvil pero no decide entre nado y escalamiento, lo registra
-        como \textit{conducta activa}, una cuarta conducta (ver RN-13). El buceo se
+        activo, inmovilidad o escalamiento \cite{armario2021}. Cuando la confianza no
+        alcanza para decidir entre nado y escalamiento, lo registra como
+        \textit{conducta activa}, una cuarta conducta (ver RN-13). El buceo se
         clasifica como nado activo. Las conductas son mutuamente excluyentes (ver
-        RN-07).
+        RN-07). Cada análisis tiene un nivel de clasificación: «agrupado» si queda algún
+        segundo en conducta activa y «preciso» si no; el nivel se recalcula cuando el
+        usuario corrige segundos en la revisión (ver RF-32).
       & Alta & Sistema \\
       \hline
 RF-18 & Análisis conductual
@@ -187,7 +190,11 @@ RF-18 & Análisis conductual
         distingue. Para presentarlos en la unidad de la técnica de bloques de
         5~segundos, los resultados también se muestran en bloques de 5~segundos,
         calculados según RN-15, y cada bloque muestra dentro los segundos que lo
-        componen. Los fragmentos en que el espécimen no se ve se marcan en el
+        componen. La pantalla de bloques tiene tantas columnas como bloques tenga el
+        espécimen más largo (como mínimo una); los especímenes más cortos dejan
+        vacías las celdas del final. Los segundos en que el espécimen no se ve quedan
+        sin conducta y se cuentan en una quinta clave, «sin ver», de modo que las
+        cinco sumen 100\,\% y 60~s por minuto completo; esos fragmentos se marcan en el
         reporte de resultados.
       & Alta & Sistema \\
 \hline
@@ -195,13 +202,14 @@ RF-18 & Análisis conductual
 % ── Resultados ─────────────────────────────────────────────
 RF-19 & Resultados
       & La pantalla de resultados debe mostrar el tiempo total en segundos y el
-        porcentaje de cada conducta por espécimen, en una tabla
+        porcentaje de cada conducta, y de «sin ver», por espécimen, en una tabla
         descargable. El investigador elige ver los resultados del grupo completo,
         con todas sus tandas, o los de una sola tanda.
       & Alta & Investigador \\
 \hline
 RF-20 & Resultados
-      & El sistema debe ofrecer un desglose de conductas por minuto para cada espécimen.
+      & El sistema debe ofrecer un desglose de conductas por minuto para cada espécimen,
+        con los segundos «sin ver» como una quinta columna (ver RF-18).
       & Alta & Investigador \\
 \hline
 RF-21 & Resultados
@@ -212,31 +220,35 @@ RF-21 & Resultados
 \hline
 RF-22 & Resultados
       & El investigador debe poder descargar los datos de resultados en formato CSV
-        y XLSX desde la pantalla de resultados y desde el dashboard. El archivo debe
+        y XLSX desde la pantalla de resultados y desde el \textit{dashboard} (panel de control). El archivo debe
         contener las columnas: \texttt{Grupo}, \texttt{Tanda}, \texttt{Espécimen},
         \texttt{Tiempo (min:seg)}, \texttt{Nado activo}, \texttt{Escalamiento},
-        \texttt{Inmovilidad} y \texttt{Conducta activa}, con una fila por espécimen
-        y por minuto analizado y el valor de cada conducta en segundos. Al final
+        \texttt{Inmovilidad}, \texttt{Conducta activa} y \texttt{Sin ver} (los
+        segundos sin conducta, al final), con una fila por espécimen
+        y por minuto analizado y el valor de cada columna en segundos, de modo que
+        las cinco sumen 60~s por minuto completo y 100\,\%. Al final
         incluye las filas con la media, la desviación estándar y la varianza de cada
-        conducta de los especímenes de esa descarga, sean los de una tanda o los del
+        columna, \texttt{Sin ver} incluida, de los especímenes de esa descarga, sean los de una tanda o los del
         grupo completo (ver RF-31). Además se descargan, por
         separado y en PDF, el reporte de resultados (los tiempos por espécimen y
-        conducta, con los fragmentos en que el espécimen no se ve marcados) y el
+        conducta, con los fragmentos en que el espécimen no se ve marcados y sin la
+        columna «sin ver») y el
         reporte de diagnóstico (ver RN-11).
       & Alta & Investigador \\
 \hline
 
 % ── Dashboard / gestión de experimentos ──────────────────
-RF-23 & Dashboard
-      & El dashboard debe mostrar la lista de todos los experimentos del laboratorio
+RF-23 & \textit{Dashboard}
+      & El \textit{dashboard} debe mostrar la lista de todos los experimentos del laboratorio
         con nombre, fecha, número de grupos, sesión, estado (en cola, procesando, en pausa,
-        completado, error; «en espera del Día~2» si solo tiene el video del Día~1) y accesos directos a resultados y descarga (ver RN-08).
+        completado, error, cancelado; «sin videos» si aún no tiene ninguno y «en espera
+        del Día~2» si solo tiene el video del Día~1) y accesos directos a resultados y descarga (ver RN-08).
         La lista es filtrable por estado, fecha o tratamiento; el filtro por
         tratamiento muestra los experimentos que tengan al menos un grupo con
         ese tratamiento.
       & Alta & Investigador \\
 \hline
-RF-24 & Dashboard
+RF-24 & \textit{Dashboard}
       & El sistema debe mostrar un aviso visible cuando un video está a menos de
         7~días de ser eliminado automáticamente, indicando el nombre del experimento
         y la fecha de vencimiento exacta. El período de 7~días da tiempo suficiente
@@ -247,21 +259,21 @@ RF-24 & Dashboard
         omisiones.
       & Media & Sistema \\
 \hline
-RF-25 & Dashboard
+RF-25 & \textit{Dashboard}
       & El sistema debe borrar automáticamente los archivos de video 30~días después
         de que el análisis termine exitosamente, notificando al investigador con un
         aviso en la interfaz antes de que ocurra (ver RN-05). Si el disco supera el
         90\,\%, el borrado se adelanta a los videos más antiguos (ver RNF-09).
       & Media & Sistema \\
 \hline
-RF-26 & Dashboard
+RF-26 & \textit{Dashboard}
       & Los resultados y reportes deben conservarse indefinidamente, aunque el video
         original ya haya sido borrado.
       & Alta & Sistema \\
 \hline
-RF-27 & Dashboard
+RF-27 & \textit{Dashboard}
       & El investigador debe poder eliminar un experimento propio desde el
-        dashboard o desde su detalle; el Administrador puede eliminar cualquiera. La acción es
+        \textit{dashboard} o desde su detalle; el Administrador puede eliminar cualquiera. La acción es
         permanente e irreversible y requiere un aviso de confirmación (ver RN-09).
       & Media & Investigador / Admin \\
 \hline
@@ -303,11 +315,16 @@ RF-32 & Resultados
         coloreada por conducta, donde cada segundo muestra la conducta que puso el
         sistema y el usuario puede corregirla. Para reproducirlo en el navegador, al
         terminar el análisis el sistema genera una copia del video recortado a los
-        segundos analizados en un formato compatible con el navegador (H.264). Solo
+        segundos analizados en un formato compatible con el navegador (códec H.264, estándar de compresión de video). Solo
         el investigador que subió el video y el Administrador pueden corregir. Cada
         conducta guarda su origen
         (del sistema, confirmada, corregida o dudosa). Los totales por minuto se calculan desde las
-        etiquetas, así que reflejan las correcciones (ver RN-14).
+        etiquetas, así que reflejan las correcciones (ver RN-14). Al guardar las
+        correcciones de segundos, el sistema recalcula el nivel de clasificación del
+        análisis: «agrupado» si queda algún segundo en conducta activa y «preciso» si
+        no (ver RN-13). Reiniciar el análisis
+        desde esta pantalla borra toda la revisión hecha; la pantalla avisa antes y no
+        se puede deshacer (ver RN-04).
       & Media & Investigador \\
 \hline
 RF-33 & Notificaciones
@@ -352,7 +369,7 @@ tiempo aceptable se determina con el usuario durante las pruebas \cite{iso25010}
 
 RNF-01 & Rendimiento
        & Las operaciones de navegación e interacción con la interfaz (cargar el
-         dashboard, filtrar experimentos, abrir resultados) deben responder en menos
+         \textit{dashboard}, filtrar experimentos, abrir resultados) deben responder en menos
          de 3~s. Derivado del atributo \textit{time behaviour} de la ISO/IEC~25010:2011
          \cite{iso25010}.
        & Tiempo de respuesta $\leq 3$~s en condiciones normales de red. \\
@@ -364,8 +381,11 @@ RNF-02 & Calidad del análisis
          variabilidad aceptada entre analistas humanos, declarada por el investigador
          colaborador en la entrevista de levantamiento (véase la
          justificación de umbrales en la sección~\ref{sec:umbrales}).
-       & F1 $\geq 85$\,\% por conducta (nado, inmovilidad, escalamiento y conducta
-         activa) sobre el conjunto de prueba de la fase de validación (TT-II). \\
+       & F1 $\geq 85$\,\% por conducta (primera evaluación, por clase de la red
+         --nado activo, inmovilidad y escalamiento--, sobre los segundos etiquetados
+         con esas tres clases, con validación por video; y segunda evaluación,
+         inmovilidad contra activa, con $P(\text{inmovilidad}) \geq 0.5$, ver RN-13) sobre el conjunto de
+         prueba de la fase de validación (Trabajo Terminal II, TT-II). \\
 \hline
 RNF-03 & Disponibilidad
        & El sistema debe permitir que los investigadores dejen análisis corriendo
@@ -375,7 +395,7 @@ RNF-03 & Disponibilidad
 \hline
 RNF-04 & Seguridad
        & Solo los usuarios autenticados pueden acceder al sistema. La autenticación
-         usa tokens JWT con tiempo de expiración configurable. Todos los
+         usa \textit{tokens} JWT con tiempo de expiración configurable. Todos los
          investigadores con cuenta activa pueden consultar los experimentos y
          resultados de cualquier otro investigador del laboratorio (ver RN-08).
        & Autenticación con JWT verificada en pruebas de integración. Acceso a datos
@@ -408,7 +428,7 @@ RNF-08 & Almacenamiento
          termina exitosamente. Los resultados y reportes se conservan
          indefinidamente. El sistema alerta al usuario cuando un video está a menos
          de 7~días de ser borrado.
-       & Tarea programada (\textit{cron job}) diaria, a cargo del \textit{worker}. Aviso visible en dashboard
+       & Tarea programada (\textit{cron job}) diaria, a cargo del \textit{worker}. Aviso visible en \textit{dashboard}
          con indicador de días restantes. \\
 \hline
 RNF-09 & Almacenamiento
@@ -429,7 +449,7 @@ RNF-10 & Portabilidad
 \hline
 RNF-11 & Escalabilidad
        & El módulo de clasificación debe estar diseñado de forma modular, de modo que
-         pueda reconfigurarse para paradigmas conductuales distintos al FST sin
+         pueda reconfigurarse para paradigmas conductuales distintos a la prueba de nado forzado (\textit{forced swim test}, FST) sin
          modificar la plataforma web. Validar el sistema con otros paradigmas queda fuera
          del alcance de este trabajo.
        & Diseño modular verificado en la revisión de arquitectura al cierre
@@ -489,11 +509,14 @@ ajustarse en la fase de validación (TT-II).
         El F1 se calcula contra las etiquetas del conjunto de prueba propio, hechas
         por el equipo con su etiquetador, y el 85\,\% se toma como la meta de calidad.
         El F1 por conducta se evaluará sobre el conjunto de prueba de la fase de
-        validación en TT-II. El umbral se exige a las cuatro conductas, incluida la
-        conducta activa (ver RN-13): como es la clase a la que el sistema manda los
-        segundos en que no distingue entre nado y escalamiento, medirla evita que esos
-        segundos dejen de contar como error en las otras dos y que su F1 salga mejor
-        de lo que el sistema acierta.
+        validación en TT-II. El umbral se exige a las tres clases que da la red
+        (escalamiento, inmovilidad y nado) en la primera evaluación (por clase de la
+        red): se calcula con la clase más probable de la red en cada segundo, solo sobre
+        los segundos que el equipo etiquetó con esas tres clases, con validación por
+        video; no mide la salida de producción con la regla de confianza. La conducta
+        activa no sale de la red: se asigna después, segundo a segundo, con la regla de
+        RN-13. Por eso se mide también en una segunda evaluación, inmovilidad contra
+        activa, con $P(\text{inmovilidad}) \geq 0.5$ y no con la regla de confianza.
 
   \item \textbf{Repetibilidad: variación máxima de entre el 5 y el 10\,\%.}
         En la entrevista de levantamiento, el investigador colaborador indicó que lo
@@ -509,8 +532,10 @@ ajustarse en la fase de validación (TT-II).
         segundo y detecta conductas breves de unos 2~segundos, que es justo lo que el
         análisis a ojo no alcanza a registrar. El criterio manual se conserva como
         referencia: los resultados también se agrupan en bloques de 5~segundos, con la
-        conducta que más segundos ocupó en cada bloque, la unidad de la técnica de
-        muestreo por intervalos de la literatura (ver RF-18 y RN-15).
+        conducta que más segundos ocupó en cada bloque (conducta activa si hay empate
+        en el primer lugar, y con un matiz cuando algún segundo no se vio bien), la
+        unidad de la técnica de muestreo por intervalos de la literatura (ver RF-18 y
+        RN-15).
 
   \item \textbf{Período de retención de videos: 30~días.}
         Confirmado por el investigador colaborador en la entrevista de levantamiento
@@ -571,8 +596,11 @@ RN-03 & Una tanda tiene como máximo dos videos: uno del Día~1 (20~min) y uno d
 \hline
 RN-04 & El análisis lo inicia el sistema automáticamente al terminar la carga. El
         investigador no puede iniciarlo ni pausarlo, y solo puede cancelarlo mientras
-        el análisis está en pausa. Sí puede reiniciarlo desde la pantalla de revisión:
-        al reiniciar se borra el resultado anterior y el análisis empieza de nuevo.
+        el análisis está en pausa. Solo el investigador que subió el video y el
+        Administrador pueden reiniciar un análisis en estado «completado», desde la
+        pantalla de revisión: al reiniciar se borran el resultado y toda la revisión
+        humana hecha, la pantalla avisa antes y la acción no se puede deshacer; el
+        análisis vuelve a «en cola».
         Solo el sistema pausa un análisis (ver RN-17).
       & Evita estados inconsistentes en la cola, que procesa un análisis a la vez. Si
         cambia el video o el modelo, el resultado es un análisis nuevo y no una
@@ -632,12 +660,18 @@ RN-12 & La comparación entre grupos usa solo los videos del Día~2. Los
         constancia y no lo analiza; el efecto del tratamiento se mide en el Día~2.
         Ver RF-09, RF-21. \\
 \hline
-RN-13 & Cuando el clasificador sabe que el espécimen no está inmóvil pero no
-        decide entre nado activo y escalamiento, esos segundos se registran como
-        \textit{conducta activa}, una cuarta conducta. Un mismo análisis puede
+RN-13 & La red da tres salidas (escalamiento, inmovilidad y nado); la
+        \textit{conducta activa}, una cuarta conducta, no sale de ella: se asigna a cada
+        segundo con un umbral de confianza de 0.80 en tres pasos. Primero, si la
+        probabilidad máxima es de al menos 0.80, gana esa clase. Si no, y la suma de las
+        probabilidades de nado y escalamiento es de al menos 0.80, el segundo es conducta
+        activa (el espécimen no está inmóvil pero no se decide entre nado y
+        escalamiento). Si tampoco, gana la clase más probable. Un mismo análisis puede
         mezclar las cuatro conductas, y los reportes muestran la conducta activa
         como una columna más, de modo que el investigador pueda interpretar los
-        resultados en consecuencia.
+        resultados en consecuencia. El análisis tiene un nivel de clasificación:
+        «agrupado» si queda algún segundo en conducta activa y «preciso» si no; el nivel
+        se recalcula al guardar correcciones en la revisión.
       & Contemplado en el alcance (cap.~1) y en el riesgo R-08. Corresponde al
         nivel de Porsolt (inmóvil o no inmóvil) cuando no se separa lo activo en
         nado y escalamiento. Ver RF-17, RF-18. \\
@@ -648,20 +682,24 @@ RN-14 & Solo se puede revisar un análisis completado, y solo lo corrigen el
         minuto de los especímenes corregidos ya reflejan los cambios, porque se
         calculan desde las etiquetas, y los reportes guardados del experimento se
         regeneran con los datos nuevos.
-        Corregir etiquetas no cambia el modelo ni el video.
+        Corregir etiquetas no cambia el modelo ni el video. Reiniciar el análisis
+        borra toda esta revisión; la pantalla avisa antes y no se puede deshacer
+        (ver RN-04).
       & La revisión humana corrige al clasificador sin sustituirlo. Si lo que cambia
         es el video o el modelo, el resultado es un análisis nuevo (ver RN-04).
         Ver RF-32. \\
 \hline
 RN-15 & Los resultados también se agrupan en bloques de 5~segundos, la unidad de la
-        técnica de muestreo por intervalos de la literatura. La conducta de cada bloque es la que ocupa más de sus
-        cinco segundos, tomada de la conducta ya asignada a cada segundo; el cálculo
-        no vuelve a usar el clasificador. Si nado activo y escalamiento empatan, el
-        bloque es conducta activa; con dos segundos de inmovilidad y dos de nado
-        activo decide el quinto, y tanto escalamiento como «no se ve» dan conducta
-        activa. Un bloque cuyos cinco segundos son «no se ve» se muestra como
-        conducta activa. Los fragmentos «no se ve» se marcan en pantalla y en el reporte
-        de resultados. Los bloques se calculan al mostrarse y no se guardan; dentro de cada
+        técnica de muestreo por intervalos de la literatura. La conducta de cada bloque es la que ocupa más segundos
+        (mayoría relativa), tomada de la conducta ya asignada a cada segundo; el cálculo
+        no vuelve a usar el clasificador. Cualquier empate en el primer lugar da
+        conducta activa. Si algún segundo del bloque no se vio, el bloque lleva un
+        matiz (se muestra rayado, «no se vio bien»); si ninguno de sus segundos se vio,
+        el bloque es conducta activa con matiz. El último bloque puede quedar
+        incompleto: los segundos que le faltan no cuentan como no vistos. Los huecos en
+        la numeración de los segundos sí cuentan como no vistos. Los fragmentos «no se
+        ve» se marcan en pantalla y en el reporte de resultados. Los bloques y los
+        totales se calculan al mostrarse y nunca se guardan; dentro de cada
         uno se siguen viendo sus cinco segundos.
       & Sigue la técnica de muestreo por intervalos de Detke et~al.\ \cite{detke1995},
         tal como la describen Craft et~al.\ \cite{craft2010} para la prueba de nado
@@ -671,8 +709,8 @@ RN-15 & Los resultados también se agrupan en bloques de 5~segundos, la unidad d
         predominante sale de los segundos ya clasificados, no de la apreciación de un
         observador. No equivale al conteo «por eventos» que el laboratorio ha usado en
         parte de sus análisis manuales, que registra la conducta del instante exacto
-        cada 5~segundos y no la predominante del periodo. Los desempates son criterios
-        propios del sistema; esos autores no los tratan. Ver RF-18, RN-13 y la
+        cada 5~segundos y no la predominante del periodo. El empate en el primer lugar
+        y el matiz son reglas propias del sistema; esos autores no las tratan. Ver RF-18, RN-13 y la
         sección~\ref{sec:umbrales}. \\
 \hline
 RN-16 & Siempre debe existir al menos un Administrador activo: el sistema rechaza
@@ -761,8 +799,9 @@ R(2+1)D-18 \cite{tran2018}
       preentrena con Kinetics-400 (videos de acciones humanas) para aplicar
       transfer learning \cite{pan2010}.
     & Es el clasificador de conducta. Se fusiona con una rama de 22 medidas (los quince
-      rasgos del etiquetador y siete reglas de pataleo y nariz) y decide la conducta de
-      cada segundo. Se evalúa en TT-II con F1 por conducta. \\
+      rasgos del etiquetador y siete reglas de pataleo y nariz) y da tres salidas por
+      segundo (escalamiento, inmovilidad y nado); la conducta activa se asigna aparte
+      (ver RN-13). Se evalúa en TT-II con F1 por clase. \\
 \hline
 PyTorch \cite{paszke2019}
     & Framework de aprendizaje profundo para entrenamiento e inferencia de redes
@@ -1035,7 +1074,10 @@ proyecto, los criterios que determinan si el sistema es operativamente aceptable
   \item El reporte generado debe incluir, al menos, la duración acumulada por conducta
         (nado activo, inmovilidad, escalamiento y conducta activa) desglosada por
         minuto, de modo que sea directamente comparable con la tabla que el
-        investigador construye hoy a mano.
+        investigador construye hoy a mano. La pantalla de resultados y los archivos
+        CSV y XLSX añaden una quinta columna, «sin ver» (los segundos sin conducta),
+        con la que los totales suman 100\,\% y 60~s por minuto completo; el reporte en
+        PDF conserva las cuatro conductas, sin esa columna.
   \item Cuando el video no se pueda procesar (no se abre o no se encuentran los
         cilindros, según RN-11), el sistema debe notificarlo explícitamente en el
         reporte de diagnóstico en lugar de entregar un resultado silencioso

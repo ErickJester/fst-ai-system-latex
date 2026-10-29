@@ -29,7 +29,7 @@ package P1_Autenticacion_y_usuarios {
     +subirVideo(idTanda, sesion, archivo) : Video
     +eliminarExperimento(id) : void
     +descargarReporte(idExperimento, formato) : Reporte
-    +reiniciarAnalisis(idAnalisis) : void
+    +reiniciarAnalisis(idAnalisis)
     +ajustarRecuadro(idAnalisis, cilindro, recuadro) : void
     +cancelarAnalisisEnPausa(idAnalisis) : void
   }
@@ -154,7 +154,7 @@ package P4_Resultados_y_reportes {
   end note
 
   class Observacion {
-    +calcularBloques() : List<String>
+    +calcularBloques()
   }
 
   enum Conducta {

@@ -106,14 +106,14 @@
   \textbf{Docker}
   & Plataforma de contenedorización que empaqueta una aplicación junto con todas
     sus dependencias en unidades aisladas y reproducibles. El sistema se
-    despliega como cuatro contenedores orquestados: frontend, backend, worker y
-    base de datos. \\[5pt]
+    despliega como cuatro contenedores orquestados: \textit{frontend}, \textit{backend},
+    \textit{worker} y base de datos. \\[5pt]
 
   % ── E ──────────────────────────────────────────────────────────────
   \textbf{Entropía cruzada}
   & (\textit{Cross-entropy loss}.) Función de pérdida estándar para clasificación
     multiclase que mide la discrepancia entre la distribución de probabilidad
-    predicha por el modelo y la distribución real (etiquetas one-hot). Se
+    predicha por el modelo y la distribución real (etiquetas \textit{one-hot}). Se
     minimiza durante el entrenamiento del clasificador de conductas. \\[5pt]
 
   \textbf{Espécimen}
@@ -127,14 +127,17 @@
   \textbf{F1-score}
   & Media armónica entre precisión y recall: $F_1 = 2 \cdot \frac{P \cdot R}{P + R}$.
     Métrica balanceada que penaliza tanto los falsos positivos como los falsos
-    negativos; se reporta por conducta (inmovilidad, nado activo, escalamiento)
-    para evaluar el clasificador. \\[5pt]
+    negativos; la primera evaluación es el F1 por clase de la red (inmovilidad, nado
+    activo y escalamiento), sobre los segundos etiquetados con esas tres clases y con
+    validación por video. Una segunda evaluación separa inmovilidad de activa (nado y
+    escalamiento juntos) con $P(\text{inmovilidad}) \geq 0.5$. \\[5pt]
 
   \textbf{Frame}
   & (Cuadro de video.) Imagen estática individual dentro de una secuencia de
     video. El pipeline mide cuadro a cuadro (posición y movimiento del espécimen) y
     clasifica por segundo: cada segundo recibe una conducta a partir de una ventana
-    de 4~s alrededor de él, y los tiempos de conducta se acumulan en segundos. \\[5pt]
+    de 4~s centrada en él, de la que se toma el clip de 16 fotogramas que recibe la
+    red, y los tiempos de conducta se acumulan en segundos. \\[5pt]
 
   \textbf{FST}
   & (\textit{Forced Swim Test} / Prueba de Nado Forzado.) Paradigma experimental
@@ -153,9 +156,11 @@
   % ── I ──────────────────────────────────────────────────────────────
   \textbf{ImageNet}
   & Base de datos de más de 14 millones de imágenes anotadas en más de 21{,}000
-    categorías. Es el conjunto de referencia para preentrenar redes de
-    clasificación de imágenes antes de aplicar transfer learning; para video, el
-    equivalente es Kinetics-400, con el que se preentrena la R(2+1)D-18. \\[5pt]
+    categorías en su versión completa; la versión que se usa para preentrenar redes
+    de clasificación tiene más de un millón de imágenes en 1{,}000 clases. Es el
+    conjunto de referencia para preentrenar antes de aplicar \textit{transfer
+    learning}; para video, el equivalente es Kinetics-400, con el que se preentrena
+    la R(2+1)D-18. \\[5pt]
 
   \textbf{Inmovilidad}
   & (\textit{Immobility}.) Conducta en el FST caracterizada por la ausencia de
@@ -167,7 +172,7 @@
 
   \textbf{ISRS}
   & (Inhibidor Selectivo de la Recaptación de Serotonina.) Clase farmacológica
-    que bloquea el transportador SERT, incrementando la disponibilidad sináptica
+    que bloquea el transportador de serotonina (SERT, \textit{serotonin transporter}), incrementando la disponibilidad sináptica
     de serotonina. En el FST aumentan específicamente el tiempo de nado activo
     sin afectar de forma significativa el escalamiento. Fluoxetina y sertralina
     son ejemplos representativos. \\[5pt]
@@ -204,8 +209,8 @@
   \textbf{Overfitting}
   & (Sobreajuste.) Fenómeno en el que un modelo aprende el ruido del conjunto de
     entrenamiento en lugar de los patrones generalizables, resultando en alta
-    precisión en entrenamiento pero baja en datos nuevos. Se mitiga con data
-    augmentation, dropout y validación cruzada. \\[5pt]
+    precisión en entrenamiento pero baja en datos nuevos. Se mitiga con \textit{data
+    augmentation}, \textit{dropout} y validación cruzada. \\[5pt]
 
   % ── P ──────────────────────────────────────────────────────────────
   \textbf{Pipeline de análisis}
@@ -227,9 +232,10 @@
 
   \textbf{Prueba de nado forzado}
   & Véase \textbf{FST}. Protocolo de dos sesiones (día 1: 20 min de nado de
-    habituación; día 2: 5 min de prueba) durante las cuales se registran en
-    video los tiempos de inmovilidad, nado activo, escalamiento y conducta activa de
-    cada espécimen. \\[5pt]
+    habituación; día 2: 5 min de prueba). Ambas sesiones se graban en video, pero el
+    sistema solo analiza el día 2, del que obtiene los tiempos de inmovilidad, nado
+    activo, escalamiento y conducta activa de cada espécimen; el video del día 1 se
+    sube y se guarda sin análisis. \\[5pt]
 
   % ── R ──────────────────────────────────────────────────────────────
   \textbf{Recall}
@@ -258,7 +264,7 @@
     del cilindro. \\[5pt]
 
   \textbf{Serotoninérgico}
-  & Relativo al sistema de neurotransmisión mediado por serotonina (5-HT). Los
+  & Relativo al sistema de neurotransmisión mediado por serotonina (5-hidroxitriptamina, 5-HT). Los
     antidepresivos serotoninérgicos como la fluoxetina incrementan específicamente el tiempo
     de nado activo en el FST sin modificar significativamente el escalamiento ni
     la actividad locomotora general. \\[5pt]
@@ -267,7 +273,9 @@
   & Función de activación que transforma un vector de puntuaciones en una
     distribución de probabilidad: $\sigma(z)_i = e^{z_i}/\sum_j e^{z_j}$.
     La capa final de la red convolucional aplica softmax para obtener la
-    probabilidad de cada conducta (inmovilidad, nado activo, escalamiento y conducta activa). \\[5pt]
+    probabilidad de cada una de sus tres clases (escalamiento, inmovilidad y nado
+    activo); la conducta activa no es una clase de la red, el sistema la asigna después
+    con una regla de confianza. \\[5pt]
 
   \textbf{Sustracción de fondo}
   & (\textit{Background subtraction}.) Técnica de segmentación que identifica

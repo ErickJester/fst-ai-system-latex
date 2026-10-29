@@ -67,23 +67,23 @@
 
         <table class="table">
           <thead><tr>
-            <th style="width:31%">Espécimen</th><th style="text-align:right">Nado activo</th><th style="text-align:right">Inmovilidad</th><th style="text-align:right">Escalamiento</th><th style="width:30%">Distribución</th>
+            <th style="width:31%">Espécimen</th><th style="text-align:right">Nado activo</th><th style="text-align:right">Inmovilidad</th><th style="text-align:right">Escalamiento</th><th style="text-align:right">Sin ver</th><th style="width:24%">Distribución</th>
           </tr></thead>
           <tbody id="rows"></tbody>
         </table>
 
-        <p class="hint" style="margin:14px 0 0">Cada segundo cuenta, sin duración mínima; el buceo se contabiliza como nado activo. Los tres renglones grises son los estadísticos de RF-31 de lo que se ve (la tanda o el grupo completo); el CSV y el XLSX descargan esos mismos. El desglose por minuto se almacena y exporta <strong>en segundos</strong>, no en porcentaje.</p>
+        <p class="hint" style="margin:14px 0 0">Cada segundo cuenta, sin duración mínima; el buceo se contabiliza como nado activo. Los tres renglones grises son los estadísticos de RF-31 de lo que se ve (la tanda o el grupo completo); el CSV y el XLSX descargan esos mismos. Los segundos en que no se ve al espécimen forman la columna «Sin ver», que completa los 300 s; el desglose por minuto se almacena y exporta <strong>en segundos</strong>, no en porcentaje.</p>
 
         <div class="k" id="secTimeline" style="margin:26px 0 12px">Espécimen 1 · Cilindro P1</div>
         <div style="border:1px solid var(--color-divider);padding:16px 18px">
           <div id="timeline" style="display:flex;flex-direction:column;gap:8px"></div>
         </div>
 
-        <div class="k" id="secBloques" style="margin:26px 0 12px">Espécimen 1 · bloques de 5 s</div>
+        <div class="k" id="secBloques" style="margin:26px 0 12px">Bloques de 5 s por espécimen</div>
         <div style="border:1px solid var(--color-divider);padding:16px 18px">
           <div id="bloques" style="display:flex;flex-direction:column;gap:10px"></div>
         </div>
-        <p class="hint" style="margin:10px 0 0">Cada bloque toma la conducta que más segundos ocupó (arriba) y muestra debajo sus 5 segundos. Así se ven las conductas breves, de unos 2 s, que el análisis a ojo por bloques no distingue, y el resultado se compara directo con el manual. El bloque sale por mayoría de sus 5 segundos; si nado activo y escalamiento empatan, es conducta activa. Los bloques rayados tienen segundos «no se ve»: el modelo no vio bien esa parte del video, y el reporte de resultados también los marca.</p>
+        <p class="hint" style="margin:10px 0 0">Cada bloque toma la conducta que más segundos ocupó (arriba) y muestra debajo sus 5 segundos. Así se ven las conductas breves, de unos 2 s, que el análisis a ojo por bloques no distingue, y el resultado se compara directo con el manual. El bloque toma la conducta con más segundos; cualquier empate en el primer lugar es conducta activa. Los bloques rayados tienen segundos «no se ve»: el modelo no vio bien esa parte del video, y el reporte de resultados también los marca. La pantalla tiene tantas columnas como bloques del espécimen más largo; los más cortos dejan celdas vacías al final, y el último bloque puede quedar incompleto.</p>
       </div>
 
       <div style="background:var(--color-bg);padding-left:26px;display:flex;flex-direction:column;gap:24px">
@@ -123,6 +123,7 @@
   const { mean, variance, fmt, r1 } = FST;
   const INK = 'var(--color-text)', ACC = 'var(--color-accent)', N400 = 'var(--color-neutral-400)';
   const MUT = 'var(--muted)', PEND = 'var(--color-accent-700)';
+  const RAYADO = 'repeating-linear-gradient(135deg,color-mix(in srgb,var(--color-text) 30%,transparent) 0 3px,transparent 3px 6px)';
 
   const behaviors = [
     { id: 'nado', label: 'Nado activo', color: INK, nota: 'Desplazamiento horizontal sostenido; el buceo cuenta aquí.' },
@@ -130,17 +131,17 @@
     { id: 'escal', label: 'Escalamiento', color: N400, nota: 'Patas delanteras rompiendo la superficie contra la pared del cilindro.' }
   ];
   const rawA = [
-    { pos: '1', tanda: 'Tanda A', label: 'Espécimen 1 · P1', nado: 171, inmov: 88, escal: 41 },
-    { pos: '2', tanda: 'Tanda A', label: 'Espécimen 2 · P2', nado: 158, inmov: 104, escal: 38 },
-    { pos: '3', tanda: 'Tanda A', label: 'Espécimen 3 · P3', nado: 182, inmov: 76, escal: 42 },
-    { pos: '4', tanda: 'Tanda A', label: 'Espécimen 4 · P4', nado: 149, inmov: 118, escal: 33 }
+    { pos: '1', tanda: 'Tanda A', label: 'Espécimen 1 · P1', nado: 162, inmov: 88, escal: 41, sinver: 9 },
+    { pos: '2', tanda: 'Tanda A', label: 'Espécimen 2 · P2', nado: 158, inmov: 104, escal: 38, sinver: 0 },
+    { pos: '3', tanda: 'Tanda A', label: 'Espécimen 3 · P3', nado: 182, inmov: 76, escal: 42, sinver: 0 },
+    { pos: '4', tanda: 'Tanda A', label: 'Espécimen 4 · P4', nado: 149, inmov: 118, escal: 33, sinver: 0 }
   ];
   // Tanda B: valores de ejemplo para mostrar la vista del grupo completo (RF-19).
   const rawB = [
-    { pos: '5', tanda: 'Tanda B', label: 'Espécimen 5 · P1', nado: 165, inmov: 95, escal: 40 },
-    { pos: '6', tanda: 'Tanda B', label: 'Espécimen 6 · P2', nado: 140, inmov: 121, escal: 39 },
-    { pos: '7', tanda: 'Tanda B', label: 'Espécimen 7 · P3', nado: 176, inmov: 82, escal: 42 },
-    { pos: '8', tanda: 'Tanda B', label: 'Espécimen 8 · P4', nado: 154, inmov: 109, escal: 37 }
+    { pos: '5', tanda: 'Tanda B', label: 'Espécimen 5 · P1', nado: 165, inmov: 95, escal: 40, sinver: 0 },
+    { pos: '6', tanda: 'Tanda B', label: 'Espécimen 6 · P2', nado: 140, inmov: 121, escal: 39, sinver: 0 },
+    { pos: '7', tanda: 'Tanda B', label: 'Espécimen 7 · P3', nado: 176, inmov: 82, escal: 42, sinver: 0 },
+    { pos: '8', tanda: 'Tanda B', label: 'Espécimen 8 · P4', nado: 154, inmov: 109, escal: 37, sinver: 0 }
   ];
   let raw = rawA, vista = 'tanda';
   const rotulo = r => (vista === 'grupo' ? r.tanda + ' · ' : '') + r.label;
@@ -170,16 +171,18 @@
       '<td class="num" style="text-align:right">' + fmt(r.nado) + '</td>' +
       '<td class="num" style="text-align:right">' + fmt(r.inmov) + '</td>' +
       '<td class="num" style="text-align:right">' + fmt(r.escal) + '</td>' +
+      '<td class="num" style="text-align:right">' + fmt(r.sinver) + '</td>' +
       '<td><div style="display:flex;height:16px;border:1px solid var(--color-divider)">' +
         '<div title="Nado activo" style="background:' + INK + ';width:' + (r.nado / 3) + '%"></div>' +
         '<div title="Inmovilidad" style="background:' + ACC + ';width:' + (r.inmov / 3) + '%"></div>' +
         '<div title="Escalamiento" style="background:' + N400 + ';width:' + (r.escal / 3) + '%"></div>' +
+        '<div title="Sin ver" style="background:' + RAYADO + ';width:' + (r.sinver / 3) + '%"></div>' +
       '</div></td>' +
     '</tr>').join('') +
     stats.map(s =>
     '<tr style="background:var(--color-surface)">' +
       '<td class="k" style="color:color-mix(in srgb,var(--color-text) 70%,transparent)">' + s.nombre + '</td>' +
-      ['nado', 'inmov', 'escal'].map(k => '<td class="num nd" style="text-align:right">' + s.f(col(k)) + '</td>').join('') +
+      ['nado', 'inmov', 'escal', 'sinver'].map(k => '<td class="num nd" style="text-align:right">' + s.f(col(k)) + '</td>').join('') +
       '<td style="font-size:11.5px;color:var(--muted)">' + s.nota + '</td>' +
     '</tr>').join('');
   }
@@ -217,43 +220,54 @@
   // ── bloques de 5 s (RF-18): la conducta con más segundos y, debajo, sus 5 segundos ──
   const porSegundo = patron.flatMap(segs => segs.flatMap(([c, d]) => Array(d).fill(c)));
   // «No se ve» y «conducta activa con matiz» (D-53) se dibujan rayados.
-  const RAYADO = 'repeating-linear-gradient(135deg,color-mix(in srgb,var(--color-text) 30%,transparent) 0 3px,transparent 3px 6px)';
   cmap.activa = 'var(--color-accent-300)'; lbl.activa = 'Conducta activa';
   cmap.nove = RAYADO; lbl.nove = 'No se ve';
-  // El bloque se calcula por mayoría de sus 5 segundos, sin la CNN (D-53):
-  // gana la conducta con más segundos; si nado y escalamiento empatan, o si decide el
-  // quinto segundo (2 de inmovilidad y 2 de nado), el bloque es conducta activa; un bloque
-  // con «no se ve» que no se resuelve por mayoría también es conducta activa, con matiz.
+  // El bloque se calcula por mayoría relativa de sus segundos vistos, sin la CNN (D-52, D-53):
+  // gana la conducta con más segundos; cualquier empate en el primer lugar es conducta activa;
+  // lleva matiz (rayado) si algún segundo no se vio, y si ninguno se vio es conducta activa con
+  // matiz. El último bloque puede quedar incompleto: lo que falta no cuenta como no visto.
   function bloque(segs5) {
     const n = { nado: 0, inmov: 0, escal: 0, nove: 0 }; segs5.forEach(c => { n[c] = (n[c] || 0) + 1; });
     const vistos = ['nado', 'inmov', 'escal'];
     const max = Math.max(...vistos.map(c => n[c]));
     const top = vistos.filter(c => n[c] === max);
-    let c, matiz = false, titulo;
-    if (max === 0) { c = 'activa'; matiz = true; }
-    else if (top.length === 1) { c = top[0]; }
-    else if (top.includes('nado') && top.includes('escal') && !top.includes('inmov')) { c = 'activa'; }
-    else if (n.nado + n.escal > n.inmov) { c = 'activa'; }
-    else { c = 'activa'; matiz = true; }
-    if (c !== 'activa' && n.nove) matiz = false;
-    titulo = c === 'activa'
-      ? 'Conducta activa' + (matiz ? ' · el modelo no vio bien parte de este bloque' : ' · desempate del bloque')
-      : lbl[c] + ' · ' + n[c] + ' de 5 s';
+    const matiz = n.nove > 0;
+    const c = (max > 0 && top.length === 1) ? top[0] : 'activa';
+    const titulo = c === 'activa'
+      ? 'Conducta activa' + (max === 0 ? ' · ningún segundo se vio' : ' · empate en el primer lugar') + (matiz ? ' · el modelo no vio bien parte de este bloque' : '')
+      : lbl[c] + ' · ' + n[c] + ' de ' + segs5.length + ' s' + (matiz ? ' · el modelo no vio bien parte de este bloque' : '');
     const fondo = matiz ? RAYADO : cmap[c];
-    return '<div title="' + titulo + '" style="flex:1;display:flex;flex-direction:column;gap:2px">' +
+    return '<div title="' + titulo + '" style="display:flex;flex-direction:column;gap:2px;min-width:0">' +
       '<div style="height:14px;background:' + fondo + ';border:1px solid var(--color-divider)"></div>' +
       '<div style="display:flex;gap:1px;height:7px">' +
         segs5.map(s => '<div style="flex:1;background:' + cmap[s] + '"></div>').join('') +
       '</div>' +
     '</div>';
   }
-  $('bloques').innerHTML = patron.map((_, m) =>
-    '<div style="display:flex;align-items:center;gap:12px">' +
-      '<span class="num" style="width:74px;font-size:11.5px;color:color-mix(in srgb,var(--color-text) 60%,transparent)">' + fmt(m * 60) + '–' + fmt(m * 60 + 60) + '</span>' +
-      '<div style="flex:1;display:flex;gap:3px">' +
-        Array.from({ length: 12 }, (_, b) => bloque(porSegundo.slice(m * 60 + b * 5, m * 60 + b * 5 + 5))).join('') +
-      '</div>' +
-    '</div>').join('');
+  // Tres especímenes de distinta duración (300 s, 233 s y 180 s); unos segundos «no se ve».
+  const conNoVe = porSegundo.map((c, s) => ((s >= 50 && s < 53) || (s >= 130 && s < 135) || s === 211) ? 'nove' : c);
+  const especimenes = [
+    { nombre: 'Espécimen 1', segs: conNoVe },
+    { nombre: 'Espécimen 2', segs: porSegundo.slice(12, 245) },
+    { nombre: 'Espécimen 3', segs: porSegundo.slice(40, 220) }
+  ];
+  // Columnas = bloques del espécimen más largo (mínimo 1); los más cortos dejan celdas vacías al final.
+  const nBloques = s => Math.ceil(s.length / 5);
+  const columnas = Math.max(1, ...especimenes.map(e => nBloques(e.segs)));
+  const rejilla = 'display:grid;grid-template-columns:repeat(' + columnas + ',minmax(0,1fr));gap:2px;flex:1';
+  const eje = Array.from({ length: columnas }, (_, k) =>
+    '<span class="num" style="font-size:10px;color:color-mix(in srgb,var(--color-text) 60%,transparent);overflow:visible;white-space:nowrap">' + (k % 12 === 0 ? fmt(k * 5) : '') + '</span>').join('');
+  $('bloques').innerHTML =
+    '<div style="display:flex;align-items:flex-end;gap:12px"><span style="width:96px"></span><div style="' + rejilla + '">' + eje + '</div></div>' +
+    especimenes.map(e =>
+      '<div style="display:flex;align-items:center;gap:12px">' +
+        '<span style="width:96px;font-size:12px">' + e.nombre + '</span>' +
+        '<div style="' + rejilla + '">' +
+          Array.from({ length: columnas }, (_, k) => k < nBloques(e.segs)
+            ? bloque(e.segs.slice(k * 5, k * 5 + 5))
+            : '<div style="height:23px;border:1px dashed var(--color-divider);opacity:.4"></div>').join('') +
+        '</div>' +
+      '</div>').join('');
 
   // ── comparación entre grupos ────────────────────────────────────────────
   const pct = v => (v / 300 * 100) + '%';
@@ -298,14 +312,15 @@
 
   // ── exportación (segundos, no porcentaje) ───────────────────────────────
   function tabla() {
-    const out = [['Espécimen', 'Nado activo (s)', 'Inmovilidad (s)', 'Escalamiento (s)']];
-    raw.forEach(r => out.push([rotulo(r), r.nado, r.inmov, r.escal]));
-    stats.forEach(s => out.push([s.nombre].concat(['nado', 'inmov', 'escal'].map(k => s.f(col(k)).replace(' s', '')))));
+    const out = [['Espécimen', 'Nado activo (s)', 'Inmovilidad (s)', 'Escalamiento (s)', 'Sin ver (s)']];
+    raw.forEach(r => out.push([rotulo(r), r.nado, r.inmov, r.escal, r.sinver]));
+    stats.forEach(s => out.push([s.nombre].concat(['nado', 'inmov', 'escal', 'sinver'].map(k => s.f(col(k)).replace(' s', '')))));
     out.push([]);
-    out.push(['Espécimen 1 · Cilindro P1 · minuto', 'Nado activo (s)', 'Inmovilidad (s)', 'Escalamiento (s)']);
+    out.push(['Espécimen 1 · Cilindro P1 · minuto', 'Nado activo (s)', 'Inmovilidad (s)', 'Escalamiento (s)', 'Sin ver (s)']);
     patron.forEach((segs, i) => {
-      const sum = k => segs.filter(s => s[0] === k).reduce((a, s) => a + s[1], 0);
-      out.push([fmt(i * 60) + '–' + fmt(i * 60 + 60), sum('nado'), sum('inmov'), sum('escal')]);
+      const min = conNoVe.slice(i * 60, i * 60 + 60);
+      const sum = k => min.filter(c => c === k).length;
+      out.push([fmt(i * 60) + '–' + fmt(i * 60 + 60), sum('nado'), sum('inmov'), sum('escal'), sum('nove')]);
     });
     return out;
   }

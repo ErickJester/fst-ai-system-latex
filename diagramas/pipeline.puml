@@ -13,9 +13,10 @@
 '    revisado: preprocesamiento, cilindros, clasificacion.
 '  - Clasificacion (D-66): la red de fusion R(2+1)D-18 es el clasificador:
 '    recibe el clip de 16 cuadros de una ventana de 4 s y una rama de
-'    medidas (15 rasgos y 7 reglas); entrega solo la conducta de cada
-'    segundo, una de cuatro (D-78, D-94): sin probabilidades ni regla
-'    de confianza. El gradient boosting es
+'    medidas (15 rasgos y 7 reglas); tiene tres salidas (escalamiento,
+'    inmovilidad, nado). La conducta activa no sale de la red: se asigna
+'    por segundo con una regla de tres pasos y umbral 0.80 (RN-13). El
+'    gradient boosting es
 '    el etiquetador del equipo y aporta los 15 rasgos.
 '  - Preprocesamiento segun fst_auto (CLA-04, 5-oct): sin correccion
 '    de contraste; fondo por percentil 10, no por mediana.
@@ -65,7 +66,7 @@ partition "3. Clasificación de conducta" {
   endif
   :Mide quince rasgos de movimiento, postura\ny trayectoria y siete reglas de observación\n(pataleo bajo el agua y cambios sobre\nla línea de agua);
   :Para cada segundo, toma una ventana de 4 s\ncentrada en él y arma el clip de 16 cuadros\ndel cilindro;
-  :La red de fusión R(2+1)D-18 recibe el clip\ny las medidas y asigna al segundo una de las\ncuatro conductas: nado activo, inmovilidad,\nescalamiento o conducta activa;
+  :La red de fusión R(2+1)D-18 recibe el clip\ny las medidas y da tres salidas: nado,\ninmovilidad y escalamiento. Con la regla del umbral\n0.80, el sistema asigna a cada segundo una de ellas\no conducta activa;
 }
 
 partition "4. Resultados" {

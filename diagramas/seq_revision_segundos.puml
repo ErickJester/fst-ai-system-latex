@@ -13,8 +13,10 @@
 '
 '  Corrige el investigador que subio el video o el Administrador. La
 '  copia del video en H.264 la genera el worker al terminar el analisis.
-'  El usuario puede reiniciar el analisis desde esta pantalla: se borra
-'  el resultado anterior y el analisis empieza de nuevo.
+'  El creador del experimento o el Administrador puede reiniciar el analisis
+'  completado desde esta pantalla: la pantalla avisa antes que se borran el
+'  resultado anterior y toda la revision hecha, y que no se puede deshacer; al
+'  confirmar, el analisis vuelve a "en cola" y empieza de nuevo.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_revision_segundos.puml
@@ -67,8 +69,10 @@ else el análisis está completado
 
   opt el usuario elige "Reiniciar el análisis"
     u -> ui: elige "Reiniciar el análisis"
+    ui --> u: avisa que se borran el resultado anterior y toda la revisión hecha,\ny que no se puede deshacer
+    u -> ui: confirma el reinicio
     ui -> api: pide reiniciar el análisis del video
-    api -> db: borra el resultado anterior\ny deja el análisis "en cola"
+    api -> db: borra el resultado anterior y toda la revisión hecha\ny deja el análisis "en cola"
     api --> ui: confirma el reinicio
   end
 end

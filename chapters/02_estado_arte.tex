@@ -197,7 +197,7 @@ etiquetar imágenes para entrenar un detector.
 Esta sección revisa los enfoques de \textit{machine learning} (aprendizaje automático, ML) y \textit{deep learning}
 (aprendizaje profundo, DL) que son viables
 para clasificar las tres conductas del FST (nado, inmovilidad, escalamiento) dado el
-tamaño del \textit{dataset} (conjunto de datos) disponible y las condiciones de grabación del laboratorio.
+tamaño del \textit{dataset} disponible y las condiciones de grabación del laboratorio.
 
 \subsection{Clasificadores clásicos sobre descriptores de movimiento}
 
@@ -223,11 +223,11 @@ de la red de fusión que describe la sección siguiente (cap.~5).
 Las redes neuronales convolucionales (CNN) \cite{lecun1998} son la arquitectura de referencia para clasificación de
 imágenes. Entrenar una CNN desde cero requiere conjuntos de datos etiquetados muy grandes,
 lo cual no es viable con el dataset disponible. La solución es el \textit{transfer
-learning} \cite{pan2010}: se toma una red preentrenada en ImageNet (más de un millón
+learning} \cite{pan2010}: se toma una red preentrenada en ImageNet (en su versión de preentrenamiento, más de un millón
 de imágenes de 1{,}000 clases) y se reemplaza solo la última capa de clasificación por
-una nueva con 4 salidas: una por cada conducta del FST (nado, inmovilidad y escalamiento) y
-una cuarta para la conducta activa, que el sistema añade para los segundos en que no distingue
-entre nado y escalamiento. Las capas anteriores ya saben detectar bordes,
+una nueva con 3 salidas: una por cada conducta del FST (nado, inmovilidad y escalamiento).
+La conducta activa no es una salida: el sistema la asigna después, con una regla de
+confianza, para los segundos en que no distingue entre nado y escalamiento. Las capas anteriores ya saben detectar bordes,
 texturas y formas generales, y eso se aprovecha directamente.
 
 ResNet \cite{he2016} es una de las arquitecturas más usadas para ese fin. Sus

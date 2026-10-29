@@ -38,7 +38,7 @@ tener varios análisis en cola al mismo tiempo.
 El sistema tiene una arquitectura cliente-servidor de tres capas (\textit{three-tier}:
 presentación, lógica de negocio y datos) separadas en
 contenedores Docker independientes: \textit{frontend}, \textit{backend} y base de datos. Un cuarto
-contenedor ---el worker--- ejecuta el \textit{pipeline} de análisis de forma asíncrona, sin
+contenedor ---el \textit{worker}--- ejecuta el \textit{pipeline} de análisis de forma asíncrona, sin
 bloquear al servidor web mientras procesa los videos.
 
 La Figura~\ref{fig:arquitectura_software} muestra qué tecnología reside en cada
@@ -46,7 +46,7 @@ contenedor y cómo se comunican entre sí. Se distinguen cuatro grupos: la capa 
 presentación (React.js + Vite), la lógica de negocio (Flask + SQLAlchemy), el
 procesamiento asíncrono (OpenCV, scikit-learn y PyTorch) y la capa de datos
 (PostgreSQL, sistema de archivos y volumen de modelos entrenados). El archivo del
-clasificador de conducta reside en un volumen Docker dedicado que el worker monta al
+clasificador de conducta reside en un volumen Docker dedicado que el \textit{worker} monta al
 arrancar el contenedor.
 
 \begin{figure}[H]
@@ -82,7 +82,7 @@ Las responsabilidades de cada componente son:
 
         La cola de tareas no es un servicio aparte: es la propia tabla
         \texttt{ANALISIS}. Cuando se sube un video válido, el \textit{backend} crea un
-        registro con estado «en cola». El worker obtiene las tareas mediante
+        registro con estado «en cola». El \textit{worker} obtiene las tareas mediante
         \textit{polling} (consulta periódica): cada cierto tiempo consulta esa tabla,
         toma un análisis en cola, lo pasa a «procesando» y, al terminar, a
         «completado» o «error». Se eligió este enfoque en lugar de un sistema de
@@ -97,9 +97,9 @@ Las responsabilidades de cada componente son:
 \end{itemize}
 
 La separación en contenedores empaqueta cada servicio con sus dependencias. La
-separación entre worker
+separación entre \textit{worker}
 y \textit{backend} también satisface el RF-12 y el RF-15 (análisis automático en segundo plano) y deja
-al servidor web atendiendo peticiones mientras el worker procesa un video a la vez.
+al servidor web atendiendo peticiones mientras el \textit{worker} procesa un video a la vez.
 
 La Figura~\ref{fig:flujo_sistema} muestra el flujo funcional del sistema: cómo
 transita el video desde la carga hasta la generación de resultados, y cómo el ciclo
@@ -239,12 +239,15 @@ espacio-temporal R(2+1)D-18 \cite{tran2018}, preentrenada con videos de acciones
 humanas e implementada con PyTorch \cite{paszke2019}. Recibe un clip de 16
 fotogramas del cilindro de cada espécimen y lo fusiona con una rama de medidas: los
 quince rasgos y siete reglas de observación del pataleo bajo el agua y de los
-cambios sobre la línea de agua. Entrega, para cada segundo, una de las cuatro conductas:
-nado activo, inmovilidad, escalamiento o \textit{conducta activa}. La red toma la conducta
-de mayor probabilidad: no hay umbral de confianza y entrega solo la conducta, no las
-probabilidades. La conducta activa es la que elige cuando el espécimen no está inmóvil
-pero no distingue entre nado y escalamiento (ver RN-13). El sistema no marca segundos
-como dudosos por sí mismo: la marca «dudosa» la puede poner el usuario al revisar.
+cambios sobre la línea de agua. La red tiene tres salidas, una por clase: escalamiento,
+inmovilidad y nado. La \textit{conducta activa} no sale de la red: el sistema la asigna a
+cada segundo con una regla de tres pasos y un umbral de 0.80. Primero, si la mayor de las
+tres probabilidades llega a 0.80, gana esa clase. Si no, y la suma de las probabilidades de
+nado y de escalamiento llega a 0.80, el segundo es \textit{conducta activa}: el espécimen
+no está inmóvil pero la red no distingue entre nado y escalamiento. Si tampoco, queda la
+clase más probable (ver RN-13). Un segundo en el que no se ve al espécimen queda sin
+conducta. El sistema no marca segundos como dudosos por sí mismo: la marca «dudosa» la
+puede poner el usuario al revisar.
 
 \paragraph{Decisión segundo a segundo.} Para decidir el segundo $k$, el sistema
 toma el clip y las medidas de una ventana de 4~s centrada en él (desde 1.5~s antes
@@ -255,7 +258,7 @@ conductas más breves, pero mediría con muy pocos datos; 4~s es el punto de
 equilibrio. El segundo es la unidad con la que el sistema registra las conductas;
 no se aplica una duración mínima de episodio (ver RF-18 y
 sec.~\ref{sec:umbrales}). Al agrupar los segundos de cada bloque de 5~s y tomar la
-conducta mayoritaria (RN-15), el resultado se presenta en la unidad de la técnica de
+conducta con más segundos (RN-15), el resultado se presenta en la unidad de la técnica de
 muestreo por intervalos de la literatura.
 
 \paragraph{Conjunto de entrenamiento.} La red se entrena con segundos que el equipo
@@ -267,8 +270,9 @@ validación agrupa por video, no por segundo ni por bloque, porque los segundos
 vecinos comparten casi el mismo clip y medirlos por separado inflaría el resultado.
 
 \paragraph{Estado de la red.} La red de fusión sigue en desarrollo. Su desempeño
-se evaluará en TT-II con precisión, \textit{recall} y F1 por conducta (ver OE-5 y
-RNF-02); hasta entonces no se reportan cifras de desempeño.
+se evaluará en TT-II con precisión, \textit{recall} y F1 por clase de la red sobre los
+segundos etiquetados con las tres clases, con validación por video (ver OE-5 y RNF-02); hasta
+entonces no se reportan cifras de desempeño.
 
 Cuando el sistema registra un segundo como \textit{conducta activa}, los reportes
 la muestran como una cuarta columna (ver RN-13).
@@ -290,15 +294,22 @@ Al finalizar el análisis, el \textit{pipeline} produce dos salidas:
 Los tiempos por conducta ---los segundos de nado activo, inmovilidad, escalamiento y
 conducta activa de cada espécimen, su total y su desglose por minuto--- no se guardan:
 se calculan al mostrarse, contando los segundos de cada conducta en \texttt{SEGUNDO}
-(el minuto sale del número de segundo). Así no puede haber un total que contradiga a
+(el minuto sale del número de segundo). Los segundos sin conducta (aquellos en que no se
+ve al espécimen) se cuentan aparte, como una quinta clave, «sin ver», de modo que cada
+espécimen suma 100~\% y cada minuto suma 60~s. Así no puede haber un total que contradiga a
 las etiquetas, y una corrección en la revisión cambia solo una fila.
 
 Además, los resultados se muestran en bloques de 5~segundos, la unidad de la técnica de
 muestreo por intervalos de la literatura. Los bloques tampoco son una salida guardada: se calculan al mostrarse, a
 partir de la conducta de cada segundo almacenada en \texttt{SEGUNDO}, y el clasificador
-no interviene. La conducta de cada bloque es la que ocupa más de sus cinco segundos,
-como en el muestreo por intervalos de 5~s de Detke et~al.\ \cite{detke1995}, descrito por
-Craft et~al.\ \cite{craft2010} (ver RN-15).
+no interviene. La conducta de cada bloque es la que tiene más segundos dentro de él
+(mayoría relativa); cualquier empate en el primer lugar da \textit{conducta activa}. El
+bloque lleva un matiz si algún segundo suyo no se vio bien, y un bloque cuyos segundos
+no se vieron es \textit{conducta activa} con matiz. El último bloque puede quedar
+incompleto: los segundos que le faltan no cuentan como no vistos. La conducta predominante
+por periodo sigue el muestreo por intervalos de 5~s de Detke et~al.\ \cite{detke1995},
+descrito por Craft et~al.\ \cite{craft2010}; el empate y el matiz son criterios propios
+del sistema (ver RN-15).
 
 \subsection{Ciclo de vida del análisis}
 
@@ -329,7 +340,7 @@ reencola los que quedaron en \texttt{procesando} y los empieza de nuevo, y cance
 \end{figure}
 
 Un experimento agrupa varias tandas, cada una con su propio análisis, así que
-el estado que ve el investigador en el dashboard (Figura~\ref{fig:estados_experimento})
+el estado que ve el investigador en el \textit{dashboard} (Figura~\ref{fig:estados_experimento})
 es un valor calculado, no una columna de \texttt{EXPERIMENTO} (ver CU-22, RF-23):
 se deriva del conjunto de análisis de todas sus tandas, con precedencia
 error > cancelado > en pausa > procesando > en cola > completado cuando
@@ -713,11 +724,13 @@ GET    & \path{/experiments/{id}/status}  & Devuelve el progreso del análisis e
 \hline
 
 % --- Resultados ---
-GET    & \path{/experiments/{id}/results}          & Devuelve los resultados por espécimen y conducta. & Investiga\-dor \\
+GET    & \path{/experiments/{id}/results}          & Devuelve los resultados por espécimen y conducta, con los segundos «sin ver» como una clave más. & Investiga\-dor \\
 \hline
-GET    & \path{/experiments/{id}/results/byminute} & Devuelve el desglose temporal por minuto. & Investiga\-dor \\
+GET    & \path{/experiments/{id}/results/byminute} & Devuelve el desglose temporal por minuto, con los segundos «sin ver» como una clave más. & Investiga\-dor \\
 \hline
 GET    & \path{/experiments/{id}/results/groups} & Devuelve la comparación entre grupos con el Día~2: el promedio por espécimen de cada grupo (RF-21). & Investiga\-dor \\
+\hline
+GET    & \path{/experiments/{id}/results/blocks} & Devuelve, por espécimen, los bloques de 5~s con su conducta, su matiz y sus segundos (RF-18, RN-15); solo con el análisis completado. & Investiga\-dor \\
 \hline
 
 % --- Reportes ---
@@ -733,7 +746,7 @@ GET    & \path{/experiments/{id}/analyses/{idAnalisis}/review}   & Devuelve los 
 \hline
 GET    & \path{/experiments/{id}/analyses/{idAnalisis}/video}    & Entrega el video de la revisión por partes, para poder adelantar y retroceder. & Investiga\-dor \\
 \hline
-PUT    & \path{/experiments/{id}/analyses/{idAnalisis}/segundos} & Guarda las correcciones por segundo. & Investiga\-dor \\
+PUT    & \path{/experiments/{id}/analyses/{idAnalisis}/segundos} & Guarda las correcciones por segundo y recalcula el nivel de clasificación del análisis. & Investiga\-dor \\
 \hline
 
 % --- Administración ---
@@ -1013,7 +1026,7 @@ caso de uso.
 \hline
 3 & Inv. / Admin. & Introduce su correo electrónico. \\
 \hline
-4 & Sistema & Envía un enlace de restablecimiento con validez de tiempo limitado al correo indicado. \\
+4 & Sistema & Envía un enlace de restablecimiento, válido 60 minutos, al correo indicado. \\
 \hline
 5 & Inv. / Admin. & Accede al enlace recibido e introduce una nueva contraseña. \\
 \hline
@@ -1030,7 +1043,7 @@ caso de uso.
 \hline
 3 & El correo no está registrado: el sistema responde con el mismo mensaje que si existiera, para no exponer información sobre cuentas registradas. \\
 \hline
-5 & El enlace ya expiró: el sistema informa que el enlace no es válido y solicita reiniciar el proceso desde el paso 1. \\
+5 & El enlace ya expiró (pasaron más de 60 minutos): el sistema informa que el enlace no es válido y solicita reiniciar el proceso desde el paso 1. \\
 \hline
 \end{tabular}
 
@@ -1778,9 +1791,9 @@ caso de uso.
 \hline
 2 & Sistema & Recupera de la base de datos los registros de \textbf{OBSERVACION} y \textbf{SEGUNDO} del análisis, o de los análisis de todas las tandas del grupo si se eligió el grupo completo. \\
 \hline
-3 & Sistema & Muestra tabla de tiempos por espécimen: nado activo, inmovilidad, escalamiento y conducta activa, con totales en segundos y porcentaje. Si se eligió el grupo completo, cada espécimen se rotula con su tanda, por ejemplo «Tanda~A $\cdot$ Espécimen~2». \\
+3 & Sistema & Muestra tabla de tiempos por espécimen: nado activo, inmovilidad, escalamiento y conducta activa, con una columna «Sin ver» para los segundos en que no se vio al espécimen, y totales en segundos y porcentaje (cada espécimen suma 100~\%). Si se eligió el grupo completo, cada espécimen se rotula con su tanda, por ejemplo «Tanda~A $\cdot$ Espécimen~2». \\
 \hline
-4 & Sistema & Calcula y muestra el desglose de conductas por minuto para cada espécimen, contando los segundos de cada conducta. \\
+4 & Sistema & Calcula y muestra el desglose de conductas por minuto para cada espécimen, contando los segundos de cada conducta y los segundos sin ver (cada minuto suma 60~s). \\
 \hline
 5 & Sistema & Muestra la comparación entre grupos: el tiempo promedio por conducta de los especímenes de cada grupo en el Día~2, con los especímenes sin analizar señalados como faltantes. \\
 \hline
@@ -1945,7 +1958,7 @@ caso de uso.
 \hline
 5 & Inv. / Admin. & Elige «Guardar». \\
 \hline
-6 & Sistema & Guarda las correcciones, marca como «confirmada» la conducta de los segundos que el usuario vio sin cambiar, y confirma el guardado. \\
+6 & Sistema & Guarda las correcciones, marca como «confirmada» la conducta de los segundos que el usuario vio sin cambiar, recalcula el nivel de clasificación del análisis («agrupado» si queda algún segundo como conducta activa, «preciso» si no) y confirma el guardado. \\
 \hline
 \end{tabular}
 
@@ -1960,7 +1973,7 @@ caso de uso.
 \hline
 2 & El usuario no subió el video y no es Administrador: el sistema rechaza la petición. \\
 \hline
-4 & El usuario elige «Reiniciar el análisis»: el sistema borra el resultado anterior y vuelve a encolar el análisis del video, que empieza de nuevo (ver RN-04). \\
+4 & El usuario elige «Reiniciar el análisis»: el sistema avisa que se borrarán el resultado anterior y toda la revisión hecha, y que no se puede deshacer; si el usuario confirma, los borra y vuelve a encolar el análisis del video, que empieza de nuevo (ver RN-04). Solo puede hacerlo el creador del experimento o un Administrador, con el análisis completado. \\
 \hline
 \end{tabular}
 
@@ -2308,7 +2321,7 @@ caso de uso.
 % -----------------------------------------------------------
 
 Los diagramas de secuencia \cite{omg_uml} describen el flujo de mensajes entre el
-\textit{frontend}, el \textit{backend} y el worker para los flujos principales del sistema, mostrando
+\textit{frontend}, el \textit{backend} y el \textit{worker} para los flujos principales del sistema, mostrando
 el orden temporal de las interacciones entre componentes. Están organizados en
 cuatro grupos funcionales que corresponden a los paquetes de casos de uso: autenticación
 y gestión de usuarios, administración y perfil, notificaciones, y análisis de experimentos.
@@ -2697,8 +2710,10 @@ Si pasan tres segundos seguidos sin ver al espécimen, el análisis queda en pau
 aparece una notificación y el usuario ve una imagen fija de ese instante, con los botones
 «Ajustar y continuar» (mueve el recuadro del cilindro sobre la imagen) y «Cancelar
 análisis»; si no responde en 5~minutos, el análisis se cancela (RN-17). Desde la pantalla de
-revisión el investigador sí puede reiniciar el análisis: el resultado anterior se
-borra y el análisis empieza de nuevo (RN-04).
+revisión el investigador sí puede reiniciar el análisis, si creó el experimento o es
+Administrador: la pantalla avisa antes que se borrarán el resultado anterior y toda la
+revisión hecha, y que no se puede deshacer; al confirmar, el análisis vuelve a «en cola»
+y empieza de nuevo (RN-04).
 
 \begin{figure}[H]
 \centering
@@ -2720,11 +2735,15 @@ Cuatro pestañas: resultados por espécimen, comparación entre grupos, línea d
 por minuto (RF-20) y bloques de 5~s (RF-18), donde cada bloque muestra la conducta con
 más segundos y, dentro, los cinco segundos que lo componen, para notar las conductas
 breves y presentar los bloques en la unidad de la literatura. La regla con que se decide
-la conducta de cada bloque es RN-15. Los fragmentos «no se ve» se marcan en pantalla y
-en el reporte de resultados.
+la conducta de cada bloque es RN-15: gana la conducta con más segundos, cualquier empate
+en el primer lugar da \textit{conducta activa}, y el bloque lleva un matiz si algún
+segundo no se vio bien (si ninguno se vio, es \textit{conducta activa} con matiz). La
+pantalla de bloques tiene tantas columnas como bloques tiene el espécimen más largo, y
+los más cortos dejan celdas vacías al final; el último bloque puede quedar incompleto.
+Los fragmentos «no se ve» se marcan en pantalla y en el reporte de resultados.
 Un selector en la parte superior permite ver el grupo completo, con todas sus tandas, o una
 sola tanda (RF-19); en el grupo completo, cada espécimen se rotula con su tanda. La vista por espécimen
-muestra el tiempo por conducta con media, desviación estándar y varianza de los especímenes que se ven (RF-19, RF-31; el reporte descargable las incluye para esa misma vista), el
+muestra el tiempo por conducta, con una columna «Sin ver» para los segundos sin conducta, y su media, desviación estándar y varianza de los especímenes que se ven (RF-19, RF-31; los reportes CSV y XLSX las incluyen para esa misma vista, con la columna «Sin ver» al final; el PDF y la comparación entre grupos siguen con las cuatro conductas), el
 nivel de clasificación del análisis y la leyenda de conductas; en el panel lateral
 se compara la inmovilidad entre los grupos con los videos del Día~2 (RF-21). Esa
 comparación promedia los segundos por espécimen de cada grupo y señala los especímenes
@@ -2777,7 +2796,7 @@ El panel lateral muestra la conducta del segundo actual y si es la del
 sistema o una corrección, el avance de revisión del espécimen, los segundos por
 conducta antes y después de corregir, y el nivel de clasificación que tendrá el
 análisis al guardar: si algún segundo queda como conducta activa, el análisis pasa a
-nivel agrupado (RN-13). A esta pantalla se llega con el botón «Revisar segundo a
+nivel agrupado, y si ninguno queda, a nivel preciso (RN-13); el sistema lo recalcula al guardar. A esta pantalla se llega con el botón «Revisar segundo a
 segundo» de la pantalla de resultados.
 
 \begin{figure}[H]

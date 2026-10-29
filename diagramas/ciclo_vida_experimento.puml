@@ -62,7 +62,7 @@ state "Motor de Análisis  (Worker Asíncrono)" as Procesamiento <<procesamiento
 }
 
 ' ========= FALLO ===========================================================
-' Sin reintento: el investigador no puede reiniciar un analisis (RN-04).
+' Un analisis en error no se reinicia desde la pantalla; solo uno completado puede reiniciarse (RN-04).
 state "FalloAnálisis\n(el video no se pudo abrir o\nno se encontraron los cilindros)" as FalloAnalisis <<error>>
 
 Procesamiento --> FalloAnalisis : error durante\nel pipeline

@@ -141,7 +141,7 @@ resultados para compararlos con los de otros grupos de investigación.
 
 En términos concretos: el investigador sube el video al sistema desde el navegador, el
 sistema lo analiza y, cuando termina, genera un reporte con los tiempos de nado activo,
-inmovilidad y escalamiento por espécimen y sesión. Lo que hoy lleva horas de
+inmovilidad, escalamiento y conducta activa por espécimen y sesión. Lo que hoy lleva horas de
 anotación manual, el sistema lo produce de forma automática y con los mismos criterios
 cada vez.
 
@@ -202,7 +202,8 @@ calidad de producto de software de la ISO y la IEC.
         de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}, definiendo los módulos de carga
         de videos, \textit{pipeline} de análisis, base de datos y visualización de resultados.
   \item Implementar el módulo de análisis conductual con visión por computadora y un
-        clasificador supervisado para las tres conductas del FST y la conducta activa.
+        clasificador supervisado entrenado con las tres conductas del FST, más una regla de
+        confianza que asigna la conducta activa.
   \item Evaluar el desempeño del clasificador de conductas con métricas de
         clasificación estándar (precisión, \textit{recall} y F1 por conducta) sobre un
         conjunto de prueba independiente.
@@ -278,30 +279,39 @@ fijó el laboratorio, son los cuatro criterios de aceptación de la validación 
         El buceo se clasifica como nado activo. Cada segundo recibe
         una conducta, sin duración mínima, lo que permite registrar conductas breves
         de unos dos segundos; los resultados también se agrupan en bloques de cinco
-        segundos, cada uno con su conducta predominante.
-        Cuando el clasificador sabe que el espécimen no está inmóvil pero no decide
-        entre nado activo y escalamiento, ese segundo se registra como conducta
-        activa, una cuarta conducta.
+        segundos. Cada bloque toma la conducta con más segundos (mayoría relativa);
+        si hay empate en el primer lugar, el bloque es conducta activa. Si algún segundo
+        del bloque no se vio bien, el bloque lleva un matiz (se ve rayado), y si ninguno
+        se vio, es conducta activa con matiz. El último bloque puede quedar incompleto,
+        y los segundos que le faltan no cuentan como no vistos. Los bloques y los
+        totales se calculan al consultarlos; nunca se guardan.
+        Cuando la confianza no alcanza para decidir entre nado y escalamiento, el
+        sistema lo registra como conducta activa (RN-13), una cuarta conducta.
 
   \item \textbf{Métricas y comparación por grupo:} tiempo total de cada conducta en
-        el video del día~2 (hasta 300~s), desglose por minuto, y
-        estadísticos de grupo (media, desviación estándar y varianza por conducta)
+        el video del día~2 (hasta 300~s) y desglose por minuto; los segundos sin
+        conducta se muestran como «sin ver», de modo que los porcentajes suman 100\,\%.
+        Además, estadísticos de grupo (media, desviación estándar y varianza por conducta)
         para caracterizar el perfil conductual del conjunto de especímenes de cada
         grupo experimental.
 
   \item \textbf{Reportes y exportaciones:} si el análisis falla, un reporte de
         diagnóstico en PDF indica en qué etapa se detuvo y por qué; exportación de
         datos en CSV y en XLSX con columnas Grupo, Tanda, Espécimen,
-        Tiempo (min:seg), Nado activo, Escalamiento, Inmovilidad y Conducta activa,
-        desglosadas por espécimen y por minuto, y con la media, la desviación
-        estándar y la varianza de la tanda o del grupo que se descarga.
+        Tiempo (min:seg), Nado activo, Escalamiento, Inmovilidad, Conducta activa,
+        Revisión humana y Sin ver (los segundos sin conducta, de modo que cada
+        fila suma todos los segundos), desglosadas por espécimen y por minuto, con
+        filtros por grupo y tanda, y con la media, la desviación estándar y la
+        varianza por conducta, incluida Sin ver, de la tanda o del grupo que se descarga.
 
   \item \textbf{Revisión segundo a segundo:} cuando el análisis termina, el usuario
         puede abrir una pantalla con el video y una línea de tiempo por espécimen,
         coloreada por conducta, y corregir la etiqueta de cada segundo. Cada segundo
         guarda su origen (del sistema, confirmado, corregido o dudoso), y los totales
         por minuto se calculan siempre desde esas etiquetas, así que reflejan las
-        correcciones.
+        correcciones. Reiniciar un análisis completado borra el resultado y toda la
+        revisión hecha; la pantalla avisa antes, la acción no se puede deshacer y solo
+        la hace quien subió el video o un administrador.
 
   \item \textbf{Plataforma web:} interfaz accesible desde el navegador con creación
         de cuenta de usuario por parte del administrador, carga de videos, cola de
@@ -481,7 +491,7 @@ Revisiones mensuales con directores e investigador del laboratorio
 Anotación de conductas con el etiquetador del equipo y preparación de los rasgos o clips de entrada
   & & & & & & $\bullet$ & $\bullet$ & & & & & \\
 \hline
-Entrenamiento del clasificador de conducta (nado activo, inmovilidad, escalamiento y conducta activa)
+Entrenamiento del clasificador de conducta (nado activo, inmovilidad y escalamiento) y regla de confianza para la conducta activa
   & & & & & & & $\bullet$ & $\bullet$ & & & & \\
 \hline
 Ajuste de hiperparámetros y evaluación del clasificador
