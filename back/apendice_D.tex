@@ -24,8 +24,7 @@ Los identificadores subrogados son \texttt{integer GENERATED ALWAYS AS IDENTITY}
 Las duraciones y los segundos usan \texttt{numeric} y no tipos de
 punto flotante, porque \texttt{numeric} guarda el valor decimal exacto y los
 totales que se calculan con él no acumulan errores de redondeo. En
-\texttt{varchar(n)} y \texttt{numeric(p,s)}, la longitud y la precisión se fijan al
-escribir el DDL.
+Las longitudes y precisiones son las del DDL del sistema.
 
 \section*{Dominios cerrados}
 
@@ -60,7 +59,7 @@ cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 \hline
 \texttt{nivel\_\allowbreak{}clasif\_\allowbreak{}analisis} & \texttt{varchar(8)} & \texttt{preciso} si ningún segundo del análisis quedó como conducta activa; \texttt{agrupado} si al menos uno quedó así \\
 \hline
-\texttt{origen\_\allowbreak{}segundo} & \texttt{varchar(16)} & \texttt{maquina}: conducta puesta por el sistema, sin revisar. \texttt{confirmada}: el usuario vio el segundo y dejó la conducta del sistema. \texttt{corregida}: el usuario vio el segundo y la cambió. \texttt{dudosa}: el segundo quedó sin conducta porque el usuario lo marcó como dudoso \\
+\texttt{origen\_\allowbreak{}segundo} & \texttt{varchar(16)} & \texttt{maquina}: lo asignó el sistema. \texttt{confirmada}: el usuario lo revisó y lo dejó igual. \texttt{corregida}: el usuario lo cambió por otra conducta. \texttt{dudosa}: el usuario lo marcó «No se ve». \\
 \hline
 \texttt{tipo\_\allowbreak{}conducta} & \texttt{varchar(16)} & \texttt{nado activo}, \texttt{inmovilidad}, \texttt{escalamiento}, \texttt{conducta activa}. La última se usa cuando el clasificador no distingue entre nado y escalamiento \\
 \hline
@@ -86,13 +85,13 @@ cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 \hline
 \texttt{idInstitucional} & \texttt{varchar(10)} & No & PK & Boleta o número de empleado del IPN. Un solo campo acepta los dos \\
 \hline
-\texttt{nombre} & \texttt{varchar(n)} & No & & Nombre o nombres \\
+\texttt{nombre} & \texttt{varchar(100)} & No & & Nombre o nombres \\
 \hline
-\texttt{apellidos} & \texttt{varchar(n)} & No & & Apellidos, separados del nombre para que ningún campo guarde un valor compuesto \\
+\texttt{apellidos} & \texttt{varchar(100)} & No & & Apellidos, separados del nombre para que ningún campo guarde un valor compuesto \\
 \hline
-\texttt{correo} & \texttt{varchar(n)} & No & UK & Correo con el que el usuario inicia sesión y al que llegan los avisos. Acepta cualquier dominio \\
+\texttt{correo} & \texttt{varchar(254)} & No & UK & Correo con el que el usuario inicia sesión y al que llegan los avisos. Acepta cualquier dominio \\
 \hline
-\texttt{contrasenaHash} & \texttt{varchar(n)} & No & & Contraseña cifrada con bcrypt y sal. La contraseña en claro nunca se guarda \\
+\texttt{contrasenaHash} & \texttt{varchar(255)} & No & & Contraseña cifrada con bcrypt y sal. La contraseña en claro nunca se guarda \\
 \hline
 \texttt{activo} & \texttt{boolean} & No & & Falso cuando el administrador da de baja la cuenta. La fila se conserva porque sus experimentos la referencian \\
 \hline
@@ -110,7 +109,7 @@ cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 \hline
 \texttt{idInstitucional} & \texttt{varchar(10)} & No & FK $\to$ USUARIO & Usuario que registró el experimento. Solo él o un administrador pueden eliminarlo \\
 \hline
-\texttt{nombre} & \texttt{varchar(n)} & No & UK & Nombre que el investigador le da al estudio. Es único en todo el sistema (RF-11) \\
+\texttt{nombre} & \texttt{varchar(150)} & No & UK & Nombre que el investigador le da al estudio. Es único en todo el sistema (RF-11) \\
 \hline
 \texttt{fecha} & \texttt{date} & No & & Fecha del experimento \\
 \hline
@@ -123,11 +122,11 @@ cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 \hline
 \texttt{idExperimento} & \texttt{integer} & No & FK $\to$ EXPERIMENTO; UK (idExperimento, etiqueta) & Experimento al que pertenece el grupo \\
 \hline
-\texttt{etiqueta} & \texttt{varchar(n)} & No & UK (idExperimento, etiqueta) & Nombre del grupo, único dentro de su experimento \\
+\texttt{etiqueta} & \texttt{varchar(100)} & No & UK (idExperimento, etiqueta) & Nombre del grupo, único dentro de su experimento \\
 \hline
 \texttt{tipo} & \texttt{tipo\_\allowbreak{}grupo} & No & Dominio & Control, referencia o tratamiento experimental \\
 \hline
-\texttt{tratamiento} & \texttt{text} & No & & Sustancia o condición que recibió el grupo. El grupo control registra el placebo, así que nunca queda vacío \\
+\texttt{tratamiento} & \texttt{text} & No & & Sustancia o condición que recibió el grupo; no puede quedar vacía (en el grupo control, el placebo, según el protocolo). \\
 \hline
 % ---------------- TANDA ----------------
 \multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{TANDA}: cada sesión de grabación de un grupo} \\
@@ -136,9 +135,9 @@ cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 \hline
 \texttt{idGrupo} & \texttt{integer} & No & FK $\to$ GRUPO; UK (idGrupo, ordinal) & Grupo que se grabó en esta tanda. Una tanda nunca mezcla grupos \\
 \hline
-\texttt{ordinal} & \texttt{smallint} & No & UK (idGrupo, ordinal) & Orden de la tanda dentro del grupo: 1 para la tanda A, 2 para la B, y así sucesivamente \\
+\texttt{ordinal} & \texttt{smallint} & No & CK $\geq$ 1; UK (idGrupo, ordinal) & Orden de la tanda dentro del grupo: 1 para la tanda A, 2 para la B, y así sucesivamente \\
 \hline
-\texttt{nCilindros} & \texttt{smallint} & No & & Cilindros que aparecen en el video: de 2 a 4 \\
+\texttt{nCilindros} & \texttt{smallint} & No & CK entre 2 y 4 & Cilindros que aparecen en el video: de 2 a 4 \\
 \hline
 % ---------------- ESPECIMEN ----------------
 \multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{ESPECIMEN}: cada espécimen evaluado} \\
@@ -147,7 +146,7 @@ cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 \hline
 \texttt{idTanda} & \texttt{integer} & No & FK $\to$ TANDA; UK (idTanda, numeroCilindro) & Tanda en la que se grabó el espécimen \\
 \hline
-\texttt{numeroCilindro} & \texttt{smallint} & No & UK (idTanda, numeroCilindro) & Posición del cilindro en el encuadre, de 1 al número de cilindros de la tanda \\
+\texttt{numeroCilindro} & \texttt{smallint} & No & CK entre 1 y 4; UK (idTanda, numeroCilindro) & Posición del cilindro en el encuadre. Que no pase del número de cilindros de la tanda lo valida el backend \\
 \hline
 % ---------------- VIDEO ----------------
 \multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{VIDEO}: cada grabación cargada al sistema} \\
@@ -160,7 +159,9 @@ cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 \hline
 \texttt{archivo} & \texttt{text} & Sí & & Ruta del archivo de video (\texttt{.mp4} o \texttt{.mov}) en el servidor. Es nula cuando el video ya se borró (RF-25, RN-05); la fila se conserva porque los resultados la referencian \\
 \hline
-\texttt{duracion} & \texttt{numeric(p,s)} & No & & Duración real del archivo cargado, en segundos \\
+\texttt{nombreOriginal} & \texttt{varchar(255)} & Sí & & Nombre con el que el usuario subió el archivo; solo se muestra, no se usa para armar rutas \\
+\hline
+\texttt{duracion} & \texttt{numeric(8,2)} & No & & Duración real del archivo cargado, en segundos \\
 \hline
 \texttt{fechaCarga} & \texttt{timestamptz} & No & & Momento en que terminó la carga \\
 \hline
@@ -171,7 +172,7 @@ cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 \hline
 \texttt{idVideo} & \texttt{integer} & No & FK $\to$ VIDEO; UK & Video analizado, siempre del Día 2: el video del Día 1 se guarda sin análisis. Es único: un video tiene un solo análisis vigente y un análisis nuevo, o un reinicio, reemplaza al anterior \\
 \hline
-\texttt{estado} & \texttt{estado\_\allowbreak{}analisis} & No & Dominio & En cola, procesando, en pausa (el sistema no ve al espécimen y espera al usuario), completado, error o cancelado (el usuario no respondió en 5 minutos). El \textit{worker} toma de la cola los análisis en estado \texttt{en cola} \\
+\texttt{estado} & \texttt{estado\_\allowbreak{}analisis} & No & Dominio & En cola, procesando, en pausa (el sistema no ve al espécimen y espera al usuario hasta 72 horas), completado, error o cancelado (el usuario no respondió en 72 horas). El \textit{worker} toma de la cola los análisis en estado \texttt{en cola} \\
 \hline
 \texttt{etapa} & \texttt{etapa\_\allowbreak{}analisis} & No & Dominio & Etapa del pipeline en curso o, si hubo error, la etapa donde se detuvo. Con ella se arma el mensaje de error. Al encolar el análisis el backend le pone el valor de arranque \texttt{preprocesamiento}; el \textit{worker} la actualiza en cada etapa \\
 \hline
@@ -179,7 +180,7 @@ cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 \hline
 \texttt{fechaAnalisis} & \texttt{timestamptz} & No & & Momento del análisis. Al encolar el análisis vale la fecha de encolado; el \textit{worker} la reemplaza al terminar (completado o error), y desde esa fecha se cuentan los 30 días del borrado de videos \\
 \hline
-\texttt{rutaDiagnostico} & \texttt{text} & Sí & & Ruta del reporte de diagnóstico en PDF. Solo tiene valor cuando el estado es \texttt{error} \\
+\texttt{rutaDiagnostico} & \texttt{text} & Sí & CK: solo con estado \texttt{error} & Ruta del reporte de diagnóstico en PDF. Solo tiene valor cuando el estado es \texttt{error} \\
 \hline
 % ---------------- OBSERVACION ----------------
 \multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{OBSERVACION}: un espécimen dentro de un video} \\
@@ -188,7 +189,7 @@ cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 \hline
 \texttt{idEspecimen} & \texttt{integer} & No & FK $\to$ ESPECIMEN; UK (idEspecimen, idVideo) & Espécimen observado \\
 \hline
-\texttt{idVideo} & \texttt{integer} & No & FK $\to$ VIDEO; UK (idEspecimen, idVideo) & Video en que se le observó. Cada video analizado (el del Día 2) tiene de 2 a 4 observaciones, una por espécimen; el del Día 1 no tiene ninguna \\
+\texttt{idVideo} & \texttt{integer} & No & FK $\to$ VIDEO; UK (idEspecimen, idVideo) & Video en que se le observó. Cada video analizado (el del Día 2) tiene hasta cuatro observaciones, una por espécimen; el del Día 1 no tiene ninguna \\
 \hline
 % ---------------- SEGUNDO ----------------
 \multicolumn{5}{|l|}{\cellcolor{gray!15}\textbf{SEGUNDO}: la conducta de un espécimen en cada segundo analizado} \\
@@ -197,7 +198,7 @@ cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 \hline
 \texttt{segundo} & \texttt{smallint} & No & PK; CK entre 1 y 300 & Posición del segundo dentro de la ventana analizada (1 a 300), tras recortar los últimos 300 segundos. El minuto del análisis sale de este número y no se guarda \\
 \hline
-\texttt{conducta} & \texttt{tipo\_\allowbreak{}conducta} & Sí & Dominio & Conducta vigente del segundo, que el usuario puede corregir en la revisión. Queda nula si el sistema no pudo decidir o si el usuario lo marcó como dudoso \\
+\texttt{conducta} & \texttt{tipo\_\allowbreak{}conducta} & Sí & Dominio & Conducta vigente del segundo, que el usuario puede corregir en la revisión. Queda nula cuando el sistema no pudo ver al espécimen (origen \texttt{maquina}) o cuando el usuario marcó el segundo «No se ve» (origen \texttt{dudosa}) \\
 \hline
 \texttt{origen} & \texttt{origen\_\allowbreak{}segundo} & No & Dominio & Quién puso la conducta vigente y cómo (Tabla~\ref{tab:dominios}) \\
 \hline

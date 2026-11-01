@@ -173,6 +173,7 @@ class VIDEO {
   idTanda   [FK] [AK]
   sesion   [AK]
   archivo   (nulo)
+  nombreOriginal   (nulo)
   duracion
   fechaCarga
 }

@@ -107,8 +107,8 @@
   \textbf{Docker}
   & Plataforma de contenedorización que empaqueta una aplicación junto con todas
     sus dependencias en unidades aisladas y reproducibles. El sistema se
-    despliega como cuatro contenedores orquestados: \textit{frontend}, \textit{backend},
-    \textit{worker} y base de datos. \\[5pt]
+    despliega como cuatro contenedores orquestados: \texttt{web} (interfaz), \texttt{api}
+    (\textit{backend}), \texttt{worker} y \texttt{db} (base de datos). \\[5pt]
 
   % ── E ──────────────────────────────────────────────────────────────
   \textbf{Entropía cruzada}
@@ -137,7 +137,7 @@
   & (Cuadro de video.) Imagen estática individual dentro de una secuencia de
     video. El pipeline mide cuadro a cuadro (posición y movimiento del espécimen) y
     clasifica por segundo: cada segundo recibe una conducta a partir de una ventana
-    de 4~s centrada en él, de la que se toma el clip de 16 fotogramas que recibe la
+    de 4~s alrededor de él, de la que se toma el clip de 16 fotogramas que recibe la
     red, y los tiempos de conducta se acumulan en segundos. \\[5pt]
 
   \textbf{FST}
@@ -228,7 +228,7 @@
   \textbf{PostgreSQL}
   & Sistema de gestión de bases de datos relacional de código abierto con soporte
     para tipos de datos avanzados y transacciones ACID. Es la base de datos
-    primaria del sistema B066, que almacena usuarios, experimentos, videos,
+    primaria del sistema, que almacena usuarios, experimentos, videos,
     resultados de conducta y notificaciones. \\[5pt]
 
   \textbf{Precisión}

@@ -10,7 +10,7 @@ Este capítulo describe las decisiones de diseño del sistema: cómo están orga
 sus módulos, cómo se estructura la base de datos, cómo se comunican los componentes
 a través de la API REST, y cómo se ve la interfaz desde la perspectiva del investigador.
 También incluye el diseño del \textit{pipeline} de análisis conductual: el flujo de procesamiento
-de video, la estrategia de separación por sujeto y la arquitectura del clasificador.
+de video, la estrategia de separación por espécimen y la arquitectura del clasificador.
 
 Los diagramas de este capítulo siguen la notación \textit{Unified Modeling Language}
 (UML) versión~2.5.1, especificada por el \textit{Object Management Group}
@@ -185,8 +185,7 @@ Los cilindros se numeran de izquierda a derecha y cada uno recibe una
 \textbf{región de interés} (ROI) que delimita el área de análisis de su espécimen.
 Las regiones de los cilindros de los extremos se ensanchan, porque el espécimen que
 escala lo hace pegado a la pared exterior. Las columnas de los cilindros salen del mapa de ocupación, y las líneas de agua y de fondo, de los bordes horizontales del fondo (filtro Sobel), y no de un umbral sobre la imagen, porque objetos del laboratorio con el mismo tono que
-el aparato engañan a un umbral. Ninguna medida se escribe a mano: el sistema las
-deduce de cada video, así que funciona con grabaciones de distintos días, encuadres
+el aparato engañan a un umbral. La geometría se deduce sin medidas en píxeles escritas a mano; las proporciones respecto al ancho del cilindro son constantes del método. El sistema las aplica a cada video, así que funciona con grabaciones de distintos días, encuadres
 y resoluciones. Si no encuentra los cilindros, el \textit{pipeline} se detiene y genera el
 reporte de diagnóstico (ver RN-11).
 
@@ -199,7 +198,7 @@ cilindro es su espécimen.
 La clasificación trabaja sobre el cilindro de cada espécimen y se basa en
 aprendizaje supervisado. El clasificador es una red neuronal convolucional
 espacio-temporal que se fusiona con una rama de medidas del espécimen. Un
-clasificador sobre rasgos medidos, que ya funciona, sirve al equipo para proponer las
+clasificador sobre rasgos medidos sirve al equipo para proponer las
 etiquetas del conjunto de entrenamiento y aporta los rasgos de esa rama de medidas.
 
 \paragraph{Separación del espécimen.} En cada cuadro alineado y dentro de la
@@ -227,13 +226,11 @@ boosting} (potenciación del gradiente) sobre árboles de decisión
 \cite{friedman2001}, en la variante por histogramas que implementa scikit-learn
 como \texttt{HistGradientBoostingClassifier} \cite{pedregosa2011,ke2017}, recibe
 los quince rasgos y estima la probabilidad de nado activo, inmovilidad y
-escalamiento. Es la herramienta con la que el equipo propone las etiquetas de
-entrenamiento, y sus quince rasgos son la entrada de la rama de medidas de la red de
-fusión que describe el párrafo siguiente.
+escalamiento. Es la herramienta con la que el equipo propone las etiquetas que revisa para entrenar, y sirve de referencia en la validación; el clasificador del sistema es la red de fusión que describe el párrafo siguiente, y sus quince rasgos son la entrada de su rama de medidas.
 
 \paragraph{Red de fusión.} El clasificador del sistema es una red convolucional
-espacio-temporal R(2+1)D-18 \cite{tran2018}, preentrenada con videos de acciones
-humanas e implementada con PyTorch \cite{paszke2019}. Recibe un clip de 16
+espacio-temporal R(2+1)D-18 \cite{tran2018}, preentrenada con Kinetics-400 (videos de acciones
+humanas) e implementada con PyTorch \cite{paszke2019}. Recibe un clip de 16
 fotogramas del cilindro de cada espécimen y lo fusiona con una rama de medidas: los
 quince rasgos y siete reglas de observación del pataleo bajo el agua y de los
 cambios sobre la línea de agua. La red tiene tres salidas, una por clase: escalamiento,
@@ -243,11 +240,10 @@ tres probabilidades llega a 0.80, gana esa clase. Si no, y la suma de las probab
 nado y de escalamiento llega a 0.80, el segundo es \textit{conducta activa}: el espécimen
 no está inmóvil pero la red no distingue entre nado y escalamiento. Si tampoco, queda la
 clase más probable (ver RN-13). Un segundo en el que no se ve al espécimen queda sin
-conducta. El sistema no marca segundos como dudosos por sí mismo: la marca «dudosa» la
-puede poner el usuario al revisar.
+conducta. El sistema no marca segundos como dudosos por sí mismo: el usuario marca «No se ve» en la revisión, y ese segundo queda sin conducta con origen «dudosa».
 
 \paragraph{Decisión segundo a segundo.} Para decidir el segundo $k$, el sistema
-toma el clip y las medidas de una ventana de 4~s centrada en él (desde 1.5~s antes
+toma el clip y las medidas de una ventana de 4~s alrededor de él (desde 1.5~s antes
 hasta 2.5~s después) y aplica la red. La ventana avanza un segundo a la vez,
 así que cada segundo tiene su propia decisión y aparecen conductas breves, de unos
 2~s, que una decisión por bloques de 5~s esconde. Una ventana más corta vería
@@ -459,8 +455,7 @@ clasificación de conducta (módulo 3).
         escalamiento y conducta activa, esta última cuando el clasificador no
         decide entre nado y escalamiento; ver RN-13). Es una entidad del esquema
         conceptual; en el relacional no es tabla sino el dominio cerrado
-        \texttt{tipo\_conducta} de la columna \texttt{SEGUNDO.conducta}, porque son
-        cuatro valores fijos y no tiene atributos propios.
+        \texttt{tipo\_conducta} de la columna \texttt{SEGUNDO.conducta}, porque son cuatro valores fijos y no tiene atributos propios. En el modelo físico, \textit{Conducta} se implementa como dominio cerrado de cuatro valores.
 
   \item \textbf{SEGUNDO}: una fila por espécimen y por segundo analizado, con
         la conducta asignada (o ninguna, si el espécimen no se ve) y el origen
@@ -761,13 +756,13 @@ GET    & \path{/experiments/{id}/analyses/{idAnalisis}/control} & Imagen de cont
 \hline
 
 % --- Revisión segundo a segundo ---
-GET    & \path{/experiments/{id}/analyses/{idAnalisis}/review}   & Devuelve los especímenes, las etiquetas de cada segundo y los recuadros de los cilindros de un análisis completado. & Investiga\-dor \\
+GET    & \path{/experiments/{id}/analyses/{idAnalisis}/review}   & Devuelve los especímenes, las etiquetas de cada segundo y los recuadros de los cilindros de un análisis completado. & Autenti\-cado \\
 \hline
-POST   & \path{/experiments/{id}/analyses/{idAnalisis}/video-token} & Emite un permiso temporal de 120 minutos para ver el video. & Investiga\-dor \\
+POST   & \path{/experiments/{id}/analyses/{idAnalisis}/video-token} & Emite un permiso temporal de 120 minutos para ver el video. & Creador o Admin \\
 \hline
-GET    & \path{/experiments/{id}/analyses/{idAnalisis}/video?vt=} & Entrega el video de la revisión por partes, con el permiso temporal, para poder adelantar y retroceder. & Investiga\-dor \\
+GET    & \path{/experiments/{id}/analyses/{idAnalisis}/video?vt=} & Entrega el video de la revisión por partes, con el permiso temporal, para poder adelantar y retroceder. & Permiso temporal (sin sesión) \\
 \hline
-PUT    & \path{/experiments/{id}/analyses/{idAnalisis}/segundos} & Guarda las correcciones por segundo y recalcula el nivel de clasificación del análisis. & Investiga\-dor \\
+PUT    & \path{/experiments/{id}/analyses/{idAnalisis}/segundos} & Guarda las correcciones por segundo y recalcula el nivel de clasificación del análisis. & Creador o Admin \\
 \hline
 
 % --- Notificaciones ---
@@ -1966,7 +1961,7 @@ caso de uso.
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-32, RN-14. Extendido por: CU-26 (Corregir etiqueta de un segundo).} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Análisis en estado «completado»; sesión activa; el usuario es el investigador que subió el video o un Administrador (ver RN-14).} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Análisis en estado «completado»; sesión activa (cualquier usuario abre la revisión; sin video ni guardado si no es el creador del experimento ni Administrador, ver RN-14).} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Pantalla de revisión abierta con las etiquetas de cada segundo; si el usuario no corrige nada, las conductas no cambian y solo se marcan como confirmadas las que vio.} \\
 \hline
@@ -1987,7 +1982,7 @@ caso de uso.
 \hline
 2 & Sistema & Comprueba que el análisis esté completado y consulta la etiqueta de cada segundo de cada espécimen. \\
 \hline
-3 & Sistema & Muestra la copia del video en formato H.264 que generó el \textit{worker} al terminar el análisis, la línea de tiempo de cada espécimen y la conducta que puso el sistema en cada segundo. \\
+3 & Sistema & Muestra, si el usuario puede corregir, la copia del video en formato H.264 que generó el \textit{worker} al terminar el análisis, la línea de tiempo de cada espécimen y la conducta que puso el sistema en cada segundo. \\
 \hline
 4 & Inv. / Admin. & Revisa un espécimen a la vez con el video corriendo, y corrige las etiquetas que no coincidan con lo que observa (ver CU-26). \\
 \hline
@@ -2006,7 +2001,7 @@ caso de uso.
 \hline
 2 & El análisis no está completado: el sistema rechaza la petición e informa el motivo. \\
 \hline
-2 & El usuario no subió el video y no es Administrador: la pantalla se abre en solo lectura. Ve las etiquetas y el video, pero no puede corregir ni guardar; el sistema no rechaza la petición. \\
+2 & El usuario no es el creador del experimento ni Administrador: la pantalla se abre en solo lectura. Ve los segundos y sus etiquetas, sin el video, y no puede corregir ni guardar; el sistema no rechaza la petición. \\
 \hline
 4 & El usuario elige «Reiniciar el análisis»: el sistema avisa que se borrarán el resultado anterior y toda la revisión hecha, y que no se puede deshacer; si el usuario confirma, borra los resultados de la corrida anterior y toda la revisión hecha, deja el análisis «en cola» y lo pasa al final de la cola, y lleva a la pantalla de progreso (ver RN-04). Solo puede hacerlo el creador del experimento o un Administrador, con el análisis completado. \\
 \hline
@@ -2173,7 +2168,7 @@ caso de uso.
 \hline
 4 & Estado «error»: el sistema muestra la descripción del error según la etapa en que se detuvo y habilita el acceso al reporte de diagnóstico si está disponible (ver CU-08). \\
 \hline
-4 & El investigador aplica un filtro (por estado, fecha o tratamiento): el sistema actualiza la lista mostrando solo los experimentos que coinciden con el criterio seleccionado; el filtro por tratamiento considera los experimentos con al menos un grupo de ese tratamiento (ver RF-23). \\
+4 & El investigador aplica un filtro (por estado, año o tratamiento): el sistema actualiza la lista mostrando solo los experimentos que coinciden con el criterio seleccionado; el filtro por tratamiento considera los experimentos con al menos un grupo de ese tratamiento (ver RF-23). \\
 \hline
 \end{tabular}
 
@@ -2459,8 +2454,8 @@ procesar (no se abre o no se encuentran los cilindros, ver RN-11): el Worker gen
 el reporte de diagnóstico PDF y lo pone disponible para descarga, sin necesidad de
 un diagrama aparte para ese caso. Si el Worker deja de ver al espécimen, la pausa del
 análisis (Figura~\ref{fig:seq_pausa}) muestra cómo guarda una imagen fija, cómo el
-usuario ajusta el recuadro del cilindro o cancela, y cómo el análisis ajustado vuelve al
-frente de la cola. Una vez completado el análisis, la consulta de
+usuario ajusta el recuadro del cilindro o cancela, y cómo el análisis ajustado vuelve a la
+cola por delante de los que llegaron después. Una vez completado el análisis, la consulta de
 resultados (Figura~\ref{fig:seq_resultados}) devuelve los tiempos por espécimen
 y conducta, y la descarga de reportes (Figura~\ref{fig:seq_reportes}) permite
 exportar los datos en PDF, CSV o XLSX. Además, el usuario puede revisar el análisis
@@ -2544,8 +2539,8 @@ calculan desde \textbf{Segundo}.
 
 Las estadísticas (RF-31) son datos derivados: se calculan por conducta al consultarlos y no se guardan en la base de datos. Para cada conducta se obtienen la media, la desviación estándar muestral y la varianza del tiempo entre los especímenes; en el grupo se agregan todas sus tandas, y en el experimento se comparan los grupos (RF-21). El resultado
 es un objeto de la clase \textbf{Estadisticas}, uno por conducta, con la conducta, la media,
-la desviación estándar, la varianza y el número de especímenes que entraron al cálculo
-(\texttt{n}); es una clase derivada y no tiene tabla.
+la desviación estándar muestral y la varianza,
+es una clase derivada y no tiene tabla.
 
 \begin{sidewaysfigure}
 \centering
@@ -2560,8 +2555,7 @@ la desviación estándar, la varianza y el número de especímenes que entraron 
 La interfaz tiene catorce pantallas (inicio de sesión, restablecer contraseña, primer acceso, perfil, experimentos, nuevo experimento, experimento, grupo, cargar video, progreso, pausa, revisión, resultados y administración), diseñadas para que un investigador sin
 experiencia en programación pueda completar el flujo completo ---crear experimento,
 esperar el análisis, consultar y descargar resultados--- sin necesitar asistencia
-técnica (ver RNF-06). Las capturas de esta sección corresponden a la segunda versión
-de los mockups (v2), construida con datos de ejemplo y sin conexión al servidor.
+técnica (ver RNF-06). Las capturas de esta sección corresponden a los mockups, construidos con datos de ejemplo y sin conexión al servidor.
 
 \subsection{Pantalla de inicio de sesión}
 
@@ -2645,8 +2639,8 @@ ofrece la opción de eliminarlo, con un diálogo que pide confirmación (ver RN-
 \subsection{Detalle de experimento y de grupo}
 
 El detalle de un experimento reúne sus grupos y el estado de cada tanda. Solo quien
-creó el experimento o un administrador puede eliminarlo, y la acción solo pide
-confirmar con un diálogo que pide confirmación (RF-27, RN-09), sin nombre ni contraseña. El detalle de un grupo muestra
+creó el experimento o un administrador puede eliminarlo, y la acción pide
+confirmación en un diálogo, sin nombre ni contraseña (RF-27, RN-09). El detalle de un grupo muestra
 sus tandas, los especímenes de cada una con el cilindro que ocuparon y los videos de
 Día~1 y Día~2 con su estado. Desde ahí se abren los resultados de una tanda o los del
 grupo completo, que reúne los análisis de todas sus tandas (RF-19).
@@ -2773,7 +2767,7 @@ nivel de clasificación del análisis y la leyenda de conductas; el panel latera
 compara entre grupos la conducta que elija el usuario (por omisión, la inmovilidad), con las cuatro conductas disponibles, usando los videos del Día~2 (RF-21). Esa
 comparación promedia los segundos por espécimen de cada grupo y señala los especímenes
 cuyo video aún no está analizado, que no entran al promedio (RN-12). Si un grupo mezcla
-análisis en nivel preciso y agrupado, los muestra por separado. Incluye botones de
+análisis en nivel preciso y agrupado, no lo promedia: lo muestra por tanda y avisa. Incluye botones de
 descarga en PDF, CSV y XLSX.
 
 \begin{figure}[H]
@@ -2806,7 +2800,7 @@ descarga en PDF, CSV y XLSX.
 \subsection{Revisión segundo a segundo}
 
 Se abre solo cuando el análisis está completado, desde la pantalla de progreso o
-desde la de resultados (RF-32, RN-14). Muestra el video, con el tubo del espécimen
+desde la de resultados (RF-32, RN-14). Muestra el video (solo al creador del experimento o a un Administrador), con el tubo del espécimen
 que se revisa destacado, y una línea de tiempo por espécimen coloreada por
 conducta: una vista ampliada de 40~s alrededor del segundo actual y otra de los
 300~s completos. Cada segundo ya trae la conducta que puso el sistema; cuando
@@ -2837,7 +2831,7 @@ Vista exclusiva para quienes pertenecen a \texttt{ADMINISTRADOR} (ver CU-15).
 Muestra la lista de cuentas con correo, rol y estado, y permite desactivarlas sin
 borrarlas; la cola de trabajos; el uso de almacenamiento, con un aviso al llegar
 al 80\,\% de disco y el borrado de los videos más antiguos al llegar al 90\,\% (RF-29,
-RNF-09); y las conductas. Para crear una cuenta, el
+RNF-09). Para crear una cuenta, el
 Administrador captura identificador institucional, nombre, apellidos y correo (RF-05);
 el sistema envía la contraseña temporal por correo en texto plano, después de confirmar la creación, y además se la muestra una sola vez al Administrador, como respaldo; si el envío falla, la interfaz no avisa.
 Al editar una cuenta puede cambiar el nombre, los apellidos y el correo; el rol es una acción aparte (dar o quitar Administrador). La cuenta se desactiva o reactiva, y se le puede generar una contraseña temporal nueva. El identificador institucional es de solo lectura. El sistema impide dejar sin ningún Administrador activo y no permite que un Administrador se desactive ni se quite el rol a sí mismo.
