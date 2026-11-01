@@ -1,49 +1,29 @@
 @startuml seq_analisis_automatico
 ' ================================================================
-'  Secuencia - Analisis automatico (ejecucion del pipeline por el Worker)
+'  Secuencia - Análisis automático (ejecución del pipeline por el Worker)
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Reemplaza a figures/mermaid/seq_analisis.png. Cubre el curso normal
-'  de CU-07 "Monitorear progreso del analisis" (chapters/05_diseno.tex:
-'  1425-1468), la parte que ejecuta el Worker -- no la pantalla de
-'  progreso ni el reporte de diagnostico, que siguen siendo diagramas
-'  aparte (seq_progreso, seq_error) y quedan pendientes por decision
-'  explicita del usuario (13-sep): no fusionar los tres en uno solo.
+'  Cubre el curso normal de CU-07 "Monitorear progreso del análisis"
+'  en la parte que ejecuta el Worker. Pantalla de progreso y reporte
+'  de diagnóstico: seq_consulta_progreso.puml. Pausa y ajuste:
+'  seq_pausa_y_ajuste.puml.
 '
-'  Que cambia respecto del diagrama viejo, con fuente:
-'  - Participante "Pipeline IA" eliminado. El pipeline no es un
-'    componente aparte, es el propio Worker ejecutando sus tres
-'    etapas (CU-07, paso 2: "el Worker ejecuta el pipeline completo").
-'    Ademas evita el termino prohibido "IA" (CLAUDE.md, terminologia):
-'    las etapas de preprocesamiento/cilindros son vision por computadora,
-'    la de clasificacion es aprendizaje supervisado.
-'  - "Rastrea a los animales" -> "rastrea a los especimenes"
-'    (terminologia obligatoria, CLAUDE.md).
-'  - "Detecta las zonas de interes" -> "detecta los cilindros", igual
-'    a como lo nombra CU-07 paso 4. Si no se abre el video o no se
-'    hallan los cilindros, el analisis queda en "error" (D-15, RN-11)
-'    y se genera el reporte de diagnostico (CU-08). El pipeline no
-'    reintenta: solo se detiene (RN-04).
-'  - "Guarda los resultados por animal" (un paso plano) -> se abre en
-'    la jerarquia real del modelo: por cada especimen, una OBSERVACION
-'    de este video, con una fila SEGUNDO por cada segundo analizado --
-'    nada de esto se guarda como total (D-52, 14-oct: ya no hay
-'    INTERVALO ni PRESENTA), los totales se derivan en consulta (ver
-'    seq_consulta_resultados.puml).
-'  - Se agrega el registro del nivel de clasificacion (D-17, 13-sep):
-'    el Worker etiqueta el analisis como "preciso" o "agrupado" segun
-'    la capacidad del modelo activo (RN-13, F1 >= 85% por conducta) --
-'    esto no se calcula por video, es una propiedad conocida del
-'    modelo en uso (una constante del pipeline, D-51), no una decision
-'    en vivo.
-'  - Los nombres de etapa vienen de D-16, revisado el 5-oct: preproce-
-'    samiento, cilindros, clasificacion. La etapa de seguimiento se
-'    quito porque el pipeline real no usa tracker (un especimen por
-'    cilindro).
-'  - Se agrega la eliminacion programada del video (RNF-08, 30 dias
-'    tras terminar el analisis) -- ya estaba en el diagrama viejo, se
-'    conserva igual porque sigue vigente.
+'  Etapas: preprocesamiento solo verifica archivos y lee datos
+'  técnicos del video; cilindros alinea la cámara, construye el
+'  modelo de fondo, localiza los cilindros y la línea de agua, y
+'  separa al espécimen; la revisión de tres segundos sin ver ocurre
+'  al terminar cilindros, y la pausa queda registrada en "cilindros".
+'  Clasificación: la red clasifica cada segundo; en esa misma etapa
+'  se guardan la copia para el navegador, los recuadros y los
+'  segundos.
+'
+'  Nivel de clasificación: se fija por análisis al completarse
+'  ("agrupado" si queda algún segundo en conducta activa por la regla
+'  de 0.80; si no, "preciso"). Lo mismo para la revisión.
+'
+'  Version de lenguaje natural. Los códigos, rutas, nombres de archivo
+'  y pesos por etapa están en diagramas/guia_web/seq_analisis_automatico.puml.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_analisis_automatico.puml
@@ -62,69 +42,80 @@ database "Base de datos" as db
 
 == Al arrancar el Worker ==
 
-w -> db: busca los análisis que quedaron "procesando" sin nadie\ntrabajando en ellos (el Worker se apagó a media análisis)
-w -> db: los pasa a "en cola" con la etapa "preprocesamiento":\nempiezan de cero (D-84)
-w -> db: revisa que cada análisis "en pausa" tenga su archivo de pausa;\nsi no lo tiene, lo cancela
+w -> db: pasa a "en cola", con la etapa de preprocesamiento,\ntodos los análisis que quedaron "procesando"\n(empiezan de cero)
 
 == Un análisis a la vez ==
 
-w -> db: revisa la tabla de análisis, buscando el más antiguo en cola\n(polling periódico; se atiende uno a la vez, D-85)
-db --> w: siguiente análisis en cola, si hay alguno
-w -> fs: revisa el espacio libre del disco\n(aviso al 80 %, limpieza al 90 %, D-86)
+w -> fs: revisa el espacio libre del disco\n(aviso al 80 %, limpieza al 90 %)
+w -> db: toma el análisis más antiguo en cola\n(uno a la vez)
 w -> db: marca el análisis como "procesando"
 
-w -> fs: lee el archivo de video de la tanda
+== Etapa de preprocesamiento ==
 
-alt no se pudo abrir el video (RN-11)
-  w -> db: deja la etapa en "preprocesamiento"
-  w -> w: genera el reporte de diagnóstico PDF (ver CU-08)
-  w -> fs: guarda el PDF de diagnóstico
-  w -> db: guarda la ruta del PDF (rutaDiagnostico) y marca el análisis como "error"\n(no se reinicia desde la pantalla de error, RN-04)
-  w -> db: crea la notificación de error en el análisis
+w -> fs: verifica que existan el archivo de video, los especímenes y el modelo
+w -> w: lee el ancho, el alto y la duración del video
+
+alt no se puede abrir el video (RN-11)
+  w -> db: deja la etapa en preprocesamiento
+  w -> fs: genera y guarda el reporte de diagnóstico PDF
+  w -> db: marca el análisis como "error" y guarda la ruta del reporte\n(no se reintenta ni se reinicia desde la pantalla de error, RN-04)
+  w -> db: crea la notificación de error
   w -> w: envía también el aviso por correo\n(si el envío falla, el aviso queda en el panel)
 else el video se abre
-fs --> w: video listo para procesar
 
-w -> db: actualiza la etapa a "preprocesamiento"
-w -> w: alinea la cámara y construye el modelo de fondo
+  == Etapa de cilindros ==
 
-w -> db: actualiza la etapa a "cilindros"
-w -> w: localiza los cilindros y la línea de agua\n(sobre el video completo)
+  w -> db: actualiza la etapa a "cilindros"
+  w -> w: alinea la cámara y construye el modelo de fondo
+  w -> w: localiza los cilindros y la línea de agua
+  w -> w: mide al espécimen en cada cilindro y comprueba\nque los cilindros coincidan con los especímenes
 
-alt se hallaron los cilindros
-  w -> db: actualiza la etapa a "clasificación"
-  w -> w: clasifica la conducta de cada espécimen, segundo a segundo\n(nado, inmovilidad, escalamiento o conducta activa)
-  alt pasan tres segundos seguidos sin ver al espécimen (RN-17)
-    w -> fs: guarda una imagen fija de ese instante\ny el archivo de pausa
-    w -> db: marca el análisis como "en pausa"
-    w -> db: crea la notificación de análisis en pausa
-    w -> w: suelta el video y atiende el siguiente de la cola\n(el ajuste, la cancelación y la reanudación están\nen seq_pausa_y_ajuste.puml)
-  else se clasificó todo el video
+  alt no se hallaron los cilindros (RN-11)
+    w -> fs: genera y guarda el reporte de diagnóstico PDF
+    w -> db: marca el análisis como "error" y guarda la ruta del reporte
+    w -> db: crea la notificación de error
+    w -> w: envía también el aviso por correo
+  else se hallaron los cilindros
+    w -> w: separa al espécimen del fondo, segundo a segundo
 
-    w -> w: la red analizó el video completo; se queda con los últimos 300 segundos de cada espécimen\n(como máximo; si el video dura menos, todos)\ny los renumera de 1 a 300
+    alt pasan tres segundos seguidos sin ver al espécimen (RN-17)
+      w -> fs: guarda la imagen fija a la mitad de esos tres segundos\ny los datos de la pausa
+      w -> db: marca el análisis como "en pausa", en la etapa cilindros
+      w -> db: crea la notificación de análisis en pausa
+      w -> w: suelta el video y atiende el siguiente de la cola\n(el ajuste, la continuación, la cancelación y la reanudación\nse muestran en el diagrama de pausa y ajuste)
+    else se separó todo el video
 
-    loop por cada espécimen detectado en el video
-      w -> db: guarda su observación de este video
-      w -> db: guarda una etiqueta por cada segundo analizado (SEGUNDO)
+      == Etapa de clasificación ==
+
+      w -> db: actualiza la etapa a "clasificación"
+      w -> w: la red clasifica cada segundo; la conducta activa\nse asigna con la regla de 0.80 (RN-13)
+
+      w -> w: se queda con los últimos 300 segundos de cada espécimen\n(como máximo; si el video dura menos, todos)\ny los renumera de 1 a 300
+
+      w -> fs: guarda la copia del video que el navegador puede reproducir
+      w -> fs: guarda los recuadros de los cilindros
+
+      w -> db: guarda en una sola operación las observaciones, los segundos,\nel nivel de clasificación ("agrupado" o "preciso") y la fecha de análisis,\ny marca el análisis como "completado"
+      w -> db: deja el video sujeto al borrado automático a los 30 días (RN-05, RNF-08)
+      w -> db: crea la notificación de análisis terminado
+      w -> w: envía también el aviso por correo\n(si el envío falla, el aviso queda en el panel)
     end
-
-    w -> fs: guarda los recuadros de los cilindros\n(archivo de recuadros del análisis)
-    w -> fs: recorta el video a esos mismos últimos 300 s y guarda la copia\nen un formato que el navegador puede reproducir\n(es el video que ve el usuario)
-
-    w -> db: marca el análisis como "completado",\ncon su nivel de clasificación y fechaAnalisis
-    w -> db: deja el video sujeto al borrado automático\na los 30 días (RNF-08)
-    w -> db: crea la notificación de análisis terminado
-    w -> w: envía también el aviso por correo\n(si el envío falla, el aviso queda en el panel)
   end
-else no se hallaron los cilindros (RN-11)\no falló algo imprevisto en el pipeline (D-88)
-  w -> w: genera el reporte de diagnóstico PDF (ver CU-08)
-  w -> fs: guarda el PDF de diagnóstico
-  w -> db: guarda la ruta del PDF (rutaDiagnostico)
-  w -> db: marca el análisis como "error" y fija fechaAnalisis\n(no se reinicia desde la pantalla de error, RN-04)
-  w -> db: crea la notificación de error en el análisis
-  w -> w: envía también el aviso por correo\n(si el envío falla, el aviso queda en el panel)
 end
 
-end
+note over w
+  si ocurre un fallo imprevisto en cualquier etapa (por ejemplo,
+  falta de memoria), el análisis pasa a "error" con su reporte de
+  diagnóstico, y el Worker sigue con el siguiente sin reintentar
+end note
+
+== Tareas diarias ==
+
+note over w
+  una vez al día, a una hora fija de la madrugada:
+  - se revisa el disco; el aviso de disco va a los administradores
+    y la limpieza avisa al creador del experimento (RNF-09)
+  - respaldo diario de la base de datos, con 7 días de retención
+end note
 
 @enduml

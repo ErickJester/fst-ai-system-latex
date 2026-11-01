@@ -10,17 +10,18 @@ participant Backend as api
 database "Base de datos" as db
 
 note over db
-  Las notificaciones las crean el worker (análisis
-  terminado o con error) y las tareas programadas
-  (alerta de disco). Cada una pertenece a un usuario.
+  Las crea el worker (análisis completado, error, pausa o cancelado por plazo;
+  alerta de disco; video borrado antes de tiempo) y las tareas programadas.
+  Cada una pertenece a un usuario. El correo se envía aparte; si falla, queda en el panel.
+  El borrado a 30 días no notifica.
 end note
 
-loop al abrir la aplicación y luego cada 30 segundos
+loop al entrar a cada pantalla y cada 30 s (solo con la pestaña visible)
   ui -> api: GET /notifications
   api -> db: notificaciones del idInstitucional del token,\nmás recientes primero
   db --> api: lista (tipo, mensaje, leido, fechaCreacion)
   api --> ui: 200 OK
-  ui -> u: muestra el contador de no leídas en la campana
+  ui -> u: contador de todas las no leídas en la campana
 end
 
 u -> ui: abre la campana y toca una notificación
@@ -28,5 +29,28 @@ ui -> api: PATCH /notifications/{id} {leido: true}
 api -> db: marca leido = true\n(solo si pertenece al usuario del token)
 db --> api: confirma
 api --> ui: 200 OK
-ui --> u: abre el experimento relacionado, si lo hay
+ui --> u: destino por tipo: completado -> resultados;\nerror, pausa o cancelado -> progreso;\ndisco -> /admin; video borrado -> experimento
+
+opt "Marcar todas como leídas"
+  u -> ui: elige "Marcar todas como leídas"
+  loop por cada notificación no leída
+    ui -> api: PATCH /notifications/{id} {leido: true}
+    api -> db: marca leido = true (solo si pertenece al usuario del token;\nsi no, 404)
+    db --> api: confirma
+    api --> ui: 200 OK
+  end
+end
+
+opt "Marcar como no leída"
+  u -> ui: elige "Marcar como no leída"
+  ui -> api: PATCH /notifications/{id} {leido: false}
+  api -> db: marca leido = false (solo si pertenece al usuario del token;\nsi no, 404)
+  db --> api: confirma
+  api --> ui: 200 OK
+end
+
+ui -> api: GET /notifications/unread-count
+api -> db: cuenta todas las notificaciones no leídas del usuario
+db --> api: noLeidas
+api --> ui: 200 OK {noLeidas}
 @enduml

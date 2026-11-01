@@ -8,9 +8,9 @@
 '  diagrama para Investigador y Administrador: el rol no se guarda
 '  en USUARIO, se deduce de si el usuario figura en ADMINISTRADOR.
 '
-'  Decision D-37 (3-oct): no se registra el ultimo acceso, asi que
-'  el inicio de sesion no escribe nada en la base de datos.
-'  Decision D-36 (3-oct): el token dura mucho y es configurable.
+'  No se registra el ultimo acceso, asi que el inicio de sesion no
+'  escribe nada en la base de datos. La sesion dura 168 horas por
+'  omision (configurable).
 '
 '  Reemplaza a figures/mermaid/seq_login.png (que registraba una
 '  "ultima conexion" sin columna que la respalde).
@@ -38,16 +38,20 @@ db --> api: la cuenta (contraseña cifrada, activa o no), si existe
 alt la cuenta existe, está activa y la contraseña coincide
   api -> db: ¿el usuario figura como administrador?
   db --> api: sí / no
-  api -> api: genera el token JWT\n(vigencia larga y configurable)
-  api --> ui: token y rol del usuario
+  api -> api: genera el token de sesión\n(la sesión dura 168 horas por omisión; configurable)
+  api --> ui: token, rol y si debe cambiar la contraseña
+  note right of ui
+    el rol no va en el token;
+    se vuelve a leer en cada petición
+  end note
   ui -> ui: guarda el token en el navegador
   alt la cuenta tiene el cambio de contraseña obligatorio
     ui --> u: muestra la pantalla de cambio de contraseña (ver CU-16)
   else
-    ui --> u: muestra el panel principal
+    ui --> u: muestra la lista de experimentos
   end
 else el correo no existe, la cuenta está desactivada\no la contraseña no coincide
   api --> ui: error de credenciales\n(no dice cuál dato falló, RN-01)
-  ui --> u: muestra "correo o contraseña incorrectos"
+  ui --> u: muestra "Correo o contraseña incorrectos"
 end
 @enduml

@@ -22,7 +22,7 @@ package P1_Autenticacion_y_usuarios {
     +cambiarContrasena(nueva) : void
     +recuperarContrasena(correo) : void
     +actualizarPerfil(datos) : void
-    +consultarDashboard() : List<Experimento>
+    +consultarListaExperimentos() : List<Experimento>
     +crearExperimento(datos) : Experimento
     +subirVideo(idTanda, sesion, archivo) : Video
     +eliminarExperimento(id) : void
@@ -37,6 +37,8 @@ package P1_Autenticacion_y_usuarios {
     +listarUsuarios() : List<Usuario>
     +monitorearSistema() : void
     +modificarCuentaUsuario(id, datos) : void
+    +reactivarCuentaUsuario(id) : void
+    +generarContrasenaTemporal(id) : void
   }
 }
 
@@ -158,7 +160,7 @@ package P4_Resultados_y_reportes {
   }
 }
 
-package P5_Dashboard_y_notificaciones {
+package P5_Notificaciones {
   class Notificacion {
     -id : Integer
     -tipo : String

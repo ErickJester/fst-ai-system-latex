@@ -1,24 +1,29 @@
 @startuml pipeline
 ' ================================================================
-'  Pipeline de analisis conductual — FST
+'  Pipeline de análisis conductual — FST
 '  TT 2026-B066 | ESCOM-IPN
 ' ----------------------------------------------------------------
 '  Reemplaza a figures/mermaid/pipeline.png (Mermaid sin fuente en
-'  el repo), que mostraba cinco modulos con YOLOv8 + ByteTrack y
-'  ResNet-18/50 con respaldo por geometria. Se rehace desde el texto
-'  vigente del cap. 5 (Modulos 1-4) y el etiquetador real (fst_auto):
+'  el repo), que mostraba cinco módulos con YOLOv8 + ByteTrack y
+'  ResNet-18/50 con respaldo por geometría. Se rehace desde el texto
+'  vigente del cap. 5 (Módulos 1-4) y el etiquetador real (fst_auto):
 '
-'  - Sin modulo de seguimiento (CLA-02, 5-oct): un especimen por
+'  - Sin módulo de seguimiento (CLA-02, 5-oct): un espécimen por
+'    revisado: preprocesamiento, cilindros, clasificación.
+'  - Preprocesamiento solo verifica archivos y lee ancho, alto y
+'    duración. La alineación, el modelo de fondo, los cilindros, la
+'    línea de agua y la revisión de tres segundos sin ver están en
+'    la etapa de cilindros; la pausa queda registrada en "cilindros".
+'  - Clasificación (D-66): la red de fusión R(2+1)D-18 es el clasificador:
 '    cilindro, asi que no hay tracker. Las etapas son las de D-16
-'    revisado: preprocesamiento, cilindros, clasificacion.
-'  - Clasificacion (D-66): la red de fusion R(2+1)D-18 es el clasificador:
 '    recibe el clip de 16 cuadros de una ventana de 4 s y una rama de
 '    medidas (15 rasgos y 7 reglas); tiene tres salidas (escalamiento,
 '    inmovilidad, nado). La conducta activa no sale de la red: se asigna
 '    por segundo con una regla de tres pasos y umbral 0.80 (RN-13). El
-'    gradient boosting es
-'    el etiquetador del equipo y aporta los 15 rasgos.
-'  - Preprocesamiento segun fst_auto (CLA-04, 5-oct): sin correccion
+'    gradient boosting es el etiquetador del equipo y aporta los 15 rasgos.
+'  - En la etapa de clasificación se guardan la copia del video para
+'    revisión, los recuadros y los segundos.
+'  - Preprocesamiento según fst_auto (CLA-04, 5-oct): sin corrección
 '    de contraste; fondo por percentil 10, no por mediana.
 '
 '  Generar:
@@ -38,16 +43,16 @@ start
 
 partition "1. Preprocesamiento" {
   if (¿Se pudo abrir el video?) then (sí)
-    :Lee los cuadros del video;
+    :Verifica archivo de video, especímenes y modelo;\nlee ancho, alto y duración del video;
   else (no)
     :Genera el reporte de diagnóstico\ny marca el análisis con error;
     stop
   endif
-  :Alinea cada cuadro contra uno de referencia\n(registro de cámara);
-  :Construye el modelo de fondo\n(percentil 10 de cada píxel)\ny el mapa de ocupación;
 }
 
-partition "2. Localización de los cilindros" {
+partition "2. Cilindros" {
+  :Alinea cada cuadro contra uno de referencia\n(registro de cámara);
+  :Construye el modelo de fondo\n(percentil 10 de cada píxel)\ny el mapa de ocupación;
   :Localiza los rebordes del recipiente:\nlínea de agua y suelo;
   :Separa los cilindros por dónde\nhubo movimiento dentro del agua;
   if (¿Se hallaron los cilindros?) then (sí)
@@ -56,21 +61,23 @@ partition "2. Localización de los cilindros" {
     :Genera el reporte de diagnóstico\ny marca el análisis con error;
     stop
   endif
+  :Mide al espécimen en cada cilindro\ny comprueba que los cilindros coincidan\ncon los especímenes;
+  :Separa al espécimen del fondo\ndentro de su cilindro\n(diferencia y brillo, región más grande);
+  if (¿Pasan 3 s seguidos sin ver\nal espécimen en un cilindro?) then (sí)
+    :Guarda una imagen fija a la mitad de esos tres segundos\ny avisa al worker, que deja el análisis\nen pausa (etapa cilindros) hasta que el usuario\najuste el recuadro, continúe o lo cancele;
+    stop
+  endif
 }
 
 partition "3. Clasificación de conducta" {
-  :Separa al espécimen del fondo\ndentro de su cilindro\n(diferencia y brillo, región más grande);
-  if (¿Pasan 3 s seguidos sin ver\nal espécimen en un cilindro?) then (sí)
-    :Guarda una imagen fija de ese instante\ny avisa al worker, que deja el análisis\nen pausa hasta que el usuario ajuste\nel recuadro o lo cancele;
-    stop
-  endif
   :Mide quince rasgos de movimiento, postura\ny trayectoria y siete reglas de observación\n(pataleo bajo el agua y cambios sobre\nla línea de agua);
   :Para cada segundo, toma una ventana de 4 s\ncentrada en él y arma el clip de 16 cuadros\ndel cilindro;
   :La red de fusión R(2+1)D-18 recibe el clip\ny las medidas y da tres salidas: nado,\ninmovilidad y escalamiento. Con la regla del umbral\n0.80, el sistema asigna a cada segundo una de ellas\no conducta activa;
+  :Guarda la copia del video para revisión (H.264),\nlos recuadros y los segundos;
 }
 
 partition "4. Resultados" {
-  :Guarda la conducta de cada segundo\y la copia del video para revisión (H.264);
+  :Calcula los totales por conducta y los bloques de 5 s\nal mostrarse; no se guardan;
 }
 stop
 

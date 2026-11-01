@@ -4,37 +4,30 @@
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Reemplaza a figures/mermaid/seq_reportes.png. Cubre CU-10
-'  "Descargar reporte" (chapters/05_diseno.tex:1602-1644, RF-22,
-'  RF-31), que no tiene cursos alternos documentados en el .tex --
-'  el unico curso alterno que agrega este diagrama (cache vencido
-'  por reanalisis) viene de D-21, no de CU-10.
+'  Cubre CU-10 "Descargar reporte" y RF-22, RF-31.
 '
-'  Que cubre y con que fuente:
-'  - Contenido de CSV/XLSX: datos individuales por especimen (RF-19,
-'    RF-20, RF-22: tiempo y desglose por minuto, columnas Tiempo,
-'    Nado, Escalamiento, Inmovilidad) MAS estadisticas de grupo
-'    -- media, desviacion estandar y varianza por conducta -- que
-'    RF-31 exige incluir "junto con los datos individuales" en el
-'    mismo archivo descargable.
-'  - Contenido de PDF: "reporte de resultados" (RF-22, D-76) --
-'    un documento distinto del reporte de diagnostico de CU-08 (ese
-'    es solo para analisis en estado "error").
-'  - Alcance de las estadisticas de grupo: RF-31 las describe "a
-'    partir de los experimentos que comparten el mismo tratamiento"
-'    (cruzando VARIOS experimentos), pero el sistema no modela ese
-'    nivel -- no hay "Proyecto" (Q-D, preguntas-doctor.md SS2) ni
-'    relacion entre experimentos, y REPORTE solo tiene FK a UN
-'    EXPERIMENTO. Aqui se calculan las estadisticas de los tres
-'    grupos DENTRO del experimento actual (control/referencia/
-'    tratamiento), igual que seq_consulta_resultados.puml -- esa
-'    parte de RF-31 esta obsoleta, ya se sabia por Q-D.
-'  - Cache y regeneracion (D-21, 13-sep): REPORTE.ruta es clave
-'    alterna y CU-10 dice "el sistema genera O RECUPERA el archivo",
-'    o sea que ya se preveia cachear. D-21 agrega la regla de
-'    invalidacion que faltaba: si hay un analisis mas reciente que
-'    el reporte guardado (reanalisis, D-03), se regenera; si no, se
-'    reusa el archivo existente.
+'  Que se descarga:
+'  - CSV y XLSX: la vista que el investigador tiene abierta, por grupo
+'    o por tanda. Datos por espécimen y por minuto (tiempo, nado
+'    activo, inmovilidad, escalamiento, conducta activa y "Sin ver",
+'    con la media, la desviación estándar y la varianza de esa vista).
+'  - PDF: el reporte de resultados del experimento, con la columna
+'    "Sin ver". Es distinto del reporte de diagnóstico de CU-08.
+'  - Las estadísticas son las del grupo o la tanda que se pidió.
+'
+'  Caché:
+'  - El reporte guardado se invalida por eventos: corregir etiquetas,
+'    reiniciar un análisis, editar el experimento, borrar una tanda o
+'    el experimento, cambiar el nombre del creador, y cuando el Worker
+'    completa o falla un análisis.
+'  - Borrar un video no invalida el reporte: los resultados se
+'    conservan (RF-26).
+'  - En modo desarrollador no hay caché: cada descarga se genera de
+'    nuevo.
+'
+'  Sin análisis completados: la descarga de CSV o XLSX se rechaza con
+'    un aviso; el PDF muestra "Sin resultados" y ese PDF no se guarda
+'    en caché.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_descarga_reportes.puml
@@ -53,35 +46,46 @@ participant Backend as api
 database "Base de datos" as db
 participant "Archivos" as fs
 
-inv -> ui: selecciona el formato de descarga\n(CSV, XLSX o PDF), desde resultados o el dashboard
-ui -> api: pide el reporte del experimento en ese formato
+inv -> ui: elige el formato (CSV, XLSX o PDF) desde la pantalla de resultados\ny, en CSV o XLSX, la tanda o el grupo completo
+ui -> api: pide el reporte en ese formato y para esa vista
 
-api -> db: busca si ya hay un reporte guardado\nen ese formato para este experimento
-db --> api: reporte guardado, si existe, con su fecha de generación
-api -> db: busca la fecha del análisis más reciente del experimento
-db --> api: fecha del último análisis completado
+api -> db: ¿hay análisis completados en el experimento?
+db --> api: sí / no
 
-alt no hay un reporte guardado en ese formato
-  api -> api: genera el archivo con los datos actuales\n(ver nota)
-  api -> fs: guarda el archivo generado
-  api -> db: registra el reporte nuevo (ruta, formato, fecha de generación)
-else el reporte guardado es más viejo que el último análisis
-  api -> api: regenera el archivo con los datos actuales\n(ver nota)
-  api -> fs: reemplaza el archivo guardado
-  api -> db: actualiza la ruta y la fecha de generación del reporte
-else el reporte guardado sigue vigente
-  api -> fs: recupera el archivo ya guardado
+alt no hay análisis completados
+  alt el formato es CSV o XLSX
+    api --> ui: rechaza la descarga, con el motivo
+    ui --> inv: muestra que no hay resultados todavía
+  else el formato es PDF
+    api --> ui: documento "Sin resultados" (no se guarda en caché)
+    ui --> inv: descarga el documento "Sin resultados"
+  end
+else hay análisis completados
+  api -> db: busca si ya hay un reporte guardado\nen ese formato y para esa vista
+  db --> api: reporte guardado, si existe, con su fecha de generación
+
+  alt no hay un reporte guardado, o se invalidó por un evento
+    note over api
+      Eventos que invalidan el reporte: corregir etiquetas,
+      reiniciar un análisis, editar el experimento, borrar una tanda
+      o el experimento, cambiar el nombre del creador, y que el Worker
+      complete o falle un análisis. Borrar un video no invalida.
+    end note
+    api -> api: genera el archivo con los datos actuales,\nde la vista pedida
+    api -> fs: guarda el archivo generado
+    api -> db: registra el reporte nuevo
+  else el reporte guardado sigue vigente
+    api -> fs: recupera el archivo ya guardado
+  end
 end
 
 note right of api
-  CSV / XLSX: datos por espécimen (tiempo y desglose
-  por minuto, RF-19/RF-20/RF-22) más las estadísticas
-  de grupo -- media, desviación estándar y varianza por
-  conducta, entre los especímenes de cada uno de los
-  grupos del experimento (RF-31).
+  CSV / XLSX: datos por espécimen y por minuto, con "Sin ver",
+  más la media, la desviación estándar y la varianza de la vista
+  (grupo o tanda), entre los especímenes de esa vista (RF-31).
 
-  PDF: reporte de resultados (RF-22), documento distinto
-  del reporte de diagnóstico de CU-08.
+  PDF: reporte de resultados del experimento, con la columna
+  "Sin ver"; distinto del reporte de diagnóstico de CU-08.
 end note
 
 api --> ui: archivo listo

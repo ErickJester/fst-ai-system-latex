@@ -1,39 +1,21 @@
 @startuml seq_crear_cuenta
 ' ================================================================
-'  Secuencia - Crear cuenta de usuario (CU-12), con verificacion
-'  de rol (D-12) y contraseña temporal obligatoria (D-25)
+'  Secuencia - Crear cuenta de usuario (CU-12)
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Reemplaza a diagramas/seq_registro.png. Ese diagrama viejo no
-'  tenia ningun paso de verificacion de rol -- confiaba en que el
-'  frontend escondiera el boton de "Crear cuenta". D-12 (13-sep)
-'  exige las dos cosas: esconder EN LA INTERFAZ y ademas verificar
-'  el rol EN EL BACKEND antes de ejecutar la accion, sin importar
-'  por donde llegue la peticion.
-'
 '  Cubre CU-12 "Crear cuenta de usuario" (RF-05, RF-07).
 '
-'  Cambios deliberados contra CU-12 tal como esta escrito hoy en
-'  chapters/05_diseno.tex:1739 (no se toca ese .tex en esta sesion,
-'  solo se deja registrado aqui por que el diagrama no lo sigue):
-'    - El paso 2 de CU-12 dice que el formulario pide un campo
-'      "rol". Eso ya no es correcto contra D-08: USUARIO no tiene
-'      columna rol, y ADMINISTRADOR es una tabla aparte que no se
-'      crea desde este caso de uso. Este diagrama omite ese campo.
-'    - Se agrega el paso de verificacion de rol que CU-12 no
-'      describe (el hueco que marcaba COMPARATIVA-FIGURAS-CAP5.md
-'      para esta figura).
-'
-'  D-38 (3-oct, corregido 4-oct): el formulario pide identificador
-'  institucional, nombre, apellidos y correo; el backend rechaza el
-'  alta si el identificador o el correo ya existen. La contraseña
-'  temporal la genera el sistema (no la escribe el Administrador),
-'  igual que en CU-12 y en el mockup v2 de administracion.
-'
-'  D-25 (15-sep): la cuenta se crea con cambioRequerido = true, asi
-'  el login (fuera de este diagrama) sabe que debe forzar el
-'  cambio de contraseña en el primer ingreso.
+'  Solo el Administrador crea cuentas. La verificacion de rol se
+'  hace en el backend antes de ejecutar la accion, y la interfaz
+'  solo oculta el boton. El formulario pide identificador
+'  institucional (de 1 a 10 digitos), nombre, apellidos y correo;
+'  el backend revisa el identificador y el correo por separado y
+'  rechaza el alta con un mensaje para cada uno si ya existen. La
+'  contraseña temporal la genera el sistema y la cuenta se crea
+'  como Investigador con cambio de contraseña obligatorio en el
+'  primer ingreso. El rol de Administrador se asigna despues, al
+'  modificar la cuenta.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_crear_cuenta.puml
@@ -61,36 +43,52 @@ note right of ui
 end note
 
 admin -> ui: selecciona "Crear cuenta"
-ui -> admin: muestra el formulario\n(identificador institucional, nombre,\napellidos, correo electrónico)
+ui -> admin: muestra el formulario\n(identificador institucional de 1 a 10 dígitos, nombre,\napellidos, correo electrónico)
 
 admin -> ui: completa los datos y confirma
 ui -> api: envía identificador, nombre, apellidos y correo\ncon la sesión activa del Administrador
 
-api -> db: ¿el idInstitucional de la sesión está en ADMINISTRADOR?
+note over api
+  el filtro de rol se aplica en cada petición, no solo en esta acción:
+  si la sesión no pertenece a un Administrador, la petición
+  no tiene permiso: «No tienes permiso para esta acción»
+end note
+
+api -> db: ¿la sesión pertenece a un Administrador?
 db --> api: sí / no
 
-alt no está en ADMINISTRADOR
-  api --> ui: rechaza la petición: no autorizado
-  ui --> admin: muestra el error, no crea la cuenta
-else sí está en ADMINISTRADOR
-  api -> db: ¿el identificador institucional o el correo\nya están registrados?
+alt no pertenece a un Administrador
+  api --> ui: rechaza: no tiene permiso («No tienes permiso para esta acción»)
+  ui --> admin: lleva a la lista de experimentos
+else pertenece a un Administrador
+  api -> db: ¿el identificador institucional ya está registrado?
   db --> api: sí / no
 
-  alt el identificador o el correo ya están registrados
-    api --> ui: informa el conflicto
-    ui --> admin: muestra el error, no crea el duplicado
-  else ambos están disponibles
-    api -> api: genera contraseña temporal
-    api -> db: crea USUARIO\n(identificador, nombre, apellidos y correo),\ncon contraseña temporal cifrada,\ncuenta activa y cambio de contraseña obligatorio
-    db --> api: confirma la creación
-    api -> api: envía correo al nuevo investigador\ncon sus credenciales de acceso inicial
-    note right of api
-      si el envío falla, la cuenta queda
-      creada igual: la contraseña
-      temporal se muestra en el paso siguiente
-    end note
-    api --> ui: cuenta creada, con la contraseña temporal
-    ui --> admin: confirma la cuenta creada y muestra\nla contraseña temporal una sola vez
+  alt el identificador ya está registrado
+    api --> ui: informa que el identificador ya está registrado
+    ui --> admin: muestra ese error, no crea el duplicado
+  else el identificador está libre
+    api -> db: ¿el correo ya está registrado?
+    db --> api: sí / no
+
+    alt el correo ya está registrado
+      api --> ui: informa que el correo ya está registrado
+      ui --> admin: muestra ese error, no crea el duplicado
+    else el correo está libre
+      api -> api: genera contraseña temporal
+      api -> db: crea USUARIO\n(identificador, nombre, apellidos y correo),\ncon contraseña temporal cifrada,\ncuenta activa y cambio de contraseña obligatorio
+      note over api
+        la cuenta siempre nace como Investigador; el rol de Administrador\n        se asigna después, al modificarla
+      end note
+      db --> api: confirma la creación
+      api -> api: después de confirmar, envía correo al nuevo investigador\ncon su correo y la contraseña temporal en texto plano
+      note right of api
+        si el envío falla, la cuenta queda creada igual
+        y la interfaz no avisa del fallo
+      end note
+      api --> ui: cuenta creada, con la contraseña temporal
+      ui --> admin: confirma la cuenta creada y muestra\nla contraseña temporal una sola vez
+    end
   end
 end
 

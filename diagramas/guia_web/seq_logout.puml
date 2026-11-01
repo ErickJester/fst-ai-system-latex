@@ -13,4 +13,8 @@ ui -> api: POST /auth/logout
 api --> ui: 200 OK\n(no guarda nada: no hay lista de bloqueo)
 ui -> ui: borra el token del navegador
 ui --> u: muestra la pantalla de inicio de sesión
+note over api
+  JWT_EXPIRES_HOURS = 168 (una semana, por defecto).
+  Al vencer el token, el login se pide de nuevo.
+end note
 @enduml

@@ -236,7 +236,7 @@ class NOTIFICACION {
 ' ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 USUARIO        "1" --o "0..*" EXPERIMENTO
-EXPERIMENTO    "1" --o "3..*" GRUPO
+EXPERIMENTO    "1" --o "0..*" GRUPO
 GRUPO          "1" --o "1..*" TANDA
 TANDA          "1" --o "2..4" ESPECIMEN
 TANDA          "1" --o "1..2" VIDEO

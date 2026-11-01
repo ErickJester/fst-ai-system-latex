@@ -1,6 +1,6 @@
 @startuml
 !pragma layout smetana
-title Plataforma Web FST\nPaquete 5 - Dashboard, notificaciones y administración
+title Plataforma Web FST\nPaquete 5 - Lista de experimentos, notificaciones y administración
 left to right direction
 skinparam packageStyle rectangle
 skinparam actorStyle awesome
@@ -13,7 +13,7 @@ actor "Administrador" as ADMIN
 actor ":Worker:\n<<system>>" as WRK #LightYellow
 INV <|-- ADMIN
 rectangle "Plataforma Web FST - Paquete 5" {
-  usecase "CU-22\nConsultar dashboard" as CU22
+  usecase "CU-22\nConsultar lista de experimentos" as CU22
   usecase "Filtrar experimentos" as UC51a
   usecase "Avisar expiración de video" as UC52
   usecase "CU-23\nEliminar experimento" as CU23
@@ -31,7 +31,7 @@ ADMIN --> CU13
 ADMIN --> UC57a
 ADMIN --> CU24
 WRK --> CU14
-UC52 ..> CU22 : <<extend>>\n[video expira en < 7 dias]
+UC52 ..> CU22 : <<extend>>\n[video expira en 7 días o menos]
 UC51a ..> CU22 : <<extend>>\n[aplica filtro]
 CU23 ..> UC53a : <<include>>
 @enduml

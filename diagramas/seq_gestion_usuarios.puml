@@ -1,30 +1,21 @@
 @startuml seq_gestion_usuarios
 ' ================================================================
-'  Secuencia - Gestion de usuarios: listar y desactivar (CU-11),
-'  con verificacion de rol (D-12) y regla del ultimo administrador
+'  Secuencia - Gestion de usuarios: listar, cambiar rol, desactivar,
+'  reactivar y contraseña temporal (CU-11)
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Reemplaza a diagramas/seq_gestion_usuarios.png. Ese diagrama
-'  viejo hacia "SELECT usuarios (rol, activo, nombre)" - USUARIO no
-'  tiene columna rol (D-08: ADMINISTRADOR es tabla aparte, no un
-'  valor de columna). Es el mismo hueco que marcaba
-'  COMPARATIVA-FIGURAS-CAP5.md para esta figura.
-'
 '  Cubre CU-11 "Gestionar cuenta de investigador" (RF-05, RF-06,
-'  RF-07). CU-11 declara <<include>> de CU-12 para la parte de
-'  crear cuenta (chapters/05_diseno.tex:920) - por eso ese tramo se
-'  referencia con "ref over" en vez de repetirse: ya tiene su
-'  propio diagrama, diagramas/seq_crear_cuenta.puml. Copiar los
-'  mismos pasos aqui otra vez es el riesgo que ya se discutio en
-'  sesion: dos diagramas describiendo el mismo tramo pueden
-'  desincronizarse con el tiempo.
+'  RF-07). La parte de crear cuenta se referencia con "ref over"
+'  y tiene su propio diagrama, diagramas/seq_crear_cuenta.puml.
 '
-'  El viejo tampoco verificaba el rol de quien pide la accion
-'  (D-12) ni la regla de "debe existir al menos un Administrador
-'  activo en todo momento" que ya esta escrita en
-'  chapters/05_diseno.tex:1697 (curso alterno 4a de CU-11) pero
-'  nunca se habia dibujado. Los dos se agregan aqui.
+'  Solo el Administrador accede. La verificacion de rol se hace en
+'  el backend en cada peticion. El sistema siempre debe tener al
+'  menos un Administrador activo: la ultima cuenta de administrador
+'  no se puede desactivar ni perder el rol.
+'
+'  El rol no es una columna de USUARIO: el Administrador figura en
+'  una tabla aparte.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_gestion_usuarios.puml
@@ -45,22 +36,28 @@ database "Base de datos" as db
 admin -> ui: abre el panel de usuarios
 ui -> api: solicita la lista de usuarios\ncon la sesión activa del Administrador
 
-api -> db: ¿el idInstitucional de la sesión está en ADMINISTRADOR?
+note over api
+  filtro de rol en cada petición: si la sesión no pertenece
+  a un Administrador, la petición no tiene permiso:
+  «No tienes permiso para esta acción»
+end note
+
+api -> db: ¿la sesión pertenece a un Administrador?
 db --> api: sí / no
 
-alt no está en ADMINISTRADOR
-  api --> ui: rechaza la petición: no autorizado
+alt no pertenece a un Administrador
+  api --> ui: rechaza: no tiene permiso («No tienes permiso para esta acción»)
   ui --> admin: muestra el error, no abre el panel
-else sí está en ADMINISTRADOR
-  api -> db: consulta los usuarios (nombre, correo, activo)
-  db --> api: lista de usuarios
-  api -> db: consulta cuáles de esos usuarios tienen fila en ADMINISTRADOR
-  db --> api: lista de idInstitucional con permisos de administrador
-  api -> api: combina ambas listas\n(marca en cada fila si es Administrador)
-  api --> ui: la lista de usuarios, con la marca de administrador
+else pertenece a un Administrador
+  api -> db: consulta todos los usuarios en una sola consulta, sin paginación,\nincluida la marca de si cada uno es Administrador
+  db --> api: lista de usuarios con esa marca
+  api --> ui: la lista de usuarios
   ui --> admin: muestra la tabla de usuarios
 
   admin -> ui: elige la acción sobre un usuario
+  note right of ui
+    no hay acción para eliminar una cuenta
+  end note
 
   alt crear cuenta nueva
     ref over ui, api, db
@@ -68,40 +65,87 @@ else sí está en ADMINISTRADOR
     end ref
     ui --> admin: la tabla se actualiza con la cuenta nueva
 
-  else editar datos de una cuenta, incluido su rol
-
-    admin -> ui: modifica los datos o el rol de un usuario y confirma
+  else editar datos de una cuenta (nombre, apellidos o correo)
+    admin -> ui: modifica los datos y confirma
     ui -> api: solicita guardar los cambios de la cuenta
 
-    api -> db: si el cambio le quita el rol de Administrador,\n¿cuántos Administradores activos quedarían después?
-    db --> api: cantidad restante (o "no aplica" si el rol no cambia)
+    api -> db: actualiza nombre, apellidos y correo de la cuenta
+    db --> api: confirma la actualización
+    api --> ui: confirma los cambios
+    ui --> admin: la tabla muestra los datos actualizados
 
-    alt quedarían 0 Administradores activos
-      api --> ui: rechaza el cambio
-      ui --> admin: muestra la advertencia\n"debe existir al menos un Administrador activo"
-    else se puede guardar
-      api -> db: actualiza los datos y el rol de la cuenta
-      db --> api: confirma la actualización
-      api --> ui: confirma los cambios
-      ui --> admin: la tabla muestra los datos actualizados
+  else dar o quitar el rol de Administrador
+    admin -> ui: cambia el rol de un usuario y confirma
+    ui -> api: solicita el cambio de rol
+
+    alt es la propia cuenta del Administrador
+      api --> ui: rechaza: «Para cambiar tu propia cuenta usa Mi perfil.»
+      ui --> admin: muestra el error
+    else es otra cuenta
+      api -> db: cuenta cuántos Administradores activos quedarían después del cambio,\nsin que otro cambio se cruce antes de contar
+      db --> api: cantidad restante
+
+      alt quedarían 0 Administradores activos
+        api --> ui: rechaza el cambio
+        ui --> admin: muestra la advertencia\n"debe existir al menos un Administrador activo"
+      else se puede cambiar
+        api -> db: agrega o quita su registro de administrador\nen la misma operación
+        db --> api: confirma el cambio
+        api --> ui: confirma el cambio de rol
+        ui --> admin: la tabla muestra el nuevo rol
+      end
     end
 
   else desactivar cuenta
-
     admin -> ui: selecciona un usuario y confirma la desactivación
     ui -> api: solicita desactivar la cuenta
 
-    api -> db: si este usuario es Administrador,\n¿cuántos Administradores activos quedarían después?
-    db --> api: cantidad restante (o "no aplica" si no es Administrador)
+    alt es la propia cuenta del Administrador
+      api --> ui: rechaza: «Para cambiar tu propia cuenta usa Mi perfil.»
+      ui --> admin: muestra el error
+    else es otra cuenta
+      api -> db: cuenta cuántos Administradores activos quedarían después,\nsin que otro cambio se cruce antes de contar; si esta cuenta es Administrador
+      db --> api: cantidad restante (o "no aplica" si no es Administrador)
 
-    alt quedarían 0 Administradores activos
-      api --> ui: rechaza la desactivación
-      ui --> admin: muestra la advertencia\n"debe existir al menos un Administrador activo"
-    else se puede desactivar
-      api -> db: actualiza USUARIO, marca activo = false
-      db --> api: confirma la actualización
-      api --> ui: confirma la desactivación
-      ui --> admin: usuario marcado como inactivo en la tabla
+      alt quedarían 0 Administradores activos
+        api --> ui: rechaza la desactivación
+        ui --> admin: muestra la advertencia\n"debe existir al menos un Administrador activo"
+      else se puede desactivar
+        api -> db: marca la cuenta como inactiva
+        db --> api: confirma la actualización
+        api -> api: corta las sesiones activas de esa cuenta
+        api --> ui: confirma la desactivación
+        ui --> admin: usuario marcado como inactivo en la tabla
+      end
+    end
+
+  else reactivar cuenta
+    admin -> ui: selecciona un usuario inactivo y confirma la reactivación
+    ui -> api: solicita reactivar la cuenta
+    api -> db: marca la cuenta como activa
+    db --> api: confirma la actualización
+    note over api
+      solo marca la cuenta como activa: la contraseña anterior
+      vuelve a servir; no se genera una contraseña nueva, no se
+      pide cambiarla y no se envía correo
+    end note
+    api --> ui: cuenta reactivada
+    ui --> admin: la tabla muestra la cuenta como activa
+  else generar contraseña temporal nueva
+    admin -> ui: selecciona otro usuario (no a sí mismo) y confirma
+    alt la cuenta está inactiva
+      ui --> admin: pide reactivar la cuenta primero
+    else la cuenta está activa
+      ui -> api: solicita una contraseña temporal nueva
+      api -> api: genera la contraseña temporal
+      api -> db: guarda la contraseña temporal y obliga a cambiarla\nen el siguiente acceso
+      db --> api: confirma
+      api -> api: envía la contraseña temporal por correo
+      note over api
+        queda registrada la acción, sin la contraseña
+      end note
+      api --> ui: confirma el envío
+      ui --> admin: confirma la acción
     end
   end
 end

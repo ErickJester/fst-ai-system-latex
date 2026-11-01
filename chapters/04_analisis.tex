@@ -28,7 +28,7 @@ los procesos de definición de requerimientos de la norma ISO/IEC/IEEE~12207:201
 
 Los requerimientos funcionales están organizados por módulo de la interfaz con tres
 niveles de prioridad: \textbf{Alta} (sin esto el prototipo no funciona),
-\textbf{Media} (importante pero puede quedar para una iteración posterior) y
+\textbf{Media} (importante, pero no indispensable para operar) y
 \textbf{Baja} (deseable pero no urgente). Cada requerimiento se derivó directamente
 de los prototipos de interfaz diseñados \cite{pressman2014,sommerville2011}.
 
@@ -79,18 +79,22 @@ RF-04 & Autenticación
 
 % ── Gestión de usuarios ────────────────────────────────────
 RF-05 & Gestión de usuarios
-      & El Administrador debe poder crear, modificar (incluido el rol de Investigador o
-        Administrador) y desactivar cuentas de usuario desde el panel de administración.
-        La creación requiere identificador institucional,
-        nombre, apellidos y correo; el sistema genera una contraseña temporal que el
+      & El Administrador debe poder crear, modificar sus datos (nombre, apellidos y
+        correo), dar o quitar el rol de Administrador, y desactivar cuentas de usuario
+        desde el panel de administración.
+        La creación requiere identificador institucional (de 1 a 10 dígitos, sin espacios a los lados),
+        nombre, apellidos y correo; la cuenta se crea siempre como Investigador y el rol de Administrador se asigna
+        después, al modificarla. El sistema genera una contraseña temporal que el
         usuario cambia al primer ingreso y que recibe por correo. El identificador
         institucional no se puede modificar después. No se puede desactivar la última cuenta de
-        Administrador activa ni quitarle el rol (ver RN-16).
+        Administrador activa ni quitarle el rol, y ningún Administrador puede desactivarse
+        ni quitarse a sí mismo el rol (ver RN-16).
       & Alta & Admin \\
 \hline
 RF-06 & Gestión de usuarios
-      & El Investigador debe poder actualizar su nombre, correo y contraseña desde
-        su perfil de usuario; el identificador institucional no es editable.
+      & El Investigador debe poder actualizar su nombre, apellidos y correo; la
+        contraseña se cambia en otro formulario de la misma pantalla. El identificador
+        institucional no es editable.
       & Media & Investigador \\
 \hline
 RF-07 & Gestión de usuarios
@@ -108,7 +112,7 @@ RF-08 & Carga de video
 \hline
 RF-09 & Carga de video
       & El sistema debe permitir subir uno o dos videos por tanda: Día~1
-        (sesión de habituación, 20~min) y Día~2 (sesión post-tratamiento, 5~min). Cada
+        (sesión de habituación, 20~min) y Día~2 (sesión post-tratamiento, 5~min), según el protocolo. Cada
         tanda debe tener al menos un video: el Día~1 es opcional y, si una tanda solo
         tiene el Día~1, su experimento queda «en espera del Día~2». El \textit{pipeline} analiza, como máximo, los últimos
         300~segundos del video de Día~2 (si dura menos, lo analiza completo; el resto
@@ -145,10 +149,12 @@ RF-12 & Carga de video
 % ── Análisis conductual ────────────────────────────────────
 RF-13 & Análisis conductual
       & El \textit{pipeline} de análisis debe ejecutar tres etapas secuenciales:
-        preprocesamiento del video (decodificación, alineación de la cámara y
-        modelo de fondo),
-        localización de los cilindros y clasificación de conductas. Cada etapa
-        debe tener un indicador de estado visible en la pantalla de progreso.
+        preprocesamiento del video (verificación de archivos y lectura del ancho, el
+        alto y la duración), cilindros (alineación de la cámara, modelo de fondo,
+        localización de los cilindros y de la línea de agua, y medición del espécimen en
+        cada cilindro) y clasificación de conductas (la red clasifica cada segundo; en esa
+        misma etapa se guardan la copia para el navegador, los recuadros y los segundos).
+        Cada etapa debe tener un indicador de estado visible en la pantalla de progreso.
       & Alta & Sistema \\
 \hline
 RF-14 & Análisis conductual
@@ -162,7 +168,7 @@ RF-15 & Análisis conductual
         real con una barra de porcentaje y la etapa activa. El análisis continúa
         en segundo plano aunque el investigador cierre la pestaña. Si el sistema deja de
         ver al espécimen, el análisis queda en pausa hasta que el usuario responda
-        (ver RN-17).
+        o pasen 72~horas (ver RN-17).
       & Alta & Investigador \\
 \hline
 RF-16 & Análisis conductual
@@ -174,10 +180,9 @@ RF-16 & Análisis conductual
 \hline
 RF-17 & Análisis conductual
       & El sistema debe clasificar segundo a segundo la conducta de cada espécimen: nado
-        activo, inmovilidad o escalamiento \cite{armario2021}. Cuando la confianza no
-        alcanza para decidir entre nado y escalamiento, lo registra como
-        \textit{conducta activa}, una cuarta conducta (ver RN-13). El buceo se
-        clasifica como nado activo. Las conductas son mutuamente excluyentes (ver
+        activo, inmovilidad o escalamiento \cite{armario2021}. Cuando ninguna clase alcanza el umbral de 0.80, pero la suma de nado y escalamiento sí lo alcanza, lo registra como
+        \textit{conducta activa}, una cuarta conducta (ver RN-13). En el etiquetado del entrenamiento, el buceo se
+        cuenta como nado, por lo que el sistema lo clasifica como nado. Las conductas son mutuamente excluyentes (ver
         RN-07). Cada análisis tiene un nivel de clasificación: «agrupado» si queda algún
         segundo en conducta activa y «preciso» si no; el nivel se recalcula cuando el
         usuario corrige segundos en la revisión (ver RF-32).
@@ -215,14 +220,14 @@ RF-20 & Resultados
 RF-21 & Resultados
       & El sistema debe mostrar una comparación entre los grupos de un experimento
         con el tiempo promedio por conducta de los especímenes de cada grupo,
-        calculado con los videos del Día~2.
+        calculado con los videos del Día~2. Un grupo que mezcle niveles «preciso» y «agrupado» se muestra por tanda, sin promedio.
       & Alta & Investigador \\
 \hline
 RF-22 & Resultados
       & El investigador debe poder descargar los datos de resultados en formato CSV
-        y XLSX desde la pantalla de resultados y desde el \textit{dashboard} (panel de control). El archivo debe
+        y XLSX desde la pantalla de resultados. El archivo debe
         contener las columnas: \texttt{Grupo}, \texttt{Tanda}, \texttt{Espécimen},
-        \texttt{Tiempo (min:seg)}, \texttt{Nado activo}, \texttt{Escalamiento},
+        \texttt{Tiempo (min:seg)}, \texttt{Nado}, \texttt{Escalamiento},
         \texttt{Inmovilidad}, \texttt{Conducta activa} y \texttt{Sin ver} (los
         segundos sin conducta, al final), con una fila por espécimen
         y por minuto analizado y el valor de cada columna en segundos, de modo que
@@ -231,24 +236,23 @@ RF-22 & Resultados
         columna, \texttt{Sin ver} incluida, de los especímenes de esa descarga, sean los de una tanda o los del
         grupo completo (ver RF-31). Además se descargan, por
         separado y en PDF, el reporte de resultados (los tiempos por espécimen y
-        conducta, con los fragmentos en que el espécimen no se ve marcados y sin la
-        columna «sin ver») y el
+        conducta, con la columna «Sin ver» y los fragmentos en que el espécimen no se ve marcados) y el
         reporte de diagnóstico (ver RN-11).
       & Alta & Investigador \\
 \hline
 
-% ── Dashboard / gestión de experimentos ──────────────────
-RF-23 & \textit{Dashboard}
-      & El \textit{dashboard} debe mostrar la lista de todos los experimentos del laboratorio
+% ── Lista de experimentos / gestión de experimentos ──────────────────
+RF-23 & \textit{Lista de experimentos}
+      & La lista de experimentos debe mostrar todos los experimentos del laboratorio
         con nombre, fecha, número de grupos, sesión, estado (en cola, procesando, en pausa,
         completado, error, cancelado; «sin videos» si aún no tiene ninguno y «en espera
         del Día~2» si solo tiene el video del Día~1) y accesos directos a resultados y descarga (ver RN-08).
-        La lista es filtrable por estado, fecha o tratamiento; el filtro por
+        La lista es filtrable por estado, año o tratamiento; el filtro por
         tratamiento muestra los experimentos que tengan al menos un grupo con
         ese tratamiento.
       & Alta & Investigador \\
 \hline
-RF-24 & \textit{Dashboard}
+RF-24 & \textit{Lista de experimentos}
       & El sistema debe mostrar un aviso visible cuando un video está a menos de
         7~días de ser eliminado automáticamente, indicando el nombre del experimento
         y la fecha de vencimiento exacta. El período de 7~días da tiempo suficiente
@@ -259,21 +263,21 @@ RF-24 & \textit{Dashboard}
         omisiones.
       & Media & Sistema \\
 \hline
-RF-25 & \textit{Dashboard}
+RF-25 & \textit{Lista de experimentos}
       & El sistema debe borrar automáticamente los archivos de video 30~días después
         de que el análisis termine exitosamente, notificando al investigador con un
         aviso en la interfaz antes de que ocurra (ver RN-05). Si el disco supera el
         90\,\%, el borrado se adelanta a los videos más antiguos (ver RNF-09).
       & Media & Sistema \\
 \hline
-RF-26 & \textit{Dashboard}
+RF-26 & \textit{Lista de experimentos}
       & Los resultados y reportes deben conservarse indefinidamente, aunque el video
         original ya haya sido borrado.
       & Alta & Sistema \\
 \hline
-RF-27 & \textit{Dashboard}
+RF-27 & \textit{Lista de experimentos}
       & El investigador debe poder eliminar un experimento propio desde el
-        \textit{dashboard} o desde su detalle; el Administrador puede eliminar cualquiera. La acción es
+        lista de experimentos o desde su detalle; el Administrador puede eliminar cualquiera. La acción es
         permanente e irreversible y requiere un aviso de confirmación (ver RN-09).
       & Media & Investigador / Admin \\
 \hline
@@ -289,7 +293,7 @@ RF-28 & Administración
 RF-29 & Administración
       & El Administrador debe poder monitorear el estado del sistema: porcentaje de
         uso del disco, espacio disponible en GB, tamaño de la cola de procesamiento,
-        número de análisis activos y tiempo estimado de término. El sistema alerta cuando el disco
+        número de análisis activos y tiempo estimado para vaciar la cola, calculado con un promedio fijo de minutos por video. El sistema alerta cuando el disco
         supera el 80\,\% de uso.
       & Baja & Admin \\
 \hline
@@ -306,7 +310,7 @@ RF-31 & Resultados
         una tanda, el investigador ve y descarga las estadísticas de esa tanda; al ver
         el grupo completo, las del grupo (ver RF-19). Las estadísticas se incluyen en
         el reporte descargable (CSV/XLSX), para la misma vista que se descarga, junto
-        con los datos individuales por espécimen.
+        con los datos individuales por espécimen. La desviación estándar es muestral ($n-1$). La comparación entre grupos usa solo las cuatro conductas, sin «Sin ver», y no promedia un grupo que mezcle niveles «preciso» y «agrupado» (se muestra por tanda; ver RF-21).
       & Media & Investigador \\
 \hline
 RF-32 & Resultados
@@ -316,9 +320,9 @@ RF-32 & Resultados
         sistema y el usuario puede corregirla. Para reproducirlo en el navegador, al
         terminar el análisis el sistema genera una copia del video recortado a los
         segundos analizados en un formato compatible con el navegador (códec H.264, estándar de compresión de video). Solo
-        el investigador que subió el video y el Administrador pueden corregir. Cada
+        el creador del experimento y el Administrador pueden corregir. Cada
         conducta guarda su origen
-        (del sistema, confirmada, corregida o dudosa). Los totales por minuto se calculan desde las
+        (de la máquina, confirmada, corregida o dudosa). Los totales por minuto se calculan desde las
         etiquetas, así que reflejan las correcciones (ver RN-14). Al guardar las
         correcciones de segundos, el sistema recalcula el nivel de clasificación del
         análisis: «agrupado» si queda algún segundo en conducta activa y «preciso» si
@@ -336,7 +340,7 @@ RF-33 & Notificaciones
         investigador de cada experimento afectado cuando un video se borra antes de
         los 30 días por falta de espacio (ver RN-05). Los
         correos se envían desde una cuenta de correo configurable en el servidor; si
-        el envío falla, el aviso permanece en el panel de notificaciones.
+        el envío falla, el aviso permanece en el panel de notificaciones. «Cancelado» se notifica solo cuando el análisis se cancela por plazo. Las notificaciones se consultan al entrar a cada pantalla y cada 30 segundos, y el borrado automático a los 30 días no genera ninguna.
       & Media & Investigador / Admin \\
 \hline
 
@@ -351,7 +355,7 @@ ISO/IEC~25010:2011 \cite{iso25010}, que establece que un sistema debe responder 
 de los tiempos que el usuario percibe como aceptables para cada tipo de operación. Para
 operaciones interactivas cortas (navegación, filtros, consultas) el umbral estándar es
 de 1 a 3 segundos; para operaciones de procesamiento intensivo (análisis de video) el
-tiempo aceptable se determina con el usuario durante las pruebas \cite{iso25010}.
+tiempo aceptable lo fija el laboratorio \cite{iso25010}.
 
 \begin{longtable}{|>{\bfseries}p{1.2cm}|>{\raggedright}p{2.9cm}|>{\raggedright}p{5.2cm}|>{\raggedright\arraybackslash}p{3.8cm}|}
 \caption{Requerimientos No Funcionales (RNF).
@@ -369,7 +373,7 @@ tiempo aceptable se determina con el usuario durante las pruebas \cite{iso25010}
 
 RNF-01 & Rendimiento
        & Las operaciones de navegación e interacción con la interfaz (cargar el
-         \textit{dashboard}, filtrar experimentos, abrir resultados) deben responder en menos
+         lista de experimentos, filtrar experimentos, abrir resultados) deben responder en menos
          de 3~s. Derivado del atributo \textit{time behaviour} de la ISO/IEC~25010:2011
          \cite{iso25010}.
        & Tiempo de respuesta $\leq 3$~s en condiciones normales de red. \\
@@ -385,7 +389,7 @@ RNF-02 & Calidad del análisis
          --nado activo, inmovilidad y escalamiento--, sobre los segundos etiquetados
          con esas tres clases, con validación por video; y segunda evaluación,
          inmovilidad contra activa, con $P(\text{inmovilidad}) \geq 0.5$, ver RN-13) sobre el conjunto de
-         prueba de la fase de validación (Trabajo Terminal II, TT-II). \\
+         prueba propio. \\
 \hline
 RNF-03 & Disponibilidad
        & El sistema debe permitir que los investigadores dejen análisis corriendo
@@ -413,8 +417,8 @@ RNF-06 & Usabilidad
          experimento, subir un video, esperar el análisis y descargar el reporte
          sin necesitar ayuda técnica. Derivado del atributo \textit{usability} de
          la ISO/IEC~25010:2011 \cite{iso25010}.
-       & Prueba con al menos un usuario real del laboratorio durante la fase de
-         validación y robustez. Tasa de completación de tarea $\geq$ 90\% sin
+       & Prueba con al menos un usuario real del laboratorio, con los videos
+         del laboratorio. Tasa de completación de tarea $\geq$ 90\% sin
          asistencia. \\
 \hline
 RNF-07 & Compatibilidad
@@ -428,7 +432,7 @@ RNF-08 & Almacenamiento
          termina exitosamente. Los resultados y reportes se conservan
          indefinidamente. El sistema alerta al usuario cuando un video está a menos
          de 7~días de ser borrado.
-       & Tarea programada (\textit{cron job}) diaria, a cargo del \textit{worker}. Aviso visible en \textit{dashboard}
+       & Tarea programada (\textit{cron job}) diaria, a cargo del \textit{worker}. Aviso visible en la lista de experimentos
          con indicador de días restantes. \\
 \hline
 RNF-09 & Almacenamiento
@@ -459,7 +463,7 @@ RNF-12 & Mantenibilidad
        & El código debe estar documentado y separado en módulos independientes
          (\textit{backend}, \textit{pipeline} de análisis de video, \textit{frontend}), siguiendo PEP~8 en Python y ESLint
          en JavaScript.
-       & Revisión de calidad de código en cada cierre de bloque de
+       & Se revisa la calidad del código en cada cierre de bloque de
          implementación. \\
 \hline
 RNF-13 & Concurrencia
@@ -469,7 +473,7 @@ RNF-13 & Concurrencia
          fue declarado por el investigador colaborador en la entrevista de
          levantamiento (véase la justificación de umbrales en la
          sección~\ref{sec:umbrales}).
-       & Pruebas con 4 sesiones de usuario activas simultáneamente y al menos 1
+       & Se probó con 4 sesiones de usuario activas simultáneamente y al menos 1
          análisis en cola, sin degradación de respuesta $> 3$~s en operaciones
          de interfaz. \\
 \hline
@@ -479,7 +483,7 @@ RNF-14 & Repetibilidad
          como lo que más le importa: reducir la variabilidad que introduce el analista
          (véase la justificación de umbrales en la sección~\ref{sec:umbrales}).
        & Variación máxima de entre el 5 y el 10\,\% en los segundos de cada conducta
-         entre análisis repetidos del mismo video, verificada en TT-II. \\
+         entre análisis repetidos del mismo video, verificada con los videos del laboratorio. \\
 \hline
 
 \end{longtable}
@@ -491,7 +495,7 @@ RNF-14 & Repetibilidad
 
 Los requerimientos y reglas de negocio contienen valores numéricos concretos.
 A continuación se documenta el origen de cada uno para que puedan auditarse y
-ajustarse en la fase de validación (TT-II).
+ajustarse con la validación agrupada por video.
 
 \begin{itemize}
   \item \textbf{F1 mínimo por conducta: $\geq 85$\,\%.}
@@ -508,8 +512,8 @@ ajustarse en la fase de validación (TT-II).
         sistemas automatizados comparables \cite{nandi2021_dbscorer,meng2024_dsaan}.
         El F1 se calcula contra las etiquetas del conjunto de prueba propio, hechas
         por el equipo con su etiquetador, y el 85\,\% se toma como la meta de calidad.
-        El F1 por conducta se evaluará sobre el conjunto de prueba de la fase de
-        validación en TT-II. El umbral se exige a las tres clases que da la red
+        El F1 por conducta se evalúa sobre el conjunto de prueba propio, con
+        validación agrupada por video. El umbral se exige a las tres clases que da la red
         (escalamiento, inmovilidad y nado) en la primera evaluación (por clase de la
         red): se calcula con la clase más probable de la red en cada segundo, solo sobre
         los segundos que el equipo etiquetó con esas tres clases, con validación por
@@ -552,7 +556,7 @@ ajustarse en la fase de validación (TT-II).
         Umbrales estándar de gestión de capacidad en sistemas de almacenamiento
         \cite{pressman2014}. Dejan margen operativo suficiente antes de que el
         disco se llene y evitan pérdida de datos por falta de espacio. Se
-        revisarán según el volumen real de videos generados (ver RNF-09).
+        se ajustan según el volumen real de videos generados (ver RNF-09).
 \end{itemize}
 
 % -----------------------------------------------------------
@@ -584,19 +588,19 @@ RN-01 & Las credenciales incorrectas muestran un mensaje de error genérico que 
       & Seguridad básica contra enumeración de usuarios. Ver RF-01. \\
 \hline
 RN-02 & Un video pertenece a exactamente una tanda (y, a través de ella, a un
-        grupo y un experimento). No se puede reutilizar un video ya subido en
-        una tanda distinta.
+        grupo y un experimento). Cada video corresponde a una sola tanda: cada carga se guarda
+        como un archivo propio de esa tanda y sesión.
       & Trazabilidad de resultados. Ver RF-09. \\
 \hline
 RN-03 & Una tanda tiene como máximo dos videos: uno del Día~1 (20~min) y uno del
         Día~2 (5~min). Un experimento, al tener varios grupos y tandas, puede
-        acumular muchos más de dos videos en total. El video del Día~1 se guarda, pero
+        acumular muchos más de dos videos en total. Cada tanda admite un video por sesión. El video del Día~1 se guarda, pero
         no se analiza (ver RN-12).
       & Así funciona el protocolo FST del laboratorio \cite{slattery2012}. Ver RF-09. \\
 \hline
 RN-04 & El análisis lo inicia el sistema automáticamente al terminar la carga. El
         investigador no puede iniciarlo ni pausarlo, y solo puede cancelarlo mientras
-        el análisis está en pausa. Solo el investigador que subió el video y el
+        el análisis está en pausa. Solo el creador del experimento y el
         Administrador pueden reiniciar un análisis en estado «completado», desde la
         pantalla de revisión: al reiniciar se borran el resultado y toda la revisión
         humana hecha, la pantalla avisa antes y la acción no se puede deshacer; el
@@ -632,8 +636,8 @@ RN-08 & Todos los investigadores con cuenta activa pueden consultar los experime
       & Definido en entrevista de levantamiento. Ver RF-04, RNF-04, RF-30. \\
 \hline
 RN-09 & Borrar un experimento es permanente e irreversible: se eliminan el video,
-        los resultados y los reportes. Antes de ejecutarlo, el sistema muestra un aviso
-        que pregunta si está seguro; no pide nombre ni contraseña. No se puede borrar
+        los resultados y los reportes. Antes de ejecutarlo, el sistema muestra un diálogo de confirmación
+        sin pedir nombre ni contraseña; el foco inicial está en «Cancelar». No se puede borrar
         un experimento mientras alguno de sus análisis está procesando o en pausa;
         los que están en cola salen de la cola al borrarlo.
       & Previene borrados accidentales y que el sistema pierda los datos de un
@@ -649,7 +653,8 @@ RN-10 & La interfaz rechaza cualquier archivo que no sea \texttt{.mp4} o
 RN-11 & Si el video no se puede abrir o el \textit{pipeline} no encuentra los cilindros, se
         detiene y el sistema genera automáticamente un reporte de diagnóstico
         descargable que indica el motivo del fallo. Los videos en que sí se
-        encuentran continúan el análisis de forma normal.
+        encuentran continúan el análisis de forma normal. No hay reintento: el análisis
+        en error no se reinicia desde la pantalla de error (RN-04).
       & Evita que el sistema produzca resultados incorrectos sin advertir al
         investigador. Ver RF-14, RF-16. \\
 \hline
@@ -677,11 +682,13 @@ RN-13 & La red da tres salidas (escalamiento, inmovilidad y nado); la
         nado y escalamiento. Ver RF-17, RF-18. \\
 \hline
 RN-14 & Solo se puede revisar un análisis completado, y solo lo corrigen el
-        investigador que subió el video y el Administrador. Al revisar, el usuario corrige
+        creador del experimento y el Administrador. Al revisar, el usuario corrige
         las etiquetas segundo a segundo; cada etiqueta guarda su origen. Al guardar, los totales por
         minuto de los especímenes corregidos ya reflejan los cambios, porque se
         calculan desde las etiquetas, y los reportes guardados del experimento se
-        regeneran con los datos nuevos.
+        borran y se generan de nuevo cuando alguien los pide. La caché de reportes se invalida al corregir segundos, al
+        reiniciar un análisis, al editar o eliminar el experimento o una tanda, al cambiar el nombre o los apellidos del
+        creador, y cuando el \textit{worker} termina o falla un análisis.
         Corregir etiquetas no cambia el modelo ni el video. Reiniciar el análisis
         borra toda esta revisión; la pantalla avisa antes y no se puede deshacer
         (ver RN-04).
@@ -714,18 +721,22 @@ RN-15 & Los resultados también se agrupan en bloques de 5~segundos, la unidad d
         sección~\ref{sec:umbrales}. \\
 \hline
 RN-16 & Siempre debe existir al menos un Administrador activo: el sistema rechaza
-        desactivar la última cuenta de Administrador activa y quitarle el rol.
+        desactivar la última cuenta de Administrador activa y quitarle el rol. Tampoco
+        puede quitarse a sí mismo el rol de Administrador ni desactivar su propia cuenta.
       & Sin un Administrador activo nadie podría crear cuentas ni desactivar otras
         (RF-05), y el sistema quedaría sin quien lo administre. Ver RF-05. \\
 \hline
 RN-17 & Si en un segundo no se ve al espécimen, ese segundo se registra como «no se ve».
         Si pasan tres segundos seguidos «no se ve», el análisis queda en pausa, el sistema
         avisa al usuario en el panel de notificaciones y le pide ajustar el recuadro del
-        cilindro; con el ajuste, el sistema vuelve a revisar esos mismos tres segundos.
-        El usuario también puede cancelar el análisis mientras está en pausa; si no
-        responde en 5~minutos, el análisis se cancela. Mientras el análisis espera, el
-        sistema atiende el siguiente video de la cola; el análisis ajustado vuelve al
-        frente de la cola y continúa desde el segundo de la pausa.
+        cilindro. La imagen fija se toma a la mitad de esos tres segundos, y la pausa se registra
+        en la etapa de cilindros. El usuario tiene tres acciones: «Ajustar y continuar», «El recuadro está bien,
+        continuar» y «Cancelar análisis». Cancelar pide confirmar con «¿Cancelar el análisis? No se puede reanudar:
+        habrá que subir el video otra vez.»; el análisis cancelado no borra archivos, no crea notificación y no guarda motivo.
+        Si no hay respuesta en 72~horas, el análisis se cancela. Mientras el análisis espera, el sistema atiende el
+        siguiente video de la cola. El análisis ajustado vuelve a la cola por delante de los que llegaron después; al
+        retomarse, el sistema procesa el video de nuevo desde el principio y aplica el recuadro corregido desde el inicio
+        del primer segundo de esos tres.
       & Evita entregar como resultado un tramo en que el sistema no vio al espécimen sin
         que el usuario pueda intervenir, y evita dejar un análisis esperando para siempre
         en la cola. Ver RN-04, RN-07, RF-15. \\
@@ -801,7 +812,7 @@ R(2+1)D-18 \cite{tran2018}
     & Es el clasificador de conducta. Se fusiona con una rama de 22 medidas (los quince
       rasgos del etiquetador y siete reglas de pataleo y nariz) y da tres salidas por
       segundo (escalamiento, inmovilidad y nado); la conducta activa se asigna aparte
-      (ver RN-13). Se evalúa en TT-II con F1 por clase. \\
+      (ver RN-13). Se evalúa con F1 por clase. \\
 \hline
 PyTorch \cite{paszke2019}
     & Framework de aprendizaje profundo para entrenamiento e inferencia de redes
@@ -812,7 +823,7 @@ PyTorch \cite{paszke2019}
 scikit-learn \cite{pedregosa2011}
     & Biblioteca de ML con clasificadores de \textit{gradient boosting}, métricas y
       validación cruzada.
-    & Implementa el clasificador sobre rasgos (\texttt{HistGradientBoostingClassifier}),
+    & Implementa el clasificador sobre rasgos (\texttt{HistGradient\allowbreak BoostingClassifier}),
       que propone las etiquetas del equipo y aporta los quince rasgos de la rama de
       medidas de la red, y calcula las métricas de
       clasificación (F1, precisión y \textit{recall} por conducta) y la validación
@@ -845,11 +856,10 @@ Etiquetador del equipo
 \hline
 \endfoot
 
-Flask (Python) \cite{grinberg2018}
-    & Microframework ligero para APIs REST. Extensiones para JWT
-      (Flask-JWT-Extended), ORM (SQLAlchemy) y tareas asíncronas.
-    & Suficiente para el tamaño del prototipo. Integra el \textit{pipeline} de análisis de video sin
-      necesitar un framework más pesado. \\
+Spring Boot 4.1 (Java 21)
+    & Spring Web MVC para la API REST, Spring Security con OAuth2 Resource Server para firmar y validar los JWT,
+      Spring Data JPA y JdbcTemplate para el acceso a datos, Spring Mail para el correo, iText y Apache POI para los reportes.
+    & Integra en un solo framework la API, la seguridad, el acceso a datos, el correo y los reportes del prototipo. \\
 \hline
 React.js + Vite
     & Framework \textit{frontend} basado en componentes. Vite reduce los tiempos de
@@ -859,7 +869,7 @@ React.js + Vite
 \hline
 PostgreSQL
     & Base de datos relacional con transacciones ACID y código abierto.
-    & Cubre los patrones de acceso del sistema y se integra con SQLAlchemy. \\
+    & Cubre los patrones de acceso del sistema y se integra con Spring Data JPA y JdbcTemplate. \\
 \hline
 Docker + Docker Compose \cite{merkel2014}
     & Empaqueta todos los servicios (\textit{backend}, \textit{frontend}, base de datos, worker) en
@@ -900,7 +910,7 @@ Para cada riesgo se documenta una acción concreta de mitigación.
 R-01 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
      & Videos con reflejos, iluminación variable o especímenes de pelaje claro que
        hacen fallar el \textit{pipeline} (no se encuentran los cilindros, ver RN-11).
-     & Definir con el laboratorio los requisitos mínimos de calidad de video.
+     & Se definen con el laboratorio los requisitos mínimos de calidad de video.
        El sistema deduce el fondo y la posición de los cilindros de cada video, sin
        parámetros fijados a mano para un encuadre; si aun así no se encuentran los
        cilindros, se genera el reporte de diagnóstico (ver RN-11). \\
@@ -908,7 +918,7 @@ R-01 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
 R-02 & \cellcolor{red!12}\textcolor{red!70!black}{\Large$\bullet$}~\textbf{Alto}
      & El \textit{dataset} (conjunto de datos) de bloques y segundos etiquetados no alcanza para entrenar un clasificador
        con el F1 objetivo.
-     & Ampliar el \textit{dataset} anotando más segundos con el etiquetador del equipo y aplicar
+     & Se amplía el \textit{dataset} anotando más segundos con el etiquetador del equipo y se aplica
        \textit{data augmentation} (aumento de datos). Si el escalamiento no se distingue del nado
        con la precisión objetivo, los segundos en que no se distinguen se registran
        como ``conducta activa'' (ver RN-13). \\
@@ -920,36 +930,36 @@ R-03 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf
        5~s) y el sistema entrega la conducta predominante de cada bloque de 5~s, por
        lo que sus análisis manuales no son una referencia directa contra la cual
        contrastar los bloques (ver RN-15).
-     & Etiquetar el conjunto de prueba propio con el etiquetador del equipo y
-       acordar con el laboratorio una sesión de contraste de los bloques de 5~s,
+     & Se etiqueta el conjunto de prueba propio con el etiquetador del equipo y
+       se acuerda con el laboratorio una sesión de contraste de los bloques de 5~s,
        aprovechando las sesiones con el Dr.\ Sandino. \\
 \hline
 R-04 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
      & El tiempo de análisis de un video de 5~min supera lo que el laboratorio
        puede asumir en su flujo de trabajo.
-     & Medir tiempos por etapa del \textit{pipeline}. Evaluar reducción de resolución o
-       uso de GPU. El umbral aceptable de tiempo se define con el laboratorio
-       durante la fase de pruebas (ver los criterios de aceptación operativa). \\
+     & Se miden los tiempos por etapa del \textit{pipeline} y se evalúa la reducción de resolución o
+       uso de GPU. El umbral aceptable de tiempo lo fija el laboratorio
+       (ver los criterios de aceptación operativa). \\
 \hline
 R-05 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
      & La integración del módulo de visión por computadora con el \textit{backend}
        vía cola asíncrona resulta más compleja de lo esperado.
-     & Definir contratos de \textit{API} al inicio de la fase de implementación
-       y ejecutar una prueba de integración de extremo a extremo antes de agregar
+     & Se definen contratos de \textit{API} antes de programar
+       y se ejecuta una prueba de integración de extremo a extremo antes de agregar
        más funcionalidad. \\
 \hline
 R-07 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
      & El laboratorio solicita cambios en los requerimientos a mitad del desarrollo.
-     & Diseño modular del clasificador para incorporar conductas adicionales sin
-       reescribir la arquitectura. Gestionar los cambios dentro del proceso de
+     & El clasificador tiene diseño modular para incorporar conductas adicionales sin
+       reescribir la arquitectura. Los cambios se gestionan dentro del proceso de
        revisión de \textit{sprint} conforme a la metodología Scrum. \\
 \hline
 R-08 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
      & El escalamiento y el nado activo se ven tan parecidos desde la vista lateral
        que el modelo no los distingue con suficiente precisión.
-     & Usar en el entrenamiento únicamente clips inequívocos de escalamiento
+     & Se usan en el entrenamiento únicamente clips inequívocos de escalamiento
        (movimiento de patas delanteras hacia las paredes del cilindro). Si no se
-       alcanza la precisión objetivo, registrar como ``conducta activa'' los
+       alcanza la precisión objetivo, se registran como ``conducta activa'' los
        segundos en que no se distinguen (ver RN-13). \\
 \hline
 
@@ -978,7 +988,7 @@ implementar el prototipo de forma eficiente y sostenible \cite{pressman2014}.
 \subsubsection{Evaluación de recursos actuales y brechas tecnológicas}
 
 El equipo de desarrollo cuenta con experiencia en las herramientas del stack tecnológico
-seleccionado ---Python, OpenCV, PyTorch, Flask y React--- adquirida en cursos de la
+seleccionado ---Java, Spring Boot, Python, OpenCV, PyTorch y React--- adquirida en cursos de la
 carrera en la ESCOM. Todas las herramientas son de código abierto, están bien
 documentadas y tienen comunidades activas que reducen el riesgo de incompatibilidades.
 
@@ -998,7 +1008,7 @@ elimina dependencias de hardware específico en el laboratorio.
 
 \subsubsection{Simulación, modelado y pruebas}
 
-Antes de la implementación completa del sistema, el \textit{pipeline} de análisis se probó con
+El \textit{pipeline} de análisis se probó con
 videos del laboratorio: localiza de forma automática los cilindros y la línea de agua
 en grabaciones de distintos días y encuadres, con vista lateral y de dos a cuatro
 cilindros simultáneos. Esa prueba reduce el riesgo técnico de la etapa de localización
@@ -1012,13 +1022,11 @@ etapa con el dataset disponible.
 \subsubsection{Evaluación de compatibilidad e integración}
 
 El prototipo tiene una arquitectura modular que separa el \textit{pipeline} de análisis de video
-(Python, OpenCV, scikit-learn y PyTorch) de la plataforma web (Flask, React, PostgreSQL) mediante una
+(Python, OpenCV, scikit-learn y PyTorch) de la plataforma web (Spring Boot, React, PostgreSQL) mediante una
 cola de tareas asíncrona. Esa separación permite desarrollar y probar cada módulo de
-forma independiente y facilita la integración progresiva conforme avanza el desarrollo.
+forma independiente y facilita la integración progresiva.
 
-La contenedorización con Docker garantiza que el sistema se comporta igual en el equipo
-de desarrollo y en el laboratorio, lo que elimina
-la clase más común de problemas de compatibilidad \cite{merkel2014}.
+Docker empaqueta el sistema con todas sus dependencias, de modo que se ejecuta de la misma forma en cualquier equipo que tenga Docker \cite{merkel2014}.
 
 \subsection{Factibilidad operativa}
 
@@ -1067,17 +1075,17 @@ proyecto, los criterios que determinan si el sistema es operativamente aceptable
 
 \begin{itemize}
   \item El tiempo de procesamiento de un video de 5~min se mide en segundos de
-        cómputo y su umbral se define con el laboratorio durante la validación en
-        TT-II; como referencia, el análisis manual lleva alrededor de 30~min por
+        cómputo y su umbral aceptable lo fija el laboratorio;
+        como referencia, el análisis manual lleva alrededor de 30~min por
         espécimen (hasta unas 2~h por video). Cualquier resultado en ese rango o por
         debajo ya representa una ganancia operativa.
   \item El reporte generado debe incluir, al menos, la duración acumulada por conducta
         (nado activo, inmovilidad, escalamiento y conducta activa) desglosada por
         minuto, de modo que sea directamente comparable con la tabla que el
-        investigador construye hoy a mano. La pantalla de resultados y los archivos
-        CSV y XLSX añaden una quinta columna, «sin ver» (los segundos sin conducta),
-        con la que los totales suman 100\,\% y 60~s por minuto completo; el reporte en
-        PDF conserva las cuatro conductas, sin esa columna.
+        investigador construye hoy a mano. La pantalla de resultados, los archivos
+        CSV y XLSX y el reporte PDF añaden la quinta columna «Sin ver» (los segundos sin conducta),
+        con la que los totales suman 100\,\% y 60~s por minuto completo; la comparación
+        entre grupos usa solo las cuatro conductas.
   \item Cuando el video no se pueda procesar (no se abre o no se encuentran los
         cilindros, según RN-11), el sistema debe notificarlo explícitamente en el
         reporte de diagnóstico en lugar de entregar un resultado silencioso
@@ -1087,8 +1095,7 @@ proyecto, los criterios que determinan si el sistema es operativamente aceptable
         (ver RNF-14).
 \end{itemize}
 
-Estos cuatro criterios se verificarán durante la etapa de validación en TT-II con los
-videos del laboratorio y las métricas de clasificación definidas en RNF-02.
+Estos cuatro criterios se comprueban con los videos del laboratorio y las métricas de clasificación de RNF-02.
 
 \subsection{Factibilidad económica}
 
@@ -1135,7 +1142,7 @@ Conectividad e infraestructura (internet y electricidad durante el desarrollo,
       12~meses)
     & \$4{,}500 \\
 \hline
-Herramientas de desarrollo (Python, Flask, React, PostgreSQL, Docker, OpenCV,
+Herramientas de desarrollo (Java, Spring Boot, Python, React, PostgreSQL, Docker, OpenCV,
       scikit-learn, PyTorch)
     & \$0 --- distribución bajo licencias de código abierto sin costo para uso
       académico. \\
@@ -1181,7 +1188,7 @@ Formación técnica complementaria (acceso a cursos especializados de visión po
       computadora y Docker)
     & \$2{,}000 \\
 \hline
-\textbf{Subtotal costos variables} & \textbf{\$5{,}500} \\
+\textbf{Subtotal costos variables} & \textbf{\$4{,}000 a \$5{,}500} \\
 \hline
 
 \end{longtable}
@@ -1204,7 +1211,7 @@ Formación técnica complementaria (acceso a cursos especializados de visión po
 
 Costos fijos & \$51{,}000 \\
 \hline
-Costos variables & \$5{,}500 \\
+Costos variables & \$4{,}000 a \$5{,}500 \\
 \hline
 \textbf{Costo total estimado} & \textbf{\$56{,}500} \\
 \hline
@@ -1216,7 +1223,7 @@ humano (\$40{,}000), que refleja el esfuerzo real de desarrollo en un contexto
 académico. El resto de la inversión corresponde a servicios de cómputo en la nube para
 el entrenamiento del clasificador, conectividad, documentación e insumos menores. El
 retorno es inmediato para el laboratorio: anotar manualmente un video de 5~min toma
-hasta unas 2~h; con alrededor de 32 a 40~videos en un semestre de actividad regular,
+hasta unas 2~h; con alrededor de 24 a 32~videos en un semestre de actividad regular,
 el sistema evita decenas de horas-persona de trabajo manual por ciclo. Al no requerir compra de hardware
 especializado ni licencias de software comercial, el proyecto es económicamente viable
 con los recursos del equipo académico.
@@ -1252,8 +1259,8 @@ manejo de especímenes de laboratorio en investigación biomédica.
 
 Cada herramienta del \textit{stack} tecnológico se distribuye bajo una licencia que
 permite su uso, modificación y distribución en contextos académicos sin costo:
-PSF (Python), BSD-3-Clause (Flask, scikit-learn y PyTorch), MIT (React), PostgreSQL
-License (PostgreSQL) y Apache~2.0 (Docker y OpenCV).
+PSF (Python), Apache~2.0 (Spring Boot, Docker y OpenCV), BSD-3-Clause (scikit-learn y PyTorch), MIT (React) y
+PostgreSQL License (PostgreSQL).
 El código fuente, los modelos entrenados y la documentación
 producidos durante el TT son obra intelectual del equipo desarrollador y quedan
 amparados por la Ley Federal del Derecho de Autor (LFDA).
@@ -1298,4 +1305,4 @@ El sistema se entrega como prototipo funcional. Para mantenerlo hace falta conoc
 básico de Python y Docker. La documentación técnica de este documento y el
 \texttt{README} del repositorio están diseñados para que cualquiera que retome el
 proyecto pueda entenderlo sin el equipo original. Las herramientas principales (OpenCV,
-PyTorch, Flask, React, PostgreSQL) tienen desarrollo activo y comunidades grandes.
+PyTorch, Spring Boot, React, PostgreSQL) tienen desarrollo activo y comunidades grandes.

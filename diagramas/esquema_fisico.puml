@@ -314,7 +314,7 @@ USUARIO        "1" --o "0..*" EXPERIMENTO              : idInstitucional
 USUARIO        "1" --o "0..*" NOTIFICACION              : idInstitucional
 USUARIO        "1" --o "0..1" ADMINISTRADOR             : idInstitucional
 
-EXPERIMENTO    "1" --o "3..*" GRUPO                     : idExperimento
+EXPERIMENTO    "1" --o "0..*" GRUPO                     : idExperimento
 EXPERIMENTO    "1" --o "0..*" REPORTE                   : idExperimento
 EXPERIMENTO    "0..1" --o "0..*" NOTIFICACION               : idExperimento
 

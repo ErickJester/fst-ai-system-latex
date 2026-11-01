@@ -5,51 +5,43 @@
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
 '  Reemplaza a CU-09 "Consultar resultados del analisis"
-'  (chapters/05_diseno.tex:1540-1591) y a figures/mermaid/seq_resultados.
+'  (chapters/05_diseno.tex) y a figures/mermaid/seq_resultados.
 '
 '  Por que cambia, con fuente:
 '  - CU-09 compara "Dia 1 vs Dia 2 por especimen" y lee de las tablas
 '    viejas ResultadoComportamiento / ComportamientoPorMinuto, que ya
 '    no existen. La comparacion real que pide el protocolo es OTRA:
-'    "Los 5 minutos del Dia 2, entre los tres grupos" (Reunion 3-sep,
-'    ver errores/preguntas-doctor.md SS5 "Ya respondido").
+'    "Los 5 minutos del Dia 2, entre los tres grupos" (Reunion 3-sep).
 '  - El Dia 1 no mide el efecto del tratamiento: solo confirma que
-'    existe el video de habituacion de la prueba de Porsolt (D-54).
 '    No se analiza ni entra en esta comparacion.
 '  - Camino de datos real: GRUPO -> TANDA -> ESPECIMEN -> OBSERVACION
 '    (del video con sesion = "Dia 2") -> SEGUNDO (una fila por
 '    segundo, con su conducta). Se cuenta por especimen y se agrega
-'    por grupo -- nada de esto se preguarda, se deriva en consulta
-'    (D-52, 14-oct: ya no hay INTERVALO ni PRESENTA)
-'    (ver DISENO-BD.md SS0, "Decisiones que sostienen el modelo").
-'  - D-17 (13-sep): un analisis puede ser "preciso" (tres conductas
-'    separadas) o "agrupado" (nado activo + escalamiento fundidos en
-'    "conducta activa"), segun si el clasificador alcanzo F1 >= 85%.
-'    Si dentro de un mismo grupo hay especimenes con los dos niveles,
-'    comparar sus segundos por conducta sin avisar mezclaria
-'    categorias que no significan lo mismo -- CU-09 nunca contemplo
-'    esto porque D-15/D-16/D-17 son posteriores.
-'  - D-41 (3-oct): el nivel se guarda en ANALISIS.nivelClasif --
+'    por grupo; nada de esto se guarda, se deriva al mostrarse
 '    "agrupado" si algun segundo del analisis quedo como conducta
-'    activa, "preciso" si ninguno. La interfaz solo lo usa para
-'    avisar en los resultados; el diagrama lo lee junto con los
-'    segundos de cada especimen.
+'    activa, "preciso" si ninguno. Se recalcula al guardar
+'    correcciones. La interfaz lo usa para avisar en el encabezado
+'    de resultados.
 '
-'  ---- Provisional, pendiente de confirmar con el laboratorio ----
-'  Q-E  Se promedia por especimen, no se suma por grupo, para que el
-'       tamano del grupo no distorsione la comparacion. Sin confirmar
-'       si el laboratorio de verdad compara asi o por total.
-'  Q-F  Si un grupo mezcla niveles "preciso"/"agrupado", se muestran
-'       separados con aviso, en vez de forzar todo a "agrupado". Sin
-'       confirmar cual prefiere el laboratorio.
-'  Ver errores/preguntas-doctor.md SS2 (Q-E, Q-F) para el detalle.
-'
-'  D-93 y RF-31 (14-oct): primero se muestra la tabla por espécimen, con
-'  su tanda, y el investigador elige ver el grupo completo o una sola
-'  tanda; la media, la desviación estándar y la varianza se calculan sobre
-'  los especímenes que se ven (de la tanda o del grupo completo) y el reporte
-'  descargable las incluye para esa misma vista. La comparación entre grupos
-'  usa todas las tandas de cada grupo.
+'  Reglas vigentes de esta pantalla:
+'  - La tabla por especimen tiene una columna "Sin ver" (los segundos
+'    sin conducta) y totales en segundos y porcentaje. Los porcentajes
+'    son sobre los ultimos 300 s analizados. "Sin ver" no entra en la
+'    comparacion entre grupos, que usa las cuatro conductas.
+'  - Media, desviacion estandar y varianza de la vista (tanda o grupo
+'    completo), con la desviacion muestral (n - 1) en la interfaz.
+'  - Si un grupo mezcla niveles "preciso" y "agrupado", sus
+'    especimenes no se promedian: la comparacion muestra ese grupo por
+'    tanda, con un aviso en la comparacion.
+'  - Los especimenes cuyo Dia 2 no tiene resultado se muestran como
+'    faltantes, por tanda y con su estado (en cola, procesando, en
+'    pausa, con error o sin subir). No entran al promedio.
+'  - El aviso de conducta activa va en el encabezado de resultados.
+'  - No hay pantalla de "lista de experimentos" de entrada: se llega desde la lista
+'    de experimentos, el detalle, el grupo, el progreso o una
+'    notificacion.
+'  - Los tres grupos se comparan por especimen, no por suma, para que
+'    el tamano del grupo no distorsione la comparacion.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_consulta_resultados.puml
@@ -67,16 +59,21 @@ participant "Interfaz web" as ui
 participant Backend as api
 database "Base de datos" as db
 
-inv -> ui: abre resultados del experimento\n(desde el dashboard o la pantalla de progreso)
+inv -> ui: abre resultados del experimento\n(desde la lista, el detalle, el grupo,\nel progreso o una notificación)
 ui -> api: pide los resultados del experimento
 api -> db: busca los especímenes analizados, con su tanda y su grupo,\ny la conducta de cada segundo
-db --> api: segundos por conducta de cada espécimen
+db --> api: segundos por conducta de cada espécimen, con los segundos "sin ver"
 api --> ui: resultados por espécimen
-ui -> inv: muestra la tabla por espécimen, cada uno con su tanda
+ui -> inv: muestra la tabla por espécimen, con su tanda y una columna "Sin ver"
+note right of ui
+  Si algún análisis del experimento es "agrupado",
+  el encabezado avisa que parte de los segundos
+  son conducta activa.
+end note
 inv -> ui: elige ver el grupo completo o una sola tanda
-ui -> ui: calcula la media, la desviación estándar y la varianza\nde los especímenes que se ven
+ui -> ui: calcula la media, la desviación estándar y la varianza\n(muestrales) de los especímenes que se ven
 ui -> api: pide la comparación entre grupos
-api -> db: busca los grupos del experimento
+api -> db: busca los grupos del experimento y sus tandas
 
 db --> api: grupos (control, referencia, tratamiento)
 
@@ -85,27 +82,24 @@ loop por cada grupo
   api -> db: para cada espécimen, busca su observación\ndel video con sesión "Día 2"
 
   alt el espécimen ya tiene su Día 2 analizado
-    api -> db: cuenta los segundos de cada conducta\nen los segundos de esa observación\ny lee el nivel de clasificación de su análisis
+    api -> db: cuenta los segundos de cada una de las cuatro conductas\nen los segundos de esa observación\ny lee el nivel de clasificación de su análisis
     db --> api: segundos de nado activo, inmovilidad, escalamiento y conducta activa,\ny el nivel ("preciso" o "agrupado")
-  else el Día 2 de ese espécimen no tiene resultado\n(análisis en cola, procesando, con error, o sin subir)
-    api -> api: marca al espécimen como dato faltante\npara este grupo
+  else el Día 2 de ese espécimen no tiene resultado\n(en cola, procesando, en pausa, con error, o sin subir)
+    api -> api: marca al espécimen como dato faltante\npara este grupo, con su estado y su tanda
+  end
+
+  alt el grupo mezcla niveles "preciso" y "agrupado"
+    api -> api: no promedia el grupo: lo separa por tanda
+  else el grupo tiene un solo nivel
+    api -> api: calcula la media, la desviación estándar y la varianza\n(muestrales) por conducta entre sus especímenes analizados,\ncon todas sus tandas
   end
 end
 
-api -> api: calcula la media, la desviación estándar y la varianza\nde los segundos por conducta entre los especímenes\nanalizados de cada grupo, con todas sus tandas\n(no se suman, para que el tamaño del grupo\nno distorsione la comparación)
-
-alt algún análisis es "agrupado" (parte de sus segundos quedó como conducta activa)
-  api --> ui: comparación entre grupos en las cuatro conductas,\ncon aviso de que parte de los segundos son conducta activa
-else todos los análisis están en "preciso"
-  api --> ui: comparación entre grupos en las cuatro conductas
+api --> ui: comparación entre grupos en las cuatro conductas\n(sin "Sin ver"), con los faltantes por tanda y su estado
+alt algún grupo mezcla niveles
+  ui -> inv: aviso en la comparación: ese grupo se muestra por tanda,\nsin promedio, porque sus niveles no significan lo mismo
 end
-
-ui -> inv: muestra la comparación de los grupos\n(solo Día 2), con los especímenes faltantes señalados\ny el nivel de clasificación de los resultados
-note right of ui
-  El nivel solo sirve para avisar:
-  "agrupado" significa que al menos un segundo
-  del análisis quedó como "conducta activa"
-end note
-inv -> ui: puede pedir el reporte descargable de lo que ve,\nde la tanda o del grupo completo (ver CU-10)
+ui -> inv: muestra la comparación de los grupos (solo Día 2),\ncon los especímenes faltantes señalados
+inv -> ui: puede descargar en CSV o XLSX lo que ve\n(la tanda o el grupo completo); el PDF se descarga desde el experimento (ver CU-10)
 
 @enduml

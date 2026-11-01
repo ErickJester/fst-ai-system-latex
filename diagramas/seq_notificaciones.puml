@@ -4,16 +4,26 @@
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Reemplaza a figures/mermaid/seq_notificaciones.png, que no tenia
-'  fuente en el repositorio y decia que el Worker "actualiza el
-'  estado del video como completado" (el estado es del ANALISIS).
+'  aviso y, además, la envía por correo; si el envío falla, el aviso
+'  queda en el panel. Las crea el Worker, durante el análisis y en
 '
-'  Cubre RF-33 y D-45: el sistema crea una NOTIFICACION por cada
-'  aviso y, ademas, la envia por correo; si el envio falla, el aviso
-'  queda en el panel. Los tipos son los del dominio tipo_notificacion:
-'  analisis completado, error del pipeline, analisis en pausa,
-'  analisis cancelado, alerta de disco y video borrado. Las crea el
-'  Worker: durante el analisis y en sus tareas diarias (D-82).
+'  Tipos y destino al abrirla:
+'  - análisis completado -> resultados del experimento
+'  - error, pausa o cancelado -> pantalla de progreso
+'  - alerta de disco -> panel de administración (solo Administrador)
+'  - video borrado antes de tiempo -> detalle del experimento
+'  "Cancelado" solo se notifica cuando el análisis se cancela por plazo
+'  (no se contesta la pausa en 5 minutos), no cuando el usuario lo cancela.
+'  El borrado automático a los 30 días no genera notificación.
+'
+'  Consulta: el contador de no leídas se actualiza al entrar a cada
+'  pantalla y luego cada 30 segundos, pero no se consulta mientras la
+'  pestaña está oculta. El contador cuenta todas las no leídas.
+'
+'  Acciones del panel: abrir una notificación la marca como leída;
+'  "Marcar todas como leídas" y "Marcar como no leída" también existen.
+'  Cubre RF-33: el sistema crea una NOTIFICACION por cada
+'  Worker: durante el analisis y en sus tareas diarias.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_notificaciones.puml
@@ -34,17 +44,17 @@ actor Usuario as u
 
 == El sistema crea la notificación ==
 
-w -> db: crea la notificación para el usuario que corresponde\n(análisis terminado, con error, en pausa o cancelado;\nalerta de disco; video borrado antes de tiempo)
+w -> db: crea la notificación para el usuario que corresponde\n(análisis terminado, con error, en pausa o cancelado por plazo;\nalerta de disco; video borrado antes de tiempo)
 w -> w: envía también el aviso por correo\n(si el envío falla, el aviso queda en el panel)
 
 == El usuario la consulta ==
 
-loop al abrir la aplicación y luego cada 30 segundos
+loop al entrar a cada pantalla y luego cada 30 segundos (si la pestaña está visible)
   ui -> api: pide las notificaciones del usuario
   api -> db: busca las notificaciones de ese usuario,\nlas más recientes primero
   db --> api: lista (tipo, mensaje, leída o no, fecha)
   api --> ui: lista de notificaciones
-  ui -> u: muestra el contador de no leídas en la barra superior
+  ui -> u: muestra el contador de todas las no leídas en la barra superior
 end
 
 u -> ui: abre el panel y elige una notificación
@@ -52,6 +62,29 @@ ui -> api: marca la notificación como leída
 api -> db: actualiza la notificación como leída\n(solo si pertenece al usuario de la sesión)
 db --> api: confirma
 api --> ui: confirma
-ui --> u: abre el experimento relacionado, si lo hay
+ui --> u: lleva a la pantalla de destino según el tipo
+
+opt el usuario elige "Marcar todas como leídas"
+  u -> ui: elige "Marcar todas como leídas"
+  ui -> api: marca cada notificación no leída como leída
+  api -> db: actualiza cada notificación
+  db --> api: confirma
+  api --> ui: confirma
+  ui --> u: actualiza el contador
+end
+
+opt el usuario elige "Marcar como no leída"
+  u -> ui: elige "Marcar como no leída"
+  ui -> api: marca la notificación como no leída
+  api -> db: actualiza la notificación
+  db --> api: confirma
+  api --> ui: confirma
+end
+
+ui -> api: pide cuántas notificaciones no leídas tiene
+api -> db: cuenta las no leídas del usuario
+db --> api: cantidad
+api --> ui: cantidad
+ui --> u: muestra el contador
 
 @enduml

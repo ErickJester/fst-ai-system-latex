@@ -1,391 +1,418 @@
 \chapter{Desarrollo}
 
-\section{Entorno de desarrollo}
-% [PENDIENTE: detallar versiones: Python 3.11, OpenCV 4.x, Node.js, etc.]
+Este capítulo describe el sistema tal como quedó construido. Se organiza por partes: el entorno y
+las tecnologías, la arquitectura en contenedores, cada uno de los servicios (\textit{backend},
+interfaz y \textit{worker}), las etapas del análisis, la pausa de ajuste, los resultados y reportes,
+el correo y las cuentas, y las pruebas automatizadas. Las reglas de negocio que cada parte cumple
+están en el capítulo 4, y el diseño de casos de uso y secuencias, en el capítulo 5.
 
-\section{Implementaci\'{o}n del m\'{o}dulo de seguimiento (tracker.py)}
+\section{Entorno y tecnologías}
 
-\subsection{Representación de imágenes y video}
+El sistema es una aplicación web de escritorio. Se usa desde Chrome, Firefox o Edge en sus versiones
+actuales, sin instalar nada en el equipo del usuario. No hay versión móvil.
 
-Para el módulo de seguimiento, un video se trata como una secuencia de matrices de
-números. Cada cuadro (\textit{frame}) es una imagen BGR de tres canales (azul, verde,
-rojo), que es la convención de OpenCV. Un video de 5 minutos a 30 FPS equivale a
-procesar 9{,}000 cuadros de forma secuencial.
+La Tabla~\ref{tab:tecnologias} resume las tecnologías por función. Todas corren dentro de
+contenedores, de modo que el laboratorio no necesita instalar más que Docker.
 
-\subsection{Modelo de fondo y sustracción}
+\begin{table}[H]
+\centering
+\caption{Tecnologías del sistema por función.}
+\label{tab:tecnologias}
+\begin{tabular}{|p{3.4cm}|p{10.8cm}|}
+\hline
+\textbf{Función} & \textbf{Tecnología} \\
+\hline
+Backend & Java 21 con Spring Boot 4.1: Spring Web MVC, Spring Data JPA, Spring Security como servidor de recursos OAuth2 con JWT, y Spring Mail. Generación de PDF con iText 5.5 y de XLSX con Apache POI 5.5. Documentación de la API con springdoc-openapi 3.1. Se compila con Maven 3.9 y se ejecuta sobre Temurin 21 JRE. \\
+\hline
+Interfaz & React 18.3 con React Router 7 y Axios 1.20, compilado con Vite 8 en Node 22. Pruebas con Vitest 5. Se sirve con nginx 1.27. \\
+\hline
+Worker & Python 3.12 con PyTorch 2.14 y torchvision 0.29 (CPU), OpenCV 5.0 sin interfaz gráfica, NumPy 2.5, pandas 3.1, scikit-learn 1.9, psycopg2 2.9 y Pillow 12.3. Usa ffmpeg para la copia de revisión y pg\_dump para los respaldos. \\
+\hline
+Base de datos & PostgreSQL 16. \\
+\hline
+Empaquetado & Docker Compose. El sistema se arranca con \texttt{portable\textbackslash iniciar.bat}, que fija la versión y ejecuta \texttt{docker compose up}. \\
+\hline
+\end{tabular}
+\end{table}
 
-El primer paso del pipeline es construir un modelo del fondo: una imagen de referencia
-del cilindro sin la rata. Se calcula como la mediana píxel a píxel de los primeros
-60 cuadros del video. Usar la mediana en vez del promedio evita que una rata inmóvil
-al inicio ``contamine'' el modelo. Después, en cada cuadro se calcula la diferencia
-absoluta contra esa referencia; los píxeles que cambiaron significativamente son el
-primer plano (la rata).
+La interfaz y la API se comunican solo por una API REST que intercambia datos en formato JSON. La
+sesión del usuario va en un token JWT firmado con HS256 que el navegador guarda y envía en cada
+petición.
 
-Este enfoque es más simple que métodos adaptativos como el modelo de mezcla gaussiana
-(GMM) \cite{zivkovic2004}, pero es suficiente para este caso de uso: la cámara es fija
-y el fondo no cambia durante el experimento.
+\section{Arquitectura en contenedores}
 
-\subsection{Umbralización y limpieza morfológica}
+El sistema se compone de cuatro servicios que se levantan juntos. La Tabla~\ref{tab:contenedores}
+describe cada uno.
 
-La imagen de diferencias se convierte a binario con el método de Otsu \cite{otsu1979},
-que calcula automáticamente el umbral óptimo a partir del histograma de intensidades.
-Después se aplica una apertura morfológica (erosión seguida de dilatación) para
-eliminar ruido pequeño y rellenar huecos en la región detectada.
+\begin{table}[H]
+\centering
+\caption{Servicios del sistema.}
+\label{tab:contenedores}
+\begin{tabular}{|p{3.0cm}|p{6.6cm}|p{4.6cm}|}
+\hline
+\textbf{Servicio} & \textbf{Responsabilidad} & \textbf{Acceso} \\
+\hline
+\texttt{db} & Base de datos PostgreSQL. El esquema se crea la primera vez, con el volumen vacío. & Solo interno, puerto 5432. \\
+\hline
+\texttt{api} & \textit{Backend}: API REST, autenticación, validación de archivos y creación de análisis en cola. & Solo interno, puerto 8000. Límite de memoria de 1.5 GB. \\
+\hline
+\texttt{worker} & Toma los análisis en cola, los procesa, escribe resultados, avisa y ejecuta las tareas programadas. & Sin puerto. Límite de memoria de 5 GB. \\
+\hline
+\texttt{web} & nginx. Sirve la interfaz compilada y reenvía las peticiones \texttt{/api/} al \texttt{backend}. & Es el único servicio con puerto publicado: \texttt{PUERTO\_WEB}, 8088 por omisión. \\
+\hline
+\end{tabular}
+\end{table}
 
-\subsection{Detección de contornos y selección de candidatos}
+El \textit{backend} y el \textit{worker} no se llaman entre sí. Se coordinan solo por la base de datos
+y por el volumen compartido. La cola de análisis es una tabla de la base: no hay Redis ni un sistema
+de mensajes separado.
 
-Sobre la imagen binaria limpia se extraen los contornos con \texttt{findContours} de
-OpenCV \cite{suzuki1985}. De cada contorno se obtiene el área, el rectángulo envolvente
-(\textit{bounding box}) y el centroide. Con esas propiedades se filtra cuál de los
-candidatos detectados corresponde a la rata y cuál es ruido, usando restricciones de
-área mínima y máxima calibradas para el tamaño esperado del espécimen dentro de cada
-cilindro.
+El volumen \texttt{videos\_reportes} se monta en \texttt{/data/archivos} tanto en \textit{backend} como
+en \textit{worker}. Guarda los videos originales, la copia para revisión, los recuadros de cada cilindro,
+los datos de las pausas, los reportes de resultados y los reportes de diagnóstico. Las rutas que la
+base guarda son relativas a la raíz de este volumen. El modelo entrenado no va dentro de la imagen: el
+\textit{worker} lo lee en modo solo lectura desde una carpeta del equipo.
 
-Para verificar consistencia entre cuadros consecutivos se usa la métrica IoU
-(\textit{Intersection over Union}): la relación entre el área de intersección y el
-área de unión de dos rectángulos. Un IoU cercano a 1 indica que la detección actual
-coincide con la del cuadro anterior; si baja demasiado se activa el respaldo del
-tracker CSRT.
+La carpeta de cada análisis contiene la copia H.264 para revisión, el archivo de recuadros y, si el
+análisis terminó en error, el reporte de diagnóstico. Cuando hay una pausa, contiene además la imagen
+fija y su archivo de datos. Al eliminar el experimento, se borra la carpeta completa.
 
-\subsection{Estimación de la línea de agua}
+Las imágenes de \textit{backend}, \textit{worker} e interfaz llevan número de versión. Se construyen una
+vez, se empaquetan en un archivo y se cargan en el equipo de destino, donde arrancan sin descargar ni
+construir nada. Así corre exactamente lo que se probó. El número de versión sale del archivo
+\texttt{VERSION} de la raíz del paquete.
 
-La superficie del agua puede generar reflejos que hacen que la rata aparezca
-duplicado desde la vista lateral. Para mitigar ese efecto, el sistema estima en cada
-cuadro la posición vertical de la línea del agua: analiza el perfil de intensidad
-promedio por filas dentro de cada ROI e identifica la fila con el cambio más brusco.
-Como esa estimación oscila por ruido entre cuadros, se estabiliza con un promedio
-móvil exponencial (EMA, véase ecuación~\ref{eq:ema} del capítulo de marco teórico),
-donde $\tilde{y}_t$ es la estimación del cuadro actual, $\hat{y}_{t-1}$ el valor
-suavizado anterior y $\alpha \in (0,1)$ controla la velocidad de respuesta. Esta
-lógica está encapsulada en la clase \texttt{WaterlineSmoother}. Su efectividad depende
-de las condiciones del video y se evaluará durante las pruebas de validación.
+Los parámetros de funcionamiento salen de un archivo \texttt{.env}, nunca del código. Los más
+importantes son la llave de firma del token, la duración de la sesión, la conexión a la base, los datos
+del servidor de correo, el límite de tamaño de video y los umbrales de disco.
 
-\subsection{Arquitectura de clases del módulo de seguimiento}
+El sistema se arranca con \texttt{portable\textbackslash iniciar.bat}, que fija la versión y ejecuta
+\texttt{docker compose up}; el primer Administrador se crea con los datos \texttt{ADMIN\_*} del archivo \texttt{.env}.
 
-El módulo \texttt{tracker.py} organiza la lógica de seguimiento en dos clases
-principales y una función de procesamiento de alto nivel.
+\section{Backend}
 
-\textbf{WaterlineSmoother} encapsula la estimación de la línea de agua descrita en la
-sección anterior. Mantiene internamente el valor suavizado $\hat{y}_{t-1}$ y expone un
-único método que recibe la estimación cruda del cuadro actual y devuelve el valor
-filtrado por EMA (ecuación~\ref{eq:ema}).
-
-\textbf{YoloTracker} encapsula la integración con Ultralytics YOLOv8 en modo
-\textit{track}. Al instanciarse carga el modelo (\texttt{weights/rat.pt}) y configura
-ByteTrack \cite{zhang2022_bytetrack} como algoritmo de seguimiento a través del
-archivo \texttt{bytetrack.yaml} que Ultralytics incluye en su distribución. Su método
-principal, \texttt{track()}, invoca \texttt{model.track()} con el parámetro
-\texttt{persist=True} para mantener la continuidad de identidades entre cuadros
-consecutivos. Si Ultralytics no está disponible en el entorno ---por ausencia de GPU o
-del paquete--- la clase reporta \texttt{available=False} y el pipeline cae
-automáticamente al detector clásico (sustracción de fondo con Otsu).
-
-La función \texttt{process\_video()} integra ambas clases con la lógica de gating
-físico (restricciones de tamaño, posición respecto a la línea de agua y velocidad
-máxima entre cuadros), la política de congelación de posición (\textit{freeze}) con
-decaimiento de confianza, y el mecanismo de re-adquisición con umbral de confianza
-reducido para ROIs en recuperación. En la práctica, el pipeline sigue la jerarquía:
-ByteTrack (vía \texttt{YoloTracker})
-$\rightarrow$ detector clásico
-$\rightarrow$ posición congelada.
-
-% ════════════════════════════════════════════════════════════
-%  FRAGMENTO 1 — WaterlineSmoother
-% ════════════════════════════════════════════════════════════
-
-\subsubsection{Clase \texttt{WaterlineSmoother}}
-
-El Listado~\ref{lst:waterline} muestra la implementación de
-\texttt{WaterlineSmoother}. La clase encapsula dos responsabilidades: detectar
-la fila de píxeles con mayor variación de intensidad dentro de la ROI (línea
-del agua cruda) y suavizarla con EMA para evitar saltos bruscos entre cuadros.
-
-\begin{lstlisting}[
-  style=python,
-  caption={Clase \texttt{WaterlineSmoother} en \texttt{tracker.py}.},
-  label={lst:waterline}
-]
-class WaterlineSmoother:
-    """Estima y suaviza la línea del agua dentro de una ROI.
-
-    Parámetros
-    ----------
-    alpha : float
-        Factor de suavizado EMA (0 < alpha < 1).
-        Valores bajos = más suave; valores altos = más reactivo.
-    """
-
-    def __init__(self, alpha: float = 0.1):
-        self.alpha = alpha
-        self._smoothed: float | None = None   # valor suavizado anterior
-
-    def update(self, roi_gray: np.ndarray) -> int:
-        """Devuelve la fila estimada de la línea del agua (coordenada y).
-
-        Parámetros
-        ----------
-        roi_gray : np.ndarray
-            Subimagen en escala de grises correspondiente a un cilindro.
-
-        Retorna
-        -------
-        int
-            Coordenada y de la línea del agua dentro de la ROI.
-        """
-        # Perfil de intensidad promedio por fila
-        row_mean = roi_gray.mean(axis=1)          # shape: (H,)
-
-        # Gradiente vertical: dónde cambia más la intensidad
-        gradient = np.abs(np.diff(row_mean))      # shape: (H-1,)
-        raw_y = float(np.argmax(gradient))
-
-        # Primera llamada: inicializar con la estimación cruda
-        if self._smoothed is None:
-            self._smoothed = raw_y
-        else:
-            # Ecuación EMA: ŷ_t = alpha * y_t + (1 - alpha) * ŷ_{t-1}
-            self._smoothed = (
-                self.alpha * raw_y
-                + (1.0 - self.alpha) * self._smoothed
-            )
-
-        return int(round(self._smoothed))
-\end{lstlisting}
-
-Los puntos clave del listado son:
+El \textit{backend} es la única puerta de entrada a los datos. Está construido con Spring Boot y se
+organiza en capas de API, reglas de negocio y acceso a la base. Sus responsabilidades son:
 
 \begin{itemize}
-    \item \textbf{Líneas 19--20.} El perfil de intensidad por fila
-    (\texttt{row\_mean}) reduce la imagen 2D a un vector 1D, eliminando
-    variaciones horizontales irrelevantes.
-
-    \item \textbf{Líneas 23--24.} \texttt{np.diff} calcula la diferencia
-    entre filas consecutivas; \texttt{argmax} localiza la fila con el cambio
-    más brusco, que corresponde a la transición agua--rata.
-
-    \item \textbf{Líneas 27--33.} La actualización EMA corresponde
-    directamente a la ecuación~\ref{eq:ema} del capítulo de marco teórico,
-    con $\alpha = 0.1$ como valor por defecto.
+  \item \textbf{Autenticación.} Las contraseñas se guardan con BCrypt. El token JWT no guarda el rol:
+  en cada petición el rol y el estado de la cuenta se leen de la base.
+  \item \textbf{Autorización.} Las rutas bajo \texttt{/admin/} exigen rol de administrador. Cada ruta
+  protegida revisa el rol en el servidor, no solo en la pantalla que lo muestra.
+  \item \textbf{Validación de videos.} Se acepta solo \texttt{.mp4} y \texttt{.mov}, con un tamaño de hasta
+  2048 MB (\texttt{MAX\_UPLOAD\_MB}). La extensión se valida también en la interfaz antes de subir. El
+  archivo debe ser reproducible y estar en horizontal, es decir, con más ancho que alto. Un video girado
+  se rechaza con un mensaje claro. No hay opción de girarlo.
+  \item \textbf{Guardado de videos.} El video se guarda en el volumen con el nombre del identificador del
+  video y su extensión. Grupo, tanda y video se registran en la base.
+  \item \textbf{Cola de análisis.} Crea el análisis en estado en cola solo cuando el video es del Día 2.
+  Un video del Día 1 se guarda, pero no se analiza.
+  \item \textbf{Gestión.} Crear, modificar, desactivar y reactivar cuentas; generar contraseñas temporales;
+  eliminar experimentos; y reiniciar análisis.
 \end{itemize}
 
+El \textit{backend} nunca cambia el estado de un análisis por su cuenta, salvo en tres casos: al crear el
+análisis en cola, al reiniciarlo y al atender una pausa (ajustar, confirmar o cancelar). Todo lo demás lo escribe el
+\textit{worker}.
 
-% ════════════════════════════════════════════════════════════
-%  FRAGMENTO 2 — YoloTracker
-% ════════════════════════════════════════════════════════════
+Un experimento se puede borrar solo si quien lo pide lo creó o es administrador. Si algún análisis del
+experimento está procesándose o en pausa, la operación se rechaza con un conflicto. Los análisis que
+solo están en cola salen de la cola al borrarse el experimento.
 
-\subsubsection{Clase \texttt{YoloTracker}}
+Por seguridad, la documentación interactiva de la API (Swagger) está apagada en el paquete de producción.
+Los orígenes permitidos para las peticiones se limitan con \texttt{CORS\_ORIGINS}.
 
-El Listado~\ref{lst:yolotracker} muestra la clase que integra YOLOv8 en modo
-\textit{track} con ByteTrack. El diseño aísla la dependencia de Ultralytics
-en un único punto: si la biblioteca no está disponible, el atributo
-\texttt{available} indica al pipeline que debe usar el detector clásico.
+\section{Interfaz}
 
-\begin{lstlisting}[
-  style=python,
-  caption={Clase \texttt{YoloTracker} en \texttt{tracker.py}.},
-  label={lst:yolotracker}
-]
-class YoloTracker:
-    """Envuelve YOLOv8 en modo track (ByteTrack) para seguimiento de rata.
-
-    Si Ultralytics no está instalado, ``available`` es False y el
-    pipeline cae automáticamente al detector clásico.
-    """
-
-    WEIGHTS = Path("weights/rat.pt")
-    TRACKER_CFG = "bytetrack.yaml"   # incluido en Ultralytics
-
-    def __init__(self):
-        self.available = False
-        self._model = None
-        try:
-            from ultralytics import YOLO
-            if not self.WEIGHTS.exists():
-                raise FileNotFoundError(
-                    f"Pesos no encontrados: {self.WEIGHTS}"
-                )
-            self._model = YOLO(str(self.WEIGHTS))
-            self.available = True
-        except Exception as exc:          # ImportError o FileNotFoundError
-            warnings.warn(
-                f"YoloTracker no disponible: {exc}. "
-                "Se usará el detector clásico como respaldo."
-            )
-
-    def track(
-        self,
-        frame: np.ndarray,
-        roi: tuple[int, int, int, int],
-        conf: float = 0.25,
-    ) -> list[dict]:
-        """Ejecuta detección + seguimiento ByteTrack sobre una ROI.
-
-        Parámetros
-        ----------
-        frame : np.ndarray
-            Cuadro completo en BGR.
-        roi : tuple[int, int, int, int]
-            Región de interés (x, y, w, h) en píxeles del cuadro.
-        conf : float
-            Umbral mínimo de confianza para reportar una detección.
-
-        Retorna
-        -------
-        list[dict]
-            Lista de detecciones; cada elemento contiene:
-            ``{'id': int, 'bbox': [x,y,w,h], 'conf': float}``.
-            Lista vacía si no se detectó ningún objeto.
-        """
-        if not self.available:
-            return []
-
-        x, y, w, h = roi
-        crop = frame[y:y+h, x:x+w]
-
-        # persist=True mantiene el mismo ID entre cuadros consecutivos
-        results = self._model.track(
-            crop,
-            tracker=self.TRACKER_CFG,
-            persist=True,
-            conf=conf,
-            verbose=False,
-        )
-
-        detections = []
-        if results and results[0].boxes is not None:
-            for box in results[0].boxes:
-                track_id = int(box.id) if box.id is not None else -1
-                bx, by, bw, bh = box.xywh[0].tolist()
-                detections.append({
-                    "id":   track_id,
-                    "bbox": [x + int(bx - bw/2),   # convertir a coords
-                             y + int(by - bh/2),   # del cuadro completo
-                             int(bw), int(bh)],
-                    "conf": float(box.conf),
-                })
-        return detections
-\end{lstlisting}
-
-Los puntos clave del listado son:
+La interfaz es una aplicación de una sola página, compilada con Vite y servida por nginx. Tiene las
+pantallas siguientes:
 
 \begin{itemize}
-    \item \textbf{Líneas 11--23.} El bloque \texttt{try/except} aísla la
-    dependencia de Ultralytics. Si la importación falla (por ejemplo, en un
-    entorno sin GPU o sin la biblioteca instalada), el objeto queda en estado
-    \texttt{available = False} sin lanzar una excepción que interrumpa el
-    pipeline.
-
-    \item \textbf{Líneas 41--43.} El cuadro completo se recorta a la ROI
-    antes de pasarlo al detector. Esto reduce la carga computacional y evita
-    que el modelo detecte ratas de otros cilindros dentro del mismo cuadro.
-
-    \item \textbf{Línea 46.} \texttt{persist=True} es el parámetro que activa
-    la continuidad de identidades entre cuadros en Ultralytics: ByteTrack
-    recuerda qué ID asignó a cada trayectoria en el cuadro anterior y lo
-    mantiene en el cuadro actual.
-
-    \item \textbf{Líneas 55--62.} Las coordenadas del bounding box se
-    devuelven en el sistema de referencia del cuadro completo (no de la ROI),
-    para que el resto del pipeline pueda trabajar siempre en el mismo espacio
-    de coordenadas.
+  \item \textbf{Inicio de sesión.} Pide correo y contraseña. Si las credenciales no coinciden, el mensaje
+  es «Correo o contraseña incorrectos», sin indicar cuál campo falló.
+  \item \textbf{Lista de experimentos.} Muestra los experimentos con su estado calculado, el aviso de los
+  videos próximos a borrarse y los filtros. Es la pantalla de inicio de los dos tipos de usuario.
+  \item \textbf{Crear experimento.} Pide nombre único, fecha y notas opcionales. El grupo, el tratamiento y
+  el número de especímenes de cada tanda se capturan después, al subir el primer video de cada grupo.
+  \item \textbf{Progreso del análisis.} Muestra el porcentaje y la etapa actual de cada análisis.
+  \item \textbf{Resultados.} Muestra las tablas por espécimen y por grupo, y la descarga de los reportes.
+  \item \textbf{Revisión segundo a segundo.} Reproduce la copia del video y una línea de tiempo por
+  espécimen. Permite corregir la conducta de cada segundo y, si hace falta, reiniciar el análisis.
+  \item \textbf{Panel de administración.} Solo visible para el administrador. Lista las cuentas, crea cuentas
+  nuevas y cambia su estado, su rol y su contraseña temporal. También muestra el estado del sistema y el uso
+  del disco.
+  \item \textbf{Mi perfil.} Permite cambiar el nombre, el correo y la contraseña propios. La barra superior
+  muestra las iniciales del usuario y su menú.
 \end{itemize}
 
+La interfaz no toma decisiones de negocio. Muestra lo que devuelve la API y reenvía las acciones del
+usuario. Los textos de error y de aviso vienen del \textit{backend}, para que sean los mismos en todas
+las pantallas.
 
-% ════════════════════════════════════════════════════════════
-%  FRAGMENTO 3 — Jerarquía de fallback en process_video()
-% ════════════════════════════════════════════════════════════
+\section{Worker}
 
-\subsubsection{Jerarquía de respaldo en \texttt{process\_video()}}
+El \textit{worker} es un proceso de Python independiente del servidor web. Consulta la base cada 5 segundos
+(\texttt{WORKER\_POLL\_SECONDS}) y procesa un análisis a la vez. Su comportamiento es el siguiente:
 
-El Listado~\ref{lst:fallback} muestra el núcleo del bucle de procesamiento
-por cuadro dentro de \texttt{process\_video()}. Implementa la jerarquía de
-tres niveles descrita en la sección de marco teórico: ByteTrack como
-primera opción, detector clásico como respaldo y congelamiento de posición
-como último recurso.
+\begin{enumerate}
+  \item \textbf{Toma de la cola.} Selecciona el análisis en cola más antiguo con un bloqueo de fila que
+  salta los análisis ya bloqueados, de modo que dos procesos no tomen el mismo análisis. Lo pasa a
+  procesando.
+  \item \textbf{Al arrancar.} Si encuentra un análisis en procesando, lo devuelve a la cola para que empiece
+  de cero. También revisa las pausas: un análisis en pausa sin su archivo de pausa se cancela.
+  \item \textbf{Control de tiempo.} Cada paso del pipeline tiene un límite de una hora, y la copia para revisión, de 30 minutos.
+  \item \textbf{Revisión del disco.} Antes de cada análisis revisa el espacio libre.
+  \item \textbf{Etapas.} Va registrando la etapa en este orden: preprocesamiento, cilindros y clasificación.
+  \item \textbf{Error.} Si no puede abrir el video o no encuentra los cilindros, genera el reporte de
+  diagnóstico, marca el análisis en error y crea una notificación de error. No hay reintento. Un fallo
+  imprevisto sigue el mismo camino, con el mensaje técnico en el diagnóstico, y el \textit{worker} continúa
+  con el siguiente análisis sin detenerse.
+  \item \textbf{Resultado.} Si todo sale bien, escribe los resultados, genera la copia H.264 y el archivo de
+  recuadros, y marca el análisis como completado.
+\end{enumerate}
 
-\begin{lstlisting}[
-  style=python,
-  caption={Bucle principal de seguimiento en \texttt{process\_video()}.
-           Se omiten las partes de gating físico y escritura de resultados
-           para centrarse en la jerarquía de respaldo.},
-  label={lst:fallback}
-]
-for frame_idx, frame in enumerate(video_frames(cap)):
+Los resultados se escriben solo en la base y en el volumen. Cada notificación que el \textit{worker} crea se
+envía también por correo (sección~\ref{sec:correo}).
 
-    for roi_id, roi in enumerate(rois):
-        det = None
+Además de los análisis, el \textit{worker} ejecuta las tareas programadas una vez al día, a una hora fija de
+madrugada (\texttt{WORKER\_DAILY\_HOUR}, por defecto las 3 a. m.). Son seis: el respaldo diario de la base con
+\texttt{pg\_dump}, en una carpeta del equipo fuera de los volúmenes de Docker; el borrado de los videos vencidos; la
+limpieza de pausas huérfanas; la limpieza de reportes huérfanos; el aviso de los videos próximos a vencer; y la
+vigilancia del disco. Si el
+\textit{worker} estaba apagado a esa hora, las ejecuta al arrancar, y guarda la fecha de la última corrida para no
+repetirlas el mismo día. Si hay un análisis en curso, las tareas esperan a que termine.
 
-        # -- Nivel 1: ByteTrack (vía YoloTracker) --
-        if yolo_tracker.available:
-            hits = yolo_tracker.track(frame, roi, conf=CONF_HIGH)
-            if hits:
-                det = hits[0]                 # exactamente 1 rata por ROI
-                freeze_counter[roi_id] = 0   # reiniciar contador de freeze
+\section{Pipeline de análisis}
 
-        # -- Nivel 2: detector clásico (sustracción de fondo + Otsu) --
-        if det is None:
-            bbox_classic = classic_detect(frame, roi, bg_model)
-            if bbox_classic is not None and iou(
-                bbox_classic, last_bbox[roi_id]
-            ) > IOU_MIN:
-                det = {"bbox": bbox_classic, "conf": CONF_CLASSIC,
-                       "id": roi_id}
-                freeze_counter[roi_id] = 0
+El análisis de cada video tiene tres etapas. Las etapas se reflejan en la pantalla de progreso y en la
+columna de etapa de cada análisis. La Tabla~\ref{tab:etapas} resume lo que hace cada una.
 
-        # -- Nivel 3: congelamiento con decaimiento de confianza --
-        if det is None:
-            freeze_counter[roi_id] += 1
-            decay = CONF_FREEZE_INIT * (
-                CONF_FREEZE_DECAY ** freeze_counter[roi_id]
-            )
-            det = {
-                "bbox": last_bbox[roi_id],
-                "conf": max(decay, CONF_FREEZE_MIN),
-                "id":   roi_id,
-            }
+\begin{table}[H]
+\centering
+\caption{Etapas del análisis.}
+\label{tab:etapas}
+\begin{tabular}{|p{3.2cm}|p{6.4cm}|p{5.0cm}|}
+\hline
+\textbf{Etapa} & \textbf{Qué hace} & \textbf{Si falla} \\
+\hline
+Preprocesamiento & Comprueba que el archivo se pueda abrir y lee sus dimensiones y su duración. Comprueba que los especímenes y el modelo estén disponibles. & Error con reporte de diagnóstico. \\
+\hline
+Cilindros & Alinea la cámara, construye el modelo de fondo, localiza los cilindros y registra los recuadros. Si un espécimen deja de verse tres segundos seguidos, el análisis entra en pausa. & Error si no se hallan los cilindros. Pausa si un espécimen no se ve. \\
+\hline
+Clasificación & Clasifica la conducta de cada segundo de cada espécimen y escribe los resultados. & Error con reporte de diagnóstico. \\
+\hline
+\end{tabular}
+\end{table}
 
-        # Actualizar estado y aplicar gating físico
-        last_bbox[roi_id] = det["bbox"]
-        waterline_y[roi_id] = wl_smoothers[roi_id].update(
-            _crop_gray(frame, roi)
-        )
-        frame_results[roi_id].append(det)
-\end{lstlisting}
+\subsection{Preprocesamiento}
 
-Los puntos clave del listado son:
+Esta etapa solo comprueba el archivo y no modifica el video. El \textit{worker} verifica que el video se pueda
+abrir en el volumen (si no está, el análisis termina en error) y lo lee con ffprobe; si el archivo está dañado o
+no es un video, el análisis termina en error; un video con duración cero ya se rechaza al subirlo. Después comprueba que
+la tanda tenga especímenes registrados, porque de ese número depende cuántos cilindros se buscan, y confirma que el
+modelo entrenado está disponible. Si el video trae una rotación de 90° o 270° en sus metadatos, el \textit{worker} la
+corrige antes de continuar.
+
+\subsection{Cilindros}
+
+La cámara se coloca de lado y los cilindros se ven en horizontal. En esta etapa el sistema hace cuatro cosas:
+
+\begin{enumerate}
+  \item \textbf{Alineación.} Toma un cuadro de referencia en la mitad del video (si no alcanza, prueba otros
+  puntos) y lo compara con los demás cuadros mediante puntos característicos ORB, con prueba de razón de 0.75 y un
+  mínimo de 12 coincidencias. Con esas coincidencias estima una transformación de similitud por RANSAC, con un umbral
+  de 2.5 píxeles. Si no logra alinear, usa la identidad.
+  \item \textbf{Modelo de fondo.} Toma un cuadro por segundo (mínimo 10) y calcula, para cada píxel, el percentil 10.
+  Con esos mismos cuadros arma un mapa de ocupación, que indica en qué zonas aparece el espécimen.
+  \item \textbf{Geometría.} Las líneas de agua y de fondo salen de los dos bordes horizontales más marcados del fondo (filtro Sobel).
+  Si quedan a menos del 25\,\% del alto, se usan las proporciones típicas 0.22 y 0.84; si no se encuentran dos bordes, la etapa falla. Las columnas de los cilindros salen de las rachas de
+  ocupación en la franja de agua; si sobran rachas, conserva las más activas. Hay un cilindro por espécimen registrado
+  en la tanda, numerados de izquierda a derecha. El recuadro de cada cilindro se interpola en el tiempo con la
+  alineación. La región de interés va desde la línea de agua menos 0.45 veces el ancho del cilindro hasta el fondo más
+  0.05 veces ese ancho.
+  \item \textbf{Medición.} Para cada cilindro y cada ventana de tiempo calcula 15 rasgos: posición, movimiento, postura y
+  permanencia por cuadrante, entre otros. El espécimen se aísla con una silueta por diferencia contra el fondo (umbral de
+  diferencia 45 y de brillo 80), se toma la componente conexa mayor, y la postura se obtiene tras una erosión elíptica
+  de 21 píxeles. El centroide se suaviza con una mediana móvil de 5 cuadros.
+\end{enumerate}
+
+Si el modelo de fondo no tiene al menos 10 cuadros útiles, la etapa falla. Los recuadros resultantes se guardan en el
+archivo de recuadros del análisis.
+
+Si el espécimen deja de verse durante tres segundos seguidos en un cilindro, el análisis entra en pausa
+(sección~\ref{sec:pausa}).
+
+\subsection{Clasificación}
+
+La clasificación toma cada segundo del video y decide la conducta del espécimen. Para cada segundo y cada cilindro,
+la red recibe un clip de 16 cuadros a 4 cuadros por segundo, es decir, una ventana de 4 segundos que va de un segundo
+y medio antes hasta dos segundos y medio después del segundo que se clasifica. En los bordes del video la ventana se
+recorre hacia adentro. Cada cuadro se recorta al recuadro del cilindro, se reduce a 128 × 96 píxeles y se normaliza
+por el brillo del clip.
+
+La red es de fusión. Una rama es un \textit{backbone} R(2+1)D-18 preentrenado con Kinetics-400, que analiza el
+movimiento y la apariencia del clip. En paralelo, una rama de perceptrón multicapa recibe los 15 rasgos medidos en la
+etapa de cilindros y 7 reglas del observador. Ambas ramas se unen en una capa lineal de tres salidas: nado,
+escalamiento e inmovilidad. Cada salida es una probabilidad, y las tres suman 1.
+
+La red se entrena con aprendizaje supervisado sobre los segundos etiquetados por el equipo. El entrenamiento dura 15
+épocas, con lotes de 16 clips, optimizador AdamW con decaimiento de pesos de 1e-4 y una política de tasa de
+aprendizaje OneCycle: 1e-4 en el \textit{backbone} y 1e-3 en las capas nuevas. La función de pérdida es la entropía
+cruzada con pesos por clase y suavizado de etiquetas de 0.05. La validación usa GroupKFold con 5 particiones
+agrupadas por video, para que los segundos de un mismo video no aparezcan en entrenamiento y validación a la vez. El
+modelo final se entrena con todos los datos.
+
+La conducta de cada segundo se decide con una regla de tres pasos y un umbral de confianza de 0.80:
+
+\begin{enumerate}
+  \item Si la probabilidad más alta es de al menos 0.80, gana esa clase.
+  \item Si no, y la suma de las probabilidades de nado y de escalamiento es de al menos 0.80, el segundo es
+  \textit{conducta activa}: el espécimen no está inmóvil, pero la red no distingue entre nado y escalamiento.
+  \item Si tampoco se cumple, gana la clase más probable aunque su confianza sea baja.
+\end{enumerate}
+
+El umbral se aplica solo al clasificar, no durante el entrenamiento. La conducta activa no es una salida de
+la red: la asigna esta regla.
+
+Un segundo es \textit{sin ver} cuando no se pudo medir al espécimen en ese segundo, es decir, cuando la etapa de
+medición no produjo rasgos. Ese segundo no recibe ninguna conducta y queda vacío. No hay un umbral de probabilidad
+para decidirlo: lo determina la medición, no la red. Por eso «sin ver» es una quinta columna en los resultados, al lado
+de las cuatro conductas.
+
+El pipeline procesa el video completo; para cada espécimen se conservan y revisan únicamente los últimos 300 s. Si el
+video dura menos, se conservan todos sus segundos. La revisión de la pausa (tres segundos seguidos sin ver) solo mira
+esos 300 segundos. Antes de guardarlos, el \textit{worker} los renumera de 1 a 300 para que coincidan con el video
+recortado que ve el usuario.
+
+\section{Pausa de ajuste}
+\label{sec:pausa}
+
+Si en tres segundos seguidos no se ve al espécimen en un cilindro, el análisis se detiene y se sigue este
+procedimiento:
+
+\begin{enumerate}
+  \item El pipeline guarda una imagen fija del video original en el segundo central de esos tres, con el
+  recuadro vigente de cada cilindro. Los datos de la pausa se guardan en un archivo junto a la imagen.
+  \item El \textit{worker} marca el análisis como en pausa, primero el archivo y después el estado, y crea una
+  notificación para el usuario. Luego libera el video y atiende el siguiente análisis de la cola. La pausa no
+  bloquea a los demás.
+  \item El usuario ve la imagen con el recuadro y tiene tres acciones: ajustar el recuadro y continuar,
+  confirmar que el recuadro está bien y continuar, o cancelar el análisis. Las pueden usar quien subió el
+  video y el administrador.
+  \item Si ajusta el recuadro, el \textit{backend} lo agrega al archivo de pausa y el análisis vuelve a la cola.
+  Conserva su fecha de encolado, así que queda por delante de los análisis que llegaron después.
+  \item Si confirma el recuadro, el análisis vuelve a la cola sin cambios en el recuadro.
+  \item El \textit{worker}procesa el video de nuevo desde el principio; el recuadro corregido rige desde el inicio de esos tres segundos
+  (instante $k-1$) y los segundos anteriores se miden con el recuadro original.
+  Un mismo cilindro puede pausarse más de una vez en el mismo análisis.
+  \item Si el usuario cancela, el análisis pasa a cancelado sin notificación. Si pasan 72 horas sin respuesta
+  (\texttt{PAUSE\_TIMEOUT\_HOURS}), el \textit{worker} lo cancela y crea una notificación de cancelación. El
+  \textit{worker} revisa las pausas vencidas en cada vuelta de la cola, así que la cancelación por vencimiento
+  puede ocurrir un poco después de las 72 horas.
+\end{enumerate}
+
+Las transiciones de la pausa solo se aplican si el análisis sigue en pausa. Quien llegue segundo no hace nada.
+Así, una acción del usuario y el vencimiento no pueden contradecirse.
+
+\section{Progreso, resultados y reportes}
+
+\subsection{Progreso}
+
+El porcentaje de avance de cada análisis lo escribe el \textit{worker} en un archivo de progreso dentro de la
+carpeta del análisis. Cada etapa tiene un peso fijo: preprocesamiento, 1 punto; cilindros, 9; clasificación, 90. Los pesos salen de una
+corrida de referencia y no cambian entre análisis.
+Mientras el análisis corre, el porcentaje no pasa de 99. Al completarse, llega a 100. Si el archivo no existe,
+el \textit{backend} muestra un porcentaje fijo por etapa: 33, 67 o 100. El progreso no se guarda en la base: se
+lee del archivo cada vez que la pantalla lo pide.
+
+\subsection{Resultados}
+
+Los totales por minuto no se guardan. Se calculan desde la tabla de segundos, donde cada segundo tiene una
+conducta o queda sin ver. Así, si el usuario corrige un segundo, los totales cambian sin recalcular nada más.
+
+En un minuto, la suma de los segundos de las conductas no pasa de 60. Los segundos sin ver cuentan aparte, y las
+cuatro conductas más los sin ver suman 60 segundos y el 100\,\% del minuto.
+
+La comparación entre grupos usa solo el Día 2. Promedia por grupo, no suma, para que el tamaño del grupo no
+distorsione el resultado. Los segundos sin ver quedan fuera de la comparación. Los especímenes sin resultado se
+marcan como dato faltante.
+
+Si un grupo tiene análisis con nivel preciso y con nivel agrupado, no se promedia: se muestra por tanda, cada una con su
+nivel, y la pantalla lo avisa. El nivel de un análisis es agrupado si algún segundo quedó como conducta activa, y preciso
+si ninguno.
+
+\subsection{Revisión humana}
+
+Solo se puede revisar un análisis completado. El usuario corrige la conducta de cada segundo, y cada segundo queda
+marcado con su origen: de la máquina, confirmado, corregido o dudoso. Al guardar, el nivel se recalcula. La conducta
+que puso el sistema se reemplaza al corregir, pero el origen conserva que el segundo fue revisado.
+
+Corregir no cambia el video ni el modelo. Reiniciar el análisis es una acción aparte, que solo hacen el creador del
+experimento o un Administrador; borra los resultados y la revisión y devuelve el análisis a la cola. El sistema muestra
+un aviso antes, y el borrado ocurre solo al confirmarlo.
+
+\subsection{Reportes y caché}
+
+Cada experimento tiene tres formatos de reporte. El PDF lo genera el \textit{backend} con iText, incluye la columna «Sin ver» y la revisión
+humana. El CSV tiene las columnas Grupo, Tanda, Espécimen, Tiempo (min:seg), Nado, Escalamiento, Inmovilidad,
+Conducta activa y Sin ver, con una fila por espécimen y por minuto. El XLSX se genera con Apache POI y tiene el mismo
+contenido, con las estadísticas por grupo (media, desviación estándar y varianza de cada conducta, agregando todas
+las tandas del grupo). El PDF de diagnóstico es otro documento: se genera solo cuando un análisis termina en error.
+
+Los reportes se guardan en una carpeta por experimento dentro del volumen, y la tabla de reportes guarda la ruta y la
+fecha. Al pedir uno, el sistema lo devuelve si existe; si no, lo genera. Un reporte sin resultados no se guarda en caché.
+La caché se invalida por eventos, no por fecha:
 
 \begin{itemize}
-    \item \textbf{Líneas 5--9.} Si \texttt{YoloTracker} está disponible y
-    produce al menos una detección, se toma la primera (ya que hay exactamente
-    una rata por ROI) y se reinicia el contador de \textit{freeze}.
-
-    \item \textbf{Líneas 12--19.} El detector clásico solo se usa si
-    ByteTrack no produjo resultado. La condición \texttt{iou > IOU\_MIN}
-    actúa como \textit{gating} geográfico: si la detección clásica aparece
-    demasiado lejos de la última posición conocida, se descarta como
-    artefacto (reflejo o ruido morfológico).
-
-    \item \textbf{Líneas 22--31.} El congelamiento asigna la última posición
-    conocida con una confianza que decrece exponencialmente cada cuadro
-    ($\texttt{conf} = c_0 \cdot \gamma^{k}$, donde $k$ es el número de
-    cuadros congelados). Esto permite que el clasificador de conducta posterior
-    descarte las predicciones de muy baja confianza, en lugar de tratarlas
-    como detecciones válidas.
-
-    \item \textbf{Líneas 34--38.} La línea del agua se actualiza en cada
-    cuadro usando \texttt{WaterlineSmoother}, independientemente del nivel
-    de respaldo que haya producido la detección.
+  \item \textit{Worker:} al terminar un análisis con resultados nuevos y al terminar con error.
+  \item \textit{Backend:} al editar el experimento, al eliminar el experimento o una tanda, al corregir segundos en la
+  revisión, al reiniciar un análisis y al cambiar el nombre o los apellidos del creador del experimento.
 \end{itemize}
 
-\section{Implementaci\'{o}n del clasificador de conducta}
-% [PENDIENTE: pendiente Sprint 4 --- arquitectura del clasificador,
-%   proceso de fine-tuning, conjunto de entrenamiento y anotaci\'{o}n con el etiquetador del equipo]
+No invalidan la caché la pausa, la cancelación ni la subida de un video. En todos los casos, el reporte se vuelve a
+generar cuando alguien lo pide.
 
-\section{Implementaci\'{o}n del backend (Flask)}
-% [PENDIENTE: endpoints implementados, modelo de datos SQLAlchemy]
+\section{Correo, cuentas y sesión}
+\label{sec:correo}
 
-\section{Implementaci\'{o}n del frontend (React + Vite)}
-% [PENDIENTE: vistas implementadas, comunicaci\'{o}n con API]
+\subsection{Correo}
 
-\section{Integraci\'{o}n y despliegue con Docker Compose}
-% [PENDIENTE: descripci\'{o}n del docker-compose.yml y servicios definidos]
+El sistema envía correo desde una cuenta de correo normal, configurada con las variables del servidor, puerto,
+usuario, contraseña y remitente. El \textit{worker} envía los avisos de análisis con un cliente SMTP de Python y un
+tiempo de espera de 10 segundos. El \textit{backend} envía los correos de recuperación de contraseña y de cuenta nueva.
+No hay reintentos: si un envío falla, el error queda en la bitácora y el aviso sigue visible en el panel de
+notificaciones. Si la variable \texttt{SMTP\_HOST} está vacía, el \textit{worker} no envía correos.
+
+\subsection{Cuentas}
+
+No hay autorregistro. El administrador crea cada cuenta con su identificador institucional, nombre, apellidos y
+correo. El sistema genera una contraseña temporal, que se muestra una sola vez en la pantalla y se envía por correo
+al usuario. La cuenta nace como investigador, activa y con cambio de contraseña obligatorio en el primer ingreso.
+
+Si el identificador o el correo ya existen, la creación se rechaza con un mensaje que indica cuál de los dos ya está
+registrado: «Ya existe una cuenta con ese identificador.» o «Ya existe una cuenta con ese correo.».
+
+El administrador puede desactivar una cuenta. Desactivar cierra las sesiones de esa cuenta, y el usuario no puede
+volver a entrar. Reactivar una cuenta la vuelve a activar sin cambiar su contraseña ni el cambio obligatorio. Generar
+una contraseña temporal nueva es una acción aparte, que solo aplica a cuentas activas. El sistema nunca borra cuentas.
+
+El sistema siempre tiene al menos un administrador activo: rechaza desactivar la última cuenta de administrador o
+quitarle el rol. Un administrador no puede desactivarse ni quitarse el rol a sí mismo; el sistema responde que para
+cambiar su propia cuenta debe usar Mi perfil.
+
+\subsection{Sesión}
+
+El token de sesión dura 168 horas (una semana) por defecto, y ese plazo es configurable. El servidor no guarda una
+lista de tokens cancelados ni una tabla de sesiones. «Cerrar sesión» borra el token en el navegador; por eso, al cerrar
+sesión no hay ninguna escritura en la base. Cuando el token vence, el sistema pide iniciar sesión de nuevo.
+
+La recuperación de contraseña usa un enlace que vence a los 60 minutos y lleva su vencimiento firmado dentro, así que no
+se necesita una columna adicional en la tabla de usuarios.
+
+\section{Pruebas automatizadas}
+
+El sistema tiene pruebas en sus tres partes. El \textit{backend} tiene 162 pruebas JUnit repartidas en 16 clases; las de
+integración corren contra una base PostgreSQL de prueba. La interfaz tiene 202 pruebas con Vitest, jsdom y Testing
+Library. El \textit{worker} tiene 71 pruebas con \texttt{unittest}, que cubren los correos, el diagnóstico, la pausa, los
+reportes, el respaldo, los tiempos y la vigilancia del disco. Además, se hizo una prueba de carga con cuatro sesiones simultáneas (consultas y revisión, sin subida de videos ni
+reportes PDF). El simulador \texttt{worker\_fake} sirve solo para probar el sistema sin el pipeline real.

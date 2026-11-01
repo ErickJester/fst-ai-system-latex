@@ -10,7 +10,7 @@
 \setlength{\LTpre}{6pt}
 \setlength{\LTpost}{0pt}
 
-\begin{longtable}{@{} p{4.3cm} p{11.3cm} @{}}
+\begin{longtable}{@{} p{4.0cm} p{10.9cm} @{}}
 
   \toprule
   \textbf{Término} & \textbf{Definición} \\
@@ -40,7 +40,7 @@
   \textbf{API REST}
   & Interfaz de programación de aplicaciones que sigue las restricciones
     arquitectónicas REST (\textit{Representational State Transfer}). En el
-    sistema propuesto, la API Flask expone los recursos del backend (experimentos,
+    sistema propuesto, la API REST del backend (Spring Boot) expone los recursos (experimentos,
     videos, resultados) mediante peticiones HTTP estándar (GET, POST, PATCH, DELETE)
     e intercambia datos en formato JSON. \\[5pt]
 
@@ -58,9 +58,7 @@
     traslacional de depresión. \\[5pt]
 
   \textbf{Bounding box}
-  & (Caja delimitadora.) Rectángulo mínimo que encierra a un objeto detectado
-    en una imagen. En el sistema se obtiene de la región del espécimen dentro de
-    su cilindro. \\[5pt]
+  & (Caja delimitadora.) Rectángulo que encierra un cilindro y en el que se busca al espécimen. \\[5pt]
 
   % ── C ──────────────────────────────────────────────────────────────
   \textbf{CNN}
@@ -76,6 +74,9 @@
     tabla de análisis, que el worker consulta cada cierto tiempo (\textit{polling})
     para tomar el más antiguo en estado «en cola». Atiende un video a la vez, sin
     bloquear el servidor web. \\[5pt]
+
+  \textbf{Conducta activa}
+  & Cuarta conducta del sistema. Se asigna cuando ninguna clase alcanza una confianza de 0.80, pero la suma de nado y escalamiento sí la alcanza. No es una salida de la red. \\[5pt]
 
   \textbf{Conducta de escalamiento}
   & (\textit{Climbing / escape attempts}.) Comportamiento en el FST caracterizado
@@ -95,7 +96,7 @@
   & (Aumento de datos.) Técnica que incrementa artificialmente el tamaño del
     conjunto de entrenamiento aplicando transformaciones geométricas (rotación,
     volteo, zoom) y fotométricas (brillo, contraste) a las imágenes originales,
-    reduciendo el riesgo de sobreajuste. \\[5pt]
+    reduciendo el riesgo de sobreajuste. En el sistema se aplica volteo horizontal aleatorio de los clips durante el entrenamiento. \\[5pt]
 
   \textbf{Detección de objetos}
   & Tarea de visión por computadora que consiste en localizar y clasificar
@@ -121,7 +122,7 @@
     espécimen es una rata blanca de laboratorio evaluada en la prueba de nado
     forzado (FST). El sistema identifica, analiza y reporta resultados por
     espécimen dentro de su grupo experimental (control, referencia o
-    tratamiento). \\[5pt]
+    tratamiento experimental). \\[5pt]
 
   % ── F ──────────────────────────────────────────────────────────────
   \textbf{F1-score}
@@ -149,8 +150,7 @@
   % ── H ──────────────────────────────────────────────────────────────
   \textbf{Hiperparámetro}
   & Parámetro cuyo valor se fija antes del entrenamiento y no se aprende de los
-    datos (e.g., tasa de aprendizaje, tamaño del lote, número de épocas,
-    umbral de confianza del clasificador). Se ajusta mediante búsqueda en
+    datos (e.g., tasa de aprendizaje, tamaño del lote, número de épocas). Se ajusta mediante búsqueda en
     cuadrícula o validación cruzada. \\[5pt]
 
   % ── I ──────────────────────────────────────────────────────────────
@@ -193,6 +193,9 @@
     espécimen por su diferencia con el fondo en cada cuadro. \\[5pt]
 
   % ── N ──────────────────────────────────────────────────────────────
+  \textbf{Nivel de clasificación}
+  & Etiqueta de cada análisis: «agrupado» si queda algún segundo como conducta activa; «preciso» si no. \\[5pt]
+
   \textbf{Noradrenérgico}
   & Relativo al sistema de neurotransmisión mediado por noradrenalina (norepinefrina).
     Los antidepresivos noradrenérgicos (e.g., desipramina) aumentan
@@ -203,8 +206,8 @@
   \textbf{ORM}
   & (\textit{Object-Relational Mapping}.) Técnica que abstrae las operaciones de
     base de datos relacional mediante objetos del lenguaje de programación. El
-    backend utiliza SQLAlchemy como ORM para interactuar con PostgreSQL sin
-    escribir SQL directamente en la lógica de negocio. \\[5pt]
+    backend usa Spring Data JPA para las entidades y JdbcTemplate con SQL explícito en las
+    consultas que requieren bloqueos de fila o control fino. \\[5pt]
 
   \textbf{Overfitting}
   & (Sobreajuste.) Fenómeno en el que un modelo aprende el ruido del conjunto de
@@ -213,6 +216,9 @@
     augmentation}, \textit{dropout} y validación cruzada. \\[5pt]
 
   % ── P ──────────────────────────────────────────────────────────────
+  \textbf{Pausa}
+  & Detención del análisis cuando un cilindro pasa tres segundos seguidos sin espécimen visible. El análisis espera al usuario hasta 72 horas. \\[5pt]
+
   \textbf{Pipeline de análisis}
   & Secuencia de etapas de procesamiento encadenadas en las que la salida de
     cada etapa es la entrada de la siguiente. En el sistema, el pipeline comprende:
@@ -241,7 +247,7 @@
   \textbf{Recall}
   & (Sensibilidad / \textit{Sensitivity}.) Fracción de los casos positivos reales
     que son correctamente identificados: $R = \frac{VP}{VP + FN}$. Un recall alto
-    indica que el sistema detecta la mayoría de los fotogramas de cada conducta
+    indica que el sistema detecta la mayoría de los segundos de cada conducta
     presentes en el video. \\[5pt]
 
   \textbf{ResNet}
@@ -269,6 +275,9 @@
     de nado activo en el FST sin modificar significativamente el escalamiento ni
     la actividad locomotora general. \\[5pt]
 
+  \textbf{Sin ver}
+  & Segundo sin conducta, porque no se pudo medir al espécimen o porque la revisión lo marcó «No se ve». Es la quinta columna de resultados y reportes. \\[5pt]
+
   \textbf{Softmax}
   & Función de activación que transforma un vector de puntuaciones en una
     distribución de probabilidad: $\sigma(z)_i = e^{z_i}/\sum_j e^{z_j}$.
@@ -285,11 +294,14 @@
 
   % ── T ──────────────────────────────────────────────────────────────
 
+  \textbf{Tanda}
+  & Conjunto de 2 a 4 especímenes grabados juntos, cada uno en su cilindro. Cada tanda admite un video por sesión. \\[5pt]
+
   \textbf{Transfer learning}
   & (Aprendizaje por transferencia.) Técnica que reutiliza los pesos de un
     modelo entrenado en una tarea o conjunto de datos extenso (ImageNet) como
     punto de partida para una tarea relacionada con datos más limitados. Permite
-    entrenar el clasificador de conductas con menos fotogramas etiquetados. \\[5pt]
+    entrenar el clasificador de conductas con menos fotogramas etiquetados. En el sistema, la R(2+1)D-18 parte de pesos preentrenados en Kinetics-400 (video); ImageNet es el caso general de imágenes. \\[5pt]
 
   % ── W ──────────────────────────────────────────────────────────────
   \textbf{Worker}

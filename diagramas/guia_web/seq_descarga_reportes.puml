@@ -11,36 +11,45 @@ participant Backend as api
 database "Base de datos" as db
 participant "Archivos" as fs
 
-inv -> ui: selecciona el formato de descarga\n(CSV, XLSX o PDF), desde resultados o el dashboard
-ui -> api: GET /experiments/{id}/report/{formato}
-api -> db: busca si ya hay un reporte guardado\nen ese formato para este experimento
-db --> api: reporte guardado, si existe, con su fecha de generación
-api -> db: busca la fecha del análisis más reciente del experimento
-db --> api: fecha del último análisis completado
+inv -> ui: elige CSV, XLSX o PDF desde resultados\n(en CSV/XLSX, la tanda o el grupo que ve)
+ui -> api: GET /experiments/{id}/report/csv | /report/xlsx (grupo o tanda)\no GET /experiments/{id}/report/pdf
+api -> db: ¿hay análisis completados en el experimento?
+db --> api: sí / no
 
-alt no hay un reporte guardado en ese formato
-  api -> api: genera el archivo con los datos actuales
-  api -> fs: guarda el archivo generado
-  api -> db: registra el reporte nuevo (ruta, formato, fecha de generación)
-else el reporte guardado es más viejo que el último análisis
-  api -> api: regenera el archivo con los datos actuales
-  api -> fs: reemplaza el archivo guardado
-  api -> db: actualiza la ruta y la fecha de generación del reporte
-else el reporte guardado sigue vigente
-  api -> fs: recupera el archivo ya guardado
+alt no hay análisis completados
+  alt CSV o XLSX
+    api --> ui: 409 Conflict (sin resultados completados)
+    ui --> inv: muestra el motivo
+  else PDF
+    api --> ui: 200 OK, PDF "Sin resultados" (no se guarda en caché)
+  end
+else hay análisis completados
+  api -> db: ¿hay reporte guardado para ese formato y esa vista?
+  db --> api: reporte guardado, con su fecha de generación, si existe
+  alt no hay reporte guardado o un evento lo invalidó
+    note over api
+      Invalidan el reporte: PUT .../segundos (corregir), POST .../restart,
+      PATCH del experimento, borrado de tanda o experimento,
+      cambio de nombre del creador, y que el Worker complete o falle.
+      Borrar un video NO invalida (RF-26). En modo desarrollador no hay caché.
+    end note
+    api -> api: genera el archivo de la vista pedida (grupo o tanda)
+    api -> fs: guarda el archivo generado
+    api -> db: registra el reporte (ruta, formato, vista, fecha de generación)
+  else el reporte guardado sigue vigente
+    api -> fs: recupera el archivo guardado
+  end
 end
 
 note right of api
-  CSV / XLSX: datos por espécimen (tiempo total y
-  desglose por minuto) más estadísticas por grupo:
-  media, desviación estándar y varianza por conducta,
-  entre los especímenes de cada uno de los tres grupos.
-  Columnas: Tiempo (min:seg), Nado, Escalamiento,
-  Inmovilidad, Conducta activa. Una fila por minuto.
-  PDF: reporte de resultados, documento distinto del
-  reporte de diagnóstico.
+  CSV / XLSX: columnas Grupo, Tanda, Espécimen, Tiempo (min:seg),
+  Nado activo, Escalamiento, Inmovilidad, Conducta activa y Sin ver
+  (al final). Una fila por espécimen y minuto. Al final, media,
+  desviación estándar (n - 1) y varianza de cada columna de la vista.
+  PDF: reporte de resultados del experimento, con la columna Sin ver;
+  distinto del reporte de diagnóstico (CU-08).
 end note
 
-api --> ui: archivo listo
+api --> ui: 200 OK, archivo listo
 ui --> inv: descarga inmediata en el navegador
 @enduml

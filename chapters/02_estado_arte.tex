@@ -20,8 +20,8 @@ de entrenamiento represente las condiciones reales de uso.
 Los videos del laboratorio colaborador tienen características que complican las cosas:
 grabación con cámara web, variaciones de iluminación entre sesiones, y
 especímenes de pelaje claro con poco contraste frente al cilindro. El sistema se entrena
-y se prueba con esos mismos videos, de modo que aprende las condiciones reales del
-laboratorio, y su robustez ante ellas se mide durante la validación.
+con videos del laboratorio y se evalúa con validación agrupada por video, de modo que ningún video de prueba se usa
+en el entrenamiento.
 
 % -----------------------------------------------------------
 \section{Trabajos similares}
@@ -215,15 +215,15 @@ diferencia es capturable con descriptores simples, como la verticalidad del cuer
 posición del centroide respecto de la línea de agua. Este proyecto
 usa ese camino para etiquetar y para medir: un clasificador de
 \textit{gradient boosting} (potenciación del gradiente) sobre quince rasgos del
-espécimen propone las etiquetas del equipo y aporta esos rasgos a la rama de medidas
-de la red de fusión que describe la sección siguiente (cap.~5).
+espécimen propone las etiquetas que el equipo revisa y sirve de referencia en la validación; esos mismos quince rasgos
+alimentan la rama de medidas de la red de fusión que describe la sección siguiente (cap.~5).
 
 \subsection{Redes convolucionales con \textit{transfer learning} (aprendizaje por transferencia)}
 
 Las redes neuronales convolucionales (CNN) \cite{lecun1998} son la arquitectura de referencia para clasificación de
 imágenes. Entrenar una CNN desde cero requiere conjuntos de datos etiquetados muy grandes,
 lo cual no es viable con el dataset disponible. La solución es el \textit{transfer
-learning} \cite{pan2010}: se toma una red preentrenada en ImageNet (en su versión de preentrenamiento, más de un millón
+learning} \cite{pan2010}: se toma una red preentrenada (ImageNet es el antecedente general del método, con más de un millón
 de imágenes de 1{,}000 clases) y se reemplaza solo la última capa de clasificación por
 una nueva con 3 salidas: una por cada conducta del FST (nado, inmovilidad y escalamiento).
 La conducta activa no es una salida: el sistema la asigna después, con una regla de
@@ -246,10 +246,10 @@ Valle et al.\ \cite{della_valle2025} usan este enfoque y logran la clasificació
 tres conductas. El costo es computacional: las redes 3D requieren más memoria y tiempo
 de inferencia que las 2D, lo que puede ser una limitación en hardware sin GPU.
 
-Este proyecto usa la R(2+1)D-18 \cite{tran2018}, una ResNet-18 para video que
-separa cada convolución 3D en una espacial y una temporal, preentrenada con videos de
-acciones humanas, fusionada con una rama de medidas del espécimen. Es el clasificador
-del sistema, y su desempeño se evalúa en TT-II con F1 por conducta (cap.~5).
+El sistema usa la R(2+1)D-18 \cite{tran2018}, una ResNet-18 para video que
+separa cada convolución 3D en una espacial y una temporal. La red del sistema parte de esa arquitectura con pesos de
+Kinetics-400, sustituye la capa final por una de tres salidas, añade la rama de medidas y ajusta la red completa. Es el
+clasificador del sistema, y su desempeño se valida con F1 por conducta (capítulo 5).
 
 % -----------------------------------------------------------
 \section{Criterios de calidad para la evaluación del sistema}
@@ -260,13 +260,12 @@ y software, y establece atributos medibles que permiten verificar si un sistema 
 sus objetivos. Para este proyecto, los atributos relevantes son:
 
 \begin{itemize}
-  \item \textbf{\textit{Functional correctness}:} los resultados del sistema deben clasificar
-        correctamente las tres conductas del FST y la conducta activa. Se evalúa con métricas de
+  \item \textbf{\textit{Functional correctness}:} los resultados del sistema clasifican
+        correctamente las tres conductas del FST; la conducta activa se asigna con la regla de confianza y se reporta, pero no se evalúa con F1 propio. Se evalúa con métricas de
         clasificación estándar: precisión, \textit{recall} y F1 por conducta.
-  \item \textbf{\textit{Time behaviour}:} el tiempo de análisis de un video de 5~minutos debe
-        ser aceptable para el flujo de trabajo del laboratorio. Se mide en segundos de
-        procesamiento por video (cualquier otra relación con la duración del video es opcional) y se define el umbral concreto con el
-        laboratorio durante la fase de pruebas y validación.
+  \item \textbf{\textit{Time behaviour}:} el análisis de un video de 5~minutos termina
+        en un tiempo aceptable para el laboratorio. El tiempo de análisis se mide por etapa, en segundos de
+        procesamiento por video.
   \item \textbf{\textit{Usability}:} un investigador sin conocimientos de programación debe
         poder operar el sistema sin ayuda técnica. Se evalúa con una prueba de
         usabilidad con al menos un usuario real del laboratorio.
@@ -305,7 +304,7 @@ DSAAN          & Sí    & No    & Sí  & No  & No  & Precisión 88.7\,\% \\
 DeepLabCut+clf & Parc. & Parc. & Sí  & No  & Sí  & Concordancia con experto \\
 YOLO-Behaviour & No    & ---   & Sí  & No  & Sí  & Precisión, recall \\
 \hline
-\textbf{Propuesta} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & F1 por conducta, tiempo \\
+\textbf{Propuesta} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{Sí} & \textbf{No} & F1 por conducta, tiempo \\
 \hline
 \end{tabular}}
 
@@ -314,12 +313,12 @@ YOLO-Behaviour & No    & ---   & Sí  & No  & Sí  & Precisión, recall \\
 conductas; DL: aprendizaje profundo (\textit{deep learning}); Parc.: parcial; clf: clasificador.}
 \end{table}
 
-Ningún sistema existente cubre los cinco criterios al mismo tiempo. Los comerciales no
+Ningún sistema existente cubre los cuatro criterios al mismo tiempo. Los comerciales no
 son abiertos y no clasifican las tres conductas. Los de código abierto más cercanos
 al FST (ezTrack y DBscorer) no usan aprendizaje profundo ni tienen interfaz web;
 los abiertos que sí lo usan (DeepLabCut y YOLO-Behaviour) tampoco ofrecen plataforma web
 ni clasifican las tres conductas de forma directa. De los de aprendizaje profundo,
 solo el 3D-RCNN clasifica las tres conductas, pero no tiene plataforma web ni reporta
-métricas de tiempo de análisis. El sistema propuesto cubrirá los cinco criterios y
-documentará explícitamente los atributos de calidad de la ISO/IEC~25010:2011
+métricas de tiempo de análisis. El sistema propuesto cubre los cuatro criterios y
+documenta explícitamente los atributos de calidad de la ISO/IEC~25010:2011
 \cite{iso25010}.

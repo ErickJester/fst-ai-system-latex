@@ -13,45 +13,50 @@ participant "Archivos" as fs
 
 u -> ui: en Progreso o Resultados elige\n"Revisar segundo a segundo"
 ui -> api: GET /experiments/{id}/analyses/{idAnalisis}/review
-api -> db: ¿el análisis está "completado" y el usuario lo subió o es Administrador? (D-57)
+api -> db: ¿el análisis está "completado"? (D-57)
 db --> api: sí / no
-alt no está completado o el usuario no tiene permiso
-  api --> ui: 409 o 403
+alt no está completado
+  api --> ui: 409
   ui --> u: muestra el motivo
-else se puede revisar
+else se puede abrir la revisión
   api -> db: especímenes, observaciones y etiquetas de SEGUNDO
   db --> api: filas por espécimen y por segundo
   api -> fs: lee analisis/{idAnalisis}/cajas.json
   fs --> api: recuadros de los tubos
-  api --> ui: 200 OK {duración, especímenes, etiquetas, recuadros}
-  ui -> api: GET .../video (con Range)
+  api --> ui: 200 OK {duración, especímenes, etiquetas, recuadros, permiso de corrección}
+  note over ui
+    Quien no subió el video y no es Administrador
+    ve la revisión en solo lectura (sin rechazo).
+  end note
+  ui -> api: POST .../video-token
+  api --> ui: 200 OK {vt, vigencia 120 min}
+  ui -> api: GET .../video?vt={vt} (con Range)
   api -> fs: lee analisis/{idAnalisis}/web.mp4
   api --> ui: 206 Partial Content
   loop el usuario revisa un espécimen a la vez
-    u -> ui: pulsa 1 a 4 o 0, pausa o mueve la línea de tiempo
+    u -> ui: pulsa 1 a 4, 0 o «No se ve» (el segundo queda sin conducta; origen «dudosa»),
+pausa o mueve la línea de tiempo
     ui -> ui: guarda un borrador en el navegador
+  end
+  opt hay cambios y el usuario elige "Guardar" (Ctrl+S)
+    ui -> api: PUT .../segundos\n{cambios: [{numeroCilindro, segundo, conducta, origen}]}
+    api -> db: [transacción] actualiza SEGUNDO\n(conducta y origen)
+    api -> db: [transacción] recalcula nivelClasif\n(agrupado si queda algún segundo como conducta activa, preciso si no)
+    api -> db: borra los reportes guardados del experimento\npara que se regeneren con los datos nuevos
+    api -> fs: borra los archivos de esos reportes
+    db --> api: confirma
+    api --> ui: 200 OK {totales y nivel recalculados, sin guardarlos}
+    ui --> u: confirma que se guardó; borra el borrador
   end
   opt el usuario elige "Reiniciar el análisis" (RN-04, D-60)
     ui --> u: avisa que se borran el resultado anterior y toda la revisión hecha,\ny que no se puede deshacer
     u -> ui: confirma el reinicio
     ui -> api: POST .../restart
+    api -> fs: borra los archivos de la corrida
     api -> db: [transacción] borra el resultado anterior y la revisión humana\n(observaciones y segundos de ese video)
-    api -> db: [transacción] deja el análisis "en cola"\ncon sus valores de arranque
+    api -> db: [transacción] deja el análisis "en cola"\ncon fechaanalisis = ahora (final de la cola)
     api --> ui: 202 Accepted
-    ui --> u: vuelve a la pantalla de progreso
+    ui --> u: lleva a la pantalla de progreso; borra el borrador
   end
-  u -> ui: Guardar (Ctrl+S)
-  ui -> api: PUT .../segundos\n{cambios: [{numeroCilindro, segundo, conducta, origen}]}
-  api -> db: [transacción] actualiza SEGUNDO\n(conducta y origen)
-  api -> db: [transacción] actualiza nivelClasif\n(agrupado si queda algún segundo como conducta activa)
-  api -> db: borra los reportes guardados del experimento\npara que se regeneren con los datos nuevos
-  api -> fs: borra los archivos de esos reportes
-  db --> api: confirma
-  api --> ui: 200 OK
-  ui --> u: confirma que se guardó
 end
-note over api, db
-  Quién puede corregir y el recálculo de nivelClasif
-  son propuestas, aún no aprobadas.
-end note
 @enduml

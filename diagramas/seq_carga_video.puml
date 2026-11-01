@@ -1,26 +1,19 @@
 @startuml seq_carga_video
 ' ================================================================
-'  Secuencia - Carga de video, con inferencia de tanda (D-19)
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
 '  Reemplaza a figures/mermaid/seq_carga.png (modelo viejo: el video
 '  colgaba directo de Experimento, sin Grupo ni Tanda).
 '
-'  Cubre CU-04 "Subir video para analisis" (RF-08, RF-09, RF-12) mas
-'  la inferencia de tanda decidida en D-19: al escribir el nombre del
-'  grupo/tratamiento, si coincide con uno ya usado en el MISMO
-'  experimento, el sistema sugiere la siguiente tanda (letra A, B,
-'  C... en pantalla; en la base de datos sigue siendo TANDA.ordinal
-'  entero) en un campo editable, pero pide confirmacion explicita
-'  antes de guardar -- no basta con dejar el valor precargado sin
-'  que el investigador lo confirme.
+'  Cubre CU-05 "Subir video" (RF-08, RF-09, RF-10, RF-12, RN-02,
+'  de grupos trae, en la misma respuesta, la tanda sugerida (la
+'  siguiente, o la A si el grupo es nuevo). La interfaz la precarga
+'  en un campo editable, pero pide confirmacion explicita antes de
+'  guardar.
 '
-'  El encolado del analisis es solo crear el registro con estado
-'  "en cola" (D-15); el Worker lo toma despues por polling a la
-'  tabla de analisis (cap. 5, CU-07) -- no hay cola aparte tipo
-'  Redis, esa pieza de docs/diagramas.pdf pag. 1 esta desactualizada
-'  (ver MIGRACION-DIAGRAMAS.md SS3.7).
+'  Version de lenguaje natural. Los codigos, rutas y nombres de
+'  archivo estan en diagramas/guia_web/seq_carga_video.puml.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_carga_video.puml
@@ -37,56 +30,73 @@ actor Investigador as inv
 participant "Interfaz web" as ui
 participant Backend as api
 database "Base de datos" as db
+participant "Archivos" as fs
 
 inv -> ui: selecciona el experimento activo
 inv -> ui: escribe el nombre del grupo o tratamiento
 
-ui -> api: busca coincidencias del nombre
+ui -> api: busca grupos del experimento que coincidan con lo escrito\n(sin importar acentos ni mayúsculas)
 api -> db: consulta los grupos de este experimento
-db --> api: grupos con nombre parecido, si existen
-api --> ui: sugerencias para autocompletar
+db --> api: grupos que coinciden, con su tanda sugerida
+api --> ui: sugerencias, cada una con su tanda sugerida
 
 alt el nombre coincide con un grupo de este mismo experimento
   inv -> ui: selecciona la sugerencia
-  ui -> api: pide la siguiente tanda de ese grupo
-  api -> db: cuenta las tandas ya registradas del grupo
-  db --> api: siguiente tanda disponible (por ejemplo, la B)
-  api --> ui: precarga la tanda sugerida en un campo editable
-  ui -> inv: pide confirmar\n"¿esta es la tanda B de [grupo]?"
+  ui -> inv: precarga la tanda sugerida en un campo editable\ny pide confirmar "¿esta es la tanda B de [grupo]?"
   inv -> ui: confirma la tanda, o la corrige a mano
-else no hay ningun grupo con ese nombre en este experimento
-  ui -> inv: pide los datos del grupo nuevo\n(tipo, tratamiento)
+else no hay ningún grupo con ese nombre en este experimento
+  ui -> inv: pide los datos del grupo nuevo\n(tipo, tratamiento, número de especímenes)
   inv -> ui: captura el grupo nuevo
   note right of ui
     la primera tanda de un
-    grupo nuevo siempre es "A"
+    grupo nuevo es "A", precargada y editable
   end note
 end
 
-inv -> ui: elige la sesion (Día 1 o Día 2) y selecciona el archivo .mp4 o .mov
-ui -> ui: comprueba que la extensión sea .mp4 o .mov\nantes de enviar el video
-ui -> api: envía el video del experimento
+inv -> ui: elige la sesión (Día 1 o Día 2) y selecciona el archivo
+ui -> ui: comprueba que sea un formato de video aceptado\nantes de enviarlo
+ui -> api: envía el video con su grupo, tanda y sesión
 
-api -> api: valida la reproducibilidad\ny que el video esté en horizontal
-
-alt el archivo no es válido
-  api --> ui: reporta el error de validación
+api -> api: comprueba que quien sube sea el creador del experimento
+alt quien sube no es el creador del experimento
+  api --> ui: "Solo quien creó el experimento sube sus videos."
   ui --> inv: muestra el mensaje, no avanza
-else el archivo es válido
-  api -> api: guarda el archivo en el volumen compartido
-  api -> db: guarda el grupo, si es nuevo
-  api -> db: guarda la tanda, nueva o existente
-  api -> db: guarda el video, con su tanda y su sesión
-  alt la sesión es el Día 2
-    api -> db: crea el análisis del video, con estado "en cola"
-    db --> api: confirma que todo quedó guardado
-    api --> ui: video almacenado, análisis en cola
-    ui --> inv: confirmación, y redirección a la pantalla de progreso
-  else la sesión es el Día 1 (habituación)
-    db --> api: confirma que todo quedó guardado
-    api --> ui: video almacenado; el Día 1 no se analiza
-    ui --> inv: confirmación de que el video quedó guardado
+else faltan datos obligatorios
+  api --> ui: rechaza: faltan datos
+  ui --> inv: muestra el error, no avanza
+else datos completos
+  api -> fs: guarda el archivo en un espacio temporal
+  api -> api: lee los datos técnicos del video:\nque se pueda reproducir, que esté en horizontal\ny que dure más de cero segundos
+
+  alt el archivo no pasa la validación
+    api -> fs: descarta el archivo temporal
+    api --> ui: rechaza, con el motivo (formato, video vertical,\n"El video no se puede reproducir: el archivo está dañado o incompleto.")
+    ui --> inv: muestra el mensaje, no avanza
+  else el archivo es válido
+    api -> db: guarda grupo, tanda, especímenes y video\nen una sola operación
+    alt la tanda ya tiene un video de esa sesión
+      db --> api: conflicto
+      api -> fs: descarta el archivo temporal
+      api --> ui: rechaza: la tanda ya tiene un video de esa sesión
+      ui --> inv: muestra el conflicto; no reemplaza el video\n(para sustituirlo hay que borrar la tanda)
+    else la operación se completa
+      db --> api: confirma que todo quedó guardado
+      api -> fs: mueve el archivo a su lugar definitivo
+      alt el video es del Día 2
+        api -> db: crea el análisis, en cola
+        api --> ui: video almacenado, análisis en cola
+        ui --> inv: confirmación, y redirección a la pantalla de progreso
+      else el video es del Día 1 (habituación)
+        api --> ui: video almacenado; el Día 1 no se analiza
+        ui --> inv: confirmación de que el video quedó guardado
+      end
+    end
   end
 end
+
+note over api
+  si algo falla después de guardar, se borran el archivo
+  temporal y el archivo ya movido
+end note
 
 @enduml

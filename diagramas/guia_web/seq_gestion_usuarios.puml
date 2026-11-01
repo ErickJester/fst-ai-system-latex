@@ -12,35 +12,94 @@ database "Base de datos" as db
 
 admin -> ui: abre el panel de usuarios
 ui -> api: GET /admin/users\ncon la sesión activa del Administrador
+note over api
+  filtro de rol en cada petición (D-12), no solo en esta ruta
+end note
 api -> db: ¿el idInstitucional de la sesión está en ADMINISTRADOR?
 db --> api: sí / no
 alt no está en ADMINISTRADOR
-  api --> ui: 403, no autorizado
+  api --> ui: 403, "No tienes permiso para esta acción"
   ui --> admin: muestra el error, no abre el panel
 else sí está en ADMINISTRADOR
-  api -> db: consulta los usuarios (nombre, correo, activo)
-  db --> api: lista de usuarios
-  api -> db: consulta cuáles de esos usuarios tienen fila en ADMINISTRADOR
-  db --> api: lista de idInstitucional con permisos de administrador
-  api -> api: combina ambas listas\n(marca en cada fila si es Administrador)
+  api -> db: consulta todos los usuarios en una sola consulta, sin paginación,\nincluida la marca de administrador (ADMINISTRADOR)
+  db --> api: lista de usuarios con esa marca
   api --> ui: 200 OK {usuarios, con marca de administrador}
   ui --> admin: muestra la tabla de usuarios
   admin -> ui: elige la acción sobre un usuario
+  note right of ui
+    no hay acción para eliminar una cuenta
+  end note
   alt crear cuenta nueva
     ui --> admin: abre el formulario de "Crear cuenta"\n(ver seq_crear_cuenta)
-  else editar o desactivar cuenta
-    admin -> ui: cambia datos o rol, o selecciona un usuario\ny confirma la desactivación
-    ui -> api: PATCH /admin/users/{id} {datos, rol, o activo: false}
-    api -> db: si este usuario es Administrador y se desactiva\no pierde el rol, ¿cuántos Administradores activos quedarían?
-    db --> api: cantidad restante (o "no aplica")
-    alt quedarían 0 Administradores activos
-      api --> ui: rechaza la desactivación
-      ui --> admin: muestra la advertencia\n"debe existir al menos un Administrador activo"
-    else se puede aplicar el cambio
-      api -> db: actualiza USUARIO (datos o activo = false)\ny agrega o quita su fila en ADMINISTRADOR si cambia el rol
-      db --> api: confirma la actualización
+  else editar datos (nombre, apellidos o correo)
+    ui -> api: PATCH /admin/users/{id} {nombre, apellidos, correo}
+    api -> db: actualiza los datos de la cuenta
+    db --> api: confirma
+    api --> ui: 200 OK
+    ui --> admin: la tabla refleja el cambio
+  else dar o quitar el rol de Administrador
+    admin -> ui: cambia el rol de un usuario y confirma
+    ui -> api: PATCH /admin/users/{id} {rol}
+    alt es la propia cuenta del Administrador
+      api --> ui: 409, «Para cambiar tu propia cuenta usa Mi perfil.»
+      ui --> admin: muestra el error
+    else es otra cuenta
+      api -> db: bloquea la tabla ADMINISTRADOR antes de contar\ny cuenta cuántos Administradores activos quedarían después
+      db --> api: cantidad restante
+      alt quedarían 0 Administradores activos
+        api --> ui: rechaza el cambio
+        ui --> admin: muestra la advertencia\n"debe existir al menos un Administrador activo"
+      else se puede cambiar
+        api -> db: agrega o quita la fila en ADMINISTRADOR\nen la misma transacción
+        db --> api: confirma
+        api --> ui: 200 OK
+        ui --> admin: la tabla refleja el nuevo rol
+      end
+    end
+  else desactivar cuenta
+    admin -> ui: selecciona un usuario y confirma la desactivación
+    ui -> api: PATCH /admin/users/{id} {activo: false}
+    alt es la propia cuenta del Administrador
+      api --> ui: 409, «Para cambiar tu propia cuenta usa Mi perfil.»
+      ui --> admin: muestra el error
+    else es otra cuenta
+      api -> db: bloquea la tabla ADMINISTRADOR antes de contar\ny cuenta cuántos Administradores activos quedarían después,\nsi esta cuenta es Administrador
+      db --> api: cantidad restante (o "no aplica")
+      alt quedarían 0 Administradores activos
+        api --> ui: rechaza la desactivación
+        ui --> admin: muestra la advertencia\n"debe existir al menos un Administrador activo"
+      else se puede desactivar
+        api -> db: USUARIO.activo = false, en la misma transacción
+        db --> api: confirma
+        api -> api: corta las sesiones activas de esa cuenta (JWT)
+        api --> ui: 200 OK
+        ui --> admin: usuario marcado como inactivo en la tabla
+      end
+    end
+  else reactivar cuenta
+    admin -> ui: selecciona un usuario inactivo y confirma
+    ui -> api: PATCH /admin/users/{id} {activo: true}
+    api -> db: activo = true
+    db --> api: confirma
+    note over api
+      solo marca activo = true: la contraseña anterior vuelve a servir;
+      no cambia cambioRequerido ni envía correo
+    end note
+    api --> ui: 200 OK
+    ui --> admin: la tabla muestra la cuenta como activa
+  else contraseña temporal nueva
+    admin -> ui: selecciona otro usuario (no a sí mismo) y confirma
+    alt la cuenta está inactiva
+      ui --> admin: pide reactivar primero (PATCH /admin/users/{id} {activo: true})
+    else la cuenta está activa
+      ui -> api: POST /admin/users/{id}/reset-temporal
+      api -> api: genera una contraseña temporal de 12 caracteres
+      api -> db: actualiza contrasenaHash y pone cambioRequerido = true
+      db --> api: confirma
+      api -> api: envía la temporal por correo
+      api -> db: registra auditoría, sin la contraseña
       api --> ui: 200 OK
-      ui --> admin: la tabla refleja el cambio
+      ui --> admin: confirma el envío
     end
   end
 end

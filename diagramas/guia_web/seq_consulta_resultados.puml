@@ -10,31 +10,37 @@ participant "Interfaz web" as ui
 participant Backend as api
 database "Base de datos" as db
 
-inv -> ui: abre resultados del experimento\n(desde el dashboard o la pantalla de progreso)
+inv -> ui: abre resultados (desde la lista, el detalle, el grupo,\nel progreso o una notificación)
+ui -> api: GET /experiments/{id}/results
+api -> db: especímenes analizados con tanda y grupo;\nconducta de cada segundo, con "sin ver" (SEGUNDO)
+db --> api: segundos por conducta de cada espécimen
+api --> ui: 200 OK {especímenes, /results sin ver incluido, nivelClasif, encabezado con aviso si hay agrupado}
+ui -> inv: tabla por espécimen con columna "Sin ver";\nporcentajes sobre los últimos 300 s analizados
+inv -> ui: elige grupo completo o una tanda
+ui -> ui: media, desviación estándar (n - 1) y varianza\nde los especímenes de la vista
 ui -> api: GET /experiments/{id}/results/groups
-api -> db: busca los grupos del experimento
+api -> db: grupos del experimento, por tanda
 db --> api: grupos (control, referencia, tratamiento)
 
 loop por cada grupo
-  api -> db: busca los especímenes del grupo, vía sus tandas
-  api -> db: para cada espécimen, busca su observación\ndel video con sesión "Día 2"
-  alt el espécimen ya tiene su Día 2 analizado
-    api -> db: cuenta los segundos de cada conducta\\nen los segundos de esa observación
-    db --> api: segundos de nado activo, inmovilidad, escalamiento y conducta activa
-  else el Día 2 de ese espécimen no tiene resultado\n(análisis en cola, procesando, con error, o sin subir)
-    api -> api: marca al espécimen como dato faltante\npara este grupo
+  api -> db: especímenes del grupo, vía sus tandas
+  api -> db: observación del video con sesión "Día 2" de cada espécimen
+  alt el espécimen tiene su Día 2 analizado
+    api -> db: segundos de nado activo, inmovilidad, escalamiento\ny conducta activa (sin "sin ver"), y nivelClasif
+    db --> api: cuatro conductas y nivel ("preciso" o "agrupado")
+  else el Día 2 no tiene resultado (en cola, procesando, en pausa, con error o sin subir)
+    api -> api: marca al espécimen como faltante, con su tanda y su estado
   end
 end
 
-api -> api: promedia los segundos por conducta\nentre los especímenes analizados de cada grupo\n(no se suman, para que el tamaño del grupo\nno distorsione la comparación)
-
-alt los especímenes de un grupo no coinciden en el nivel de clasificación\n("preciso" y "agrupado" mezclados)
-  api -> api: separa el resultado por nivel de clasificación\nen vez de sumarlos juntos
-  api --> ui: comparación entre grupos, con aviso de nivel mixto
-else todos los especímenes analizados coinciden en su nivel
-  api --> ui: comparación entre grupos, un solo nivel
+alt el grupo mezcla niveles "preciso" y "agrupado"
+  api -> api: no promedia: devuelve ese grupo por tanda
+  api --> ui: comparación con aviso de nivel mixto en la comparación
+else un solo nivel
+  api -> api: media, desviación estándar (n - 1) y varianza por conducta\nentre sus especímenes analizados, con todas sus tandas
+  api --> ui: 200 OK comparación en cuatro conductas (sin "sin ver")
 end
 
-ui -> inv: muestra la comparación de los grupos\n(solo Día 2), con los especímenes faltantes señalados
-inv -> ui: puede pedir el reporte descargable
+ui -> inv: muestra la comparación (solo Día 2) con faltantes por tanda y su estado
+inv -> ui: puede pedir el reporte de la vista (ver CU-10)
 @enduml

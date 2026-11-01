@@ -122,7 +122,7 @@ edge([Rr('REPORTE', 'idExperimento'), (gap(0, 40), rowy('REPORTE', 'idExperiment
       (gap(0, 40), rowy('EXPERIMENTO', 'fecha')), Lr('EXPERIMENTO', 'fecha')], '0..*', '1')
 edge([Rr('NOTIFICACION', 'idExperimento'), (gap(0, 62), rowy('NOTIFICACION', 'idExperimento')),
       (gap(0, 62), rowy('EXPERIMENTO', 'notas')), Lr('EXPERIMENTO', 'notas')], '0..*', '0..1')
-edge([Lr('GRUPO', 'idExperimento'), Rr('EXPERIMENTO', 'idExperimento')], '3..*', '1')
+edge([Lr('GRUPO', 'idExperimento'), Rr('EXPERIMENTO', 'idExperimento')], '0..*', '1')
 edge([Tc('TANDA'), Bc('GRUPO')], '1..*', '1')
 edge([Rr('ESPECIMEN', 'idTanda'), Lr('TANDA', 'idTanda')], '2..4', '1')
 edge([Tc('VIDEO'), Bc('TANDA')], '1..2', '1')

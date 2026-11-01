@@ -17,18 +17,18 @@ ui -> api: DELETE /experiments/{id}
 api -> db: lee el experimento, su dueño y el estado de sus análisis
 db --> api: datos
 alt el usuario no es quien lo creó ni es Administrador
-  api --> ui: 403
+  api --> ui: 403, "Solo quien creó el experimento o un Administrador puede eliminarlo"
 else algún análisis del experimento está "procesando" o "en pausa"
-  api --> ui: 409, "Espera a que termine el análisis o cancélalo"
+  api --> ui: 409, "No se puede eliminar mientras un análisis está procesando o en pausa"
 else se puede eliminar
   api -> db: borra en orden, de las hojas hacia arriba:\nSEGUNDO, OBSERVACION, ANALISIS,\nVIDEO, ESPECIMEN, TANDA, GRUPO,\nREPORTE, NOTIFICACION, EXPERIMENTO\n(todo en una sola transacción)
   db --> api: confirma
   api -> fs: borra los videos, reportes, diagnósticos y carpetas de pausa del experimento
   api --> ui: 200 OK
-  ui --> u: quita el experimento del dashboard
+  ui --> u: quita el experimento de la lista de experimentos
 end
 note over api, db
-  Quién puede eliminar y qué pasa con un análisis
-  en curso son propuestas, aún no aprobadas.
+  Solo el creador del experimento o un Administrador (403 si no);
+  409 si hay un análisis procesando o en pausa.
 end note
 @enduml

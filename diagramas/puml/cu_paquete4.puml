@@ -21,6 +21,11 @@ rectangle "Plataforma Web FST - Paquete 4" {
 INV --> CU09
 INV --> CU10
 INV --> CU25
+INV --> UC25R
+note right of UC25R
+  solo el creador del experimento
+  o un Administrador
+end note
 CU10 ..> CU09 : <<extend>>\n[solicita un reporte]
 CU10 ..> UC46 : <<include>>
 CU26 ..> CU25 : <<extend>>\n[la conducta del sistema\nno es la correcta]

@@ -4,10 +4,10 @@
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Cubre CU-02 "Cerrar sesion" (RF-02). Decision D-36 (3-oct): el
-'  token JWT dura mucho y es configurable; "cerrar sesion" solo
-'  hace que el navegador lo descarte. El servidor no guarda tokens
-'  cancelados, asi que no hay ninguna escritura en la base de datos.
+'  Cubre CU-02 "Cerrar sesion" (RF-02). La sesion dura 168 horas
+'  por omision (configurable); "cerrar sesion" solo hace que el
+'  navegador la olvide. El servidor no guarda sesiones canceladas,
+'  asi que no hay ninguna escritura en la base de datos.
 '
 '  Reemplaza a figures/mermaid/seq_logout.png (que mostraba el
 '  token registrado como invalido en el servidor).
@@ -28,7 +28,11 @@ participant Backend as api
 
 u -> ui: elige "Cerrar sesión" en el menú de usuario
 ui -> api: avisa que el usuario cierra sesión
-api --> ui: confirma\n(no guarda nada: el servidor no lleva\nuna lista de tokens cancelados)
-ui -> ui: borra el token del navegador
+api --> ui: confirma\n(no guarda nada: el servidor no lleva\nuna lista de sesiones canceladas)
+ui -> ui: el navegador olvida la sesión
 ui --> u: muestra la pantalla de inicio de sesión
+note over ui
+  La sesión dura una semana. Si vence,
+  se pide iniciar sesión de nuevo.
+end note
 @enduml

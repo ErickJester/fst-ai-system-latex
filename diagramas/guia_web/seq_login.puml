@@ -14,17 +14,21 @@ ui -> api: POST /auth/login {correo, contraseña}
 api -> db: busca el USUARIO por correo
 db --> api: usuario, o nada
 alt no existe, está inactivo (activo = false)\no la contraseña no coincide (bcrypt)
-  api --> ui: 401 con mensaje genérico\n"Credenciales incorrectas"
+  api --> ui: 401 con mensaje genérico\n"Correo o contraseña incorrectos"
   ui --> u: muestra el error, sin decir qué campo falló
 else credenciales válidas
   api -> db: ¿el idInstitucional está en ADMINISTRADOR?
   db --> api: sí / no
-  api -> api: genera el JWT con idInstitucional, rol\ny vencimiento (JWT_EXPIRES_HOURS)
+  api -> api: genera el JWT con idInstitucional\ny vencimiento (JWT_EXPIRES_HOURS)
   api --> ui: 200 OK {token, rol, cambioRequerido}
+  note right of ui
+    el rol no va en el JWT;
+    el backend lo vuelve a leer en cada petición
+  end note
   alt cambioRequerido = true
     ui --> u: obliga a cambiar la contraseña\nantes de continuar
   else cambioRequerido = false
-    ui --> u: abre el dashboard
+    ui --> u: muestra la lista de experimentos
   end
 end
 @enduml

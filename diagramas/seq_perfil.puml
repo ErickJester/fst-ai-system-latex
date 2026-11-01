@@ -30,13 +30,14 @@ participant Backend as api
 database "Base de datos" as db
 
 u -> ui: abre su perfil desde el menú de usuario
-ui -> api: pide los datos del perfil\ncon la sesión del usuario
-api -> db: lee nombre, apellidos y correo del usuario
-db --> api: datos actuales
-api --> ui: datos del perfil
-ui --> u: muestra el formulario con los datos actuales\ny la opción de cambiar la contraseña
+note over ui
+  no hay consulta de lectura: nombre, apellidos
+  y correo salen de la sesión del usuario
+end note
+ui --> u: muestra el formulario con los datos de la sesión\ny, en otro formulario de la misma pantalla,\nla opción de cambiar la contraseña
 
 u -> ui: modifica nombre, apellidos o correo y confirma
+ui -> ui: deshabilita el botón mientras se guarda
 ui -> api: envía los datos modificados
 
 alt el correo nuevo no tiene un formato válido
@@ -53,13 +54,13 @@ else el correo es válido
     api -> db: actualiza nombre, apellidos y correo\ndel usuario de la sesión
     db --> api: confirma
     api --> ui: datos actualizados
-    ui --> u: muestra el perfil actualizado
+    ui --> u: no muestra ningún mensaje; la barra superior actualiza las iniciales del usuario y el menú de usuario muestra los datos nuevos
   end
 end
 
 note over u, ui
-  El cambio de contraseña se hace aparte
-  (ver seq_cambio_pass_inv).
+  El cambio de contraseña se hace aparte, en otro
+  formulario de la misma pantalla (ver seq_cambio_pass_inv).
 end note
 
 @enduml

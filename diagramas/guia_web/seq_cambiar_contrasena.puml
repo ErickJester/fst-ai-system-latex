@@ -20,15 +20,28 @@ api -> db: lee contrasenaHash del usuario
 db --> api: hash actual
 alt la contraseña actual no coincide
   api --> ui: 400, "La contraseña actual no es correcta"
+  ui --> u: muestra el error, no cambia nada
 else coincide
-  alt la nueva es igual a la actual
-    api --> ui: 400, "Elige una contraseña distinta"
-  else es distinta
+  alt la nueva no cumple algún criterio
+    api --> ui: 400, solo el primer criterio incumplido, en este orden:\nmínimo 8 caracteres, máximo 72 bytes,\n"Elige una contraseña distinta"
+    ui --> u: pide escribir otra contraseña
+  else es válida
     api -> api: calcula el hash nuevo (bcrypt con sal)
     api -> db: actualiza contrasenaHash y\npone cambioRequerido = false
     db --> api: confirma
+    note over api
+      la sesión actual y las demás del usuario siguen activas;
+      los enlaces de recuperación pendientes (seq_recuperar_contrasena) dejan de servir
+    end note
     api --> ui: 200 OK
-    ui --> u: confirma el cambio y continúa al dashboard
+    alt primer acceso (CU-16)
+      ui --> u: confirma el cambio y muestra la lista de experimentos
+    else cambio voluntario (CU-18)
+      ui --> u: confirma el cambio y se queda en Mi perfil
+    end
   end
 end
+note over u, ui
+  Con cambioRequerido = true solo se permite\ncambiar la contraseña o cerrar sesión.
+end note
 @enduml

@@ -45,16 +45,34 @@ alt la contraseña actual no coincide
   api --> ui: rechaza: la contraseña actual no es correcta
   ui --> u: muestra el error, no cambia nada
 else la contraseña actual coincide
-  alt la nueva no cumple los requisitos\no es igual a la actual
-    api --> ui: rechaza e indica los criterios incumplidos
-    ui --> u: pide escribir una contraseña diferente
+  alt la nueva no cumple algún criterio
+    note over api
+      se avisa solo el primer criterio incumplido, en este orden:
+      mínimo 8 caracteres, máximo 72 bytes, distinta de la actual
+    end note
+    api --> ui: rechaza e indica ese criterio
+    ui --> u: pide escribir otra contraseña
   else la nueva contraseña es válida
-    api -> api: cifra la contraseña nueva (con sal)
+    api -> api: cifra la contraseña nueva
     api -> db: guarda la contraseña nueva\ny quita la marca de cambio obligatorio
     db --> api: confirma
-    api --> ui: cambio realizado
-    ui --> u: confirma el cambio y continúa al dashboard
+    note over api
+      la sesión actual y las demás sesiones del usuario siguen activas;
+      los enlaces de restablecer contraseña pendientes dejan de servir
+    end note
+    alt viene del primer acceso (CU-16)
+      api --> ui: cambio realizado
+      ui --> u: confirma el cambio y muestra la lista de experimentos
+    else cambio voluntario desde el perfil (CU-18)
+      api --> ui: cambio realizado
+      ui --> u: confirma el cambio y se queda en Mi perfil
+    end
   end
 end
+
+note over u, ui
+  Mientras la cuenta tenga el cambio obligatorio, solo se permite
+  cambiar la contraseña o cerrar sesión.
+end note
 
 @enduml

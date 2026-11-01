@@ -24,7 +24,7 @@ end note
 job -> db: análisis completados cuya fechaAnalisis + 30 días\ncaiga dentro de los próximos 7 días\ny cuyo archivo todavía exista
 db --> job: lista de videos por vencer
 note right of job
-  No se guarda nada: el dashboard calcula el aviso
+  No se guarda nada: la lista de experimentos calcula el aviso
   con esta misma regla (nombre del experimento y
   fecha exacta de vencimiento).
 end note

@@ -380,8 +380,9 @@ notificaciones.
   [`diagramas/seq_descarga_reportes.puml`](diagramas/seq_descarga_reportes.puml),
   reemplaza a `seq_reportes`. `REPORTE` sigue colgando de `EXPERIMENTO`, sin cambio de
   fondo en el modelo, pero CU-10 ya insinuaba caché ("el sistema genera o recupera el
-  archivo") sin decir cómo se invalida — **D-21** resuelve que se regenera solo si hubo un
-  análisis más reciente que el reporte guardado (reanálisis, D-03).
+  archivo"). El caché del reporte no se invalida por fecha: se invalida por eventos
+  (reanálisis, corrección en la revisión, edición del experimento, borrado de tanda o de
+  experimento, cambio de nombre del creador, fin o falla del worker).
 
 ### 3.5 Diagramas de casos de uso (`:581`–`:2042`)
 

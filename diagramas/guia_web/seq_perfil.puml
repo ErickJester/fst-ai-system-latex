@@ -9,7 +9,15 @@ participant "Interfaz web" as ui
 participant Backend as api
 database "Base de datos" as db
 
-u -> ui: abre su perfil y cambia nombre, apellidos o correo
+u -> ui: abre su perfil
+note over ui
+  no hay GET: nombre, apellidos y correo
+  salen de la sesión (JWT)
+end note
+ui --> u: formulario con esos datos y, en otro formulario\nde la misma pantalla, el cambio de contraseña
+
+u -> ui: cambia nombre, apellidos o correo y confirma
+ui -> ui: deshabilita el botón mientras guarda
 ui -> api: PATCH /users/me {nombre, apellidos, correo}\ncon el JWT del usuario
 alt el correo nuevo no tiene un formato válido
   api --> ui: 400, "Escribe un correo válido"
@@ -22,11 +30,11 @@ else el correo es válido
     api -> db: actualiza nombre, apellidos y correo\ndel idInstitucional del token
     db --> api: confirma
     api --> ui: 200 OK {datos actualizados}
-    ui --> u: muestra el perfil actualizado
+    ui --> u: sin mensaje; la barra superior actualiza las iniciales del usuario y el menú de usuario muestra los datos nuevos
   end
 end
 note over u, ui
-  El cambio de contraseña se hace aparte
-  (ver seq_cambiar_contrasena).
+  El cambio de contraseña se hace aparte, en otro
+  formulario de la misma pantalla (ver seq_cambiar_contrasena).
 end note
 @enduml

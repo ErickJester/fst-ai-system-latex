@@ -35,7 +35,7 @@ reproductivos cortos y bajo costo de mantenimiento.
 
 El uso de especímenes de laboratorio en México está regulado por la Norma Oficial Mexicana
 NOM-062-ZOO-1999 \cite{nom062}, que establece las especificaciones éticas, sanitarias
-y de bienestar animal para su cuidado y uso experimental. El laboratorio colaborador
+y de cuidado para su uso experimental. El laboratorio colaborador
 opera bajo esas disposiciones; este proyecto solo analiza los videos que resultan de
 los experimentos, sin intervenir en ningún procedimiento con los especímenes.
 
@@ -56,10 +56,10 @@ necesidad que origina este Trabajo Terminal.
 
 Un experimento de FST es un estudio completo que compara varios grupos de especímenes
 entre sí. Hay tres tipos de grupo, y cada tipo cumple un papel distinto en la evaluación,
-como se muestra en la Tabla~\ref{tab:grupos_experimentales}. Un experimento tiene tres o
+como se muestra en la Tabla~\ref{tab:grupos_experimentales}. Por protocolo, un experimento tiene tres o
 más grupos, en promedio cuatro, porque un mismo tipo puede repetirse: por ejemplo, varias
 moléculas o varias dosis evaluadas como tratamientos experimentales distintos. Lo habitual
-es que cada grupo tenga de 6 a 8 especímenes, aunque no es una regla del protocolo.
+es que cada grupo tenga de 6 a 8 especímenes; el sistema no fija un máximo.
 
 \begin{table}[H]
 \centering
@@ -73,7 +73,7 @@ es que cada grupo tenga de 6 a 8 especímenes, aunque no es una regla del protoc
 Control
   & Recibe placebo (el vehículo, sin principio activo) el día~2; el día~1 nadie recibe
     nada. Los tres grupos pasan por el mismo protocolo de nado forzado (20~min el día~1,
-    5~min el día~2), y el placebo hace que el estrés de la inyección sea igual en todos,
+    5~min el día~2, según el protocolo), y el placebo hace que el estrés de la inyección sea igual en todos,
     de modo que una diferencia con otro grupo no se atribuya al piquete. Sus conductas
     establecen la línea base contra la que se comparan los demás grupos. \\
 \hline
@@ -110,7 +110,7 @@ cada conducta--- lleva alrededor de 30 minutos por espécimen, es decir, hasta u
 horas por video de cuatro especímenes. Si el protocolo incluye que tres
 analistas anotan de forma independiente para verificar consistencia, ese tiempo se
 triplica. En un semestre de actividad regular el laboratorio puede juntar alrededor de
-32 a 40 videos, aunque no tiene un calendario fijo, lo que suma decenas de horas-persona
+24 a 32 videos, aunque no tiene un calendario fijo, lo que suma decenas de horas-persona
 de anotación manual.
 
 Los problemas que genera ese proceso son los siguientes:
@@ -173,9 +173,8 @@ El sistema tiene dos partes:
 
 El sistema asume calidad mínima de entrada: vista lateral con todos los cilindros
 visibles (de dos a cuatro), contraste suficiente entre el espécimen y el fondo, y cámara estable. Los videos
-disponibles tienen variaciones de iluminación y contraste; el sistema se entrena con ellas,
-se mide su robustez durante el desarrollo y se documentarán los requisitos mínimos de
-calidad de los videos.
+disponibles tienen variaciones de iluminación y contraste; el sistema se entrena con ellas
+y su robustez se evalúa con validación agrupada por video.
 
 El desempeño del clasificador se evalúa con métricas de clasificación estándar
 (precisión, \textit{recall} y F1 por conducta) sobre un conjunto de prueba independiente.
@@ -215,7 +214,7 @@ calidad de producto de software de la ISO y la IEC.
 
 \section{Justificación}
 
-Un semestre de actividad regular puede traer alrededor de 32 a 40 videos que anotar,
+Un semestre de actividad regular puede traer alrededor de 24 a 32 videos que anotar,
 aunque el laboratorio no tiene un calendario fijo. Con el método manual, anotar un
 video de 5~minutos con sus dos a cuatro especímenes lleva alrededor de 30 minutos por
 espécimen, hasta unas dos horas por video; si tres analistas lo hacen de forma independiente para verificar consistencia,
@@ -251,7 +250,7 @@ estándar sobre el conjunto de prueba; \textit{time behaviour} (desempeño tempo
 debe terminar en un tiempo asumible en el flujo de trabajo; y \textit{usability}
 (usabilidad), que garantiza que un investigador sin conocimientos de programación puede
 operar el sistema sin ayuda técnica. Esos tres atributos, junto con la repetibilidad que
-fijó el laboratorio, son los cuatro criterios de aceptación de la validación final.
+fijó el laboratorio, son los cuatro criterios de aceptación del sistema.
 
 
 \section{Alcance del proyecto}
@@ -263,8 +262,8 @@ fijó el laboratorio, son los cuatro criterios de aceptación de la validación 
         la cámara girada no se puede procesar), con todos los cilindros (de dos a cuatro)
         visibles simultáneamente en el encuadre y cámara estacionaria. El video principal que
         el sistema procesa es el del día~2 (5~min) para cada espécimen de todos los
-        grupos experimentales; de cada video se analizan, como máximo, los últimos 300~segundos
-        (si el video dura menos, se analiza completo). El video del día~1, que es una sesión de
+        grupos experimentales; el pipeline procesa el video completo; para cada espécimen se conservan y revisan únicamente los últimos 300~s
+        (si el video dura menos, se conservan todos sus segundos). El video del día~1, que es una sesión de
         habituación, puede subirse para dejar constancia de que el grupo la tuvo; el sistema no
         lo analiza.
 
@@ -276,8 +275,8 @@ fijó el laboratorio, son los cuatro criterios de aceptación de la validación 
 
   \item \textbf{Clasificación de conductas:} el sistema clasifica de forma continua
         las tres conductas del FST: nado activo, inmovilidad y escalamiento.
-        El buceo se clasifica como nado activo. Cada segundo recibe
-        una conducta, sin duración mínima, lo que permite registrar conductas breves
+        El buceo se clasifica como nado activo. Cada segundo se clasifica observando
+        una ventana de 4 s a su alrededor y recibe una conducta, sin duración mínima, lo que permite registrar conductas breves
         de unos dos segundos; los resultados también se agrupan en bloques de cinco
         segundos. Cada bloque toma la conducta con más segundos (mayoría relativa);
         si hay empate en el primer lugar, el bloque es conducta activa. Si algún segundo
@@ -285,8 +284,8 @@ fijó el laboratorio, son los cuatro criterios de aceptación de la validación 
         se vio, es conducta activa con matiz. El último bloque puede quedar incompleto,
         y los segundos que le faltan no cuentan como no vistos. Los bloques y los
         totales se calculan al consultarlos; nunca se guardan.
-        Cuando la confianza no alcanza para decidir entre nado y escalamiento, el
-        sistema lo registra como conducta activa (RN-13), una cuarta conducta.
+        Cuando ninguna clase alcanza el umbral de confianza de 0.80, pero la suma de nado y
+        escalamiento sí lo alcanza, el segundo queda como conducta activa (RN-13), una cuarta conducta.
 
   \item \textbf{Métricas y comparación por grupo:} tiempo total de cada conducta en
         el video del día~2 (hasta 300~s) y desglose por minuto; los segundos sin
@@ -297,25 +296,26 @@ fijó el laboratorio, son los cuatro criterios de aceptación de la validación 
 
   \item \textbf{Reportes y exportaciones:} si el análisis falla, un reporte de
         diagnóstico en PDF indica en qué etapa se detuvo y por qué; exportación de
-        datos en CSV y en XLSX con columnas Grupo, Tanda, Espécimen,
-        Tiempo (min:seg), Nado activo, Escalamiento, Inmovilidad, Conducta activa,
-        Revisión humana y Sin ver (los segundos sin conducta, de modo que cada
-        fila suma todos los segundos), desglosadas por espécimen y por minuto, con
-        filtros por grupo y tanda, y con la media, la desviación estándar y la
-        varianza por conducta, incluida Sin ver, de la tanda o del grupo que se descarga.
+        datos en CSV y en XLSX, y un reporte de resultados en PDF que también incluye la columna «Sin ver»; las hojas CSV y XLSX tienen nueve columnas: Grupo, Tanda, Espécimen,
+        Tiempo (min:seg), Nado, Escalamiento, Inmovilidad, Conducta activa y Sin ver
+        (los segundos sin conducta, de modo que cada fila suma todos los segundos),
+        desglosadas por espécimen y por minuto. Si un análisis tiene revisión humana, el
+        archivo lo indica en una fila de texto al final, con los especímenes revisados.
+        La exportación se hace por grupo o por tanda, e incluye la media, la desviación
+        estándar y la varianza por conducta, incluida Sin ver.
 
   \item \textbf{Revisión segundo a segundo:} cuando el análisis termina, el usuario
         puede abrir una pantalla con el video y una línea de tiempo por espécimen,
         coloreada por conducta, y corregir la etiqueta de cada segundo. Cada segundo
-        guarda su origen (del sistema, confirmado, corregido o dudoso), y los totales
+        guarda su origen (de la máquina, confirmado, corregido o dudoso), y los totales
         por minuto se calculan siempre desde esas etiquetas, así que reflejan las
         correcciones. Reiniciar un análisis completado borra el resultado y toda la
         revisión hecha; la pantalla avisa antes, la acción no se puede deshacer y solo
-        la hace quien subió el video o un administrador.
+        la hacen solo el creador del experimento (quien sube sus videos) o un Administrador.
 
   \item \textbf{Plataforma web:} interfaz accesible desde el navegador con creación
         de cuenta de usuario por parte del administrador, carga de videos, cola de
-        procesamiento secuencial para hasta cuatro usuarios trabajando en un mismo período,
+        procesamiento secuencial, con un análisis a la vez en orden de llegada, para hasta cuatro usuarios trabajando en un mismo período,
         consulta de resultados por espécimen y sesión, avisos de análisis terminado o con error
         en el panel y por correo, y descarga de reportes. Los
         datos se almacenan en base de datos para permitir comparar grupos y
@@ -428,13 +428,13 @@ Revisiones mensuales con directores e investigador del laboratorio
 \hline
 \multicolumn{13}{|l|}{\textbf{TT-II --- Implementación y pruebas (julio--enero)}} \\
 \hline
-Entorno Flask\,/\,PostgreSQL\,/\,Docker, esquema de la base de datos y API REST
+Entorno Spring Boot\,/\,PostgreSQL\,/\,Docker, esquema de la base de datos y API REST
   & & & & & & $\bullet$ & $\bullet$ & & & & & \\
 \hline
 Autenticación y control de acceso (\textit{JSON Web Token}, JWT, y roles)
   & & & & & & & $\bullet$ & & & & & \\
 \hline
-Vistas React.js: carga de video, \textit{dashboard} (panel de control) y seguimiento de progreso
+Vistas React: carga de video, lista de experimentos y seguimiento de progreso
   & & & & & & & $\bullet$ & $\bullet$ & & & & \\
 \hline
 Integración \textit{frontend}--\textit{backend} y módulo de gestión de sesiones
@@ -497,7 +497,7 @@ Entrenamiento del clasificador de conducta (nado activo, inmovilidad y escalamie
 Ajuste de hiperparámetros y evaluación del clasificador
   & & & & & & & & $\bullet$ & & & & \\
 \hline
-Generación de métricas por individuo y por sesión
+Generación de métricas por espécimen y por sesión
   & & & & & & & & & $\bullet$ & & & \\
 \hline
 Pruebas con distintas condiciones $+$ oclusiones y reflejos
@@ -512,9 +512,9 @@ Redacción de caps.\ resultados, manuales y material de defensa
 \end{tabular}
 \end{sidewaystable}
 
-El \textit{stack} (conjunto de tecnologías) técnico cubre los dos frentes del proyecto: Python con Flask, OpenCV,
-scikit-learn, PyTorch y PostgreSQL para el \textit{pipeline} y el \textit{backend}; React.js
-para el \textit{frontend}; un etiquetador propio del equipo, que propone la conducta de cada
+El \textit{stack} (conjunto de tecnologías) técnico cubre los dos frentes del proyecto: Java con Spring Boot
+para el \textit{backend}; Python con OpenCV, scikit-learn, PyTorch y pandas para el \textit{worker} y el
+\textit{pipeline}; PostgreSQL para la base de datos; React con Vite para el \textit{frontend}; un etiquetador propio del equipo, que propone la conducta de cada
 espécimen y permite revisarla y corregirla, para anotar el \textit{dataset} (conjunto de datos) de conductas; Git
 para control de versiones y Docker para empaquetar el sistema.
 

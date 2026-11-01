@@ -1,29 +1,15 @@
 @startuml seq_pausa_y_ajuste
 ' ================================================================
 '  Secuencia - Pausa del análisis por espécimen que no se ve,
-'  ajuste del recuadro del cilindro y cancelación
+'  ajuste del recuadro del cilindro, continuación o cancelación
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Fuente nueva (12-oct). Cubre RN-17 y las decisiones D-59, D-67
-'  y D-89: el Worker pausa el análisis, el usuario ajusta el
-'  recuadro sobre una imagen fija o cancela, y el análisis vuelve al
-'  frente de la cola y continúa desde el segundo de la pausa.
+'  la pausa espera al usuario hasta 72 horas.
+'  La etapa registrada en la pausa es "cilindros".
 '
-'  Detalles que fija D-89:
-'  - Quien nota que no se ve al espécimen es el pipeline (la
-'    segmentación contra el fondo), no la red: la red solo entrega
-'    la conducta de cada segundo.
-'  - La imagen fija es un fotograma del video original, tomado en el
-'    segundo central de los tres que no se vieron.
-'  - El recuadro no vive en la base de datos: va en el archivo de
-'    pausa del volumen compartido (no hay tabla ni columna nueva).
-'  - El Worker suelta el video en pausa y atiende el siguiente de la
-'    cola. El análisis ajustado conserva su fecha de encolado, así
-'    que queda por delante de los que llegaron después.
-'  - El Worker escribe primero el archivo y después el estado. El
-'    estado de la base es el árbitro: backend y Worker lo cambian
-'    solo si el análisis sigue "en pausa".
+'  Version de lenguaje natural. Los códigos, rutas y nombres de
+'  archivo están en diagramas/guia_web/seq_pausa_y_ajuste.puml.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_pausa_y_ajuste.puml
@@ -45,9 +31,9 @@ participant Worker as w
 
 == El Worker pausa el análisis ==
 
-w -> w: ve tres segundos seguidos sin el espécimen en un cilindro (RN-17)
-w -> fs: guarda una imagen fija del segundo central de esos tres,\ncon el recuadro actual de cada cilindro
-w -> fs: escribe el archivo de pausa: cilindro, segundo,\nhora de la pausa y recuadros
+w -> w: ve tres segundos seguidos sin ver al espécimen (RN-17)
+w -> fs: toma una imagen fija a la mitad de esos tres segundos,\ncon los recuadros actuales de cada cilindro
+w -> fs: guarda los datos de la pausa: cilindro, segundo,\nhora de la pausa y recuadros
 w -> db: marca el análisis como "en pausa"
 w -> db: crea la notificación de análisis en pausa
 w -> w: suelta el video y atiende el siguiente de la cola
@@ -57,47 +43,86 @@ w -> w: suelta el video y atiende el siguiente de la cola
 inv -> ui: abre la notificación
 ui -> api: pide los datos de la pausa de ese análisis
 api -> db: lee el análisis y su estado
-api -> fs: lee el archivo de pausa y la imagen fija
-api --> ui: imagen, recuadro actual y tiempo que queda de los 5 minutos
-ui --> inv: muestra la imagen con el recuadro, el tiempo que queda\ny los botones "Ajustar y continuar" y "Cancelar análisis"
+api -> fs: lee los datos de la pausa y la imagen fija
+api --> ui: imagen, recuadro actual y tiempo que queda de las 72 horas
+ui --> inv: muestra la imagen con el recuadro, el tiempo que queda\ny tres botones: "Ajustar y continuar",\n"El recuadro está bien, continuar" y "Cancelar análisis"
 
 alt el usuario ajusta el recuadro
   inv -> ui: arrastra el recuadro y pulsa "Ajustar y continuar"
   ui -> api: envía el cilindro y el recuadro nuevo
-  api -> fs: agrega el recuadro nuevo al archivo de pausa
-  api -> db: pasa el análisis a "en cola", solo si todavía está "en pausa"\n(conserva su fecha de encolado)
+  api -> api: revisa el recuadro
+  alt el recuadro queda fuera de la imagen
+    api --> ui: rechaza: el recuadro queda fuera de la imagen
+    ui --> inv: pide corregirlo
+  else el recuadro casi no cambió (3 píxeles o menos)
+    api --> ui: rechaza: el recuadro casi no cambió
+    ui --> inv: pide mover el recuadro
+  else el recuadro es válido
+    api -> fs: agrega el recuadro nuevo a los datos de la pausa
+    api -> db: pasa el análisis a "en cola", solo si sigue "en pausa"\n(conserva su fecha de encolado)
+    alt el análisis seguía en pausa
+      db --> api: confirma
+      api --> ui: confirma
+      ui --> inv: avisa que el análisis continuará en cuanto el sistema esté libre
+    note over api
+      al retomarse, el pipeline procesa el video de nuevo desde el principio
+      y aplica el recuadro corregido desde el inicio del primer segundo de esos tres
+    end note
+    else ya no estaba en pausa
+      db --> api: no cambió nada
+      api --> ui: "El análisis ya no está en pausa."
+      ui --> inv: muestra ese mensaje
+    end
+  end
+else el recuadro está bien
+  inv -> ui: pulsa "El recuadro está bien, continuar"
+  ui -> api: pide continuar sin cambiar el recuadro
+  api -> db: pasa el análisis a "en cola", solo si sigue "en pausa"
   alt el análisis seguía en pausa
     db --> api: confirma
     api --> ui: confirma
-    ui --> inv: avisa que el análisis continuará en cuanto el sistema esté libre
-  else ya no estaba en pausa (se canceló)
+    ui --> inv: avisa que el análisis continuará
+  else ya no estaba en pausa
     db --> api: no cambió nada
-    api --> ui: ya no se puede ajustar
-    ui --> inv: avisa que el análisis ya se canceló
+    api --> ui: "El análisis ya no está en pausa."
+    ui --> inv: muestra ese mensaje
   end
 else el usuario cancela el análisis
   inv -> ui: pulsa "Cancelar análisis"
+  ui --> inv: pide confirmar: «¿Cancelar el análisis? No se puede reanudar:\nhabrá que subir el video otra vez.»
+  inv -> ui: confirma la cancelación
   ui -> api: pide cancelar el análisis
-  api -> db: pasa el análisis a "cancelado", solo si todavía está "en pausa"
-  api --> ui: confirma, o avisa que ya no estaba en pausa
-  ui --> inv: muestra el análisis como cancelado
+  api -> db: pasa el análisis a "cancelado", solo si sigue "en pausa"
+  note right of api
+    no borra archivos, no crea notificación
+    y no guarda motivo
+  end note
+  alt el análisis seguía en pausa
+    api --> ui: confirma
+    ui --> inv: muestra el análisis como cancelado
+  else ya no estaba en pausa
+    api --> ui: "El análisis ya no está en pausa."
+    ui --> inv: muestra ese mensaje
+  end
 end
 
 == El Worker retoma el análisis ajustado ==
 
-w -> db: toma el análisis en cola más antiguo\n(el ajustado queda por delante de los que llegaron después)
-w -> fs: lee el archivo de pausa
-w -> w: convierte el recuadro nuevo a las coordenadas del video estabilizado\ny reemplaza la geometría de ese cilindro
+w -> db: toma el análisis en cola más antiguo\n(el ajustado conserva su fecha de encolado)
 w -> db: marca el análisis como "procesando"
-w -> w: vuelve a revisar esos tres segundos y continúa\ndesde el segundo de la pausa
+w -> fs: lee los datos de la pausa
+w -> w: convierte el recuadro nuevo a las coordenadas del video\nestabilizado y reemplaza la geometría de ese cilindro
+w -> w: procesa el video de nuevo desde el principio y aplica\nel recuadro corregido desde el inicio del primer segundo de esos tres
 
-== Si pasan 5 minutos sin respuesta ==
+== Si pasan 72 horas sin respuesta ==
 
 loop en cada vuelta de la cola
   w -> db: busca los análisis "en pausa"
-  w -> fs: lee la hora de pausa de cada uno
-  opt pasaron más de 5 minutos
-    w -> db: pasa el análisis a "cancelado", solo si todavía está "en pausa"
+  opt el análisis no tiene datos de pausa
+    w -> db: pasa el análisis a "cancelado", solo si sigue "en pausa"
+  end
+  opt pasaron más de 72 horas desde la pausa
+    w -> db: pasa el análisis a "cancelado", solo si sigue "en pausa"
     w -> db: crea la notificación de análisis cancelado
   end
 end

@@ -5,18 +5,30 @@
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
 '  Cubre la pantalla de revision que el usuario abre cuando el
-'  analisis termina (D-34, 3-oct). El usuario ve el video con una
 '  linea de tiempo por especimen, coloreada por conducta, y corrige
 '  la etiqueta de cada segundo. Las correcciones se guardan en
-'  SEGUNDO (D-35). Los totales por minuto no se guardan (D-52): se
-'  calculan desde SEGUNDO al mostrarse, asi que no hay que recalcularlos.
 '
-'  Corrige el investigador que subio el video o el Administrador. La
-'  copia del video en H.264 la genera el worker al terminar el analisis.
-'  El creador del experimento o el Administrador puede reiniciar el analisis
-'  completado desde esta pantalla: la pantalla avisa antes que se borran el
-'  resultado anterior y toda la revision hecha, y que no se puede deshacer; al
-'  confirmar, el analisis vuelve a "en cola" y empieza de nuevo.
+'  Quien no puede corregir (no subio el video y no es Administrador)
+'  ve la misma pantalla en solo lectura; no se le rechaza.
+'
+'  Al guardar, el sistema recalcula el nivel de clasificación del
+'  análisis ("agrupado" o "preciso", RN-13) y devuelve los totales
+'  recalculados sin guardarlos. Si no hay cambios, no se envía nada.
+'
+'  Reiniciar el análisis (solo el creador del experimento o el
+'  Administrador, y solo con el análisis completado) borra los
+'  archivos de la corrida y toda la revisión hecha, pone la fecha
+'  del análisis en el momento actual (queda al final de la cola),
+'  responde "aceptado" y lleva a la pantalla de progreso. La
+'  pantalla avisa antes y no se puede deshacer (RN-04).
+'
+'  El borrador de la revisión se restaura al volver a entrar. Se
+'  borra al guardar, al reiniciar y al cerrar sesión; también se
+'  guarda al cerrar la pestaña.
+'
+'  La copia del video en H.264 la genera el Worker al terminar el
+'  análisis. El video se entrega con un permiso temporal de 120
+'  minutos, obtenido antes de pedir el video.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_revision_segundos.puml
@@ -37,10 +49,10 @@ participant "Archivos" as fs
 
 u -> ui: en Progreso o en Resultados elige\n"Revisar segundo a segundo"
 ui -> api: pide los datos de la revisión del análisis
-api -> db: ¿el análisis está "completado" y el usuario subió el video\no es Administrador?
+api -> db: ¿el análisis está "completado"?\n¿el usuario subió el video o es Administrador?
 db --> api: sí / no
 
-alt el análisis no está completado o el usuario no puede corregirlo
+alt el análisis no está completado
   api --> ui: rechaza la petición
   ui --> u: muestra el motivo
 else el análisis está completado
@@ -49,31 +61,45 @@ else el análisis está completado
   api -> fs: lee los recuadros de los cilindros
   fs --> api: recuadros
   api --> ui: duración, especímenes, etiquetas y recuadros
-  ui -> api: pide el video
+  note over ui
+    Si el usuario no subió el video y no es
+    Administrador, la pantalla queda en solo
+    lectura: ve todo, pero no puede corregir.
+  end note
+  ui -> api: pide un permiso temporal para el video (120 minutos)
+  api --> ui: permiso temporal
+  ui -> api: pide el video con ese permiso
   api -> fs: lee la copia del video en H.264 para reproducir
   api --> ui: video, por partes (para adelantar y retroceder)
 
   loop el usuario revisa un espécimen a la vez
-    u -> ui: pulsa una conducta, pausa\no mueve la línea de tiempo
+    u -> ui: pulsa una conducta o «No se ve» (el segundo queda sin conducta),\npausa o mueve la línea de tiempo
     ui -> ui: guarda un borrador en el navegador
   end
 
-  u -> ui: elige "Guardar"
-  ui -> api: envía las correcciones\n(espécimen, segundo, conducta, origen)
-  api -> db: actualiza SEGUNDO\n(conducta y origen de cada segundo)
-  api -> db: borra los reportes guardados del experimento\npara que se regeneren con los datos nuevos
-  api -> fs: borra los archivos de esos reportes
-  db --> api: confirma
-  api --> ui: guardado
-  ui --> u: confirma que se guardó
+  opt el usuario hizo cambios y elige "Guardar"
+    u -> ui: elige "Guardar"
+    ui -> api: envía las correcciones\n(espécimen, segundo, conducta, origen)
+    api -> db: actualiza SEGUNDO\n(conducta y origen de cada segundo)
+    api -> db: recalcula el nivel de clasificación del análisis\n("agrupado" si queda algún segundo como conducta activa,\n"preciso" si no)
+    api -> db: borra los reportes guardados del experimento\npara que se regeneren con los datos nuevos
+    api -> fs: borra los archivos de esos reportes
+    db --> api: confirma
+    api --> ui: guardado, con los totales recalculados\n(no se guardan)
+    ui --> u: confirma que se guardó
+    ui -> ui: borra el borrador
+  end
 
   opt el usuario elige "Reiniciar el análisis"
     u -> ui: elige "Reiniciar el análisis"
     ui --> u: avisa que se borran el resultado anterior y toda la revisión hecha,\ny que no se puede deshacer
     u -> ui: confirma el reinicio
     ui -> api: pide reiniciar el análisis del video
-    api -> db: borra el resultado anterior y toda la revisión hecha\ny deja el análisis "en cola"
-    api --> ui: confirma el reinicio
+    api -> fs: borra los resultados de la corrida anterior
+    api -> db: borra el resultado anterior y toda la revisión hecha,\ny deja el análisis "en cola"\ny lo pasa al final de la cola
+    api --> ui: aceptado
+    ui -> ui: borra el borrador
+    ui --> u: lleva a la pantalla de progreso
   end
 end
 @enduml

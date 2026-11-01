@@ -16,7 +16,7 @@ rectangle "Plataforma Web FST" {
   rectangle "Paquete 2\nGestion de experimentos y carga de video" as P2
   rectangle "Paquete 3\nPipeline de analisis conductual" as P3
   rectangle "Paquete 4\nResultados y reportes" as P4
-  rectangle "Paquete 5\nDashboard, notificaciones y administracion" as P5
+  rectangle "Paquete 5\nLista de experimentos, notificaciones y administracion" as P5
 }
 INV --> P1
 INV --> P2

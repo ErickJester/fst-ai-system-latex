@@ -14,6 +14,7 @@
   .agua{position:absolute;left:0;right:0;top:78px;border-top:2px dashed color-mix(in srgb,var(--color-text) 35%,transparent)}
   .caja{position:absolute;border:3px solid var(--color-accent);background:color-mix(in srgb,var(--color-accent) 12%,transparent);cursor:move}
   .caja i{position:absolute;right:-6px;bottom:-6px;width:11px;height:11px;background:var(--color-accent);cursor:nwse-resize}
+  .caja b{position:absolute;left:0;top:-24px;white-space:nowrap;font-size:11px;font-weight:400}
   .tiempo{font-size:30px}
 </style>
 </head>
@@ -31,14 +32,14 @@
         <h3 style="margin:0">Análisis en pausa</h3>
         <span class="tag tag-accent" style="white-space:nowrap">En pausa</span>
       </div>
-      <p class="lead" style="margin:0 0 18px;max-width:640px">Compuesto CSR-14 · Experimental B · Tanda A · Día 2. El sistema no vio al espécimen del <strong>cilindro 2 (P2)</strong> durante tres segundos seguidos, en el <strong>segundo 142</strong> del video.</p>
+      <p class="lead" style="margin:0 0 18px;max-width:640px">Compuesto CSR-14 · Experimental B · Tanda A · Día 2. No se ve al espécimen del <strong>cilindro 2 (P2)</strong> durante tres segundos seguidos, del segundo 141 al 143 del video; la imagen fija es la del segundo 142.</p>
 
       <div style="display:flex;align-items:center;gap:22px;border:2px solid var(--color-accent);padding:14px 18px;margin-bottom:18px">
         <div>
           <div class="k">Tiempo que queda para responder</div>
-          <div class="num nd tiempo" id="reloj">3:41</div>
+          <div class="num nd tiempo" id="reloj">71 h 42 min</div>
         </div>
-        <div class="hint" style="flex:1">Si pasan 5 minutos sin respuesta, el sistema cancela el análisis. Mientras tanto, la cola atiende el siguiente video.</div>
+        <div class="hint" style="flex:1">Si pasan 72 horas sin respuesta, el análisis se cancela (RN-17). Mientras tanto, la cola atiende el siguiente video.</div>
       </div>
 
       <div class="k" style="margin-bottom:8px">Imagen fija del instante · arrastra el recuadro hasta donde está el espécimen</div>
@@ -48,14 +49,15 @@
         <div class="cil" style="left:250px"><span class="num nd">P2</span></div>
         <div class="cil" style="left:430px"><span class="num nd">P3</span></div>
         <div class="cil" style="left:610px"><span class="num nd">P4</span></div>
-        <div class="caja" id="caja" style="left:262px;top:210px;width:96px;height:100px"><i id="asa"></i></div>
+        <div class="caja" id="caja" style="left:262px;top:210px;width:96px;height:100px"><b>Recuadro del cilindro 2</b><i id="asa"></i></div>
       </div>
-      <p class="hint" style="margin:8px 0 18px">El recuadro se arrastra y se redimensiona sobre la imagen. «Ajustar y continuar» reemplaza el recuadro de ese cilindro, vuelve a revisar esos 3 segundos y sigue desde ahí; los segundos anteriores se quedan medidos con el recuadro original.</p>
+      <p class="hint" style="margin:8px 0 18px">El recuadro se arrastra y se redimensiona sobre la imagen. «Ajustar y continuar» guarda el recuadro del cilindro y reinicia el análisis con esa corrección desde el inicio de esos tres segundos. «El recuadro está bien, continuar» hace lo mismo con el recuadro actual.</p>
 
       <div style="display:flex;align-items:center;flex-wrap:wrap;gap:12px">
         <button type="button" class="btn btn-primary" id="btnAjustar">Ajustar y continuar</button>
+        <button type="button" class="btn btn-secondary" id="btnBien">El recuadro está bien, continuar</button>
         <button type="button" class="btn btn-secondary" id="btnCancelar">Cancelar análisis</button>
-        <span class="hint">Solo quien subió el video o un administrador puede ajustar o cancelar.</span>
+        <span class="hint">Solo quien subió el video o un administrador puede ajustar, continuar o cancelar.</span>
       </div>
     </div>
 
@@ -66,7 +68,7 @@
       </div>
       <p class="lead" style="margin:0 0 18px;max-width:640px">Compuesto CSR-14 · Experimental B · Tanda A · Día 2.</p>
       <div style="border:2px solid var(--color-accent);padding:16px 20px;font-size:13px;line-height:1.6">
-        El análisis ya se canceló: pasaron los 5 minutos sin respuesta y el sistema lo cerró. No se guardó ningún resultado de esta tanda.
+        El análisis ya se canceló. No se guardó ningún resultado de esta tanda.
       </div>
       <div style="margin-top:16px"><a class="btn btn-secondary" href="progreso.html">Volver al progreso</a></div>
     </div>
@@ -75,19 +77,14 @@
 
 <script>
   const $ = id => document.getElementById(id);
-  // Cuenta regresiva de los 5 minutos (en el mockup arranca en 3:41).
-  let s = 221;
-  const pinta = () => { $('reloj').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
-  pinta();
-  const t = setInterval(() => { if (s > 0) { s--; pinta(); } else { clearInterval(t); cancelar(); } }, 1000);
-
+  // El plazo es de 72 horas; el mockup muestra el tiempo restante fijo, sin cuenta regresiva.
   function cancelar() {
-    clearInterval(t);
     $('vistaPausa').classList.add('hidden');
     $('vistaCancelado').classList.remove('hidden');
   }
   $('btnCancelar').onclick = cancelar;
   $('btnAjustar').onclick = () => { location.href = 'progreso.html'; };
+  $('btnBien').onclick = () => { location.href = 'progreso.html'; };
   if (new URLSearchParams(location.search).get('estado') === 'cancelado') cancelar();
 
   // Arrastrar y redimensionar el recuadro.

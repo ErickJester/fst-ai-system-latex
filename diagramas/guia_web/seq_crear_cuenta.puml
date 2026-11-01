@@ -19,24 +19,41 @@ admin -> ui: selecciona "Crear cuenta"
 ui -> admin: muestra el formulario\n(identificador institucional, nombre, apellidos, correo electrónico)
 admin -> ui: completa los datos y confirma
 ui -> api: POST /admin/users {idInstitucional, nombre, apellidos, correo}\ncon la sesión activa del Administrador
+note over api
+  filtro de rol en cada petición (D-12), no solo en esta ruta
+end note
 api -> db: ¿el idInstitucional de la sesión está en ADMINISTRADOR?
 db --> api: sí / no
 alt no está en ADMINISTRADOR
-  api --> ui: 403, no autorizado
-  ui --> admin: muestra el error, no crea la cuenta
+  api --> ui: 403, "No tienes permiso para esta acción"
+  ui --> admin: lleva a la lista de experimentos
 else sí está en ADMINISTRADOR
-  api -> db: ¿el correo ya está registrado?
+  api -> db: ¿el idInstitucional ya está registrado?
   db --> api: sí / no
-  alt el correo ya está registrado
-    api --> ui: 409, conflicto
+  alt el idInstitucional ya está registrado
+    api --> ui: 409, "Ya existe una cuenta con ese identificador."
     ui --> admin: muestra el error, no crea el duplicado
-  else el correo está disponible
-    api -> api: genera la contraseña temporal
-    api -> db: crea USUARIO\n(nombre, apellidos, correo, contrasenaHash,\nactivo = true, cambioRequerido = true)
-    db --> api: confirma la creación
-    api -> api: envía correo al nuevo usuario\ncon sus credenciales de acceso inicial
-    api --> ui: 201 Created
-    ui --> admin: confirma la cuenta creada
+  else el idInstitucional está libre
+    api -> db: ¿el correo ya está registrado?
+    db --> api: sí / no
+    alt el correo ya está registrado
+      api --> ui: 409, "Ya existe una cuenta con ese correo."
+      ui --> admin: muestra el error, no crea el duplicado
+    else el correo está disponible
+      api -> api: genera la contraseña temporal
+      api -> db: crea USUARIO\n(idInstitucional, nombre, apellidos, correo, contrasenaHash,\nactivo = true, cambioRequerido = true)
+      note over api
+        sin campo rol: la cuenta nace como Investigador (D-08)
+      end note
+      db --> api: confirma la creación
+      api -> api: después de confirmar, envía correo al nuevo usuario\ncon su correo y la contraseña temporal en texto plano
+      note right of api
+        si el envío falla, la cuenta queda creada igual
+        y la interfaz no avisa del fallo
+      end note
+      api --> ui: 201 Created, con la contraseña temporal
+      ui --> admin: confirma la cuenta creada y muestra\nla contraseña temporal una sola vez
+    end
   end
 end
 @enduml
