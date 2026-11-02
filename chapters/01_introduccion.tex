@@ -280,25 +280,23 @@ fijó el laboratorio, son los cuatro criterios de aceptación del sistema.
         habituación, puede subirse para dejar constancia de que el grupo la tuvo; el sistema no
         lo analiza.
 
-  \item \textbf{Localización de los especímenes:} identificación automática de
-        hasta cuatro especímenes dentro de la grabación, distinguiéndolos por su posición
-        en el encuadre. Los cilindros son fijos y no cambian de posición entre sesiones,
-        lo que permite asignar cada región a un espécimen de forma estable a lo largo
-        del video.
+  \item \textbf{Localización de los especímenes:} el sistema localiza automáticamente
+        los cilindros del encuadre (de dos a cuatro) mediante visión por computadora, los
+        numera de izquierda a derecha y asocia cada uno al espécimen que el usuario
+        registró en esa posición de la tanda. No reconoce al espécimen como individuo:
+        lo distingue por el cilindro en que está. Dentro de cada cilindro separa la
+        silueta del espécimen del fondo para medir su posición, movimiento y postura.
 
-  \item \textbf{Clasificación de conductas:} el sistema clasifica de forma continua
-        las tres conductas del FST: nado activo, inmovilidad y escalamiento.
-        El buceo se clasifica como nado activo. Cada segundo se clasifica observando
-        una ventana de 4 s a su alrededor y recibe una conducta, sin duración mínima, lo que permite registrar conductas breves
-        de unos dos segundos; los resultados también se agrupan en bloques de cinco
-        segundos. Cada bloque toma la conducta con más segundos (mayoría relativa);
-        si hay empate en el primer lugar, el bloque es conducta activa. Si algún segundo
-        del bloque no se vio bien, el bloque lleva un matiz (se ve rayado), y si ninguno
-        se vio, es conducta activa con matiz. El último bloque puede quedar incompleto,
-        y los segundos que le faltan no cuentan como no vistos. Los bloques y los
-        totales se calculan al consultarlos; nunca se guardan.
-        Cuando ninguna clase alcanza el umbral de confianza de 0.80, pero la suma de nado y
-        escalamiento sí lo alcanza, el segundo queda como conducta activa (RN-13), una cuarta conducta.
+  \item \textbf{Clasificación de conductas:} clasificar significa asignar a cada
+        segundo de cada espécimen una de las tres conductas del FST: nado, inmovilidad
+        o escalamiento (el buceo cuenta como nado). Lo hace un modelo de aprendizaje
+        supervisado que observa una ventana de 4~s alrededor de ese segundo. Cuando
+        ninguna clase alcanza el umbral de confianza de 0.80, pero la suma de nado y
+        escalamiento sí lo alcanza, el segundo queda como conducta activa (RN-13); si no
+        se pudo ver al espécimen, el segundo queda sin conducta («sin ver»). Al no exigir
+        duración mínima, el sistema registra conductas breves de unos dos segundos. Para
+        su lectura, los resultados también se agrupan en bloques de 5~s, cuya regla
+        (RN-15) se detalla en el capítulo de Diseño.
 
   \item \textbf{Métricas y comparación por grupo:} tiempo total de cada conducta en
         el video del día~2 (hasta 300~s) y desglose por minuto; los segundos sin
