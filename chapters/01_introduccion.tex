@@ -206,9 +206,11 @@ calidad de producto de software de la ISO y la IEC.
         de videos, \textit{pipeline} de análisis, base de datos y visualización de resultados.
   \item Implementar el módulo de análisis conductual: localizar a cada espécimen con
         alineación de cuadros, sustracción de fondo y segmentación de la silueta, y
-        clasificar su conducta en cada segundo con una red convolucional espaciotemporal
-        (R(2+1)D-18) entrenada con las tres conductas del FST, más una regla de confianza
-        que asigna la conducta activa.
+        entrenar un clasificador supervisado (una red convolucional espaciotemporal
+        R(2+1)D-18 combinada con rasgos medidos del espécimen) cuyo atributo objetivo
+        es la conducta de cada segundo (nado, inmovilidad o escalamiento), a partir de
+        segundos etiquetados por el equipo; una regla de confianza asigna la conducta
+        activa cuando ninguna clase alcanza el umbral.
   \item Evaluar el desempeño del clasificador de conductas con métricas de
         clasificación estándar (precisión, \textit{recall} y F1 por conducta) sobre un
         conjunto de prueba independiente.
