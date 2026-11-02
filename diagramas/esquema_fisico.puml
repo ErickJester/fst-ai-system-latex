@@ -143,10 +143,10 @@ skinparam arrow {
 entity USUARIO {
   * idInstitucional : varchar(10) <<PK>>
   --
-  nombre : varchar(n)
-  apellidos : varchar(n)
-  correo : varchar(n) <<UK>>
-  contrasenaHash : varchar(n)
+  nombre : varchar(100)
+  apellidos : varchar(100)
+  correo : varchar(254) <<UK>>
+  contrasenaHash : varchar(255)
   activo : boolean
   cambioRequerido : boolean
 }
@@ -162,7 +162,7 @@ entity EXPERIMENTO {
   * idExperimento : integer <<PK>>
   --
   idInstitucional : varchar(10) <<FK>>
-  nombre : varchar(n) <<UK>>
+  nombre : varchar(150) <<UK>>
   fecha : date
   notas : text (nulo)
 }
@@ -171,7 +171,7 @@ entity GRUPO {
   * idGrupo : integer <<PK>>
   --
   idExperimento : integer <<FK>>
-  etiqueta : varchar(n)
+  etiqueta : varchar(100)
   tipo : tipo_grupo
   tratamiento : text
   ..

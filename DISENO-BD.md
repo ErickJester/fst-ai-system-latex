@@ -586,7 +586,30 @@ la actual. Si alguien externo va a abrirlos, hay que mover el anclaje de compart
 
 ---
 
-*Última actualización: 2026-10-06 — D-53: `SEGUNDO.clase` pasa a `conducta`; D-54: se analizan los últimos 300 s; D-55: fuera `ESPECIMEN.numeroRata` (63
+## 9. Cambios del 1-nov
+
+Verificados contra `db/init/001_esquema.sql` (solo lectura) y contra las entidades JPA.
+
+| # | Cambio | Dónde está aplicado |
+|---|---|---|
+| C1 | `EXPERIMENTO`–`GRUPO` pasa de `3..*` a `0..*`. Un experimento se crea vacío; «tres o más grupos» es del protocolo del laboratorio, no una regla del modelo. | `esquema_fisico.puml`, `grafo_relacional_3_vigente.puml`, `gen_esquema.py`, `esquema_bd.png` (2x) |
+| C2 | `VIDEO.nombreOriginal varchar(255)`, admite nulo: nombre con que el usuario subió el archivo; solo se muestra, no arma rutas. `VIDEO` pasa de 6 a 7 atributos; el esquema de 57 a 58. | `esquema_fisico.puml`, `grafo_relacional_3_vigente.puml`, `gen_esquema.py`, `apendice_D.tex` |
+| C3 | Tipos concretos del DDL: `USUARIO.nombre` varchar(100), `apellidos` varchar(100), `correo` varchar(254), `contrasenaHash` varchar(255); `EXPERIMENTO.nombre` varchar(150); `GRUPO.etiqueta` varchar(100); `VIDEO.duracion` numeric(8,2). | `esquema_fisico.puml`, `gen_esquema.py`, `apendice_D.tex` |
+| C4 | `CHECK` que faltaban: `TANDA.ordinal` ≥ 1 (con `UK (idGrupo, ordinal)`); `TANDA.nCilindros` entre 2 y 4; `ESPECIMEN.numeroCilindro` entre 1 y 4 (que no pase de `nCilindros` lo valida el backend); `ANALISIS.rutaDiagnostico` solo con estado `error`. | `apendice_D.tex`, artifact físico (pendiente de publicar) |
+| C5 | El DDL ya existe (`db/init/001_esquema.sql`) y el respaldo diario con `pg_dump` lo ejecuta el worker. Lo que decía «falta ejecutar», «falta escribir el DDL» o «falta el cron del respaldo» pasa a implementado. | `apendice_D.tex`, artifact físico (pendiente de publicar) |
+| C6 | `origen_segundo`: `maquina` = lo asignó el sistema; `confirmada` = el usuario lo revisó y lo dejó igual; `corregida` = lo cambió por otra conducta; `dudosa` = el usuario lo marcó «No se ve». `SEGUNDO.conducta` es nula cuando el sistema no vio al espécimen (origen `maquina`) o el usuario marcó «No se ve» (origen `dudosa`). | `apendice_D.tex`, `esquema_fisico.puml`, artifact físico (pendiente de publicar) |
+| C7 | Dominio «especímenes por grupo: entero ≥ 2» (conceptual): el sistema no valida mínimo por grupo; valida 2 a 4 especímenes por **tanda** (`nCilindros`). | Artifacts conceptual y lógico (no tocados aquí) |
+| C8 | Comentario viejo de `nivel_clasif_analisis` («por no alcanzar F1 ≥ 85 %»): el criterio vigente es D-41 (agrupado si algún segundo quedó como conducta activa). | `esquema_fisico.puml`, artifact físico (pendiente de publicar) |
+
+**Pendiente:** publicar el artifact físico (`https://claude.ai/artifact/972fCkz4K4U7fQrPRR3qyH`) con
+C1–C6 y C8. El borrador ya está listo en la copia de trabajo; la publicación fue rechazada por el
+permiso de escritura externa del entorno y hay que aprobarla o hacerla a mano.
+
+---
+
+*Última actualización: 2026-11-01 — sección 9: cambios C1–C8 del 1-nov.*
+
+*Actualización anterior: 2026-10-06 — D-53: `SEGUNDO.clase` pasa a `conducta`; D-54: se analizan los últimos 300 s; D-55: fuera `ESPECIMEN.numeroRata` (63
 atributos, 17 llaves foráneas). Ver §5.*
 
 *Actualización anterior: 2026-10-05 — D-51: fuera `MODELO`, `CONFIGURACION` y

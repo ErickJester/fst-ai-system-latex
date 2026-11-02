@@ -1,0 +1,879 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Diseño Físico FST</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Spectral:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --paper:      #F5F7F5;
+    --surface:    #FFFFFF;
+    --surface-2:  #ECF0EE;
+    --ink:        #0D1F21;
+    --ink-soft:   #3A4E4E;
+    --muted:      #677978;
+    --rule:       #D3DBD8;
+    --rule-soft:  #E3E9E6;
+    --accent:     #0F6F70;
+    --accent-dim: #DCEBEA;
+    --warn:       #A65D2E;
+    --warn-dim:   #F4E7DC;
+    --nuevo:      #64459B;
+    --nuevo-dim:  #EAE2F7;
+    --recon:      #8A5A0B;
+    --recon-dim:  #FAEFDA;
+
+    --f-display: "Spectral", Georgia, "Times New Roman", serif;
+    --f-body:    "IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif;
+    --f-mono:    "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+    --measure: 68ch;
+    --gutter: clamp(1.1rem, 4vw, 3rem);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #0A1314;
+      --surface:    #10201F;
+      --surface-2:  #16292A;
+      --ink:        #E3EAE8;
+      --ink-soft:   #BCCBC9;
+      --muted:      #869695;
+      --rule:       #24403F;
+      --rule-soft:  #1B3231;
+      --accent:     #57C2C0;
+      --accent-dim: #12312F;
+      --warn:       #DD9762;
+      --warn-dim:   #33241A;
+      --nuevo:      #B79EE8;
+      --nuevo-dim:  #251E3C;
+      --recon:      #E0AE5C;
+      --recon-dim:  #33270F;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:      #0A1314;
+    --surface:    #10201F;
+    --surface-2:  #16292A;
+    --ink:        #E3EAE8;
+    --ink-soft:   #BCCBC9;
+    --muted:      #869695;
+    --rule:       #24403F;
+    --rule-soft:  #1B3231;
+    --accent:     #57C2C0;
+    --accent-dim: #12312F;
+    --warn:       #DD9762;
+    --warn-dim:   #33241A;
+    --nuevo:      #B79EE8;
+    --nuevo-dim:  #251E3C;
+    --recon:      #E0AE5C;
+    --recon-dim:  #33270F;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--f-body); font-size: 16px; line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: clamp(2rem, 6vw, 4.5rem) var(--gutter) 6rem; }
+  .col { max-width: var(--measure); }
+
+  .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 1.6rem; }
+  .eyebrow {
+    font-family: var(--f-mono); font-size: .705rem; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 1.1rem;
+  }
+  h1 {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: clamp(2.1rem, 5.6vw, 3.3rem); line-height: 1.08;
+    letter-spacing: -.015em; text-wrap: balance; margin: 0 0 .7rem;
+  }
+  .standfirst {
+    font-family: var(--f-display); font-size: clamp(1.02rem, 2.1vw, 1.2rem);
+    line-height: 1.55; color: var(--ink-soft); max-width: 62ch; margin: 0;
+  }
+
+  .pipeline {
+    display: flex; flex-wrap: wrap; margin-top: 2rem;
+    border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; background: var(--surface);
+  }
+  .pipeline div { flex: 1 1 190px; padding: .85rem 1.1rem; border-right: 1px solid var(--rule-soft); }
+  .pipeline div:last-child { border-right: 0; }
+  .pipeline dt {
+    font-family: var(--f-mono); font-size: .645rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .25rem;
+  }
+  .pipeline dd { margin: 0; font-size: .9rem; font-weight: 500; }
+
+  .toc { margin: 2.6rem 0 0; border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; background: var(--surface); }
+  .toc a, .toc div.row {
+    display: grid; grid-template-columns: 2.4rem 1fr auto; gap: 0 .9rem;
+    align-items: baseline; padding: .68rem 1.1rem;
+    border-bottom: 1px solid var(--rule-soft); text-decoration: none; color: var(--ink);
+  }
+  .toc > :last-child { border-bottom: 0; }
+  .toc a:hover { background: var(--surface-2); }
+  .toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .toc .n { font-family: var(--f-mono); font-size: .73rem; color: var(--accent); font-weight: 500; }
+  .toc div.row .n, .toc div.row .t { color: var(--muted); }
+  .toc .t { font-size: .93rem; }
+  .toc .s {
+    font-family: var(--f-mono); font-size: .655rem; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--muted); white-space: nowrap;
+  }
+  .toc .s.done { color: var(--accent); }
+  .toc .s.wait { color: var(--warn); }
+
+  .act { margin-top: 4.2rem; border-top: 2px solid var(--ink); padding-top: 1.4rem; scroll-margin-top: 1rem; }
+  .act-n {
+    font-family: var(--f-mono); font-size: .68rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 .45rem;
+    display: flex; align-items: center; gap: .7rem; flex-wrap: wrap;
+  }
+  .act-n .chip {
+    font-size: .62rem; letter-spacing: .08em; padding: .16em .45em;
+    border-radius: 2px; background: var(--accent-dim); color: var(--accent);
+  }
+  .act-n .chip.wait  { background: var(--warn-dim);  color: var(--warn); }
+  .act-n .chip.prop  { background: var(--warn-dim);  color: var(--warn); }
+
+  .act h2 {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: clamp(1.45rem, 3vw, 1.95rem); line-height: 1.16;
+    letter-spacing: -.012em; text-wrap: balance; margin: 0 0 1rem;
+  }
+
+  .asks {
+    border-left: 2px solid var(--accent); padding: .1rem 0 .1rem 1.15rem;
+    margin: 0 0 1.6rem; max-width: 64ch;
+    font-family: var(--f-display); font-size: 1.02rem; line-height: 1.55; color: var(--ink-soft);
+  }
+  .asks p { margin: 0; }
+  .asks cite {
+    display: block; margin-top: .5rem; font-family: var(--f-mono); font-style: normal;
+    font-size: .67rem; letter-spacing: .09em; text-transform: uppercase; color: var(--muted);
+  }
+
+  .pair {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    background: var(--rule); border: 1px solid var(--rule);
+    border-radius: 3px; overflow: hidden; margin: 1.5rem 0;
+  }
+  @media (max-width: 720px) { .pair { grid-template-columns: 1fr; } }
+  .pair > div { background: var(--surface); padding: 1.15rem 1.25rem 1.3rem; }
+  .pair .lbl {
+    font-family: var(--f-mono); font-size: .645rem; letter-spacing: .11em;
+    text-transform: uppercase; color: var(--muted); margin: 0 0 .6rem;
+  }
+  .pair .proj .lbl { color: var(--accent); }
+  .pair p { margin: 0 0 .6rem; font-size: .9rem; line-height: 1.55; }
+  .pair p:last-child { margin-bottom: 0; }
+  .pair ul { margin: 0; padding-left: 1.1rem; font-size: .88rem; }
+  .pair li { margin-bottom: .34rem; line-height: 1.48; }
+  .pair li:last-child { margin-bottom: 0; }
+  .pair li::marker { color: var(--muted); }
+  .pair .k { font-family: var(--f-mono); font-size: .8rem; }
+
+  h3 { font-family: var(--f-body); font-weight: 600; font-size: 1.02rem; margin: 2.4rem 0 .7rem; }
+  p { margin: 0 0 1rem; }
+  .col p:last-child { margin-bottom: 0; }
+  strong { font-weight: 600; }
+  code { font-family: var(--f-mono); font-size: .86em; background: var(--surface-2);
+         padding: .1em .38em; border-radius: 2px; }
+
+  /* ---------- marcado propio de esta etapa ---------- */
+
+  .pr { color: var(--warn); font-weight: 600; }
+  code.pr { background: var(--warn-dim); color: var(--warn); }
+  .dc { color: var(--accent); font-weight: 600; }
+  tr.fila-prop td { background: var(--warn-dim); }
+  .note.prop { border-left-color: var(--warn); background: var(--warn-dim); }
+  .note.prop .tag { color: var(--warn); }
+  .tally dd.pr { color: var(--warn); }
+  .tbl.prop { background: var(--warn-dim); }
+  .figbox svg text.pt { fill: var(--warn); font-weight: 600; }
+  .figbox svg text.at { fill: var(--accent); font-weight: 600; }
+
+  .scroll { overflow-x: auto; margin: 1.4rem 0; }
+  table { border-collapse: collapse; width: 100%; min-width: 540px;
+          font-size: .875rem; font-variant-numeric: tabular-nums; }
+  th {
+    text-align: left; font-family: var(--f-mono); font-weight: 500;
+    font-size: .645rem; letter-spacing: .11em; text-transform: uppercase;
+    color: var(--muted); padding: 0 1rem .55rem 0;
+    border-bottom: 1px solid var(--ink); vertical-align: bottom;
+  }
+  td { padding: .6rem 1rem .6rem 0; border-bottom: 1px solid var(--rule-soft);
+       vertical-align: top; line-height: 1.5; }
+  th:last-child, td:last-child { padding-right: 0; }
+  tbody tr:last-child td { border-bottom: 1px solid var(--rule); }
+  .card { font-family: var(--f-mono); font-size: .81rem; white-space: nowrap; }
+  .ok { color: var(--accent); font-weight: 500; }
+  .no { color: var(--warn); font-weight: 500; }
+  .dom { font-family: var(--f-mono); font-size: .77rem; line-height: 1.45; }
+
+  .src {
+    font-family: var(--f-mono); font-size: .69rem; font-style: normal; white-space: nowrap;
+    padding: .1em .4em; border-radius: 2px; background: var(--surface-2); color: var(--ink-soft);
+  }
+  .src.d { background: var(--accent-dim); color: var(--accent); }
+  .src.p { background: var(--warn-dim); color: var(--warn); }
+
+  /* ---------- bloques de DDL ---------- */
+
+  .ddl {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 3px;
+    padding: 1.1rem 1.3rem; margin: 1.4rem 0; overflow-x: auto;
+    font-family: var(--f-mono); font-size: .775rem; line-height: 1.8;
+    white-space: pre; color: var(--ink-soft);
+  }
+  .ddl b { color: var(--accent); font-weight: 500; }
+  .ddl i { color: var(--muted); font-style: normal; }
+  .ddl u { color: var(--warn); font-weight: 600; text-decoration: none; }
+
+  .keyleg {
+    display: flex; flex-wrap: wrap; gap: .55rem 1.4rem;
+    margin: 1.3rem 0; align-items: center;
+    font-family: var(--f-mono); font-size: .69rem; color: var(--muted);
+  }
+  .keyleg span { display: flex; align-items: center; gap: .4rem; }
+
+  figure { margin: 1.9rem 0; }
+  .figbox {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 3px; padding: 1.5rem 1.2rem; overflow-x: auto;
+  }
+  .figbox svg { display: block; max-width: 100%; height: auto; margin: 0 auto; min-width: 620px; }
+  .figbox svg text { font-family: var(--f-body); fill: currentColor; }
+  .figbox svg text.m { font-family: var(--f-mono); }
+  figcaption { font-size: .845rem; color: var(--muted); line-height: 1.5; margin-top: .9rem; max-width: 62ch; }
+  figcaption b { color: var(--ink-soft); font-weight: 500; }
+
+  .note {
+    border: 1px solid var(--rule); border-left: 3px solid var(--accent);
+    background: var(--surface); border-radius: 2px;
+    padding: 1.05rem 1.2rem; margin: 1.5rem 0; max-width: 74ch;
+  }
+  .note.warn { border-left-color: var(--warn); }
+  .note p:last-child { margin-bottom: 0; }
+  .note .tag {
+    font-family: var(--f-mono); font-size: .645rem; letter-spacing: .11em;
+    text-transform: uppercase; color: var(--accent); display: block; margin-bottom: .4rem;
+  }
+  .note.warn .tag { color: var(--warn); }
+  .note ul { margin: 0 0 .8rem; padding-left: 1.2rem; font-size: .93rem; }
+  .note li { margin-bottom: .4rem; line-height: 1.5; }
+
+  .tally {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(146px, 1fr));
+    gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+    border-radius: 3px; overflow: hidden; margin: 1.6rem 0;
+  }
+  .tally div { background: var(--surface); padding: .9rem 1.05rem; }
+  .tally dt {
+    font-family: var(--f-mono); font-size: .635rem; letter-spacing: .11em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .26rem;
+  }
+  .tally dd {
+    margin: 0; font-family: var(--f-display); font-size: 1.7rem;
+    font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .tally dd small {
+    display: block; font-family: var(--f-body); font-size: .73rem; font-weight: 400;
+    color: var(--muted); margin-top: .3rem; line-height: 1.35;
+  }
+
+  footer {
+    margin-top: 4.5rem; padding-top: 1.4rem; border-top: 1px solid var(--rule);
+    font-family: var(--f-mono); font-size: .68rem; letter-spacing: .07em;
+    color: var(--muted); display: flex; flex-wrap: wrap; gap: .5rem 1.6rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">TT 2026-B066 · ESCOM-IPN · Etapa de diseño físico · decisiones cerradas el 13-sep · actualizado el 1-nov-2026</p>
+    <h1>Diseño Físico FST</h1>
+    <p class="standfirst">Traducción del esquema lógico definitivo a un esquema implementable en un gestor concreto. Cubre las seis actividades del método, y las seis ya tienen sus decisiones tomadas. Lo que queda de aquí en adelante es ejecutarlas, no decidirlas.</p>
+
+    <dl class="pipeline">
+      <div><dt>Entrada</dt><dd>Esquema lógico definitivo · 12 relaciones en BCNF</dd></div>
+      <div><dt>Proceso</dt><dd>Traducción a las estructuras de PostgreSQL</dd></div>
+      <div><dt>Salida</dt><dd>Esquema físico · 12 tablas, 13 llaves foráneas · DDL implementado (db/init/001_esquema.sql)</dd></div>
+      <div><dt>Estado</dt><dd>Decisiones cerradas · 6 de 6 actividades</dd></div>
+    </dl>
+
+    <nav class="toc">
+      <a href="#a1"><span class="n">01</span><span class="t">Selección del gestor de base de datos</span><span class="s done">Resuelta</span></a>
+      <a href="#a2"><span class="n">02</span><span class="t">Representación del esquema lógico en el gestor</span><span class="s done">Resuelta</span></a>
+      <a href="#a3"><span class="n">03</span><span class="t">Organización de archivos e índices</span><span class="s done">Resuelta</span></a>
+      <a href="#a4"><span class="n">04</span><span class="t">Seguridad y control de acceso</span><span class="s done">Resuelta</span></a>
+      <a href="#a5"><span class="n">05</span><span class="t">Rendimiento y redundancia controlada</span><span class="s done">Resuelta</span></a>
+      <a href="#a6"><span class="n">06</span><span class="t">Documentación de la implementación</span><span class="s done">Resuelta</span></a>
+    </nav>
+
+    <div class="note" style="margin-bottom:0">
+      <span class="tag">En qué sentido esto está terminado, y en cuál no</span>
+      <p>Los documentos de diseño conceptual y lógico describen etapas <strong>cerradas</strong> con resultado validado. Este documento llegó a un punto parecido pero no idéntico: <strong>las seis actividades tienen ya su decisión tomada</strong>, con fecha y responsable en cada una. Lo que faltaba era escribir el código: el DDL de las 12 relaciones y el respaldo de D-18 ya están implementados; lo pendiente es declarar los índices.</p>
+      <p><span class="dc">En verde, lo que decidió el equipo</span> en sesión de trabajo, con registro en <code>preguntas-doctor.md</code>. <span class="pr">En ámbar, lo que este documento propone</span> como forma concreta de ejecutar esas decisiones —los tipos exactos de PostgreSQL, la convención de nombres de las restricciones— y que nadie ha revisado línea por línea todavía.</p>
+    </div>
+
+    <div class="note warn" style="margin-bottom:1.5rem">
+      <span class="tag">Actualización del 1 de noviembre · qué cambió desde el 14-oct</span>
+      <ul>
+        <li><strong>Cardinalidad EXPERIMENTO–GRUPO: de 3..* a 0..*</strong>. Un experimento se crea vacío y el sistema no exige un mínimo de grupos; «tres o más grupos» es del protocolo del laboratorio, no una regla del modelo.</li>
+        <li><strong><code>VIDEO.nombreOriginal</code> varchar(255), admite nulo</strong>: el nombre con que el usuario subió el archivo; solo se muestra, no arma rutas. VIDEO pasa de 6 a 7 atributos y el esquema de 57 a 58.</li>
+        <li><strong>Tipos concretos del DDL</strong>: <code>USUARIO.nombre</code> varchar(100), <code>apellidos</code> varchar(100), <code>correo</code> varchar(254), <code>contrasenaHash</code> varchar(255); <code>EXPERIMENTO.nombre</code> varchar(150); <code>GRUPO.etiqueta</code> varchar(100); <code>VIDEO.duracion</code> numeric(8,2). Ya no quedan <code>varchar(n)</code> ni <code>numeric(p,s)</code> genéricos.</li>
+        <li><strong>Restricciones CHECK que faltaban</strong>: <code>TANDA.ordinal</code> ≥ 1; <code>TANDA.nCilindros</code> entre 2 y 4; <code>ESPECIMEN.numeroCilindro</code> entre 1 y 4 (que no pase del número de cilindros de la tanda lo valida el backend); <code>ANALISIS.rutaDiagnostico</code> solo con estado <em>error</em>.</li>
+        <li><strong>Estado de implementación</strong>: el DDL ya existe (<code>db/init/001_esquema.sql</code>) y el respaldo diario con <code>pg_dump</code> lo ejecuta el worker. Donde este documento decía «falta ejecutar», «falta escribir el DDL» o «falta el cron del respaldo», ahora está implementado.</li>
+        <li><strong><code>origen_segundo</code>, significado exacto</strong>: <em>maquina</em> = lo asignó el sistema; <em>confirmada</em> = el usuario lo revisó y lo dejó igual; <em>corregida</em> = lo cambió por otra conducta; <em>dudosa</em> = el usuario lo marcó «No se ve». <code>SEGUNDO.conducta</code> es nula cuando el sistema no vio al espécimen (origen maquina) o el usuario marcó «No se ve» (origen dudosa).</li>
+        <li><strong>Comentario de <code>nivel_clasif_analisis</code></strong>: el criterio vigente es D-41 (agrupado si algún segundo quedó como conducta activa); se quita la referencia a F1 ≥ 85 %.</li>
+      </ul>
+    </div>
+
+    <div class="note warn" style="margin-bottom:1.5rem">
+      <span class="tag">Actualización del 14 de octubre · qué cambió desde el 6-oct</span>
+      <ul>
+        <li><strong>Se quitan las tablas <code>INTERVALO</code> y <code>PRESENTA</code></strong> (D-52): los segundos por conducta de cada minuto se calculan contando las filas de <code>SEGUNDO</code>, no se guardan. El esquema pasó a 13 tablas, 58 atributos y 14 llaves foráneas.</li>
+        <li><strong><code>CONDUCTA</code> deja de ser tabla</strong> (D-102): es el noveno dominio cerrado, <code>tipo_conducta</code>, y <code>SEGUNDO.conducta</code> toma sus valores de él sin llave foránea. Con esto el esquema pasa a <strong>12 tablas, 57 atributos y 13 llaves foráneas</strong>.</li>
+        <li><strong>Índices</strong>: de las 13 llaves foráneas, 8 ya quedan indexadas y 5 hay que declarar (antes 10 y 7). Se va el índice de <code>SEGUNDO.conducta</code>, que ya no es llave foránea.</li>
+        <li><strong>Dominios</strong>: <code>estado_analisis</code> suma <em>en pausa</em> y <em>cancelado</em> (D-59, D-67, D-89), <code>origen_segundo</code> queda en cuatro valores (D-80) y <code>tipo_notificacion</code> suma <em>analisis en pausa</em> y <em>analisis cancelado</em>.</li>
+        <li><strong>Día 1</strong>: el video se guarda y no se analiza (D-71), así que no tiene fila en <code>ANALISIS</code> ni en <code>OBSERVACION</code>.</li>
+        <li><strong>Borrado de un experimento</strong>: el orden de las hojas hacia arriba empieza en <code>SEGUNDO</code> y sigue con <code>OBSERVACION</code>.</li>
+      </ul>
+    </div>
+
+    <div class="note warn" style="margin-bottom:0">
+      <span class="tag">Actualización del 6 de octubre · qué cambió desde la versión del 13-sep</span>
+      <ul>
+        <li><strong>Tabla nueva, <code>SEGUNDO</code></strong>, con llave primaria (<code>idObservacion</code>, <code>segundo</code>), <code>CHECK</code> de 1 a 300 y dos llaves foráneas (D-35, D-53).</li>
+        <li><strong>Se eliminan <code>MODELO</code>, <code>CONFIGURACION</code> y <code>ANALISIS.idConfig</code></strong> (D-51). Con ellas se va el argumento de la clave alterna de ocho umbrales y el <code>char(64)</code> del hash (D-14 queda sin objeto).</li>
+        <li><strong><code>ANALISIS</code></strong>: <code>idVideo</code> es <code>UNIQUE</code> (D-24), sin <code>confianza</code> (D-47) y con <code>rutaDiagnostico</code> (D-23). <code>rutaRecuadros</code> se agregó y se retiró el mismo día: el archivo de recuadros se nombra con el id del análisis.</li>
+        <li><strong>Nulos y unicidad</strong>: <code>VIDEO.archivo</code> admite nulo cuando el video ya se borró; <code>EXPERIMENTO.nombre</code> es <code>UNIQUE</code> (D-51).</li>
+        <li><strong>Dominios</strong>: tres etapas (D-16), el aviso <em>video borrado</em> (D-51) y el dominio nuevo <code>origen_segundo</code> (D-35). Siguen siendo ocho.</li>
+        <li><strong>Sesión</strong>: token JWT de vida larga; cerrar sesión hace que el navegador lo descarte, sin lista de bloqueo (D-36).</li>
+        <li><strong>Sin número de rata</strong>: se quita <code>ESPECIMEN.numeroRata</code> y, con ella, el <code>idGrupo</code> redundante, su <code>UNIQUE</code> y su disparador. D-04 queda sin objeto y el esquema físico tiene las mismas llaves foráneas que el lógico (D-55).</li>
+        <li><strong><code>SEGUNDO</code></strong>: <code>clase</code> pasa a llamarse <code>conducta</code> y se quita <code>propuesta</code> (D-53).</li>
+        <li><strong>Últimos 300 s</strong>: el <code>CHECK</code> de 1 a 300 se mantiene, y ahora son los últimos 300 s del video (D-54). Es un máximo, sin mínimo: si el video dura menos, se analiza todo lo que tenga. La CNN analiza el video completo; el worker conserva las últimas 300 filas de cada espécimen, las renumera de 1 a 300 y recorta el video a esos mismos segundos, y el usuario solo ve ese recorte (el segundo N cae en el instante N − 1). El Día 1 solo confirma que existe el video de habituación y no se analiza.</li>
+        <li><strong>Resultado a esa fecha</strong>: 15 tablas, 17 llaves foráneas (las mismas del lógico), 10 que ya quedan indexadas y 7 que hay que declarar. Las cifras vigentes están en la actualización del 14-oct.</li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ══════════ ACTIVIDAD 1 ══════════ -->
+  <section class="act" id="a1">
+    <p class="act-n">Actividad 1 <span class="chip">Resuelta</span></p>
+    <h2>Selección del gestor de base de datos</h2>
+
+    <blockquote class="asks">
+      <p>«<b>Seleccionar el Sistema Gestor de Base de Datos</b> en el cuál se implementará la base de datos e identificar sus funcionalidades.»</p>
+      <cite>Metodología de diseño · etapa física · actividad 1</cite>
+    </blockquote>
+
+    <div class="pair">
+      <div>
+        <p class="lbl">Los ejemplos del libro</p>
+        <p>El apéndice A implementa su caso en <span class="k">PostgreSQL</span>; el apéndice B implementa otro caso distinto en <span class="k">Oracle</span>.</p>
+        <p>Son dos ejemplos paralelos, no una recomendación: el libro <strong>no argumenta ninguna de las dos elecciones</strong>, igual que no argumentó el modelo relacional en la etapa lógica.</p>
+      </div>
+      <div class="proj">
+        <p class="lbl">Este proyecto · FST</p>
+        <p><span class="k">PostgreSQL</span>, decidido por el equipo el 13 de septiembre de 2026 y registrado como <b class="dc">D-11</b>.</p>
+        <p>El capítulo 3 del TT ya lo mencionaba, pero eso no bastaba: el documento escrito es la fuente de <strong>menor</strong> autoridad del proyecto. Lo que cierra la actividad es la decisión, no la mención.</p>
+      </div>
+    </div>
+
+    <h3>Por qué PostgreSQL y no MySQL</h3>
+
+    <div class="col">
+      <p>La comparación se hizo contra las necesidades reales del sistema, sin apoyarse en lo que el libro usa ni en lo que el capítulo 3 ya decía. Dos criterios decidieron.</p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:22%">Criterio</th><th style="width:39%">Qué exige este sistema</th><th>Por qué inclina la balanza</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>Consultas de los reportes</b></td>
+            <td><code>OBSERVACION</code> → <code>SEGUNDO</code> es una medición por segundo y por espécimen, de la que se calculan los totales por minuto y por conducta. Los reportes comparan los tres grupos entre sí, que es lo que el laboratorio declara como objetivo del experimento</td>
+            <td>Son consultas de agregación y comparación entre subconjuntos. PostgreSQL tiene mejor soporte de funciones de ventana y de agregación que MySQL, y esas consultas se van a escribir muchas veces</td>
+          </tr>
+          <tr>
+            <td><b>Integridad estricta</b></td>
+            <td>La base declara reglas que no se pueden romper: dominios cerrados, rangos (<code>segundo</code> entre 1 y 300), unicidades. <b>Actualizado (D-51):</b> el ejemplo original era la clave alterna de ocho umbrales de <code>CONFIGURACION</code>, que ya no existe; el criterio sigue valiendo para las demás restricciones</td>
+            <td>Eso solo funciona si el gestor rechaza lo que no cuadra en vez de acomodarlo. PostgreSQL es estricto por omisión; MySQL, salvo que se active el modo estricto, trunca en lugar de rechazar</td>
+          </tr>
+          <tr>
+            <td>Costo y licencia</td>
+            <td>Proyecto escolar, sin presupuesto</td>
+            <td>No decide: los dos son libres y gratuitos</td>
+          </tr>
+          <tr>
+            <td>Volumen y concurrencia</td>
+            <td>Un laboratorio, pocos investigadores a la vez</td>
+            <td>No decide: cualquiera de los dos sobra para esta escala</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">Qué se acepta a cambio</span>
+      <p>Nada relevante para este proyecto. La ventaja histórica de MySQL —presencia en hospedaje compartido barato— no aplica: el sistema corre con un módulo de visión por computadora y un clasificador, así que va a vivir en un servidor propio del laboratorio o en una máquina dedicada, no en hospedaje compartido.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 2 ══════════ -->
+  <section class="act" id="a2">
+    <p class="act-n">Actividad 2 <span class="chip">Resuelta</span></p>
+    <h2>Representación del esquema lógico en las estructuras del gestor</h2>
+
+    <blockquote class="asks">
+      <p>«<b>Representar e implementar los elementos del Esquema Lógico</b> en las estructuras permitidas por el Modelo Físico que sigue el Sistema Gestor, teniendo en cuenta todas las consideraciones estructurales y no estructurales.»</p>
+      <cite>Metodología de diseño · etapa física · actividad 2</cite>
+    </blockquote>
+
+    <div class="col">
+      <p>Lo que entra a esta actividad ya está completo y validado: <strong>12 relaciones en BCNF, 58 atributos y 13 llaves foráneas</strong>, todas de una sola columna (vigente al 1-nov; el 14-oct eran 57 atributos y el 6-oct, 15 relaciones, 63 atributos y 17 llaves). Lo que falta es traducir cada elemento a un tipo, una restricción o una estructura que PostgreSQL entienda. <code>ANALISIS.rutaDiagnostico</code> (D-23) está ya en el lógico y en el físico.</p>
+    </div>
+
+    <dl class="tally">
+      <div><dt>Relaciones</dt><dd>12<small>9 del experimento + 2 de soporte del sistema + Administrador</small></dd></div>
+      <div><dt>Atributos</dt><dd>58<small>los del lógico, más <code>nombreOriginal</code>; <code>rutaDiagnostico</code> ya estaba</small></dd></div>
+      <div><dt>Llaves foráneas</dt><dd>13<small>las mismas del lógico</small></dd></div>
+      <div><dt>Dominios por fijar</dt><dd class="ok">0<small>los nueve, resueltos</small></dd></div>
+    </dl>
+
+    <h3>Parte 1 — De dominio lógico a tipo de PostgreSQL</h3>
+
+    <div class="col">
+      <p>El esquema lógico describe los dominios en lenguaje natural: «identificador», «texto», «entero ≥ 1», «real». Esta actividad les asigna un tipo concreto. La tabla siguiente es la regla que se aplicó; todas las filas son <span class="pr">propuesta de este documento</span>.</p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:24%">Dominio lógico</th><th style="width:26%">Tipo propuesto</th><th>Por qué ese y no otro</th></tr></thead>
+        <tbody>
+          <tr class="fila-prop"><td>Identificador subrogado</td><td class="card">integer generated always as identity</td><td>Es la forma del estándar SQL y sustituye a <code>serial</code>, que PostgreSQL conserva solo por compatibilidad. «Always» impide que la aplicación inserte el identificador a mano</td></tr>
+          <tr><td>Identificador institucional<br><span class="dom">USUARIO</span></td><td class="card">varchar(10)</td><td>No es numérico aunque lo parezca: puede llevar ceros a la izquierda. Por <b class="dc">D-02</b> el mismo campo acepta boleta de estudiante o número de empleado; 10 caracteres cubre el formato de boleta del IPN. Decidido por el equipo el 13-sep</td></tr>
+          <tr class="fila-prop"><td>Texto corto</td><td class="card">varchar(100 · 150 · 254 · 255)</td><td>Nombres, etiquetas, correos, hash de contraseña y nombre original del video, cada uno con la longitud de su columna en el DDL. El apéndice del libro usa <code>character(n)</code> de longitud fija, que rellena con espacios y ensucia las comparaciones — aquí se descarta a propósito</td></tr>
+          <tr class="fila-prop"><td>Texto libre y rutas</td><td class="card">text</td><td><code>notas</code>, <code>mensaje</code>, <code>archivo</code>, <code>ruta</code>, <code>rutaDiagnostico</code>. No hay una longitud defendible que imponer, y en PostgreSQL <code>text</code> no cuesta más que <code>varchar</code></td></tr>
+          <tr class="fila-prop"><td>Fecha sin hora</td><td class="card">date</td><td>Solo <code>EXPERIMENTO.fecha</code>: es el día del experimento, no un instante</td></tr>
+          <tr class="fila-prop"><td>Marca de tiempo</td><td class="card">timestamptz</td><td>Las fechas de registro. Con zona horaria, para que la hora de carga de un video no dependa de la configuración de la máquina que lo insertó</td></tr>
+          <tr class="fila-prop"><td>Segundos y duración</td><td class="card">numeric(8,2)</td><td><code>VIDEO.duracion</code> (<code>PRESENTA.segundos</code> se quitó con D-52). <strong>No <code>real</code> ni <code>double precision</code>:</strong> <code>numeric</code> guarda el decimal exacto, y los totales que se calculan con él no acumulan errores de redondeo. (El argumento original, la clave alterna de umbrales de <code>CONFIGURACION</code>, se fue con D-51)</td></tr>
+          <tr class="fila-prop"><td>Contadores pequeños</td><td class="card">smallint</td><td><code>ordinal</code>, <code>nCilindros</code>, <code>numeroCilindro</code> y <code>SEGUNDO.segundo</code> (1 a 300). Ninguno pasa de tres dígitos</td></tr>
+          <tr class="fila-prop"><td>Booleano</td><td class="card">boolean</td><td><code>USUARIO.activo</code> (<b class="dc">D-10</b>) y <code>NOTIFICACION.leido</code></td></tr>
+          <tr><td><s>Hash del modelo</s></td><td class="card"><s>char(64)</s></td><td><span class="no">Sin objeto (D-51):</span> <code>MODELO</code> se eliminó, así que D-14 (SHA-256 en <code>char(64)</code>) ya no aplica. No confundir con el hash de contraseñas, que sigue usando <code>bcrypt</code> (ver actividad 4)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Parte 2 — Los dominios por extensión</h3>
+
+    <div class="col">
+      <p>El libro muestra exactamente cómo se declaran los dominios por extensión: <code>CREATE DOMAIN … CHECK (VALUE IN (…))</code>. <strong>Vigentes al 14-oct son nueve.</strong> Los seis de la etapa lógica se convirtieron en cinco listas (el sexto, el umbral de confianza, era un rango y desapareció con D-51), más dos de <code>ANALISIS</code> que surgieron después (D-16, D-17) y <code>origen_segundo</code>, que trajo <code>SEGUNDO</code> (D-35). El rango numérico —<code>segundo</code> entre 1 y 300— se declara como <code>CHECK</code> sobre la columna.</p>
+    </div>
+
+    <div class="ddl"><i>-- los nueve dominios vigentes</i>
+<b>CREATE DOMAIN</b> tipo_grupo <b>AS</b> varchar(24)
+  <b>CHECK</b> (VALUE <b>IN</b> ('control', 'referencia', 'tratamiento experimental'));
+
+<b>CREATE DOMAIN</b> sesion_video <b>AS</b> varchar(6)
+  <b>CHECK</b> (VALUE <b>IN</b> ('Dia 1', 'Dia 2'));
+
+<b>CREATE DOMAIN</b> formato_reporte <b>AS</b> varchar(4)
+  <b>CHECK</b> (VALUE <b>IN</b> ('CSV', 'XLSX', 'PDF'));
+
+<b>CREATE DOMAIN</b> tipo_notificacion <b>AS</b> varchar(32)
+  <b>CHECK</b> (VALUE <b>IN</b> ('analisis completado', 'error del pipeline', 'alerta de disco',
+                  'video borrado', 'analisis en pausa', 'analisis cancelado'));
+                  <i>-- D-51: se notifica el borrado adelantado (RN-05); D-89: pausa y cancelación</i>
+
+<u>CREATE DOMAIN estado_analisis AS varchar(10)
+  CHECK (VALUE IN ('en cola', 'procesando', 'completado', 'error',
+                   'en pausa', 'cancelado'));
+  -- D-59, D-67 y D-89 (11 y 12-oct) suman "en pausa" y "cancelado".
+  -- D-15, 13-sep: eran 4, no 3. Falta "en cola" para el momento entre que se
+  -- pide el análisis y que el Worker lo toma de la cola (cap. 1 y 3 del TT
+  -- ya piden esa cola; el cap. 5, para el modelo viejo, ya traía el cuarto
+  -- valor y este documento no lo había cruzado con el esquema)</u>
+
+<u>CREATE DOMAIN etapa_analisis AS varchar(16)
+  CHECK (VALUE IN ('preprocesamiento', 'cilindros', 'clasificacion'));
+  -- D-16 revisado, 5-oct: tres etapas. Se quitó "seguimiento" porque el
+  -- pipeline real no usa tracker (un espécimen por cilindro)</u>
+
+<u>CREATE DOMAIN nivel_clasif_analisis AS varchar(8)
+  CHECK (VALUE IN ('preciso', 'agrupado'));
+  -- D-17, 13-sep: el reporte indica si el clasificador distinguió las tres
+  -- conductas (preciso) o si hubo conducta activa (agrupado).
+  -- D-41, 3-oct: agrupado si algún segundo quedó como conducta activa</u>
+
+<u>CREATE DOMAIN origen_segundo AS varchar(16)
+  CHECK (VALUE IN ('maquina', 'confirmada', 'corregida', 'dudosa'));
+  -- maquina: lo asignó el sistema; confirmada: el usuario lo revisó y lo dejó igual;
+  -- corregida: lo cambió por otra conducta; dudosa: el usuario lo marcó «No se ve».
+  -- D-35, 3-oct, y D-80, 12-oct: cuatro valores (D-53 agregó la columna).</u>
+
+<u>CREATE DOMAIN tipo_conducta AS varchar(16)
+  CHECK (VALUE IN ('nado activo', 'inmovilidad', 'escalamiento', 'conducta activa'));
+  -- D-102, 14-oct: las conductas ya no son tabla. SEGUNDO.conducta usa este
+  -- dominio y admite nulo (nula cuando el sistema no vio al espécimen o el usuario marcó «No se ve»)</u></div>
+
+    <div class="note">
+      <span class="tag">Los nueve dominios quedan resueltos</span>
+      <p>Nada de esta actividad depende ya de una decisión sin tomar. El DDL de las 12 relaciones ya existe con los tipos y dominios fijados (<code>db/init/001_esquema.sql</code>).</p>
+    </div>
+
+    <h3>Parte 3 — <code>CONDUCTA</code> es un dominio, no una tabla</h3>
+
+    <div class="col">
+      <p>Las conductas parecían el candidato más obvio a dominio cerrado y se habían dejado como tabla. <strong>Actualizado (D-102, 14-oct):</strong> pasan a dominio. La razón para la tabla era que dos columnas la referenciaban por llave foránea, <code>PRESENTA.conducta</code> y <code>SEGUNDO.conducta</code>; desde D-52 solo queda la segunda. Son cuatro valores fijos (nado activo, inmovilidad, escalamiento y conducta activa, D-29) y no tienen atributos propios.</p>
+      <p>Con <code>tipo_conducta</code> la integridad es la misma, porque el <code>CHECK</code> rechaza cualquier otro valor, y se ahorra una tabla, una llave foránea y la reunión para leer la conducta de un segundo. Si algún día cambian las conductas, se modifica el dominio.</p>
+    </div>
+
+    <h3>Parte 4 — La forma de las tablas</h3>
+
+    <div class="col">
+      <p>Un ejemplo completo, con todos los tipos de restricción que el esquema necesita. Se eligió <code>ESPECIMEN</code> porque concentra tres casos: llave subrogada, foránea y clave alterna, más una restricción semántica que queda pendiente.</p>
+    </div>
+
+    <div class="ddl"><b>CREATE TABLE</b> ESPECIMEN
+(
+  idEspecimen     integer <b>GENERATED ALWAYS AS IDENTITY</b>,
+  idTanda         integer <b>NOT NULL</b>,
+  numeroCilindro  smallint <b>NOT NULL</b>,
+
+  <b>CONSTRAINT</b> PK_ESPECIMEN <b>PRIMARY KEY</b> (idEspecimen),
+
+  <b>CONSTRAINT</b> AK_ESPECIMEN_CILINDRO <b>UNIQUE</b> (idTanda, numeroCilindro),
+
+  <b>CONSTRAINT</b> FK_TANDA_ESPECIMEN <b>FOREIGN KEY</b> (idTanda)
+    <b>REFERENCES</b> TANDA (idTanda) <b>MATCH SIMPLE</b>
+    <b>ON UPDATE NO ACTION ON DELETE NO ACTION</b>
+
+  <i>-- falta: numeroCilindro &lt;= nCilindros de su tanda, que mira otra tabla</i>
+  <i>-- sin numeroRata ni idGrupo: el espécimen se distingue por su posición en el cuadro (D-55)</i>
+);</div>
+
+    <div class="note">
+      <span class="tag">Restricciones de columna que el DDL declara</span>
+      <p><code>TANDA.ordinal</code> ≥ 1, con <code>UK (idGrupo, ordinal)</code>; <code>TANDA.nCilindros</code> entre 2 y 4; <code>ESPECIMEN.numeroCilindro</code> entre 1 y 4; <code>ANALISIS.rutaDiagnostico</code> solo con estado <em>error</em>. Que el número de cilindro no pase del de su tanda lo valida el backend, porque cruza dos tablas.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">La política de las 13 llaves foráneas</span>
+      <p>Todas se declaran <code>ON UPDATE NO ACTION ON DELETE NO ACTION</code>, que es lo que hace el apéndice del libro en cada una de las suyas. La consecuencia es deliberada: <strong>la base de datos rechaza el borrado en vez de propagarlo</strong>. Nadie borra un experimento y se lleva por delante sus grupos, tandas, especímenes, observaciones y segundos sin darse cuenta.</p>
+      <p>Es la misma lógica que sostiene <code>USUARIO.activo</code> (<b class="dc">D-10</b>): si borrar está prohibido de hecho, hace falta una forma de dar de baja que no sea borrar.</p>
+    </div>
+
+    <h3>Parte 5 — Dónde este esquema se aparta del ejemplo del libro</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:26%">El apéndice hace</th><th style="width:26%">Aquí se hace</th><th>Por qué</th></tr></thead>
+        <tbody>
+          <tr class="fila-prop"><td class="card">character(n)</td><td class="card">varchar(n) · text</td><td>La longitud fija rellena con espacios a la derecha. En comparaciones y en exportación a CSV eso aparece como basura invisible</td></tr>
+          <tr class="fila-prop"><td class="card">Llaves naturales</td><td class="card">Llaves subrogadas</td><td>No es una desviación de esta etapa: se decidió en la lógica, porque la transformación literal producía llaves de hasta siete columnas sobre una sola de dato</td></tr>
+          <tr class="fila-prop"><td class="card">money</td><td class="card">No se usa</td><td>No hay ningún atributo monetario en este esquema</td></tr>
+          <tr class="fila-prop"><td class="card">Restricciones sin nombre en algunos casos</td><td class="card">Todas con nombre</td><td><code>PK_</code>, <code>AK_</code>, <code>FK_</code>, <code>CK_</code>. Cuando una restricción falla en producción, el nombre es lo único que dice qué regla se violó</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">Actualizado 13-sep · los dos huecos de esta actividad ya se cerraron</span>
+      <p><code>ADMINISTRADOR(idInstitucional* [FK])</code> ya está en el grafo relacional (hoy <code>grafo_relacional_3_vigente.puml</code>), en relación (1,1)–(0,1) con <code>USUARIO</code> (<b class="dc">D-08</b>). Su llave primaria es la misma foránea, así que PostgreSQL la indexa sola al declarar el <code>PRIMARY KEY</code> — entra a la columna de índices gratuitos en la actividad 3, no a la de índices por declarar.</p>
+      <p>La discrepancia de nombre también se resolvió: el grafo relacional ya dice <code>contrasenaHash</code>, igual que el diagrama de clases. La tabla de tipos de la Parte 1 y el ejemplo de <code>ESPECIMEN</code> no la mencionan directamente, pero la regla de <b>texto corto → varchar(n)</b> de esa misma parte le aplica sin cambios.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 3 ══════════ -->
+  <section class="act" id="a3">
+    <p class="act-n">Actividad 3 <span class="chip">Resuelta</span></p>
+    <h2>Organización de archivos e índices</h2>
+
+    <blockquote class="asks">
+      <p>«<b>Determinar la organización de los archivos y los índices requeridos</b> según el análisis de los datos que serán almacenados y las transacciones previstas, en esta actividad debe considerarse la estimación del espacio en disco.»</p>
+      <cite>Metodología de diseño · etapa física · actividad 3</cite>
+    </blockquote>
+
+    <div class="col">
+      <p>Esta actividad tiene una entrada que ya existe: las <strong>once transacciones verificadas</strong> en la actividad 6 de la etapa lógica. Ahí se comprobó que el esquema las soporta; aquí se mira qué índices necesitan para no recorrer tablas enteras.</p>
+      <p>El punto de partida es un detalle del gestor que decide casi todo el trabajo: <strong>PostgreSQL crea el índice de las llaves primarias y de las restricciones de unicidad, pero no el de las llaves foráneas.</strong> Una foránea sin índice propio obliga a recorrer la tabla hija completa cada vez que se navega desde el padre.</p>
+    </div>
+
+    <figure>
+      <div class="figbox">
+        <svg viewBox="0 0 1040 434" role="img" aria-label="Las trece llaves foraneas del esquema fisico divididas en dos columnas. A la izquierda, las ocho que ya quedan indexadas porque son la primera columna de una clave alterna o de la llave primaria, porque son UNIQUE, o porque la propia foranea es la llave primaria de un subtipo; entre ellas Analisis a Video, que es UNIQUE, y Segundo a Observacion. A la derecha, las cinco que necesitan un indice declarado a proposito, entre ellas la de Observacion a Video.">
+          <text class="m" x="20" y="20" font-size="10.5" fill="currentColor" opacity=".7" letter-spacing="1.2">LAS 13 LLAVES FOR&#193;NEAS Y SU &#205;NDICE</text>
+
+          <rect x="20" y="42" width="490" height="370" rx="3" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.4"/>
+          <line x1="20" y1="78" x2="510" y2="78" stroke="var(--accent)" stroke-width="1.4"/>
+          <text class="m at" x="34" y="63" font-size="10">8 · YA QUEDAN INDEXADAS</text>
+          <text class="m" x="34" y="95" font-size="8" fill="currentColor" opacity=".62">son la primera columna de una clave ya declarada, o son UNIQUE</text>
+
+          <text class="m" x="34" y="123" font-size="9">GRUPO.idExperimento → EXPERIMENTO</text>
+          <text class="m" x="46" y="136" font-size="7.5" fill="currentColor" opacity=".55">clave alterna (idExperimento, etiqueta)</text>
+          <text class="m" x="34" y="163" font-size="9">TANDA.idGrupo → GRUPO</text>
+          <text class="m" x="46" y="176" font-size="7.5" fill="currentColor" opacity=".55">clave alterna (idGrupo, ordinal)</text>
+          <text class="m" x="34" y="203" font-size="9">ESPECIMEN.idTanda → TANDA</text>
+          <text class="m" x="46" y="216" font-size="7.5" fill="currentColor" opacity=".55">clave alterna (idTanda, numeroCilindro)</text>
+          <text class="m" x="34" y="243" font-size="9">VIDEO.idTanda → TANDA</text>
+          <text class="m" x="46" y="256" font-size="7.5" fill="currentColor" opacity=".55">clave alterna (idTanda, sesion)</text>
+          <text class="m" x="34" y="283" font-size="9">ANALISIS.idVideo → VIDEO</text>
+          <text class="m" x="46" y="296" font-size="7.5" fill="currentColor" opacity=".55">es UNIQUE: un análisis vigente por video · D-24</text>
+          <text class="m" x="34" y="323" font-size="9">OBSERVACION.idEspecimen → ESPECIMEN</text>
+          <text class="m" x="46" y="336" font-size="7.5" fill="currentColor" opacity=".55">clave alterna (idEspecimen, idVideo)</text>
+          <text class="m" x="34" y="363" font-size="9">SEGUNDO.idObservacion → OBSERVACION</text>
+          <text class="m" x="46" y="376" font-size="7.5" fill="currentColor" opacity=".55">primera columna de la llave primaria · D-35</text>
+          <text class="m" x="34" y="403" font-size="9">ADMINISTRADOR.idInstitucional → USUARIO</text>
+          <text class="m" x="46" y="416" font-size="7.5" fill="currentColor" opacity=".55">es también su llave primaria · subtipo, D-08</text>
+
+          <rect x="530" y="42" width="490" height="370" rx="3" fill="var(--warn-dim)" stroke="var(--warn)" stroke-width="1.4"/>
+          <line x1="530" y1="78" x2="1020" y2="78" stroke="var(--warn)" stroke-width="1.4"/>
+          <text class="m pt" x="544" y="63" font-size="10">5 · HAY QUE DECLARAR EL &#205;NDICE</text>
+          <text class="m" x="544" y="95" font-size="8" fill="currentColor" opacity=".62">ninguna clave existente las cubre</text>
+
+          <text class="m" x="544" y="123" font-size="9">EXPERIMENTO.idInstitucional → USUARIO</text>
+          <text class="m" x="556" y="136" font-size="7.5" fill="currentColor" opacity=".55">experimentos de un investigador</text>
+          <text class="m" x="544" y="163" font-size="9">OBSERVACION.idVideo → VIDEO</text>
+          <text class="m" x="556" y="176" font-size="7.5" fill="currentColor" opacity=".55">es la segunda columna de su clave alterna</text>
+          <text class="m" x="544" y="203" font-size="9">REPORTE.idExperimento → EXPERIMENTO</text>
+          <text class="m" x="556" y="216" font-size="7.5" fill="currentColor" opacity=".55">reportes de un experimento</text>
+          <text class="m" x="544" y="243" font-size="9">NOTIFICACION.idInstitucional → USUARIO</text>
+          <text class="m" x="556" y="256" font-size="7.5" fill="currentColor" opacity=".55">el panel del investigador, la consulta más frecuente</text>
+          <text class="m" x="544" y="283" font-size="9">NOTIFICACION.idExperimento → EXPERIMENTO</text>
+          <text class="m" x="556" y="296" font-size="7.5" fill="currentColor" opacity=".55">admite nulo · el índice no indexa los nulos</text>
+
+</svg>
+      </div>
+      <figcaption><b>Figura 1. Reparto de las trece llaves foráneas</b> (vigente al 14-oct) — ocho no cuestan nada porque el índice ya viene con una clave que empieza por esa columna, porque son <code>UNIQUE</code> o porque la propia foránea es la primaria de un subtipo; las otras cinco hay que declararlas. La de <code>OBSERVACION.idVideo</code> es el caso menos evidente: la clave alterna existe, pero un índice compuesto no sirve para buscar por su segunda columna. Con D-52 salieron las tres de <code>INTERVALO</code> y <code>PRESENTA</code>, y con D-102 la de <code>SEGUNDO.conducta</code>, que ya no es llave foránea.</figcaption>
+    </figure>
+
+    <h3>Cuántas filas hay que indexar</h3>
+
+    <div class="col">
+      <p>Antes de justificar índices conviene saber el tamaño real. Las multiplicidades del grafo relacional permiten estimarlo sin medir nada: un experimento mínimo son tres grupos, dos tandas por grupo, dos a cuatro especímenes por tanda y una o dos sesiones grabadas.</p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:30%">Relación</th><th style="width:22%">Filas por experimento</th><th>De dónde sale</th></tr></thead>
+        <tbody>
+          <tr><td class="card">GRUPO</td><td class="card">3</td><td>Control, referencia y tratamiento experimental</td></tr>
+          <tr><td class="card">TANDA</td><td class="card">6</td><td>Dos tandas por grupo</td></tr>
+          <tr><td class="card">ESPECIMEN</td><td class="card">~24</td><td>Hasta cuatro por tanda (D-28)</td></tr>
+          <tr><td class="card">VIDEO</td><td class="card">~12</td><td>Una o dos sesiones por tanda; solo el del Día 2 se analiza</td></tr>
+          <tr><td class="card">OBSERVACION</td><td class="card">~24</td><td>Una por espécimen: solo el video del Día 2 se analiza (D-71)</td></tr>
+          <tr><td class="card">SEGUNDO</td><td class="card">~7&#8239;200</td><td>300 segundos por observación (D-35)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">El espacio en disco no es problema de la base de datos</span>
+      <p>Un experimento completo cabe en <strong>unas siete mil quinientas filas</strong>, casi todas de <code>SEGUNDO</code> y todas de cinco columnas cortas o menos. Cien experimentos son del orden de setecientas cincuenta mil filas: para PostgreSQL sigue siendo poco, y ningún índice de esta lista se justifica por volumen. (Antes de <code>SEGUNDO</code> eran menos de mil quinientas por experimento; con <code>INTERVALO</code> y <code>PRESENTA</code>, unas dieciséis mil.)</p>
+      <p>El disco lo consumen <strong>los videos</strong>, que no viven en la base de datos —<code>VIDEO.archivo</code> guarda la ruta, no el contenido. Por eso la estimación de espacio que esta actividad pide corresponde en realidad al almacenamiento de archivos, y por eso existe la regla de negocio que los borra a los treinta días de completado el análisis.</p>
+      <p>La consecuencia práctica: los cinco índices de la derecha se declaran <strong>por corrección de las consultas, no por tamaño</strong>. Y conviene decirlo así en la defensa, en vez de justificarlos con un argumento de rendimiento que a esta escala no se sostiene.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">La otra mitad de la actividad — dónde viven los datos</span>
+      <p>Esto ya estaba resuelto, solo que en otros capítulos del TT y nunca cruzado con esta actividad. Los datos se reparten en <strong>tres lugares</strong>: PostgreSQL para todo lo estructurado, un volumen compartido para los videos que suben los investigadores, y un volumen aparte y dedicado para el modelo entrenado del clasificador, que el Worker monta al arrancar (cap. 5; cuál modelo, se decide en CLA-03). <b>Actualizado (D-42):</b> por cada análisis el Worker deja además tres archivos en el volumen: los recuadros de los tubos, una copia del video para reproducirlo en el navegador y, si falla, el PDF de diagnóstico. La base guarda solo la ruta del PDF; los otros dos se nombran con el id del análisis (<code>analisis_{idAnalisis}_cajas.json</code> y <code>analisis_{idAnalisis}_web.mp4</code>).</p>
+      <p>La política de retención de los videos también está escrita: se borran automáticamente a los 30 días de terminado el análisis (<b>RNF-08</b>), mientras que los reportes y resultados se conservan indefinidamente aunque el video ya no exista (<b>RN-06</b>). Y hay un mecanismo de capacidad: alerta al Administrador al 80% de uso de disco, limpieza automática de los videos más antiguos al 90% (<b>RNF-09</b>).</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">D-18 · resuelto (equipo, 13-sep) · respaldo de la base de datos</span>
+      <p>Esto sí era un hueco real: a diferencia de la retención de videos, <strong>ningún <code>.tex</code> menciona con qué frecuencia o herramienta se respalda la base de datos</strong> — son dos cosas distintas, esta es sobre <code>PostgreSQL</code> completo (experimentos, resultados, cuentas), no sobre los archivos de video.</p>
+      <p>Respaldo automático diario con <code>pg_dump</code>, conservando los últimos 7 días. Suficiente para un laboratorio de este tamaño, sin herramientas adicionales — <code>pg_dump</code> viene incluido con PostgreSQL.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 4 ══════════ -->
+  <section class="act" id="a4">
+    <p class="act-n">Actividad 4 <span class="chip">Resuelta</span></p>
+    <h2>Seguridad y control de acceso</h2>
+
+    <blockquote class="asks">
+      <p>«<b>Implementar mecanismos de seguridad y control de acceso</b> a los datos.»</p>
+      <cite>Metodología de diseño · etapa física · actividad 4</cite>
+    </blockquote>
+
+    <div class="col">
+      <p>Esta actividad tenía el hueco más grande del documento: una <strong>contradicción entre dos cosas que el proyecto ya había dado por buenas</strong> y que nunca se pusieron una junto a la otra. Ya se resolvió con el equipo (D-12, D-13).</p>
+    </div>
+
+    <div class="pair">
+      <div>
+        <p class="lbl">Lo que decía la etapa lógica</p>
+        <p>La actividad 5 —integración de vistas— se había cerrado como «no aplica»: <span class="k">una sola vista, sin permisos diferenciados</span>.</p>
+        <p>Y entre las transacciones verificadas había una que lo confirmaba: «consultar experimentos de cualquier investigador — sin restricción de acceso».</p>
+      </div>
+      <div class="proj">
+        <p class="lbl">Lo que decía D-08</p>
+        <p>El administrador <span class="k">sí tiene permisos que un investigador no tiene</span>: crear cuentas, desactivarlas, listar usuarios, monitorear el sistema.</p>
+        <p>Se modeló como subtipo, así que la diferencia de permisos ya estaba en el esquema — pero nadie había dicho <strong>quién la hace cumplir</strong>.</p>
+      </div>
+    </div>
+
+    <div class="note">
+      <span class="tag">D-12 · resuelto (equipo, 13-sep)</span>
+      <p>Sí hay una vista diferenciada, pero es una sola aplicación con un solo inicio de sesión — no dos sistemas separados. A un <code>Administrador</code> le aparece una pestaña o sección adicional que a un <code>Investigador</code> no le aparece, y ahí ejecuta las cuatro acciones de D-08.</p>
+      <p>El control vive <strong>en la aplicación</strong>, no en roles de PostgreSQL, y es doble a propósito:</p>
+      <ul>
+        <li><strong>Se esconde:</strong> esa sección no se muestra en la interfaz si el usuario no está en <code>ADMINISTRADOR</code>.</li>
+        <li><strong>Se bloquea:</strong> antes de ejecutar cualquiera de las cuatro acciones, el sistema verifica el rol — sin importar por dónde llegue la petición, no solo cuando viene del botón.</li>
+      </ul>
+      <p>Esconder sin bloquear no basta: si alguien encuentra la forma de pedirle al sistema esa acción directamente —sin pasar por la pantalla—, y el sistema no vuelve a preguntar quién es, la ejecuta igual. Con las dos cosas juntas, ni se ve el botón ni se puede entrar por otro lado.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">D-13 · resuelto (equipo, 13-sep)</span>
+      <p>La transacción «sin restricción de acceso» entre investigadores <strong>sigue vigente</strong>, y ahora con motivo explícito: necesitan ver los experimentos de los demás <strong>para poder comparar sus resultados</strong> entre sí. Es una restricción distinta e independiente de D-12 — esta es entre investigadores, D-12 es investigador contra administrador.</p>
+    </div>
+
+    <h3>Qué falta ejecutar, ya con la decisión tomada</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:24%">Pieza</th><th>Qué falta</th></tr></thead>
+        <tbody>
+          <tr class="fila-prop"><td>La comprobación de rol</td><td>Escribir la función que revisa si <code>idInstitucional</code> aparece en <code>ADMINISTRADOR</code>, y llamarla antes de las cuatro acciones y antes de mostrar la sección. Una sola función, usada en los dos lugares, para que no se desincronicen</td></tr>
+          <tr><td>La sesión</td><td><b class="dc">D-36</b>: token JWT de vida larga, configurable (una semana por omisión). Cerrar sesión hace que el navegador descarte el token; no hay lista de bloqueo. Es lo que la comprobación de rol usa para saber quién pide la acción</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">Y por debajo, una pregunta anterior, ya cerrada</span>
+      <p><b class="pr">Q-08</b> pregunta si existe autoregistro con aprobación o si solo el administrador crea cuentas. <b class="dc">D-01</b> ya la respondió del lado del equipo —solo el administrador crea cuentas— y dejó dicho que el capítulo 1 del TT estaba mal escrito. <b>Actualizado:</b> la corrección ya se aplicó; el capítulo 1 y el 4 dicen lo mismo. Tampoco hay bloqueo por intentos fallidos (D-48).</p>
+      <p>Fuera de eso, las contraseñas se almacenan como hash, nunca en claro, con <strong><code>bcrypt</code> y sal</strong> — ya documentado en el cap. 4 (RNF-05) y el cap. 5, es lo único de esta actividad que el propio LaTeX resuelve sin necesitar una decisión nueva.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 5 ══════════ -->
+  <section class="act" id="a5">
+    <p class="act-n">Actividad 5 <span class="chip">Resuelta</span></p>
+    <h2>Rendimiento y redundancia controlada</h2>
+
+    <blockquote class="asks">
+      <p>«<b>Garantizar el rendimiento</b> de la base de datos y tomar acciones como incluir <b>redundancia controlada</b> en caso de ser necesario buscando mejorar el desempeño del sistema.»</p>
+      <cite>Metodología de diseño · etapa física · actividad 5</cite>
+    </blockquote>
+
+    <div class="col">
+      <p>La etapa lógica llegó aquí con una candidata ya identificada: <code>ESPECIMEN.idGrupo</code>, una redundancia controlada que D-04 aceptó el 13-sep para poder declarar único el número de rata dentro de su grupo. <strong>Quedó sin objeto el 6-oct (D-55):</strong> el sistema ya no guarda el número de rata.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">D-04 · sin objeto desde D-55 (6-oct) · redundancia controlada</span>
+      <p>La 3FN había obligado a quitar <code>ESPECIMEN.idGrupo</code> del esquema lógico, porque el grupo de un espécimen se alcanza por su tanda. D-04 la repuso solo en el físico, con <code>UNIQUE (idGrupo, numeroRata)</code> y un disparador que la mantenía igual al grupo de la tanda. Su única razón de ser era declarar esa unicidad.</p>
+      <p>Con D-55 se quitó <code>numeroRata</code>: ya no hay comparación Día 1 contra Día 2 por espécimen (D-44), y el reporte y la revisión solo necesitan distinguir a los especímenes de una tanda por su posición, <code>numeroCilindro</code>. Se van la columna, su unicidad, la llave foránea <code>ESPECIMEN.idGrupo → GRUPO</code> y el disparador <code>fn_sincronizar_grupo_especimen</code>. <strong>El esquema físico y el lógico vuelven a tener las mismas llaves foráneas</strong>, y la tabla <code>ESPECIMEN</code> queda con <code>idEspecimen</code>, <code>idTanda</code> y <code>numeroCilindro</code>.</p>
+      <p>Una consecuencia de lectura: «Espécimen 1» se repite en cada tanda de un grupo, así que los reportes y la revisión lo muestran junto con la tanda («Tanda A · Espécimen 2»).</p>
+    </div>
+
+    <h3>Lo demás del rendimiento</h3>
+
+    <div class="col">
+      <p>Esta actividad no tiene mucho que resolver y conviene decirlo: con el orden de magnitud calculado en la actividad 3 —cientos de miles de filas cortas en el peor caso—, <strong>no hay un problema de rendimiento que atacar</strong>. Lo que sí puede tardar es el procesamiento de video del pipeline, que no toca la base de datos y no se resuelve aquí.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 6 ══════════ -->
+  <section class="act" id="a6">
+    <p class="act-n">Actividad 6 <span class="chip">Resuelta</span></p>
+    <h2>Documentación de la implementación</h2>
+
+    <blockquote class="asks">
+      <p>«<b>Documentar las consideraciones</b> tenidas en cuenta para la implementación de la base de datos física.»</p>
+      <cite>Metodología de diseño · etapa física · actividad 6</cite>
+    </blockquote>
+
+    <div class="col">
+      <p>Esta actividad es este documento, y solo podía cerrarse cuando las cinco anteriores lo hicieran — ya lo hicieron. Lo que deja fijado es la <strong>trazabilidad</strong>: cada elección de arriba tiene una fuente, y las fuentes son de dos clases muy distintas.</p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:20%">Decisión</th><th style="width:16%">Fuente</th><th style="width:12%">Fecha</th><th>Estado</th></tr></thead>
+        <tbody>
+          <tr><td>PostgreSQL como gestor</td><td class="card"><i class="src d">D-11</i></td><td class="card">13-sep</td><td class="ok">Decidida por el equipo</td></tr>
+          <tr><td>Administrador como subtipo</td><td class="card"><i class="src d">D-08</i></td><td class="card">13-sep</td><td class="ok">Decidida y aplicada</td></tr>
+          <tr><td><code>USUARIO.activo</code> en vez de borrar</td><td class="card"><i class="src d">D-10</i></td><td class="card">13-sep</td><td class="ok">Decidida y aplicada</td></tr>
+          <tr><td>Identificador institucional</td><td class="card"><i class="src d">D-02</i></td><td class="card">12-sep</td><td class="ok">Decidida y aplicada</td></tr>
+          <tr class="fila-prop"><td>Tipos de dato</td><td class="card"><i class="src p">Este doc.</i></td><td class="card">13-sep</td><td class="ok">Implementada en db/init/001_esquema.sql</td></tr>
+          <tr class="fila-prop"><td>Los cinco índices de foránea</td><td class="card"><i class="src p">Este doc.</i></td><td class="card">13-sep</td><td class="no">Propuesta</td></tr>
+          <tr class="fila-prop"><td>Nombrar todas las restricciones</td><td class="card"><i class="src p">Este doc.</i></td><td class="card">13-sep</td><td class="no">Propuesta</td></tr>
+          <tr><td><s>Unicidad de <code>numeroRata</code>: redundancia controlada</s></td><td class="card"><i class="src d">D-04</i></td><td class="card">13-sep</td><td class="no">Sin objeto desde D-55</td></tr>
+          <tr><td>Vista de Administrador: se esconde y se bloquea, control en la aplicación</td><td class="card"><i class="src d">D-12</i></td><td class="card">13-sep</td><td class="ok">Decidida por el equipo</td></tr>
+          <tr><td>Investigadores ven todos los experimentos, para comparar resultados</td><td class="card"><i class="src d">D-13</i></td><td class="card">13-sep</td><td class="ok">Decidida por el equipo</td></tr>
+          <tr><td><s><code>MODELO.hashModelo</code> se calcula con SHA-256, <code>char(64)</code></s></td><td class="card"><i class="src d">D-14</i></td><td class="card">13-sep</td><td class="no">Sin objeto desde D-51</td></tr>
+          <tr><td><code>ANALISIS.estado</code> son 4 valores, no 3 — se agrega <code>en cola</code></td><td class="card"><i class="src d">D-15</i></td><td class="card">13-sep</td><td class="ok">Decidida por el equipo</td></tr>
+          <tr><td><code>ANALISIS.etapa</code>: <code>preprocesamiento, cilindros, clasificacion</code></td><td class="card"><i class="src d">D-16</i></td><td class="card">5-oct</td><td class="ok">Revisada por el usuario</td></tr>
+          <tr><td><code>ANALISIS.nivelClasif</code>: <code>preciso, agrupado</code></td><td class="card"><i class="src d">D-17</i></td><td class="card">13-sep</td><td class="ok">Decidida por el equipo</td></tr>
+          <tr><td><s>Disparador de sincronización <code>ESPECIMEN.idGrupo</code></s></td><td class="card"><i class="src d">D-04</i></td><td class="card">13-sep</td><td class="no">Sin objeto desde D-55</td></tr>
+          <tr><td>Respaldo diario con <code>pg_dump</code>, retención de 7 días</td><td class="card"><i class="src d">D-18</i></td><td class="card">13-sep</td><td class="ok">Decidida por el equipo</td></tr>
+          <tr><td><code>ANALISIS.rutaDiagnostico</code>, nula salvo error</td><td class="card"><i class="src d">D-23</i></td><td class="card">13-sep</td><td class="ok">Decidida y aplicada</td></tr>
+          <tr><td><code>ANALISIS.idVideo</code> es <code>UNIQUE</code></td><td class="card"><i class="src d">D-24</i></td><td class="card">15-sep</td><td class="ok">Decidida y aplicada</td></tr>
+          <tr><td>Tabla <code>SEGUNDO</code> y dominio <code>origen_segundo</code></td><td class="card"><i class="src d">D-35</i></td><td class="card">3-oct</td><td class="ok">Decidida y aplicada</td></tr>
+          <tr><td>Estados <code>en pausa</code> y <code>cancelado</code>; avisos <code>analisis en pausa</code> y <code>analisis cancelado</code></td><td class="card"><i class="src d">D-59</i> <i class="src d">D-67</i> <i class="src d">D-89</i></td><td class="card">11 y 12-oct</td><td class="ok">Decidida y aplicada</td></tr>
+          <tr><td><code>origen_segundo</code> con cuatro valores: máquina, confirmada, corregida y dudosa</td><td class="card"><i class="src d">D-80</i></td><td class="card">12-oct</td><td class="ok">Decidida y aplicada</td></tr>
+          <tr><td>El video del Día 1 se guarda y no se analiza: sin fila en <code>ANALISIS</code> ni en <code>OBSERVACION</code></td><td class="card"><i class="src d">D-71</i></td><td class="card">11-oct</td><td class="ok">Decidida y aplicada</td></tr>
+          <tr><td>Se quitan las tablas <code>INTERVALO</code> y <code>PRESENTA</code>: los totales por minuto se calculan desde <code>SEGUNDO</code></td><td class="card"><i class="src d">D-52</i></td><td class="card">14-oct</td><td class="ok">Decidida y aplicada</td></tr>
+          <tr><td><code>CONDUCTA</code> deja de ser tabla y pasa a dominio cerrado <code>tipo_conducta</code></td><td class="card"><i class="src d">D-102</i></td><td class="card">14-oct</td><td class="ok">Decidida y aplicada</td></tr>
+          <tr><td>Sesión con token JWT de vida larga, sin lista de bloqueo</td><td class="card"><i class="src d">D-36</i></td><td class="card">3-oct</td><td class="ok">Decidida por el equipo</td></tr>
+          <tr><td>Fuera <code>MODELO</code>, <code>CONFIGURACION</code> e <code>idConfig</code>; <code>archivo</code> nulo; <code>nombre</code> único; aviso <em>video borrado</em></td><td class="card"><i class="src d">D-51</i></td><td class="card">5-oct</td><td class="ok">Decidida y aplicada</td></tr>
+          <tr><td><code>SEGUNDO.clase</code> pasa a <code>conducta</code>; fuera <code>SEGUNDO.propuesta</code></td><td class="card"><i class="src d">D-53</i></td><td class="card">6-oct</td><td class="ok">Decidida y aplicada</td></tr>
+          <tr><td>Se analizan como máximo los últimos 300 s del video, no los primeros; la CNN analiza el video completo y el worker recorta y renumera</td><td class="card"><i class="src d">D-54</i></td><td class="card">6-oct</td><td class="ok">Decidida y aplicada</td></tr>
+          <tr><td>Fuera <code>ESPECIMEN.numeroRata</code>, su <code>idGrupo</code> redundante y el disparador</td><td class="card"><i class="src d">D-55</i></td><td class="card">6-oct</td><td class="ok">Decidida y aplicada</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════ cierre ══════════ -->
+  <section class="act" id="sig">
+    <p class="act-n">Cierre</p>
+    <h2>Las decisiones están cerradas; la ejecución no</h2>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:6%">#</th><th style="width:32%">Actividad</th><th style="width:16%">Estado</th><th>Qué falta ejecutar</th></tr></thead>
+        <tbody>
+          <tr><td class="card">01</td><td>Selección del gestor</td><td class="ok">Resuelta</td><td>—</td></tr>
+          <tr><td class="card">02</td><td>Representación en el gestor</td><td class="ok">Resuelta</td><td>DDL implementado en <code>db/init/001_esquema.sql</code></td></tr>
+          <tr><td class="card">03</td><td>Archivos e índices</td><td class="ok">Resuelta</td><td>Declarar los 5 índices. El respaldo con pg_dump (D-18) ya lo ejecuta el worker</td></tr>
+          <tr><td class="card">04</td><td>Seguridad y control de acceso</td><td class="ok">Resuelta</td><td>Escribir la comprobación de rol (D-12) sobre el token de sesión (D-36)</td></tr>
+          <tr><td class="card">05</td><td>Rendimiento y redundancia</td><td class="ok">Resuelta</td><td>Nada: D-04 quedó sin objeto con D-55</td></tr>
+          <tr><td class="card">06</td><td>Documentación</td><td class="ok">Resuelta</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">Qué significa "resuelta" aquí</span>
+      <p>Las dos etapas anteriores se cerraron con resultado validado: un esquema conceptual y uno lógico que ya existen. Esta etapa cierra distinto, y conviene decirlo así en la defensa en vez de dejarlo implícito: <strong>las seis actividades tienen su decisión tomada</strong> —con fecha, con motivo, con equipo responsable, registradas en <code>preguntas-doctor.md</code>— pero el esquema físico ya está implementado: el DDL vive en <code>db/init/001_esquema.sql</code> y el respaldo diario con pg_dump lo ejecuta el worker.</p>
+      <p>Eso no es un hueco del método: el diseño físico decide <em>qué</em> hacer, la implementación es <em>hacerlo</em>. Lo que sí vale la pena señalar es que hace apenas unas horas esta misma etapa tenía tres decisiones bloqueando todo el avance —la contradicción de permisos, la unicidad de <code>numeroRata</code>, y ocho dominios sin valores— y ninguna de las tres sigue abierta.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>TT 2026-B066 · ESCOM-IPN</span>
+    <span>Frausto Robles Á. A. · Rodríguez Verdín S. V.</span>
+    <span>Etapa de diseño físico · actividades 1 a 6 · decisiones cerradas</span>
+    <span>Actualizado 01-11-2026</span>
+  </footer>
+
+</div>
+
+
+</body></html>

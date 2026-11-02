@@ -1,0 +1,1599 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Diseño Lógico FST v5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Spectral:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --paper:      #F5F7F5;
+    --surface:    #FFFFFF;
+    --surface-2:  #ECF0EE;
+    --ink:        #0D1F21;
+    --ink-soft:   #3A4E4E;
+    --muted:      #677978;
+    --rule:       #D3DBD8;
+    --rule-soft:  #E3E9E6;
+    --accent:     #0F6F70;
+    --accent-dim: #DCEBEA;
+    --warn:       #A65D2E;
+    --warn-dim:   #F4E7DC;
+
+    --f-display: "Spectral", Georgia, "Times New Roman", serif;
+    --f-body:    "IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif;
+    --f-mono:    "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+    --measure: 68ch;
+    --gutter: clamp(1.1rem, 4vw, 3rem);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #0A1314;
+      --surface:    #10201F;
+      --surface-2:  #16292A;
+      --ink:        #E3EAE8;
+      --ink-soft:   #BCCBC9;
+      --muted:      #869695;
+      --rule:       #24403F;
+      --rule-soft:  #1B3231;
+      --accent:     #57C2C0;
+      --accent-dim: #12312F;
+      --warn:       #DD9762;
+      --warn-dim:   #33241A;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:      #0A1314;
+    --surface:    #10201F;
+    --surface-2:  #16292A;
+    --ink:        #E3EAE8;
+    --ink-soft:   #BCCBC9;
+    --muted:      #869695;
+    --rule:       #24403F;
+    --rule-soft:  #1B3231;
+    --accent:     #57C2C0;
+    --accent-dim: #12312F;
+    --warn:       #DD9762;
+    --warn-dim:   #33241A;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--f-body); font-size: 16px; line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: clamp(2rem, 6vw, 4.5rem) var(--gutter) 6rem; }
+  .col { max-width: var(--measure); }
+
+  .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 1.6rem; }
+  .eyebrow {
+    font-family: var(--f-mono); font-size: .705rem; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 1.1rem;
+  }
+  h1 {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: clamp(2.1rem, 5.6vw, 3.3rem); line-height: 1.08;
+    letter-spacing: -.015em; text-wrap: balance; margin: 0 0 .7rem;
+  }
+  .standfirst {
+    font-family: var(--f-display); font-size: clamp(1.02rem, 2.1vw, 1.2rem);
+    line-height: 1.55; color: var(--ink-soft); max-width: 62ch; margin: 0;
+  }
+
+  .pipeline {
+    display: flex; flex-wrap: wrap; margin-top: 2rem;
+    border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; background: var(--surface);
+  }
+  .pipeline div { flex: 1 1 190px; padding: .85rem 1.1rem; border-right: 1px solid var(--rule-soft); }
+  .pipeline div:last-child { border-right: 0; }
+  .pipeline dt {
+    font-family: var(--f-mono); font-size: .645rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .25rem;
+  }
+  .pipeline dd { margin: 0; font-size: .9rem; font-weight: 500; }
+
+  .toc { margin: 2.6rem 0 0; border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; background: var(--surface); }
+  .toc a, .toc div.row {
+    display: grid; grid-template-columns: 2.4rem 1fr auto; gap: 0 .9rem;
+    align-items: baseline; padding: .68rem 1.1rem;
+    border-bottom: 1px solid var(--rule-soft); text-decoration: none; color: var(--ink);
+  }
+  .toc > :last-child { border-bottom: 0; }
+  .toc a:hover { background: var(--surface-2); }
+  .toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .toc .n { font-family: var(--f-mono); font-size: .73rem; color: var(--accent); font-weight: 500; }
+  .toc div.row .n, .toc div.row .t { color: var(--muted); }
+  .toc .t { font-size: .93rem; }
+  .toc .s {
+    font-family: var(--f-mono); font-size: .655rem; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--muted); white-space: nowrap;
+  }
+  .toc .s.done { color: var(--accent); }
+
+  .act { margin-top: 4.2rem; border-top: 2px solid var(--ink); padding-top: 1.4rem; scroll-margin-top: 1rem; }
+  .act-n {
+    font-family: var(--f-mono); font-size: .68rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 .45rem;
+    display: flex; align-items: center; gap: .7rem; flex-wrap: wrap;
+  }
+  .act-n .chip {
+    font-size: .62rem; letter-spacing: .08em; padding: .16em .45em;
+    border-radius: 2px; background: var(--accent-dim); color: var(--accent);
+  }
+  .act-n .chip.wait  { background: var(--warn-dim);  color: var(--warn); }
+
+  .act h2 {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: clamp(1.45rem, 3vw, 1.95rem); line-height: 1.16;
+    letter-spacing: -.012em; text-wrap: balance; margin: 0 0 1rem;
+  }
+
+  .asks {
+    border-left: 2px solid var(--accent); padding: .1rem 0 .1rem 1.15rem;
+    margin: 0 0 1.6rem; max-width: 64ch;
+    font-family: var(--f-display); font-size: 1.02rem; line-height: 1.55; color: var(--ink-soft);
+  }
+  .asks p { margin: 0; }
+  .asks cite {
+    display: block; margin-top: .5rem; font-family: var(--f-mono); font-style: normal;
+    font-size: .67rem; letter-spacing: .09em; text-transform: uppercase; color: var(--muted);
+  }
+
+  .pair {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    background: var(--rule); border: 1px solid var(--rule);
+    border-radius: 3px; overflow: hidden; margin: 1.5rem 0;
+  }
+  @media (max-width: 720px) { .pair { grid-template-columns: 1fr; } }
+  .pair > div { background: var(--surface); padding: 1.15rem 1.25rem 1.3rem; }
+  .pair .lbl {
+    font-family: var(--f-mono); font-size: .645rem; letter-spacing: .11em;
+    text-transform: uppercase; color: var(--muted); margin: 0 0 .6rem;
+  }
+  .pair .proj .lbl { color: var(--accent); }
+  .pair p { margin: 0 0 .6rem; font-size: .9rem; line-height: 1.55; }
+  .pair p:last-child { margin-bottom: 0; }
+  .pair ul { margin: 0; padding-left: 1.1rem; font-size: .88rem; }
+  .pair li { margin-bottom: .34rem; line-height: 1.48; }
+  .pair li:last-child { margin-bottom: 0; }
+  .pair li::marker { color: var(--muted); }
+  .pair .k { font-family: var(--f-mono); font-size: .8rem; }
+
+  h3 { font-family: var(--f-body); font-weight: 600; font-size: 1.02rem; margin: 2.4rem 0 .7rem; }
+  p { margin: 0 0 1rem; }
+  .col p:last-child { margin-bottom: 0; }
+  strong { font-weight: 600; }
+  code { font-family: var(--f-mono); font-size: .86em; background: var(--surface-2);
+         padding: .1em .38em; border-radius: 2px; }
+
+  /* ---------- tablas del esquema ---------- */
+
+  .tbls {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(262px, 1fr));
+    gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+    border-radius: 3px; overflow: hidden; margin: 1.5rem 0;
+  }
+  .tbl { background: var(--surface); padding: .95rem 1.05rem 1.1rem; }
+  .tbl h4 {
+    font-family: var(--f-mono); font-size: .8rem; font-weight: 500;
+    letter-spacing: .06em; margin: 0 0 .5rem;
+    display: flex; align-items: baseline; justify-content: space-between; gap: .5rem;
+  }
+  .tbl .badge {
+    font-size: .58rem; letter-spacing: .08em; text-transform: uppercase;
+    padding: .14em .4em; border-radius: 2px; flex: none;
+    background: var(--surface-2); color: var(--ink-soft);
+  }
+  .tbl ul { list-style: none; margin: 0; padding: 0; }
+  .tbl li {
+    display: grid; grid-template-columns: 3.4rem 1fr; gap: .5rem;
+    font-family: var(--f-mono); font-size: .745rem; line-height: 1.5; padding: .12rem 0;
+  }
+  .tbl .kk { color: var(--accent); font-weight: 500; }
+  .tbl .kf { color: var(--muted); }
+  .tbl .nn { color: var(--muted); }
+  .tbl .grado {
+    font-family: var(--f-mono); font-size: .67rem; color: var(--muted);
+    margin: .55rem 0 0; padding-top: .45rem; border-top: 1px solid var(--rule-soft);
+  }
+
+  /* ---------- esquema en la notación del libro ---------- */
+
+  .esquema {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 3px;
+    padding: 1.25rem 1.4rem; margin: 1.5rem 0; overflow-x: auto;
+    font-family: var(--f-mono); font-size: .8rem; line-height: 2.1;
+  }
+  .esquema > div { white-space: nowrap; }
+  .esquema .r { font-weight: 500; letter-spacing: .03em; }
+  .esquema .pk { border-bottom: 1.4px solid currentColor; padding-bottom: 1px; }
+  .esquema .fk { color: #2E9E9C; }
+  .esquema .ref { color: var(--muted); font-size: .72rem; padding-left: .55rem; }
+
+  .keyleg {
+    display: flex; flex-wrap: wrap; gap: .55rem 1.4rem;
+    margin: 1.3rem 0; align-items: center;
+    font-family: var(--f-mono); font-size: .69rem; color: var(--muted);
+  }
+  .keyleg span { display: flex; align-items: center; gap: .4rem; }
+
+  figure { margin: 1.9rem 0; }
+  .figbox {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 3px; padding: 1.5rem 1.2rem; overflow-x: auto;
+  }
+  .figbox svg { display: block; max-width: 100%; height: auto; margin: 0 auto; min-width: 620px; }
+  .figbox svg text { font-family: var(--f-body); fill: currentColor; }
+  .figbox svg text.m { font-family: var(--f-mono); }
+  figcaption { font-size: .845rem; color: var(--muted); line-height: 1.5; margin-top: .9rem; max-width: 62ch; }
+  figcaption b { color: var(--ink-soft); font-weight: 500; }
+
+  .note {
+    border: 1px solid var(--rule); border-left: 3px solid var(--accent);
+    background: var(--surface); border-radius: 2px;
+    padding: 1.05rem 1.2rem; margin: 1.5rem 0; max-width: 74ch;
+  }
+  .note.warn { border-left-color: var(--warn); }
+  .note p:last-child { margin-bottom: 0; }
+  .note .tag {
+    font-family: var(--f-mono); font-size: .645rem; letter-spacing: .11em;
+    text-transform: uppercase; color: var(--accent); display: block; margin-bottom: .4rem;
+  }
+  .note.warn .tag { color: var(--warn); }
+  .note ul { margin: 0 0 .8rem; padding-left: 1.2rem; font-size: .93rem; }
+  .note li { margin-bottom: .4rem; line-height: 1.5; }
+
+  .tally {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(146px, 1fr));
+    gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+    border-radius: 3px; overflow: hidden; margin: 1.6rem 0;
+  }
+  .tally div { background: var(--surface); padding: .9rem 1.05rem; }
+  .tally dt {
+    font-family: var(--f-mono); font-size: .635rem; letter-spacing: .11em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .26rem;
+  }
+  .tally dd {
+    margin: 0; font-family: var(--f-display); font-size: 1.7rem;
+    font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .tally dd small {
+    display: block; font-family: var(--f-body); font-size: .73rem; font-weight: 400;
+    color: var(--muted); margin-top: .3rem; line-height: 1.35;
+  }
+
+  footer {
+    margin-top: 4.5rem; padding-top: 1.4rem; border-top: 1px solid var(--rule);
+    font-family: var(--f-mono); font-size: .68rem; letter-spacing: .07em;
+    color: var(--muted); display: flex; flex-wrap: wrap; gap: .5rem 1.6rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">TT 2026-B066 · ESCOM-IPN · Etapa de diseño lógico · actualizado el 1-nov-2026</p>
+    <h1>Diseño Lógico FST</h1>
+    <p class="standfirst">Transformación del esquema conceptual al modelo relacional, validación del resultado con las formas normales y documentación de la etapa. Cubre las siete actividades, y produce los dos entregables que el método pide: el grafo relacional inicial y el final.</p>
+
+    <dl class="pipeline">
+      <div><dt>Entrada</dt><dd>Esquema conceptual · 10 entidades del laboratorio + soporte del sistema</dd></div>
+      <div><dt>Proceso</dt><dd>Modelo relacional · validación por normalización</dd></div>
+      <div><dt>Salida</dt><dd>Esquema lógico definitivo · 12 relaciones, 58 atributos, 13 llaves foráneas</dd></div>
+      <div><dt>Estado</dt><dd>Cerrada · actualizada con las decisiones de octubre</dd></div>
+    </dl>
+
+    <nav class="toc">
+      <a href="#a1"><span class="n">01</span><span class="t">Selección del modelo lógico</span><span class="s done">Hecha</span></a>
+      <a href="#a2"><span class="n">02</span><span class="t">Transformación del esquema conceptual</span><span class="s done">Hecha</span></a>
+      <a href="#a3"><span class="n">03</span><span class="t">Restricciones de integridad e identidad</span><span class="s done">Hecha</span></a>
+      <div class="row"><span class="n">04</span><span class="t">Elementos no estructurales para la etapa física</span><span class="s done">Ya existen</span></div>
+      <div class="row"><span class="n">05</span><span class="t">Integración de vistas</span><span class="s">No aplica</span></div>
+      <a href="#a6"><span class="n">06</span><span class="t">Validación con las formas normales</span><span class="s done">Hecha</span></a>
+      <a href="#a7"><span class="n">07</span><span class="t">Documentación del esquema lógico</span><span class="s done">Hecha</span></a>
+    </nav>
+
+    <div class="note" style="margin-bottom:1.5rem">
+      <span class="tag">Actualización del 1 de noviembre · qué cambió desde el 14-oct</span>
+      <ul>
+        <li><strong>Se agrega <code>VIDEO.nombreOriginal</code></strong> (varchar(255), admite nulo): el nombre con que el usuario subió el archivo. Solo se muestra; no arma rutas. <code>VIDEO</code> pasa de grado 6 a grado 7.</li>
+        <li><strong>Resultado vigente: 12 relaciones, 58 atributos y 13 llaves foráneas</strong>, en BCNF. Son seis atributos nulables: <code>EXPERIMENTO.notas</code>, <code>NOTIFICACION.idExperimento</code>, <code>VIDEO.archivo</code>, <code>VIDEO.nombreOriginal</code>, <code>SEGUNDO.conducta</code> y <code>ANALISIS.rutaDiagnostico</code>.</li>
+        <li><strong>Restricciones de dominio para la etapa física</strong> (no cambian la estructura): <code>TANDA.ordinal</code> mayor o igual que 1, con unicidad (idGrupo, ordinal); <code>TANDA.nCilindros</code> entre 2 y 4; <code>ESPECIMEN.numeroCilindro</code> entre 1 y 4 (que no pase de <code>nCilindros</code> lo valida el backend); y <code>ANALISIS.rutaDiagnostico</code> solo con estado «error».</li>
+        <li><strong>Significado de <code>origen</code> en <code>SEGUNDO</code></strong>: máquina = lo asignó el sistema; confirmada = el usuario lo revisó y lo dejó igual; corregida = lo cambió por otra conducta; dudosa = el usuario lo marcó «No se ve». <code>SEGUNDO.conducta</code> es nula solo cuando el sistema no vio al espécimen (origen máquina) o el usuario marcó «No se ve» (origen dudosa).</li>
+        <li><strong>Nivel de clasificación</strong>: agrupado si algún segundo quedó como conducta activa (D-41).</li>
+      </ul>
+    </div>
+
+    <div class="note warn" style="margin-bottom:1.5rem">
+      <span class="tag">Actualización del 14 de octubre · qué cambió desde el 6-oct</span>
+      <ul>
+        <li><strong>Se quitan <code>INTERVALO</code> y <code>PRESENTA</code></strong> (D-52). Los segundos por conducta de cada minuto no se guardan: se calculan contando las filas de <code>SEGUNDO</code> (el minuto sale del número de segundo). Con ellas se va la única relación N:M del esquema.</li>
+        <li><strong>Resultado de D-52</strong>: 13 relaciones, 58 atributos y 14 llaves foráneas, en BCNF. Los 58 incluyen <code>ANALISIS.rutaDiagnostico</code>, que el grafo lógico ya trae (M-24). Quedan cinco atributos nulables.</li>
+        <li><strong><code>CONDUCTA</code> deja de ser relación y pasa a dominio cerrado</strong> (D-102): solo <code>SEGUNDO.conducta</code> la referenciaba, son cuatro valores fijos y no tiene atributos propios. Es el noveno dominio, <code>tipo_conducta</code>. <strong>Resultado vigente: 12 relaciones, 57 atributos y 13 llaves foráneas</strong>, en BCNF.</li>
+        <li><strong>El video del Día 1 se guarda y no se analiza</strong> (D-71): <code>VIDEO — ANALISIS</code> pasa a (0,1), <code>VIDEO — OBSERVACION</code> a (0,4) y <code>ESPECIMEN — OBSERVACION</code> a (0,1).</li>
+        <li><strong><code>ESPECIMEN — GRUPO</code> es derivada</strong> (D-92): el modelo no la guarda; el grupo se alcanza por la tanda.</li>
+        <li><strong>Dominios</strong>: <code>estado_analisis</code> suma <em>en pausa</em> y <em>cancelado</em> (D-59, D-67, D-89), <code>origen_segundo</code> queda en cuatro valores (D-80) y <code>tipo_notificacion</code> suma <em>análisis en pausa</em> y <em>análisis cancelado</em>.</li>
+        <li><strong>Resultados y estadísticas</strong>: por tanda o por grupo completo, calculados al mostrarse y no guardados (D-93).</li>
+      </ul>
+    </div>
+
+    <div class="note warn" style="margin-bottom:0">
+      <span class="tag">Actualización del 6 de octubre · qué cambió desde la versión del 18-sep</span>
+      <p>Las actividades conservan el razonamiento original, porque es la evidencia del método. Donde una decisión posterior cambió el resultado, la sección lo marca como <em>actualizado</em>. El esquema definitivo, las tablas, el grafo y el diccionario ya reflejan el modelo vigente, igual que <code>grafo_relacional_3_vigente.puml</code>.</p>
+      <ul>
+        <li><strong>Relación nueva, <code>SEGUNDO</code></strong> (<code>idObservacion</code>, <code>segundo</code>, <code>conducta</code>, <code>origen</code>): la conducta de cada espécimen en cada segundo, con su clave compuesta y dos llaves foráneas (D-35, D-53).</li>
+        <li><strong>Se eliminan <code>MODELO</code>, <code>CONFIGURACION</code> y <code>ANALISIS.idConfig</code></strong>: ningún requisito permite cambiar el modelo ni el umbral, así que son constantes del pipeline (D-51).</li>
+        <li><strong><code>ANALISIS</code></strong>: sin <code>confianza</code> (D-47) y con <code>idVideo</code> como clave alterna, porque un video tiene un solo análisis vigente (D-03, D-24).</li>
+        <li><strong>Nulos nuevos</strong>: <code>VIDEO.archivo</code> (el video ya se borró), <code>SEGUNDO.conducta</code> (D-35, D-51). (<code>rutaRecuadros</code> se agregó y se retiró el mismo día: el archivo de recuadros se nombra con el id del análisis).</li>
+        <li><strong>Unicidad nueva</strong>: <code>EXPERIMENTO.nombre</code> (D-51).</li>
+        <li><strong>Dominios</strong>: cuatro conductas (D-29), estado con cuatro valores (D-15), tres etapas (D-16), <code>origen</code> de la etiqueta (D-35) y el aviso <em>video borrado</em> (D-51).</li>
+        <li><strong>Sin número de rata</strong>: se quita <code>ESPECIMEN.numeroRata</code>. El sistema no necesita identificar a cada rata por su número del laboratorio; el espécimen se distingue por su posición en el cuadro, <code>numeroCilindro</code>. Con la columna se van el <code>idGrupo</code> redundante del físico y su disparador: D-04 queda sin objeto (D-55).</li>
+        <li><strong><code>SEGUNDO</code> sin propuesta</strong>: <code>clase</code> pasa a llamarse <code>conducta</code> y se quita <code>propuesta</code>, el único dato que solo servía para mejorar la red neuronal (D-53).</li>
+        <li><strong>Últimos 300 s</strong>: se analizan los últimos 300 s del video, no los primeros (D-54). Es un máximo, sin mínimo: si el video dura menos, se analiza todo lo que tenga. La CNN analiza el video completo; el worker conserva las últimas 300 filas de cada espécimen, las renumera de 1 a 300 y recorta el video a esos mismos segundos, y el usuario solo ve ese recorte (el segundo N cae en el instante N − 1). El Día 1 solo confirma que existe el video de habituación y no se analiza.</li>
+        <li><strong>Resultado a esa fecha</strong>: 15 relaciones, 63 atributos y 17 llaves foráneas, en BCNF. Las cifras vigentes están en la actualización del 14-oct.</li>
+      </ul>
+      <p><strong>Resuelto (M-24, 14-oct):</strong> <code>ANALISIS.rutaDiagnostico</code> (D-23) ya está también en el grafo lógico, y <code>idVideo</code> lleva su marca de clave alterna.</p>
+    </div>
+  </header>
+
+  <!-- ══════════ ACTIVIDAD 1 ══════════ -->
+  <section class="act" id="a1">
+    <p class="act-n">Actividad 1 <span class="chip">Hecha</span></p>
+    <h2>Selección del modelo lógico</h2>
+
+    <blockquote class="asks">
+      <p>«Seleccionar un <b>Modelo de Datos Lógico</b> e identificar sus estructuras, reglas y restricciones.»</p>
+      <cite>Metodología de diseño · etapa lógica · actividad 1</cite>
+    </blockquote>
+
+    <div class="pair">
+      <div>
+        <p class="lbl">Ejemplo del libro · concesionario</p>
+        <p>«Modelo de Datos Lógico seleccionado: <span class="k">Relacional</span>.»</p>
+        <p>El libro no justifica la elección — la da por hecha, igual que en la etapa conceptual eligió Entidad/Interrelación sin argumentar.</p>
+      </div>
+      <div class="proj">
+        <p class="lbl">Este proyecto · FST</p>
+        <p><span class="k">Relacional</span>, y aquí la elección sí está condicionada: el capítulo 3 del TT ya declara <strong>PostgreSQL</strong> como gestor.</p>
+        <p>El libro advierte que la independencia de esta etapa es nominal — «los SGBD tienen implementado o atienden a un Modelo de Datos específico».</p>
+      </div>
+    </div>
+
+    <h3>Reglas de transformación</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:16%">Cardinalidad</th><th style="width:26%">Caso</th><th>Qué hacer</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="3" class="card"><b>1:1</b></td><td>Ambos extremos obligatorios</td><td>Fusionar las dos entidades en una sola tabla; la llave primaria es cualquiera de las dos</td></tr>
+          <tr><td>Un extremo opcional</td><td>La llave primaria de una pasa a la otra como llave foránea. Resultan 2 tablas</td></tr>
+          <tr><td>Ambos extremos opcionales</td><td>Tercer caso previsto por el método</td></tr>
+          <tr><td rowspan="2" class="card"><b>1:N</b></td><td>El lado 1 es (1,1) — obligatorio</td><td>La llave primaria del lado 1 pasa al lado N como llave foránea. Los atributos de la relación también pasan al lado N. Resultan 2 tablas</td></tr>
+          <tr><td>El lado 1 es (0,1) — opcional</td><td>La relación se convierte en tabla propia, con las llaves de ambas entidades como primaria compuesta y como foráneas</td></tr>
+          <tr><td class="card"><b>N:M</b></td><td>Siempre</td><td>La relación se convierte en tabla, conserva sus atributos y recibe las llaves primarias de ambos lados como foráneas y primarias</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">Las reglas del libro bastan para este esquema</span>
+      <p>Las reglas de arriba cubren relaciones binarias entre entidades fuertes. Eso es exactamente lo que hay: tras la respuesta a P-01, <strong>el esquema conceptual no tiene entidades débiles ni agregación</strong>. Las dieciséis interrelaciones son quince del tipo 1:N con el lado 1 obligatorio y una del tipo N:M.</p>
+      <p><strong>Actualizado (D-52, 14-oct):</strong> con <code>INTERVALO</code> y <code>presenta</code> fuera, ya no queda ninguna N:M: todas las interrelaciones son 1:N.</p>
+      <p>Las cinco interrelaciones que traen <code>MODELO</code>, <code>CONFIGURACION</code>, <code>REPORTE</code> y <code>NOTIFICACION</code> son todas 1:N con el lado 1 obligatorio. <strong>El método no necesita una sola regla adicional</strong> — es un buen indicio de que las cuatro entidades encajan en el mismo modelo y no son un cuerpo extraño pegado al esquema.</p>
+      <p><strong>Actualizado:</strong> <code>MODELO</code> y <code>CONFIGURACION</code> se eliminaron (D-51). <code>SEGUNDO</code> (D-35) entra con dos interrelaciones 1:N: con <code>OBSERVACION</code>, de lado obligatorio, y con <code>CONDUCTA</code>, de lado opcional (un segundo puede quedar sin conducta). Tampoco necesitan reglas nuevas.</p>
+    </div>
+
+    <h3>Restricciones para que una tabla sea una relación</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:38%">Restricción</th><th>Consecuencia en este esquema</th></tr></thead>
+        <tbody>
+          <tr><td>Cada tabla debe tener nombre único</td><td>Se resuelve con la nomenclatura de las 12 relaciones</td></tr>
+          <tr><td>No puede haber dos filas iguales; no se permiten duplicados</td><td>Garantizado por la llave primaria de cada relación</td></tr>
+          <tr><td>Todos los datos de una columna deben pertenecer al mismo dominio</td><td>Los dominios ya están fijados en el diccionario de datos del conceptual</td></tr>
+          <tr><td>Los valores pueden ser nulos <strong>salvo</strong> que el atributo sea parte de la llave primaria</td><td>En el dominio del laboratorio, solo <code>notas</code>: el grupo control recibe placebo, así que <code>tratamiento</code> siempre tiene valor. <b>Actualizado (1-nov):</b> hoy son seis nulables en todo el esquema (ver actividad 3)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 2 ══════════ -->
+  <section class="act" id="a2">
+    <p class="act-n">Actividad 2 </p>
+    <h2>Transformación del esquema conceptual</h2>
+
+    <blockquote class="asks">
+      <p>«<b>Transformar</b> los elementos contemplados en el Esquema Conceptual según el Modelo Lógico seleccionado.»</p>
+      <cite>Metodología de diseño · etapa lógica · actividad 2</cite>
+    </blockquote>
+
+    <div class="pair">
+      <div>
+        <p class="lbl">Ejemplo del libro · concesionario</p>
+        <p>Dos entidades —Vehículos y Clientes— unidas por <span class="k">Comprar</span>, que lleva los atributos fecha, valor y medio de pago.</p>
+        <p>Un cliente compra varios vehículos y cada vehículo se vende una vez: es 1:N con el lado 1 obligatorio. Por la regla, la llave de Cliente pasa a Vehículo junto con los atributos de la relación. <strong>Resultado: 2 tablas.</strong></p>
+      </div>
+      <div class="proj">
+        <p class="lbl">Este proyecto · FST</p>
+        <p>Catorce entidades y dieciséis interrelaciones. <strong>Resultado: 15 relaciones.</strong> <b>Actualizado (D-52):</b> sin <code>INTERVALO</code> ni <code>presenta</code>, quedan 13; con D-102, 12 (<code>CONDUCTA</code> pasa a dominio).</p>
+        <p>Quince de las dieciséis interrelaciones son del mismo caso que el del concesionario —1:N con el lado 1 obligatorio— y se resuelven con la misma regla. Solo <code>presenta</code> era N:M y generaba tabla propia; desapareció con D-52.</p>
+      </div>
+    </div>
+
+    <h3>Interrelación por interrelación</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:30%">Interrelación</th><th style="width:14%">Tipo</th><th>Regla aplicada</th></tr></thead>
+        <tbody>
+          <tr><td class="card">Usuario — registra — Experimento</td><td class="card">1:N (1,1)</td><td>La llave de Usuario pasa a Experimento como foránea</td></tr>
+          <tr><td class="card">Experimento — compone — Grupo</td><td class="card">1:N (1,1)</td><td>La llave de Experimento pasa a Grupo</td></tr>
+          <tr><td class="card">Grupo — agrupa — Espécimen</td><td class="card">1:N (1,1)</td><td>La llave de Grupo pasa a Espécimen — <b>a qué tratamiento se asignó la rata</b>. <span class="no">Derivada (D-92):</span> el modelo no la guarda; el grupo se alcanza por la tanda (actividad 6)</td></tr>
+          <tr><td class="card">Grupo — se graba en — Tanda</td><td class="card">1:N (1,1)</td><td>La llave de Grupo pasa a Tanda</td></tr>
+          <tr><td class="card">Tanda — aloja — Espécimen</td><td class="card">1:N (1,1)</td><td>La llave de Tanda pasa a Espécimen — <b>en qué grabación salió</b>. Es su segunda foránea</td></tr>
+          <tr><td class="card">Tanda — produce — Video</td><td class="card">1:N (1,1)</td><td>La llave de Tanda pasa a Video</td></tr>
+          <tr><td class="card">Video — procesa — Análisis</td><td class="card">1:N (1,1)</td><td>La llave de Video pasa a Análisis como <code>idVideo</code>, única. El video del Día 1 no se analiza, así que del lado del video es (0,1) (D-24, D-71)</td></tr>
+          <tr><td class="card">Espécimen — aparece en — Observación</td><td class="card">1:N (1,1)</td><td>La llave de Espécimen pasa a Observación. Un espécimen tiene a lo más una observación, la del Día 2 (D-71)</td></tr>
+          <tr><td class="card">Video — contiene — Observación</td><td class="card">1:N (1,1)</td><td>La llave de Video pasa a Observación. Con la anterior forman su clave candidata. De 0 a 4 por video: el del Día 1 no tiene (D-71)</td></tr>
+          <tr><td class="card"><s>Observación — se divide en — Intervalo</s></td><td class="card">—</td><td><span class="no">Eliminada</span> con la tabla <code>INTERVALO</code> (D-52)</td></tr>
+          <tr><td class="card"><s>Intervalo — presenta — Conducta</s></td><td class="card">—</td><td><span class="no">Eliminada</span> con <code>PRESENTA</code> (D-52): los segundos por conducta de cada minuto se calculan desde <code>SEGUNDO</code></td></tr>
+          <tr><td class="card"><s>Modelo — configura — Configuración</s></td><td class="card">—</td><td><span class="no">Eliminada</span> con las dos tablas (D-51)</td></tr>
+          <tr><td class="card"><s>Configuración — parametriza — Análisis</s></td><td class="card">—</td><td><span class="no">Eliminada</span> con <code>ANALISIS.idConfig</code> (D-51)</td></tr>
+          <tr><td class="card">Observación — se etiqueta en — Segundo</td><td class="card">1:N (1,1)</td><td>La llave de Observación pasa a Segundo y, junto con <code>segundo</code>, forma su llave primaria compuesta (D-35)</td></tr>
+          <tr><td class="card">Segundo — se clasifica como — Conducta</td><td class="card">1:N (0,1)</td><td>La llave de Conducta pasaba a Segundo como <code>conducta</code> (la vigente), <b>admitiendo nulo</b> (D-35, D-53). <span class="no">Desde D-102</span> Conducta es un dominio: no hay llave foránea, y <code>conducta</code> es una columna de <code>SEGUNDO</code> con valores de <code>tipo_conducta</code> que admite nulo</td></tr>
+          <tr><td class="card">Experimento — genera — Reporte</td><td class="card">1:N (1,1)</td><td>La llave de Experimento pasa a Reporte</td></tr>
+          <tr><td class="card">Usuario — recibe — Notificación</td><td class="card">1:N (1,1)</td><td>La llave de Usuario pasa a Notificación — a quién se le avisa</td></tr>
+          <tr><td class="card">Experimento — origina — Notificación</td><td class="card">1:N (0,1)</td><td>La llave de Experimento pasa a Notificación, <b>admitiendo nulo</b>: la alerta de disco no proviene de ningún experimento</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">La única interrelación que no sigue la regla al pie de la letra</span>
+      <p><code>Experimento — origina — Notificación</code> es la excepción, y conviene declararla antes de que la encuentre otro. Su lado 1 es <strong>(0,1)</strong>, y para ese caso el método no dice «foránea nulable»: dice que <strong>la relación se convierte en tabla propia</strong>, con las llaves de ambas entidades como primaria compuesta.</p>
+      <p>Aplicarlo al pie de la letra daría una decimosexta relación, <code>ORIGINA (idNotificacion, idExperimento)</code>, cuya única función sería registrar que un aviso vino de un experimento. Se descartó por dos razones:</p>
+      <ul>
+        <li>El lado (0,1) del método está pensado para relaciones donde <em>ambos</em> extremos son opcionales o la relación tiene atributos propios. Aquí no hay atributos y la opcionalidad es de un solo tipo de aviso.</li>
+        <li>La tabla puente obligaría a una reunión externa en la consulta más frecuente del panel —«mis notificaciones con su experimento»— a cambio de evitar un nulo.</li>
+      </ul>
+      <p><strong>Se adopta la foránea nulable</strong> y se registra aquí como desviación consciente del método, no como descuido. Es la única del esquema.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">De dónde salen estas cinco</span>
+      <p>No del laboratorio. Salen del <strong>capítulo 1 del TT</strong>, que promete tres cosas que ninguna relación podía sostener: exportar reportes en CSV, XLSX y PDF; avisar al investigador cuando un análisis termina o falla; y poder decir con qué modelo y con qué umbrales se calculó un resultado.</p>
+      <p>La tercera es la que más pesa. Sin <code>CONFIGURACION</code>, <code>ANALISIS</code> guarda un <code>estado</code> y una <code>confianza</code> pero no <em>con qué</em> se produjeron, y un resultado sin sus parámetros no es reproducible.</p>
+      <p><strong>Actualizado (D-51):</strong> ningún requisito permite cambiar el modelo ni el umbral, así que el modelo final y el umbral de 0.80 son constantes del pipeline y se documentan en el capítulo 6. <code>MODELO</code> y <code>CONFIGURACION</code> se eliminaron; de las cuatro relaciones de soporte quedan <code>REPORTE</code> y <code>NOTIFICACION</code>.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">Lo que se decidió NO agregar</span>
+      <p>El modelo anterior del capítulo 5 tenía una tabla <code>ROIS</code> con el recuadro <code>(x, y, w, h)</code> de cada rata en cada video. <strong>No vuelve</strong>, y la razón está en el propio diseño del pipeline: el módulo 2 <em>calcula</em> los cilindros en cada corrida, y lo único que conserva de esa geometría es el orden espacial —«se ordena primero por fila y luego por columna»—, que ya está guardado como <code>ESPECIMEN.numeroCilindro</code>.</p>
+      <p>Guardar el recuadro sería almacenar un <strong>derivado inestable</strong>: si se reprocesa con otro modelo de fondo, cambia. Y si <code>ROIS</code> se hubiera conservado, habría colisionado con <code>OBSERVACION</code>: las dos tienen exactamente la misma llave, el par (espécimen, video).</p>
+      <p><b>Reserva:</b> el día que exista una pantalla para corregir a mano un cilindro mal detectado, el recuadro pasa a ser dato del usuario y entonces sí necesitaría dónde vivir — como atributos de <code>OBSERVACION</code>, no como tabla aparte.</p>
+      <p><b>Actualizado (D-42, D-51):</b> los recuadros que dibuja la pantalla de revisión se guardan en un archivo por análisis, <code>analisis_{idAnalisis}_cajas.json</code>. Su nombre se deriva del id del análisis, así que la base no guarda la ruta. Sigue sin haber tabla de recuadros.</p>
+    </div>
+
+    <h3>El esquema lógico resultante</h3>
+
+    <div class="col">
+      <p><strong>Vigente al 14-oct:</strong> doce relaciones. Cada una tiene una llave de una sola columna, salvo <code>SEGUNDO</code>, que se identifica por su observación y su número de segundo. (Hasta el 13-oct eran quince: <code>INTERVALO</code> y <code>PRESENTA</code> se quitaron con D-52 y <code>CONDUCTA</code> pasó a dominio con D-102.)</p>
+      <p>Las dos últimas están separadas del resto a propósito: las primeras describen <strong>el experimento</strong>, y son las que el laboratorio puede leer y validar. <code>REPORTE</code> y <code>NOTIFICACION</code> describen <strong>el software</strong>, y al laboratorio no le incumben.</p>
+      <p><code>USUARIO</code> lleva <code>idInstitucional</code> como llave primaria (D-02) y <code>activo</code> para dar de baja cuentas sin eliminarlas (D-10).</p>
+    </div>
+
+    <div class="tbls">
+
+      <div class="tbl">
+        <h4>USUARIO <span class="badge">fuerte</span></h4>
+        <ul>
+          <li><span class="kk">PK</span><span>idInstitucional</span></li>
+          <li><span class="nn"></span><span>nombre</span></li>
+          <li><span class="nn"></span><span>apellidos</span></li>
+          <li><span class="nn"></span><span>correo</span></li>
+          <li><span class="nn"></span><span>contrasenaHash</span></li>
+          <li><span class="nn"></span><span>activo</span></li>
+          <li><span class="nn"></span><span>cambioRequerido</span></li>
+        </ul>
+        <p class="grado">grado 7 · clave 1</p>
+      </div>
+
+      <div class="tbl">
+        <h4>ADMINISTRADOR <span class="badge">subtipo</span></h4>
+        <ul>
+          <li><span class="kk">PK FK</span><span>idInstitucional</span></li>
+        </ul>
+        <p class="grado">grado 1 · clave 1 · si no aparece aquí, es investigador simple</p>
+      </div>
+
+      <div class="tbl">
+        <h4>EXPERIMENTO <span class="badge">fuerte</span></h4>
+        <ul>
+          <li><span class="kk">PK</span><span>idExperimento</span></li>
+          <li><span class="kf">FK</span><span>idInstitucional</span></li>
+          <li><span>alt</span><span>nombre</span></li>
+          <li><span class="nn"></span><span>fecha</span></li>
+          <li><span class="nn"></span><span>notas <em>(nulo)</em></span></li>
+        </ul>
+        <p class="grado">grado 5 · clave 1</p>
+      </div>
+
+      <div class="tbl">
+        <h4>GRUPO <span class="badge">fuerte</span></h4>
+        <ul>
+          <li><span class="kk">PK</span><span>idGrupo</span></li>
+          <li><span class="kf">FK</span><span>idExperimento</span></li>
+          <li><span class="nn"></span><span>etiqueta</span></li>
+          <li><span class="nn"></span><span>tipo</span></li>
+          <li><span>≠∅</span><span>tratamiento</span></li>
+        </ul>
+        <p class="grado">grado 5 · clave 1 · <b>sin nulos</b></p>
+      </div>
+
+      <div class="tbl">
+        <h4>TANDA <span class="badge">fuerte</span></h4>
+        <ul>
+          <li><span class="kk">PK</span><span>idTanda</span></li>
+          <li><span class="kf">FK</span><span>idGrupo</span></li>
+          <li><span class="nn"></span><span>ordinal</span></li>
+          <li><span class="nn"></span><span>nCilindros</span></li>
+        </ul>
+        <p class="grado">grado 4 · clave 1</p>
+      </div>
+
+      <div class="tbl">
+        <h4>ESPECIMEN <span class="badge">fuerte</span></h4>
+        <ul>
+          <li><span class="kk">PK</span><span>idEspecimen</span></li>
+          <li><span class="kf">FK</span><span>idTanda</span></li>
+          <li><span>alt</span><span>numeroCilindro</span></li>
+        </ul>
+        <p class="grado">grado 3 · clave alterna (idTanda, numeroCilindro) · sin número de rata (D-55)</p>
+      </div>
+
+      <div class="tbl">
+        <h4>VIDEO <span class="badge">fuerte</span></h4>
+        <ul>
+          <li><span class="kk">PK</span><span>idVideo</span></li>
+          <li><span class="kf">FK</span><span>idTanda</span></li>
+          <li><span class="nn"></span><span>sesion</span></li>
+          <li><span class="nn"></span><span>archivo <em>(nulo)</em></span></li>
+          <li><span class="nn"></span><span>duracion</span></li>
+          <li><span class="nn"></span><span>fechaCarga</span></li>
+          <li><span class="nn"></span><span>nombreOriginal <em>(nulo)</em></span></li>
+        </ul>
+        <p class="grado">grado 7 · clave 1 · <code>archivo</code> nulo = video borrado</p>
+      </div>
+
+      <div class="tbl">
+        <h4>ANALISIS <span class="badge">fuerte</span></h4>
+        <ul>
+          <li><span class="kk">PK</span><span>idAnalisis</span></li>
+          <li><span class="kf">FK alt</span><span>idVideo</span></li>
+          <li><span class="nn"></span><span>estado</span></li>
+          <li><span class="nn"></span><span>etapa</span></li>
+          <li><span class="nn"></span><span>nivelClasif</span></li>
+          <li><span class="nn"></span><span>fechaAnalisis</span></li>
+          <li><span class="nn"></span><span>rutaDiagnostico <em>(nulo)</em></span></li>
+        </ul>
+        <p class="grado">grado 7 · clave 2 · un análisis vigente por video</p>
+      </div>
+
+      <div class="tbl">
+        <h4>OBSERVACION <span class="badge">asociativa</span></h4>
+        <ul>
+          <li><span class="kk">PK</span><span>idObservacion</span></li>
+          <li><span class="kf">FK</span><span>idEspecimen</span></li>
+          <li><span class="kf">FK</span><span>idVideo</span></li>
+        </ul>
+        <p class="grado">grado 3 · clave 1 · sin atributos propios · de 0 a 4 por video</p>
+      </div>
+
+      <div class="tbl">
+        <h4>SEGUNDO <span class="badge">D-35</span></h4>
+        <ul>
+          <li><span class="kk">PK FK</span><span>idObservacion</span></li>
+          <li><span class="kk">PK</span><span>segundo</span></li>
+          <li><span class="nn"></span><span>conducta <em>(nulo)</em></span></li>
+          <li><span class="nn"></span><span>origen</span></li>
+        </ul>
+        <p class="grado">grado 4 · clave 2 · <b>el dato medido</b>: la conducta de cada segundo, del dominio <code>tipo_conducta</code></p>
+      </div>
+
+      <div class="tbl">
+        <h4>REPORTE <span class="badge">fuerte</span></h4>
+        <ul>
+          <li><span class="kk">PK</span><span>idReporte</span></li>
+          <li><span class="kf">FK</span><span>idExperimento</span></li>
+          <li><span class="nn"></span><span>formato</span></li>
+          <li><span class="nn"></span><span>ruta</span></li>
+          <li><span class="nn"></span><span>fechaGeneracion</span></li>
+        </ul>
+        <p class="grado">grado 5 · clave 2 · alterna <code>ruta</code></p>
+      </div>
+
+      <div class="tbl">
+        <h4>NOTIFICACION <span class="badge">fuerte</span></h4>
+        <ul>
+          <li><span class="kk">PK</span><span>idNotificacion</span></li>
+          <li><span class="kf">FK</span><span>idInstitucional</span></li>
+          <li><span class="kf">FK</span><span>idExperimento <em>(nulo)</em></span></li>
+          <li><span class="nn"></span><span>tipo</span></li>
+          <li><span class="nn"></span><span>mensaje</span></li>
+          <li><span class="nn"></span><span>leido</span></li>
+          <li><span class="nn"></span><span>fechaCreacion</span></li>
+        </ul>
+        <p class="grado">grado 7 · clave 1</p>
+      </div>
+
+    </div>
+
+    <h3>La cadena que P-01 evitó</h3>
+
+    <div class="col">
+      <p>Conviene dejar constancia de dónde estaba el problema, porque es el argumento que justifica haber insistido con la pregunta. Mientras el espécimen fue una entidad débil, la cadena tenía <strong>seis niveles encadenados</strong> y cada uno heredaba la llave completa de su propietario. El resultado no era un detalle estético: la tabla que guarda el único dato que el sistema mide terminaba con varias columnas de llave y una de dato (siete antes de D-52, seis después).</p>
+    </div>
+
+    <figure>
+      <div class="figbox">
+        <svg viewBox="0 0 940 340" role="img" aria-label="Comparación del crecimiento de la llave primaria. A la izquierda, el esquema descartado con llaves naturales: la clave crece de uno a seis componentes hasta la tabla SEGUNDO. A la derecha, el esquema adoptado con llaves subrogadas: se mantiene en uno, y SEGUNDO queda con dos.">
+          <g class="m" font-size="11" fill="currentColor" opacity=".72">
+            <text x="20" y="34" letter-spacing="1.2">DESCARTADO · LLAVES NATURALES</text>
+            <text x="490" y="34" letter-spacing="1.2">ADOPTADO · LLAVES SUBROGADAS</text>
+          </g>
+
+          <line x1="20" y1="48" x2="450" y2="48" stroke="currentColor" stroke-width="1" opacity=".3"/>
+          <line x1="490" y1="48" x2="920" y2="48" stroke="currentColor" stroke-width="1" opacity=".3"/>
+
+          <g class="m" font-size="10.5" fill="currentColor" text-anchor="end">
+            <text x="122" y="86">EXPERIMENTO</text>
+            <text x="122" y="130">GRUPO</text>
+            <text x="122" y="174">TANDA</text>
+            <text x="122" y="218">ESPECIMEN</text>
+            <text x="122" y="262">OBSERVACION</text>
+            <text x="122" y="306">SEGUNDO</text>
+            <text x="592" y="86">EXPERIMENTO</text>
+            <text x="592" y="130">GRUPO</text>
+            <text x="592" y="174">TANDA</text>
+            <text x="592" y="218">ESPECIMEN</text>
+            <text x="592" y="262">OBSERVACION</text>
+            <text x="592" y="306">SEGUNDO</text>
+          </g>
+
+          <g fill="currentColor" opacity=".38">
+            <rect x="134" y="74" width="16" height="16" rx="2"/>
+
+            <rect x="134" y="118" width="16" height="16" rx="2"/>
+            <rect x="153" y="118" width="16" height="16" rx="2"/>
+
+            <rect x="134" y="162" width="16" height="16" rx="2"/>
+            <rect x="153" y="162" width="16" height="16" rx="2"/>
+            <rect x="172" y="162" width="16" height="16" rx="2"/>
+
+            <rect x="134" y="206" width="16" height="16" rx="2"/>
+            <rect x="153" y="206" width="16" height="16" rx="2"/>
+            <rect x="172" y="206" width="16" height="16" rx="2"/>
+            <rect x="191" y="206" width="16" height="16" rx="2"/>
+
+            <rect x="134" y="250" width="16" height="16" rx="2"/>
+            <rect x="153" y="250" width="16" height="16" rx="2"/>
+            <rect x="172" y="250" width="16" height="16" rx="2"/>
+            <rect x="191" y="250" width="16" height="16" rx="2"/>
+            <rect x="210" y="250" width="16" height="16" rx="2"/>
+
+          </g>
+
+          <g fill="#C87137">
+            <rect x="134" y="294" width="16" height="16" rx="2"/>
+            <rect x="153" y="294" width="16" height="16" rx="2"/>
+            <rect x="172" y="294" width="16" height="16" rx="2"/>
+            <rect x="191" y="294" width="16" height="16" rx="2"/>
+            <rect x="210" y="294" width="16" height="16" rx="2"/>
+            <rect x="229" y="294" width="16" height="16" rx="2"/>
+          </g>
+
+          <g class="m" font-size="11" fill="currentColor" opacity=".6">
+            <text x="270" y="306">6 componentes</text>
+          </g>
+
+          <g fill="currentColor" opacity=".38">
+            <rect x="604" y="74" width="16" height="16" rx="2"/>
+            <rect x="604" y="118" width="16" height="16" rx="2"/>
+            <rect x="604" y="162" width="16" height="16" rx="2"/>
+            <rect x="604" y="206" width="16" height="16" rx="2"/>
+            <rect x="604" y="250" width="16" height="16" rx="2"/>
+          </g>
+
+          <g fill="#2E9E9C">
+            <rect x="604" y="294" width="16" height="16" rx="2"/>
+            <rect x="623" y="294" width="16" height="16" rx="2"/>
+          </g>
+
+          <g class="m" font-size="11" fill="currentColor" opacity=".6">
+            <text x="660" y="306">2 componentes</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption><b>Figura 1.</b> A la izquierda, el esquema que se descartó: cada entidad débil hereda la llave completa de su propietario y le añade su identificador parcial, así que la llave crece nivel a nivel hasta los seis componentes de <code>SEGUNDO</code> (la figura original llegaba a siete con <code>PRESENTA</code>, que ya no existe: D-52). A la derecha, el adoptado: cada relación lleva su propio identificador de una columna y <code>SEGUNDO</code> queda con dos.</figcaption>
+    </figure>
+
+    <dl class="tally">
+      <div><dt>Relaciones</dt><dd>12<small>vigentes al 14-oct · eran 15 antes de D-52 y D-102, y 16 antes de D-35 y D-51</small></dd></div>
+      <div><dt>Grado total</dt><dd>58<small>incluidas las llaves foráneas · 58 desde el 1-nov (nombreOriginal) · eran 73</small></dd></div>
+      <div><dt>Clave más larga</dt><dd>2<small>componentes, solo en SEGUNDO</small></dd></div>
+    </dl>
+
+    <div class="note">
+      <span class="tag">Una de las cuatro no salió de la transformación</span>
+      <p>Las tablas de arriba ya muestran <code>MODELO</code>, pero conviene decir de dónde viene: <strong>la transformación no la produjo</strong>. De las cuatro entidades reconciliadas salieron tres relaciones, con <code>nombreModelo</code> guardado dentro de <code>CONFIGURACION</code>. Fue la <strong>validación de la actividad 6</strong> la que encontró ahí una transitiva y separó la decimoquinta.</p>
+      <p>Es el mismo patrón que ya tenía el esquema con <code>ESPECIMEN</code>: la actividad 2 transforma, la actividad 6 corrige. Por eso el método entrega dos grafos y no uno.</p>
+      <p><strong>Actualizado (D-51):</strong> <code>MODELO</code> ya no existe. Se conserva aquí como registro de lo que encontró la validación.</p>
+    </div>
+
+    <h3>El grafo relacional inicial</h3>
+
+    <div class="col">
+      <p>El método presenta el resultado de esta etapa como un <strong>grafo relacional</strong>: las relaciones son los nodos y las llaves foráneas son las aristas, dirigidas hacia la llave primaria que referencian. La figura 1.6 del libro es precisa sobre qué grafo es este: la etapa lógica produce <strong>dos</strong>. Un <em>Esquema Lógico Preliminar</em> —cuyo entregable es el grafo inicial— que pasa por una validación y da un <em>Esquema Lógico Definitivo</em>, con su grafo final.</p>
+      <p>El grafo inicial tiene catorce nodos y dieciséis aristas, todas de una sola columna, y <code>ESPECIMEN</code> como la única relación con dos padres — apunta a <code>GRUPO</code> y a <code>TANDA</code>. La validación de la actividad 6 le quita esa primera arista.</p>
+      <p>El conteo de aristas no cambia entre los dos grafos, pero el conjunto sí: el final pierde la de <code>ESPECIMEN</code> a <code>GRUPO</code> y gana la de <code>CONFIGURACION</code> a <code>MODELO</code>. Dieciséis en ambos, por coincidencia. Lo que de verdad distingue a uno del otro es que el final tiene <strong>una relación más</strong> y ninguna con dos padres.</p>
+      <p>Lo que sigue abajo es el <strong>final</strong>, ya con las correcciones de la validación.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 3 ══════════ -->
+  <section class="act" id="a3">
+    <p class="act-n">Actividad 3 </p>
+    <h2>Restricciones de integridad e identidad</h2>
+
+    <blockquote class="asks">
+      <p>«Identificar las <b>restricciones</b> que se tienen en el universo del discurso, tales como restricciones de <b>integridad</b> y de <b>identidad</b>.»</p>
+      <cite>Metodología de diseño · etapa lógica · actividad 3</cite>
+    </blockquote>
+
+    <h3>Integridad referencial — las foráneas</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:22%">Relación</th><th style="width:22%">Foránea</th><th style="width:20%">Referencia a</th><th>Qué afirma</th></tr></thead>
+        <tbody>
+          <tr><td class="card">EXPERIMENTO</td><td class="card">idInstitucional</td><td class="card">USUARIO</td><td>Todo experimento tiene un creador</td></tr>
+          <tr><td class="card">GRUPO</td><td class="card">idExperimento</td><td class="card">EXPERIMENTO</td><td>Todo grupo pertenece a un estudio</td></tr>
+          <tr><td class="card">TANDA</td><td class="card">idGrupo</td><td class="card">GRUPO</td><td>Toda grabación es de un solo grupo</td></tr>
+          <tr><td class="card">ESPECIMEN</td><td class="card">idGrupo</td><td class="card">GRUPO</td><td><span class="no">La actividad 6 la elimina</span> — resultaba derivable de la tanda (derivada, D-92)</td></tr>
+          <tr><td class="card">ESPECIMEN</td><td class="card">idTanda</td><td class="card">TANDA</td><td><b>En qué grabación salió</b></td></tr>
+          <tr><td class="card">VIDEO</td><td class="card">idTanda</td><td class="card">TANDA</td><td>Todo video corresponde a una tanda</td></tr>
+          <tr><td class="card">ANALISIS</td><td class="card">idVideo</td><td class="card">VIDEO</td><td>Todo análisis procesa un video del Día 2 (el del Día 1 no se analiza, D-71)</td></tr>
+          <tr><td class="card">OBSERVACION</td><td class="card">idEspecimen</td><td class="card">ESPECIMEN</td><td>Qué rata se observó</td></tr>
+          <tr><td class="card">OBSERVACION</td><td class="card">idVideo</td><td class="card">VIDEO</td><td>En qué video se la observó</td></tr>
+          <tr><td class="card"><s>INTERVALO · PRESENTA</s></td><td class="card"><s>idObservacion · idIntervalo · conducta</s></td><td class="card">—</td><td><span class="no">Eliminadas</span> con las dos tablas (D-52)</td></tr>
+          <tr><td class="card">SEGUNDO</td><td class="card">idObservacion</td><td class="card">OBSERVACION</td><td>De qué espécimen y video es el segundo (D-35)</td></tr>
+          <tr><td class="card"><s>SEGUNDO</s></td><td class="card"><s>conducta</s></td><td class="card">—</td><td><span class="no">Eliminada</span> con la tabla <code>CONDUCTA</code> (D-102): <code>conducta</code> es ahora una columna con dominio. <b>Admite nulo:</b> cuando el sistema no vio al espécimen (origen máquina) o el usuario marcó «No se ve» (origen dudosa) (D-53)</td></tr>
+          <tr><td class="card"><s>ANALISIS</s></td><td class="card"><s>idConfig</s></td><td class="card">—</td><td><span class="no">Eliminada</span> (D-51)</td></tr>
+          <tr><td class="card"><s>CONFIGURACION</s></td><td class="card"><s>hashModelo</s></td><td class="card">—</td><td><span class="no">Eliminada</span> con la tabla (D-51)</td></tr>
+          <tr><td class="card">REPORTE</td><td class="card">idExperimento</td><td class="card">EXPERIMENTO</td><td>De qué estudio es el archivo exportado</td></tr>
+          <tr><td class="card">NOTIFICACION</td><td class="card">idInstitucional</td><td class="card">USUARIO</td><td>A quién se le avisa</td></tr>
+          <tr><td class="card">NOTIFICACION</td><td class="card">idExperimento</td><td class="card">EXPERIMENTO</td><td>De qué experimento habla el aviso. <b>Admite nulo:</b> la alerta de disco no viene de ninguno</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Identidad — las claves que la subrogación desplazó</h3>
+
+    <div class="col">
+      <p>Cada entidad que dejó de ser débil conserva su discriminante, pero ya no como llave. Aquí se declara la unicidad que antes venía gratis. Sin estas, el esquema admite duplicados que con llaves naturales eran imposibles de escribir.</p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:20%">Relación</th><th style="width:36%">Debe ser único</th><th>Qué repone</th></tr></thead>
+        <tbody>
+          <tr><td class="card">GRUPO</td><td class="card">(idExperimento, etiqueta)</td><td>La llave parcial de la antigua entidad débil</td></tr>
+          <tr><td class="card">TANDA</td><td class="card">(idGrupo, ordinal)</td><td>La llave parcial de la antigua entidad débil</td></tr>
+          <tr><td class="card">ESPECIMEN</td><td class="card">(idTanda, numeroCilindro)</td><td>Dos ratas no pueden ocupar el mismo cilindro en una grabación</td></tr>
+          <tr><td class="card"><s>ESPECIMEN</s></td><td class="card"><s>(idTanda, numeroRata)</s> · <s>(idGrupo, numeroRata)</s></td><td><span class="no">Retiradas (D-55):</span> el sistema ya no guarda el número de rata, así que no hay unicidad que declarar</td></tr>
+          <tr><td class="card">VIDEO</td><td class="card">(idTanda, sesion)</td><td>Una tanda tiene como mucho un video por día</td></tr>
+          <tr><td class="card">OBSERVACION</td><td class="card">(idEspecimen, idVideo)</td><td>La llave de la antigua agregación · es su clave candidata</td></tr>
+          <tr><td class="card"><s>INTERVALO</s></td><td class="card"><s>(idObservacion, minuto)</s></td><td><span class="no">Eliminada</span> con la tabla (D-52)</td></tr>
+          <tr><td class="card">USUARIO</td><td class="card">correo</td><td>Credencial de acceso · no es el identificador</td></tr>
+          <tr><td class="card"><s>CONFIGURACION</s></td><td class="card"><s>(hashModelo, versionPipeline, y los seis umbrales)</s></td><td><span class="no">Eliminada</span> con la tabla (D-51)</td></tr>
+          <tr><td class="card">REPORTE</td><td class="card">ruta</td><td>Dos reportes no pueden compartir archivo</td></tr>
+          <tr><td class="card">ANALISIS</td><td class="card">idVideo</td><td>Un video tiene un solo análisis vigente: el reanálisis reemplaza al anterior (D-03, D-24)</td></tr>
+          <tr><td class="card">EXPERIMENTO</td><td class="card">nombre</td><td>Dos experimentos no pueden llamarse igual (RF-11, D-51)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">La clave natural más larga del esquema</span>
+      <p>Las ocho columnas de <code>CONFIGURACION</code> son <strong>el mejor argumento a favor de las llaves subrogadas que tiene este diseño</strong>, mejor que cualquiera de los que ya estaban. Nadie querría <code>ANALISIS</code> arrastrando ocho columnas de foránea para decir con qué parámetros corrió; con <code>idConfig</code> son una.</p>
+      <p>Es exactamente el intercambio que la actividad 2 documentó para el resto del esquema: una columna extra por relación, a cambio de declarar como unicidad lo que la llave natural garantizaba sola.</p>
+      <p><strong>Actualizado (D-51):</strong> <code>CONFIGURACION</code> se eliminó. El argumento a favor de las llaves subrogadas sigue en pie con la cadena de la figura 1.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">El único problema que esta etapa no resuelve sola</span>
+      <p>Habíamos declarado <code>idLaboratorio</code> como clave alterna <strong>única en todo el laboratorio</strong>. La reunión lo desmintió: es un número del 1 al 8 <strong>dentro del grupo</strong>, marcado con líneas de plumón en la cola, que se reinicia en cada grupo y muere con el experimento.</p>
+      <p>La clave alterna correcta es entonces <strong>(grupo, número de rata)</strong>. Y ahí está el problema: <code>idGrupo</code> <strong>ya no es un atributo de <code>ESPECIMEN</code></strong> — la actividad 6 lo eliminó por tercera forma normal, porque era derivable de la tanda. Una restricción de unicidad no puede atravesar una reunión de tablas.</p>
+      <p><strong>Hay una mitad que sí se salva.</strong> Como cada tanda lleva un subconjunto de las ratas del grupo, los números dentro de una tanda son necesariamente distintos: <code>UNIQUE (idTanda, numeroRata)</code> es declarable y correcto. Lo que no atrapa es el caso de la rata 3 en la tanda 1 y otra rata 3 en la tanda 2 <em>del mismo grupo</em>. Es necesario pero no suficiente.</p>
+      <p>Dos salidas para la otra mitad, ambas de la etapa física:</p>
+      <ul>
+        <li><strong>Disparador</strong> que valide recorriendo <code>ESPECIMEN → TANDA → GRUPO</code>. Deja lógica fuera del esquema y cuesta más defender en la revisión.</li>
+        <li><strong>Reintroducir <code>ESPECIMEN.idGrupo</code></strong> como redundancia controlada. Rompe la 3FN a propósito, pero el método lo admite explícitamente en la actividad 5 del diseño físico, y esa columna ya estaba señalada como la candidata natural.</li>
+      </ul>
+      <p><strong>Resuelto (D-04):</strong> se reintroduce <code>ESPECIMEN.idGrupo</code> como redundancia controlada solo en el esquema físico, con <code>UNIQUE (idGrupo, numeroRata)</code> y un disparador que la mantiene igual al grupo de la tanda. El esquema lógico se queda en BCNF.</p>
+      <p><strong>Actualizado (D-55, 6-oct):</strong> el problema desaparece. Se quitó <code>numeroRata</code> y, con ella, el <code>idGrupo</code> redundante y su disparador: D-04 queda sin objeto y el esquema físico ya no se aparta del lógico en este punto.</p>
+    </div>
+
+    <h3>Integridad semántica — lo que no cabe en llaves</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:20%">Sobre</th><th style="width:44%">Restricción</th><th>Origen</th></tr></thead>
+        <tbody>
+          <tr><td class="card">ESPECIMEN</td><td>La tanda de una rata pertenece a su <b>mismo grupo</b> · <span class="ok">la actividad 6 la vuelve innecesaria</span></td><td class="no">Estructural perdida</td></tr>
+          <tr><td class="card">OBSERVACION</td><td>El espécimen y el video son de la <b>misma tanda</b></td><td class="no">Estructural perdida</td></tr>
+          <tr><td class="card"><s>ESPECIMEN</s></td><td><s><code>numeroRata</code> es único dentro del grupo de la rata</s> · <span class="no">columna eliminada</span></td><td class="card">D-55</td></tr>
+          <tr><td class="card">TANDA</td><td><code>nCilindros</code> entre 2 y 4</td><td class="card">Equipo · D-28</td></tr>
+          <tr><td class="card">ESPECIMEN</td><td><code>numeroCilindro</code> no excede el <code>nCilindros</code> de su tanda</td><td class="card">Equipo</td></tr>
+          <tr><td class="card">GRUPO</td><td><code>tipo</code> ∈ {control, referencia, tratamiento experimental}</td><td class="card">Cap. 1 · PA</td></tr>
+          <tr><td class="card">GRUPO</td><td><b>se elimina: el control recibe placebo</b></td><td class="card"><i class="src">Equipo</i></td></tr>
+          <tr><td class="card">VIDEO</td><td><code>sesion</code> ∈ {Día 1, Día 2}</td><td class="card">Cap. 3 · P4</td></tr>
+          <tr><td class="card"><s>ANALISIS</s></td><td><s><code>confianza</code> entre 0 y 1</s> · <span class="no">columna eliminada</span></td><td class="card">D-47</td></tr>
+          <tr><td class="card">SEGUNDO</td><td><code>segundo</code> entre 1 y 300 · máximo 300 sin mínimo, los últimos 300 s del video</td><td class="card">D-31 · D-35 · D-54</td></tr>
+          <tr><td class="card">SEGUNDO</td><td><code>origen</code> ∈ {máquina, confirmada, corregida, dudosa} · máquina: lo asignó el sistema; confirmada: el usuario lo dejó igual; corregida: lo cambió por otra conducta; dudosa: el usuario lo marcó «No se ve»</td><td class="card">D-35 · D-80</td></tr>
+          <tr><td class="card">SEGUNDO</td><td><code>conducta</code> ∈ {nado activo, inmovilidad, escalamiento, conducta activa}, o nula</td><td class="card">D-29 · D-102</td></tr>
+          <tr><td class="card"><s>INTERVALO · PRESENTA</s></td><td><s><code>minuto</code> entre 1 y 5 · <code>segundos</code> ≥ 0 y la suma de un intervalo no pasa de 60</s> · <span class="no">tablas eliminadas</span></td><td class="card">D-52</td></tr>
+          <tr><td class="card">ANALISIS</td><td><code>estado</code> ∈ {en cola, procesando, completado, error, en pausa, cancelado}</td><td class="card">Cap. 4 · D-15 · D-59 · D-67</td></tr>
+          <tr><td class="card">ANALISIS</td><td><code>etapa</code> ∈ {preprocesamiento, cilindros, clasificación}</td><td class="card">D-16</td></tr>
+          <tr><td class="card">ANALISIS</td><td><code>nivelClasif</code> ∈ {preciso, agrupado}</td><td class="card">D-17 · D-41</td></tr>
+          <tr><td class="card">REPORTE</td><td><code>formato</code> ∈ {CSV, XLSX, PDF}</td><td class="card">Cap. 1</td></tr>
+          <tr><td class="card">NOTIFICACION</td><td><code>tipo</code> ∈ {análisis completado, error del pipeline, alerta de disco, video borrado, análisis en pausa, análisis cancelado}</td><td class="card">Cap. 5 · D-51 · D-89</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">Estas cuatro llegan a la etapa física como dominios, no como tablas</span>
+      <p>Los cuatro dominios por extensión de arriba —más <code>GRUPO.tipo</code> y <code>VIDEO.sesion</code>, que ya estaban— son listas cerradas y estables sin atributos propios. El libro es explícito sobre a qué llegan en la etapa física: <code>CREATE DOMAIN … CHECK (VALUE IN (…))</code>.</p>
+      <p><strong>Actualizado (D-102, 14-oct):</strong> <code>CONDUCTA</code> también llega como dominio, <code>tipo_conducta</code>, y ya no hay excepción. Antes se conservaba como tabla porque dos columnas la referenciaban por llave foránea; desde D-52 solo quedaba <code>SEGUNDO.conducta</code>, son cuatro valores fijos (D-29) y no tiene atributos propios.</p>
+      <p><code>NOTIFICACION.tipo</code> es el caso a vigilar: si algún día los mensajes se vuelven plantilla pura, el texto tendría que mudarse a un catálogo <code>TIPO_NOTIFICACION</code> — y un dominio cerrado no puede colgar una plantilla. Hoy no aplica, porque los mensajes de error llevan diagnóstico por instancia.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">Sobre los nulos</span>
+      <p>El método recuerda que un valor puede ser nulo salvo que forme parte de la llave primaria. En el dominio experimental el único nulable es <strong><code>EXPERIMENTO.notas</code></strong>. <code>GRUPO.tratamiento</code> no lo es porque el grupo control recibe placebo —el estrés de la inyección tiene que ser idéntico en los tres grupos— y por tanto la columna siempre tiene valor.</p>
+      <p>La reconciliación vuelve a subirlo a dos. <code>NOTIFICACION.idExperimento</code> admite nulo, y es un nulo <strong>legítimo, no una omisión</strong>: dos de los tres tipos de aviso nacen de un experimento —análisis completado, error del pipeline— pero la alerta de disco es del sistema y no proviene de ninguno. Obligarla a apuntar a un experimento inventado sería peor.</p>
+      <p>Es además el <strong>único caso del esquema donde una foránea es opcional</strong>. Las otras quince son obligatorias, y por eso todas se resolvieron con la misma regla de transformación.</p>
+      <p><strong>Actualizado (1-nov):</strong> son seis los nulables: <code>EXPERIMENTO.notas</code>, <code>NOTIFICACION.idExperimento</code>, <code>VIDEO.archivo</code> (el video ya se borró), <code>VIDEO.nombreOriginal</code> (el nombre con que se subió el archivo), <code>SEGUNDO.conducta</code> y <code>ANALISIS.rutaDiagnostico</code> (solo existe si el análisis terminó en error). La última es también una foránea opcional, así que <code>NOTIFICACION.idExperimento</code> ya no es la única (D-53 quitó <code>propuesta</code>). Desde D-102 <code>conducta</code> deja de ser foránea: es una columna con dominio, y <code>NOTIFICACION.idExperimento</code> vuelve a ser la única foránea opcional.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">Restricciones de dominio para la etapa física (1-nov)</span>
+      <p>No cambian la estructura del esquema: son restricciones de dominio que la etapa física lleva a la base como CHECK. <code>TANDA.ordinal</code> es mayor o igual que 1 y, junto con <code>idGrupo</code>, forma la unicidad de la tanda. <code>TANDA.nCilindros</code> va de 2 a 4. <code>ESPECIMEN.numeroCilindro</code> va de 1 a 4; que no pase de <code>nCilindros</code> de su tanda lo valida el backend. <code>ANALISIS.rutaDiagnostico</code> solo tiene valor cuando el estado es «error».</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">Qué pasa con el Día 1</span>
+      <p>La revisión confirmó que <strong>cada grupo puede tener o no su Día 1</strong>. Eso no obliga a ningún cambio aquí: la tanda produce uno o dos videos, y la unicidad <code>(idTanda, sesion)</code> ya admite que falte la fila del Día 1. Se registra por completitud, no porque haya que corregir nada.</p>
+      <p><strong>Actualizado (D-71):</strong> el video del Día 1 se guarda y no se analiza. Por eso la relación <code>VIDEO — ANALISIS</code> es (0,1) del lado del video, <code>VIDEO — OBSERVACION</code> es (0,4) y <code>ESPECIMEN — OBSERVACION</code> es (0,1): el Día 1 no tiene análisis ni observaciones.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 6 ══════════ -->
+  <section class="act" id="a6">
+    <p class="act-n">Actividad 6 </p>
+    <h2>Validación con las formas normales</h2>
+
+    <blockquote class="asks">
+      <p>«<b>Validar el esquema lógico</b> obtenido verificando que se conserve la semántica inicial contenida en la Especificación de Requisitos, que cumpla con las restricciones de integridad, de identidad y otras consideraciones como soportar las transacciones de los usuarios.»</p>
+      <cite>Metodología de diseño · etapa lógica · actividad 6</cite>
+    </blockquote>
+
+    <div class="pair">
+      <div>
+        <p class="lbl">Ejemplo del libro · concesionario</p>
+        <p>«La validación del esquema relacional se realizará con las <span class="k">Formas Normales</span>…»</p>
+        <p>En su caso el esquema <strong>no cambia</strong>: sus tres relaciones ya estaban normalizadas. La validación no le encuentra nada.</p>
+      </div>
+      <div class="proj">
+        <p class="lbl">Este proyecto · FST</p>
+        <p>Aquí sí encuentra. <strong>Cuatro defectos: uno de 1FN y tres de 3FN.</strong> El esquema definitivo no es igual al preliminar.</p>
+        <p>El más incómodo es una redundancia que <strong>introdujimos nosotros</strong> en el conceptual, al separar el tratamiento de la grabación. El cuarto salió de las relaciones de soporte del sistema — señal de que la validación no es un trámite: mordió en las dos mitades del esquema.</p>
+      </div>
+    </div>
+
+    <h3>Punto de partida — dependencias funcionales</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:18%">Relación</th><th style="width:34%">Llaves candidatas</th><th style="width:26%">Dependencias que no salen de una llave</th><th>Veredicto</th></tr></thead>
+        <tbody>
+          <tr><td class="card">USUARIO</td><td class="card">idInstitucional · correo</td><td>—</td><td class="no">1FN ✗</td></tr>
+          <tr><td class="card">EXPERIMENTO</td><td class="card">idExperimento</td><td>—</td><td class="ok">BCNF</td></tr>
+          <tr><td class="card">GRUPO</td><td class="card">idGrupo · (idExperimento, etiqueta)</td><td>—</td><td class="ok">BCNF</td></tr>
+          <tr><td class="card">TANDA</td><td class="card">idTanda · (idGrupo, ordinal)</td><td>—</td><td class="ok">BCNF</td></tr>
+          <tr><td class="card">ESPECIMEN</td><td class="card">idEspecimen · (idTanda, numeroCilindro) · <b>(idTanda, numeroRata)</b> idLaboratorio</td><td class="card"><b>idTanda → idGrupo</b></td><td class="no">3FN ✗</td></tr>
+          <tr><td class="card">VIDEO</td><td class="card">idVideo · (idTanda, sesion)</td><td class="card"><b>sesion → duracion</b></td><td class="no">3FN ✗</td></tr>
+          <tr><td class="card">ANALISIS</td><td class="card">idAnalisis · <b>idVideo</b> (D-24)</td><td>—</td><td class="ok">BCNF</td></tr>
+          <tr><td class="card">OBSERVACION</td><td class="card">idObservacion · (idEspecimen, idVideo)</td><td>—</td><td class="ok">BCNF</td></tr>
+          <tr><td class="card"><s>CONDUCTA</s></td><td class="card"><s>nombre</s></td><td>—</td><td class="no">Eliminada después (D-102)</td></tr>
+          <tr><td class="card"><s>INTERVALO · PRESENTA</s></td><td class="card"><s>idIntervalo · (idObservacion, minuto) · (idIntervalo, conducta)</s></td><td>—</td><td class="no">Eliminadas después (D-52)</td></tr>
+          <tr><td class="card">CONFIGURACION</td><td class="card">idConfig · (hashModelo, versionPipeline y los seis umbrales)</td><td class="card"><b>hashModelo → nombreModelo</b></td><td class="no">3FN ✗ · eliminada después (D-51)</td></tr>
+          <tr><td class="card">SEGUNDO</td><td class="card">(idObservacion, segundo)</td><td>—</td><td class="ok">BCNF · agregada el 3-oct (D-35)</td></tr>
+          <tr><td class="card">REPORTE</td><td class="card">idReporte · ruta</td><td>—</td><td class="ok">BCNF</td></tr>
+          <tr><td class="card">NOTIFICACION</td><td class="card">idNotificacion</td><td>—</td><td class="ok">BCNF</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">Una pregunta abierta sobre las llaves candidatas de <code>ANALISIS</code></span>
+      <p>Al entrar <code>idConfig</code>, aparece una posible clave alterna: <strong>(idVideo, idConfig)</strong>. Lo sería si el sistema no permitiera correr <em>dos veces la misma configuración sobre el mismo video</em> — el pipeline es determinista, así que dos corridas idénticas darían el mismo resultado y solo se distinguirían por <code>fechaAnalisis</code>.</p>
+      <p>No se declara, porque depende de una decisión que todavía no está tomada: si el botón de reanalizar valida que algo haya cambiado. Queda registrada como <strong>D-05</strong> en la actividad 7, y se cruza con <strong>D-03</strong> —la misma que <code>DISENO-BD.md</code> llama <strong>P-08</strong>—. Si la respuesta es que el reanálisis reemplaza al anterior, la pregunta desaparece sola: <code>idVideo</code> por sí solo sería clave alterna.</p>
+      <p><strong>Resuelto:</strong> el reanálisis reemplaza al anterior (D-03), así que <code>idVideo</code> es clave alterna y se declara <code>UNIQUE</code> (D-24). <code>idConfig</code> ya no existe (D-51).</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">Una clave candidata menos en <code>ESPECIMEN</code></span>
+      <p>Mientras creímos que el identificador de la rata era único en el laboratorio, <code>idLaboratorio</code> por sí solo era clave candidata. Ya no lo es: un mismo número aparece en cada grupo. Su lugar lo toma el par <code>(idTanda, numeroRata)</code>, que sí determina una fila.</p>
+      <p>No afecta al veredicto de forma normal —la transitiva que había que corregir era <code>idTanda → idGrupo</code>, y sigue igual— pero sí a la lista de determinantes que hay que revisar en el paso de Boyce-Codd.</p>
+      <p><strong>Actualizado (D-55):</strong> el par <code>(idTanda, numeroRata)</code> también desapareció. Con <code>numeroRata</code> eliminada, la única clave alterna de <code>ESPECIMEN</code> es <code>(idTanda, numeroCilindro)</code>.</p>
+    </div>
+
+    <h3>Paso 1 — Primera forma normal</h3>
+
+    <div class="note warn">
+      <span class="tag">Hallazgo 1 · USUARIO — dominio compuesto</span>
+      <p><code>nombre</code> guarda el nombre completo del investigador, que es un valor descomponible: nombre de pila y apellidos son dos datos, no uno. El propio libro lo trata así en el ejemplo del concesionario.</p>
+      <p><b>Corrección:</b> <code>nombre</code> se parte en <code>nombre</code> y <code>apellidos</code>.</p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:24%">Atributo revisado</th><th style="width:18%">Veredicto</th><th>Razón</th></tr></thead>
+        <tbody>
+          <tr><td class="card">EXPERIMENTO.notas</td><td class="ok">Pasa</td><td>Es texto libre, un solo valor. No es un grupo repetido</td></tr>
+          <tr><td class="card">VIDEO.archivo</td><td class="ok">Pasa</td><td>Una referencia a un archivo por video</td></tr>
+          <tr><td class="card">GRUPO.tratamiento</td><td class="ok">Pasa</td><td>Un grupo no recibe más de un tratamiento: el atributo es monovaluado. La revisión añade que el control recibe <b>placebo</b>, no nada — sigue siendo un solo valor, pero deja de admitir nulo</td></tr>
+          <tr><td class="card">ESPECIMEN.numeroRata</td><td class="ok">Pasa</td><td>Un entero por rata. La marca física —líneas de plumón en la cola— es la representación del mismo dato, no un segundo valor. <span class="no">Columna eliminada después (D-55)</span></td></tr>
+          <tr><td class="card">CONFIGURACION · los siete parámetros</td><td class="ok">Pasa</td><td><b>Por construcción, no por suerte.</b> La tentación era guardar los parámetros del pipeline como un solo campo JSON. Eso viola la 1FN: un campo único con múltiples valores heterogéneos. Cada umbral ocupa su propia columna, y por eso se puede filtrar o comparar corridas por umbral o por versión sin parsear texto. <span class="no">La tabla se eliminó después (D-51)</span></td></tr>
+          <tr><td class="card">SEGUNDO · las 300 etiquetas</td><td class="ok">Pasa</td><td><b>Por construcción.</b> La tentación era guardar las 300 conductas de un espécimen como una lista dentro de <code>OBSERVACION</code>. Eso viola la 1FN. Cada segundo es una fila, y por eso se puede revisar o corregir uno solo sin reescribir la lista (D-35). Es el ejemplo de 1FN que hoy usa el capítulo 5</td></tr>
+          <tr><td class="card">NOTIFICACION.mensaje</td><td class="ok">Pasa</td><td>Texto libre, un solo valor</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">El único argumento que el capítulo 5 ya tenía bien</span>
+      <p>La fila de <code>CONFIGURACION</code> no es nueva: es <strong>literalmente el argumento de 1FN que el capítulo 5 del TT ya trae escrito</strong>, sobre la tabla que en el modelo viejo se llamaba <code>CONFIGURACIONES_ANALISIS</code>. De todo el diseño anterior, es lo único que sobrevive intacto a la reconstrucción.</p>
+      <p>Vale la pena decirlo en la defensa: el rediseño no tira todo lo anterior por sistema. Tira lo que no se derivó del universo del discurso, y conserva lo que sí estaba bien razonado.</p>
+      <p><strong>Actualizado (D-51):</strong> con <code>CONFIGURACION</code> eliminada, el capítulo 5 cambió ese ejemplo por el de <code>SEGUNDO</code>.</p>
+    </div>
+
+    <h3>Paso 2 — Segunda forma normal</h3>
+
+    <div class="col">
+      <p><strong>Once de las doce relaciones tienen llave primaria de una sola columna</strong>, así que no pueden tener dependencias parciales. Hasta el 13-oct la otra era <code>PRESENTA (idIntervalo, conducta)</code>, cuyo único atributo no llave —<code>segundos</code>— necesitaba las dos; la tabla se quitó con D-52.</p>
+      <p><strong>Actualizado (D-35, D-52):</strong> <code>SEGUNDO (idObservacion, segundo)</code> es hoy la única relación con llave compuesta. Sus columnas no llave —<code>conducta</code> y <code>origen</code>— describen ese segundo de esa observación, así que dependen de la llave completa.</p>
+      <p>Las cuatro relaciones de soporte no cambian nada aquí: las cuatro nacieron con llave subrogada de una columna, por la misma decisión que se tomó para el resto del esquema en la actividad 2.</p>
+    </div>
+
+    <h3>Paso 3 — Tercera forma normal</h3>
+
+    <div class="note warn">
+      <span class="tag">Hallazgo 2 · ESPECIMEN — el grupo es derivable de la tanda</span>
+      <p>La cadena es <code>idEspecimen → idTanda → idGrupo</code>. Como una tanda pertenece a un solo grupo, saber en qué tanda se grabó una rata ya dice a qué grupo pertenece. Guardar <code>idGrupo</code> en <code>ESPECIMEN</code> es guardar dos veces el mismo hecho.</p>
+      <p><b>Corrección:</b> se elimina <code>idGrupo</code> de <code>ESPECIMEN</code>. El grupo de una rata se obtiene por su tanda, con una sola reunión de tablas.</p>
+      <p><b>La condición que lo sostiene quedó confirmada en la reunión:</b> «siempre utilizamos para cada video ratas que hayan recibido el mismo tratamiento». Una tanda no mezcla grupos, así que la transitiva existe y la corrección es válida.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">Pero esa misma corrección es la que ahora estorba</span>
+      <p>Vale la pena decirlo junto: <strong>la eliminación de <code>idGrupo</code> es correcta por 3FN y es la que impide declarar la clave alterna real del espécimen.</strong> No es una contradicción del método, es el intercambio que el método anticipa — por eso la etapa física admite redundancia controlada.</p>
+      <p>Lo que cambió el 3-sep es el <em>precio</em>: antes reintroducir <code>idGrupo</code> era una optimización opcional, justificable solo por medición de desempeño. Ahora es también la forma limpia de declarar una restricción de integridad que el laboratorio sí impone.</p>
+    </div>
+
+    <div class="note warn">
+      <span class="tag">Hallazgo 3 · VIDEO — la duración depende de la sesión</span>
+      <p>Tal como quedó definido en el diccionario, <code>duracion</code> es «la duración de la grabación según la sesión»: 20 minutos el Día 1, 5 minutos el Día 2. Leído así, <code>sesion → duracion</code>, y como <code>sesion</code> no es la llave, es una transitiva de libro.</p>
+      <p><b>Corrección:</b> se redefine <code>duracion</code> como la <strong>duración real del archivo cargado</strong>. La duración nominal del protocolo no se almacena: se convierte en una verificación de que el archivo cargado corresponde a la sesión declarada, con tolerancia.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">Hallazgo 4 · <code>CONFIGURACION</code> — el nombre del modelo es derivable del hash</span>
+      <p>Un hash identifica un archivo, y el archivo tiene nombre: <code>hashModelo → nombreModelo</code> es una dependencia real. Y <code>hashModelo</code> <strong>no es clave candidata</strong> de <code>CONFIGURACION</code>, porque el mismo modelo aparece en varias filas con umbrales distintos — esa es justamente la razón de ser de la tabla. Determinante que no es clave, atributo no primo: transitiva de manual.</p>
+      <p>La consecuencia práctica no es teórica. Con las dos columnas juntas, un modelo usado en veinte configuraciones tiene su nombre escrito veinte veces; renombrarlo obliga a veinte <code>UPDATE</code>, y una actualización parcial deja dos nombres para el mismo archivo.</p>
+      <p><b>Corrección:</b> se extrae <code>MODELO (hashModelo, nombreModelo)</code>. <code>CONFIGURACION</code> lo referencia por foránea. <strong>Es la decimoquinta relación</strong>, y la única que no salió de la transformación sino de esta validación.</p>
+      <p><b>Actualizado (D-51):</b> las dos tablas se eliminaron. El capítulo 5 usa ahora como ejemplo de 3FN la cadena <code>ESPECIMEN → TANDA → GRUPO</code>: el tipo y el tratamiento viven en <code>GRUPO</code>.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">Una tabla de dos columnas que se paga sola</span>
+      <p><code>MODELO</code> se ve flaca y es tentador dejarla fuera. Conviene no hacerlo, y no solo por la 3FN: en TT-II se reentrena el clasificador, así que los modelos dejan de ser un dato suelto y pasan a ser objetos que se comparan. Con la tabla, «todos los análisis corridos con el modelo X» es una consulta; sin ella, es un <code>LIKE</code> sobre texto repetido.</p>
+      <p>El pipeline usa además <strong>más de un modelo</strong> —YOLOv8 para detectar y ResNet-18/50 para clasificar—, así que un solo <code>hashModelo</code> por configuración puede quedarse corto. No se resuelve aquí: se registra como pendiente para cuando TT-II fije qué modelos entran en la cadena.</p>
+      <p><b>Actualizado:</b> el pipeline ya no usa YOLOv8 ni ResNet (CLA-02), y con D-51 el modelo dejó de guardarse en la base: es una constante del pipeline.</p>
+    </div>
+
+    <h3>Paso 4 — Forma normal de Boyce-Codd</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:22%">Relación</th><th style="width:44%">Determinantes encontrados</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr><td class="card">USUARIO</td><td class="card">idInstitucional · correo</td><td class="ok">Los dos son llave candidata</td></tr>
+          <tr><td class="card">GRUPO</td><td class="card">idGrupo · (idExperimento, etiqueta)</td><td class="ok">Los dos son llave candidata</td></tr>
+          <tr><td class="card">ESPECIMEN</td><td class="card">idEspecimen · (idTanda, numeroCilindro)</td><td class="ok">Los dos son llave candidata</td></tr>
+          <tr><td class="card">VIDEO</td><td class="card">idVideo · (idTanda, sesion)</td><td class="ok">Los dos son llave candidata</td></tr>
+          <tr><td class="card">OBSERVACION</td><td class="card">idObservacion · (idEspecimen, idVideo)</td><td class="ok">Los dos son llave candidata</td></tr>
+                    <tr><td class="card">ANALISIS</td><td class="card">idAnalisis · idVideo</td><td class="ok">Los dos son llave candidata (D-24)</td></tr>
+          <tr><td class="card">SEGUNDO</td><td class="card">(idObservacion, segundo)</td><td class="ok">Es la llave primaria (D-35)</td></tr>
+          <tr><td class="card">REPORTE</td><td class="card">idReporte · ruta · <b>ruta → formato</b></td><td class="ok">Se cumple, pero <code>ruta</code> es llave candidata</td></tr>
+          <tr><td class="card">Las otras cuatro</td><td class="card">Solo su llave primaria</td><td class="ok">Nada que revisar</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col">
+      <p>Cuatro determinantes sospechosos se examinaron y se descartaron:</p>
+      <ul>
+        <li><code>tipo → tratamiento</code> en <code>GRUPO</code>. <strong>No se cumple:</strong> dos grupos del mismo tipo pueden recibir tratamientos distintos. La revisión lo refuerza: ahora que el control recibe placebo, el tipo tampoco determina el tratamiento en ese caso — «placebo» es un valor como cualquier otro.</li>
+        <li><code>estado → etapa</code> en <code>ANALISIS</code>. <strong>No se cumple:</strong> un análisis «procesando» puede estar en cualquiera de las tres etapas del pipeline (D-16).</li>
+        <li><code>ruta → formato</code> en <code>REPORTE</code>. <strong>Sí se cumple</strong> —la extensión del archivo determina el formato— pero no viola nada: <code>ruta</code> es llave candidata, y BCNF solo prohíbe determinantes que <em>no</em> lo sean.</li>
+        <li><code>tipo → mensaje</code> en <code>NOTIFICACION</code>. <strong>No se cumple.</strong> Sería cierto si los mensajes fueran plantillas por tipo, pero no lo son: el pipeline genera un reporte de diagnóstico cuando el análisis se detiene (RN-11), así que el texto lleva detalle por instancia. Si algún día se vuelven plantilla pura, la dependencia aparecería y habría que mover el texto a un catálogo <code>TIPO_NOTIFICACION</code>.</li>
+      </ul>
+      <p><strong>El esquema queda en BCNF</strong>, la más restrictiva de las cuatro — las doce relaciones vigentes, verificadas una por una (quince antes de D-52 y D-102). Sigue así con los cambios de octubre: <code>SEGUNDO</code> solo tiene como determinante su llave primaria.</p>
+    </div>
+
+    <h3>Los otros dos criterios de la actividad</h3>
+
+    <div class="col">
+      <p>La actividad 6 no es solo normalizar. El método pide además que el esquema <strong>conserve la semántica</strong> y <strong>soporte las transacciones</strong>.</p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:34%">Transacción</th><th style="width:12%">Soporta</th><th>Camino tras la normalización</th></tr></thead>
+        <tbody>
+          <tr><td>Tiempo total por conducta, por espécimen y sesión</td><td class="ok">Sí</td><td>Sin cambio</td></tr>
+          <tr><td>Desglose por minuto</td><td class="ok">Sí</td><td>Se calcula desde <code>SEGUNDO</code>: ya no hay tabla de resumen (D-52)</td></tr>
+          <tr><td><s>Comparar Día 1 contra Día 2 del mismo espécimen</s></td><td class="no">Retirada</td><td>Se quitó del sistema (D-44)</td></tr>
+          <tr><td>Revisar y corregir la conducta de cada segundo</td><td class="ok">Sí</td><td><b>Nueva (D-35).</b> <code>OBSERVACION → SEGUNDO</code>; al guardar solo cambia <code>SEGUNDO</code>, porque los totales por minuto no se guardan (D-52)</td></tr>
+          <tr><td>Media, desviación estándar y varianza por grupo</td><td class="ok">Sí</td><td><b>Una reunión más:</b> del espécimen se pasa por la tanda para llegar al grupo</td></tr>
+          <tr><td>Comparar los tres grupos entre sí en el Día 2</td><td class="ok">Sí</td><td>Grupos hermanos bajo el mismo experimento. <b>Es lo que el laboratorio declara como el objetivo del experimento</b></td></tr>
+          <tr><td>Exportar tiempo + columna por conducta</td><td class="ok">Sí</td><td>Sin cambio</td></tr>
+          <tr><td>Seguir a la misma rata entre experimentos</td><td class="no">No</td><td>No es posible: el sistema no guarda número de rata (D-55) y las ratas se sacrifican al terminar el experimento</td></tr>
+          <tr><td>Consultar experimentos de cualquier investigador</td><td class="ok">Sí</td><td>Sin cambio — sin restricción de acceso</td></tr>
+          <tr><td><s>Saber con qué modelo y umbrales se calculó un resultado</s></td><td class="no">Retirada</td><td>El modelo y el umbral son constantes del pipeline y no se guardan por análisis (D-51)</td></tr>
+          <tr><td>Recuperar un reporte de un experimento cuyo video ya se borró</td><td class="ok">Sí</td><td><b>Nueva.</b> <code>REPORTE</code> cuelga de <code>EXPERIMENTO</code>, no de <code>VIDEO</code>, así que sobrevive al borrado a los 30 días (RN-06)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">Por qué <code>REPORTE</code> cuelga del experimento y no del video</span>
+      <p>No es arbitrario: lo obliga <strong>RN-06</strong>. Los videos se borran a los 30 días de completado el análisis, pero los reportes se conservan. Si <code>REPORTE</code> apuntara a <code>VIDEO</code>, borrar el video dejaría la foránea colgando o arrastraría el reporte con él.</p>
+      <p>Es un caso donde una regla de negocio del capítulo 4 <strong>decide la estructura</strong>, no solo una restricción semántica.</p>
+    </div>
+
+    <h3>Del esquema preliminar al definitivo</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:16%">Relación</th><th style="width:30%">Preliminar</th><th style="width:30%">Definitivo</th><th>Por</th></tr></thead>
+        <tbody>
+          <tr><td class="card">USUARIO</td><td class="card">nombre</td><td class="card">nombre · apellidos</td><td class="card">1FN</td></tr>
+          <tr><td class="card">ESPECIMEN</td><td class="card">idEspecimen · <b>idGrupo</b> · idTanda · idLaboratorio · numeroCilindro</td><td class="card">idEspecimen · idTanda · numeroRata · numeroCilindro</td><td class="card">3FN</td></tr>
+          <tr><td class="card">VIDEO</td><td class="card">duracion = la nominal de la sesión</td><td class="card">duracion = la real del archivo</td><td class="card">3FN</td></tr>
+          <tr><td class="card">ESPECIMEN</td><td class="card">idLaboratorio, único en el laboratorio</td><td class="card"><b>numeroRata, único en su grupo</b> · <s>retirada (D-55)</s></td><td class="card"><i class="src">3-sep</i></td></tr>
+          <tr><td class="card">GRUPO</td><td class="card">tratamiento admite nulo</td><td class="card"><b>tratamiento obligatorio</b></td><td class="card"><i class="src">3-sep</i></td></tr>
+          <tr><td class="card">CONFIGURACION</td><td class="card">idConfig · <b>hashModelo · nombreModelo</b> · versionPipeline · seis umbrales · fechaCreacion</td><td class="card">idConfig · <b>hashModelo → MODELO</b> · versionPipeline · seis umbrales · fechaCreacion</td><td class="card">3FN</td></tr>
+          <tr><td class="card">MODELO</td><td class="card">—</td><td class="card"><b>hashModelo · nombreModelo</b></td><td class="card">3FN</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <dl class="tally">
+      <div><dt>Relaciones</dt><dd>15<small>era 14 · la 3FN parte MODELO</small></dd></div>
+      <div><dt>Forma normal</dt><dd>BCNF<small>verificada relación por relación</small></dd></div>
+      <div><dt>Llaves foráneas</dt><dd>16<small>cae la de Especimen a Grupo, entra la de Configuracion a Modelo</small></dd></div>
+      <div><dt>Atributos nulables</dt><dd>2<small>notas · y el experimento de una notificación</small></dd></div>
+    </dl>
+
+    <div class="note">
+      <span class="tag">Cifras de la validación, y cifras vigentes</span>
+      <p>Las cifras de arriba son las de la validación de septiembre. Con las decisiones de octubre, el esquema vigente tiene <strong>15 relaciones</strong> (entra <code>SEGUNDO</code>; salen <code>MODELO</code> y <code>CONFIGURACION</code>), <strong>63 atributos</strong>, <strong>17 llaves foráneas</strong> y <strong>4 atributos nulables</strong> (D-53 y D-55 quitaron <code>propuesta</code> y <code>numeroRata</code>), y seguía en BCNF. <b>Vigentes al 14-oct (D-52, M-24 y D-102):</b> 12 relaciones, 57 atributos, 13 llaves foráneas y 5 nulables, en BCNF.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">Esta vez sí se partió una relación</span>
+      <p>Tres de los cuatro defectos se corrigieron moviendo o redefiniendo columnas, sin partir ninguna relación. <strong>El cuarto sí partió una</strong>, y conviene decirlo con todas sus letras porque es lo que un sinodal va a querer ver.</p>
+      <p>La 3FN partió <code>CONFIGURACION</code> en dos, y esa es la forma canónica en que una forma normal actúa. Que las tres correcciones anteriores no lo hicieran era, en el fondo, un accidente afortunado.</p>
+    </div>
+
+    <h3>El grafo relacional final</h3>
+
+    <div class="col">
+      <p>Este es el segundo entregable que pide la figura 1.6, y el que cierra la etapa: el <strong>Esquema Lógico Definitivo</strong>, ya con las correcciones de la revisión del 3 de septiembre.</p>
+    </div>
+
+    <div class="keyleg">
+      <span><span style="border-bottom:1.4px solid currentColor">atributo</span> forma la llave primaria</span>
+      <span><span style="color:#2E9E9C">atributo</span> es llave foránea</span>
+      <span>→ arista hacia la relación referenciada</span>
+    </div>
+
+    <figure>
+      <div class="figbox">
+        <svg viewBox="0 0 1080 1040" role="img" aria-label="Grafo relacional final del esquema logico definitivo, vigente al 14 de octubre. Doce relaciones y trece llaves foraneas. Especimen no referencia a Grupo, su grupo se alcanza a traves de Tanda, y ya no tiene numero de rata. Segundo cuelga de Observacion y su columna conducta toma valores del dominio tipo_conducta. A la derecha, las dos de soporte del sistema: Reporte y Notificacion cuelgan de Experimento y Usuario. Junto a Usuario, Administrador: subtipo de Usuario con permisos extra.">
+          <defs>
+            <marker id="fl_f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+            </marker>
+            <marker id="fl_r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--recon)"/>
+            </marker>
+          </defs>
+          <text class="m" x="24" y="24" font-size="10.5" fill="currentColor" opacity=".7" letter-spacing="1.2">GRAFO RELACIONAL FINAL &#183; ESQUEMA L&#211;GICO DEFINITIVO</text>
+          <text class="m" x="820" y="24" font-size="10.5" letter-spacing="1.2">SOPORTE DEL SISTEMA</text>
+  <rect x="280" y="42" width="220" height="101" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <line x1="280" y1="61" x2="500" y2="61" stroke="currentColor" stroke-width="1.4"/>
+  <text class="m" x="288" y="55.5" font-size="9.5" font-weight="500" fill="currentColor">USUARIO</text>
+  <text class="m" x="288" y="72.5" font-size="8.5" fill="currentColor">idInstitucional</text>
+  <line x1="288" y1="74.7" x2="364.2" y2="74.7" stroke="currentColor" stroke-width="1.1" opacity=".8"/>
+  <text class="m" x="288" y="85" font-size="8.5" fill="currentColor" opacity=".72">nombre</text>
+  <text class="m" x="288" y="97.5" font-size="8.5" fill="currentColor" opacity=".72">apellidos</text>
+  <text class="m" x="288" y="110" font-size="8.5" fill="currentColor" opacity=".72">correo</text>
+  <text class="m" x="288" y="122.5" font-size="8.5" fill="currentColor" opacity=".72">contrasenaHash</text>
+  <text class="m" x="288" y="135" font-size="8.5" fill="currentColor" opacity=".72">activo</text>
+
+  <rect x="620" y="42" width="150" height="38.5" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <line x1="620" y1="61" x2="770" y2="61" stroke="currentColor" stroke-width="1.4"/>
+  <text class="m" x="628" y="55.5" font-size="9.5" font-weight="500" fill="currentColor">ADMINISTRADOR</text>
+  <text class="m" x="628" y="72.5" font-size="8.5" fill="#2E9E9C">idInstitucional</text>
+  <line x1="628" y1="74.7" x2="704.2" y2="74.7" stroke="currentColor" stroke-width="1.1" opacity=".8"/>
+  <path d="M 500 61 L 620 61" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".7" marker-end="url(#fl_f)"/>
+  <text class="m" x="560" y="55" font-size="7.5" fill="currentColor" opacity=".62" text-anchor="middle">idInstitucional</text>
+
+  <rect x="280" y="162" width="220" height="88.5" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <line x1="280" y1="181" x2="500" y2="181" stroke="currentColor" stroke-width="1.4"/>
+  <text class="m" x="288" y="175.5" font-size="9.5" font-weight="500" fill="currentColor">EXPERIMENTO</text>
+  <text class="m" x="288" y="192.5" font-size="8.5" fill="currentColor">idExperimento</text>
+  <line x1="288" y1="194.7" x2="354.04" y2="194.7" stroke="currentColor" stroke-width="1.1" opacity=".8"/>
+  <text class="m" x="288" y="205" font-size="8.5" fill="#2E9E9C">idInstitucional</text>
+  <text class="m" x="288" y="217.5" font-size="8.5" fill="currentColor" opacity=".72">nombre</text>
+  <text class="m" x="288" y="230" font-size="8.5" fill="currentColor" opacity=".72">fecha</text>
+  <text class="m" x="288" y="242.5" font-size="8.5" fill="currentColor" opacity=".72">notas</text>
+  <rect x="280" y="306" width="220" height="88.5" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <line x1="280" y1="325" x2="500" y2="325" stroke="currentColor" stroke-width="1.4"/>
+  <text class="m" x="288" y="319.5" font-size="9.5" font-weight="500" fill="currentColor">GRUPO</text>
+  <text class="m" x="288" y="336.5" font-size="8.5" fill="currentColor">idGrupo</text>
+  <line x1="288" y1="338.7" x2="323.56" y2="338.7" stroke="currentColor" stroke-width="1.1" opacity=".8"/>
+  <text class="m" x="288" y="349" font-size="8.5" fill="#2E9E9C">idExperimento</text>
+  <text class="m" x="288" y="361.5" font-size="8.5" fill="currentColor" opacity=".72">etiqueta</text>
+  <text class="m" x="288" y="374" font-size="8.5" fill="currentColor" opacity=".72">tipo</text>
+  <text class="m" x="288" y="386.5" font-size="8.5" fill="currentColor" opacity=".72">tratamiento *</text>
+  <rect x="20" y="463" width="220" height="63.5" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <line x1="20" y1="482" x2="240" y2="482" stroke="currentColor" stroke-width="1.4"/>
+  <text class="m" x="28" y="476.5" font-size="9.5" font-weight="500" fill="currentColor">ESPECIMEN</text>
+  <text class="m" x="28" y="493.5" font-size="8.5" fill="currentColor">idEspecimen</text>
+  <line x1="28" y1="495.7" x2="83.88" y2="495.7" stroke="currentColor" stroke-width="1.1" opacity=".8"/>
+  <text class="m" x="28" y="506" font-size="8.5" fill="#2E9E9C">idTanda</text>
+  <text class="m" x="28" y="518.5" font-size="8.5" fill="currentColor" opacity=".72">numeroCilindro</text>
+  <rect x="280" y="463" width="220" height="76" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <line x1="280" y1="482" x2="500" y2="482" stroke="currentColor" stroke-width="1.4"/>
+  <text class="m" x="288" y="476.5" font-size="9.5" font-weight="500" fill="currentColor">TANDA</text>
+  <text class="m" x="288" y="493.5" font-size="8.5" fill="currentColor">idTanda</text>
+  <line x1="288" y1="495.7" x2="323.56" y2="495.7" stroke="currentColor" stroke-width="1.1" opacity=".8"/>
+  <text class="m" x="288" y="506" font-size="8.5" fill="#2E9E9C">idGrupo</text>
+  <text class="m" x="288" y="518.5" font-size="8.5" fill="currentColor" opacity=".72">ordinal</text>
+  <text class="m" x="288" y="531" font-size="8.5" fill="currentColor" opacity=".72">nCilindros</text>
+  <rect x="280" y="613" width="220" height="113.5" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <line x1="280" y1="632" x2="500" y2="632" stroke="currentColor" stroke-width="1.4"/>
+  <text class="m" x="288" y="626.5" font-size="9.5" font-weight="500" fill="currentColor">VIDEO</text>
+  <text class="m" x="288" y="643.5" font-size="8.5" fill="currentColor">idVideo</text>
+  <line x1="288" y1="645.7" x2="323.56" y2="645.7" stroke="currentColor" stroke-width="1.1" opacity=".8"/>
+  <text class="m" x="288" y="656" font-size="8.5" fill="#2E9E9C">idTanda</text>
+  <text class="m" x="288" y="668.5" font-size="8.5" fill="currentColor" opacity=".72">sesion</text>
+  <text class="m" x="288" y="681" font-size="8.5" fill="currentColor" opacity=".72">archivo <tspan opacity=".8">(nulo)</tspan></text>
+  <text class="m" x="288" y="693.5" font-size="8.5" fill="currentColor" opacity=".72">duracion</text>
+  <text class="m" x="288" y="706" font-size="8.5" fill="currentColor" opacity=".72">fechaCarga</text>
+  <text class="m" x="288" y="718.5" font-size="8.5" fill="currentColor" opacity=".72">nombreOriginal <tspan opacity=".8">(nulo)</tspan></text>
+  <rect x="540" y="613" width="220" height="113.5" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <line x1="540" y1="632" x2="760" y2="632" stroke="currentColor" stroke-width="1.4"/>
+  <text class="m" x="548" y="626.5" font-size="9.5" font-weight="500" fill="currentColor">ANALISIS</text>
+  <text class="m" x="548" y="643.5" font-size="8.5" fill="currentColor">idAnalisis</text>
+  <line x1="548" y1="645.7" x2="598.8" y2="645.7" stroke="currentColor" stroke-width="1.1" opacity=".8"/>
+  <text class="m" x="548" y="656" font-size="8.5" fill="#2E9E9C">idVideo</text>
+  <text class="m" x="548" y="668.5" font-size="8.5" fill="currentColor" opacity=".72">estado</text>
+  <text class="m" x="548" y="681" font-size="8.5" fill="currentColor" opacity=".72">etapa</text>
+  <text class="m" x="548" y="693.5" font-size="8.5" fill="currentColor" opacity=".72">nivelClasif</text>
+  <text class="m" x="548" y="706" font-size="8.5" fill="currentColor" opacity=".72">fechaAnalisis</text>
+  <text class="m" x="548" y="718.5" font-size="8.5" fill="currentColor" opacity=".72">rutaDiagnostico <tspan opacity=".8">(nulo)</tspan></text>
+
+  <rect x="820" y="42" width="220" height="113.5" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <line x1="820" y1="61" x2="1040" y2="61" stroke="currentColor" stroke-width="1.4"/>
+  <text class="m" x="828" y="55.5" font-size="9.5">NOTIFICACION</text>
+  <text class="m" x="828" y="72.5" font-size="8.5" fill="currentColor">idNotificacion</text>
+  <line x1="828" y1="74.7" x2="893.88" y2="74.7" stroke="currentColor" stroke-width="1.1" opacity=".8"/>
+  <text class="m" x="828" y="85" font-size="8.5" fill="#2E9E9C">idInstitucional</text>
+  <text class="m" x="828" y="97.5" font-size="8.5" fill="#2E9E9C">idExperimento <tspan fill="currentColor" opacity=".6">(nulo)</tspan></text>
+  <text class="m" x="828" y="110" font-size="8.5" fill="currentColor" opacity=".72">tipo</text>
+  <text class="m" x="828" y="122.5" font-size="8.5" fill="currentColor" opacity=".72">mensaje</text>
+  <text class="m" x="828" y="135" font-size="8.5" fill="currentColor" opacity=".72">leido</text>
+  <text class="m" x="828" y="147.5" font-size="8.5" fill="currentColor" opacity=".72">fechaCreacion</text>
+
+  <rect x="820" y="200" width="220" height="88.5" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <line x1="820" y1="219" x2="1040" y2="219" stroke="currentColor" stroke-width="1.4"/>
+  <text class="m" x="828" y="213.5" font-size="9.5">REPORTE</text>
+  <text class="m" x="828" y="230.5" font-size="8.5" fill="currentColor">idReporte</text>
+  <line x1="828" y1="232.7" x2="873.72" y2="232.7" stroke="currentColor" stroke-width="1.1" opacity=".8"/>
+  <text class="m" x="828" y="243" font-size="8.5" fill="#2E9E9C">idExperimento</text>
+  <text class="m" x="828" y="255.5" font-size="8.5" fill="currentColor" opacity=".72">formato</text>
+  <text class="m" x="828" y="268" font-size="8.5" fill="currentColor" opacity=".72">ruta</text>
+  <text class="m" x="828" y="280.5" font-size="8.5" fill="currentColor" opacity=".72">fechaGeneracion</text>
+
+  <rect x="158" y="790" width="220" height="63.5" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <line x1="158" y1="809" x2="378" y2="809" stroke="currentColor" stroke-width="1.4"/>
+  <text class="m" x="166" y="803.5" font-size="9.5" font-weight="500" fill="currentColor">OBSERVACION</text>
+  <text class="m" x="166" y="820.5" font-size="8.5" fill="currentColor">idObservacion</text>
+  <line x1="166" y1="822.7" x2="232.04" y2="822.7" stroke="currentColor" stroke-width="1.1" opacity=".8"/>
+  <text class="m" x="166" y="833" font-size="8.5" fill="#2E9E9C">idEspecimen</text>
+  <text class="m" x="166" y="845.5" font-size="8.5" fill="#2E9E9C">idVideo</text>
+  <rect x="620" y="880" width="220" height="76" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <line x1="620" y1="899" x2="840" y2="899" stroke="currentColor" stroke-width="1.4"/>
+  <text class="m" x="628" y="893.5" font-size="9.5" font-weight="500" fill="currentColor">SEGUNDO</text>
+  <text class="m" x="628" y="910.5" font-size="8.5" fill="#2E9E9C">idObservacion</text>
+  <line x1="628" y1="912.7" x2="694" y2="912.7" stroke="currentColor" stroke-width="1.1" opacity=".8"/>
+  <text class="m" x="628" y="923" font-size="8.5" fill="currentColor">segundo</text>
+  <line x1="628" y1="925.2" x2="663.5" y2="925.2" stroke="currentColor" stroke-width="1.1" opacity=".8"/>
+  <text class="m" x="628" y="935.5" font-size="8.5" fill="currentColor" opacity=".72">conducta <tspan opacity=".8">(nulo)</tspan></text>
+  <text class="m" x="628" y="948" font-size="8.5" fill="currentColor" opacity=".72">origen</text>
+  <path d="M 390 162 L 390 143" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".7" marker-end="url(#fl_f)"/>
+  <text class="m" x="436" y="149.25" font-size="7.5" fill="currentColor" opacity=".62" text-anchor="middle">idInstitucional</text>
+  <path d="M 390 306 L 390 250.5" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".7" marker-end="url(#fl_f)"/>
+  <text class="m" x="436" y="281.25" font-size="7.5" fill="currentColor" opacity=".62" text-anchor="middle">idExperimento</text>
+  <path d="M 440 463 L 440 394.5" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".7" marker-end="url(#fl_f)"/>
+  <text class="m" x="486" y="431.75" font-size="7.5" fill="currentColor" opacity=".62" text-anchor="middle">idGrupo</text>
+  <path d="M 240 501 L 280 501" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".7" marker-end="url(#fl_f)"/>
+  <text class="m" x="260" y="495" font-size="7.5" fill="currentColor" opacity=".62" text-anchor="middle">idTanda</text>
+  <path d="M 390 613 L 390 539" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".7" marker-end="url(#fl_f)"/>
+  <text class="m" x="436" y="579" font-size="7.5" fill="currentColor" opacity=".62" text-anchor="middle">idTanda</text>
+  <path d="M 540 660 L 500 660" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".7" marker-end="url(#fl_f)"/>
+  <text class="m" x="520" y="654" font-size="7.5" fill="currentColor" opacity=".62" text-anchor="middle">idVideo</text>
+  <path d="M 200 790 L 200 580 L 130 580 L 130 526.5" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".7" marker-end="url(#fl_f)"/>
+  <text class="m" x="165" y="575" font-size="7.5" fill="currentColor" opacity=".62" text-anchor="middle">idEspecimen</text>
+  <path d="M 340 790 L 340 752 L 390 752 L 390 726.5" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".7" marker-end="url(#fl_f)"/>
+  <text class="m" x="365" y="747" font-size="7.5" fill="currentColor" opacity=".62" text-anchor="middle">idVideo</text>
+  <path d="M 820 86 L 500 86" fill="none" stroke="currentColor" stroke-width="1.3" marker-end="url(#fl_r)"/>
+  <text class="m" x="660" y="80" font-size="7.5" text-anchor="middle">idInstitucional</text>
+  <path d="M 820 97.5 L 780 97.5 L 780 206 L 500 206" fill="none" stroke="currentColor" stroke-width="1.3" marker-end="url(#fl_r)"/>
+  <text class="m" x="655" y="200" font-size="7.5" text-anchor="middle">idExperimento</text>
+  <path d="M 820 243 L 500 243" fill="none" stroke="currentColor" stroke-width="1.3" marker-end="url(#fl_r)"/>
+  <text class="m" x="660" y="237" font-size="7.5" text-anchor="middle">idExperimento</text>
+  <path d="M 620 905 L 600 905 L 600 822 L 378 822" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".7" marker-end="url(#fl_f)"/>
+  <text class="m" x="489" y="816" font-size="7.5" fill="currentColor" opacity=".62" text-anchor="middle">idObservacion</text>
+
+  <text class="m" x="24" y="1000" font-size="7.5" fill="currentColor" opacity=".62">* obligatorio: el grupo control recibe placebo</text>
+  <text class="m" x="24" y="1015" font-size="7.5">a la derecha, las dos relaciones de soporte del sistema y sus tres aristas</text>
+  <text class="m" x="24" y="1030" font-size="7.5" fill="currentColor" opacity=".62">administrador es investigador con permisos extra · subtipo (D-08)</text>
+        </svg>
+      </div>
+      <figcaption><b>Figura 2. Grafo relacional final</b> — el Esquema Lógico Definitivo vigente al 14 de octubre, en BCNF. <code>ESPECIMEN</code> tiene un solo padre —su grupo se alcanza por <code>TANDA</code>— y ya no lleva número de rata (D-55). Doce nodos y trece aristas, todas de una columna. <code>CONDUCTA</code> deja de ser nodo con D-102: <code>SEGUNDO.conducta</code> usa el dominio <code>tipo_conducta</code>. <code>INTERVALO</code> y <code>PRESENTA</code> se quitaron con D-52: los segundos por conducta de cada minuto se calculan desde <code>SEGUNDO</code>. <code>ANALISIS</code> ya trae <code>rutaDiagnostico</code> (M-24). <code>SEGUNDO</code> (D-35) referencia a <code>CONDUCTA</code> con su columna <code>conducta</code> (D-53). La columna derecha es el soporte del sistema, y está separada a propósito: el laboratorio puede leer y validar las relaciones del experimento, pero <code>REPORTE</code> y <code>NOTIFICACION</code> no le incumben. <code>MODELO</code> y <code>CONFIGURACION</code> se eliminaron (D-51). <span><code>USUARIO</code> se identifica con <code>idInstitucional</code> (D-02) y lleva el atributo <code>activo</code> para dar de baja cuentas sin borrarlas (D-10). Se incluye <code>ADMINISTRADOR</code>, en relación (1,1)–(0,1) con <code>USUARIO</code> — el administrador no es un tipo de usuario aparte, es un investigador con permisos extra (D-08).</span></figcaption>
+    </figure>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 7 ══════════ -->
+  <section class="act" id="a7">
+    <p class="act-n">Actividad 7 </p>
+    <h2>Documentación del esquema lógico</h2>
+
+    <blockquote class="asks">
+      <p>«<b>Documentar el esquema lógico</b> obtenido estructuralmente y sus respectivas consideraciones de tipo <b>no estructural</b>.»</p>
+      <cite>Metodología de diseño · etapa lógica · actividad 7</cite>
+    </blockquote>
+
+    <h3>Parte 1 — Esquema relacional definitivo</h3>
+
+    <div class="keyleg">
+      <span><span style="border-bottom:1.4px solid currentColor">atributo</span> llave primaria</span>
+      <span><span style="color:#2E9E9C">atributo</span> llave foránea</span>
+    </div>
+
+    <div class="esquema">
+      <div><span class="r">USUARIO</span> (<span class="pk">idInstitucional</span>, nombre, apellidos, correo, contrasenaHash, activo, cambioRequerido)</div>
+      <div><span class="r">ADMINISTRADOR</span> (<span class="pk fk">idInstitucional</span>)<span class="ref">idInstitucional → USUARIO</span></div>
+      <div><span class="r">EXPERIMENTO</span> (<span class="pk">idExperimento</span>, <span class="fk">idInstitucional</span>, nombre, fecha, notas)<span class="ref">idInstitucional → USUARIO · nombre único</span></div>
+      <div><span class="r">GRUPO</span> (<span class="pk">idGrupo</span>, <span class="fk">idExperimento</span>, etiqueta, tipo, <span>tratamiento</span>)<span class="ref">idExperimento → EXPERIMENTO</span></div>
+      <div><span class="r">TANDA</span> (<span class="pk">idTanda</span>, <span class="fk">idGrupo</span>, ordinal, nCilindros)<span class="ref">idGrupo → GRUPO</span></div>
+      <div><span class="r">ESPECIMEN</span> (<span class="pk">idEspecimen</span>, <span class="fk">idTanda</span>, numeroCilindro)<span class="ref">idTanda → TANDA</span></div>
+      <div><span class="r">VIDEO</span> (<span class="pk">idVideo</span>, <span class="fk">idTanda</span>, sesion, archivo, nombreOriginal, duracion, fechaCarga)<span class="ref">idTanda → TANDA</span></div>
+      <div><span class="r">ANALISIS</span> (<span class="pk">idAnalisis</span>, <span class="fk">idVideo</span>, estado, etapa, nivelClasif, fechaAnalisis, rutaDiagnostico)<span class="ref">idVideo → VIDEO · idVideo único</span></div>
+      <div><span class="r">OBSERVACION</span> (<span class="pk">idObservacion</span>, <span class="fk">idEspecimen</span>, <span class="fk">idVideo</span>)<span class="ref">idEspecimen → ESPECIMEN · idVideo → VIDEO</span></div>
+            <div><span class="r">SEGUNDO</span> (<span class="pk fk">idObservacion</span>, <span class="pk">segundo</span>, conducta, origen)<span class="ref">idObservacion → OBSERVACION · conducta: dominio tipo_conducta (nulo)</span></div>
+      <div style="opacity:.35">&#160;</div>
+      <div><span class="r">REPORTE</span> (<span class="pk">idReporte</span>, <span class="fk">idExperimento</span>, formato, ruta, fechaGeneracion)<span class="ref">idExperimento → EXPERIMENTO</span></div>
+      <div><span class="r">NOTIFICACION</span> (<span class="pk">idNotificacion</span>, <span class="fk">idInstitucional</span>, <span class="fk">idExperimento</span>, tipo, mensaje, leido, fechaCreacion)<span class="ref">idInstitucional → USUARIO · idExperimento → EXPERIMENTO (nulo)</span></div>
+    </div>
+
+    <div class="note">
+      <span class="tag">Por qué las dos últimas van separadas del bloque</span>
+      <p>No es decoración. Las de arriba se derivaron del <strong>universo del discurso del laboratorio</strong> y son las que el Dr. Sandino puede leer, reconocer y desmentir — como hizo el 3 de septiembre. <code>REPORTE</code> y <code>NOTIFICACION</code> se derivaron de los <strong>requisitos del capítulo 1 del TT</strong>, y preguntarle a él por ellas no tendría sentido.</p>
+      <p>Mantener la línea visible entre las dos procedencias es lo que permite volver a presentar el modelo al laboratorio sin pedirle que valide algo que no es suyo.</p>
+    </div>
+
+    <dl class="tally">
+      <div><dt>Relaciones</dt><dd>12<small>12 entidades · ninguna N:M desde D-52</small></dd></div>
+      <div><dt>Atributos</dt><dd>58<small>incluidas las llaves foráneas, rutaDiagnostico y nombreOriginal (desde el 1-nov)</small></dd></div>
+      <div><dt>Llaves foráneas</dt><dd>13<small>todas de una sola columna</small></dd></div>
+      <div><dt>Forma normal</dt><dd>BCNF<small>verificada relación por relación</small></dd></div>
+    </dl>
+
+    <dl class="tally">
+      <div><dt>Del experimento</dt><dd>9<small>las ocho del laboratorio + SEGUNDO</small></dd></div>
+      <div><dt>Del sistema</dt><dd>2<small>REPORTE y NOTIFICACION · más el subtipo ADMINISTRADOR</small></dd></div>
+      <div><dt>Defectos corregidos</dt><dd>4<small>uno de 1FN, tres de 3FN</small></dd></div>
+      <div><dt>Nulables</dt><dd>6<small>ver actividad 3</small></dd></div>
+    </dl>
+
+    <h3>Parte 2 — Diccionario del esquema lógico</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:15%">Relación</th><th style="width:17%">Atributo</th><th style="width:22%">Papel</th><th style="width:30%">Dominio</th><th>Nulo</th></tr></thead>
+        <tbody>
+          <tr><td class="card" rowspan="7"><b>USUARIO</b></td><td class="card">idInstitucional</td><td class="ok">Primaria</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">nombre</td><td>—</td><td class="dom">texto</td><td>No</td></tr>
+          <tr><td class="card">apellidos</td><td>—</td><td class="dom">texto</td><td>No</td></tr>
+          <tr><td class="card">correo</td><td class="ok">Alterna</td><td class="dom">texto</td><td>No</td></tr>
+          <tr><td class="card">contrasenaHash</td><td>—</td><td class="dom">texto cifrado</td><td>No</td></tr>
+          <tr><td class="card">activo</td><td>—</td><td class="dom">booleano</td><td>No</td></tr>
+          <tr><td class="card">cambioRequerido</td><td>—</td><td class="dom">booleano · obliga a cambiar la contraseña temporal en el primer ingreso</td><td>No</td></tr>
+
+          <tr><td class="card" rowspan="1"><b>ADMINISTRADOR</b></td><td class="card">idInstitucional</td><td class="ok">Primaria + foránea → USUARIO</td><td class="dom">identificador</td><td>No</td></tr>
+
+          <tr><td class="card" rowspan="5"><b>EXPERIMENTO</b></td><td class="card">idExperimento</td><td class="ok">Primaria</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">idInstitucional</td><td class="card">Foránea → USUARIO</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">nombre</td><td class="ok">Alterna</td><td class="dom">texto · único (D-51)</td><td>No</td></tr>
+          <tr><td class="card">fecha</td><td>—</td><td class="dom">fecha</td><td>No</td></tr>
+          <tr><td class="card">notas</td><td>—</td><td class="dom">texto libre</td><td>Sí</td></tr>
+
+          <tr><td class="card" rowspan="5"><b>GRUPO</b></td><td class="card">idGrupo</td><td class="ok">Primaria</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">idExperimento</td><td class="card">Foránea → EXPERIMENTO · alterna</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">etiqueta</td><td>Alterna con idExperimento</td><td class="dom">texto</td><td>No</td></tr>
+          <tr><td class="card">tipo</td><td>—</td><td class="dom">{control, referencia, tratamiento experimental}</td><td>No</td></tr>
+          <tr><td class="card">tratamiento</td><td>—</td><td class="dom">texto · el control lleva «placebo»</td><td>No</td></tr>
+
+          <tr><td class="card" rowspan="4"><b>TANDA</b></td><td class="card">idTanda</td><td class="ok">Primaria</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">idGrupo</td><td class="card">Foránea → GRUPO · alterna</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">ordinal</td><td>Alterna con idGrupo</td><td class="dom">entero ≥ 1</td><td>No</td></tr>
+          <tr><td class="card">nCilindros</td><td>—</td><td class="dom">entero {2, 3, 4}</td><td>No</td></tr>
+
+          <tr><td class="card" rowspan="3"><b>ESPECIMEN</b></td><td class="card">idEspecimen</td><td class="ok">Primaria</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">idTanda</td><td class="card">Foránea → TANDA · alterna</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">numeroCilindro</td><td>Alterna con idTanda</td><td class="dom">entero 1..nCilindros de su tanda</td><td>No</td></tr>
+
+          <tr><td class="card" rowspan="7"><b>VIDEO</b></td><td class="card">idVideo</td><td class="ok">Primaria</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">idTanda</td><td class="card">Foránea → TANDA · alterna</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">sesion</td><td>Alterna con idTanda</td><td class="dom">{Día 1, Día 2}</td><td>No</td></tr>
+          <tr><td class="card">archivo</td><td>—</td><td class="dom">referencia a un archivo MP4 o MOV · nulo cuando el video ya se borró</td><td>Sí</td></tr>
+          <tr><td class="card">nombreOriginal</td><td>—</td><td class="dom">texto · nombre con que el usuario subió el archivo; solo se muestra, no arma rutas</td><td>Sí</td></tr>
+          <tr><td class="card">duracion</td><td>—</td><td class="dom">duración real del archivo cargado</td><td>No</td></tr>
+          <tr><td class="card">fechaCarga</td><td>—</td><td class="dom">fecha</td><td>No</td></tr>
+
+          <tr><td class="card" rowspan="7"><b>ANALISIS</b></td><td class="card">idAnalisis</td><td class="ok">Primaria</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">idVideo</td><td class="card">Foránea → VIDEO · alterna</td><td class="dom">identificador · un análisis vigente por video</td><td>No</td></tr>
+          <tr><td class="card">estado</td><td>—</td><td class="dom">{en cola, procesando, completado, error, en pausa, cancelado}</td><td>No</td></tr>
+          <tr><td class="card">etapa</td><td>—</td><td class="dom">{preprocesamiento, cilindros, clasificación}</td><td>No</td></tr>
+          <tr><td class="card">nivelClasif</td><td>—</td><td class="dom">{preciso, agrupado} · agrupado si algún segundo quedó como conducta activa</td><td>No</td></tr>
+          <tr><td class="card">fechaAnalisis</td><td>—</td><td class="dom">fecha</td><td>No</td></tr>
+          <tr><td class="card">rutaDiagnostico</td><td>—</td><td class="dom">ruta del reporte de diagnóstico · solo si el análisis terminó en error (D-23)</td><td>Sí</td></tr>
+
+          <tr><td class="card" rowspan="3"><b>OBSERVACION</b></td><td class="card">idObservacion</td><td class="ok">Primaria</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">idEspecimen</td><td class="card">Foránea → ESPECIMEN · alterna</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">idVideo</td><td class="card">Foránea → VIDEO · alterna</td><td class="dom">identificador</td><td>No</td></tr>
+
+          <tr><td class="card" rowspan="4"><b>SEGUNDO</b></td><td class="card">idObservacion</td><td class="ok">Primaria + foránea → OBSERVACION</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">segundo</td><td class="ok">Primaria</td><td class="dom">entero 1..300</td><td>No</td></tr>
+          <tr><td class="card">conducta</td><td>—</td><td class="dom">{nado activo, inmovilidad, escalamiento, conducta activa} · conducta vigente; nula solo si el sistema no vio al espécimen (origen máquina) o el usuario marcó «No se ve» (origen dudosa)</td><td>Sí</td></tr>
+          <tr><td class="card">origen</td><td>—</td><td class="dom">{máquina, confirmada, corregida, dudosa} · máquina: lo asignó el sistema; confirmada: el usuario lo dejó igual; corregida: lo cambió por otra conducta; dudosa: el usuario lo marcó «No se ve»</td><td>No</td></tr>
+
+          <tr><td class="card" rowspan="4"><b>REPORTE</b></td><td class="card">idReporte</td><td class="ok">Primaria</td><td class="dom">identificador propio</td><td>No</td></tr>
+          <tr><td class="card">idExperimento</td><td class="card">Foránea → EXPERIMENTO</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">formato</td><td>—</td><td class="dom">{CSV, XLSX, PDF}</td><td>No</td></tr>
+          <tr><td class="card">ruta</td><td class="ok">Alterna</td><td class="dom">ruta de archivo</td><td>No</td></tr>
+
+          <tr><td class="card" rowspan="4"><b>NOTIFICACION</b></td><td class="card">idNotificacion</td><td class="ok">Primaria</td><td class="dom">identificador propio</td><td>No</td></tr>
+          <tr><td class="card">idInstitucional</td><td class="card">Foránea → USUARIO</td><td class="dom">identificador</td><td>No</td></tr>
+          <tr><td class="card">idExperimento</td><td class="card">Foránea → EXPERIMENTO</td><td class="dom">identificador</td><td>Sí</td></tr>
+          <tr><td class="card">tipo</td><td>—</td><td class="dom">{análisis completado, error del pipeline, alerta de disco, video borrado, análisis en pausa, análisis cancelado}</td><td>No</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col">
+      <p>Las 12 relaciones vigentes, con su papel estructural y su dominio. Los atributos de puro registro —<code>fechaCreacion</code>, <code>fechaGeneracion</code>, <code>mensaje</code>, <code>leido</code>— no llevan restricción más allá de su tipo.</p>
+    </div>
+
+    <h3>Parte 3 — Consideraciones no estructurales para la etapa física</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:30%">Qué viaja</th><th style="width:12%">Cuántas</th><th>Dónde está el detalle</th></tr></thead>
+        <tbody>
+          <tr><td>Integridad referencial</td><td class="card">13</td><td>Actividad 3 · una por cada llave foránea, todas de una columna</td></tr>
+          <tr><td>Identidad y unicidad</td><td class="card">9</td><td>Vigentes al 14-oct (sale la de <code>INTERVALO</code>, D-52). Al 6-oct: Salió la unicidad de <code>numeroRata</code> (D-55) y las ocho columnas de <code>CONFIGURACION</code> (D-51); entraron la <code>ruta</code> de <code>REPORTE</code>, el <code>idVideo</code> de <code>ANALISIS</code> y el <code>nombre</code> de <code>EXPERIMENTO</code></td></tr>
+          <tr><td>Integridad semántica</td><td class="card">12</td><td>Sale la nulidad condicional de <code>tratamiento</code>, entra la unicidad de <code>numeroRata</code>. Entran cuatro dominios por extensión: estado, formato, tipo de notificación y umbral de confianza. <b>Actualizado:</b> sale el umbral de confianza (D-51) y entran la etapa, el nivel de clasificación, el rango de <code>segundo</code> y el <code>origen</code> de la etiqueta (ver la tabla de la actividad 3). Con D-55 sale también la restricción de <code>numeroRata</code></td></tr>
+          <tr><td>Atributos que admiten nulo</td><td class="card">6</td><td><code>EXPERIMENTO.notas</code>, <code>NOTIFICACION.idExperimento</code>, <code>VIDEO.archivo</code>, <code>VIDEO.nombreOriginal</code>, <code>SEGUNDO.conducta</code> y <code>ANALISIS.rutaDiagnostico</code></td></tr>
+          <tr><td>Redundancia controlada</td><td class="card">0</td><td><b>Ninguna.</b> D-04 (<code>ESPECIMEN.idGrupo</code> en el físico) quedó sin objeto cuando D-55 quitó <code>numeroRata</code></td></tr>
+          <tr><td>Dominios por extensión</td><td class="card">9</td><td>Llegan como <code>CREATE DOMAIN … CHECK (VALUE IN (…))</code>, que es lo que el apéndice del libro muestra. Desde D-102 se suma <code>tipo_conducta</code> y ya no hay excepción: <code>CONDUCTA</code> deja de ser tabla</td></tr>
+          <tr><td>Desviaciones del método</td><td class="card">1</td><td>La foránea nulable de <code>NOTIFICACION</code> a <code>EXPERIMENTO</code>, donde el método pedía tabla puente. Justificada en la actividad 2</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Parte 4 — Las decisiones de la etapa y por qué se tomaron</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:28%">Decisión</th><th style="width:34%">Por qué</th><th>Qué se aceptó a cambio</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>Llaves subrogadas en todas las relaciones</b></td>
+            <td>La transformación literal producía llaves de hasta siete columnas sobre una sola de dato</td>
+            <td>Una columna extra por relación, y declarar como unicidad lo que la llave natural garantizaba sola</td>
+          </tr>
+          <tr>
+            <td><b><code>OBSERVACION</code> con identificador propio</b></td>
+            <td>Deja la foránea de <code>SEGUNDO</code> en una columna en vez de cinco</td>
+            <td>El par (espécimen, video) se conserva como llave candidata, no como primaria</td>
+          </tr>
+          <tr>
+            <td><b>Eliminar <code>ESPECIMEN.idGrupo</code></b></td>
+            <td>Era derivable de la tanda. Lo exige la 3FN, y la reunión confirmó la condición que lo sostiene: una grabación no mezcla grupos</td>
+            <td>Una reunión más en las consultas por grupo, <b>y ahora también la imposibilidad de declarar la clave alterna del espécimen con un <code>UNIQUE</code> simple</b></td>
+          </tr>
+          <tr>
+            <td><b><code>duracion</code> es la real, no la nominal</b></td>
+            <td>La nominal dependía de la sesión, no de la llave — transitiva</td>
+            <td>Hay que verificar que cuadre con la sesión declarada, con tolerancia</td>
+          </tr>
+          <tr>
+            <td><b>Separar <code>nombre</code> de <code>apellidos</code></b></td>
+            <td>Un nombre completo es un dominio compuesto</td>
+            <td>Nada — es una mejora sin costo</td>
+          </tr>
+          <tr>
+            <td><b>Extraer <code>MODELO</code></b> <span class="no">(revertida por D-51)</span></td>
+            <td>El hash determina el nombre del archivo, y el hash no es clave de <code>CONFIGURACION</code>. Además, en TT-II los modelos se comparan entre sí</td>
+            <td>Una relación de dos columnas y una reunión más para mostrar el nombre del modelo</td>
+          </tr>
+          <tr>
+            <td><b>Eliminar <code>MODELO</code> y <code>CONFIGURACION</code></b> (D-51)</td>
+            <td>Ningún requisito permite cambiar el modelo ni el umbral: las dos tablas solo registrarían un valor que nunca cambia</td>
+            <td>El modelo final y el umbral de 0.80 se documentan en el capítulo 6, no en la base</td>
+          </tr>
+          <tr>
+            <td><b>Agregar <code>SEGUNDO</code></b> (D-35)</td>
+            <td>El usuario revisa y corrige la conducta de cada segundo; la conducta que puso el sistema no se guarda aparte (D-53)</td>
+            <td>Hasta 300 filas por espécimen y video. Los totales por minuto se calculan al mostrarse, contando filas: <code>INTERVALO</code> y <code>PRESENTA</code> se quitaron (D-52)</td>
+          </tr>
+          <tr>
+            <td><b>Quitar <code>INTERVALO</code> y <code>PRESENTA</code></b> (D-52)</td>
+            <td>Eran un dato derivado de <code>SEGUNDO</code>: había que mantenerlos al día en cada corrección y podían contradecir a las etiquetas</td>
+            <td>Cada consulta de resultados cuenta filas (unas 300 por espécimen) en vez de leer un total guardado. Con este volumen no tiene costo apreciable</td>
+          </tr>
+          <tr>
+            <td><b>No reponer <code>ROIS</code></b></td>
+            <td>El pipeline recalcula el recuadro en cada corrida; lo único estable es el orden espacial, ya guardado en <code>numeroCilindro</code>. Y su llave habría colisionado con la de <code>OBSERVACION</code></td>
+            <td>Si mañana se permite corregir un cilindro a mano, el recuadro habrá que reponerlo — como atributos de <code>OBSERVACION</code>, no como tabla</td>
+          </tr>
+          <tr>
+            <td><b>Foránea nulable en <code>NOTIFICACION</code></b></td>
+            <td>El método pedía tabla puente para el caso (0,1), pero sería una relación sin atributos y una reunión externa en la consulta más frecuente del panel</td>
+            <td>Un nulo legítimo, y ser la única desviación declarada del método en todo el esquema</td>
+          </tr>
+          <tr>
+            <td><b>Pasar <code>CONDUCTA</code> a dominio cerrado</b> (D-102)</td>
+            <td>Solo <code>SEGUNDO.conducta</code> la referenciaba, son cuatro valores fijos (D-29) y no tiene atributos propios: un <code>CHECK</code> da la misma integridad con una relación y una llave foránea menos, y sin reunión para leer la conducta de un segundo</td>
+            <td>Si algún día cambian las conductas, se modifica el dominio en lugar de insertar filas, y no hay dónde guardar atributos propios de una conducta</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Parte 5 — Qué queda abierto</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:14%">Ref.</th><th style="width:40%">Qué falta</th><th>A qué afecta</th></tr></thead>
+        <tbody>
+          <tr><td class="card">D-04</td><td><span class="ok">Sin objeto (D-55).</span> Unicidad de <code>numeroRata</code> dentro del grupo</td><td>Se quitó <code>numeroRata</code> y, con ella, el <code>idGrupo</code> redundante y su disparador</td></tr>
+          <tr><td class="card">D-03</td><td><span class="ok">Resuelto.</span> El reanálisis reemplaza al anterior</td><td><code>Video — Análisis</code> queda en (0,1) desde D-71, porque el video del Día 1 no se analiza; <code>idVideo</code> es único en <code>ANALISIS</code> (D-24)</td></tr>
+          <tr><td class="card">Q-08</td><td><span class="ok">Resuelto.</span> Solo el administrador crea cuentas (D-01)</td><td>El administrador es un subtipo de <code>USUARIO</code> (D-08)</td></tr>
+          <tr><td class="card">Rev. 2</td><td>Revisión de la notación con la <b>Dra. Martha Cordero</b></td><td>Que los diagramas estén bien construidos. En curso</td></tr>
+          <tr><td class="card">D-05</td><td><span class="ok">Sin objeto.</span> Se disolvió con D-03, y <code>idConfig</code> ya no existe (D-51)</td><td>—</td></tr>
+          <tr><td class="card">D-06</td><td><span class="ok">Sin objeto.</span> <code>MODELO</code> y <code>CONFIGURACION</code> se eliminaron (D-51)</td><td>—</td></tr>
+          <tr><td class="card">D-52</td><td><span class="ok">Resuelto (14-oct).</span> Se quitan <code>INTERVALO</code> y <code>PRESENTA</code>, que se calculan desde <code>SEGUNDO</code></td><td>Quedan 13 relaciones, 58 atributos y 14 llaves foráneas</td></tr>
+          <tr><td class="card">M-24</td><td><span class="ok">Resuelto (14-oct).</span> <code>ANALISIS.rutaDiagnostico</code> (D-23) ya está en el grafo lógico</td><td>El grado de <code>ANALISIS</code> es 7</td></tr>
+          <tr><td class="card">Q-09</td><td>Si los mensajes de notificación llevan detalle por instancia o son plantilla por tipo</td><td>Hoy se asume lo primero, con base en el reporte de diagnóstico del módulo 1. Si fueran plantilla, <code>tipo → mensaje</code> sería transitiva y el texto tendría que mudarse a un catálogo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">Lo que queda abierto es del equipo, no del laboratorio</span>
+      <p>Conviene notarlo antes de la próxima reunión: <strong>ninguna de las abiertas se le pregunta al Dr. Sandino</strong>. Q-09 es una decisión de implementación.</p>
+      <p>Es la consecuencia esperable de que las cuatro relaciones nuevas vengan de los requisitos del sistema: sus pendientes también son del sistema.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">En qué sentido esto está terminado</span>
+      <p>Las siete actividades están hechas y el esquema es presentable: cada relación se deriva de una regla escrita del método, cada restricción tiene su fuente y cada decisión su justificación. <strong>La revisión con el laboratorio ya ocurrió</strong> y el esquema absorbió sus tres correcciones sin partir ninguna tabla ni salir de BCNF.</p>
+      <p>Las cuatro relaciones de soporte cierran un hueco distinto: no un error del modelo, sino <strong>una fuente que faltaba</strong>. El universo del discurso del laboratorio no contenía los requisitos del sistema, y por eso reportes, notificaciones y reproducibilidad se habían quedado sin dónde vivir. Con las cuatro relaciones nuevas, el esquema cubre lo que el capítulo 1 promete.</p>
+      <p>Lo que queda no es trabajo de derivación sino <strong>decisiones de implementación</strong> —si el reanálisis reemplaza o acumula, cuántos modelos entran en una configuración, y la unicidad de <code>numeroRata</code> (resuelta al quitarla, D-55)— y la revisión de notación con la Dra. Cordero. Ninguna impide arrancar la etapa de diseño físico; las tres primeras se resuelven dentro de ella.</p>
+      <p><strong>Actualizado:</strong> de las cuatro relaciones de soporte quedan dos (D-51), se agregó <code>SEGUNDO</code> (D-35), se quitaron <code>INTERVALO</code> y <code>PRESENTA</code> (D-52) y <code>CONDUCTA</code> pasó a dominio (D-102). Una advertencia para la defensa: las relaciones de soporte <strong>no han sido presentadas a nadie</strong>. Las once del dominio pasaron por el Dr. Sandino el 3 de septiembre; estas cuatro salen de los requisitos del propio equipo y solo se han validado contra el documento. Eso no las hace peores, pero sí las deja con menos respaldo externo — y conviene decirlo antes de que lo pregunten.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ cierre ══════════ -->
+  <section class="act" id="sig">
+    <p class="act-n">Cierre</p>
+    <h2>La etapa lógica queda cerrada</h2>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:8%">#</th><th style="width:38%">Actividad</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr><td class="card">01</td><td>Selección del modelo lógico</td><td class="ok">Relacional</td></tr>
+          <tr><td class="card">02</td><td>Transformación del esquema conceptual</td><td class="ok">15 relaciones al cerrar la actividad; 12 desde D-52 y D-102 · grafo relacional inicial</td></tr>
+          <tr><td class="card">03</td><td>Restricciones de integridad e identidad</td><td class="ok">13 referenciales vigentes · ver actividad 3</td></tr>
+          <tr><td class="card">04</td><td>Elementos no estructurales para la etapa física</td><td class="ok">Consolidados en la actividad 7</td></tr>
+          <tr><td class="card">05</td><td>Integración de vistas de usuario</td><td>No aplica — una sola vista, sin permisos diferenciados</td></tr>
+          <tr><td class="card">06</td><td>Validación con las formas normales</td><td class="ok">BCNF · 4 defectos corregidos · grafo relacional final</td></tr>
+          <tr><td class="card">07</td><td>Documentación del esquema lógico</td><td class="ok">Esquema, diccionario, no estructurales y trazabilidad</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Lo que recibe la etapa física</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:8%">#</th><th style="width:40%">Actividad del diseño físico</th><th>Punto de partida que ya existe</th></tr></thead>
+        <tbody>
+          <tr><td class="card">01</td><td>Seleccionar el SGBD e identificar sus funcionalidades</td><td>El cap. 3 del TT ya declara PostgreSQL — falta formalizar la elección</td></tr>
+          <tr><td class="card">02</td><td>Representar el esquema lógico en las estructuras del SGBD</td><td>Las 12 relaciones y sus restricciones documentadas, más los 9 dominios por extensión</td></tr>
+          <tr><td class="card">03</td><td>Determinar organización de archivos e índices</td><td>Las transacciones verificadas en la actividad 6 dicen qué se consulta</td></tr>
+          <tr><td class="card">04</td><td>Implementar mecanismos de seguridad y control de acceso</td><td>Una sola vista: todos los investigadores ven todos los experimentos</td></tr>
+          <tr><td class="card">05</td><td>Garantizar el rendimiento, con redundancia controlada si hace falta</td><td>La candidata (<code>ESPECIMEN.idGrupo</code>) se descartó con D-55: sin <code>numeroRata</code> ya no hace falta</td></tr>
+          <tr><td class="card">06</td><td>Documentar las consideraciones de la implementación</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">Y en paralelo, el documento escrito</span>
+      <p><strong>Actualizado (5-oct):</strong> el capítulo 5 y el apéndice D (diccionario de datos) reflejaban este esquema el 5-oct: Grupo, Tanda, <code>SEGUNDO</code> y las 15 relaciones. El 14-oct se actualizaron a las 12 relaciones de D-52 y D-102.</p>
+      <p>El Prof. Israel Salas lo dejó dicho en la reunión: <strong>todos los cambios del modelo deben estar justificados y representados en el documento</strong>, porque los sinodales los van a pedir. Los dos grafos —inicial y final— van juntos: presentar solo uno deja sin evidencia el paso de validación que el método exige.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>TT 2026-B066 · ESCOM-IPN</span>
+    <span>Frausto Robles Á. A. · Rodríguez Verdín S. V.</span>
+    <span>Etapa de diseño lógico · actividades 1 a 7 · cerrada</span>
+    <span>Esquema lógico definitivo · en BCNF · actualizado el 1-nov-2026</span>
+  </footer>
+
+</div>
+
+
+</body></html>

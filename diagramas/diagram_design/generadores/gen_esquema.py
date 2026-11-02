@@ -17,8 +17,8 @@ def tab(name, col, cols, cons=(), soporte=False):
 
 # columna 0: usuarios y soporte del sistema
 tab('USUARIO', 0, [
-    ('PK', 'idInstitucional', 'varchar(10)'), ('', 'nombre', 'varchar(n)'), ('', 'apellidos', 'varchar(n)'),
-    ('UK', 'correo', 'varchar(n)'), ('', 'contrasenaHash', 'varchar(n)'), ('', 'activo', 'boolean'),
+    ('PK', 'idInstitucional', 'varchar(10)'), ('', 'nombre', 'varchar(100)'), ('', 'apellidos', 'varchar(100)'),
+    ('UK', 'correo', 'varchar(254)'), ('', 'contrasenaHash', 'varchar(255)'), ('', 'activo', 'boolean'),
     ('', 'cambioRequerido', 'boolean')])
 tab('ADMINISTRADOR', 0, [('PK FK', 'idInstitucional', 'varchar(10)')])
 tab('NOTIFICACION', 0, [
@@ -30,7 +30,7 @@ tab('REPORTE', 0, [
     ('UK', 'ruta', 'text'), ('', 'fechaGeneracion', 'timestamptz')], soporte=True)
 # columna 1: experimento, espécimen, observación, conducta
 tab('EXPERIMENTO', 1, [
-    ('PK', 'idExperimento', 'integer'), ('FK', 'idInstitucional', 'varchar(10)'), ('UK', 'nombre', 'varchar(n)'),
+    ('PK', 'idExperimento', 'integer'), ('FK', 'idInstitucional', 'varchar(10)'), ('UK', 'nombre', 'varchar(150)'),
     ('', 'fecha', 'date'), ('', 'notas', 'text · nulo')])
 tab('ESPECIMEN', 1, [
     ('PK', 'idEspecimen', 'integer'), ('FK', 'idTanda', 'integer'), ('', 'numeroCilindro', 'smallint')],
@@ -40,7 +40,7 @@ tab('OBSERVACION', 1, [
     ['UK (idEspecimen, idVideo)'])
 # columna 2: grupo, tanda, video, analisis, segundo
 tab('GRUPO', 2, [
-    ('PK', 'idGrupo', 'integer'), ('FK', 'idExperimento', 'integer'), ('', 'etiqueta', 'varchar(n)'),
+    ('PK', 'idGrupo', 'integer'), ('FK', 'idExperimento', 'integer'), ('', 'etiqueta', 'varchar(100)'),
     ('', 'tipo', 'tipo_grupo'), ('', 'tratamiento', 'text')], ['UK (idExperimento, etiqueta)'])
 tab('TANDA', 2, [
     ('PK', 'idTanda', 'integer'), ('FK', 'idGrupo', 'integer'), ('', 'ordinal', 'smallint'),

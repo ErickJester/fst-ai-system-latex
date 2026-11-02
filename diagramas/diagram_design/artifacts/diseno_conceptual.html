@@ -1,0 +1,1385 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Diseño Conceptual FST v4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Spectral:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --paper:      #F5F7F5;
+    --surface:    #FFFFFF;
+    --surface-2:  #ECF0EE;
+    --ink:        #0D1F21;
+    --ink-soft:   #3A4E4E;
+    --muted:      #677978;
+    --rule:       #D3DBD8;
+    --rule-soft:  #E3E9E6;
+    --accent:     #0F6F70;
+    --accent-dim: #DCEBEA;
+    --warn:       #A65D2E;
+    --warn-dim:   #F4E7DC;
+
+    --f-display: "Spectral", Georgia, "Times New Roman", serif;
+    --f-body:    "IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif;
+    --f-mono:    "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+    --measure: 68ch;
+    --gutter: clamp(1.1rem, 4vw, 3rem);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #0A1314;
+      --surface:    #10201F;
+      --surface-2:  #16292A;
+      --ink:        #E3EAE8;
+      --ink-soft:   #BCCBC9;
+      --muted:      #869695;
+      --rule:       #24403F;
+      --rule-soft:  #1B3231;
+      --accent:     #57C2C0;
+      --accent-dim: #12312F;
+      --warn:       #DD9762;
+      --warn-dim:   #33241A;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:      #0A1314;
+    --surface:    #10201F;
+    --surface-2:  #16292A;
+    --ink:        #E3EAE8;
+    --ink-soft:   #BCCBC9;
+    --muted:      #869695;
+    --rule:       #24403F;
+    --rule-soft:  #1B3231;
+    --accent:     #57C2C0;
+    --accent-dim: #12312F;
+    --warn:       #DD9762;
+    --warn-dim:   #33241A;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--f-body); font-size: 16px; line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: clamp(2rem, 6vw, 4.5rem) var(--gutter) 6rem; }
+  .col { max-width: var(--measure); }
+
+  /* ---------- masthead ---------- */
+
+  .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 1.6rem; }
+
+  .eyebrow {
+    font-family: var(--f-mono); font-size: .705rem; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 1.1rem;
+  }
+
+  h1 {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: clamp(2.1rem, 5.6vw, 3.3rem); line-height: 1.08;
+    letter-spacing: -.015em; text-wrap: balance; margin: 0 0 .7rem;
+  }
+
+  .standfirst {
+    font-family: var(--f-display); font-size: clamp(1.02rem, 2.1vw, 1.2rem);
+    line-height: 1.55; color: var(--ink-soft); max-width: 62ch; margin: 0;
+  }
+
+  .pipeline {
+    display: flex; flex-wrap: wrap; margin-top: 2rem;
+    border: 1px solid var(--rule); border-radius: 3px; overflow: hidden;
+    background: var(--surface);
+  }
+  .pipeline div { flex: 1 1 190px; padding: .85rem 1.1rem; border-right: 1px solid var(--rule-soft); }
+  .pipeline div:last-child { border-right: 0; }
+  .pipeline dt {
+    font-family: var(--f-mono); font-size: .645rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .25rem;
+  }
+  .pipeline dd { margin: 0; font-size: .9rem; font-weight: 500; }
+
+  /* ---------- índice ---------- */
+
+  .toc { margin: 2.6rem 0 0; border: 1px solid var(--rule); border-radius: 3px;
+         overflow: hidden; background: var(--surface); }
+  .toc a {
+    display: grid; grid-template-columns: 2.4rem 1fr auto; gap: 0 .9rem;
+    align-items: baseline; padding: .68rem 1.1rem;
+    border-bottom: 1px solid var(--rule-soft); text-decoration: none; color: var(--ink);
+  }
+  .toc a:last-child { border-bottom: 0; }
+  .toc a:hover { background: var(--surface-2); }
+  .toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .toc .n { font-family: var(--f-mono); font-size: .73rem; color: var(--accent); font-weight: 500; }
+  .toc .t { font-size: .93rem; }
+  .toc .s {
+    font-family: var(--f-mono); font-size: .655rem; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--muted); white-space: nowrap;
+  }
+  .toc .s.done { color: var(--accent); }
+  .toc .s.wait { color: var(--warn); }
+
+  /* ---------- actividad ---------- */
+
+  .act { margin-top: 4.2rem; border-top: 2px solid var(--ink); padding-top: 1.4rem; scroll-margin-top: 1rem; }
+
+  .act-n {
+    font-family: var(--f-mono); font-size: .68rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 .45rem;
+    display: flex; align-items: center; gap: .7rem; flex-wrap: wrap;
+  }
+  .act-n .chip {
+    font-size: .62rem; letter-spacing: .08em; padding: .16em .45em;
+    border-radius: 2px; background: var(--accent-dim); color: var(--accent);
+  }
+  .act-n .chip.wait  { background: var(--warn-dim);  color: var(--warn); }
+
+  .act h2 {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: clamp(1.45rem, 3vw, 1.95rem); line-height: 1.16;
+    letter-spacing: -.012em; text-wrap: balance; margin: 0 0 1rem;
+  }
+
+  .asks {
+    border-left: 2px solid var(--accent); padding: .1rem 0 .1rem 1.15rem;
+    margin: 0 0 1.6rem; max-width: 64ch; font-family: var(--f-display);
+    font-size: 1.02rem; line-height: 1.55; color: var(--ink-soft);
+  }
+  .asks p { margin: 0; }
+  .asks cite {
+    display: block; margin-top: .5rem; font-family: var(--f-mono); font-style: normal;
+    font-size: .67rem; letter-spacing: .09em; text-transform: uppercase; color: var(--muted);
+  }
+
+  /* ---------- par libro / proyecto ---------- */
+
+  .pair {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    background: var(--rule); border: 1px solid var(--rule);
+    border-radius: 3px; overflow: hidden; margin: 1.5rem 0;
+  }
+  @media (max-width: 720px) { .pair { grid-template-columns: 1fr; } }
+  .pair > div { background: var(--surface); padding: 1.15rem 1.25rem 1.3rem; }
+  .pair .lbl {
+    font-family: var(--f-mono); font-size: .645rem; letter-spacing: .11em;
+    text-transform: uppercase; color: var(--muted); margin: 0 0 .6rem;
+  }
+  .pair .proj .lbl { color: var(--accent); }
+  .pair p { margin: 0 0 .6rem; font-size: .9rem; line-height: 1.55; }
+  .pair p:last-child { margin-bottom: 0; }
+  .pair ul { margin: 0; padding-left: 1.1rem; font-size: .88rem; }
+  .pair li { margin-bottom: .34rem; line-height: 1.48; }
+  .pair li:last-child { margin-bottom: 0; }
+  .pair li::marker { color: var(--muted); }
+  .pair .k { font-family: var(--f-mono); font-size: .8rem; color: var(--ink); }
+
+  /* ---------- texto ---------- */
+
+  h3 { font-family: var(--f-body); font-weight: 600; font-size: 1.02rem; margin: 2.3rem 0 .7rem; }
+  p { margin: 0 0 1rem; }
+  .col p:last-child { margin-bottom: 0; }
+  strong { font-weight: 600; }
+  code { font-family: var(--f-mono); font-size: .86em; background: var(--surface-2);
+         padding: .1em .38em; border-radius: 2px; }
+  a { color: var(--accent); }
+
+  /* ---------- tablas ---------- */
+
+  .scroll { overflow-x: auto; margin: 1.4rem 0; }
+  table { border-collapse: collapse; width: 100%; min-width: 540px;
+          font-size: .875rem; font-variant-numeric: tabular-nums; }
+  th {
+    text-align: left; font-family: var(--f-mono); font-weight: 500; font-size: .645rem;
+    letter-spacing: .11em; text-transform: uppercase; color: var(--muted);
+    padding: 0 1rem .55rem 0; border-bottom: 1px solid var(--ink); vertical-align: bottom;
+  }
+  td { padding: .6rem 1rem .6rem 0; border-bottom: 1px solid var(--rule-soft);
+       vertical-align: top; line-height: 1.5; }
+  th:last-child, td:last-child { padding-right: 0; }
+  tbody tr:last-child td { border-bottom: 1px solid var(--rule); }
+
+  .card { font-family: var(--f-mono); font-size: .81rem; white-space: nowrap; }
+  .ok { color: var(--accent); font-weight: 500; }
+  .no { color: var(--warn); font-weight: 500; }
+  .at { font-family: var(--f-mono); font-size: .81rem; white-space: nowrap; }
+  .dom { font-family: var(--f-mono); font-size: .77rem; line-height: 1.45; }
+  .ob { font-family: var(--f-mono); font-size: .74rem; white-space: nowrap; }
+  .ob.id { color: var(--accent); font-weight: 500; }
+  .ob.op { color: var(--muted); }
+
+  .src {
+    font-family: var(--f-mono); font-size: .69rem; font-style: normal; white-space: nowrap;
+    padding: .1em .4em; border-radius: 2px; background: var(--surface-2); color: var(--ink-soft);
+  }
+  .src.r1  { background: var(--accent-dim); color: var(--accent); }
+  .src.der { background: var(--warn-dim);   color: var(--warn); }
+
+  .keyleg {
+    display: flex; flex-wrap: wrap; gap: .55rem 1.3rem; margin: 1.3rem 0;
+    font-family: var(--f-mono); font-size: .69rem; color: var(--muted); align-items: center;
+  }
+  .keyleg span { display: flex; align-items: center; gap: .4rem; }
+
+  /* ---------- entidades compactas ---------- */
+
+  .ents {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+    gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+    border-radius: 3px; overflow: hidden; margin: 1.5rem 0;
+  }
+  .ents > div { background: var(--surface); padding: .85rem 1rem .95rem; }
+  .ents h4 {
+    font-family: var(--f-display); font-size: 1.06rem; font-weight: 600; margin: 0 0 .1rem;
+    display: flex; align-items: baseline; justify-content: space-between; gap: .5rem;
+  }
+  .kind {
+    font-family: var(--f-mono); font-size: .58rem; letter-spacing: .09em;
+    text-transform: uppercase; padding: .16em .42em; border-radius: 2px;
+    white-space: nowrap; flex: none;
+  }
+  .k-fuerte { background: var(--accent-dim); color: var(--accent); }
+  .k-agg    { background: var(--surface-2);  color: var(--ink-soft); }
+  .ents p { font-family: var(--f-mono); font-size: .7rem; color: var(--muted);
+            margin: 0; line-height: 1.45; }
+  .ents p b { color: var(--ink-soft); font-weight: 500; }
+
+  /* ---------- diccionario ---------- */
+
+  .dic h4 {
+    display: flex; align-items: baseline; gap: .6rem; margin: 2.5rem 0 .15rem;
+    font-family: var(--f-display); font-size: 1.14rem; font-weight: 600;
+  }
+  .dic h4:first-of-type { margin-top: 1.6rem; }
+  .dic .ctx { font-family: var(--f-mono); font-size: .705rem; color: var(--muted); margin: 0; }
+  .dic .ctx b { color: var(--ink-soft); font-weight: 500; }
+  .dic table { min-width: 660px; }
+  .dic .scroll { margin: .7rem 0 0; }
+
+  /* ---------- figuras ---------- */
+
+  figure { margin: 1.9rem 0; }
+  .figbox {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 3px;
+    padding: 1.5rem 1.2rem; overflow-x: auto;
+  }
+  .figbox svg { display: block; max-width: 100%; height: auto; margin: 0 auto; min-width: 640px; }
+  .figbox svg text { font-family: var(--f-body); fill: currentColor; }
+  .figbox svg text.m { font-family: var(--f-mono); }
+
+  figcaption { font-size: .845rem; color: var(--muted); line-height: 1.5;
+               margin-top: .9rem; max-width: 62ch; }
+  figcaption b { color: var(--ink-soft); font-weight: 500; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 1.1rem; margin-top: 1rem;
+            font-family: var(--f-mono); font-size: .68rem; color: var(--muted); }
+  .legend span { display: flex; align-items: center; gap: .38rem; }
+
+  /* ---------- notas ---------- */
+
+  .note {
+    border: 1px solid var(--rule); border-left: 3px solid var(--accent);
+    background: var(--surface); border-radius: 2px; padding: 1.05rem 1.2rem;
+    margin: 1.5rem 0; max-width: 74ch;
+  }
+  .note.warn { border-left-color: var(--warn); }
+  .note p:last-child { margin-bottom: 0; }
+  .note .tag {
+    font-family: var(--f-mono); font-size: .645rem; letter-spacing: .11em;
+    text-transform: uppercase; color: var(--accent); display: block; margin-bottom: .4rem;
+  }
+  .note.warn .tag { color: var(--warn); }
+
+  .tally {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(146px, 1fr));
+    gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+    border-radius: 3px; overflow: hidden; margin: 1.6rem 0;
+  }
+  .tally div { background: var(--surface); padding: .9rem 1.05rem; }
+  .tally dt {
+    font-family: var(--f-mono); font-size: .635rem; letter-spacing: .11em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .26rem;
+  }
+  .tally dd {
+    margin: 0; font-family: var(--f-display); font-size: 1.7rem; font-weight: 600;
+    line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .tally dd small {
+    display: block; font-family: var(--f-body); font-size: .73rem; font-weight: 400;
+    color: var(--muted); margin-top: .3rem; line-height: 1.35;
+  }
+
+  footer {
+    margin-top: 4.5rem; padding-top: 1.4rem; border-top: 1px solid var(--rule);
+    font-family: var(--f-mono); font-size: .68rem; letter-spacing: .07em;
+    color: var(--muted); display: flex; flex-wrap: wrap; gap: .5rem 1.6rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">TT 2026-B066 · ESCOM-IPN · Etapa de diseño conceptual · actualizado el 1-nov-2026</p>
+    <h1>Diseño Conceptual FST</h1>
+    <p class="standfirst">Las ocho actividades de la etapa de diseño conceptual, aplicadas al sistema de análisis de la prueba de nado forzado del Laboratorio de Bioquímica Estructural (ENMyH-IPN). Cada actividad muestra qué pide el método, cómo la resuelve el ejemplo del libro y qué resultó en este proyecto.</p>
+
+    <dl class="pipeline">
+      <div><dt>Entrada</dt><dd>Especificación de requisitos · universo del discurso</dd></div>
+      <div><dt>Proceso</dt><dd>Modelo de datos conceptual</dd></div>
+      <div><dt>Salida</dt><dd>Esquema conceptual</dd></div>
+      <div><dt>Dependencia del SGBD</dt><dd>Ninguna</dd></div>
+    </dl>
+
+    <nav class="toc">
+      <a href="#a1"><span class="n">01</span><span class="t">Identificación de conceptos</span><span class="s done">Hecha</span></a>
+      <a href="#a2"><span class="n">02</span><span class="t">Dominios</span><span class="s done">Hecha</span></a>
+      <a href="#a3"><span class="n">03</span><span class="t">Identificadores</span><span class="s done">Hecha</span></a>
+      <a href="#a4"><span class="n">04</span><span class="t">Selección del modelo conceptual</span><span class="s done">Hecha</span></a>
+      <a href="#a5"><span class="n">05</span><span class="t">Creación del esquema</span><span class="s done">Hecha</span></a>
+      <a href="#a6"><span class="n">06</span><span class="t">Revisión del esquema</span><span class="s done">Hecha</span></a>
+      <a href="#a7"><span class="n">07</span><span class="t">Presentación al usuario</span><span class="s wait">Parcial</span></a>
+      <a href="#a8"><span class="n">08</span><span class="t">Documentación y diccionario de datos</span><span class="s done">Hecha</span></a>
+    </nav>
+
+    <div class="note warn" style="margin-bottom:1.5rem">
+      <span class="tag">Actualización del 1 de noviembre · qué cambió desde el 14-oct</span>
+      <ul>
+        <li><strong>Cardinalidad de <em>compone</em>: (0,N)</strong>. Un experimento se crea vacío y el sistema no exige un mínimo de grupos; «tres o más grupos» es del protocolo del laboratorio, no una regla del modelo.</li>
+        <li><strong>Video, atributo nuevo <code>nombreOriginal</code></strong>: el nombre con que el usuario subió el archivo. Es opcional, solo se muestra y no arma rutas. Con él, el esquema tiene 42 atributos.</li>
+        <li><strong>Origen de la conducta de cada segundo</strong>: <em>máquina</em> es la asignada por el sistema; <em>confirmada</em>, la que el usuario revisó y dejó igual; <em>corregida</em>, la que cambió por otra conducta; <em>dudosa</em>, la que marcó como «No se ve». La conducta queda vacía cuando el sistema no vio al espécimen o cuando el usuario marcó «No se ve».</li>
+        <li><strong>Especímenes por grupo</strong>: el sistema no valida un mínimo por grupo. Lo que valida es que cada tanda aloje de 2 a 4 especímenes.</li>
+      </ul>
+    </div>
+
+    <div class="note warn" style="margin-bottom:1.5rem">
+      <span class="tag">Actualización del 14 de octubre · qué cambió desde el 6-oct</span>
+      <ul>
+        <li><strong>Se quitan <code>Intervalo</code> y la interrelación <em>presenta</em></strong> (D-52). Los segundos por conducta de cada minuto ya no se guardan: se calculan contando los segundos de <code>Segundo</code>, igual que los bloques de 5 s y las estadísticas. El esquema queda en <strong>10 entidades y 11 interrelaciones</strong>.</li>
+        <li><strong>El video del Día 1 se guarda y no se analiza</strong> (D-71): <em>procesa</em> pasa a (0,1) del lado del video, <em>contiene</em> a (0,4) y <em>aparece en</em> a (0,1).</li>
+        <li><strong><code>Conducta</code> sigue siendo entidad en este esquema</strong>, pero al traducirlo al modelo relacional no es tabla sino el dominio cerrado <code>tipo_conducta</code> (D-102): son cuatro valores fijos y no tiene atributos propios. Es una decisión del lógico y del físico, así que el diagrama de abajo no cambia.</li>
+        <li><strong><em>agrupa</em> es una interrelación derivada</strong> (D-92): el modelo relacional no la guarda, porque el grupo de un espécimen se obtiene por su tanda. Se dibuja punteada.</li>
+        <li><strong>Dominios</strong>: el análisis suma los estados <em>en pausa</em> y <em>cancelado</em> (D-59, D-67, D-89) y el origen de la etiqueta queda en cuatro valores: máquina, confirmada, corregida y dudosa (D-80).</li>
+        <li><strong>Resultados por vista</strong>: se ven y se descargan por tanda o por grupo completo, con sus estadísticas, y esas estadísticas también se calculan, no se guardan (D-93).</li>
+      </ul>
+    </div>
+
+    <div class="note warn" style="margin-bottom:0">
+      <span class="tag">Actualización del 6 de octubre · qué cambió desde la versión del 18-sep</span>
+      <p>Las decisiones de octubre tocaron el esquema en estos puntos. Cada actividad de abajo ya los refleja; el número entre paréntesis es la decisión registrada en <code>preguntas-doctor.md</code>.</p>
+      <ul>
+        <li><strong>Entidad nueva, <code>Segundo</code></strong>: la conducta de cada espécimen en cada segundo analizado, y quién puso la conducta (del sistema o revisada por el usuario). Es lo que el usuario revisa y corrige (D-35, D-53). Suma dos interrelaciones: <em>se etiqueta en</em> y <em>se clasifica como</em>.</li>
+        <li><strong>Cardinalidades</strong>: una tanda aloja de 2 a 4 especímenes; un grupo se graba en una o más tandas y tiene 2 o más especímenes; un video contiene de 2 a 4 observaciones (D-28). Un intervalo presenta de 2 a 4 conductas (D-29).</li>
+        <li><strong>Cuatro conductas</strong>: se agrega <em>conducta activa</em>, que un mismo análisis puede mezclar con las otras tres (D-29).</li>
+        <li><strong>Sin duración mínima de episodio</strong>: cada segundo recibe una conducta y ninguna se descarta por durar poco (D-49).</li>
+        <li><strong>Sin confianza de detección</strong> ni umbral de 0.70 (D-32, D-47).</li>
+        <li><strong>Sin comparación Día 1 contra Día 2</strong>: se comparan los grupos entre sí con el Día 2; el Día 1 solo verifica el estrés (D-44).</li>
+        <li><strong>Dominios</strong>: video en <code>.mp4</code> o <code>.mov</code> (D-30), solo los últimos 300 s (D-31, D-54), análisis con cuatro estados (D-15) y tres etapas (D-16).</li>
+        <li><strong>Atributos</strong>: el archivo de video queda vacío cuando el video se borra, y el nombre del experimento es único (D-51).</li>
+        <li><strong>Sin número de rata</strong>: el sistema ya no guarda el número del laboratorio (1 a 8 por grupo); el espécimen se distingue por su posición en el cuadro, <code>numeroCilindro</code>. Con D-44 ya no hay comparación Día 1 contra Día 2 por espécimen, así que ese número no sostiene ninguna comparación (D-55).</li>
+        <li><strong>Segundo sin propuesta de la máquina</strong>: <code>clase</code> pasa a llamarse <code>conducta</code> y se quita <code>propuesta</code>, el único dato que solo servía para mejorar la red neuronal. La base es para el usuario final (D-53).</li>
+        <li><strong>Bloques de 5 s</strong>: se calculan por mayoría de los cinco segundos, sin volver a usar la red; el empate entre nado activo y escalamiento da conducta activa, y los fragmentos «no se ve» se marcan en el PDF final (D-53).</li>
+        <li><strong>Últimos 300 s, no los primeros</strong>: al inicio de algunos videos aparecen personas (D-54). Es un máximo, sin mínimo: si el video dura menos, se analiza todo lo que tenga. La CNN analiza el video completo; el worker conserva las últimas 300 filas de cada espécimen, las renumera de 1 a 300 y recorta el video a esos mismos segundos, y el usuario solo ve ese recorte (el segundo N cae en el instante N − 1). El Día 1 solo confirma que existe el video de habituación y no se analiza.</li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ══════════ punto de partida ══════════ -->
+  <section class="act" id="a0">
+    <p class="act-n">Punto de partida</p>
+    <h2>Qué entró a esta etapa</h2>
+
+    <div class="col">
+      <p>El método exige que la entrada sea la especificación de requisitos, es decir, el universo del discurso. En este proyecto ese universo estaba repartido entre el documento del TT, una entrevista formal con el investigador y una transcripción cruda de una reunión — y las tres se contradecían en varios puntos.</p>
+      <p>Cuatro huecos bloqueaban el trabajo. Ninguno estaba resuelto en el documento escrito; todos se cerraron preguntando.</p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th style="width:28%">Hueco</th><th style="width:16%">Fuente</th><th>Respuesta</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>¿Qué es un «experimento»?</b></td>
+            <td class="card">Entrevista P19</td>
+            <td>Un estudio independiente: 4–6 grupos, 32–48 especímenes, ~8 videos de Día 2. No es una grabación.</td>
+          </tr>
+          <tr>
+            <td><b>¿Cuántos cilindros por grabación?</b></td>
+            <td class="card">Equipo</td>
+            <td>Variable, siempre más de dos y nunca más de cuatro a cuadro. El Día 2 conserva el número del Día 1.</td>
+          </tr>
+          <tr>
+            <td><b>¿El encuadre se conserva entre sesiones?</b></td>
+            <td class="card">Equipo</td>
+            <td>Sí. Cámara fija, encuadre idéntico. La iluminación es de mejor esfuerzo, no garantizada.</td>
+          </tr>
+          <tr>
+            <td><b>¿Una grabación mezcla grupos?</b></td>
+            <td class="card">Equipo</td>
+            <td>No. Los especímenes de una grabación son siempre del mismo grupo experimental.</td>
+          </tr>
+          <tr>
+            <td><b>¿La rata tiene identificador propio?</b></td>
+            <td class="card">Equipo · P-01</td>
+            <td><b>Sí.</b> El laboratorio identifica físicamente cada rata.</td>
+          </tr>
+          <tr>
+            <td><b>¿Con qué se identifica exactamente?</b></td>
+            <td class="card"><i class="src">Reunión 3-sep</i></td>
+            <td>Marca de <b>plumón indeleble en la cola</b>, con líneas. Lógicamente se numeran <b>del 1 al 8 dentro de su grupo</b>. No es una clave de laboratorio: las ratas se sacrifican al terminar el experimento. <b>Actualizado (D-55):</b> el sistema no guarda ese número.</td>
+          </tr>
+          <tr>
+            <td><b>¿El grupo tiene tope de tamaño?</b></td>
+            <td class="card"><i class="src">Reunión 3-sep</i></td>
+            <td>8 es lo normal, 6 el mínimo útil, 12 lo habitual como máximo. Pero pidió explícitamente que <b>el sistema no imponga límite</b>: a veces repiten el experimento con otras ocho ratas.</td>
+          </tr>
+          <tr>
+            <td><b>¿Qué pasa con el Día 1?</b></td>
+            <td class="card"><i class="src">Reunión 3-sep</i></td>
+            <td><b>Cada grupo puede tener o no su Día 1.</b> Cuando existe, sirve para verificar que todas las ratas lleguen igual de estresadas al Día 2 — no es dato de comparación del efecto.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">La respuesta que sostiene todo el modelo</span>
+      <p>Durante casi toda la derivación, el espécimen no tuvo identidad propia en ninguna fuente: se le identificaba por <strong>dónde estaba</strong>, es decir, por el cilindro que ocupaba en el encuadre. Toda la comparación Día 1 contra Día 2 descansaba entonces sobre una sola garantía del laboratorio: que la cámara y los cilindros no se mueven entre sesiones.</p>
+      <p>La respuesta a P-01 cambió eso. <strong>La rata tiene identificador propio</strong>, así que la identidad del espécimen ya no es geométrica sino real, y la comparación entre sesiones deja de depender del encuadre.</p>
+      <p><strong>Actualizado (D-55, 6-oct):</strong> al quitarse la comparación Día 1 contra Día 2 por espécimen (D-44), la identidad real de cada rata dejó de sostener ninguna comparación. El espécimen sigue teniendo su propio identificador, <code>idEspecimen</code>, pero el sistema ya no guarda el número con que el laboratorio lo marca: lo distingue su posición en el cuadro.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 1 ══════════ -->
+  <section class="act" id="a1">
+    <p class="act-n">Actividad 1 <span class="chip">Hecha</span></p>
+    <h2>Identificación de conceptos</h2>
+
+    <blockquote class="asks">
+      <p>«Identificación de los conceptos contenidos en la especificación de requisitos o universo del discurso asociados a: <b>a)</b> características, propiedades o atributos (generalmente adjetivos); <b>b)</b> conjuntos de elementos que contienen características similares (generalmente sustantivos); <b>c)</b> relaciones entre los elementos identificados (generalmente verbos).»</p>
+      <cite>Metodología de diseño · actividad 1</cite>
+    </blockquote>
+
+    <div class="pair">
+      <div>
+        <p class="lbl">Ejemplo del libro · concesionario</p>
+        <p>Del universo del discurso «se desea guardar la información relacionada con los autos y clientes…» el libro extrae:</p>
+        <ul>
+          <li><span class="k">Características:</span> color, modelo, número de matrícula, cédula de ciudadanía, nombres, apellidos, fecha de nacimiento, dirección, celular, fecha compra, valor, medio de pago</li>
+          <li><span class="k">Conjuntos:</span> Vehículos, Clientes</li>
+          <li><span class="k">Relaciones:</span> Comprar</li>
+        </ul>
+      </div>
+      <div class="proj">
+        <p class="lbl">Este proyecto · FST</p>
+        <p>La misma cosecha sobre la prosa de los capítulos 1 a 3 y la entrevista da <strong>9 conjuntos</strong> y <strong>10 interrelaciones</strong>. Pero aparece algo que el ejemplo del libro no tiene:</p>
+        <ul>
+          <li>El documento usa <strong>«experimento» con dos significados incompatibles</strong>, y falta un conjunto que nadie había nombrado: la <strong>tanda</strong>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Los conjuntos identificados</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:22%">Conjunto</th><th>Evidencia en el universo del discurso</th></tr></thead>
+        <tbody>
+          <tr><td><b>Usuario</b></td><td>Alcance: «registro de usuario con aprobación del administrador»</td></tr>
+          <tr><td><b>Experimento</b></td><td>P19: estudio independiente con 4–6 grupos y 32–48 especímenes</td></tr>
+          <tr><td><b>Grupo</b></td><td>PA: «entre 6 y 8 especímenes por grupo… mínimo tres grupos»</td></tr>
+          <tr><td><b>Tanda</b></td><td><span class="no">No estaba nombrado.</span> Se deduce de que un grupo de 6–8 no cabe en un cuadro de 4 cilindros</td></tr>
+          <tr><td><b>Espécimen</b></td><td>Alcance: «identificación automática de las ratas dentro de la grabación» · P-01: el laboratorio identifica cada rata</td></tr>
+          <tr><td><b>Video</b></td><td>Alcance: «grabaciones en formato MP4»</td></tr>
+          <tr><td><b>Análisis</b></td><td>Cap. 3: «devuelve una respuesta con el identificador del análisis»</td></tr>
+          <tr><td><s><b>Intervalo</b></s></td><td>P9: «el porcentaje de nado… en el minuto 1, 2, 3, 4 y 5». <span class="no">Retirado (D-52):</span> el minuto se calcula desde el número de segundo</td></tr>
+          <tr><td><b>Conducta</b></td><td>Cap. 3: «tres conductas mutuamente excluyentes»</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Las relaciones identificadas</h3>
+
+    <div class="col">
+      <p>Los verbos que el universo del discurso usa entre dos conjuntos: el laboratorio <strong>realiza</strong> experimentos; un experimento <strong>se compone de</strong> grupos; un grupo <strong>agrupa</strong> especímenes y <strong>se graba en</strong> tandas; una tanda <strong>aloja</strong> especímenes y <strong>produce</strong> videos; el sistema <strong>procesa</strong> videos y <strong>asigna</strong> una conducta a cada espécimen; el investigador <strong>compara</strong> sesiones y grupos.</p>
+      <p>Diez en total. Dos de ellas tocan al espécimen y conviene no confundirlas: <strong>agrupa</strong> dice a qué tratamiento se asignó la rata —el hecho experimental— y <strong>aloja</strong> dice en qué grabación aparece. La primera es dato científico; la segunda, logística de cámara.</p>
+    </div>
+
+    <h3>El hallazgo: el grupo no cabe en un cuadro</h3>
+
+    <div class="col">
+      <p>Un grupo tiene entre 6 y 8 especímenes y el encuadre admite como máximo cuatro cilindros. Esas dos cifras juntas obligan a un nivel intermedio que el documento nunca nombró: <strong>el grupo se graba en dos tandas</strong>, cada una con tres o cuatro especímenes del mismo grupo.</p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:42%">Comprobación aritmética</th><th style="width:26%">Resultado</th><th>Contra la fuente</th></tr></thead>
+        <tbody>
+          <tr><td>4 grupos × 8 especímenes</td><td class="card">32 especímenes</td><td class="ok">P19: «32 a 48»</td></tr>
+          <tr><td>8 especímenes ÷ 4 por cuadro</td><td class="card">2 tandas por grupo</td><td class="ok">Equipo: máx. 4</td></tr>
+          <tr><td>4 grupos × 2 tandas</td><td class="card">8 videos de Día 2</td><td class="ok">P19: «alrededor de 8»</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">Reserva sobre esta aritmética</span>
+      <p>Las tres cuentas cierran, pero <strong>la última descansa en una lectura nuestra</strong>: que los «alrededor de 8 videos» de la entrevista son los del Día 2. Ninguna fuente lo dice así. Si el Día 1 también se graba en todas las tandas, serían 16 archivos y no 8.</p>
+      <p>Queda como pregunta <strong>Q-B</strong> para la siguiente reunión: en un experimento completo, ¿cuántos archivos de video quedan grabados en total? La respuesta no cambia la estructura del esquema —la cardinalidad (1,2) entre Tanda y Video ya admite ambos casos— pero sí el número que aparece en el documento.</p>
+    </div>
+
+    <div class="note warn">
+      <span class="tag">Sobre la heurística del libro</span>
+      <p>El libro dice que los atributos son «generalmente adjetivos». No se sostiene, y su propio ejemplo lo demuestra: <em>color</em>, <em>modelo</em>, <em>número de matrícula</em>, <em>cédula de ciudadanía</em> — todos sustantivos, ninguno adjetivo. Lo mismo pasó aquí. La parte de la heurística que sí funciona es la de los <strong>verbos para relaciones</strong>.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 2 ══════════ -->
+  <section class="act" id="a2">
+    <p class="act-n">Actividad 2 <span class="chip">Hecha</span></p>
+    <h2>Dominios</h2>
+
+    <blockquote class="asks">
+      <p>«Revisar si existen valores que pueden tomar los atributos y en caso afirmativo, determinar la lista de los posibles valores, los cuales serán llamados en adelante <b>dominios</b>.»</p>
+      <cite>Metodología de diseño · actividad 2</cite>
+    </blockquote>
+
+    <div class="pair">
+      <div>
+        <p class="lbl">Ejemplo del libro · concesionario</p>
+        <p>El universo del discurso del libro dice: «el <span class="k">medio de pago</span> utilizado (cheque, efectivo, tarjeta de crédito)».</p>
+        <p>Eso es un dominio por extensión: <span class="k">{cheque, efectivo, tarjeta de crédito}</span>. En el apéndice A el libro muestra a qué llega esto en la etapa física: <code>CREATE DOMAIN … CHECK (VALUE IN (…))</code>.</p>
+      </div>
+      <div class="proj">
+        <p class="lbl">Este proyecto · FST</p>
+        <p>Ocho dominios por extensión y cinco por intensión. El hallazgo de método: <strong>la sección Alcance del capítulo 1 es la fuente de dominios</strong> — casi todos los valores acotados salen de ahí, no del marco teórico.</p>
+        <p>Y uno de los dominios <strong>no es estable</strong>: el de conducta tiene dos extensiones posibles.</p>
+      </div>
+    </div>
+
+    <h3>Por extensión — listas cerradas</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:24%">Atributo</th><th style="width:48%">Dominio</th><th>Fuente</th></tr></thead>
+        <tbody>
+          <tr><td class="at">conducta</td><td class="dom">{nado activo, inmovilidad, escalamiento, conducta activa}</td><td class="card">Cap. 3 · P7 · <i class="src r1">D-29</i></td></tr>
+          <tr><td class="at">tipo de grupo</td><td class="dom">{control, referencia, tratamiento experimental}</td><td class="card">Cap. 1 · PA</td></tr>
+          <tr><td class="at">sesión</td><td class="dom">{Día 1, Día 2}</td><td class="card">Cap. 3 · P4</td></tr>
+          <tr><td class="at">formato de video</td><td class="dom">{MP4, MOV}</td><td class="card">P5 · <i class="src r1">D-30</i></td></tr>
+          <tr><td class="at">exportación</td><td class="dom">{CSV, XLSX, PDF}</td><td class="card">Cap. 1</td></tr>
+          <tr><td class="at">estado de análisis</td><td class="dom">{en cola, procesando, completado, error, en pausa, cancelado}</td><td class="card">Cap. 4 · <i class="src r1">D-15</i> <i class="src r1">D-59</i> <i class="src r1">D-67</i></td></tr>
+          <tr><td class="at">etapa de análisis</td><td class="dom">{preprocesamiento, cilindros, clasificación}</td><td class="card"><i class="src r1">D-16</i></td></tr>
+          <tr><td class="at">origen de la etiqueta</td><td class="dom">{máquina, confirmada, corregida, dudosa}</td><td class="card"><i class="src r1">D-35</i> <i class="src r1">D-80</i></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Por intensión — tipo y rango</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:24%">Atributo</th><th style="width:48%">Dominio</th><th>Fuente</th></tr></thead>
+        <tbody>
+          <tr><td class="at">cilindros por tanda</td><td class="dom">entero {2, 3, 4}</td><td class="card">Equipo · <i class="src r1">D-28</i></td></tr>
+          <tr><td class="at">especímenes por grupo</td><td class="dom"><b>entero ≥ 2, sin tope por grupo</b>. El sistema valida de 2 a 4 por tanda (cilindros)</td><td class="card"><i class="src">Reunión 3-sep</i> · <i class="src r1">D-28</i></td></tr>
+          <tr><td class="at"><s>número de rata</s></td><td class="dom"><span class="no">Retirado.</span> El sistema no guarda el número del laboratorio; el espécimen se distingue por su posición en el cuadro</td><td class="card"><i class="src">Reunión 3-sep</i> · <i class="src r1">D-55</i></td></tr>
+          <tr><td class="at">segundo analizado</td><td class="dom">entero 1..300 · máximo 300, sin mínimo · últimos 300 s</td><td class="card"><i class="src r1">D-31</i> · <i class="src r1">D-35</i> · <i class="src r1">D-54</i></td></tr>
+          <tr><td class="at"><s>minuto del desglose</s></td><td class="dom"><span class="no">Retirado.</span> El minuto sale del número de segundo y no se guarda</td><td class="card">P9 · <i class="src r1">D-52</i></td></tr>
+          <tr><td class="at"><s>duración de episodio</s></td><td class="dom"><span class="no">Retirado.</span> No hay duración mínima: cada segundo recibe una conducta</td><td class="card"><i class="src r1">D-49</i></td></tr>
+          <tr><td class="at"><s>confianza de detección</s></td><td class="dom"><span class="no">Retirado.</span> El detector actual no produce un valor de confianza</td><td class="card"><i class="src r1">D-32</i> · <i class="src r1">D-47</i></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">Por qué el grupo no tiene tope</span>
+      <p>El rango 6–8 venía de la entrevista formal; hoy es solo lo típico, porque el sistema acepta grupos desde 2 especímenes (D-28). En la reunión el Dr. Sandino lo amplió: «comúnmente el máximo de ratas que llegamos a utilizar son 12», y al preguntarle si el sistema debía limitarlo a 12 contestó <strong>«yo preferiría que fuera sin límite»</strong>. La razón que dio: cuando la varianza entre las primeras ocho ratas es alta, repiten el experimento con otras ocho.</p>
+      <p>Consecuencia sobre la tanda: con 12 especímenes ya no son dos grabaciones sino tres, así que el <code>ordinal</code> de la tanda deja de estar acotado a 1..2.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">Un dominio abierto que conviene vigilar</span>
+      <p>El criterio de <strong>3 a 5 segundos</strong> para que un episodio cuente sigue documentado como venía de la entrevista, pero la reunión reveló que el laboratorio usa una segunda técnica de cuantificación que <strong>muestrea cada 5 segundos</strong>. Que ambos números ronden los cinco segundos abre la duda de si el criterio pertenece al conteo continuo —el que el sistema automatiza— o es un residuo de la otra técnica.</p>
+      <p>Está registrado como pregunta <strong>Q-A</strong>. <strong>Actualizado (D-49):</strong> el sistema ya no aplica ninguna duración mínima; cada segundo recibe una conducta. El «3 a 5 s» solo importa al comparar contra los registros manuales del laboratorio.</p>
+    </div>
+
+    <div class="note warn">
+      <span class="tag">La cuarta conducta (actualizado, D-29 y D-41)</span>
+      <p>El dominio de <code>conducta</code> ya no tiene dos extensiones: son <strong>cuatro valores</strong>, y un mismo análisis puede mezclarlos. <em>Conducta activa</em> se asigna a un segundo cuando el clasificador sabe que el espécimen no está inmóvil pero no distingue entre nado y escalamiento. El atributo <code>nivel de clasificación</code> se queda: vale <em>agrupado</em> si algún segundo del análisis quedó como conducta activa y <em>preciso</em> si ninguno.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 3 ══════════ -->
+  <section class="act" id="a3">
+    <p class="act-n">Actividad 3 <span class="chip">Hecha</span></p>
+    <h2>Identificadores</h2>
+
+    <blockquote class="asks">
+      <p>«Determinar los atributos que <b>identifican</b> un conjunto de elementos que tienen características similares.»</p>
+      <cite>Metodología de diseño · actividad 3</cite>
+    </blockquote>
+
+    <div class="pair">
+      <div>
+        <p class="lbl">Ejemplo del libro · concesionario</p>
+        <p>El libro no marca los identificadores por separado en su ejemplo — los deja dentro de la lista de características. Pero se leen solos: <span class="k">número de matrícula</span> para Vehículo y <span class="k">cédula de ciudadanía</span> para Cliente.</p>
+        <p>Los dos son identificadores naturales, propios y evidentes. Es el caso fácil.</p>
+      </div>
+      <div class="proj">
+        <p class="lbl">Este proyecto · FST</p>
+        <p>Aquí es el caso difícil: <strong>el documento no declaraba ni un solo identificador</strong>. Uno vino del capítulo 3 y el resto hubo que resolverlos. El que sí vino del laboratorio —el número de la rata— se quitó el 6-oct (D-55): el sistema no necesita identificar a cada rata.</p>
+        <p>Nueve de las diez entidades tienen identificador propio. La excepción es <code>Segundo</code>, que se identifica por su número dentro de su observación (ver la nota de abajo).</p>
+      </div>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:18%">Conjunto</th><th style="width:22%">Identificador</th><th>De dónde sale</th></tr></thead>
+        <tbody>
+          <tr><td><b>Usuario</b></td><td class="at">idInstitucional</td><td>Identificador institucional · decidido por el equipo</td></tr>
+          <tr><td><b>Experimento</b></td><td class="at">idExperimento</td><td>Propio. Ninguna fuente declara clave natural para el estudio</td></tr>
+          <tr><td><b>Grupo</b></td><td class="at">idGrupo</td><td>Propio. <code>etiqueta</code> lo distingue dentro de su experimento</td></tr>
+          <tr><td><b>Tanda</b></td><td class="at">idTanda</td><td>Propio. <code>ordinal</code> la distingue dentro de su grupo</td></tr>
+          <tr><td><b>Espécimen</b></td><td class="at">idEspecimen</td><td>Propio. <code>numeroCilindro</code> lo distingue dentro de su tanda. El número de rata del laboratorio (1 a 8 por grupo) se quitó (D-55)</td></tr>
+          <tr><td><b>Video</b></td><td class="at">idVideo</td><td>Propio. <code>sesión</code> lo distingue dentro de su tanda</td></tr>
+          <tr><td><b>Análisis</b></td><td class="at">idAnalisis</td><td>Cap. 3 — el único identificador declarado en el documento</td></tr>
+          <tr><td><b>Observación</b></td><td class="at">idObservacion</td><td>Propio. El par (espécimen, video) es su clave candidata</td></tr>
+          <tr><td><s><b>Intervalo</b></s></td><td class="at"><s>idIntervalo</s></td><td><span class="no">Retirada (D-52).</span> Ya no hay entidad que identificar</td></tr>
+          <tr><td><b>Conducta</b></td><td class="at">nombre</td><td>Catálogo cerrado de cuatro valores (D-29)</td></tr>
+          <tr><td><b>Segundo</b></td><td class="at">(observación, segundo)</td><td>El número de segundo, de 1 a 300, solo identifica dentro de su observación (D-35)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note warn">
+      <span class="tag">Los discriminantes no desaparecen: se vuelven restricciones</span>
+      <p>Que <code>Grupo</code>, <code>Tanda</code> y <code>Video</code> tengan identificador propio no borra el hecho de que <code>etiqueta</code>, <code>ordinal</code> y <code>sesión</code> <strong>solo significan algo dentro de su padre</strong>. «Tanda 2» no identifica nada por sí sola; identifica dentro de un grupo.</p>
+      <p>Ese hecho del universo del discurso se conserva como <strong>unicidad relativa al padre</strong> —una restricción no estructural, registrada en la actividad 8 y destinada a la etapa física—.</p>
+      <p><strong>Pendiente de revisar:</strong> <code>Segundo</code> no tiene identificador propio; su identificador es el par (observación, segundo). En rigor eso la vuelve entidad débil, aunque el diagrama la dibuje como las demás. Está anotado para la revisión de notación.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 4 ══════════ -->
+  <section class="act" id="a4">
+    <p class="act-n">Actividad 4 <span class="chip">Hecha</span></p>
+    <h2>Selección del modelo conceptual</h2>
+
+    <blockquote class="asks">
+      <p>«Seleccionar un <b>Modelo de Datos Conceptual</b> que permita modelar <b>todos</b> los objetos encontrados.»</p>
+      <cite>Metodología de diseño · actividad 4</cite>
+    </blockquote>
+
+    <div class="pair">
+      <div>
+        <p class="lbl">Ejemplo del libro · concesionario</p>
+        <p>«Modelo de Datos Conceptual seleccionado: <span class="k">Entidad/Interrelación</span>.»</p>
+        <p>Con dos entidades y una relación, el E/R básico le alcanza de sobra. El libro no necesita justificar la elección.</p>
+      </div>
+      <div class="proj">
+        <p class="lbl">Este proyecto · FST</p>
+        <p>El E/R básico <strong>no alcanza</strong>. Hace falta el <strong>Entidad-Relación Extendido (EER)</strong>, y hay evidencia textual para cada extensión que se usa.</p>
+      </div>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:26%">Extensión del EER</th><th style="width:38%">Por qué hace falta</th><th>Evidencia</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>Exclusividad</b></td>
+            <td>A cada espécimen, en cada segundo, se le asigna como mucho una conducta (ninguna si el segundo queda dudoso)</td>
+            <td class="card">Cap. 3</td>
+          </tr>
+          <tr>
+            <td><b>Inclusividad</b> <span class="no">retirada</span></td>
+            <td>Hacía falta para la comparación Día 1 contra Día 2, que solo existía si ambos videos se procesaron. Esa comparación se quitó (D-44): el Día 1 solo verifica el estrés</td>
+            <td class="card">D-44</td>
+          </tr>
+          <tr>
+            <td><b>Agregación</b> <span class="no">retirada</span></td>
+            <td>Hacía falta mientras el espécimen era una entidad débil. Con identidad propia, el par (espécimen, video) se cierra en una <strong>entidad asociativa</strong> —<code>Observación</code>— y el constructo del EER deja de ser necesario</td>
+            <td class="card">P-01</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">Una extensión menos que defender</span>
+      <p>La agregación es el constructo más difícil de explicar de los tres y el que más discusión abre en una revisión de diagramas. Resolver P-01 lo vuelve innecesario: <code>Observación</code> pasa a ser una entidad como cualquier otra, con identificador propio y dos interrelaciones ordinarias hacia <code>Espécimen</code> y <code>Video</code>. Con la inclusividad también retirada (D-44), el esquema usa del EER solo la <strong>exclusividad</strong>: una conducta por espécimen en cada segundo.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">Sobre los tres entregables que les pidieron</span>
+      <p>El diagrama entidad-relación, el modelo relacional y el diagrama de clases <strong>no caben todos en esta actividad</strong>. Se reparten en etapas distintas: el <strong>diagrama entidad-relación</strong> es esta actividad y la siguiente; el <strong>modelo relacional</strong> pertenece a la etapa lógica, que viene después; y el <strong>diagrama de clases</strong> queda fuera de la metodología de bases de datos del libro — es diseño de software en UML, otro eje del TT.</p>
+    </div>
+
+    <h3>La prueba de que el E/R básico no basta</h3>
+
+    <div class="col">
+      <p>El dato que el laboratorio necesita es «cuántos segundos pasó <em>este</em> espécimen haciendo <em>esta</em> conducta en <em>este</em> minuto de <em>esta</em> sesión». La tentación es una interrelación ternaria entre Espécimen, Video y Conducta. Es el error clásico del modelo E/R, y el libro lo documenta en su capítulo 2 con el ejemplo de las audiciones que no generan grabación.</p>
+    </div>
+
+    <figure>
+      <div class="figbox">
+        <svg viewBox="0 0 940 350" role="img" aria-label="Comparación: a la izquierda una interrelación ternaria entre Espécimen, Video y Conducta asigna la conducta en el mismo acto en que empareja; a la derecha la entidad asociativa Observación cierra primero el par espécimen-video y solo después lo relaciona con Conducta.">
+          <g stroke="currentColor" fill="none" stroke-width="1.4">
+            <rect x="20" y="26" width="120" height="44" rx="2"/>
+            <rect x="300" y="26" width="120" height="44" rx="2"/>
+            <polygon points="162,150 220,124 278,150 220,176"/>
+            <line x1="80" y1="70" x2="185" y2="133"/>
+            <line x1="360" y1="70" x2="255" y2="133"/>
+            <line x1="220" y1="176" x2="220" y2="262"/>
+            <rect x="160" y="262" width="120" height="44" rx="2"/>
+
+            <rect x="500" y="26" width="120" height="44" rx="2"/>
+            <rect x="794" y="26" width="120" height="44" rx="2"/>
+            <rect x="647" y="110" width="120" height="44" rx="2"/>
+            <path d="M 560 70 L 560 132 L 647 132"/>
+            <path d="M 854 70 L 854 132 L 767 132"/>
+            <line x1="707" y1="154" x2="707" y2="186"/>
+            <polygon points="656,210 707,186 758,210 707,234"/>
+            <line x1="707" y1="234" x2="707" y2="262"/>
+            <rect x="647" y="262" width="120" height="44" rx="2"/>
+          </g>
+
+          <g font-size="13" text-anchor="middle" fill="currentColor">
+            <text x="80" y="54">Espécimen</text>
+            <text x="360" y="54">Video</text>
+            <text x="220" y="290">Conducta</text>
+            <text x="560" y="54">Espécimen</text>
+            <text x="854" y="54">Video</text>
+            <text x="707" y="138">Observación</text>
+            <text x="707" y="290">Conducta</text>
+          </g>
+
+          <g font-size="11" text-anchor="middle" fill="currentColor" opacity=".9">
+            <text x="220" y="154">clasifica</text>
+            <text x="707" y="214">clasifica</text>
+          </g>
+
+          <g class="m" font-size="10" fill="currentColor" opacity=".68" text-anchor="middle">
+            <text x="600" y="123">aparece en</text>
+            <text x="814" y="123">contiene</text>
+          </g>
+
+          <g class="m" font-size="11" text-anchor="middle">
+            <text x="220" y="338" fill="currentColor" opacity=".85">✗ admite pares de tandas distintas</text>
+            <text x="707" y="338" fill="currentColor" opacity=".85">✓ el par se cierra antes de clasificar</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption><b>Figura 1.</b> La diferencia está en el orden. La ternaria empareja Espécimen y Video en el mismo acto en que asigna la conducta, y nada le impide emparejar un espécimen con el video de otra tanda. La <b>entidad asociativa</b> cierra primero el par y clasifica después.</figcaption>
+    </figure>
+
+    <div class="col">
+      <p>Otra restricción que la ternaria tampoco puede expresar: no toda combinación espécimen-sesión existe, porque el Día 1 es opcional para cada grupo. Una ternaria afirma que sí.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 5 ══════════ -->
+  <section class="act" id="a5">
+    <p class="act-n">Actividad 5 <span class="chip">Hecha</span></p>
+    <h2>Creación del esquema</h2>
+
+    <blockquote class="asks">
+      <p>«Crear a partir del modelo de datos seleccionado el respectivo <b>Esquema Conceptual</b> de la base de datos.»</p>
+      <cite>Metodología de diseño · actividad 5</cite>
+    </blockquote>
+
+    <div class="pair">
+      <div>
+        <p class="lbl">Ejemplo del libro · concesionario</p>
+        <p>El libro lo llama «Esquema Conceptual Inicial» y lo presenta como una figura: dos entidades —Vehículos y Clientes— unidas por la relación Comprar, con sus atributos colgando.</p>
+        <p>Lo llama <em>inicial</em> a propósito: todavía tiene que pasar por la revisión de las actividades 6 y 7.</p>
+      </div>
+      <div class="proj">
+        <p class="lbl">Este proyecto · FST</p>
+        <p>Diez entidades y once interrelaciones. Ninguna agregación. <code>Segundo</code>, agregada el 3-oct (D-35), cuelga de <code>Observación</code> y se clasifica con una <code>Conducta</code>. Desde el 14-oct (D-52) ya no hay <code>Intervalo</code> ni <em>presenta</em>.</p>
+        <p>La estructura se abre en el <span class="k">Grupo</span>: de ahí sale una rama hacia el <span class="k">Espécimen</span> —qué tratamiento recibió la rata— y otra hacia la <span class="k">Tanda</span> —cómo se grabó—. Las dos ramas se vuelven a juntar en <span class="k">Observación</span>.</p>
+      </div>
+    </div>
+
+    <figure>
+      <div class="figbox">
+        <svg viewBox="0 0 1040 1000" role="img" aria-label="Esquema conceptual entidad-relación: Usuario registra Experimento; el Experimento se compone de Grupos; cada Grupo se graba en una o más Tandas y agrupa, por derivación, a dos o más Especímenes; cada Tanda aloja de dos a cuatro Especímenes y produce uno o dos Videos; un Video del Día 2 se procesa en un Análisis; la entidad asociativa Observación reúne un Espécimen con un Video y se etiqueta en hasta 300 Segundos; cada Segundo se clasifica como una Conducta o ninguna.">
+
+          <g stroke="currentColor" fill="none" stroke-width="1.4">
+            <rect x="40" y="26" width="150" height="50" rx="2"/>
+            <polygon points="204,51 260,27 316,51 260,75"/>
+            <rect x="330" y="26" width="150" height="50" rx="2"/>
+            <line x1="190" y1="51" x2="204" y2="51"/>
+            <line x1="316" y1="51" x2="330" y2="51"/>
+
+            <line x1="405" y1="76" x2="405" y2="100"/>
+            <polygon points="349,124 405,100 461,124 405,148"/>
+            <line x1="405" y1="148" x2="405" y2="176"/>
+            <rect x="330" y="176" width="150" height="50" rx="2"/>
+
+            <line x1="405" y1="226" x2="405" y2="248"/>
+            <line x1="200" y1="248" x2="610" y2="248"/>
+            <line x1="200" y1="248" x2="200" y2="250"/>
+            <line x1="610" y1="248" x2="610" y2="250"/>
+
+            <polygon points="144,274 200,250 256,274 200,298" stroke-dasharray="4 4"/>
+            <line x1="200" y1="298" x2="200" y2="326" stroke-dasharray="4 4"/>
+            <polygon points="554,274 610,250 666,274 610,298"/>
+            <line x1="610" y1="298" x2="610" y2="326"/>
+
+            <rect x="125" y="326" width="150" height="50" rx="2"/>
+            <rect x="535" y="326" width="150" height="50" rx="2"/>
+            <polygon points="349,351 405,327 461,351 405,375"/>
+            <line x1="275" y1="351" x2="349" y2="351"/>
+            <line x1="461" y1="351" x2="535" y2="351"/>
+
+            <line x1="610" y1="376" x2="610" y2="400"/>
+            <polygon points="554,424 610,400 666,424 610,448"/>
+            <line x1="610" y1="448" x2="610" y2="476"/>
+            <rect x="535" y="476" width="150" height="50" rx="2"/>
+
+            <line x1="685" y1="501" x2="734" y2="501"/>
+            <polygon points="734,501 790,477 846,501 790,525"/>
+            <line x1="846" y1="501" x2="882" y2="501"/>
+            <rect x="882" y="476" width="150" height="50" rx="2"/>
+
+            <line x1="200" y1="376" x2="200" y2="550"/>
+            <polygon points="144,574 200,550 256,574 200,598"/>
+            <path d="M 200 598 L 200 651 L 330 651"/>
+
+            <line x1="610" y1="526" x2="610" y2="550"/>
+            <polygon points="554,574 610,550 666,574 610,598"/>
+            <path d="M 610 598 L 610 651 L 480 651"/>
+
+            <rect x="330" y="626" width="150" height="50" rx="2"/>
+
+            <rect x="690" y="776" width="150" height="50" rx="2"/>
+
+            <path d="M 355 676 L 355 724 L 256 724"/>
+            <polygon points="140,724 200,700 260,724 200,748"/>
+            <line x1="200" y1="748" x2="200" y2="776"/>
+            <rect x="125" y="776" width="150" height="50" rx="2"/>
+
+            <path d="M 200 826 L 200 950 L 380 950"/>
+            <polygon points="380,950 450,926 520,950 450,974"/>
+            <path d="M 520 950 L 765 950 L 765 826"/>
+          </g>
+
+          <g font-size="14" text-anchor="middle" fill="currentColor">
+            <text x="115" y="56">Usuario</text>
+            <text x="405" y="56">Experimento</text>
+            <text x="405" y="206">Grupo</text>
+            <text x="200" y="356">Espécimen</text>
+            <text x="610" y="356">Tanda</text>
+            <text x="610" y="506">Video</text>
+            <text x="957" y="506">Análisis</text>
+            <text x="405" y="656">Observación</text>
+            <text x="765" y="806">Conducta</text>
+            <text x="200" y="806">Segundo</text>
+          </g>
+
+          <g font-size="11.5" text-anchor="middle" fill="currentColor" opacity=".92">
+            <text x="260" y="55">registra</text>
+            <text x="405" y="128">compone</text>
+            <text x="200" y="278">agrupa</text>
+            <text x="610" y="278">se graba en</text>
+            <text x="405" y="355">aloja</text>
+            <text x="610" y="428">produce</text>
+            <text x="790" y="505">procesa</text>
+            <text x="200" y="578">aparece en</text>
+            <text x="610" y="578">contiene</text>
+            <text x="200" y="728">se etiqueta en</text>
+            <text x="450" y="954">se clasifica como</text>
+          </g>
+
+          <g class="m" font-size="10.5" fill="currentColor" opacity=".78">
+            <text x="196" y="43" text-anchor="end">(0,N)</text>
+            <text x="324" y="43">(1,1)</text>
+            <text x="414" y="96">(0,N)</text>
+            <text x="414" y="170">(1,1)</text>
+            <text x="209" y="320">(1,1)</text>
+            <text x="619" y="242">(1,N)</text>
+            <text x="619" y="320">(1,1)</text>
+            <text x="281" y="345">(1,1)</text>
+            <text x="529" y="345" text-anchor="end">(2,4)</text>
+            <text x="619" y="396">(1,2)</text>
+            <text x="619" y="470">(1,1)</text>
+            <text x="691" y="495">(0,1)</text>
+            <text x="876" y="495" text-anchor="end">(1,1)</text>
+            <text x="209" y="404">(0,1)</text>
+            <text x="209" y="644">(1,1)</text>
+            <text x="619" y="546">(0,4)</text>
+            <text x="601" y="644" text-anchor="end">(1,1)</text>
+            <text x="364" y="716">(1,300)</text>
+            <text x="209" y="770">(1,1)</text>
+            <text x="209" y="944">(0,1)</text>
+            <text x="774" y="944">(0,N)</text>
+          </g>
+
+          <g class="m" font-size="11.5">
+            <text x="191" y="242" text-anchor="end">(2,N)</text>
+          </g>
+
+          <g class="m" font-size="10" fill="currentColor" opacity=".7" text-anchor="end">
+            <text x="134" y="278">derivada de Tanda</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="legend">
+        <span>▭ entidad</span>
+        <span>◇ interrelación</span>
+        <span>◇ punteada: interrelación derivada (D-92)</span>
+        <span>(mín,máx) cardinalidad</span>
+        <span>Segundo: agregada el 3-oct (D-35)</span>
+      </div>
+
+      <figcaption><b>Figura 2.</b> Esquema conceptual completo. <b>Todas las entidades son fuertes</b>: ninguna necesita a otra para identificarse. El espécimen cuelga del <b>Grupo</b>, que es el hecho experimental, y aparte se aloja en una <b>Tanda</b>, que solo dice en qué grabación salió. Las dos ramas se reencuentran en <b>Observación</b>, la entidad asociativa que reúne a una rata con un video y recibe una etiqueta por segundo. La cardinalidad de <b>agrupa</b> pasó de (6,8) a (2,N): el laboratorio pidió que el grupo no tenga tope, y desde D-28 un grupo puede tener una sola tanda de 2. <b>Segundo</b> guarda la conducta de cada segundo; la cardinalidad (0,1) de <b>se clasifica como</b> admite el segundo sin conducta (espécimen que no se ve o etiqueta dudosa). Desde D-52 no hay <b>Intervalo</b> ni <b>presenta</b>: los segundos por conducta de cada minuto se calculan desde <b>Segundo</b>. El video del Día 1 no tiene análisis ni observaciones (D-71), por eso <b>procesa</b> es (0,1) del lado del video y <b>aparece en</b> y <b>contiene</b> admiten cero. <b>agrupa</b> va punteada porque es derivada (D-92).</figcaption>
+    </figure>
+
+    <div class="note warn">
+      <span class="tag">La restricción que este esquema no garantiza solo</span>
+      <p>Cuando el espécimen colgaba de la tanda, que una <code>Observación</code> emparejara a una rata con el video de su propia tanda era automático: ambos eran hijos del mismo padre. Ahora que el espécimen cuelga del grupo, esa garantía <strong>hay que declararla</strong>: la tanda del espécimen y la tanda del video de una observación tienen que ser la misma, y la tanda de un espécimen tiene que pertenecer a su mismo grupo. Las dos quedan registradas como elementos no estructurales en la actividad 8.</p>
+      <p><strong>Actualizado (D-92, 13-oct):</strong> <em>agrupa</em> pasó a ser una interrelación derivada. El grupo de un espécimen se obtiene por su tanda, de modo que la primera de esas dos condiciones se cumple sola. Se conserva en el esquema porque la pantalla del grupo y las estadísticas por grupo usan a todos sus especímenes sin separarlos por tanda.</p>
+    </div>
+
+    <h3>Inventario del esquema</h3>
+
+    <div class="ents">
+      <div><h4>Usuario <span class="kind k-fuerte">Fuerte</span></h4><p>id: <b>idInstitucional</b></p></div>
+      <div><h4>Experimento <span class="kind k-fuerte">Fuerte</span></h4><p>id: <b>idExperimento</b></p></div>
+      <div><h4>Grupo <span class="kind k-fuerte">Fuerte</span></h4><p>id: <b>idGrupo</b> · discrim. etiqueta</p></div>
+      <div><h4>Tanda <span class="kind k-fuerte">Fuerte</span></h4><p>id: <b>idTanda</b> · discrim. ordinal</p></div>
+      <div><h4>Espécimen <span class="kind k-fuerte">Fuerte</span></h4><p>id: <b>idEspecimen</b> · discrim. numeroCilindro</p></div>
+      <div><h4>Video <span class="kind k-fuerte">Fuerte</span></h4><p>id: <b>idVideo</b> · discrim. sesión</p></div>
+      <div><h4>Análisis <span class="kind k-fuerte">Fuerte</span></h4><p>id: <b>idAnalisis</b></p></div>
+      <div><h4>Observación <span class="kind k-agg">Asociativa</span></h4><p>id: <b>idObservacion</b> · Espécimen × Video</p></div>
+      <div><h4>Conducta <span class="kind k-fuerte">Fuerte</span></h4><p>id: <b>nombre</b> · cuatro valores</p></div>
+      <div><h4>Segundo <span class="kind k-agg">Por revisar</span></h4><p>id: <b>(observación, segundo)</b> · D-35</p></div>
+    </div>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 6 ══════════ -->
+  <section class="act" id="a6">
+    <p class="act-n">Actividad 6 <span class="chip">Hecha</span></p>
+    <h2>Revisión del esquema</h2>
+
+    <blockquote class="asks">
+      <p>«Revisar el esquema obtenido garantizando que <b>no exista redundancia</b> de los datos, que <b>refleje la semántica</b> descrita por el usuario, que <b>soporte transacciones</b> de los usuarios, entre otros aspectos.»</p>
+      <cite>Metodología de diseño · actividad 6</cite>
+    </blockquote>
+
+    <div class="pair">
+      <div>
+        <p class="lbl">Ejemplo del libro · concesionario</p>
+        <p>El libro <strong>no desarrolla esta actividad</strong> en su ejemplo. Pasa directo del «Esquema Conceptual Inicial» al «Esquema Conceptual Definitivo» sin mostrar la revisión intermedia.</p>
+        <p>Donde sí la muestra es en el capítulo 3, al validar el esquema relacional con las formas normales.</p>
+      </div>
+      <div class="proj">
+        <p class="lbl">Este proyecto · FST</p>
+        <p>Los tres criterios se verificaron uno por uno. Las transacciones no hubo que inventarlas: <strong>el propio planteamiento del problema las declara</strong> al describir qué falta hoy.</p>
+      </div>
+    </div>
+
+    <h3>Criterio 1 — Sin redundancia</h3>
+
+    <div class="col">
+      <p>El único dato que aparecía dos veces era el tiempo por conducta: una vez como total y otra como suma de minutos. <strong>Se conserva solo la conducta de cada segundo y los totales se derivan.</strong> Los estadísticos de grupo —media, desviación estándar, varianza— son derivados por la misma razón. Si el desempeño lo exige, materializarlos es una decisión de la etapa física, donde el método sí admite «redundancia controlada».</p>
+      <p><strong>Resuelto (D-52, 14-oct):</strong> con <code>Segundo</code>, el desglose por minuto se calcula a partir de la conducta de cada segundo, así que se quitaron <code>Intervalo</code> y <em>presenta</em>. Ningún total queda guardado.</p>
+    </div>
+
+    <h3>Criterio 2 — Fidelidad semántica</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:32%">Garantía del laboratorio</th><th style="width:14%">Absorbida</th><th>Dónde queda</th></tr></thead>
+        <tbody>
+          <tr><td>Mismo número de cilindros en ambos días</td><td class="ok">Sí</td><td><code>nCilindros</code> cuelga de la Tanda, no de cada Video</td></tr>
+          <tr><td>El encuadre se conserva entre sesiones</td><td class="ok">Sí</td><td><code>numeroCilindro</code> cuelga del Espécimen, no de cada detección</td></tr>
+          <tr><td>Una grabación no mezcla grupos</td><td class="no">No</td><td>Antes lo garantizaba que Espécimen y Video colgaran de la misma Tanda. Ahora el espécimen cuelga del Grupo, así que pasa a restricción declarada — actividad 8</td></tr>
+          <tr><td>El Día 1 es opcional para cada grupo</td><td class="ok">Sí</td><td>La cardinalidad (1,2) entre Tanda y Video ya lo admite: una tanda produce uno o dos videos</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Criterio 3 — Soporte a las transacciones</h3>
+
+    <blockquote class="asks">
+      <p>«Los resultados quedan dispersos en hojas de cálculo y notas sueltas, sin forma directa de <b>comparar sesiones o grupos entre sí</b>.»</p>
+      <cite>Cap. 1 · planteamiento del problema</cite>
+    </blockquote>
+
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th style="width:32%">Transacción</th><th style="width:12%">Fuente</th><th style="width:10%">Soporta</th><th>Camino en el esquema</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Tiempo total por conducta, por espécimen y sesión</td><td class="card">P9</td><td class="ok">Sí</td><td>Cuenta de los segundos de la observación por conducta</td></tr>
+          <tr><td>Desglose por minuto</td><td class="card">P9</td><td class="ok">Sí</td><td>Se calcula desde Segundo: el minuto sale del número de segundo</td></tr>
+          <tr><td><s>Comparar Día 1 contra Día 2 del mismo espécimen</s></td><td class="card">D-44</td><td class="no">Retirada</td><td>Se quitó del sistema: el Día 1 solo verifica el estrés</td></tr>
+          <tr><td>Revisar y corregir la conducta de cada segundo</td><td class="card">D-35</td><td class="ok">Sí</td><td>Directo: Observación → se etiqueta en → Segundo</td></tr>
+          <tr><td>Media, desviación estándar y varianza por grupo</td><td class="card">PA · P11</td><td class="ok">Sí</td><td>Agregación sobre los especímenes del grupo</td></tr>
+          <tr><td>Comparar los tres grupos entre sí en el Día 2</td><td class="card"><i class="src">Reunión 3-sep</i></td><td class="ok">Sí</td><td>Grupos hermanos bajo el mismo experimento. <b>Es la transacción que el laboratorio declara como el objetivo del experimento</b></td></tr>
+          <tr><td>Exportar tiempo + columna por conducta</td><td class="card">P10</td><td class="ok">Sí</td><td>Minuto como fila y Conducta como columna, calculados desde Segundo</td></tr>
+          <tr><td>Seguir a la misma rata entre experimentos distintos</td><td class="card"><i class="src">Reunión 3-sep</i></td><td class="no">No</td><td>No es posible: el sistema no guarda número de rata (D-55) y las ratas se sacrifican al terminar el experimento</td></tr>
+          <tr><td>Consultar experimentos de cualquier investigador</td><td class="card">P18</td><td class="ok">Sí</td><td>Sin restricción — <code>registra</code> es trazabilidad</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">Una tensión que ya se resolvió (D-44)</span>
+      <p>La comparación del Día 2 entre los tres grupos es, según el propio Dr. Sandino, <strong>lo que el experimento existe para producir</strong>. El esquema la soporta sin problema: los grupos son hermanos bajo el mismo experimento.</p>
+      <p>El capítulo 1 la declaraba fuera del alcance. Con D-44 se movió al alcance: RF-21 es ahora la comparación entre grupos con el Día 2, y se quitó toda mención de la comparación Día 1 contra Día 2.</p>
+    </div>
+
+    <div class="note">
+      <span class="tag">Qué hace y qué no hace <code>registra</code></span>
+      <p>La interrelación <code>Usuario — registra — Experimento</code> es obligatoria del lado del experimento: <strong>todo experimento tiene siempre un creador</strong>, y por eso su cardinalidad es (1,1). Pero eso es lo único que hace. <strong>No restringe quién puede consultarlo:</strong> cualquier investigador con cuenta activa ve todos los experimentos del laboratorio, no solo los suyos (P18, y las reglas RN-08 y RNF-04 del documento).</p>
+    </div>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 7 ══════════ -->
+  <section class="act" id="a7">
+    <p class="act-n">Actividad 7 <span class="chip wait">Ejecutada a medias</span></p>
+    <h2>Presentación al usuario</h2>
+
+    <blockquote class="asks">
+      <p>«<b>Presentar el Esquema Conceptual a los usuarios</b> y realizar las correcciones necesarias para obtener el <b>Esquema Definitivo</b> acorde a los requisitos.»</p>
+      <cite>Metodología de diseño · actividad 7</cite>
+    </blockquote>
+
+    <div class="pair">
+      <div>
+        <p class="lbl">Ejemplo del libro · concesionario</p>
+        <p>El libro marca esta actividad con dos entregables distintos: el «Esquema Conceptual <strong>Inicial</strong>» y, después, el «Esquema Conceptual <strong>Definitivo</strong> y estructuras no contempladas a tener en cuenta».</p>
+        <p>Es decir: el libro da por hecho que <strong>el esquema cambia</strong> tras la revisión con el usuario. El inicial no es el final.</p>
+      </div>
+      <div class="proj">
+        <p class="lbl">Este proyecto · FST</p>
+        <p><strong>La primera de las dos revisiones ya ocurrió.</strong> El 3 de septiembre se presentó el esquema al Dr. Sandino y el modelo cambió en tres puntos — exactamente lo que el libro anticipa.</p>
+        <p>Falta la segunda, con la Dra. Cordero, que no pudo asistir.</p>
+      </div>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:24%">Revisión</th><th style="width:12%">Estado</th><th>Resultado o material pendiente</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>Dr. César Sandino</b><br><span class="card">protocolo experimental</span></td>
+            <td><b>Hecha</b><br><span class="card">3-sep</span></td>
+            <td>Se recorrió el diagrama nivel por nivel. Confirmó que una grabación no mezcla grupos, que la rata vuelve al mismo cilindro el Día 2 y que «sesión» es su palabra para cada grabación. <b>Corrigió tres cosas:</b> el alcance del identificador de la rata, el tope de tamaño del grupo y el propósito del Día 1.</td>
+          </tr>
+          <tr>
+            <td><b>Dra. Martha Rosa Cordero</b><br><span class="card">construcción de diagramas</span></td>
+            <td class="no">Pendiente</td>
+            <td>Llevar la entidad asociativa <b>Observación</b> con sus dos interrelaciones, las cardinalidades y el hecho de que <b>Espécimen tenga dos padres</b> —Grupo y Tanda—. Más los casos de uso observados en la simulación de defensa. Revisión solicitada en esa retroalimentación</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">Estado real</span>
+      <p>En los términos del libro, lo que existe sigue siendo el <strong>Esquema Conceptual Inicial</strong>. Que el laboratorio ya lo haya revisado es la mitad del trámite; la otra mitad es la revisión de notación, y hasta que ocurra el esquema no pasa a Definitivo.</p>
+    </div>
+
+    <h3>Lo que la revisión cerró</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:26%">Asunto</th><th style="width:20%">Estado</th><th>Respuesta</th></tr></thead>
+        <tbody>
+          <tr><td><b>Forma del identificador de la rata</b></td><td class="ok">Resuelto</td><td>Plumón indeleble en la cola, con líneas. Numeración del 1 al 8 <b>dentro del grupo</b>. <b>Actualizado (D-55):</b> el sistema no la guarda</td></tr>
+          <tr><td><b>El cilindro entre sesiones</b></td><td class="ok">Resuelto</td><td>La rata vuelve al mismo cilindro el Día 2</td></tr>
+          <tr><td><b>¿Una tanda mezcla grupos?</b></td><td class="ok">Resuelto</td><td>No. «Siempre utilizamos para cada video ratas que hayan recibido el mismo tratamiento»</td></tr>
+          <tr><td><b>Nombre del nivel «Tanda»</b></td><td class="ok">Resuelto</td><td>El laboratorio <b>no tiene palabra</b> para ese nivel. «Tanda» sigue siendo término nuestro. En cambio «sesión» sí es suyo, y coincide con nuestro atributo</td></tr>
+          <tr><td><b>Tandas por grupo</b></td><td class="ok">Resuelto</td><td>Sin tope: con 12 especímenes son tres tandas. La cardinalidad (2,N) se sostiene</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Lo que sigue abierto</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:26%">Asunto</th><th style="width:20%">Estado</th><th>Qué falta</th></tr></thead>
+        <tbody>
+          <tr><td>El administrador en <code>Usuario</code></td><td class="ok">Resuelto</td><td>D-01: solo el administrador crea cuentas, sin autoregistro — el cap. 1 queda mal, hay que corregirlo al RF-07. D-08: el administrador no es un tipo de usuario aparte, es un investigador con permisos extra, modelado como subtipo (<code>ADMINISTRADOR</code>, relación (1,1)&#8211;(0,1) con <code>Usuario</code>)</td></tr>
+          <tr><td><b>Cuántos videos deja un experimento</b></td><td class="no">Pregunta Q-B</td><td>Asumimos que los «~8 videos» de la entrevista son los del Día 2. No cambia la estructura, pero sí el número del documento</td></tr>
+          <tr><td><b>Las dos técnicas de cuantificación</b></td><td class="no">Pregunta Q-A</td><td>El laboratorio ha contado la conducta por segundo y también «por eventos», muestreando cada 5 s. El sistema ya no depende de la respuesta (D-49: sin duración mínima); solo importa al comparar contra los registros manuales</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════ ACTIVIDAD 8 ══════════ -->
+  <section class="act" id="a8">
+    <p class="act-n">Actividad 8 <span class="chip">Hecha</span></p>
+    <h2>Documentación y diccionario de datos</h2>
+
+    <blockquote class="asks">
+      <p>«<b>Documentar esta etapa</b> considerando todos los elementos y las relaciones de tipo <b>no estructural</b> encontradas, es decir, aquellas que deben ser tenidas en cuenta pero que no se pueden representar por el Modelo de Datos seleccionado, <b>incluir el diccionario de datos</b>.»</p>
+      <cite>Metodología de diseño · actividad 8</cite>
+    </blockquote>
+
+    <h3>Parte 1 — Elementos no estructurales del universo del discurso</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:38%">Restricción</th><th style="width:14%">Fuente</th><th>Destino previsible</th></tr></thead>
+        <tbody>
+          <tr><td>El encuadre admite entre dos y cuatro cilindros</td><td class="card">Equipo · D-28</td><td><code>CHECK (n BETWEEN 2 AND 4)</code></td></tr>
+          <tr><td>Las cuatro conductas son mutuamente excluyentes en cada segundo</td><td class="card">Cap. 3 · D-29</td><td>Exclusividad EER · un solo valor por <code>Segundo</code></td></tr>
+          <tr><td>El buceo se contabiliza como nado activo</td><td class="card">P7</td><td>Mapeo de dominio en el clasificador</td></tr>
+          <tr><td><s>Un episodio cuenta si dura 3–5 s continuos</s></td><td class="card">D-49</td><td class="no">Retirada: no hay duración mínima</td></tr>
+          <tr><td><b>el Día 1 es opcional para cualquier grupo</b></td><td class="card"><i class="src">Reunión 3-sep</i></td><td>No es una regla condicional sobre <code>Grupo.tipo</code>. Su propósito es verificar que todas las ratas lleguen igual de estresadas al Día 2. El video del Día 1 se guarda pero no se analiza (D-71): no tiene análisis ni observaciones</td></tr>
+          <tr><td>El grupo control recibe placebo el Día 2</td><td class="card"><i class="src">Equipo</i></td><td>El estrés de la inyección debe ser idéntico en los tres grupos. <b>Consecuencia:</b> <code>tratamiento</code> nunca es nulo</td></tr>
+          <tr><td>Un análisis es <em>agrupado</em> si algún segundo quedó como conducta activa, y <em>preciso</em> si ninguno</td><td class="card">D-41</td><td>Regla de cálculo de <code>Análisis.nivel de clasif.</code></td></tr>
+          <tr><td>Se analizan como máximo los últimos 300 s del video, sin mínimo (al inicio de algunos videos aparecen personas)</td><td class="card">D-31 · D-54</td><td><code>CHECK (segundo BETWEEN 1 AND 300)</code></td></tr>
+          <tr><td><s>El análisis es válido solo con confianza ≥ 0.70</s></td><td class="card">D-32 · D-47</td><td class="no">Retirada</td></tr>
+          <tr><td>La iluminación no está garantizada</td><td class="card">Equipo</td><td class="no">Riesgo, no restricción de datos</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Parte 2 — Elementos no estructurales que introduce el esquema</h3>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:38%">Restricción</th><th style="width:22%">Qué reponía</th><th>Destino previsible</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>La tanda de un espécimen pertenece a su <b>mismo grupo</b></td>
+            <td>La cadena única Espécimen → Tanda → Grupo</td>
+            <td><code>CHECK</code> o disparador sobre <code>ESPECIMEN</code></td>
+          </tr>
+          <tr>
+            <td>El espécimen y el video de una observación son de la <b>misma tanda</b></td>
+            <td>Que ambos colgaran del mismo padre</td>
+            <td><code>CHECK</code> o disparador sobre <code>OBSERVACION</code></td>
+          </tr>
+          <tr>
+            <td>No hay dos observaciones para el mismo par (espécimen, video)</td>
+            <td>La llave de la agregación</td>
+            <td>Unicidad sobre el par</td>
+          </tr>
+          <tr>
+            <td><b>Unicidad relativa al padre</b> de los discriminantes: <code>etiqueta</code> en su experimento, <code>ordinal</code> en su grupo, <code>numeroCilindro</code> en su tanda y <code>sesión</code> en su tanda</td>
+            <td>Las llaves parciales de las antiguas entidades débiles</td>
+            <td>Una restricción de unicidad por par (padre, discriminante)</td>
+          </tr>
+          <tr>
+            <td><s><b><code>numeroRata</code> es único dentro de su grupo</b></s></td>
+            <td>—</td>
+            <td><span class="no">Retirada (D-55):</span> el sistema ya no guarda el número de rata, así que no hace falta esta unicidad. Ver la nota de abajo</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">El problema que abre <code>numeroRata</code></span>
+      <p>La clave alterna del espécimen pasa a ser el par <strong>(grupo, número de rata)</strong>. Pero en la etapa lógica se eliminó <code>idGrupo</code> de <code>ESPECIMEN</code> por tercera forma normal: el grupo es derivable de la tanda. Una restricción de unicidad <strong>no puede atravesar una reunión de tablas</strong>.</p>
+      <p>Dos salidas, ambas para la etapa física:</p>
+      <ul>
+        <li><strong>Disparador</strong> que valide recorriendo <code>ESPECIMEN → TANDA → GRUPO</code>. Deja lógica fuera del esquema y es más difícil de defender.</li>
+        <li><strong>Reintroducir <code>ESPECIMEN.idGrupo</code></strong> como redundancia controlada. Rompe la 3FN a propósito, pero el método lo admite explícitamente en la etapa física, y esa columna ya estaba identificada como la candidata natural.</li>
+      </ul>
+      <p><strong>Resuelto (D-04):</strong> se reintroduce <code>ESPECIMEN.idGrupo</code> como redundancia controlada, solo en el esquema físico, con <code>UNIQUE (idGrupo, numeroRata)</code> y un disparador que la mantiene igual al grupo de la tanda.</p>
+      <p><strong>Actualizado (D-55, 6-oct):</strong> el problema desaparece. Se quitó <code>numeroRata</code> y, con ella, el <code>idGrupo</code> redundante y su disparador: D-04 queda sin objeto.</p>
+    </div>
+
+    <h3>Parte 3 — Diccionario de datos</h3>
+
+    <div class="keyleg">
+      <span><i class="src r1">Equipo</i> respuesta directa</span>
+      <span><i class="src">3-sep</i> reunión con el laboratorio</span>
+      <span><i class="src">P9</i> entrevista formal</span>
+      <span><i class="src">Cap. 1</i> documento LaTeX</span>
+      <span><i class="src der">Derivado</i> sin fuente</span>
+    </div>
+
+    <div class="dic">
+
+      <h4>Usuario <span class="kind k-fuerte">Fuerte</span></h4>
+      <p class="ctx">Identificador: <b>idInstitucional</b> · registra experimentos y recibe notificaciones</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th style="width:16%">Atributo</th><th style="width:30%">Descripción</th><th style="width:24%">Dominio</th><th style="width:14%">Oblig.</th><th>Origen</th></tr></thead>
+          <tbody>
+            <tr><td class="at">idInstitucional</td><td>Clave institucional del investigador — boleta o número de empleado</td><td class="dom">identificador propio</td><td class="ob id">Sí · ident.</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">nombre</td><td>Nombre de pila</td><td class="dom">texto</td><td class="ob">Sí</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">apellidos</td><td>Apellidos, separados del nombre</td><td class="dom">texto</td><td class="ob">Sí</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">correo</td><td>Credencial de acceso, no el identificador</td><td class="dom">texto · alterna</td><td class="ob">Sí</td><td><i class="src">Cap. 1</i></td></tr>
+            <tr><td class="at">contrasenaHash</td><td>Nunca en claro</td><td class="dom">texto cifrado</td><td class="ob">Sí</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">activo</td><td>Permite dar de baja una cuenta sin eliminarla</td><td class="dom">booleano</td><td class="ob">Sí</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">cambioRequerido</td><td>Obliga a cambiar la contraseña temporal en el primer ingreso</td><td class="dom">booleano</td><td class="ob">Sí</td><td><i class="src der">Derivado</i></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Experimento <span class="kind k-fuerte">Fuerte</span></h4>
+      <p class="ctx">Identificador: <b>idExperimento</b> · registrado por un <b>Usuario</b></p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th style="width:16%">Atributo</th><th style="width:30%">Descripción</th><th style="width:24%">Dominio</th><th style="width:14%">Oblig.</th><th>Origen</th></tr></thead>
+          <tbody>
+            <tr><td class="at">idExperimento</td><td>Clave del estudio independiente</td><td class="dom">identificador propio</td><td class="ob id">Sí · ident.</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">idInstitucional</td><td>Quién creó el experimento</td><td class="dom">identificador</td><td class="ob">Sí</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">nombre</td><td>Nombre del estudio. Es único</td><td class="dom">texto · alterna</td><td class="ob">Sí</td><td><i class="src">Cap. 1</i> <i class="src r1">D-51</i></td></tr>
+            <tr><td class="at">fecha</td><td>Cuándo se realizó</td><td class="dom">fecha</td><td class="ob">Sí</td><td><i class="src">Cap. 1</i></td></tr>
+            <tr><td class="at">notas</td><td>Texto libre. El único atributo opcional del dominio experimental</td><td class="dom">texto libre</td><td class="ob">No</td><td><i class="src">Cap. 1</i></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Grupo <span class="kind k-fuerte">Fuerte</span></h4>
+      <p class="ctx">Identificador: <b>idGrupo</b> · <b>etiqueta</b> lo distingue dentro de su experimento</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th style="width:16%">Atributo</th><th style="width:30%">Descripción</th><th style="width:24%">Dominio</th><th style="width:14%">Oblig.</th><th>Origen</th></tr></thead>
+          <tbody>
+            <tr><td class="at">idGrupo</td><td>Clave del grupo experimental</td><td class="dom">identificador propio</td><td class="ob id">Sí · ident.</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">etiqueta</td><td>Distingue grupos del mismo tipo dentro de un experimento</td><td class="dom">texto</td><td class="ob">Sí</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">tipo</td><td>Papel del grupo en el diseño experimental</td><td class="dom">{control, referencia, tratamiento experimental}</td><td class="ob">Sí</td><td><i class="src">Cap. 1</i> <i class="src">PA</i></td></tr>
+            <tr><td class="at">tratamiento</td><td>Sustancia administrada el Día 2. El control recibe <b>placebo</b>, no nada: el estrés de la inyección debe ser igual en los tres grupos</td><td class="dom">texto</td><td class="ob">Sí</td><td><i class="src">Equipo</i></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Tanda <span class="kind k-fuerte">Fuerte</span></h4>
+      <p class="ctx">Identificador: <b>idTanda</b> · <b>ordinal</b> lo distingue dentro de su grupo</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th style="width:16%">Atributo</th><th style="width:30%">Descripción</th><th style="width:24%">Dominio</th><th style="width:14%">Oblig.</th><th>Origen</th></tr></thead>
+          <tbody>
+            <tr><td class="at">idTanda</td><td>Clave de la sesión de grabación</td><td class="dom">identificador propio</td><td class="ob id">Sí · ident.</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">idGrupo</td><td>A qué grupo pertenecen los especímenes grabados</td><td class="dom">identificador</td><td class="ob">Sí</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">ordinal</td><td>Distingue las tandas de un mismo grupo. Ya no acotado a 1..2: sin tope de tamaño de grupo, un grupo puede necesitar más de dos tandas</td><td class="dom">entero ≥ 1</td><td class="ob">Sí</td><td><i class="src">Reunión 3-sep</i></td></tr>
+            <tr><td class="at">nCilindros</td><td>Cuántos especímenes aloja esta tanda</td><td class="dom">entero {2, 3, 4}</td><td class="ob">Sí</td><td><i class="src">Equipo</i> <i class="src r1">D-28</i></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Espécimen <span class="kind k-fuerte">Fuerte</span></h4>
+      <p class="ctx">Identificador: <b>idEspecimen</b> · <b>numeroCilindro</b> lo distingue dentro de su tanda · se graba en una <b>Tanda</b></p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th style="width:16%">Atributo</th><th style="width:30%">Descripción</th><th style="width:24%">Dominio</th><th style="width:14%">Oblig.</th><th>Origen</th></tr></thead>
+          <tbody>
+            <tr><td class="at">idEspecimen</td><td>Clave de la rata dentro del sistema</td><td class="dom">identificador propio</td><td class="ob id">Sí · ident.</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">numeroCilindro</td><td>Cuál de los cilindros del encuadre ocupa la rata. Sirve al pipeline de visión para saber qué mancha del video le corresponde. La rata vuelve al mismo cilindro el Día 2</td><td class="dom">entero 1..nCilindros</td><td class="ob">Sí</td><td><i class="src">Cap. 1</i> <i class="src">3-sep</i></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Video <span class="kind k-fuerte">Fuerte</span></h4>
+      <p class="ctx">Identificador: <b>idVideo</b> · <b>sesión</b> lo distingue dentro de su tanda</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th style="width:16%">Atributo</th><th style="width:30%">Descripción</th><th style="width:24%">Dominio</th><th style="width:14%">Oblig.</th><th>Origen</th></tr></thead>
+          <tbody>
+            <tr><td class="at">idVideo</td><td>Clave de la grabación</td><td class="dom">identificador propio</td><td class="ob id">Sí · ident.</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">sesión</td><td>Día del protocolo. El Día 1 es opcional: una tanda puede tener solo el video del Día 2</td><td class="dom">{Día 1, Día 2}</td><td class="ob">Sí</td><td><i class="src">Cap. 3</i> <i class="src">3-sep</i></td></tr>
+            <tr><td class="at">archivo</td><td>Archivo de video cargado al sistema. Queda vacío cuando el video ya se borró; la fila se conserva porque los resultados la referencian</td><td class="dom">formato {MP4, MOV}</td><td class="ob">No</td><td><i class="src">P5</i> <i class="src r1">D-30</i> <i class="src r1">D-51</i></td></tr>
+            <tr><td class="at">nombreOriginal</td><td>Nombre con que el usuario subió el archivo. Solo se muestra; no arma rutas</td><td class="dom">texto</td><td class="ob">No</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">duración</td><td>Duración real del archivo cargado</td><td class="dom">segundos</td><td class="ob">Sí</td><td><i class="src">Cap. 3</i></td></tr>
+            <tr><td class="at">fechaCarga</td><td>Cuándo se subió el archivo a la plataforma</td><td class="dom">fecha</td><td class="ob">Sí</td><td><i class="src der">Derivado</i></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Análisis <span class="kind k-fuerte">Fuerte</span></h4>
+      <p class="ctx">Identificador: <b>idAnalisis</b> · procesa un <b>Video</b> del Día 2 — cardinalidad (0,1) del lado del video: el del Día 1 no se analiza y un video tiene a lo más un análisis vigente</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th style="width:16%">Atributo</th><th style="width:30%">Descripción</th><th style="width:24%">Dominio</th><th style="width:14%">Oblig.</th><th>Origen</th></tr></thead>
+          <tbody>
+            <tr><td class="at">idAnalisis</td><td>Clave de la corrida del pipeline</td><td class="dom">identificador propio</td><td class="ob id">Sí · ident.</td><td><i class="src">Cap. 3</i></td></tr>
+            <tr><td class="at">estado</td><td>En qué punto va el procesamiento</td><td class="dom">{en cola, procesando, completado, error, en pausa, cancelado}</td><td class="ob">Sí</td><td><i class="src">Cap. 4</i> <i class="src r1">D-15</i> <i class="src r1">D-59</i> <i class="src r1">D-67</i></td></tr>
+            <tr><td class="at">etapa</td><td>Fase del pipeline en curso o, si hubo error, donde se detuvo</td><td class="dom">{preprocesamiento, cilindros, clasificación}</td><td class="ob">Sí</td><td><i class="src">Cap. 4</i> <i class="src r1">D-16</i></td></tr>
+            <tr><td class="at">nivelClasif</td><td>Agrupado si algún segundo quedó como conducta activa; preciso si ninguno</td><td class="dom">{preciso, agrupado}</td><td class="ob">Sí</td><td><i class="src">Cap. 1</i> <i class="src r1">D-41</i></td></tr>
+            <tr><td class="at">fechaAnalisis</td><td>Cuándo se ejecutó</td><td class="dom">fecha</td><td class="ob">Sí</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">rutaDiagnostico</td><td>Reporte de diagnóstico en PDF. Solo existe si el análisis terminó en error</td><td class="dom">ruta de archivo</td><td class="ob">No</td><td><i class="src r1">D-23</i></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Observación <span class="kind k-agg">Asociativa</span></h4>
+      <p class="ctx">Identificador: <b>idObservacion</b> · une un <b>Espécimen</b> con un <b>Video</b> · clave candidata (idEspecimen, idVideo)</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th style="width:16%">Atributo</th><th style="width:30%">Descripción</th><th style="width:24%">Dominio</th><th style="width:14%">Oblig.</th><th>Origen</th></tr></thead>
+          <tbody>
+            <tr><td class="at">idObservacion</td><td>Clave propia de la entidad asociativa</td><td class="dom">identificador propio</td><td class="ob id">Sí · ident.</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">idEspecimen</td><td>Qué rata se observó</td><td class="dom">identificador</td><td class="ob">Sí</td><td><i class="src der">Derivado</i></td></tr>
+            <tr><td class="at">idVideo</td><td>En qué video se la observó</td><td class="dom">identificador</td><td class="ob">Sí</td><td><i class="src der">Derivado</i></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="ctx">Sin atributos propios: su único papel es cerrar el par válido antes de clasificar. Solo existe para el video del Día 2 analizado: de 0 a 4 por video, una por cilindro.</p>
+
+      <h4>Conducta <span class="kind k-fuerte">Fuerte</span></h4>
+      <p class="ctx">Identificador: <b>nombre</b> · catálogo cerrado de cuatro valores · en el relacional es el dominio <code>tipo_conducta</code>, no una tabla (D-102)</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th style="width:16%">Atributo</th><th style="width:30%">Descripción</th><th style="width:24%">Dominio</th><th style="width:14%">Oblig.</th><th>Origen</th></tr></thead>
+          <tbody>
+            <tr><td class="at">nombre</td><td>La conducta observada. <em>Conducta activa</em> se usa cuando el clasificador no distingue entre nado y escalamiento</td><td class="dom">{nado activo, inmovilidad, escalamiento, conducta activa}</td><td class="ob id">Sí · ident.</td><td><i class="src">Cap. 3</i> <i class="src">P7</i> <i class="src r1">D-29</i></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Segundo <span class="kind k-agg">Por revisar</span></h4>
+      <p class="ctx">Identificador: <b>(observación, segundo)</b> · se etiqueta en una <b>Observación</b> y se clasifica como una <b>Conducta</b> o ninguna · D-35</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th style="width:16%">Atributo</th><th style="width:30%">Descripción</th><th style="width:24%">Dominio</th><th style="width:14%">Oblig.</th><th>Origen</th></tr></thead>
+          <tbody>
+            <tr><td class="at">idObservacion</td><td>De qué espécimen y video es este segundo</td><td class="dom">identificador</td><td class="ob id">Sí · ident.</td><td><i class="src r1">D-35</i></td></tr>
+            <tr><td class="at">segundo</td><td>Número de segundo del video. Solo se analizan los últimos 300</td><td class="dom">entero 1..300</td><td class="ob id">Sí · ident.</td><td><i class="src r1">D-31</i> <i class="src r1">D-35</i> <i class="src r1">D-54</i></td></tr>
+            <tr><td class="at">conducta</td><td>Conducta vigente del segundo; el usuario la puede corregir. Vacía cuando el sistema no vio al espécimen (origen máquina) o cuando el usuario marcó «No se ve» (origen dudosa). Antes se llamaba <code>clase</code>; la conducta que puso el sistema no se guarda aparte</td><td class="dom">conducta</td><td class="ob">No</td><td><i class="src r1">D-35</i> <i class="src r1">D-40</i> <i class="src r1">D-53</i></td></tr>
+            <tr><td class="at">origen</td><td>Quién puso la conducta vigente: <em>máquina</em> si la asignó el sistema; <em>confirmada</em> si el usuario la revisó y la dejó igual; <em>corregida</em> si la cambió por otra conducta; <em>dudosa</em> si la marcó «No se ve»</td><td class="dom">{máquina, confirmada, corregida, dudosa}</td><td class="ob">Sí</td><td><i class="src r1">D-35</i> <i class="src r1">D-80</i></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <h3>Lectura del diccionario</h3>
+
+    <dl class="tally">
+      <div><dt>Atributos</dt><dd>42<small>en 10 entidades · eran 45 antes de D-52</small></dd></div>
+      <div><dt>Identificadores</dt><dd>10<small>nueve propios · el de Segundo incluye a su observación</small></dd></div>
+      <div><dt>Opcionales</dt><dd>5<small><code>notas</code>, <code>archivo</code>, <code>nombreOriginal</code>, <code>rutaDiagnostico</code> y <code>conducta</code></small></dd></div>
+    </dl>
+
+    <div class="col">
+      <p><strong>Todo el sistema mide un solo dato:</strong> la conducta de cada espécimen en cada segundo, en <code>Segundo</code>. Los totales por minuto y por conducta no se guardan: se calculan desde ella (D-52). Los demás atributos son estructura para ubicar ese dato —qué rata, en qué sesión, en qué segundo— o metadato del análisis que lo produjo.</p>
+      <p><strong>El atributo que exige más cuidado es <code>numeroCilindro</code>.</strong> Es lo único que distingue a un espécimen dentro de su tanda, y el Día 2 lo reutiliza del Día 1 porque el encuadre es fijo. (Hasta D-55 lo era <code>numeroRata</code>, cuyo alcance relativo al grupo no tenía solución limpia dentro del esquema normalizado; se quitó.)</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>TT 2026-B066 · ESCOM-IPN</span>
+    <span>Frausto Robles Á. A. · Rodríguez Verdín S. V.</span>
+    <span>Etapa de diseño conceptual · actividades 1 a 8</span>
+    <span>Esquema conceptual inicial · actualizado el 1-nov-2026</span>
+  </footer>
+
+</div>
+
+
+</body></html>
