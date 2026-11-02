@@ -8,12 +8,14 @@ independiente para verificar consistencia, ese tiempo se triplica. Con alrededor
 32 videos en un semestre de actividad regular, la anotación consume decenas de
 horas-persona y produce resultados que varían según quién anota y cómo interpreta cada transición entre conductas.
 
-Este Trabajo Terminal propone un prototipo de sistema web con visión por computadora y
-aprendizaje supervisado que automatice ese proceso para el Laboratorio de Bioquímica
+Este Trabajo Terminal propone un prototipo de sistema web que automatiza ese proceso
+mediante visión por computadora (sustracción de fondo y segmentación para localizar a
+cada espécimen) y aprendizaje supervisado (una red neuronal convolucional espaciotemporal
+que clasifica su conducta segundo a segundo), para el Laboratorio de Bioquímica
 Estructural, Sección de Posgrado, de la Escuela Nacional de Medicina y Homeopatía
 (ENMyH) del Instituto Politécnico Nacional (IPN). El uso concreto
 es directo: el investigador sube el video al sistema desde el navegador, el sistema lo
-analiza y, cuando termina, genera un reporte con los tiempos de nado activo, inmovilidad,
+analiza y, cuando termina, genera un reporte con los tiempos de nado, inmovilidad,
 escalamiento y conducta activa por espécimen y sesión.
 
 El sistema no diagnostica depresión ni produce información de uso clínico. Es una

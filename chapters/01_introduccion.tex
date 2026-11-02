@@ -148,8 +148,11 @@ El sistema es una herramienta de apoyo a la investigación preclínica en farmac
 No diagnostica depresión ni produce información de uso clínico; su propósito es
 reemplazar la anotación manual de videos experimentales.
 
-La propuesta es un prototipo de sistema web con visión por computadora y aprendizaje
-supervisado que analice automáticamente los videos del FST del laboratorio. El desarrollo sigue el ciclo de
+La propuesta es un prototipo de sistema web que analiza automáticamente los videos del
+FST del laboratorio. Usa técnicas de visión por computadora para localizar a cada
+espécimen (alineación de cuadros, sustracción de fondo y segmentación de la silueta) y
+aprendizaje supervisado para clasificar su conducta segundo a segundo, con una red
+neuronal convolucional espaciotemporal. El desarrollo sigue el ciclo de
 vida de software de la norma ISO/IEC/IEEE (Organización Internacional de Normalización /
 Comisión Electrotécnica Internacional / Instituto de Ingenieros Eléctricos y
 Electrónicos)~12207:2017 \cite{iso12207}, que organiza el proceso en fases de definición
@@ -180,9 +183,11 @@ El desempeño del clasificador se evalúa con métricas de clasificación están
 
 \section{Objetivo general (OG)}
 
-Diseñar, desarrollar y validar un prototipo de sistema web con visión por computadora
-y aprendizaje supervisado que automatice la detección y cuantificación de las conductas
-de la prueba de nado forzado en especímenes ---nado activo, inmovilidad, escalamiento y conducta activa--- con
+Diseñar, desarrollar y validar un prototipo de sistema web que, mediante visión por
+computadora (sustracción de fondo y segmentación para localizar a cada espécimen) y
+aprendizaje supervisado (una red neuronal convolucional espaciotemporal), automatice la
+detección y cuantificación de las conductas de la prueba de nado forzado en especímenes
+---nado, inmovilidad, escalamiento y conducta activa--- con
 desempeño validado mediante métricas de clasificación estándar y cumpliendo los
 atributos de calidad de la norma ISO/IEC~25010:2011 \cite{iso25010}, el modelo de
 calidad de producto de software de la ISO y la IEC.
@@ -199,9 +204,11 @@ calidad de producto de software de la ISO y la IEC.
   \item Diseñar la arquitectura del sistema conforme al proceso de diseño de software
         de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}, definiendo los módulos de carga
         de videos, \textit{pipeline} de análisis, base de datos y visualización de resultados.
-  \item Implementar el módulo de análisis conductual con visión por computadora y un
-        clasificador supervisado entrenado con las tres conductas del FST, más una regla de
-        confianza que asigna la conducta activa.
+  \item Implementar el módulo de análisis conductual: localizar a cada espécimen con
+        alineación de cuadros, sustracción de fondo y segmentación de la silueta, y
+        clasificar su conducta en cada segundo con una red convolucional espaciotemporal
+        (R(2+1)D-18) entrenada con las tres conductas del FST, más una regla de confianza
+        que asigna la conducta activa.
   \item Evaluar el desempeño del clasificador de conductas con métricas de
         clasificación estándar (precisión, \textit{recall} y F1 por conducta) sobre un
         conjunto de prueba independiente.
