@@ -49,8 +49,7 @@ ninguna tiene interfaz web. El trabajo más reciente con aprendizaje profundo
 distribuye como sistema que un laboratorio sin infraestructura especializada pueda
 instalar.
 
-Ese laboratorio, a cargo del Dr.\ César Augusto Sandino Reyes
-López, investigador del posgrado de esa institución, corre experimentos de FST
+Ese laboratorio, a cargo de un investigador del posgrado de esa institución, corre experimentos de FST
 regularmente y tiene un acervo de videos que hoy se analizan a mano. Esa es la
 necesidad que origina este Trabajo Terminal.
 
@@ -195,7 +194,7 @@ calidad de producto de software de la ISO y la IEC.
         supervisada más adecuados al problema.
   \item Documentar el protocolo experimental del laboratorio: qué conductas se anotan,
         cómo se graba, y qué características tienen los videos disponibles. Esto
-        requiere entrevistas con el equipo del Dr.\ Sandino y revisión de la documentación
+        requiere entrevistas con el investigador responsable del laboratorio y su equipo y revisión de la documentación
         del protocolo y de los videos que el laboratorio proporcione.
   \item Diseñar la arquitectura del sistema conforme al proceso de diseño de software
         de la ISO/IEC/IEEE~12207:2017 \cite{iso12207}, definiendo los módulos de carga
@@ -387,8 +386,8 @@ definidos antes de codificar, revisión del producto al cierre de cada bloque, y
 registro de ajustes para el siguiente ciclo.
 
 La responsabilidad de cada integrante está delimitada por frente técnico:
-Ángel Alí es responsable del sistema web e infraestructura (\textit{backend} (servidor),
-base de datos, \textit{frontend} (interfaz del navegador)); Vanesa es responsable de la
+Uno de los integrantes es responsable del sistema web e infraestructura (\textit{backend} (servidor),
+base de datos, \textit{frontend} (interfaz del navegador)); el otro integrante es responsable de la
 cadena de análisis de video (\textit{pipeline}: preprocesamiento,
 localización de los cilindros, clasificación de conducta y evaluación del desempeño
 por conducta).
@@ -401,7 +400,7 @@ cronograma mes a mes de cada integrante. La columna TT-I abarca febrero--junio
 % ── Cronograma Ángel Alí ─────────────────────────────────────────────────────
 \begin{sidewaystable}
 \centering
-\caption{Cronograma de actividades --- Frausto Robles Ángel Alí.}
+\caption{Cronograma de actividades --- Integrante 1.}
 \label{tab:cronograma_angel}
 \small
 \setlength{\tabcolsep}{4pt}
@@ -458,7 +457,7 @@ Empaquetado con Docker Compose, manuales y material de defensa
 % ── Cronograma Vanesa ─────────────────────────────────────────────────────────
 \begin{sidewaystable}
 \centering
-\caption{Cronograma de actividades --- Rodríguez Verdín Sandoval Vanesa.}
+\caption{Cronograma de actividades --- Integrante 2.}
 \label{tab:cronograma_vanesa}
 \small
 \setlength{\tabcolsep}{4pt}
@@ -518,7 +517,7 @@ para el \textit{backend}; Python con OpenCV, scikit-learn, PyTorch y pandas para
 espécimen y permite revisarla y corregirla, para anotar el \textit{dataset} (conjunto de datos) de conductas; Git
 para control de versiones y Docker para empaquetar el sistema.
 
-En la práctica, Ángel y Vanesa trabajan en ramas separadas del repositorio y se
+En la práctica, los dos integrantes trabajan en ramas separadas del repositorio y se
 sincronizan en las revisiones semanales de cada \textit{sprint} (iteración). La integración entre los dos módulos
 ---el \textit{endpoint} (punto de acceso de la API) que recibe el video y el \textit{pipeline} que lo procesa--- se prueba de forma
 conjunta al cierre de cada \textit{sprint}, no se deja acumular para el final.
