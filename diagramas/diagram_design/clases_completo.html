@@ -1,9 +1,32 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><title>Diagrama de clases del sistema</title>
 <style>html,body{margin:0;background:#fff}svg{display:block}</style></head><body><svg xmlns="http://www.w3.org/2000/svg" width="1290" height="815" viewBox="0 0 1290 815">
 <defs>
-<marker id="c-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#1a1a1a" stroke-width="1.3"/></marker>
-<marker id="c-tri" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#1a1a1a" stroke-width="1.2"/></marker>
-<marker id="c-dia" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="14" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#1a1a1a"/></marker>
+<marker id="c-arr-0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#b22222" stroke-width="1.4"/></marker><marker id="c-tri-0" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#b22222" stroke-width="1.3"/></marker><marker id="c-dia-0" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#b22222"/></marker>
+<marker id="c-arr-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#1f4e9c" stroke-width="1.4"/></marker><marker id="c-tri-1" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#1f4e9c" stroke-width="1.3"/></marker><marker id="c-dia-1" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#1f4e9c"/></marker>
+<marker id="c-arr-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#2e7d32" stroke-width="1.4"/></marker><marker id="c-tri-2" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#2e7d32" stroke-width="1.3"/></marker><marker id="c-dia-2" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#2e7d32"/></marker>
+<marker id="c-arr-3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#7b1fa2" stroke-width="1.4"/></marker><marker id="c-tri-3" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#7b1fa2" stroke-width="1.3"/></marker><marker id="c-dia-3" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#7b1fa2"/></marker>
+<marker id="c-arr-4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#e65100" stroke-width="1.4"/></marker><marker id="c-tri-4" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#e65100" stroke-width="1.3"/></marker><marker id="c-dia-4" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#e65100"/></marker>
+<marker id="c-arr-5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#6d4c41" stroke-width="1.4"/></marker><marker id="c-tri-5" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#6d4c41" stroke-width="1.3"/></marker><marker id="c-dia-5" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#6d4c41"/></marker>
+<marker id="c-arr-6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#00838f" stroke-width="1.4"/></marker><marker id="c-tri-6" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#00838f" stroke-width="1.3"/></marker><marker id="c-dia-6" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#00838f"/></marker>
+<marker id="c-arr-7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#c2185b" stroke-width="1.4"/></marker><marker id="c-tri-7" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#c2185b" stroke-width="1.3"/></marker><marker id="c-dia-7" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#c2185b"/></marker>
+<marker id="c-arr-8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#556b2f" stroke-width="1.4"/></marker><marker id="c-tri-8" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#556b2f" stroke-width="1.3"/></marker><marker id="c-dia-8" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#556b2f"/></marker>
+<marker id="c-arr-9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#1a237e" stroke-width="1.4"/></marker><marker id="c-tri-9" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#1a237e" stroke-width="1.3"/></marker><marker id="c-dia-9" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#1a237e"/></marker>
+<marker id="c-arr-10" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#8b0000" stroke-width="1.4"/></marker><marker id="c-tri-10" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#8b0000" stroke-width="1.3"/></marker><marker id="c-dia-10" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#8b0000"/></marker>
+<marker id="c-arr-11" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#0277bd" stroke-width="1.4"/></marker><marker id="c-tri-11" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#0277bd" stroke-width="1.3"/></marker><marker id="c-dia-11" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#0277bd"/></marker>
+<marker id="c-arr-12" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#558b2f" stroke-width="1.4"/></marker><marker id="c-tri-12" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#558b2f" stroke-width="1.3"/></marker><marker id="c-dia-12" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#558b2f"/></marker>
+<marker id="c-arr-13" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#4a148c" stroke-width="1.4"/></marker><marker id="c-tri-13" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#4a148c" stroke-width="1.3"/></marker><marker id="c-dia-13" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#4a148c"/></marker>
+<marker id="c-arr-14" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#bf360c" stroke-width="1.4"/></marker><marker id="c-tri-14" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#bf360c" stroke-width="1.3"/></marker><marker id="c-dia-14" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#bf360c"/></marker>
+<marker id="c-arr-15" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#00695c" stroke-width="1.4"/></marker><marker id="c-tri-15" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#00695c" stroke-width="1.3"/></marker><marker id="c-dia-15" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#00695c"/></marker>
+<marker id="c-arr-16" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#ad1457" stroke-width="1.4"/></marker><marker id="c-tri-16" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#ad1457" stroke-width="1.3"/></marker><marker id="c-dia-16" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#ad1457"/></marker>
+<marker id="c-arr-17" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#33691e" stroke-width="1.4"/></marker><marker id="c-tri-17" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#33691e" stroke-width="1.3"/></marker><marker id="c-dia-17" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#33691e"/></marker>
+<marker id="c-arr-18" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#3e2723" stroke-width="1.4"/></marker><marker id="c-tri-18" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#3e2723" stroke-width="1.3"/></marker><marker id="c-dia-18" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#3e2723"/></marker>
+<marker id="c-arr-19" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#006064" stroke-width="1.4"/></marker><marker id="c-tri-19" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#006064" stroke-width="1.3"/></marker><marker id="c-dia-19" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#006064"/></marker>
+<marker id="c-arr-20" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#9c27b0" stroke-width="1.4"/></marker><marker id="c-tri-20" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#9c27b0" stroke-width="1.3"/></marker><marker id="c-dia-20" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#9c27b0"/></marker>
+<marker id="c-arr-21" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#d84315" stroke-width="1.4"/></marker><marker id="c-tri-21" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#d84315" stroke-width="1.3"/></marker><marker id="c-dia-21" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#d84315"/></marker>
+<marker id="c-arr-22" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#283593" stroke-width="1.4"/></marker><marker id="c-tri-22" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#283593" stroke-width="1.3"/></marker><marker id="c-dia-22" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#283593"/></marker>
+<marker id="c-arr-23" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#827717" stroke-width="1.4"/></marker><marker id="c-tri-23" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#827717" stroke-width="1.3"/></marker><marker id="c-dia-23" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#827717"/></marker>
+<marker id="c-arr-24" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#880e4f" stroke-width="1.4"/></marker><marker id="c-tri-24" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#880e4f" stroke-width="1.3"/></marker><marker id="c-dia-24" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#880e4f"/></marker>
+<marker id="c-arr-25" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#37474f" stroke-width="1.4"/></marker><marker id="c-tri-25" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L13,7 L1,13 Z" fill="#fff" stroke="#37474f" stroke-width="1.3"/></marker><marker id="c-dia-25" viewBox="0 0 16 10" refX="1" refY="5" markerWidth="9" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,5 L8,0 L16,5 L8,10 Z" fill="#37474f"/></marker>
 </defs>
 <style>
 .a{font:400 11px Consolas,'Courier New',monospace;fill:#1a1a1a}
@@ -14,90 +37,123 @@
 .lg{font:400 10px Arial,Helvetica,sans-serif;fill:#444}
 </style>
 <rect width="1290" height="815" fill="#fff"/>
-<path d="M144,182 L144,200" fill="none" stroke="#1a1a1a" stroke-width="1.2" marker-end="url(#c-tri)"/>
-<path d="M278,240 L338,240" fill="none" stroke="#1a1a1a" stroke-width="1.2" marker-end="url(#c-arr)"/>
-<path d="M278,215 L300,215 L300,100 L338,100" fill="none" stroke="#1a1a1a" stroke-width="1.2" marker-end="url(#c-arr)"/>
-<path d="M405,178 L405,158" fill="none" stroke="#1a1a1a" stroke-width="1.2" marker-end="url(#c-arr)"/>
-<path d="M405,306 L405,330" fill="none" stroke="#1a1a1a" stroke-width="1.2" marker-start="url(#c-dia)" marker-end="url(#c-arr)"/>
-<path d="M405,422 L405,442" fill="none" stroke="#1a1a1a" stroke-width="1.2" marker-start="url(#c-dia)" marker-end="url(#c-arr)"/>
-<path d="M405,519 L405,539" fill="none" stroke="#1a1a1a" stroke-width="1.2" marker-start="url(#c-dia)" marker-end="url(#c-arr)"/>
-<path d="M338,290 L290,290 L290,700 L278,700" fill="none" stroke="#1a1a1a" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#c-arr)"/>
-<path d="M338,360 L305,360 L305,720 L278,720" fill="none" stroke="#1a1a1a" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#c-arr)"/>
-<path d="M338,470 L320,470 L320,740 L278,740" fill="none" stroke="#1a1a1a" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#c-arr)"/>
-<path d="M606,290 L644,290 L644,640 L686,640" fill="none" stroke="#1a1a1a" stroke-width="1.2" marker-end="url(#c-arr)"/>
-<path d="M606,455 L620,455 L620,330 L686,330" fill="none" stroke="#1a1a1a" stroke-width="1.2" marker-start="url(#c-dia)" marker-end="url(#c-arr)"/>
-<path d="M606,572 L686,572" fill="none" stroke="#1a1a1a" stroke-width="1.2" marker-end="url(#c-arr)"/>
-<path d="M606,548 L632,548 L632,420 L686,420" fill="none" stroke="#1a1a1a" stroke-width="1.2" marker-end="url(#c-arr)"/>
-<path d="M820,152 L820,170" fill="none" stroke="#1a1a1a" stroke-width="1.2" marker-end="url(#c-arr)"/>
-<path d="M820,373 L820,395" fill="none" stroke="#1a1a1a" stroke-width="1.2" marker-end="url(#c-arr)"/>
-<path d="M1014,60 L954,60" fill="none" stroke="#1a1a1a" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#c-arr)"/>
-<path d="M1014,140 L999,140 L999,215 L954,215" fill="none" stroke="#1a1a1a" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#c-arr)"/>
-<path d="M1014,250 L954,250" fill="none" stroke="#1a1a1a" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#c-arr)"/>
-<path d="M1014,190 L979,190 L979,110 L954,110" fill="none" stroke="#1a1a1a" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#c-arr)"/>
-<path d="M1014,470 L954,470" fill="none" stroke="#1a1a1a" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#c-arr)"/>
-<path d="M1014,418 L954,418" fill="none" stroke="#1a1a1a" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#c-arr)"/>
-<path d="M954,430 L990,430 L990,520 L1014,520" fill="none" stroke="#1a1a1a" stroke-width="1.2" marker-start="url(#c-dia)" marker-end="url(#c-arr)"/>
-<path d="M1148,164 L1148,186" fill="none" stroke="#1a1a1a" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#c-arr)"/>
-<path d="M1148,485 L1148,505" fill="none" stroke="#1a1a1a" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#c-arr)"/>
-<path d="M1148,603 L1148,623" fill="none" stroke="#1a1a1a" stroke-width="1.2" marker-end="url(#c-arr)"/>
-<rect x="282" y="226" width="8" height="12" fill="#fff"/>
-<text x="283" y="236" text-anchor="start" class="m">1</text>
-<rect x="309" y="226" width="25" height="12" fill="#fff"/>
-<text x="333" y="236" text-anchor="end" class="m">0..*</text>
-<rect x="282" y="201" width="8" height="12" fill="#fff"/>
-<text x="283" y="211" text-anchor="start" class="m">1</text>
-<rect x="309" y="86" width="25" height="12" fill="#fff"/>
-<text x="333" y="96" text-anchor="end" class="m">0..*</text>
-<rect x="410" y="164" width="25" height="12" fill="#fff"/>
-<text x="411" y="174" text-anchor="start" class="m">0..1</text>
-<rect x="375" y="160" width="25" height="12" fill="#fff"/>
-<text x="399" y="170" text-anchor="end" class="m">0..*</text>
-<rect x="410" y="308" width="8" height="12" fill="#fff"/>
-<text x="411" y="318" text-anchor="start" class="m">1</text>
-<rect x="375" y="308" width="25" height="12" fill="#fff"/>
-<text x="399" y="318" text-anchor="end" class="m">0..*</text>
-<rect x="410" y="424" width="8" height="12" fill="#fff"/>
-<text x="411" y="434" text-anchor="start" class="m">1</text>
-<rect x="375" y="428" width="25" height="12" fill="#fff"/>
-<text x="399" y="438" text-anchor="end" class="m">1..*</text>
-<rect x="410" y="521" width="8" height="12" fill="#fff"/>
-<text x="411" y="531" text-anchor="start" class="m">1</text>
-<rect x="375" y="525" width="25" height="12" fill="#fff"/>
-<text x="399" y="535" text-anchor="end" class="m">2..4</text>
-<rect x="610" y="276" width="8" height="12" fill="#fff"/>
-<text x="611" y="286" text-anchor="start" class="m">1</text>
-<rect x="657" y="626" width="25" height="12" fill="#fff"/>
-<text x="681" y="636" text-anchor="end" class="m">0..*</text>
-<rect x="610" y="441" width="8" height="12" fill="#fff"/>
-<text x="611" y="451" text-anchor="start" class="m">1</text>
-<rect x="657" y="316" width="25" height="12" fill="#fff"/>
-<text x="681" y="326" text-anchor="end" class="m">1..2</text>
-<rect x="610" y="558" width="8" height="12" fill="#fff"/>
-<text x="611" y="568" text-anchor="start" class="m">1</text>
-<rect x="657" y="558" width="25" height="12" fill="#fff"/>
-<text x="681" y="568" text-anchor="end" class="m">0..*</text>
-<rect x="610" y="534" width="8" height="12" fill="#fff"/>
-<text x="611" y="544" text-anchor="start" class="m">1</text>
-<rect x="657" y="406" width="25" height="12" fill="#fff"/>
-<text x="681" y="416" text-anchor="end" class="m">0..1</text>
-<rect x="825" y="154" width="25" height="12" fill="#fff"/>
-<text x="826" y="164" text-anchor="start" class="m">0..1</text>
-<rect x="807" y="156" width="8" height="12" fill="#fff"/>
-<text x="814" y="166" text-anchor="end" class="m">1</text>
-<rect x="825" y="375" width="8" height="12" fill="#fff"/>
-<text x="826" y="385" text-anchor="start" class="m">1</text>
-<rect x="790" y="373" width="25" height="12" fill="#fff"/>
-<text x="814" y="383" text-anchor="end" class="m">0..4</text>
-<rect x="958" y="456" width="25" height="12" fill="#fff"/>
-<text x="959" y="466" text-anchor="start" class="m">2..4</text>
-<rect x="958" y="432" width="8" height="12" fill="#fff"/>
-<text x="959" y="442" text-anchor="start" class="m">1</text>
-<rect x="974" y="522" width="36" height="12" fill="#fff"/>
-<text x="1009" y="532" text-anchor="end" class="m">1..300</text>
-<rect x="1153" y="605" width="25" height="12" fill="#fff"/>
-<text x="1154" y="615" text-anchor="start" class="m">0..*</text>
-<rect x="1118" y="609" width="25" height="12" fill="#fff"/>
-<text x="1142" y="619" text-anchor="end" class="m">0..1</text>
+<path d="M144,182 L144,200" fill="none" stroke="#b22222" stroke-width="1.4" marker-end="url(#c-tri-0)"/>
+<path d="M278,240 L338,240" fill="none" stroke="#1f4e9c" stroke-width="1.4" marker-end="url(#c-arr-1)"/>
+<path d="M278,215 L300,215 L300,100 L338,100" fill="none" stroke="#2e7d32" stroke-width="1.4" marker-end="url(#c-arr-2)"/>
+<path d="M405,202 L405,158" fill="none" stroke="#7b1fa2" stroke-width="1.4" marker-end="url(#c-arr-3)"/>
+<path d="M405,330 L405,374" fill="none" stroke="#e65100" stroke-width="1.4" marker-start="url(#c-dia-4)" marker-end="url(#c-arr-4)"/>
+<path d="M405,466 L405,510" fill="none" stroke="#6d4c41" stroke-width="1.4" marker-start="url(#c-dia-5)" marker-end="url(#c-arr-5)"/>
+<path d="M405,587 L405,631" fill="none" stroke="#00838f" stroke-width="1.4" marker-start="url(#c-dia-6)" marker-end="url(#c-arr-6)"/>
+<path d="M338,280 L290,280 L290,700 L278,700" fill="none" stroke="#c2185b" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#c-arr-7)"/>
+<path d="M338,420 L305,420 L305,720 L278,720" fill="none" stroke="#556b2f" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#c-arr-8)"/>
+<path d="M338,540 L320,540 L320,740 L278,740" fill="none" stroke="#1a237e" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#c-arr-9)"/>
+<path d="M606,300 L662,300 L662,670 L686,670" fill="none" stroke="#8b0000" stroke-width="1.4" marker-end="url(#c-arr-10)"/>
+<path d="M606,530 L620,530 L620,340 L686,340" fill="none" stroke="#0277bd" stroke-width="1.4" marker-start="url(#c-dia-11)" marker-end="url(#c-arr-11)"/>
+<path d="M606,668 L620,668 L620,560 L686,560" fill="none" stroke="#558b2f" stroke-width="1.4" marker-end="url(#c-arr-12)"/>
+<path d="M606,640 L632,640 L632,450 L686,450" fill="none" stroke="#4a148c" stroke-width="1.4" marker-end="url(#c-arr-13)"/>
+<path d="M820,136 L820,180" fill="none" stroke="#bf360c" stroke-width="1.4" marker-end="url(#c-arr-14)"/>
+<path d="M820,383 L820,427" fill="none" stroke="#00695c" stroke-width="1.4" marker-end="url(#c-arr-15)"/>
+<path d="M1014,60 L954,60" fill="none" stroke="#ad1457" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#c-arr-16)"/>
+<path d="M1014,140 L999,140 L999,215 L954,215" fill="none" stroke="#33691e" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#c-arr-17)"/>
+<path d="M1014,250 L954,250" fill="none" stroke="#3e2723" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#c-arr-18)"/>
+<path d="M1014,190 L979,190 L979,110 L954,110" fill="none" stroke="#006064" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#c-arr-19)"/>
+<path d="M1014,478 L980,478 L980,520 L954,520" fill="none" stroke="#9c27b0" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#c-arr-20)"/>
+<path d="M1014,440 L954,440" fill="none" stroke="#d84315" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#c-arr-21)"/>
+<path d="M954,462 L990,462 L990,520 L1014,520" fill="none" stroke="#283593" stroke-width="1.4" marker-start="url(#c-dia-22)" marker-end="url(#c-arr-22)"/>
+<path d="M1148,164 L1148,186" fill="none" stroke="#827717" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#c-arr-23)"/>
+<path d="M1148,485 L1148,505" fill="none" stroke="#880e4f" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#c-arr-24)"/>
+<path d="M1148,603 L1148,623" fill="none" stroke="#37474f" stroke-width="1.4" marker-end="url(#c-arr-25)"/>
+<line x1="281.5" y1="244.0" x2="281.5" y2="236.0" stroke="#1f4e9c" stroke-width="1.3"/>
+<line x1="286.0" y1="244.0" x2="286.0" y2="236.0" stroke="#1f4e9c" stroke-width="1.3"/>
+<circle cx="334.5" cy="240.0" r="2.6" fill="#fff" stroke="#1f4e9c" stroke-width="1.2"/>
+<line x1="327.0" y1="240.0" x2="338.0" y2="236.0" stroke="#1f4e9c" stroke-width="1.3"/>
+<line x1="327.0" y1="240.0" x2="338.0" y2="240.0" stroke="#1f4e9c" stroke-width="1.3"/>
+<line x1="327.0" y1="240.0" x2="338.0" y2="244.0" stroke="#1f4e9c" stroke-width="1.3"/>
+<line x1="281.5" y1="219.0" x2="281.5" y2="211.0" stroke="#2e7d32" stroke-width="1.3"/>
+<line x1="286.0" y1="219.0" x2="286.0" y2="211.0" stroke="#2e7d32" stroke-width="1.3"/>
+<circle cx="334.5" cy="100.0" r="2.6" fill="#fff" stroke="#2e7d32" stroke-width="1.2"/>
+<line x1="327.0" y1="100.0" x2="338.0" y2="96.0" stroke="#2e7d32" stroke-width="1.3"/>
+<line x1="327.0" y1="100.0" x2="338.0" y2="100.0" stroke="#2e7d32" stroke-width="1.3"/>
+<line x1="327.0" y1="100.0" x2="338.0" y2="104.0" stroke="#2e7d32" stroke-width="1.3"/>
+<circle cx="405.0" cy="198.5" r="2.6" fill="#fff" stroke="#7b1fa2" stroke-width="1.2"/>
+<line x1="409.0" y1="194.0" x2="401.0" y2="194.0" stroke="#7b1fa2" stroke-width="1.3"/>
+<circle cx="405.0" cy="161.5" r="2.6" fill="#fff" stroke="#7b1fa2" stroke-width="1.2"/>
+<line x1="405.0" y1="169.0" x2="401.0" y2="158.0" stroke="#7b1fa2" stroke-width="1.3"/>
+<line x1="405.0" y1="169.0" x2="405.0" y2="158.0" stroke="#7b1fa2" stroke-width="1.3"/>
+<line x1="405.0" y1="169.0" x2="409.0" y2="158.0" stroke="#7b1fa2" stroke-width="1.3"/>
+<line x1="401.0" y1="342.5" x2="409.0" y2="342.5" stroke="#e65100" stroke-width="1.3"/>
+<line x1="401.0" y1="347.0" x2="409.0" y2="347.0" stroke="#e65100" stroke-width="1.3"/>
+<circle cx="405.0" cy="370.5" r="2.6" fill="#fff" stroke="#e65100" stroke-width="1.2"/>
+<line x1="405.0" y1="363.0" x2="409.0" y2="374.0" stroke="#e65100" stroke-width="1.3"/>
+<line x1="405.0" y1="363.0" x2="405.0" y2="374.0" stroke="#e65100" stroke-width="1.3"/>
+<line x1="405.0" y1="363.0" x2="401.0" y2="374.0" stroke="#e65100" stroke-width="1.3"/>
+<line x1="401.0" y1="478.5" x2="409.0" y2="478.5" stroke="#6d4c41" stroke-width="1.3"/>
+<line x1="401.0" y1="483.0" x2="409.0" y2="483.0" stroke="#6d4c41" stroke-width="1.3"/>
+<line x1="409.0" y1="506.5" x2="401.0" y2="506.5" stroke="#6d4c41" stroke-width="1.3"/>
+<line x1="405.0" y1="499.0" x2="409.0" y2="510.0" stroke="#6d4c41" stroke-width="1.3"/>
+<line x1="405.0" y1="499.0" x2="405.0" y2="510.0" stroke="#6d4c41" stroke-width="1.3"/>
+<line x1="405.0" y1="499.0" x2="401.0" y2="510.0" stroke="#6d4c41" stroke-width="1.3"/>
+<line x1="401.0" y1="599.5" x2="409.0" y2="599.5" stroke="#00838f" stroke-width="1.3"/>
+<line x1="401.0" y1="604.0" x2="409.0" y2="604.0" stroke="#00838f" stroke-width="1.3"/>
+<line x1="409.0" y1="627.5" x2="401.0" y2="627.5" stroke="#00838f" stroke-width="1.3"/>
+<line x1="405.0" y1="620.0" x2="409.0" y2="631.0" stroke="#00838f" stroke-width="1.3"/>
+<line x1="405.0" y1="620.0" x2="405.0" y2="631.0" stroke="#00838f" stroke-width="1.3"/>
+<line x1="405.0" y1="620.0" x2="401.0" y2="631.0" stroke="#00838f" stroke-width="1.3"/>
+<text x="412.0" y="624.0" text-anchor="start" class="m" fill="#00838f" style="font-size:11px">2..4</text>
+<line x1="609.5" y1="304.0" x2="609.5" y2="296.0" stroke="#8b0000" stroke-width="1.3"/>
+<line x1="614.0" y1="304.0" x2="614.0" y2="296.0" stroke="#8b0000" stroke-width="1.3"/>
+<circle cx="682.5" cy="670.0" r="2.6" fill="#fff" stroke="#8b0000" stroke-width="1.2"/>
+<line x1="675.0" y1="670.0" x2="686.0" y2="666.0" stroke="#8b0000" stroke-width="1.3"/>
+<line x1="675.0" y1="670.0" x2="686.0" y2="670.0" stroke="#8b0000" stroke-width="1.3"/>
+<line x1="675.0" y1="670.0" x2="686.0" y2="674.0" stroke="#8b0000" stroke-width="1.3"/>
+<line x1="618.5" y1="534.0" x2="618.5" y2="526.0" stroke="#0277bd" stroke-width="1.3"/>
+<line x1="623.0" y1="534.0" x2="623.0" y2="526.0" stroke="#0277bd" stroke-width="1.3"/>
+<line x1="682.5" y1="336.0" x2="682.5" y2="344.0" stroke="#0277bd" stroke-width="1.3"/>
+<line x1="675.0" y1="340.0" x2="686.0" y2="336.0" stroke="#0277bd" stroke-width="1.3"/>
+<line x1="675.0" y1="340.0" x2="686.0" y2="340.0" stroke="#0277bd" stroke-width="1.3"/>
+<line x1="675.0" y1="340.0" x2="686.0" y2="344.0" stroke="#0277bd" stroke-width="1.3"/>
+<rect x="624" y="320" width="32" height="13" fill="#fff"/>
+<text x="626" y="330" text-anchor="start" class="m" fill="#0277bd" style="font-size:11px">1..2</text>
+<line x1="609.5" y1="672.0" x2="609.5" y2="664.0" stroke="#558b2f" stroke-width="1.3"/>
+<line x1="614.0" y1="672.0" x2="614.0" y2="664.0" stroke="#558b2f" stroke-width="1.3"/>
+<circle cx="682.5" cy="560.0" r="2.6" fill="#fff" stroke="#558b2f" stroke-width="1.2"/>
+<line x1="675.0" y1="560.0" x2="686.0" y2="556.0" stroke="#558b2f" stroke-width="1.3"/>
+<line x1="675.0" y1="560.0" x2="686.0" y2="560.0" stroke="#558b2f" stroke-width="1.3"/>
+<line x1="675.0" y1="560.0" x2="686.0" y2="564.0" stroke="#558b2f" stroke-width="1.3"/>
+<line x1="609.5" y1="644.0" x2="609.5" y2="636.0" stroke="#4a148c" stroke-width="1.3"/>
+<line x1="614.0" y1="644.0" x2="614.0" y2="636.0" stroke="#4a148c" stroke-width="1.3"/>
+<circle cx="682.5" cy="450.0" r="2.6" fill="#fff" stroke="#4a148c" stroke-width="1.2"/>
+<line x1="678.0" y1="446.0" x2="678.0" y2="454.0" stroke="#4a148c" stroke-width="1.3"/>
+<circle cx="820.0" cy="139.5" r="2.6" fill="#fff" stroke="#bf360c" stroke-width="1.2"/>
+<line x1="816.0" y1="144.0" x2="824.0" y2="144.0" stroke="#bf360c" stroke-width="1.3"/>
+<line x1="824.0" y1="176.5" x2="816.0" y2="176.5" stroke="#bf360c" stroke-width="1.3"/>
+<line x1="824.0" y1="172.0" x2="816.0" y2="172.0" stroke="#bf360c" stroke-width="1.3"/>
+<line x1="816.0" y1="386.5" x2="824.0" y2="386.5" stroke="#00695c" stroke-width="1.3"/>
+<line x1="816.0" y1="391.0" x2="824.0" y2="391.0" stroke="#00695c" stroke-width="1.3"/>
+<circle cx="820.0" cy="423.5" r="2.6" fill="#fff" stroke="#00695c" stroke-width="1.2"/>
+<line x1="820.0" y1="416.0" x2="824.0" y2="427.0" stroke="#00695c" stroke-width="1.3"/>
+<line x1="820.0" y1="416.0" x2="820.0" y2="427.0" stroke="#00695c" stroke-width="1.3"/>
+<line x1="820.0" y1="416.0" x2="816.0" y2="427.0" stroke="#00695c" stroke-width="1.3"/>
+<text x="827.0" y="420.0" text-anchor="start" class="m" fill="#00695c" style="font-size:11px">0..4</text>
+<line x1="957.5" y1="524.0" x2="957.5" y2="516.0" stroke="#9c27b0" stroke-width="1.3"/>
+<line x1="965.0" y1="520.0" x2="954.0" y2="524.0" stroke="#9c27b0" stroke-width="1.3"/>
+<line x1="965.0" y1="520.0" x2="954.0" y2="520.0" stroke="#9c27b0" stroke-width="1.3"/>
+<line x1="965.0" y1="520.0" x2="954.0" y2="516.0" stroke="#9c27b0" stroke-width="1.3"/>
+<text x="961.0" y="527.0" text-anchor="start" class="m" fill="#9c27b0" style="font-size:11px">2..4</text>
+<line x1="966.5" y1="466.0" x2="966.5" y2="458.0" stroke="#283593" stroke-width="1.3"/>
+<line x1="971.0" y1="466.0" x2="971.0" y2="458.0" stroke="#283593" stroke-width="1.3"/>
+<line x1="1010.5" y1="516.0" x2="1010.5" y2="524.0" stroke="#283593" stroke-width="1.3"/>
+<line x1="1003.0" y1="520.0" x2="1014.0" y2="516.0" stroke="#283593" stroke-width="1.3"/>
+<line x1="1003.0" y1="520.0" x2="1014.0" y2="520.0" stroke="#283593" stroke-width="1.3"/>
+<line x1="1003.0" y1="520.0" x2="1014.0" y2="524.0" stroke="#283593" stroke-width="1.3"/>
+<rect x="954" y="527" width="46" height="13" fill="#fff"/>
+<text x="956" y="537" text-anchor="start" class="m" fill="#283593" style="font-size:11px">1..300</text>
+<circle cx="1148.0" cy="606.5" r="2.6" fill="#fff" stroke="#37474f" stroke-width="1.2"/>
+<line x1="1148.0" y1="614.0" x2="1144.0" y2="603.0" stroke="#37474f" stroke-width="1.3"/>
+<line x1="1148.0" y1="614.0" x2="1148.0" y2="603.0" stroke="#37474f" stroke-width="1.3"/>
+<line x1="1148.0" y1="614.0" x2="1152.0" y2="603.0" stroke="#37474f" stroke-width="1.3"/>
+<circle cx="1148.0" cy="619.5" r="2.6" fill="#fff" stroke="#37474f" stroke-width="1.2"/>
+<line x1="1152.0" y1="615.0" x2="1144.0" y2="615.0" stroke="#37474f" stroke-width="1.3"/>
 <rect x="10" y="30" width="268" height="152" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
 <text x="144.0" y="48" text-anchor="middle" class="nm">Administrador</text>
 <line x1="10" y1="56" x2="278" y2="56" stroke="#1a1a1a"/>
@@ -151,58 +207,58 @@
 <text x="348" y="128" class="a">- fechaCreacion: DateTime</text>
 <line x1="338" y1="136" x2="606" y2="136" stroke="#1a1a1a"/>
 <text x="348" y="148" class="a">+ marcarComoLeida(): void</text>
-<rect x="338" y="178" width="268" height="128" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
-<text x="472.0" y="196" text-anchor="middle" class="nm">Experimento</text>
-<line x1="338" y1="204" x2="606" y2="204" stroke="#1a1a1a"/>
-<text x="348" y="216" class="a">- id: Integer</text>
-<text x="348" y="231" class="a">- nombre: String</text>
-<text x="348" y="246" class="a">- fecha: Date</text>
-<text x="348" y="261" class="a">- notas: String</text>
-<line x1="338" y1="269" x2="606" y2="269" stroke="#1a1a1a"/>
-<text x="348" y="281" class="a">+ validarNombreUnico(): Boolean</text>
-<text x="348" y="296" class="a">+ consultarEstado(): String</text>
-<rect x="338" y="330" width="268" height="92" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
-<text x="472.0" y="348" text-anchor="middle" class="nm">Grupo</text>
-<line x1="338" y1="356" x2="606" y2="356" stroke="#1a1a1a"/>
-<text x="348" y="368" class="a">- id: Integer</text>
-<text x="348" y="383" class="a">- etiqueta: String</text>
-<text x="348" y="398" class="a">- tipo: String</text>
-<text x="348" y="413" class="a">- tratamiento: String</text>
-<rect x="338" y="442" width="268" height="77" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
-<text x="472.0" y="460" text-anchor="middle" class="nm">Tanda</text>
-<line x1="338" y1="468" x2="606" y2="468" stroke="#1a1a1a"/>
-<text x="348" y="480" class="a">- id: Integer</text>
-<text x="348" y="495" class="a">- ordinal: Integer</text>
-<text x="348" y="510" class="a">- nCilindros: Integer</text>
-<rect x="338" y="539" width="268" height="62" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
-<text x="472.0" y="557" text-anchor="middle" class="nm">Especimen</text>
-<line x1="338" y1="565" x2="606" y2="565" stroke="#1a1a1a"/>
-<text x="348" y="577" class="a">- id: Integer</text>
-<text x="348" y="592" class="a">- numeroCilindro: Integer</text>
-<rect x="686" y="170" width="268" height="203" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
-<text x="820.0" y="188" text-anchor="middle" class="nm">Video</text>
-<line x1="686" y1="196" x2="954" y2="196" stroke="#1a1a1a"/>
-<text x="696" y="208" class="a">- id: Integer</text>
-<text x="696" y="223" class="a">- sesion: String</text>
-<text x="696" y="238" class="a">- archivo: String</text>
-<text x="696" y="253" class="a">- nombreOriginal: String</text>
-<text x="696" y="268" class="a">- duracion: Decimal</text>
-<text x="696" y="283" class="a">- fechaCarga: DateTime</text>
-<line x1="686" y1="291" x2="954" y2="291" stroke="#1a1a1a"/>
-<text x="696" y="303" class="a">+ validarFormato(): Boolean</text>
-<text x="696" y="318" class="a">+ validarOrientacion(): Boolean</text>
-<text x="696" y="333" class="a">+ validarReproducible(): Boolean</text>
-<text x="696" y="348" class="a">+ estaProximaEliminacion(dias):</text>
-<text x="696" y="363" class="a">Boolean</text>
-<rect x="686" y="30" width="268" height="122" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
-<text x="820.0" y="48" text-anchor="middle" class="nm">Analisis</text>
-<line x1="686" y1="56" x2="954" y2="56" stroke="#1a1a1a"/>
-<text x="696" y="68" class="a">- id: Integer</text>
-<text x="696" y="83" class="a">- estado: String</text>
-<text x="696" y="98" class="a">- etapa: String</text>
-<text x="696" y="113" class="a">- nivelClasif: String</text>
-<text x="696" y="128" class="a">- fechaAnalisis: DateTime</text>
-<text x="696" y="143" class="a">- rutaDiagnostico: String</text>
+<rect x="338" y="202" width="268" height="128" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+<text x="472.0" y="220" text-anchor="middle" class="nm">Experimento</text>
+<line x1="338" y1="228" x2="606" y2="228" stroke="#1a1a1a"/>
+<text x="348" y="240" class="a">- id: Integer</text>
+<text x="348" y="255" class="a">- nombre: String</text>
+<text x="348" y="270" class="a">- fecha: Date</text>
+<text x="348" y="285" class="a">- notas: String</text>
+<line x1="338" y1="293" x2="606" y2="293" stroke="#1a1a1a"/>
+<text x="348" y="305" class="a">+ validarNombreUnico(): Boolean</text>
+<text x="348" y="320" class="a">+ consultarEstado(): String</text>
+<rect x="338" y="374" width="268" height="92" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+<text x="472.0" y="392" text-anchor="middle" class="nm">Grupo</text>
+<line x1="338" y1="400" x2="606" y2="400" stroke="#1a1a1a"/>
+<text x="348" y="412" class="a">- id: Integer</text>
+<text x="348" y="427" class="a">- etiqueta: String</text>
+<text x="348" y="442" class="a">- tipo: String</text>
+<text x="348" y="457" class="a">- tratamiento: String</text>
+<rect x="338" y="510" width="268" height="77" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+<text x="472.0" y="528" text-anchor="middle" class="nm">Tanda</text>
+<line x1="338" y1="536" x2="606" y2="536" stroke="#1a1a1a"/>
+<text x="348" y="548" class="a">- id: Integer</text>
+<text x="348" y="563" class="a">- ordinal: Integer</text>
+<text x="348" y="578" class="a">- nCilindros: Integer</text>
+<rect x="338" y="631" width="268" height="62" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+<text x="472.0" y="649" text-anchor="middle" class="nm">Especimen</text>
+<line x1="338" y1="657" x2="606" y2="657" stroke="#1a1a1a"/>
+<text x="348" y="669" class="a">- id: Integer</text>
+<text x="348" y="684" class="a">- numeroCilindro: Integer</text>
+<rect x="686" y="180" width="268" height="203" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+<text x="820.0" y="198" text-anchor="middle" class="nm">Video</text>
+<line x1="686" y1="206" x2="954" y2="206" stroke="#1a1a1a"/>
+<text x="696" y="218" class="a">- id: Integer</text>
+<text x="696" y="233" class="a">- sesion: String</text>
+<text x="696" y="248" class="a">- archivo: String</text>
+<text x="696" y="263" class="a">- nombreOriginal: String</text>
+<text x="696" y="278" class="a">- duracion: Decimal</text>
+<text x="696" y="293" class="a">- fechaCarga: DateTime</text>
+<line x1="686" y1="301" x2="954" y2="301" stroke="#1a1a1a"/>
+<text x="696" y="313" class="a">+ validarFormato(): Boolean</text>
+<text x="696" y="328" class="a">+ validarOrientacion(): Boolean</text>
+<text x="696" y="343" class="a">+ validarReproducible(): Boolean</text>
+<text x="696" y="358" class="a">+ estaProximaEliminacion(dias):</text>
+<text x="696" y="373" class="a">Boolean</text>
+<rect x="686" y="14" width="268" height="122" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+<text x="820.0" y="32" text-anchor="middle" class="nm">Analisis</text>
+<line x1="686" y1="40" x2="954" y2="40" stroke="#1a1a1a"/>
+<text x="696" y="52" class="a">- id: Integer</text>
+<text x="696" y="67" class="a">- estado: String</text>
+<text x="696" y="82" class="a">- etapa: String</text>
+<text x="696" y="97" class="a">- nivelClasif: String</text>
+<text x="696" y="112" class="a">- fechaAnalisis: DateTime</text>
+<text x="696" y="127" class="a">- rutaDiagnostico: String</text>
 <rect x="1014" y="30" width="268" height="134" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
 <text x="1148.0" y="43" text-anchor="middle" class="st">«control»</text>
 <text x="1148.0" y="60" text-anchor="middle" class="nm">Worker</text>
@@ -234,28 +290,28 @@
 <text x="1024" y="446" class="a">void</text>
 <text x="1024" y="461" class="a">+ cancelarAnalisis(idAnalisis): void</text>
 <text x="1024" y="476" class="a">+ generarCopiaRevision(video): void</text>
-<rect x="686" y="460" width="268" height="151" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
-<text x="820.0" y="478" text-anchor="middle" class="nm">ROI</text>
-<line x1="686" y1="486" x2="954" y2="486" stroke="#1a1a1a"/>
-<text x="696" y="498" class="a">- numeroCilindro: Integer</text>
-<text x="696" y="513" class="a">- x: Integer</text>
-<text x="696" y="528" class="a">- y: Integer</text>
-<text x="696" y="543" class="a">- w: Integer</text>
-<text x="696" y="558" class="a">- h: Integer</text>
-<text x="696" y="573" class="a">- yAgua: Integer</text>
-<text x="696" y="588" class="a">- yFondo: Integer</text>
-<text x="696" y="604" class="st">no se guarda en la base</text>
-<rect x="686" y="615" width="268" height="143" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
-<text x="820.0" y="633" text-anchor="middle" class="nm">Reporte</text>
-<line x1="686" y1="641" x2="954" y2="641" stroke="#1a1a1a"/>
-<text x="696" y="653" class="a">- id: Integer</text>
-<text x="696" y="668" class="a">- formato: String</text>
-<text x="696" y="683" class="a">- ruta: String</text>
-<text x="696" y="698" class="a">- fechaGeneracion: DateTime</text>
-<line x1="686" y1="706" x2="954" y2="706" stroke="#1a1a1a"/>
-<text x="696" y="718" class="a">+ generar(experimento, formato):</text>
-<text x="696" y="733" class="a">void</text>
-<text x="696" y="748" class="a">+ descargar(): File</text>
+<rect x="686" y="494" width="268" height="151" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+<text x="820.0" y="512" text-anchor="middle" class="nm">ROI</text>
+<line x1="686" y1="520" x2="954" y2="520" stroke="#1a1a1a"/>
+<text x="696" y="532" class="a">- numeroCilindro: Integer</text>
+<text x="696" y="547" class="a">- x: Integer</text>
+<text x="696" y="562" class="a">- y: Integer</text>
+<text x="696" y="577" class="a">- w: Integer</text>
+<text x="696" y="592" class="a">- h: Integer</text>
+<text x="696" y="607" class="a">- yAgua: Integer</text>
+<text x="696" y="622" class="a">- yFondo: Integer</text>
+<text x="696" y="638" class="st">no se guarda en la base</text>
+<rect x="686" y="651" width="268" height="143" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+<text x="820.0" y="669" text-anchor="middle" class="nm">Reporte</text>
+<line x1="686" y1="677" x2="954" y2="677" stroke="#1a1a1a"/>
+<text x="696" y="689" class="a">- id: Integer</text>
+<text x="696" y="704" class="a">- formato: String</text>
+<text x="696" y="719" class="a">- ruta: String</text>
+<text x="696" y="734" class="a">- fechaGeneracion: DateTime</text>
+<line x1="686" y1="742" x2="954" y2="742" stroke="#1a1a1a"/>
+<text x="696" y="754" class="a">+ generar(experimento, formato):</text>
+<text x="696" y="769" class="a">void</text>
+<text x="696" y="784" class="a">+ descargar(): File</text>
 <rect x="10" y="676" width="268" height="118" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
 <text x="144.0" y="689" text-anchor="middle" class="st">«derivada»</text>
 <text x="144.0" y="706" text-anchor="middle" class="nm">Estadisticas</text>
@@ -265,10 +321,10 @@
 <text x="20" y="756" class="a">- desviacionEstandar: Decimal</text>
 <text x="20" y="771" class="a">- varianza: Decimal</text>
 <text x="20" y="787" class="st">no persistente: se calcula al consultar</text>
-<rect x="686" y="395" width="268" height="47" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
-<text x="820.0" y="413" text-anchor="middle" class="nm">Observacion</text>
-<line x1="686" y1="421" x2="954" y2="421" stroke="#1a1a1a"/>
-<text x="696" y="433" class="a">+ calcularBloques()</text>
+<rect x="686" y="427" width="268" height="47" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+<text x="820.0" y="445" text-anchor="middle" class="nm">Observacion</text>
+<line x1="686" y1="453" x2="954" y2="453" stroke="#1a1a1a"/>
+<text x="696" y="465" class="a">+ calcularBloques()</text>
 <rect x="1014" y="505" width="268" height="98" rx="5" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
 <text x="1148.0" y="523" text-anchor="middle" class="nm">Segundo</text>
 <line x1="1014" y1="531" x2="1282" y2="531" stroke="#1a1a1a"/>
@@ -285,5 +341,21 @@
 <text x="1024" y="688" class="a">inmovilidad</text>
 <text x="1024" y="703" class="a">escalamiento</text>
 <text x="1024" y="718" class="a">conducta activa</text>
-<text x="10" y="811" class="lg">Composición: rombo lleno en el dueño · Asociación: flecha · Dependencia: línea punteada · Herencia: triángulo hueco · Multiplicidad en cada extremo</text>
+<text x="10" y="811" class="lg">Composición: rombo lleno en el dueño · Asociación: flecha · Dependencia: línea punteada · Herencia: triángulo hueco</text>
+<line x1="803.5" y1="811.0" x2="803.5" y2="803.0" stroke="#444" stroke-width="1.3"/>
+<line x1="808.0" y1="811.0" x2="808.0" y2="803.0" stroke="#444" stroke-width="1.3"/>
+<text x="815" y="811" class="lg">exactamente uno</text>
+<circle cx="921.5" cy="807.0" r="2.6" fill="#fff" stroke="#444" stroke-width="1.2"/>
+<line x1="926.0" y1="811.0" x2="926.0" y2="803.0" stroke="#444" stroke-width="1.3"/>
+<text x="933.0" y="811" class="lg">cero o uno</text>
+<line x1="1012.5" y1="811.0" x2="1012.5" y2="803.0" stroke="#444" stroke-width="1.3"/>
+<line x1="1020.0" y1="807.0" x2="1009.0" y2="811.0" stroke="#444" stroke-width="1.3"/>
+<line x1="1020.0" y1="807.0" x2="1009.0" y2="807.0" stroke="#444" stroke-width="1.3"/>
+<line x1="1020.0" y1="807.0" x2="1009.0" y2="803.0" stroke="#444" stroke-width="1.3"/>
+<text x="1024.0" y="811" class="lg">uno o más</text>
+<circle cx="1098.1" cy="807.0" r="2.6" fill="#fff" stroke="#444" stroke-width="1.2"/>
+<line x1="1105.6" y1="807.0" x2="1094.6" y2="811.0" stroke="#444" stroke-width="1.3"/>
+<line x1="1105.6" y1="807.0" x2="1094.6" y2="807.0" stroke="#444" stroke-width="1.3"/>
+<line x1="1105.6" y1="807.0" x2="1094.6" y2="803.0" stroke="#444" stroke-width="1.3"/>
+<text x="1109.6" y="811" class="lg">cero o más</text>
 </svg></body></html>

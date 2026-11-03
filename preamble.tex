@@ -100,3 +100,9 @@
 % ===============================
 % Evita cajas desbordadas en párrafos con palabras largas (tercera pasada de línea).
 \emergencystretch=3em
+
+% Índices: espacio reservado para el número de página, para que no se pegue al texto.
+\makeatletter
+\renewcommand*\@pnumwidth{2.4em}
+\renewcommand*\@tocrmarg{3.4em}
+\makeatother
