@@ -1,93 +1,91 @@
 import html, sys
 esc = html.escape
 out = []
-LH = 14
+FS = 18
+LH = 24
+W, H = 1680, 1040
 
-def node(x, y, w, title, lines, focal=False, fill='#faf9f5'):
-    h = 30 + len(lines) * LH + 10
-    f, s, sw = ('#fbe9e2', '#d9532c', 1.5) if focal else (fill, '#1a1a1a', 1)
+def node(x, y, w, title, lines, focal=False):
+    h = 44 + len(lines) * LH + 16
+    f, s, sw = ('#fbe9e2', '#d9532c', 1.5) if focal else ('#faf9f5', '#1a1a1a', 1)
     out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="6" fill="{f}" stroke="{s}" stroke-width="{sw}"/>')
-    out.append(f'<text x="{x+w/2}" y="{y+20}" text-anchor="middle" class="nm">{esc(title)}</text>')
+    out.append(f'<text x="{x+w/2}" y="{y+28}" text-anchor="middle" class="nm">{esc(title)}</text>')
     for i, t in enumerate(lines):
-        out.append(f'<text x="{x+w/2}" y="{y+38+i*LH}" text-anchor="middle" class="a">{esc(t)}</text>')
-    return dict(x=x, y=y, w=w, h=h)
+        out.append(f'<text x="{x+w/2}" y="{y+52+i*LH}" text-anchor="middle" class="a">{esc(t)}</text>')
+    return dict(x=x, y=y, w=w, h=h, b=y+h, cx=x+w/2, cy=y+h/2)
 
-def frame(x, y, w, h, title, dash=True, fill='#f1eee5'):
-    out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="{fill}" stroke="#6b6b6b"' + (' stroke-dasharray="6,4"' if dash else '') + '/>')
-    out.append(f'<text x="{x+14}" y="{y+18}" class="st">{esc(title)}</text>')
+def frame(x, y, w, h, title, bottom=False):
+    out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="#f1eee5" stroke="#6b6b6b" stroke-dasharray="6,4"/>')
+    out.append(f'<text x="{x+w-16}" y="{y+26}" text-anchor="end" class="st">{esc(title)}</text>')
 
-def arrow(pts, dashed=False, color='#1a1a1a'):
+def arrow(pts, dashed=False):
     d = 'M' + ' L'.join(f'{x},{y}' for x, y in pts)
-    out.append(f'<path d="{d}" fill="none" stroke="{color}" stroke-width="1"' + (' stroke-dasharray="4,3"' if dashed else '') + ' marker-end="url(#f-arr)"/>')
+    out.append(f'<path d="{d}" fill="none" stroke="{"#6b6b6b" if dashed else "#1a1a1a"}" stroke-width="1.4"' + (' stroke-dasharray="6,4"' if dashed else '') + ' marker-end="url(#f-arr)"/>')
 
-def label(x, y, t, anchor='middle'):
-    tw = len(t) * 5.2 + 8
-    x0 = x - tw / 2 if anchor == 'middle' else x - 4
-    out.append(f'<rect x="{x0:.0f}" y="{y-9}" width="{tw:.0f}" height="11" fill="#faf9f5"/><text x="{x}" y="{y}" text-anchor="{anchor}" class="r">{esc(t)}</text>')
+def label(x, y, t, anchor='start'):
+    out.append(f'<text x="{x}" y="{y}" text-anchor="{anchor}" class="r">{esc(t)}</text>')
 
-# ---- Entrenamiento (fuera de linea) ----
-frame(500, 24, 1160, 136, 'ENTRENAMIENTO Y EVALUACIÓN · FUERA DE LÍNEA, ANTES DE DESPLEGAR · NO ES PARTE DEL FLUJO POR VIDEO')
-t1 = node(520, 56, 170, 'Videos del laboratorio', ['sin sus anotaciones', 'manuales'])
-t2 = node(730, 56, 200, 'Etiquetado por el equipo', ['el etiquetador propone,', 'el equipo revisa y corrige'])
-t3 = node(970, 56, 170, 'Entrenamiento', ['con los bloques', 'etiquetados'])
-t4 = node(1255, 56, 150, 'Modelo entrenado', ['en el volumen', 'de modelos'])
-t5 = node(1445, 56, 190, 'Evaluación', ['precisión, recall y F1', 'por conducta (provisional)'])
-arrow([(690, 86), (730, 86)])
-arrow([(930, 86), (970, 86)])
-arrow([(1140, 86), (1255, 86)])
-arrow([(1405, 86), (1445, 86)])
+# ---- Entrenamiento (fuera de línea) ----
+frame(20, 14, 1640, 176, 'ENTRENAMIENTO Y EVALUACIÓN · FUERA DE LÍNEA · NO ES PARTE DEL FLUJO POR VIDEO')
+t1 = node(40, 56, 290, 'Videos', ['sin las anotaciones', 'manuales'])
+t2 = node(370, 56, 290, 'Etiquetado', ['el equipo revisa', 'las conductas'])
+t3 = node(700, 56, 290, 'Entrenamiento', ['con los segundos', 'etiquetados'])
+t4 = node(1030, 56, 290, 'Modelo', ['en el volumen', 'de modelos'])
+t5 = node(1360, 56, 280, 'Evaluación', ['F1 por conducta', '(provisional)'])
+arrow([(330, t1['cy']), (370, t1['cy'])])
+arrow([(660, t2['cy']), (700, t2['cy'])])
+arrow([(990, t3['cy']), (1030, t3['cy'])])
+arrow([(1320, t4['cy']), (1360, t4['cy'])])
 
-# ---- Flujo por video ----
-Y = 282
-a1 = node(40, Y, 170, 'Investigador', ['sube el video', 'del experimento'])
-a2 = node(250, Y, 190, 'Backend', ['valida formato y orientación', 'y guarda el video'])
-a3 = node(480, Y, 170, 'Se encola el análisis', ['estado «en cola»', 'Día 1: solo se guarda'])
-a4 = node(690, Y, 170, 'Worker', ['toma la más antigua,', 'un video a la vez', '(consulta periódica)'])
-frame(900, 240, 520, 150, 'PIPELINE DE ANÁLISIS · DENTRO DEL WORKER')
-p1 = node(915, Y, 150, 'Preprocesamiento', ['registro de cámara', 'y modelo de fondo'])
-p2 = node(1085, Y, 150, 'Cilindros', ['localiza de 2 a 4', 'tubos por video'])
-p3 = node(1255, Y, 150, 'Clasificación', ['conducta de cada', 'segundo, con el modelo'], focal=True)
-mid = lambda n: n['y'] + 44
-arrow([(210, mid(a1)), (250, mid(a1))])
-arrow([(440, mid(a2)), (480, mid(a2))])
-arrow([(650, mid(a3)), (690, mid(a3))])
-arrow([(860, mid(a4)), (915, mid(a4))])
-arrow([(1065, mid(p1)), (1085, mid(p1))])
-arrow([(1235, mid(p2)), (1255, mid(p2))])
-pz = node(1455, Y, 215, 'En pausa', ['3 s seguidos sin ver al espécimen:', 'guarda una imagen fija y avisa;', 'el usuario ajusta el recuadro o', 'cancela. Continúa desde ahí; sin', 'respuesta en 5 min, se cancela'])
-arrow([(1405, mid(p3)), (1455, mid(p3))], dashed=True, color='#6b6b6b')
-# modelo -> clasificacion
-arrow([(1330, 56 + t4['h']), (1330, Y)])
-label(1330, 200, 'MODELO ENTRENADO')
-# falla
-e1 = node(915, 440, 290, 'Si falla', ['el video no se abre o no se encuentran', 'los cilindros (o cualquier fallo imprevisto):', 'pasa a «error» con reporte de diagnóstico', 'y aviso; el worker sigue con el siguiente'], fill='#faf9f5')
-arrow([(1065, 390), (1065, 440)], dashed=True, color='#6b6b6b')
-label(1100, 420, 'FALLA')
-# exito
-r1 = node(1235, 440, 190, 'Resultados', ['conducta de cada segundo,', 'tiempos por minuto,', 'copia H.264 para revisión'])
-arrow([(1330, 390), (1330, 440)])
-label(1370, 420, 'ÉXITO', 'start')
-r2 = node(1235, 580, 190, 'Investigador', ['consulta y revisa segundo', 'a segundo; los totales', 'por minuto se recalculan', 'puede reiniciar el análisis'])
-arrow([(1330, 440 + r1['h']), (1330, 580)])
-r3 = node(985, 580, 190, 'Reportes', ['descarga en PDF,', 'CSV o XLSX'])
-arrow([(1235, 580 + 44), (1175, 580 + 44)])
+# ---- Flujo por video (fila principal) ----
+Y = 260
+a1 = node(40, Y, 330, 'Investigador', ['sube el video', 'del experimento'])
+a2 = node(410, Y, 330, 'Backend', ['valida formato', 'y guarda el video'])
+a3 = node(780, Y, 330, 'Cola de análisis', ['estado «en cola»;', 'Día 1: solo se guarda'])
+a4 = node(1150, Y, 330, 'Worker', ['toma el más antiguo;', 'un video a la vez'])
+arrow([(370, a1['cy']), (410, a1['cy'])])
+arrow([(740, a2['cy']), (780, a2['cy'])])
+arrow([(1110, a3['cy']), (1150, a3['cy'])])
 
-legend = '''<g transform="translate(40,690)" class="lg">
-<line x1="0" y1="0" x2="28" y2="0" stroke="#1a1a1a"/><path d="M22,-4 L28,0 L22,4" fill="none" stroke="#1a1a1a"/><text x="38" y="3">FLUJO NORMAL</text>
-<line x1="160" y1="0" x2="188" y2="0" stroke="#6b6b6b" stroke-dasharray="4,3"/><path d="M182,-4 L188,0 L182,4" fill="none" stroke="#6b6b6b"/><text x="198" y="3">FLUJO DE FALLA</text>
-<rect x="340" y="-8" width="22" height="14" rx="3" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/><text x="370" y="3">CLASIFICACIÓN: LA ÚNICA ETAPA QUE USA EL MODELO</text>
+# ---- Pipeline ----
+frame(40, 430, 1600, 230, 'PIPELINE DE ANÁLISIS · DENTRO DEL WORKER')
+p1 = node(70, 470, 330, 'Preprocesamiento', ['registro de cámara', 'y modelo de fondo'])
+p2 = node(440, 470, 330, 'Cilindros', ['localiza de 2 a 4', 'tubos por video'])
+p3 = node(810, 470, 330, 'Clasificación', ['conducta de cada', 'segundo (modelo)'], focal=True)
+pz = node(1180, 470, 440, 'En pausa', ['3 s seguidos sin ver:', 'guarda imagen y avisa;', 'el usuario ajusta o cancela;', 'sin respuesta en 72 h, cancela'])
+arrow([(1310, a4['b']), (1310, 404), (235, 404), (235, p1['y'])])
+arrow([(400, p1['cy']), (440, p2['cy'])])
+arrow([(770, p2['cy']), (810, p3['cy'])])
+arrow([(1140, p3['cy']), (1180, pz['cy'])], dashed=True)
+
+# ---- Desenlaces ----
+e1 = node(70, 720, 470, 'Si falla', ['no se abre el video o no hay', 'cilindros (o un fallo imprevisto):', 'estado «error» y diagnóstico;', 'el worker sigue con el siguiente'])
+arrow([(235, p1['b']), (235, e1['y'])], dashed=True)
+label(250, p1['b'] + 60, 'FALLA')
+r1 = node(600, 720, 470, 'Resultados', ['conducta de cada segundo;', 'tiempos por minuto;', 'copia H.264 para revisión'])
+arrow([(975, p3['b']), (975, r1['y'])])
+label(990, p3['b'] + 60, 'ÉXITO')
+r2 = node(1130, 720, 490, 'Investigador', ['revisa cada segundo;', 'los totales se recalculan;', 'puede reiniciar el análisis'])
+arrow([(1070, r1['cy']), (1130, r2['cy'])])
+r3 = node(600, 890, 470, 'Reportes', ['descarga en PDF, CSV o XLSX'])
+arrow([(835, r1['b']), (835, r3['y'])])
+
+legend = f'''<g transform="translate(40,{H-24})" class="lg">
+<line x1="0" y1="0" x2="34" y2="0" stroke="#1a1a1a"/><path d="M28,-5 L34,0 L28,5" fill="none" stroke="#1a1a1a"/><text x="46" y="6">FLUJO NORMAL</text>
+<line x1="230" y1="0" x2="264" y2="0" stroke="#6b6b6b" stroke-dasharray="6,4"/><path d="M258,-5 L264,0 L258,5" fill="none" stroke="#6b6b6b"/><text x="276" y="6">FLUJO DE FALLA</text>
+<rect x="480" y="-10" width="26" height="18" rx="3" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/><text x="520" y="6">CLASIFICACIÓN: LA ÚNICA ETAPA QUE USA EL MODELO</text>
 </g>'''
-W, H = 1720, 720
-svg = f'''<svg viewBox="0 10 {W} {H-10}" role="img" aria-labelledby="fl-title fl-desc" xmlns="http://www.w3.org/2000/svg">
+
+svg = f'''<svg viewBox="0 0 {W} {H}" role="img" aria-labelledby="fl-title fl-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="fl-title">Flujo general del sistema</title>
-<desc id="fl-desc">Del video subido por el investigador al análisis en cola, las tres etapas del pipeline, los resultados y los reportes, con el entrenamiento del modelo fuera de línea.</desc>
+<desc id="fl-desc">Del video subido por el investigador a la cola de análisis, las tres etapas del pipeline, los resultados y los reportes, con el entrenamiento del modelo fuera de línea.</desc>
 <defs><marker id="f-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#444" stroke-width="1.2"/></marker></defs>
 <style>
-.a{{font:400 9px 'Geist Mono',monospace;fill:#1a1a1a}}
-.nm{{font:600 12px Geist,sans-serif;fill:#1a1a1a}}
-.st{{font:400 8px 'Geist Mono',monospace;fill:#6b6b6b;letter-spacing:.06em}}
-.r{{font:400 8px 'Geist Mono',monospace;fill:#6b6b6b;letter-spacing:.06em}}
-.lg text{{font:400 9px 'Geist Mono',monospace;fill:#6b6b6b}}
+.a{{font:400 {FS}px 'Geist Mono',monospace;fill:#1a1a1a}}
+.nm{{font:600 {FS}px Geist,sans-serif;fill:#1a1a1a}}
+.st{{font:400 {FS}px 'Geist Mono',monospace;fill:#6b6b6b}}
+.r{{font:400 {FS}px 'Geist Mono',monospace;fill:#6b6b6b}}
+.lg text{{font:400 {FS}px 'Geist Mono',monospace;fill:#6b6b6b}}
 </style>
 {chr(10).join(out)}
 {legend}
@@ -102,4 +100,4 @@ body{{overflow-x:auto;overflow-y:hidden}}
 svg{{display:block;height:100vh;width:auto}}
 </style></head><body>{svg}</body></html>'''
 open(sys.argv[1], 'w', encoding='utf-8').write(page)
-print('ok')
+print('ok', W, H)

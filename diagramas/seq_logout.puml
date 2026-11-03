@@ -16,21 +16,17 @@
 '      java -jar plantuml.jar -tpng diagramas/seq_logout.puml
 ' ================================================================
 
-!theme plain
-skinparam defaultFontName Arial
-skinparam defaultFontSize 11
-skinparam shadowing false
-skinparam sequenceMessageAlign center
+!include estilo_doc.iuml
 
 actor Usuario as u
 participant "Interfaz web" as ui
 participant Backend as api
 
-u -> ui: elige "Cerrar sesión" en el menú de usuario
-ui -> api: avisa que el usuario cierra sesión
-api --> ui: confirma\n(no guarda nada: el servidor no lleva\nuna lista de sesiones canceladas)
-ui -> ui: el navegador olvida la sesión
-ui --> u: muestra la pantalla de inicio de sesión
+u -> ui: elige "Cerrar sesión" en\nel menú de usuario
+ui -> api: avisa que el usuario\ncierra sesión
+api --> ui: confirma\n(no guarda nada: el\nservidor no lleva\nuna lista de sesiones\ncanceladas)
+ui -> ui: el navegador olvida la\nsesión
+ui --> u: muestra la pantalla de\ninicio de sesión
 note over ui
   La sesión dura una semana. Si vence,
   se pide iniciar sesión de nuevo.

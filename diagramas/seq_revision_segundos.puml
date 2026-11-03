@@ -34,12 +34,7 @@
 '      java -jar plantuml.jar -tpng diagramas/seq_revision_segundos.puml
 ' ================================================================
 
-!theme plain
-skinparam defaultFontName Arial
-skinparam defaultFontSize 11
-skinparam shadowing false
-skinparam sequenceMessageAlign center
-skinparam BoxPadding 10
+!include estilo_doc.iuml
 
 actor Usuario as u
 participant "Interfaz web" as ui
@@ -47,59 +42,62 @@ participant Backend as api
 database "Base de datos" as db
 participant "Archivos" as fs
 
-u -> ui: en Progreso o en Resultados elige\n"Revisar segundo a segundo"
-ui -> api: pide los datos de la revisión del análisis
-api -> db: ¿el análisis está "completado"?\n¿el usuario subió el video o es Administrador?
+u -> ui: en Progreso o en\nResultados elige\n"Revisar segundo a\nsegundo"
+ui -> api: pide los datos de la\nrevisión del análisis
+api -> db: ¿el análisis está\n"completado"?\n¿el usuario subió el video\no es Administrador?
 db --> api: sí / no
 
 alt el análisis no está completado
   api --> ui: rechaza la petición
   ui --> u: muestra el motivo
 else el análisis está completado
-  api -> db: consulta los especímenes y la etiqueta\nde cada segundo (SEGUNDO)
-  db --> api: etiquetas por espécimen y por segundo
-  api -> fs: lee los recuadros de los cilindros
+  api -> db: consulta los especímenes y\nla etiqueta\nde cada segundo (SEGUNDO)
+  db --> api: etiquetas por espécimen y\npor segundo
+  api -> fs: lee los recuadros de los\ncilindros
   fs --> api: recuadros
-  api --> ui: duración, especímenes, etiquetas y recuadros
+  api --> ui: duración, especímenes,\netiquetas y recuadros
   note over ui
     Si el usuario no subió el video y no es
     Administrador, la pantalla queda en solo
     lectura: ve todo, pero no puede corregir.
   end note
-  ui -> api: pide un permiso temporal para el video (120 minutos)
+  ui -> api: pide un permiso temporal\npara el video (120\nminutos)
   api --> ui: permiso temporal
-  ui -> api: pide el video con ese permiso
-  api -> fs: lee la copia del video en H.264 para reproducir
-  api --> ui: video, por partes (para adelantar y retroceder)
+  ui -> api: pide el video con ese\npermiso
+  api -> fs: lee la copia del video en\nH.264 para reproducir
+  api --> ui: video, por partes (para\nadelantar y retroceder)
 
+newpage
   loop el usuario revisa un espécimen a la vez
-    u -> ui: pulsa una conducta o «No se ve» (el segundo queda sin conducta),\npausa o mueve la línea de tiempo
-    ui -> ui: guarda un borrador en el navegador
+    u -> ui: pulsa una conducta o «No\nse ve» (el segundo queda\nsin conducta),\npausa o mueve la línea de\ntiempo
+    ui -> ui: guarda un borrador en el\nnavegador
   end
 
+newpage
   opt el usuario hizo cambios y elige "Guardar"
     u -> ui: elige "Guardar"
-    ui -> api: envía las correcciones\n(espécimen, segundo, conducta, origen)
-    api -> db: actualiza SEGUNDO\n(conducta y origen de cada segundo)
-    api -> db: recalcula el nivel de clasificación del análisis\n("agrupado" si queda algún segundo como conducta activa,\n"preciso" si no)
-    api -> db: borra los reportes guardados del experimento\npara que se regeneren con los datos nuevos
-    api -> fs: borra los archivos de esos reportes
+    ui -> api: envía las correcciones\n(espécimen, segundo,\nconducta, origen)
+    api -> db: actualiza SEGUNDO\n(conducta y origen de cada\nsegundo)
+    api -> db: recalcula el nivel de\nclasificación del análisis\n("agrupado" si queda algún\nsegundo como conducta\nactiva,\n"preciso" si no)
+    api -> db: borra los reportes\nguardados del experimento\npara que se regeneren con\nlos datos nuevos
+    api -> fs: borra los archivos de esos\nreportes
     db --> api: confirma
-    api --> ui: guardado, con los totales recalculados\n(no se guardan)
+    api --> ui: guardado, con los totales\nrecalculados\n(no se guardan)
     ui --> u: confirma que se guardó
     ui -> ui: borra el borrador
   end
 
+newpage
   opt el usuario elige "Reiniciar el análisis"
-    u -> ui: elige "Reiniciar el análisis"
-    ui --> u: avisa que se borran el resultado anterior y toda la revisión hecha,\ny que no se puede deshacer
+    u -> ui: elige "Reiniciar el\nanálisis"
+    ui --> u: avisa que se borran el\nresultado anterior y toda\nla revisión hecha,\ny que no se puede deshacer
     u -> ui: confirma el reinicio
-    ui -> api: pide reiniciar el análisis del video
-    api -> fs: borra los resultados de la corrida anterior
-    api -> db: borra el resultado anterior y toda la revisión hecha,\ny deja el análisis "en cola"\ny lo pasa al final de la cola
+    ui -> api: pide reiniciar el análisis\ndel video
+    api -> fs: borra los resultados de la\ncorrida anterior
+    api -> db: borra el resultado\nanterior y toda la\nrevisión hecha,\ny deja el análisis "en\ncola"\ny lo pasa al final de la\ncola
     api --> ui: aceptado
     ui -> ui: borra el borrador
-    ui --> u: lleva a la pantalla de progreso
+    ui --> u: lleva a la pantalla de\nprogreso
   end
 end
 @enduml

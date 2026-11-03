@@ -1,83 +1,68 @@
 @startuml pipeline
 ' ================================================================
-'  Pipeline de análisis conductual — FST
+'  Pipeline de análisis conductual - FST
 '  TT 2026-B066 | ESCOM-IPN
 ' ----------------------------------------------------------------
-'  Reemplaza a figures/mermaid/pipeline.png (Mermaid sin fuente en
-'  el repo), que mostraba cinco módulos con YOLOv8 + ByteTrack y
-'  ResNet-18/50 con respaldo por geometría. Se rehace desde el texto
-'  vigente del cap. 5 (Módulos 1-4) y el etiquetador real (fst_auto):
-'
-'  - Sin módulo de seguimiento (CLA-02, 5-oct): un espécimen por
-'    revisado: preprocesamiento, cilindros, clasificación.
-'  - Preprocesamiento solo verifica archivos y lee ancho, alto y
-'    duración. La alineación, el modelo de fondo, los cilindros, la
-'    línea de agua y la revisión de tres segundos sin ver están en
-'    la etapa de cilindros; la pausa queda registrada en "cilindros".
-'  - Clasificación (D-66): la red de fusión R(2+1)D-18 es el clasificador:
-'    cilindro, asi que no hay tracker. Las etapas son las de D-16
-'    recibe el clip de 16 cuadros de una ventana de 4 s y una rama de
-'    medidas (15 rasgos y 7 reglas); tiene tres salidas (escalamiento,
-'    inmovilidad, nado). La conducta activa no sale de la red: se asigna
-'    por segundo con una regla de tres pasos y umbral 0.80 (RN-13). El
-'    gradient boosting es el etiquetador del equipo y aporta los 15 rasgos.
-'  - En la etapa de clasificación se guardan la copia del video para
-'    revisión, los recuadros y los segundos.
-'  - Preprocesamiento según fst_auto (CLA-04, 5-oct): sin corrección
-'    de contraste; fondo por percentil 10, no por mediana.
+'  Versión resumida para legibilidad impresa (una actividad por
+'  línea). Sin módulo de seguimiento: un espécimen por cilindro.
+'  Preprocesamiento solo verifica archivos y lee ancho, alto y
+'  duración. La alineación, el fondo, los cilindros, la línea de
+'  agua y la revisión de tres segundos sin ver están en cilindros.
+'  Clasificación: la red de fusión R(2+1)D-18 recibe el clip de 16
+'  cuadros de una ventana de 4 s y una rama de medidas; da tres
+'  salidas (escalamiento, inmovilidad, nado). La conducta activa se
+'  asigna por segundo con la regla del umbral 0.80.
+'  El detalle técnico está en diagramas/guia_web/ (no se toca aquí).
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/pipeline.puml
 ' ================================================================
-
-!theme plain
-skinparam defaultFontName Arial
-skinparam defaultFontSize 11
-skinparam shadowing false
-skinparam dpi 200
-skinparam ActivityBackgroundColor #FFFEF2
-skinparam PartitionBackgroundColor #FBFBF4
+!include estilo_doc.iuml
 
 start
-:Video subido por el usuario\n(se analiza completo);
+:Video subido por el usuario;
 
 partition "1. Preprocesamiento" {
   if (¿Se pudo abrir el video?) then (sí)
-    :Verifica archivo de video, especímenes y modelo;\nlee ancho, alto y duración del video;
+    :Verifica archivos del análisis;
+    :Lee ancho, alto y duración;
   else (no)
-    :Genera el reporte de diagnóstico\ny marca el análisis con error;
+    :Genera reporte de diagnóstico;
     stop
   endif
 }
 
 partition "2. Cilindros" {
-  :Alinea cada cuadro contra uno de referencia\n(registro de cámara);
-  :Construye el modelo de fondo\n(percentil 10 de cada píxel)\ny el mapa de ocupación;
-  :Localiza los rebordes del recipiente:\nlínea de agua y suelo;
-  :Separa los cilindros por dónde\nhubo movimiento dentro del agua;
+  :Alinea la cámara con un cuadro\nde referencia;
+  :Construye el fondo del video;
+  :Ubica la línea de agua y el suelo;
+  :Separa los cilindros;
   if (¿Se hallaron los cilindros?) then (sí)
-    :Calcula la región de interés\nde cada cilindro;
+    :Calcula la región de cada cilindro;
   else (no)
-    :Genera el reporte de diagnóstico\ny marca el análisis con error;
+    :Genera reporte de diagnóstico;
     stop
   endif
-  :Mide al espécimen en cada cilindro\ny comprueba que los cilindros coincidan\ncon los especímenes;
-  :Separa al espécimen del fondo\ndentro de su cilindro\n(diferencia y brillo, región más grande);
-  if (¿Pasan 3 s seguidos sin ver\nal espécimen en un cilindro?) then (sí)
-    :Guarda una imagen fija a la mitad de esos tres segundos\ny avisa al worker, que deja el análisis\nen pausa (etapa cilindros) hasta que el usuario\najuste el recuadro, continúe o lo cancele;
+  :Mide al espécimen en cada cilindro;
+  :Separa al espécimen del fondo,\nsegundo a segundo;
+  if (¿Tres segundos seguidos sin ver al espécimen?) then (sí)
+    :Guarda imagen fija y datos de la pausa;
+    :Pausa el análisis hasta que el\nusuario responda (72 h);
     stop
   endif
 }
 
 partition "3. Clasificación de conducta" {
-  :Mide quince rasgos de movimiento, postura\ny trayectoria y siete reglas de observación\n(pataleo bajo el agua y cambios sobre\nla línea de agua);
-  :Para cada segundo, toma una ventana de 4 s\ncentrada en él y arma el clip de 16 cuadros\ndel cilindro;
-  :La red de fusión R(2+1)D-18 recibe el clip\ny las medidas y da tres salidas: nado,\ninmovilidad y escalamiento. Con la regla del umbral\n0.80, el sistema asigna a cada segundo una de ellas\no conducta activa;
-  :Guarda la copia del video para revisión (H.264),\nlos recuadros y los segundos;
+  :Mide 15 rasgos de movimiento y\npostura, y 7 reglas de observación;
+  :Conserva los últimos 300 s\nde cada espécimen;
+  :Arma, por cada segundo, un clip\nde 4 s alrededor de él;
+  :La red da tres salidas: nado,\ninmovilidad y escalamiento;
+  :Asigna a cada segundo una conducta\ncon la regla del umbral 0.80;
+  :Guarda la copia para revisión,\nlos recuadros y los segundos;
 }
 
 partition "4. Resultados" {
-  :Calcula los totales por conducta y los bloques de 5 s\nal mostrarse; no se guardan;
+  :Calcula totales y bloques de 5 s\nal mostrarse (no se guardan);
 }
 stop
 

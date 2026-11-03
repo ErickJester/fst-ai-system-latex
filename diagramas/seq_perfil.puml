@@ -17,44 +17,39 @@
 '      java -jar plantuml.jar -tpng diagramas/seq_perfil.puml
 ' ================================================================
 
-!theme plain
-skinparam defaultFontName Arial
-skinparam defaultFontSize 11
-skinparam shadowing false
-skinparam sequenceMessageAlign center
-skinparam BoxPadding 10
+!include estilo_doc.iuml
 
 actor Usuario as u
 participant "Interfaz web" as ui
 participant Backend as api
 database "Base de datos" as db
 
-u -> ui: abre su perfil desde el menú de usuario
+u -> ui: abre su perfil desde el\nmenú de usuario
 note over ui
   no hay consulta de lectura: nombre, apellidos
   y correo salen de la sesión del usuario
 end note
-ui --> u: muestra el formulario con los datos de la sesión\ny, en otro formulario de la misma pantalla,\nla opción de cambiar la contraseña
+ui --> u: muestra el formulario con\nlos datos de la sesión\ny, en otro formulario de\nla misma pantalla,\nla opción de cambiar la\ncontraseña
 
-u -> ui: modifica nombre, apellidos o correo y confirma
-ui -> ui: deshabilita el botón mientras se guarda
-ui -> api: envía los datos modificados
+u -> ui: modifica nombre, apellidos\no correo y confirma
+ui -> ui: deshabilita el botón\nmientras se guarda
+ui -> api: envía los datos\nmodificados
 
 alt el correo nuevo no tiene un formato válido
-  api --> ui: rechaza: el correo no es válido
+  api --> ui: rechaza: el correo no es\nválido
   ui --> u: muestra el error
 else el correo es válido
-  api -> db: ¿otra cuenta ya usa ese correo?
+  api -> db: ¿otra cuenta ya usa ese\ncorreo?
   db --> api: sí / no
 
   alt ya lo usa otra cuenta
-    api --> ui: informa el conflicto, no aplica el cambio
+    api --> ui: informa el conflicto, no\naplica el cambio
     ui --> u: muestra el error
   else el correo está libre
-    api -> db: actualiza nombre, apellidos y correo\ndel usuario de la sesión
+    api -> db: actualiza nombre,\napellidos y correo\ndel usuario de la sesión
     db --> api: confirma
     api --> ui: datos actualizados
-    ui --> u: no muestra ningún mensaje; la barra superior actualiza las iniciales del usuario y el menú de usuario muestra los datos nuevos
+    ui --> u: no muestra ningún mensaje;\nla barra superior\nactualiza las iniciales\ndel usuario y el menú de\nusuario muestra los datos\nnuevos
   end
 end
 

@@ -21,12 +21,7 @@
 '      java -jar plantuml.jar -tpng diagramas/seq_gestion_usuarios.puml
 ' ================================================================
 
-!theme plain
-skinparam defaultFontName Arial
-skinparam defaultFontSize 11
-skinparam shadowing false
-skinparam sequenceMessageAlign center
-skinparam BoxPadding 10
+!include estilo_doc.iuml
 
 actor Administrador as admin
 participant "Interfaz web" as ui
@@ -34,7 +29,7 @@ participant Backend as api
 database "Base de datos" as db
 
 admin -> ui: abre el panel de usuarios
-ui -> api: solicita la lista de usuarios\ncon la sesión activa del Administrador
+ui -> api: solicita la lista de\nusuarios\ncon la sesión activa del\nAdministrador
 
 note over api
   filtro de rol en cada petición: si la sesión no pertenece
@@ -42,19 +37,19 @@ note over api
   «No tienes permiso para esta acción»
 end note
 
-api -> db: ¿la sesión pertenece a un Administrador?
+api -> db: ¿la sesión pertenece a un\nAdministrador?
 db --> api: sí / no
 
 alt no pertenece a un Administrador
-  api --> ui: rechaza: no tiene permiso («No tienes permiso para esta acción»)
-  ui --> admin: muestra el error, no abre el panel
+  api --> ui: rechaza: no tiene permiso\n(«No tienes permiso para\nesta acción»)
+  ui --> admin: muestra el error, no abre\nel panel
 else pertenece a un Administrador
-  api -> db: consulta todos los usuarios en una sola consulta, sin paginación,\nincluida la marca de si cada uno es Administrador
-  db --> api: lista de usuarios con esa marca
+  api -> db: consulta todos los\nusuarios en una sola\nconsulta, sin paginación,\nincluida la marca de si\ncada uno es Administrador
+  db --> api: lista de usuarios con esa\nmarca
   api --> ui: la lista de usuarios
-  ui --> admin: muestra la tabla de usuarios
+  ui --> admin: muestra la tabla de\nusuarios
 
-  admin -> ui: elige la acción sobre un usuario
+  admin -> ui: elige la acción sobre un\nusuario
   note right of ui
     no hay acción para eliminar una cuenta
   end note
@@ -63,66 +58,69 @@ else pertenece a un Administrador
     ref over ui, api, db
       ver CU-12 "Crear cuenta de usuario"
     end ref
-    ui --> admin: la tabla se actualiza con la cuenta nueva
+    ui --> admin: la tabla se actualiza con\nla cuenta nueva
 
+newpage
   else editar datos de una cuenta (nombre, apellidos o correo)
-    admin -> ui: modifica los datos y confirma
-    ui -> api: solicita guardar los cambios de la cuenta
+    admin -> ui: modifica los datos y\nconfirma
+    ui -> api: solicita guardar los\ncambios de la cuenta
 
-    api -> db: actualiza nombre, apellidos y correo de la cuenta
+    api -> db: actualiza nombre,\napellidos y correo de la\ncuenta
     db --> api: confirma la actualización
     api --> ui: confirma los cambios
-    ui --> admin: la tabla muestra los datos actualizados
+    ui --> admin: la tabla muestra los datos\nactualizados
 
   else dar o quitar el rol de Administrador
-    admin -> ui: cambia el rol de un usuario y confirma
+    admin -> ui: cambia el rol de un\nusuario y confirma
     ui -> api: solicita el cambio de rol
 
     alt es la propia cuenta del Administrador
-      api --> ui: rechaza: «Para cambiar tu propia cuenta usa Mi perfil.»
+      api --> ui: rechaza: «Para cambiar tu\npropia cuenta usa Mi\nperfil.»
       ui --> admin: muestra el error
     else es otra cuenta
-      api -> db: cuenta cuántos Administradores activos quedarían después del cambio,\nsin que otro cambio se cruce antes de contar
+      api -> db: cuenta cuántos\nAdministradores activos\nquedarían después del\ncambio,\nsin que otro cambio se\ncruce antes de contar
       db --> api: cantidad restante
 
       alt quedarían 0 Administradores activos
         api --> ui: rechaza el cambio
-        ui --> admin: muestra la advertencia\n"debe existir al menos un Administrador activo"
+        ui --> admin: muestra la advertencia\n"debe existir al menos un\nAdministrador activo"
       else se puede cambiar
-        api -> db: agrega o quita su registro de administrador\nen la misma operación
+        api -> db: agrega o quita su registro\nde administrador\nen la misma operación
         db --> api: confirma el cambio
         api --> ui: confirma el cambio de rol
-        ui --> admin: la tabla muestra el nuevo rol
+        ui --> admin: la tabla muestra el nuevo\nrol
       end
     end
 
+newpage
   else desactivar cuenta
-    admin -> ui: selecciona un usuario y confirma la desactivación
-    ui -> api: solicita desactivar la cuenta
+    admin -> ui: selecciona un usuario y\nconfirma la desactivación
+    ui -> api: solicita desactivar la\ncuenta
 
     alt es la propia cuenta del Administrador
-      api --> ui: rechaza: «Para cambiar tu propia cuenta usa Mi perfil.»
+      api --> ui: rechaza: «Para cambiar tu\npropia cuenta usa Mi\nperfil.»
       ui --> admin: muestra el error
     else es otra cuenta
-      api -> db: cuenta cuántos Administradores activos quedarían después,\nsin que otro cambio se cruce antes de contar; si esta cuenta es Administrador
-      db --> api: cantidad restante (o "no aplica" si no es Administrador)
+      api -> db: cuenta cuántos\nAdministradores activos\nquedarían después,\nsin que otro cambio se\ncruce antes de contar; si\nesta cuenta es\nAdministrador
+      db --> api: cantidad restante (o "no\naplica" si no es\nAdministrador)
 
       alt quedarían 0 Administradores activos
         api --> ui: rechaza la desactivación
-        ui --> admin: muestra la advertencia\n"debe existir al menos un Administrador activo"
+        ui --> admin: muestra la advertencia\n"debe existir al menos un\nAdministrador activo"
       else se puede desactivar
-        api -> db: marca la cuenta como inactiva
+        api -> db: marca la cuenta como\ninactiva
         db --> api: confirma la actualización
-        api -> api: corta las sesiones activas de esa cuenta
+        api -> api: corta las sesiones activas\nde esa cuenta
         api --> ui: confirma la desactivación
-        ui --> admin: usuario marcado como inactivo en la tabla
+        ui --> admin: usuario marcado como\ninactivo en la tabla
       end
     end
 
+newpage
   else reactivar cuenta
-    admin -> ui: selecciona un usuario inactivo y confirma la reactivación
-    ui -> api: solicita reactivar la cuenta
-    api -> db: marca la cuenta como activa
+    admin -> ui: selecciona un usuario\ninactivo y confirma la\nreactivación
+    ui -> api: solicita reactivar la\ncuenta
+    api -> db: marca la cuenta como\nactiva
     db --> api: confirma la actualización
     note over api
       solo marca la cuenta como activa: la contraseña anterior
@@ -130,17 +128,17 @@ else pertenece a un Administrador
       pide cambiarla y no se envía correo
     end note
     api --> ui: cuenta reactivada
-    ui --> admin: la tabla muestra la cuenta como activa
+    ui --> admin: la tabla muestra la cuenta\ncomo activa
   else generar contraseña temporal nueva
-    admin -> ui: selecciona otro usuario (no a sí mismo) y confirma
+    admin -> ui: selecciona otro usuario\n(no a sí mismo) y confirma
     alt la cuenta está inactiva
-      ui --> admin: pide reactivar la cuenta primero
+      ui --> admin: pide reactivar la cuenta\nprimero
     else la cuenta está activa
-      ui -> api: solicita una contraseña temporal nueva
-      api -> api: genera la contraseña temporal
-      api -> db: guarda la contraseña temporal y obliga a cambiarla\nen el siguiente acceso
+      ui -> api: solicita una contraseña\ntemporal nueva
+      api -> api: genera la contraseña\ntemporal
+      api -> db: guarda la contraseña\ntemporal y obliga a\ncambiarla\nen el siguiente acceso
       db --> api: confirma
-      api -> api: envía la contraseña temporal por correo
+      api -> api: envía la contraseña\ntemporal por correo
       note over api
         queda registrada la acción, sin la contraseña
       end note

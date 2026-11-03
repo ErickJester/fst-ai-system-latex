@@ -1,115 +1,90 @@
 import html, sys
-LH = 14
-out = []
 esc = html.escape
+out = []
+LH = 19          # interlinea (px CSS) para letra de 15 px
+FS = 15          # letra de cuerpo (px CSS)
+W, H = 1400, 900
 
-def hop_path(pts, hops):
-    """pts: lista de puntos; hops: lista de (x,y) donde un tramo horizontal salta sobre una vertical."""
-    d = f'M{pts[0][0]},{pts[0][1]}'
-    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
-        if y0 == y1:
-            for hx, hy in sorted([h for h in hops if h[1] == y0], key=lambda h: -h[0] if x1 < x0 else h[0]):
-                if min(x0, x1) < hx < max(x0, x1):
-                    s = -1 if x1 < x0 else 1
-                    d += f' L{hx - 6*s},{y0} A6,6 0 0 {1 if s > 0 else 0} {hx + 6*s},{y0}'
-        d += f' L{x1},{y1}'
-    return d
-
-def plain(x, y, w, lines, title, stereo, fill='#faf9f5', stroke='#1a1a1a', sw=1):
-    h = 44 + len(lines) * LH + 14
-    out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="6" fill="{fill}" stroke="{stroke}" stroke-width="{sw}"/>')
-    out.append(f'<text x="{x+w/2}" y="{y+14}" text-anchor="middle" class="st">«{stereo}»</text>')
-    out.append(f'<text x="{x+w/2}" y="{y+30}" text-anchor="middle" class="nm">{esc(title)}</text>')
-    out.append(f'<line x1="{x}" y1="{y+40}" x2="{x+w}" y2="{y+40}" stroke="{stroke}"/>')
+def box(x, y, w, lines, title=None, stereo=None, fill='#faf9f5', stroke='#1a1a1a', sw=1, dash=False):
+    head = 58 if (title and stereo) else 44
+    h = head + len(lines) * LH + 14
+    out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="6" fill="{fill}" stroke="{stroke}" stroke-width="{sw}"' + (' stroke-dasharray="6,4"' if dash else '') + '/>')
+    ty = y + 20
+    if stereo:
+        out.append(f'<text x="{x+w/2}" y="{ty}" text-anchor="middle" class="st">«{esc(stereo)}»</text>')
+        ty += 18
+    if title:
+        out.append(f'<text x="{x+w/2}" y="{ty}" text-anchor="middle" class="nm">{esc(title)}</text>')
+    out.append(f'<line x1="{x}" y1="{y+head}" x2="{x+w}" y2="{y+head}" stroke="{stroke}"/>')
     for i, t in enumerate(lines):
-        out.append(f'<text x="{x+12}" y="{y+58+i*LH}" class="a">{esc(t)}</text>')
-    return y + h
+        out.append(f'<text x="{x+14}" y="{y+head+21+i*LH}" class="a">{esc(t)}</text>')
+    return dict(x=x, y=y, w=w, h=h, bottom=y+h)
 
-W, H = 1400, 880
-bands = [
-    ('CAPA 1', 'Presentación', 104, 240, '#f4f2ea'),
-    ('CAPA 2', 'Lógica de negocio', 262, 412, '#efede4'),
-    ('CAPA 3', 'Procesamiento asíncrono', 434, 620, '#f4f2ea'),
-    ('CAPA 4', 'Datos', 666, 826, '#efede4'),
-]
-for tag, name, y0, y1, fill in bands:
+def band(tag, name, y0, y1, fill):
     out.append(f'<rect x="20" y="{y0}" width="{W-40}" height="{y1-y0}" rx="8" fill="{fill}" stroke="#d8d5cc"/>')
-    out.append(f'<text x="38" y="{y0+24}" class="st">{tag}</text>')
-    out.append(f'<text x="38" y="{y0+42}" class="nm" text-anchor="start">{esc(name)}</text>')
+    out.append(f'<text x="36" y="{y0+22}" class="st">{tag}</text>')
+    out.append(f'<text x="36" y="{y0+42}" class="nm">{esc(name)}</text>')
 
-# ---- Componentes ----
+def lab(x, y, t, anchor='start'):
+    out.append(f'<text x="{x}" y="{y}" text-anchor="{anchor}" class="r">{esc(t)}</text>')
+
+def arrow(pts):
+    d = 'M' + ' L'.join(f'{x},{y}' for x, y in pts)
+    out.append(f'<path d="{d}" fill="none" stroke="#1a1a1a" stroke-width="1.2" marker-end="url(#c-arr)"/>')
+
 # Actor
-out.append('<rect x="230" y="22" width="300" height="52" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-dasharray="6,4"/>')
-out.append('<text x="380" y="40" text-anchor="middle" class="st">«actor»</text>')
-out.append('<text x="380" y="58" text-anchor="middle" class="nm">Investigador (navegador web)</text>')
+out.append('<rect x="480" y="16" width="440" height="62" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-dasharray="6,4"/>')
+out.append('<text x="700" y="38" text-anchor="middle" class="st">«actor»</text>')
+out.append('<text x="700" y="62" text-anchor="middle" class="nm">Investigador (navegador)</text>')
 
-# Capa 1
-plain(230, 118, 300, ['React.js + Vite', 'Formularios de experimento', 'Visualización de resultados', 'Descarga de reportes (PDF, CSV, XLSX)'], 'frontend', 'contenedor')
-# Capa 2
-plain(230, 276, 420, ['Flask + SQLAlchemy + Flask-JWT-Extended', 'API REST (JSON)', 'Autenticación con JWT', 'Validación de los archivos de video', 'Encolado de las tareas de análisis'], 'backend', 'contenedor')
-# Capa 3: worker (pieza clave)
-wx, wy, ww = 800, 456, 560
-rows = [('OpenCV', 'Preprocesamiento y localización de cilindros'),
-        ('scikit-learn', 'Clasificador sobre rasgos'),
-        ('PyTorch', 'R(2+1)D-18: clasificador de conducta'),
-        ('Python', 'Cola de a un video · retoma pendientes al arrancar · pausas'),
-        ('Python', 'Tareas diarias a la madrugada: borrado, aviso, disco')]
-wh = 44 + len(rows) * 18 + 10
-out.append(f'<rect x="{wx}" y="{wy}" width="{ww}" height="{wh}" rx="6" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/>')
-out.append(f'<text x="{wx+ww/2}" y="{wy+14}" text-anchor="middle" class="st">«contenedor»</text>')
-out.append(f'<text x="{wx+ww/2}" y="{wy+30}" text-anchor="middle" class="nm">worker</text>')
-out.append(f'<line x1="{wx}" y1="{wy+40}" x2="{wx+ww}" y2="{wy+40}" stroke="#d9532c"/>')
-for i, (a, b) in enumerate(rows):
-    yy = wy + 58 + i * 18
-    out.append(f'<text x="{wx+14}" y="{yy}" class="a" style="font-weight:600">{esc(a)}</text>')
-    out.append(f'<text x="{wx+130}" y="{yy}" class="a">{esc(b)}</text>')
-wbot = wy + wh
-# Capa 4
-dbb = plain(230, 686, 240, ['PostgreSQL', 'Cola de tareas: tabla ANALISIS', 'Esquema relacional (15 tablas)'], 'Base de datos', 'contenedor')
-plain(830, 686, 240, ['Videos originales', 'Copia H.264 para revisión', 'Recuadros, imagen y datos de la pausa', 'Reportes PDF / CSV / XLSX y diagnóstico'], 'Volumen compartido', 'volumen', fill='#ece7d8')
-plain(1110, 686, 250, ['Solo lectura para el worker', 'Archivo del clasificador', 'de conducta'], 'Volumen de modelos', 'volumen', fill='#ece7d8')
+# Bandas
+band('CAPA 1', 'Presentación', 96, 250, '#f4f2ea')
+band('CAPA 2', 'Lógica de negocio', 266, 432, '#efede4')
+band('CAPA 3', 'Procesamiento asíncrono', 452, 650, '#f4f2ea')
+band('CAPA 4', 'Datos', 666, 860, '#efede4')
 
-# ---- Flechas ----
-def arrow(pts, hops=()):
-    out.append(f'<path d="{hop_path(pts, list(hops))}" fill="none" stroke="#1a1a1a" stroke-width="1" marker-end="url(#c-arr)"/>')
-def lab_h(x, y, t):
-    tw = len(t) * 5.2 + 8
-    out.append(f'<rect x="{x-tw/2:.0f}" y="{y-9}" width="{tw:.0f}" height="11" fill="#efede4"/><text x="{x}" y="{y}" text-anchor="middle" class="r">{esc(t)}</text>')
-def lab_v(x, y, t):
-    out.append(f'<text x="{x}" y="{y}" class="r">{esc(t)}</text>')
+fe = box(420, 124, 560, ['React + Vite', 'Formularios, resultados y reportes'], 'frontend', 'contenedor')
+be = box(420, 294, 560, ['Spring Boot (Java 21)', 'API REST (JSON) con JWT', 'Valida videos y encola análisis'], 'backend', 'contenedor')
+# Worker (pieza clave)
+wk = box(260, 480, 880, ['OpenCV: preprocesamiento y cilindros', 'PyTorch: red de fusión R(2+1)D-18',
+                         'Python: un análisis a la vez; reencola al arrancar',
+                         'Python: tareas diarias (borrado, aviso, disco)'],
+         'worker', 'contenedor', fill='#fbe9e2', stroke='#d9532c', sw=1.5)
+db = box(40, 716, 430, ['PostgreSQL 16', 'Tabla ANALISIS = cola de análisis', '12 tablas del esquema'], 'Base de datos', 'contenedor')
+vid = box(500, 716, 440, ['videos, copias de revisión,', 'recuadros, pausas, reportes'], 'Volumen compartido', 'volumen', fill='#ece7d8')
+mod = box(970, 716, 390, ['solo lectura para el worker', 'archivo del clasificador'], 'Volumen de modelos', 'volumen', fill='#ece7d8')
 
-arrow([(380, 74), (380, 118)])
-arrow([(380, 218), (380, 276)])
-lab_v(390, 252, 'API REST (JSON + JWT)')
-arrow([(350, 276 + 44 + 5*LH + 14), (350, 686)])
-lab_v(360, 560, 'ENCOLA ANÁLISIS')
-by = 276 + 44 + 5 * LH + 14
-arrow([(600, by), (600, 650), (880, 650), (880, 686)])
-lab_h(740, 644, 'LEE Y SIRVE ARCHIVOS')
-arrow([(840, wbot), (840, 630), (410, 630), (410, 686)], hops=[(600, 630)])
-lab_h(735, 624, 'TOMA TAREAS Y GUARDA RESULTADOS')
-arrow([(1020, wbot), (1020, 686)])
-lab_v(1028, (wbot + 686) / 2 + 3, 'GUARDA ARCHIVOS')
-arrow([(1230, wbot), (1230, 686)])
-lab_v(1238, (wbot + 686) / 2 + 3, 'CARGA AL INICIAR')
+# Flechas
+arrow([(700, fe['bottom']), (700, be['y'])])
+lab(712, (fe['bottom'] + be['y']) / 2 + 5, 'API REST (JSON + JWT)')
+arrow([(700, be['bottom']), (700, wk['y'])])
+lab(712, (be['bottom'] + wk['y']) / 2 + 5, 'ENCOLA ANÁLISIS')
+arrow([(420, be['y'] + 40), (250, be['y'] + 40), (250, db['y'])])
+lab(240, 580, 'LEE Y ESCRIBE ANÁLISIS', 'end')
+arrow([(400, wk['bottom']), (400, db['y'])])
+lab(412, wk['bottom'] + 30, 'TOMA TAREAS Y GUARDA')
+arrow([(660, wk['bottom']), (660, vid['y'])])
+lab(672, wk['bottom'] + 30, 'GUARDA ARCHIVOS')
+arrow([(1080, mod['y']), (1080, wk['bottom'])])
+lab(1092, wk['bottom'] + 30, 'CARGA AL INICIAR')
 
-legend = '''<g transform="translate(40,850)" class="lg">
-<rect x="0" y="-8" width="22" height="14" rx="3" fill="#faf9f5" stroke="#1a1a1a"/><text x="30" y="3">CONTENEDOR DOCKER</text>
-<rect x="170" y="-8" width="22" height="14" rx="3" fill="#ece7d8" stroke="#1a1a1a"/><text x="200" y="3">VOLUMEN</text>
-<line x1="290" y1="0" x2="318" y2="0" stroke="#1a1a1a"/><path d="M312,-4 L318,0 L312,4" fill="none" stroke="#1a1a1a"/><text x="328" y="3">COMUNICACIÓN</text>
-<rect x="450" y="-8" width="22" height="14" rx="3" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/><text x="480" y="3">PIEZA CLAVE: WORKER SEPARADO DEL BACKEND</text>
+legend = '''<g transform="translate(40,884)" class="lg">
+<rect x="0" y="-12" width="24" height="16" rx="3" fill="#faf9f5" stroke="#1a1a1a"/><text x="34" y="2">CONTENEDOR</text>
+<rect x="200" y="-12" width="24" height="16" rx="3" fill="#ece7d8" stroke="#1a1a1a"/><text x="234" y="2">VOLUMEN</text>
+<line x1="380" y1="-4" x2="412" y2="-4" stroke="#1a1a1a"/><path d="M406,-8 L412,-4 L406,0" fill="none" stroke="#1a1a1a"/><text x="422" y="2">COMUNICACIÓN</text>
+<rect x="650" y="-12" width="24" height="16" rx="3" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/><text x="684" y="2">PIEZA CLAVE: WORKER SEPARADO DEL BACKEND</text>
 </g>'''
 
-svg = f'''<svg viewBox="0 6 {W} {H-6}" role="img" aria-labelledby="ca-title ca-desc" xmlns="http://www.w3.org/2000/svg">
+svg = f'''<svg viewBox="0 0 {W} {H}" role="img" aria-labelledby="ca-title ca-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="ca-title">Arquitectura de software por capas</title>
-<desc id="ca-desc">Cuatro capas: presentación (React), lógica de negocio (Flask), procesamiento asíncrono (worker con OpenCV, scikit-learn y PyTorch) y datos (PostgreSQL y dos volúmenes).</desc>
+<desc id="ca-desc">Cuatro capas: presentación (React), lógica de negocio (Spring Boot), procesamiento asíncrono (worker con OpenCV y PyTorch) y datos (PostgreSQL y dos volúmenes).</desc>
 <defs><marker id="c-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#1a1a1a" stroke-width="1.2"/></marker></defs>
 <style>
-.a{{font:400 9px 'Geist Mono',monospace;fill:#1a1a1a}}
-.nm{{font:600 12px Geist,sans-serif;fill:#1a1a1a}}
-.st{{font:400 8px 'Geist Mono',monospace;fill:#6b6b6b;letter-spacing:.06em}}
-.r{{font:400 8px 'Geist Mono',monospace;fill:#6b6b6b;letter-spacing:.06em}}
-.lg text{{font:400 9px 'Geist Mono',monospace;fill:#6b6b6b}}
+.a{{font:400 {FS}px 'Geist Mono',monospace;fill:#1a1a1a}}
+.nm{{font:600 18px Geist,sans-serif;fill:#1a1a1a}}
+.st{{font:400 {FS}px 'Geist Mono',monospace;fill:#6b6b6b}}
+.r{{font:400 {FS}px 'Geist Mono',monospace;fill:#6b6b6b}}
+.lg text{{font:400 {FS}px 'Geist Mono',monospace;fill:#6b6b6b}}
 </style>
 {chr(10).join(out)}
 {legend}
@@ -124,4 +99,4 @@ body{{overflow-x:auto;overflow-y:hidden}}
 svg{{display:block;height:100vh;width:auto}}
 </style></head><body>{svg}</body></html>'''
 open(sys.argv[1], 'w', encoding='utf-8').write(page)
-print('ok')
+print('ok', W, H)

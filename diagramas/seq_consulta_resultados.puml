@@ -47,59 +47,56 @@
 '      java -jar plantuml.jar -tpng diagramas/seq_consulta_resultados.puml
 ' ================================================================
 
-!theme plain
-skinparam defaultFontName Arial
-skinparam defaultFontSize 11
-skinparam shadowing false
-skinparam sequenceMessageAlign center
-skinparam BoxPadding 10
+!include estilo_doc.iuml
 
 actor "Investigador / Administrador" as inv
 participant "Interfaz web" as ui
 participant Backend as api
 database "Base de datos" as db
 
-inv -> ui: abre resultados del experimento\n(desde la lista, el detalle, el grupo,\nel progreso o una notificación)
-ui -> api: pide los resultados del experimento
-api -> db: busca los especímenes analizados, con su tanda y su grupo,\ny la conducta de cada segundo
-db --> api: segundos por conducta de cada espécimen, con los segundos "sin ver"
+inv -> ui: abre resultados del\nexperimento\n(desde la lista, el\ndetalle, el grupo,\nel progreso o una\nnotificación)
+ui -> api: pide los resultados del\nexperimento
+api -> db: busca los especímenes\nanalizados, con su tanda y\nsu grupo,\ny la conducta de cada\nsegundo
+db --> api: segundos por conducta de\ncada espécimen, con los\nsegundos "sin ver"
 api --> ui: resultados por espécimen
-ui -> inv: muestra la tabla por espécimen, con su tanda y una columna "Sin ver"
+ui -> inv: muestra la tabla por\nespécimen, con su tanda y\nuna columna "Sin ver"
 note right of ui
   Si algún análisis del experimento es "agrupado",
   el encabezado avisa que parte de los segundos
   son conducta activa.
 end note
-inv -> ui: elige ver el grupo completo o una sola tanda
-ui -> ui: calcula la media, la desviación estándar y la varianza\n(muestrales) de los especímenes que se ven
-ui -> api: pide la comparación entre grupos
-api -> db: busca los grupos del experimento y sus tandas
+inv -> ui: elige ver el grupo\ncompleto o una sola tanda
+ui -> ui: calcula la media, la\ndesviación estándar y la\nvarianza\n(muestrales) de los\nespecímenes que se ven
+ui -> api: pide la comparación entre\ngrupos
+api -> db: busca los grupos del\nexperimento y sus tandas
 
-db --> api: grupos (control, referencia, tratamiento)
+db --> api: grupos (control,\nreferencia, tratamiento)
 
+newpage
 loop por cada grupo
-  api -> db: busca los especímenes del grupo, vía sus tandas
-  api -> db: para cada espécimen, busca su observación\ndel video con sesión "Día 2"
+  api -> db: busca los especímenes del\ngrupo, vía sus tandas
+  api -> db: para cada espécimen, busca\nsu observación\ndel video con sesión "Día\n2"
 
   alt el espécimen ya tiene su Día 2 analizado
-    api -> db: cuenta los segundos de cada una de las cuatro conductas\nen los segundos de esa observación\ny lee el nivel de clasificación de su análisis
-    db --> api: segundos de nado activo, inmovilidad, escalamiento y conducta activa,\ny el nivel ("preciso" o "agrupado")
-  else el Día 2 de ese espécimen no tiene resultado\n(en cola, procesando, en pausa, con error, o sin subir)
-    api -> api: marca al espécimen como dato faltante\npara este grupo, con su estado y su tanda
+    api -> db: cuenta los segundos de\ncada una de las cuatro\nconductas\nen los segundos de esa\nobservación\ny lee el nivel de\nclasificación de su\nanálisis
+    db --> api: segundos de nado,\ninmovilidad, escalamiento\ny conducta activa,\ny el nivel ("preciso" o\n"agrupado")
+  else sin resultado del Día 2\n(en cola, procesando, en pausa,\ncon error o sin subir)
+    api -> api: marca al espécimen como\ndato faltante\npara este grupo, con su\nestado y su tanda
   end
 
+newpage
   alt el grupo mezcla niveles "preciso" y "agrupado"
-    api -> api: no promedia el grupo: lo separa por tanda
+    api -> api: no promedia el grupo: lo\nsepara por tanda
   else el grupo tiene un solo nivel
-    api -> api: calcula la media, la desviación estándar y la varianza\n(muestrales) por conducta entre sus especímenes analizados,\ncon todas sus tandas
+    api -> api: calcula la media, la\ndesviación estándar y la\nvarianza\n(muestrales) por conducta\nentre sus especímenes\nanalizados,\ncon todas sus tandas
   end
 end
 
-api --> ui: comparación entre grupos en las cuatro conductas\n(sin "Sin ver"), con los faltantes por tanda y su estado
+api --> ui: comparación entre grupos\nen las cuatro conductas\n(sin "Sin ver"), con los\nfaltantes por tanda y su\nestado
 alt algún grupo mezcla niveles
-  ui -> inv: aviso en la comparación: ese grupo se muestra por tanda,\nsin promedio, porque sus niveles no significan lo mismo
+  ui -> inv: aviso en la comparación:\nese grupo se muestra por\ntanda,\nsin promedio, porque sus\nniveles no significan lo\nmismo
 end
-ui -> inv: muestra la comparación de los grupos (solo Día 2),\ncon los especímenes faltantes señalados
-inv -> ui: puede descargar en CSV o XLSX lo que ve\n(la tanda o el grupo completo); el PDF se descarga desde el experimento (ver CU-10)
+ui -> inv: muestra la comparación de\nlos grupos (solo Día 2),\ncon los especímenes\nfaltantes señalados
+inv -> ui: puede descargar en CSV o\nXLSX lo que ve\n(la tanda o el grupo\ncompleto); el PDF se\ndescarga desde el\nexperimento (ver CU-10)
 
 @enduml

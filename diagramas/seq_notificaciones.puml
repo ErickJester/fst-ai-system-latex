@@ -29,12 +29,7 @@
 '      java -jar plantuml.jar -tpng diagramas/seq_notificaciones.puml
 ' ================================================================
 
-!theme plain
-skinparam defaultFontName Arial
-skinparam defaultFontSize 11
-skinparam shadowing false
-skinparam sequenceMessageAlign center
-skinparam BoxPadding 10
+!include estilo_doc.iuml
 
 participant Worker as w
 database "Base de datos" as db
@@ -44,45 +39,46 @@ actor Usuario as u
 
 == El sistema crea la notificación ==
 
-w -> db: crea la notificación para el usuario que corresponde\n(análisis terminado, con error, en pausa o cancelado por plazo;\nalerta de disco; video borrado antes de tiempo)
-w -> w: envía también el aviso por correo\n(si el envío falla, el aviso queda en el panel)
+w -> db: crea la notificación para\nel usuario que corresponde\n(análisis terminado, con\nerror, en pausa o\ncancelado por plazo;\nalerta de disco; video\nborrado antes de tiempo)
+w -> w: envía también el aviso por\ncorreo\n(si el envío falla, el\naviso queda en el panel)
 
 == El usuario la consulta ==
 
 loop al entrar a cada pantalla y luego cada 30 segundos (si la pestaña está visible)
-  ui -> api: pide las notificaciones del usuario
-  api -> db: busca las notificaciones de ese usuario,\nlas más recientes primero
-  db --> api: lista (tipo, mensaje, leída o no, fecha)
+  ui -> api: pide las notificaciones\ndel usuario
+  api -> db: busca las notificaciones\nde ese usuario,\nlas más recientes primero
+  db --> api: lista (tipo, mensaje,\nleída o no, fecha)
   api --> ui: lista de notificaciones
-  ui -> u: muestra el contador de todas las no leídas en la barra superior
+  ui -> u: muestra el contador de\ntodas las no leídas en la\nbarra superior
 end
 
-u -> ui: abre el panel y elige una notificación
-ui -> api: marca la notificación como leída
-api -> db: actualiza la notificación como leída\n(solo si pertenece al usuario de la sesión)
+u -> ui: abre el panel y elige una\nnotificación
+ui -> api: marca la notificación como\nleída
+api -> db: actualiza la notificación\ncomo leída\n(solo si pertenece al\nusuario de la sesión)
 db --> api: confirma
 api --> ui: confirma
-ui --> u: lleva a la pantalla de destino según el tipo
+ui --> u: lleva a la pantalla de\ndestino según el tipo
 
+newpage
 opt el usuario elige "Marcar todas como leídas"
-  u -> ui: elige "Marcar todas como leídas"
-  ui -> api: marca cada notificación no leída como leída
-  api -> db: actualiza cada notificación
+  u -> ui: elige "Marcar todas como\nleídas"
+  ui -> api: marca cada notificación no\nleída como leída
+  api -> db: actualiza cada\nnotificación
   db --> api: confirma
   api --> ui: confirma
   ui --> u: actualiza el contador
 end
 
 opt el usuario elige "Marcar como no leída"
-  u -> ui: elige "Marcar como no leída"
-  ui -> api: marca la notificación como no leída
+  u -> ui: elige "Marcar como no\nleída"
+  ui -> api: marca la notificación como\nno leída
   api -> db: actualiza la notificación
   db --> api: confirma
   api --> ui: confirma
 end
 
-ui -> api: pide cuántas notificaciones no leídas tiene
-api -> db: cuenta las no leídas del usuario
+ui -> api: pide cuántas\nnotificaciones no leídas\ntiene
+api -> db: cuenta las no leídas del\nusuario
 db --> api: cantidad
 api --> ui: cantidad
 ui --> u: muestra el contador

@@ -1,26 +1,26 @@
 @startuml estados_experimento
-!theme plain
-skinparam defaultFontName Arial
-skinparam defaultFontSize 11
-skinparam shadowing false
+!include estilo_doc.iuml
+top to bottom direction
 
-[*] --> sin_videos : se creó el experimento\n(CU-04)
+[*] --> sin_videos : se creó el experimento
 
-sin_videos --> en_espera_dia2 : solo se subió video\ndel Día 1 (CU-05)
-sin_videos --> en_cola : se subió y encoló\nun video del Día 2 (CU-05)
-en_espera_dia2 --> en_cola : se subió y encoló\nun video del Día 2 (CU-05)
-en_cola --> procesando : el Worker empezó a\nprocesar alguna tanda
-procesando --> completado : todas las tandas\nterminaron sin error
+sin_videos --> en_espera_dia2 : subió solo\nel video del Día 1
+sin_videos --> en_cola : subió un video\ndel Día 2
+en_espera_dia2 --> en_cola : subió un video\ndel Día 2
+en_cola --> procesando : el Worker empezó\nalguna tanda
+procesando --> completado : todas las tandas\nterminaron bien
 procesando --> error : alguna tanda\nterminó en error
-procesando --> en_pausa : alguna tanda quedó\nen pausa (RN-17)
-en_pausa --> en_cola : el usuario ajustó\nel recuadro
-en_pausa --> cancelado : el usuario canceló o\n72 horas sin respuesta
-completado --> en_cola : se agregó una tanda\nnueva (CU-05)
+procesando --> en_pausa : alguna tanda\nquedó en pausa
+en_pausa --> en_cola : el usuario ajustó\no confirmó el recuadro
+en_pausa --> cancelado : el usuario canceló\no pasaron 72 h
+completado --> en_cola : se agregó\nuna tanda nueva
+
 note right of error
-  error tiene precedencia: mientras alguna
-  tanda siga en error, el experimento sigue
-  en error (error > cancelado > en pausa >
-  procesando > en cola > completado)
+  Si una tanda está en error,
+  el experimento queda en error.
+  Prioridad: error, cancelado,
+  en pausa, procesando, en cola,
+  completado.
 end note
 
 @enduml

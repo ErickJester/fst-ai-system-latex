@@ -48,12 +48,12 @@ procesamiento asíncrono (ffprobe para el preprocesamiento, OpenCV para la etapa
 (PostgreSQL y sistema de archivos). El archivo del clasificador de conducta reside en una
 carpeta del equipo que el \textit{worker} monta en solo lectura al arrancar el contenedor.
 
-\begin{figure}[H]
+\begin{sidewaysfigure}
 \centering
-\includegraphics[width=\textwidth]{figures/diagramas/arquitectura_capas}
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/arquitectura_capas}
 \caption{Arquitectura de software por capas tecnológicas [autoría propia].}
 \label{fig:arquitectura_software}
-\end{figure}
+\end{sidewaysfigure}
 
 Las responsabilidades de cada componente son:
 
@@ -130,6 +130,12 @@ muestra el flujo completo con las tecnologías de cada módulo.
 \includegraphics[width=\textwidth, height=0.88\textheight, keepaspectratio]{figures/diagramas/pipeline_analisis}
 \caption{Diagrama de flujo del \textit{pipeline} de análisis conductual [autoría propia].}
 \label{fig:pipeline}
+\end{figure}
+\begin{figure}[p]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.88\textheight, keepaspectratio]{figures/diagramas/pipeline_analisis_001}
+\caption[]{Diagrama de flujo del \textit{pipeline} de análisis conductual (continuación).}
 \end{figure}
 
 \subsection{Módulo 1: Preprocesamiento}
@@ -323,7 +329,7 @@ reencola los que quedaron en \texttt{procesando} y los empieza de nuevo, y cance
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{figures/diagramas/estados_analisis}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/estados_analisis}
 \caption{Diagrama de estados de un análisis [autoría propia].}
 \label{fig:estados_analisis}
 \end{figure}
@@ -335,12 +341,12 @@ se deriva del conjunto de análisis de todas sus tandas, con precedencia
 error > cancelado > en pausa > procesando > en cola > completado cuando
 coexisten tandas en distintos estados.
 
-\begin{figure}[H]
+\begin{sidewaysfigure}[p]
 \centering
-\includegraphics[width=0.85\textwidth]{figures/diagramas/estados_experimento}
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/estados_experimento}
 \caption{Diagrama de estados agregado de un experimento [autoría propia].}
 \label{fig:estados_experimento}
-\end{figure}
+\end{sidewaysfigure}
 
 \subsection{Separación por espécimen}
 
@@ -390,7 +396,7 @@ Figura~\ref{fig:er} muestra el resultado.
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth, height=0.90\textheight, keepaspectratio]{figures/diagramas/esquema_bd}
+\includegraphics[width=\textwidth, height=0.92\textheight, keepaspectratio]{figures/diagramas/esquema_bd}
 \caption{Esquema físico de la base de datos [autoría propia].}
 \label{fig:er}
 \end{figure}
@@ -565,32 +571,19 @@ del correo. El correo se declara como clave alterna (\texttt{UNIQUE}), no como
 primaria: si algún día cambiara, no haría falta actualizar las claves foráneas en
 \texttt{EXPERIMENTO} y \texttt{NOTIFICACION}.
 
-\subsection{Forma Normal de Boyce--Codd (FNBC)}
-
-La FNBC es más estricta que la 3FN: exige que todo determinante (toda columna o
-conjunto de columnas del que dependan funcionalmente otras columnas) sea una
-clave candidata de la tabla, no solo que las columnas no clave dependan de la
-clave completa \cite{elmasri2015}. Una tabla puede cumplir 3FN y aun así violar
-FNBC cuando tiene más de una clave candidata y alguno de sus determinantes no
-coincide con ninguna de ellas.
-
-La misma separación que resolvió la dependencia transitiva de la 3FN también
-asegura la FNBC: con el tratamiento dentro de \texttt{ESPECIMEN},
-\texttt{idTanda} sería un determinante de esa tabla que no es clave candidata. Al
-llevar el tipo y el tratamiento a \texttt{GRUPO}, a \texttt{ESPECIMEN} solo le
-quedan determinantes que sí son claves candidatas: su clave primaria
-\texttt{idEspecimen} y su clave alterna (\texttt{idTanda},
-\texttt{numeroCilindro}).
-
-El resto de las relaciones se revisó una por una: en cada una, los únicos
-determinantes son su clave primaria y, cuando la tiene, su clave alterna. Por
-ejemplo, \texttt{GRUPO} tiene como determinantes \texttt{idGrupo} (primaria) y la
-combinación (\texttt{idExperimento}, \texttt{etiqueta}) (alterna). Con eso, las
-doce relaciones del modelo relacional cumplen FNBC.
-
-El esquema físico tiene las mismas columnas que el modelo relacional más
-\texttt{rutaDiagnostico} (ruta del reporte de diagnóstico), que depende solo de la clave
-del análisis, así que también cumple FNBC.
+La revisión de la 3FN se hizo en su forma estricta, la de Boyce--Codd (FNBC):
+además de que ninguna columna no clave dependa de otra, se comprobó que todo
+determinante (toda columna o conjunto de columnas del que dependan otras) sea una
+clave candidata de la tabla \cite{elmasri2015}. Con el tratamiento dentro de
+\texttt{ESPECIMEN}, \texttt{idTanda} sería un determinante que no es clave
+candidata; al llevar el tipo y el tratamiento a \texttt{GRUPO}, a
+\texttt{ESPECIMEN} solo le quedan su clave primaria \texttt{idEspecimen} y su
+clave alterna (\texttt{idTanda}, \texttt{numeroCilindro}). En el resto de las
+relaciones los únicos determinantes son la clave primaria y, cuando la hay, la
+clave alterna; por ejemplo, en \texttt{GRUPO} son \texttt{idGrupo} y
+(\texttt{idExperimento}, \texttt{etiqueta}). Las doce relaciones cumplen así la
+3FN en su forma estricta, y el esquema físico, que tiene las mismas columnas,
+también.
 
 \subsection{Resumen de formas normales aplicadas}
 
@@ -638,8 +631,8 @@ las tablas afectadas y la decisión de diseño concreta en cada caso.
   \texttt{idInstitucional} como primaria; correo declarado como clave alterna
   (\texttt{UNIQUE}) \\
 \hline
-FNBC &
-  Todo determinante es clave candidata &
+3FN &
+  Todo determinante es clave candidata (forma estricta, Boyce--Codd) &
   Las 12 relaciones &
   Verificado relación por relación; el esquema físico no repite columnas \\
 \hline
@@ -2376,6 +2369,12 @@ sesión activa y es obligatorio al primer ingreso cuando la cuenta fue creada co
 \caption{Secuencia: creación de cuenta de usuario por administrador [autoría propia].}
 \label{fig:seq_registro}
 \end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_crear_cuenta_001}
+\caption[]{Secuencia: creación de cuenta de usuario por administrador (continuación).}
+\end{figure}
 
 \begin{figure}[H]
 \centering
@@ -2397,6 +2396,12 @@ sesión activa y es obligatorio al primer ingreso cuando la cuenta fue creada co
 \caption{Secuencia: cambio de contraseña del usuario [autoría propia].}
 \label{fig:seq_cambio_pass_inv}
 \end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_cambio_pass_inv_001}
+\caption[]{Secuencia: cambio de contraseña del usuario (continuación).}
+\end{figure}
 
 % ---- Paquete 5: Lista de experimentos, notificaciones y administración ----
 
@@ -2412,6 +2417,24 @@ activa y permite actualizar nombre, apellidos y correo electrónico; la contrase
 \includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_gestion_usuarios}
 \caption{Secuencia: gestión de usuarios por administrador (crear, editar, cambiar el rol, desactivar, reactivar y generar una contraseña temporal nueva) [autoría propia].}
 \label{fig:seq_gestion_usuarios}
+\end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_gestion_usuarios_001}
+\caption[]{Secuencia: gestión de usuarios por administrador (crear, editar, cambiar el rol, desactivar, reactivar y generar una contraseña temporal nueva) (continuación).}
+\end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_gestion_usuarios_002}
+\caption[]{Secuencia: gestión de usuarios por administrador (crear, editar, cambiar el rol, desactivar, reactivar y generar una contraseña temporal nueva) (continuación).}
+\end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_gestion_usuarios_003}
+\caption[]{Secuencia: gestión de usuarios por administrador (crear, editar, cambiar el rol, desactivar, reactivar y generar una contraseña temporal nueva) (continuación).}
 \end{figure}
 
 \begin{figure}[H]
@@ -2435,6 +2458,12 @@ persiste la notificación y cómo el \textit{frontend} la consulta al entrar a c
 \includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_notificaciones}
 \caption{Secuencia: generación y consulta de notificaciones [autoría propia].}
 \label{fig:seq_notificaciones}
+\end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_notificaciones_001}
+\caption[]{Secuencia: generación y consulta de notificaciones (continuación).}
 \end{figure}
 
 % ---- Paquetes 2, 3 y 4: Análisis, progreso, resultados y reportes ----
@@ -2468,12 +2497,36 @@ y CU-26), y los totales por minuto reflejan las correcciones porque se calculan 
 \caption{Secuencia: carga de video con inferencia de tanda [autoría propia].}
 \label{fig:seq_carga}
 \end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_carga_video_001}
+\caption[]{Secuencia: carga de video con inferencia de tanda (continuación).}
+\end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_carga_video_002}
+\caption[]{Secuencia: carga de video con inferencia de tanda (continuación).}
+\end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_analisis_automatico}
 \caption{Secuencia: análisis automático (ejecución del \textit{pipeline} por el Worker) [autoría propia].}
 \label{fig:seq_analisis}
+\end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_analisis_automatico_001}
+\caption[]{Secuencia: análisis automático (continuación).}
+\end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_analisis_automatico_002}
+\caption[]{Secuencia: análisis automático (continuación).}
 \end{figure}
 
 \begin{figure}[H]
@@ -2482,19 +2535,86 @@ y CU-26), y los totales por minuto reflejan las correcciones porque se calculan 
 \caption{Secuencia: consulta de progreso del análisis, incluye manejo de error [autoría propia].}
 \label{fig:seq_progreso}
 \end{figure}
-
 \begin{figure}[H]
+\ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_consulta_progreso_001}
+\caption[]{Secuencia: consulta de progreso del análisis, incluye manejo de error (continuación).}
+\end{figure}
+
+\begin{sidewaysfigure}[p]
+\centering
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste}
 \caption{Secuencia: pausa del análisis, ajuste del recuadro del cilindro y cancelación [autoría propia].}
 \label{fig:seq_pausa}
-\end{figure}
+\end{sidewaysfigure}
+\begin{sidewaysfigure}[p]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste_001}
+\caption[]{Secuencia: pausa del análisis (continuación).}
+\end{sidewaysfigure}
+\begin{sidewaysfigure}[p]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste_002}
+\caption[]{Secuencia: pausa del análisis (continuación).}
+\end{sidewaysfigure}
+\begin{sidewaysfigure}[p]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste_003}
+\caption[]{Secuencia: pausa del análisis (continuación).}
+\end{sidewaysfigure}
+\begin{sidewaysfigure}[p]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste_004}
+\caption[]{Secuencia: pausa del análisis (continuación).}
+\end{sidewaysfigure}
+\begin{sidewaysfigure}[p]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste_005}
+\caption[]{Secuencia: pausa del análisis (continuación).}
+\end{sidewaysfigure}
+\begin{sidewaysfigure}[p]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste_006}
+\caption[]{Secuencia: pausa del análisis (continuación).}
+\end{sidewaysfigure}
+\begin{sidewaysfigure}[p]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste_007}
+\caption[]{Secuencia: pausa del análisis (continuación).}
+\end{sidewaysfigure}
+\begin{sidewaysfigure}[p]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste_008}
+\caption[]{Secuencia: pausa del análisis (continuación).}
+\end{sidewaysfigure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_consulta_resultados}
 \caption{Secuencia: consulta de resultados del análisis [autoría propia].}
 \label{fig:seq_resultados}
+\end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_consulta_resultados_001}
+\caption[]{Secuencia: consulta de resultados del análisis (continuación).}
+\end{figure}
+
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_consulta_resultados_002}
+\caption[]{Secuencia: consulta de resultados del análisis (continuación).}
 \end{figure}
 
 \begin{figure}[H]
@@ -2503,12 +2623,37 @@ y CU-26), y los totales por minuto reflejan las correcciones porque se calculan 
 \caption{Secuencia: descarga de reportes (PDF, CSV, XLSX) [autoría propia].}
 \label{fig:seq_reportes}
 \end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_descarga_reportes_001}
+\caption[]{Secuencia: descarga de reportes (PDF, CSV, XLSX) (continuación).}
+\end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_revision_segundos}
 \caption{Secuencia: revisión y corrección segundo a segundo [autoría propia].}
 \label{fig:seq_revision}
+\end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_revision_segundos_001}
+\caption[]{Secuencia: revisión y corrección segundo a segundo (continuación).}
+\end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_revision_segundos_002}
+\caption[]{Secuencia: revisión y corrección segundo a segundo (continuación).}
+\end{figure}
+
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_revision_segundos_003}
+\caption[]{Secuencia: revisión y corrección segundo a segundo (continuación).}
 \end{figure}
 
 % -----------------------------------------------------------
@@ -2542,13 +2687,15 @@ es un objeto de la clase \textbf{Estadisticas}, uno por conducta, con la conduct
 la desviación estándar muestral y la varianza,
 es una clase derivada y no tiene tabla.
 
-\begin{figure}[p]
+\begin{sidewaysfigure}[p]
 \centering
-\includegraphics[width=\textwidth, height=0.88\textheight, keepaspectratio]{figures/diagramas/clases_completo}
+\includegraphics[width=\textheight, height=0.96\textwidth, keepaspectratio]{figures/diagramas/clases_completo}
 \caption{Diagrama de clases del sistema [autoría propia].}
 \label{fig:clases}
-\end{figure}
+\end{sidewaysfigure}
 % -----------------------------------------------------------
+\FloatBarrier
+
 \section{Diseño de la interfaz web}
 % -----------------------------------------------------------
 
@@ -2566,16 +2713,16 @@ las credenciales, la pantalla comprueba que el correo tenga un formato válido.
 
 \begin{figure}[H]
 \centering
-  \begin{subfigure}[t]{0.48\textwidth}
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/login}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/login}
     \caption{Estado normal.}
     \label{fig:ui_login_normal}
   \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\textwidth}
+  \par\medskip
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/estados/login_error}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/estados/login_error}
     \caption{Credenciales incorrectas (RN-01).}
     \label{fig:ui_login_error}
   \end{subfigure}
@@ -2592,16 +2739,16 @@ perfil; el identificador institucional es de solo lectura.
 
 \begin{figure}[H]
 \centering
-  \begin{subfigure}[t]{0.48\textwidth}
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/primer-acceso}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/primer-acceso}
     \caption{Cambio obligatorio de la contraseña temporal.}
     \label{fig:ui_primer_acceso}
   \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\textwidth}
+  \par\medskip
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/perfil}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/perfil}
     \caption{Perfil del usuario.}
     \label{fig:ui_perfil}
   \end{subfigure}
@@ -2619,16 +2766,16 @@ ofrece la opción de eliminarlo, con un diálogo que pide confirmación (ver RN-
 
 \begin{figure}[H]
 \centering
-  \begin{subfigure}[t]{0.48\textwidth}
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/experimentos}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/experimentos}
     \caption{Lista con experimentos y aviso de vencimiento (RF-24).}
     \label{fig:ui_dashboard_normal}
   \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\textwidth}
+  \par\medskip
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/estados/experimentos_vacio}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/estados/experimentos_vacio}
     \caption{Búsqueda sin coincidencias.}
     \label{fig:ui_dashboard_vacio}
   \end{subfigure}
@@ -2647,16 +2794,16 @@ grupo completo, que reúne los análisis de todas sus tandas (RF-19).
 
 \begin{figure}[H]
 \centering
-  \begin{subfigure}[t]{0.48\textwidth}
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/experimento}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/experimento}
     \caption{Detalle de un experimento.}
     \label{fig:ui_experimento}
   \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\textwidth}
+  \par\medskip
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/grupo}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/grupo}
     \caption{Detalle de un grupo.}
     \label{fig:ui_grupo}
   \end{subfigure}
@@ -2683,36 +2830,40 @@ nuevas más adelante sin repetir los datos del experimento.
 
 \begin{figure}[H]
 \centering
-  \begin{subfigure}[t]{0.48\textwidth}
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/cargar-video}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/cargar-video}
     \caption{Formulario vacío (paso 2).}
     \label{fig:ui_nuevo_vacio}
   \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\textwidth}
+  \par\medskip
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/estados/cargar_lleno}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/estados/cargar_lleno}
     \caption{Grupo, tanda confirmada y archivo seleccionado.}
     \label{fig:ui_nuevo_lleno}
   \end{subfigure}
+\caption{Pantalla de carga de video por tanda [autoría propia].}
+\label{fig:ui_nuevo}
+\end{figure}
 
-  \vspace{8pt}
-  \begin{subfigure}[t]{0.48\textwidth}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/estados/cargar_error_formato}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/estados/cargar_error_formato}
     \caption{Archivo rechazado por formato (RF-08).}
     \label{fig:ui_nuevo_error}
   \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.48\textwidth}
+  \par\medskip
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/estados/cargar_exito}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/estados/cargar_exito}
     \caption{Carga exitosa, análisis en cola (RF-12).}
     \label{fig:ui_nuevo_exito}
   \end{subfigure}
-\caption{Pantalla de carga de video por tanda [autoría propia].}
-\label{fig:ui_nuevo}
+\caption[]{Pantalla de carga de video por tanda (continuación).}
 \end{figure}
 
 \subsection{Progreso del análisis}
@@ -2736,14 +2887,14 @@ y empieza de nuevo (RN-04).
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.75\textwidth]{figures/mockups/progreso}
+\includegraphics[width=0.9\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/progreso}
 \caption{Pantalla de progreso del análisis: un análisis en curso, uno completado con acceso a resultados y a la revisión, dos detenidos por error ---cilindros no detectados y video que no se pudo abrir--- (RF-16), uno en pausa, uno cancelado y la cola de trabajos [autoría propia].}
 \label{fig:ui_progreso}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.75\textwidth]{figures/mockups/pausa}
+\includegraphics[width=0.9\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/pausa}
 \caption{Pantalla de pausa: imagen fija del instante en que no se ve al espécimen, con el recuadro del cilindro que el usuario mueve, el tiempo que queda de las 72~horas y los tres botones «Ajustar y continuar», «El recuadro está bien, continuar» y «Cancelar análisis» (RN-17) [autoría propia].}
 \label{fig:ui_pausa}
 \end{figure}
@@ -2772,29 +2923,33 @@ descarga en PDF, CSV y XLSX.
 
 \begin{figure}[H]
 \centering
-  \begin{subfigure}[t]{0.508\textwidth}
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/resultados}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/resultados}
     \caption{Resultados por espécimen.}
     \label{fig:ui_resultados_especimen}
   \end{subfigure}
-  \hspace{0.03\textwidth}
-  \begin{subfigure}[t]{0.293\textwidth}
+  \par\medskip
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/estados/resultados_comparacion}
-    \caption{Comparación entre grupos en el Día~2 (RF-21), con todas sus tandas, sin importar la vista elegida.}
-    \label{fig:ui_resultados_comparacion}
-  \end{subfigure}
-
-  \vspace{8pt}
-  \begin{subfigure}[t]{0.75\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mockups/estados/resultados_bloques}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/estados/resultados_bloques}
     \caption{Bloques de 5~s con sus segundos (RF-18), de la vista elegida en el selector.}
     \label{fig:ui_resultados_bloques}
   \end{subfigure}
 \caption{Pantalla de resultados del experimento [autoría propia].}
 \label{fig:ui_resultados}
+\end{figure}
+
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+  \begin{subfigure}[t]{0.9\textwidth}
+    \centering
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/estados/resultados_comparacion}
+    \caption{Comparación entre grupos en el Día~2 (RF-21), con todas sus tandas, sin importar la vista elegida.}
+    \label{fig:ui_resultados_comparacion}
+  \end{subfigure}
+\caption[]{Pantalla de resultados del experimento (continuación).}
 \end{figure}
 
 \subsection{Revisión segundo a segundo}
@@ -2820,7 +2975,7 @@ segundo» de la pantalla de resultados.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{figures/mockups/revision}
+\includegraphics[width=0.9\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/revision}
 \caption{Pantalla de revisión segundo a segundo [autoría propia].}
 \label{fig:ui_revision}
 \end{figure}
@@ -2838,27 +2993,36 @@ Al editar una cuenta puede cambiar el nombre, los apellidos y el correo; el rol 
 
 \begin{figure}[H]
 \centering
-  \begin{subfigure}[t]{0.533\textwidth}
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/admin}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/admin}
     \caption{Cuentas, cola y almacenamiento.}
     \label{fig:ui_admin_normal}
   \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.427\textwidth}
+\caption{Panel de administración [autoría propia].}
+\label{fig:ui_admin}
+\end{figure}
+
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/estados/admin_crear_cuenta}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/estados/admin_crear_cuenta}
     \caption{Formulario de creación de cuenta (RF-05).}
     \label{fig:ui_admin_crear}
   \end{subfigure}
+\caption[]{Panel de administración (continuación).}
+\end{figure}
 
-  \vspace{8pt}
-  \begin{subfigure}[t]{0.80\textwidth}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+  \begin{subfigure}[t]{0.9\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/mockups/estados/admin_editar_cuenta}
+    \includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/mockups/estados/admin_editar_cuenta}
     \caption{Edición de una cuenta (RF-05).}
     \label{fig:ui_admin_editar}
   \end{subfigure}
-\caption{Panel de administración [autoría propia].}
-\label{fig:ui_admin}
+\caption[]{Panel de administración (continuación).}
 \end{figure}

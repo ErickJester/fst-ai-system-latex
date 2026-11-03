@@ -33,12 +33,7 @@
 '      java -jar plantuml.jar -tpng diagramas/seq_descarga_reportes.puml
 ' ================================================================
 
-!theme plain
-skinparam defaultFontName Arial
-skinparam defaultFontSize 11
-skinparam shadowing false
-skinparam sequenceMessageAlign center
-skinparam BoxPadding 10
+!include estilo_doc.iuml
 
 actor "Investigador / Administrador" as inv
 participant "Interfaz web" as ui
@@ -46,36 +41,37 @@ participant Backend as api
 database "Base de datos" as db
 participant "Archivos" as fs
 
-inv -> ui: elige el formato (CSV, XLSX o PDF) desde la pantalla de resultados\ny, en CSV o XLSX, la tanda o el grupo completo
-ui -> api: pide el reporte en ese formato y para esa vista
+inv -> ui: elige el formato (CSV,\nXLSX o PDF) desde la\npantalla de resultados\ny, en CSV o XLSX, la\ntanda o el grupo\ncompleto
+ui -> api: pide el reporte en ese\nformato y para esa\nvista
 
-api -> db: ¿hay análisis completados en el experimento?
+api -> db: ¿hay análisis\ncompletados en el\nexperimento?
 db --> api: sí / no
 
 alt no hay análisis completados
   alt el formato es CSV o XLSX
-    api --> ui: rechaza la descarga, con el motivo
-    ui --> inv: muestra que no hay resultados todavía
+    api --> ui: rechaza la descarga,\ncon el motivo
+    ui --> inv: muestra que no hay\nresultados todavía
   else el formato es PDF
-    api --> ui: documento "Sin resultados" (no se guarda en caché)
-    ui --> inv: descarga el documento "Sin resultados"
+    api --> ui: documento "Sin\nresultados" (no se\nguarda en caché)
+    ui --> inv: descarga el documento\n"Sin resultados"
   end
 else hay análisis completados
-  api -> db: busca si ya hay un reporte guardado\nen ese formato y para esa vista
-  db --> api: reporte guardado, si existe, con su fecha de generación
+  api -> db: busca si ya hay un\nreporte guardado en\nese formato y para esa\nvista
+  db --> api: reporte guardado, si\nexiste, con su fecha\nde generación
 
-  alt no hay un reporte guardado, o se invalidó por un evento
+newpage
+  alt no hay reporte vigente guardado
     note over api
       Eventos que invalidan el reporte: corregir etiquetas,
       reiniciar un análisis, editar el experimento, borrar una tanda
       o el experimento, cambiar el nombre del creador, y que el Worker
       complete o falle un análisis. Borrar un video no invalida.
     end note
-    api -> api: genera el archivo con los datos actuales,\nde la vista pedida
-    api -> fs: guarda el archivo generado
-    api -> db: registra el reporte nuevo
+    api -> api: genera el archivo con\nlos datos actuales, de\nla vista pedida
+    api -> fs: guarda el archivo\ngenerado
+    api -> db: registra el reporte\nnuevo
   else el reporte guardado sigue vigente
-    api -> fs: recupera el archivo ya guardado
+    api -> fs: recupera el archivo ya\nguardado
   end
 end
 
@@ -89,6 +85,6 @@ note right of api
 end note
 
 api --> ui: archivo listo
-ui --> inv: descarga inmediata en el navegador
+ui --> inv: descarga inmediata en\nel navegador
 
 @enduml

@@ -19,39 +19,35 @@
 '      java -jar plantuml.jar -tpng diagramas/seq_login.puml
 ' ================================================================
 
-!theme plain
-skinparam defaultFontName Arial
-skinparam defaultFontSize 11
-skinparam shadowing false
-skinparam sequenceMessageAlign center
+!include estilo_doc.iuml
 
 actor Usuario as u
 participant "Interfaz web" as ui
 participant Backend as api
 database "Base de datos" as db
 
-u -> ui: escribe su correo electrónico y su contraseña
-ui -> api: envía el correo y la contraseña
-api -> db: busca la cuenta con ese correo
-db --> api: la cuenta (contraseña cifrada, activa o no), si existe
+u -> ui: escribe su correo\nelectrónico y su\ncontraseña
+ui -> api: envía el correo y la\ncontraseña
+api -> db: busca la cuenta con ese\ncorreo
+db --> api: la cuenta (contraseña\ncifrada, activa o no), si\nexiste
 
 alt la cuenta existe, está activa y la contraseña coincide
-  api -> db: ¿el usuario figura como administrador?
+  api -> db: ¿el usuario figura como\nadministrador?
   db --> api: sí / no
-  api -> api: genera el token de sesión\n(la sesión dura 168 horas por omisión; configurable)
-  api --> ui: token, rol y si debe cambiar la contraseña
+  api -> api: genera el token de sesión\n(la sesión dura 168 horas\npor omisión; configurable)
+  api --> ui: token, rol y si debe\ncambiar la contraseña
   note right of ui
     el rol no va en el token;
     se vuelve a leer en cada petición
   end note
-  ui -> ui: guarda el token en el navegador
+  ui -> ui: guarda el token en el\nnavegador
   alt la cuenta tiene el cambio de contraseña obligatorio
-    ui --> u: muestra la pantalla de cambio de contraseña (ver CU-16)
+    ui --> u: muestra la pantalla de\ncambio de contraseña (ver\nCU-16)
   else
-    ui --> u: muestra la lista de experimentos
+    ui --> u: muestra la lista de\nexperimentos
   end
 else el correo no existe, la cuenta está desactivada\no la contraseña no coincide
-  api --> ui: error de credenciales\n(no dice cuál dato falló, RN-01)
-  ui --> u: muestra "Correo o contraseña incorrectos"
+  api --> ui: error de credenciales\n(no dice cuál dato falló,\nRN-01)
+  ui --> u: muestra "Correo o\ncontraseña incorrectos"
 end
 @enduml

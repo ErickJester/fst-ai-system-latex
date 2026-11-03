@@ -23,12 +23,7 @@
 '      java -jar plantuml.jar -tpng diagramas/seq_consulta_progreso.puml
 ' ================================================================
 
-!theme plain
-skinparam defaultFontName Arial
-skinparam defaultFontSize 11
-skinparam shadowing false
-skinparam sequenceMessageAlign center
-skinparam BoxPadding 10
+!include estilo_doc.iuml
 
 actor Investigador as inv
 participant "Interfaz web" as ui
@@ -36,20 +31,20 @@ participant Backend as api
 database "Base de datos" as db
 participant "Archivos" as fs
 
-inv -> ui: abre la pantalla de progreso del experimento\n(o llega redirigido tras subir un video)
+inv -> ui: abre la pantalla de\nprogreso del experimento\n(o llega redirigido tras\nsubir un video)
 
 loop mientras la pantalla está abierta y la pestaña visible
-  ui -> api: pide el estado de los análisis del experimento
-  api -> db: busca los análisis de este experimento
-  db --> api: cada análisis, con su estado y su etapa
-  api -> fs: lee el avance de cada análisis activo
+  ui -> api: pide el estado de los\nanálisis del experimento
+  api -> db: busca los análisis de este\nexperimento
+  db --> api: cada análisis, con su\nestado y su etapa
+  api -> fs: lee el avance de cada\nanálisis activo
   alt el archivo de avance existe
-    fs --> api: porcentaje que calculó el Worker
+    fs --> api: porcentaje que calculó el\nWorker
   else el archivo de avance no existe
-    api -> api: estima el porcentaje por etapa
+    api -> api: estima el porcentaje por\netapa
   end
-  api --> ui: estado, etapa y porcentaje de cada análisis
-  ui -> inv: actualiza la barra de progreso de cada video
+  api --> ui: estado, etapa y porcentaje\nde cada análisis
+  ui -> inv: actualiza la barra de\nprogreso de cada video
 end
 
 note over ui
@@ -60,26 +55,27 @@ note over ui
 end note
 
 alt algún análisis llegó a "completado"
-  ui -> inv: habilita el acceso a los resultados\n(ver el diagrama de consulta de resultados)
+  ui -> inv: habilita el acceso a los\nresultados\n(ver el diagrama de\nconsulta de resultados)
+newpage
 else algún análisis quedó "en pausa"
-  ui -> inv: muestra solo el enlace "Ajustar o cancelar →"\n(los botones están en la pantalla de pausa, ver el diagrama de pausa y ajuste)
+  ui -> inv: muestra solo el enlace\n"Ajustar o cancelar →"\n(los botones están en la\npantalla de pausa, ver el\ndiagrama de pausa y\najuste)
 else algún análisis quedó "cancelado"
-  ui -> inv: muestra "El análisis se canceló."
+  ui -> inv: muestra "El análisis se\ncanceló."
 else algún análisis llegó a "error"
-  ui -> inv: muestra el mensaje del error, con la etapa en que se detuvo,\ny habilita la descarga del reporte de diagnóstico
+  ui -> inv: muestra el mensaje del\nerror, con la etapa en que\nse detuvo,\ny habilita la descarga del\nreporte de diagnóstico
 
-  inv -> ui: selecciona la descarga del reporte de diagnóstico
-  ui -> api: pide el reporte de diagnóstico de este análisis
-  api -> fs: busca el reporte de diagnóstico
+  inv -> ui: selecciona la descarga del\nreporte de diagnóstico
+  ui -> api: pide el reporte de\ndiagnóstico de este\nanálisis
+  api -> fs: busca el reporte de\ndiagnóstico
 
   alt el reporte ya existe
     fs --> api: archivo listo
     api --> ui: reporte de diagnóstico
-    ui --> inv: descarga inmediata en el navegador
+    ui --> inv: descarga inmediata en el\nnavegador
   else el Worker todavía no lo generó
     api --> ui: aún no está disponible
-    ui -> inv: muestra indicación de espera
-    ui -> api: reintenta, con un tope de intentos
+    ui -> inv: muestra indicación de\nespera
+    ui -> api: reintenta, con un tope de\nintentos
   end
 
   note right of inv

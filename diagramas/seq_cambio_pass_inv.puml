@@ -17,12 +17,7 @@
 '      java -jar plantuml.jar -tpng diagramas/seq_cambio_pass_inv.puml
 ' ================================================================
 
-!theme plain
-skinparam defaultFontName Arial
-skinparam defaultFontSize 11
-skinparam shadowing false
-skinparam sequenceMessageAlign center
-skinparam BoxPadding 10
+!include estilo_doc.iuml
 
 actor Usuario as u
 participant "Interfaz web" as ui
@@ -35,26 +30,27 @@ note over u, ui
   voluntario desde el perfil.
 end note
 
-u -> ui: escribe la contraseña actual\ny la nueva (dos veces)
-ui -> api: envía la contraseña actual y la nueva\ncon la sesión del usuario
+u -> ui: escribe la contraseña\nactual\ny la nueva (dos veces)
+ui -> api: envía la contraseña actual\ny la nueva\ncon la sesión del usuario
 
-api -> db: lee la contraseña cifrada del usuario
+api -> db: lee la contraseña cifrada\ndel usuario
 db --> api: contraseña cifrada actual
 
 alt la contraseña actual no coincide
-  api --> ui: rechaza: la contraseña actual no es correcta
-  ui --> u: muestra el error, no cambia nada
+  api --> ui: rechaza: la contraseña\nactual no es correcta
+  ui --> u: muestra el error, no\ncambia nada
 else la contraseña actual coincide
   alt la nueva no cumple algún criterio
     note over api
       se avisa solo el primer criterio incumplido, en este orden:
       mínimo 8 caracteres, máximo 72 bytes, distinta de la actual
     end note
-    api --> ui: rechaza e indica ese criterio
-    ui --> u: pide escribir otra contraseña
+    api --> ui: rechaza e indica ese\ncriterio
+    ui --> u: pide escribir otra\ncontraseña
+newpage
   else la nueva contraseña es válida
     api -> api: cifra la contraseña nueva
-    api -> db: guarda la contraseña nueva\ny quita la marca de cambio obligatorio
+    api -> db: guarda la contraseña nueva\ny quita la marca de cambio\nobligatorio
     db --> api: confirma
     note over api
       la sesión actual y las demás sesiones del usuario siguen activas;
@@ -62,10 +58,10 @@ else la contraseña actual coincide
     end note
     alt viene del primer acceso (CU-16)
       api --> ui: cambio realizado
-      ui --> u: confirma el cambio y muestra la lista de experimentos
+      ui --> u: confirma el cambio y\nmuestra la lista de\nexperimentos
     else cambio voluntario desde el perfil (CU-18)
       api --> ui: cambio realizado
-      ui --> u: confirma el cambio y se queda en Mi perfil
+      ui --> u: confirma el cambio y se\nqueda en Mi perfil
     end
   end
 end

@@ -29,12 +29,7 @@
 '      java -jar plantuml.jar -tpng diagramas/seq_analisis_automatico.puml
 ' ================================================================
 
-!theme plain
-skinparam defaultFontName Arial
-skinparam defaultFontSize 11
-skinparam shadowing false
-skinparam sequenceMessageAlign center
-skinparam BoxPadding 10
+!include estilo_doc.iuml
 
 participant Worker as w
 participant "Archivos" as fs
@@ -42,80 +37,81 @@ database "Base de datos" as db
 
 == Al arrancar el Worker ==
 
-w -> db: pasa a "en cola", con la etapa de preprocesamiento,\ntodos los análisis que quedaron "procesando"\n(empiezan de cero)
+w -> db: pasa a "en cola" los análisis\nque quedaron "procesando"\n(empiezan de cero)
 
 == Un análisis a la vez ==
 
 w -> fs: revisa el espacio libre del disco\n(aviso al 80 %, limpieza al 90 %)
-w -> db: toma el análisis más antiguo en cola\n(uno a la vez)
-w -> db: marca el análisis como "procesando"
+w -> db: toma el análisis más antiguo en cola
+w -> db: lo marca como "procesando"
 
 == Etapa de preprocesamiento ==
 
-w -> fs: verifica que existan el archivo de video, los especímenes y el modelo
-w -> w: lee el ancho, el alto y la duración del video
+w -> fs: verifica archivos del video,\nespecímenes y modelo
+w -> w: lee ancho, alto y duración
 
-alt no se puede abrir el video (RN-11)
-  w -> db: deja la etapa en preprocesamiento
-  w -> fs: genera y guarda el reporte de diagnóstico PDF
-  w -> db: marca el análisis como "error" y guarda la ruta del reporte\n(no se reintenta ni se reinicia desde la pantalla de error, RN-04)
+alt no se puede abrir el video
+  w -> fs: guarda el reporte de diagnóstico (PDF)
+  w -> db: marca "error" y guarda la ruta\ndel reporte (no se reintenta)
   w -> db: crea la notificación de error
-  w -> w: envía también el aviso por correo\n(si el envío falla, el aviso queda en el panel)
+  w -> w: envía el aviso por correo\n(si falla, queda en el panel)
 else el video se abre
 
   == Etapa de cilindros ==
 
   w -> db: actualiza la etapa a "cilindros"
-  w -> w: alinea la cámara y construye el modelo de fondo
-  w -> w: localiza los cilindros y la línea de agua
-  w -> w: mide al espécimen en cada cilindro y comprueba\nque los cilindros coincidan con los especímenes
+  w -> w: alinea la cámara y construye el fondo
+  w -> w: ubica los cilindros y la línea de agua
+  w -> w: mide al espécimen en cada cilindro\ny comprueba que coincidan\ncon los especímenes
 
-  alt no se hallaron los cilindros (RN-11)
-    w -> fs: genera y guarda el reporte de diagnóstico PDF
-    w -> db: marca el análisis como "error" y guarda la ruta del reporte
+  newpage
+
+  alt no se hallaron los cilindros
+    w -> fs: guarda el reporte de diagnóstico (PDF)
+    w -> db: marca "error" y guarda la ruta del reporte
     w -> db: crea la notificación de error
-    w -> w: envía también el aviso por correo
+    w -> w: envía el aviso por correo
   else se hallaron los cilindros
-    w -> w: separa al espécimen del fondo, segundo a segundo
+    w -> w: separa al espécimen del fondo,\nsegundo a segundo
 
-    alt pasan tres segundos seguidos sin ver al espécimen (RN-17)
-      w -> fs: guarda la imagen fija a la mitad de esos tres segundos\ny los datos de la pausa
-      w -> db: marca el análisis como "en pausa", en la etapa cilindros
-      w -> db: crea la notificación de análisis en pausa
-      w -> w: suelta el video y atiende el siguiente de la cola\n(el ajuste, la continuación, la cancelación y la reanudación\nse muestran en el diagrama de pausa y ajuste)
+    alt tres segundos seguidos sin ver al espécimen
+      w -> fs: guarda imagen fija a la mitad\nde esos tres segundos y los datos
+      w -> db: marca "en pausa", en la etapa cilindros
+      w -> db: crea la notificación de pausa
+      w -> w: suelta el video y atiende\nel siguiente de la cola
     else se separó todo el video
+
+      newpage
 
       == Etapa de clasificación ==
 
       w -> db: actualiza la etapa a "clasificación"
-      w -> w: la red clasifica cada segundo; la conducta activa\nse asigna con la regla de 0.80 (RN-13)
-
-      w -> w: se queda con los últimos 300 segundos de cada espécimen\n(como máximo; si el video dura menos, todos)\ny los renumera de 1 a 300
-
-      w -> fs: guarda la copia del video que el navegador puede reproducir
+      w -> w: la red clasifica cada segundo;\nla conducta activa sale de la regla 0.80
+      w -> w: conserva los últimos 300 s de cada\nespécimen y los renumera de 1 a 300
+      w -> fs: guarda la copia del video\npara el navegador
       w -> fs: guarda los recuadros de los cilindros
-
-      w -> db: guarda en una sola operación las observaciones, los segundos,\nel nivel de clasificación ("agrupado" o "preciso") y la fecha de análisis,\ny marca el análisis como "completado"
-      w -> db: deja el video sujeto al borrado automático a los 30 días (RN-05, RNF-08)
+      w -> db: guarda observaciones, segundos,\nnivel de clasificación y fecha\nen una sola operación
+      w -> db: marca el análisis como "completado"
+      w -> db: deja el video para borrado\nautomático a los 30 días
       w -> db: crea la notificación de análisis terminado
-      w -> w: envía también el aviso por correo\n(si el envío falla, el aviso queda en el panel)
+      w -> w: envía el aviso por correo\n(si falla, queda en el panel)
     end
   end
 end
 
 note over w
-  si ocurre un fallo imprevisto en cualquier etapa (por ejemplo,
-  falta de memoria), el análisis pasa a "error" con su reporte de
-  diagnóstico, y el Worker sigue con el siguiente sin reintentar
+  si falla algo imprevisto (por ejemplo, falta de memoria),
+  el análisis pasa a "error" con su reporte de diagnóstico,
+  y el Worker sigue con el siguiente sin reintentar
 end note
 
 == Tareas diarias ==
 
 note over w
-  una vez al día, a una hora fija de la madrugada:
-  - se revisa el disco; el aviso de disco va a los administradores
-    y la limpieza avisa al creador del experimento (RNF-09)
-  - respaldo diario de la base de datos, con 7 días de retención
+  una vez al día, de madrugada:
+  - se revisa el disco; el aviso va a los administradores
+    y la limpieza avisa al creador del experimento
+  - respaldo diario de la base de datos (7 días)
 end note
 
 @enduml
