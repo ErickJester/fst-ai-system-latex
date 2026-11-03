@@ -18,6 +18,7 @@
 
 % --- Preliminares (numeración romana) ---
 \clearpage
+\pagenumbering{roman}
 
 
 \input{front/resumen}
@@ -26,9 +27,16 @@
 
 
 \tableofcontents
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{\listfigurename}
 \listoffigures
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{\listtablename}
 \listoftables
 
+\clearpage
 \pagenumbering{arabic}
 \setcounter{page}{1}
 \input{front/glosario}
@@ -56,6 +64,6 @@
 \input{back/apendice_D}
 
 % --- Bibliografía ---
-\printbibliography
+\printbibliography[heading=bibintoc]
 
 \end{document}
