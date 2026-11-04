@@ -396,7 +396,8 @@ Figura~\ref{fig:er} muestra el resultado.
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth, height=0.92\textheight, keepaspectratio]{figures/diagramas/esquema_bd}
+% Ocupa toda la hoja: se sale de los márgenes laterales (queda 1 cm por lado).
+\makebox[\textwidth][c]{\includegraphics[width=\dimexpr\paperwidth-2cm\relax, height=0.95\textheight, keepaspectratio]{figures/diagramas/esquema_bd}}
 \caption{Esquema físico de la base de datos [autoría propia].}
 \label{fig:er}
 \end{figure}

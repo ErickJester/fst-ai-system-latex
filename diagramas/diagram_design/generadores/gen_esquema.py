@@ -252,10 +252,7 @@ def legend(x, y, w):
     simbolos = [('one', 'exactamente uno'), ('zo', 'cero o uno'), ('om', 'uno o más'), ('zm', 'cero o más')]
     texto = [('PK', '#d9532c', 'llave primaria'), ('FK', '#1a1a1a', 'llave foránea'),
              ('UK', '#6b6b6b', 'valor único'), ('CK', '#6b6b6b', 'restricción de valores')]
-    dominios = ['Dominios:', 'tipo_notificacion,', 'formato_reporte, tipo_grupo,',
-                'sesion_video, estado_analisis,', 'etapa_analisis,', 'nivel_clasif_analisis,',
-                'tipo_conducta, origen_segundo']
-    h = 52 + (len(texto) + len(simbolos) + 2) * LH + len(dominios) * LH + 14
+    h = 52 + (len(texto) + len(simbolos) + 1) * LH + 14
     out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="6" fill="#faf9f5" stroke="#6b6b6b" stroke-dasharray="4,3"/>')
     out.append(f'<text x="{x+12}" y="{y+28}" class="nm">Leyenda</text>')
     by = y + 52
@@ -274,9 +271,6 @@ def legend(x, y, w):
     out.append(f'<rect x="{x+12}" y="{by-12}" width="26" height="14" rx="3" fill="#ece7d8" stroke="#1a1a1a"/>')
     out.append(f'<text x="{x+56}" y="{by}" class="ty">soporte del sistema</text>')
     by += LH
-    for v in dominios:
-        out.append(f'<text x="{x+12}" y="{by}" class="ty">{esc(v)}</text>')
-        by += LH
     return y + h
 
 lg_bottom = legend(colx[0], colbot[0] + GAPV, colw[0])
