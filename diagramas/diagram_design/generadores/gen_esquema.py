@@ -6,10 +6,10 @@ import math, html, sys
 
 esc = html.escape
 CH = 9.0     # ancho de carácter de Geist Mono a 15 px (0.6 em)
-LH = 22      # interlínea de filas
+LH = 28      # interlínea de filas
 HEAD = 38    # alto del encabezado de tabla
 NX = 56      # sangría del nombre de columna
-GAPV = int(sys.argv[2]) if len(sys.argv) > 2 else 44   # separación vertical entre tablas
+GAPV = int(sys.argv[2]) if len(sys.argv) > 2 else 60   # separación vertical entre tablas
 GAPC = 60    # separación horizontal entre columnas
 Y0 = 26
 X0 = 28

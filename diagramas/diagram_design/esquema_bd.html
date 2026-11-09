@@ -2,272 +2,272 @@
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Esquema de la base de datos</title>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono:wght@400;600&display=swap" rel="stylesheet">
-<style>html,body{margin:0;background:#faf9f5}svg{display:block;width:1166px;height:1112px}</style>
-</head><body><svg viewBox="0 0 1166 1112" role="img" aria-labelledby="es-title es-desc" xmlns="http://www.w3.org/2000/svg">
+<style>html,body{margin:0;background:#faf9f5}svg{display:block;width:1166px;height:1350px}</style>
+</head><body><svg viewBox="0 0 1166 1350" role="img" aria-labelledby="es-title es-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="es-title">Esquema físico de la base de datos</title>
 <desc id="es-desc">Las 12 tablas de la base de datos PostgreSQL con sus columnas, tipos, llaves, restricciones y las 13 llaves foráneas con su cardinalidad en notación de pata de gallo.</desc>
 <style>.a{font:400 15px 'Geist Mono',monospace;fill:#1a1a1a}.ty{font:400 15px 'Geist Mono',monospace;fill:#6b6b6b}.b{font:600 15px 'Geist Mono',monospace}.rl{font:400 11px 'Geist Mono',monospace}.nm{font:600 18px Geist,sans-serif;fill:#1a1a1a}</style>
-<path d="M403,97 L361,97 L361,75 L343,75" fill="none" stroke="#1b6fb0" stroke-width="1.4"/>
-<path d="M28,453 L14,453 L14,75 L28,75" fill="none" stroke="#2e8b57" stroke-width="1.4"/>
-<path d="M185,270 L185,226" fill="none" stroke="#8e44ad" stroke-width="1.4"/>
-<path d="M343,697 L383,697 L383,75 L403,75" fill="none" stroke="#c0392b" stroke-width="1.4"/>
-<path d="M343,475 L369,475 L369,75 L403,75" fill="none" stroke="#b8860b" stroke-width="1.4"/>
-<path d="M556,226 L556,182" fill="none" stroke="#16a085" stroke-width="1.4"/>
-<path d="M556,454 L556,410" fill="none" stroke="#d35400" stroke-width="1.4"/>
-<path d="M556,660 L556,616" fill="none" stroke="#e84393" stroke-width="1.4"/>
-<path d="M556,844 L556,800" fill="none" stroke="#34495e" stroke-width="1.4"/>
-<path d="M709,937 L717,937 L717,75 L769,75" fill="none" stroke="#6c8e00" stroke-width="1.4"/>
-<path d="M769,97 L729,97 L729,503 L709,503" fill="none" stroke="#0097a7" stroke-width="1.4"/>
-<path d="M953,298 L953,254" fill="none" stroke="#a0522d" stroke-width="1.4"/>
-<path d="M769,591 L723,591 L723,893 L709,893" fill="none" stroke="#5e35b1" stroke-width="1.4"/>
-<line x1="394.0" y1="97.0" x2="403.0" y2="91.0" stroke="#1b6fb0" stroke-width="1.6"/><line x1="394.0" y1="97.0" x2="403.0" y2="97.0" stroke="#1b6fb0" stroke-width="1.6"/><line x1="394.0" y1="97.0" x2="403.0" y2="103.0" stroke="#1b6fb0" stroke-width="1.6"/><circle cx="388.0" cy="97.0" r="3.5" fill="#faf9f5" stroke="#1b6fb0" stroke-width="1.6"/>
+<path d="M403,103 L361,103 L361,75 L343,75" fill="none" stroke="#1b6fb0" stroke-width="1.4"/>
+<path d="M28,539 L14,539 L14,75 L28,75" fill="none" stroke="#2e8b57" stroke-width="1.4"/>
+<path d="M185,328 L185,268" fill="none" stroke="#8e44ad" stroke-width="1.4"/>
+<path d="M343,841 L383,841 L383,75 L403,75" fill="none" stroke="#c0392b" stroke-width="1.4"/>
+<path d="M343,567 L369,567 L369,75 L403,75" fill="none" stroke="#b8860b" stroke-width="1.4"/>
+<path d="M556,272 L556,212" fill="none" stroke="#16a085" stroke-width="1.4"/>
+<path d="M556,552 L556,492" fill="none" stroke="#d35400" stroke-width="1.4"/>
+<path d="M556,804 L556,744" fill="none" stroke="#e84393" stroke-width="1.4"/>
+<path d="M556,1028 L556,968" fill="none" stroke="#34495e" stroke-width="1.4"/>
+<path d="M709,1133 L717,1133 L717,75 L769,75" fill="none" stroke="#6c8e00" stroke-width="1.4"/>
+<path d="M769,103 L729,103 L729,601 L709,601" fill="none" stroke="#0097a7" stroke-width="1.4"/>
+<path d="M953,362 L953,302" fill="none" stroke="#a0522d" stroke-width="1.4"/>
+<path d="M769,713 L723,713 L723,1077 L709,1077" fill="none" stroke="#5e35b1" stroke-width="1.4"/>
+<line x1="394.0" y1="103.0" x2="403.0" y2="97.0" stroke="#1b6fb0" stroke-width="1.6"/><line x1="394.0" y1="103.0" x2="403.0" y2="103.0" stroke="#1b6fb0" stroke-width="1.6"/><line x1="394.0" y1="103.0" x2="403.0" y2="109.0" stroke="#1b6fb0" stroke-width="1.6"/><circle cx="388.0" cy="103.0" r="3.5" fill="#faf9f5" stroke="#1b6fb0" stroke-width="1.6"/>
 <line x1="348.0" y1="81.0" x2="348.0" y2="69.0" stroke="#1b6fb0" stroke-width="1.6"/><line x1="352.0" y1="81.0" x2="352.0" y2="69.0" stroke="#1b6fb0" stroke-width="1.6"/>
-<line x1="19.0" y1="453.0" x2="28.0" y2="447.0" stroke="#2e8b57" stroke-width="1.6"/><line x1="19.0" y1="453.0" x2="28.0" y2="453.0" stroke="#2e8b57" stroke-width="1.6"/><line x1="19.0" y1="453.0" x2="28.0" y2="459.0" stroke="#2e8b57" stroke-width="1.6"/><circle cx="13.0" cy="453.0" r="3.5" fill="#faf9f5" stroke="#2e8b57" stroke-width="1.6"/>
+<line x1="19.0" y1="539.0" x2="28.0" y2="533.0" stroke="#2e8b57" stroke-width="1.6"/><line x1="19.0" y1="539.0" x2="28.0" y2="539.0" stroke="#2e8b57" stroke-width="1.6"/><line x1="19.0" y1="539.0" x2="28.0" y2="545.0" stroke="#2e8b57" stroke-width="1.6"/><circle cx="13.0" cy="539.0" r="3.5" fill="#faf9f5" stroke="#2e8b57" stroke-width="1.6"/>
 <line x1="23.0" y1="69.0" x2="23.0" y2="81.0" stroke="#2e8b57" stroke-width="1.6"/><line x1="19.0" y1="69.0" x2="19.0" y2="81.0" stroke="#2e8b57" stroke-width="1.6"/>
-<line x1="191.0" y1="265.0" x2="179.0" y2="265.0" stroke="#8e44ad" stroke-width="1.6"/><circle cx="185.0" cy="257.0" r="3.5" fill="#faf9f5" stroke="#8e44ad" stroke-width="1.6"/>
-<line x1="179.0" y1="231.0" x2="191.0" y2="231.0" stroke="#8e44ad" stroke-width="1.6"/><line x1="179.0" y1="235.0" x2="191.0" y2="235.0" stroke="#8e44ad" stroke-width="1.6"/>
-<line x1="352.0" y1="697.0" x2="343.0" y2="703.0" stroke="#c0392b" stroke-width="1.6"/><line x1="352.0" y1="697.0" x2="343.0" y2="697.0" stroke="#c0392b" stroke-width="1.6"/><line x1="352.0" y1="697.0" x2="343.0" y2="691.0" stroke="#c0392b" stroke-width="1.6"/><circle cx="358.0" cy="697.0" r="3.5" fill="#faf9f5" stroke="#c0392b" stroke-width="1.6"/>
+<line x1="191.0" y1="323.0" x2="179.0" y2="323.0" stroke="#8e44ad" stroke-width="1.6"/><circle cx="185.0" cy="315.0" r="3.5" fill="#faf9f5" stroke="#8e44ad" stroke-width="1.6"/>
+<line x1="179.0" y1="273.0" x2="191.0" y2="273.0" stroke="#8e44ad" stroke-width="1.6"/><line x1="179.0" y1="277.0" x2="191.0" y2="277.0" stroke="#8e44ad" stroke-width="1.6"/>
+<line x1="352.0" y1="841.0" x2="343.0" y2="847.0" stroke="#c0392b" stroke-width="1.6"/><line x1="352.0" y1="841.0" x2="343.0" y2="841.0" stroke="#c0392b" stroke-width="1.6"/><line x1="352.0" y1="841.0" x2="343.0" y2="835.0" stroke="#c0392b" stroke-width="1.6"/><circle cx="358.0" cy="841.0" r="3.5" fill="#faf9f5" stroke="#c0392b" stroke-width="1.6"/>
 <line x1="398.0" y1="69.0" x2="398.0" y2="81.0" stroke="#c0392b" stroke-width="1.6"/><line x1="394.0" y1="69.0" x2="394.0" y2="81.0" stroke="#c0392b" stroke-width="1.6"/>
-<line x1="352.0" y1="475.0" x2="343.0" y2="481.0" stroke="#b8860b" stroke-width="1.6"/><line x1="352.0" y1="475.0" x2="343.0" y2="475.0" stroke="#b8860b" stroke-width="1.6"/><line x1="352.0" y1="475.0" x2="343.0" y2="469.0" stroke="#b8860b" stroke-width="1.6"/><circle cx="358.0" cy="475.0" r="3.5" fill="#faf9f5" stroke="#b8860b" stroke-width="1.6"/>
+<line x1="352.0" y1="567.0" x2="343.0" y2="573.0" stroke="#b8860b" stroke-width="1.6"/><line x1="352.0" y1="567.0" x2="343.0" y2="567.0" stroke="#b8860b" stroke-width="1.6"/><line x1="352.0" y1="567.0" x2="343.0" y2="561.0" stroke="#b8860b" stroke-width="1.6"/><circle cx="358.0" cy="567.0" r="3.5" fill="#faf9f5" stroke="#b8860b" stroke-width="1.6"/>
 <line x1="398.0" y1="69.0" x2="398.0" y2="81.0" stroke="#b8860b" stroke-width="1.6"/><circle cx="390.0" cy="75.0" r="3.5" fill="#faf9f5" stroke="#b8860b" stroke-width="1.6"/>
-<line x1="556.0" y1="217.0" x2="562.0" y2="226.0" stroke="#16a085" stroke-width="1.6"/><line x1="556.0" y1="217.0" x2="556.0" y2="226.0" stroke="#16a085" stroke-width="1.6"/><line x1="556.0" y1="217.0" x2="550.0" y2="226.0" stroke="#16a085" stroke-width="1.6"/><circle cx="556.0" cy="211.0" r="3.5" fill="#faf9f5" stroke="#16a085" stroke-width="1.6"/>
-<line x1="550.0" y1="187.0" x2="562.0" y2="187.0" stroke="#16a085" stroke-width="1.6"/><line x1="550.0" y1="191.0" x2="562.0" y2="191.0" stroke="#16a085" stroke-width="1.6"/>
-<line x1="556.0" y1="445.0" x2="562.0" y2="454.0" stroke="#d35400" stroke-width="1.6"/><line x1="556.0" y1="445.0" x2="556.0" y2="454.0" stroke="#d35400" stroke-width="1.6"/><line x1="556.0" y1="445.0" x2="550.0" y2="454.0" stroke="#d35400" stroke-width="1.6"/><line x1="562.0" y1="441.0" x2="550.0" y2="441.0" stroke="#d35400" stroke-width="1.6"/>
-<line x1="550.0" y1="415.0" x2="562.0" y2="415.0" stroke="#d35400" stroke-width="1.6"/><line x1="550.0" y1="419.0" x2="562.0" y2="419.0" stroke="#d35400" stroke-width="1.6"/>
-<line x1="556.0" y1="651.0" x2="562.0" y2="660.0" stroke="#e84393" stroke-width="1.6"/><line x1="556.0" y1="651.0" x2="556.0" y2="660.0" stroke="#e84393" stroke-width="1.6"/><line x1="556.0" y1="651.0" x2="550.0" y2="660.0" stroke="#e84393" stroke-width="1.6"/><line x1="562.0" y1="647.0" x2="550.0" y2="647.0" stroke="#e84393" stroke-width="1.6"/>
-<rect x="567" y="641" width="33" height="14" fill="#faf9f5"/>
-<text x="568" y="652" text-anchor="start" class="rl" fill="#e84393">2..4</text>
-<line x1="550.0" y1="621.0" x2="562.0" y2="621.0" stroke="#e84393" stroke-width="1.6"/><line x1="550.0" y1="625.0" x2="562.0" y2="625.0" stroke="#e84393" stroke-width="1.6"/>
-<line x1="562.0" y1="839.0" x2="550.0" y2="839.0" stroke="#34495e" stroke-width="1.6"/><circle cx="556.0" cy="831.0" r="3.5" fill="#faf9f5" stroke="#34495e" stroke-width="1.6"/>
-<line x1="550.0" y1="805.0" x2="562.0" y2="805.0" stroke="#34495e" stroke-width="1.6"/><line x1="550.0" y1="809.0" x2="562.0" y2="809.0" stroke="#34495e" stroke-width="1.6"/>
-<line x1="718.0" y1="937.0" x2="709.0" y2="943.0" stroke="#6c8e00" stroke-width="1.6"/><line x1="718.0" y1="937.0" x2="709.0" y2="937.0" stroke="#6c8e00" stroke-width="1.6"/><line x1="718.0" y1="937.0" x2="709.0" y2="931.0" stroke="#6c8e00" stroke-width="1.6"/><circle cx="724.0" cy="937.0" r="3.5" fill="#faf9f5" stroke="#6c8e00" stroke-width="1.6"/>
-<rect x="712" y="948" width="33" height="14" fill="#faf9f5"/>
-<text x="713" y="959" text-anchor="start" class="rl" fill="#6c8e00">0..4</text>
+<line x1="556.0" y1="263.0" x2="562.0" y2="272.0" stroke="#16a085" stroke-width="1.6"/><line x1="556.0" y1="263.0" x2="556.0" y2="272.0" stroke="#16a085" stroke-width="1.6"/><line x1="556.0" y1="263.0" x2="550.0" y2="272.0" stroke="#16a085" stroke-width="1.6"/><circle cx="556.0" cy="257.0" r="3.5" fill="#faf9f5" stroke="#16a085" stroke-width="1.6"/>
+<line x1="550.0" y1="217.0" x2="562.0" y2="217.0" stroke="#16a085" stroke-width="1.6"/><line x1="550.0" y1="221.0" x2="562.0" y2="221.0" stroke="#16a085" stroke-width="1.6"/>
+<line x1="556.0" y1="543.0" x2="562.0" y2="552.0" stroke="#d35400" stroke-width="1.6"/><line x1="556.0" y1="543.0" x2="556.0" y2="552.0" stroke="#d35400" stroke-width="1.6"/><line x1="556.0" y1="543.0" x2="550.0" y2="552.0" stroke="#d35400" stroke-width="1.6"/><line x1="562.0" y1="539.0" x2="550.0" y2="539.0" stroke="#d35400" stroke-width="1.6"/>
+<line x1="550.0" y1="497.0" x2="562.0" y2="497.0" stroke="#d35400" stroke-width="1.6"/><line x1="550.0" y1="501.0" x2="562.0" y2="501.0" stroke="#d35400" stroke-width="1.6"/>
+<line x1="556.0" y1="795.0" x2="562.0" y2="804.0" stroke="#e84393" stroke-width="1.6"/><line x1="556.0" y1="795.0" x2="556.0" y2="804.0" stroke="#e84393" stroke-width="1.6"/><line x1="556.0" y1="795.0" x2="550.0" y2="804.0" stroke="#e84393" stroke-width="1.6"/><line x1="562.0" y1="791.0" x2="550.0" y2="791.0" stroke="#e84393" stroke-width="1.6"/>
+<rect x="567" y="785" width="33" height="14" fill="#faf9f5"/>
+<text x="568" y="796" text-anchor="start" class="rl" fill="#e84393">2..4</text>
+<line x1="550.0" y1="749.0" x2="562.0" y2="749.0" stroke="#e84393" stroke-width="1.6"/><line x1="550.0" y1="753.0" x2="562.0" y2="753.0" stroke="#e84393" stroke-width="1.6"/>
+<line x1="562.0" y1="1023.0" x2="550.0" y2="1023.0" stroke="#34495e" stroke-width="1.6"/><circle cx="556.0" cy="1015.0" r="3.5" fill="#faf9f5" stroke="#34495e" stroke-width="1.6"/>
+<line x1="550.0" y1="973.0" x2="562.0" y2="973.0" stroke="#34495e" stroke-width="1.6"/><line x1="550.0" y1="977.0" x2="562.0" y2="977.0" stroke="#34495e" stroke-width="1.6"/>
+<line x1="718.0" y1="1133.0" x2="709.0" y2="1139.0" stroke="#6c8e00" stroke-width="1.6"/><line x1="718.0" y1="1133.0" x2="709.0" y2="1133.0" stroke="#6c8e00" stroke-width="1.6"/><line x1="718.0" y1="1133.0" x2="709.0" y2="1127.0" stroke="#6c8e00" stroke-width="1.6"/><circle cx="724.0" cy="1133.0" r="3.5" fill="#faf9f5" stroke="#6c8e00" stroke-width="1.6"/>
+<rect x="712" y="1144" width="33" height="14" fill="#faf9f5"/>
+<text x="713" y="1155" text-anchor="start" class="rl" fill="#6c8e00">0..4</text>
 <line x1="764.0" y1="69.0" x2="764.0" y2="81.0" stroke="#6c8e00" stroke-width="1.6"/><line x1="760.0" y1="69.0" x2="760.0" y2="81.0" stroke="#6c8e00" stroke-width="1.6"/>
-<line x1="760.0" y1="97.0" x2="769.0" y2="91.0" stroke="#0097a7" stroke-width="1.6"/><line x1="760.0" y1="97.0" x2="769.0" y2="97.0" stroke="#0097a7" stroke-width="1.6"/><line x1="760.0" y1="97.0" x2="769.0" y2="103.0" stroke="#0097a7" stroke-width="1.6"/><line x1="756.0" y1="91.0" x2="756.0" y2="103.0" stroke="#0097a7" stroke-width="1.6"/>
-<rect x="733" y="108" width="33" height="14" fill="#faf9f5"/>
-<text x="734" y="119" text-anchor="start" class="rl" fill="#0097a7">1..2</text>
-<line x1="714.0" y1="509.0" x2="714.0" y2="497.0" stroke="#0097a7" stroke-width="1.6"/><line x1="718.0" y1="509.0" x2="718.0" y2="497.0" stroke="#0097a7" stroke-width="1.6"/>
-<line x1="959.0" y1="293.0" x2="947.0" y2="293.0" stroke="#a0522d" stroke-width="1.6"/><circle cx="953.0" cy="285.0" r="3.5" fill="#faf9f5" stroke="#a0522d" stroke-width="1.6"/>
-<line x1="947.0" y1="259.0" x2="959.0" y2="259.0" stroke="#a0522d" stroke-width="1.6"/><line x1="947.0" y1="263.0" x2="959.0" y2="263.0" stroke="#a0522d" stroke-width="1.6"/>
-<line x1="760.0" y1="591.0" x2="769.0" y2="585.0" stroke="#5e35b1" stroke-width="1.6"/><line x1="760.0" y1="591.0" x2="769.0" y2="591.0" stroke="#5e35b1" stroke-width="1.6"/><line x1="760.0" y1="591.0" x2="769.0" y2="597.0" stroke="#5e35b1" stroke-width="1.6"/><line x1="756.0" y1="585.0" x2="756.0" y2="597.0" stroke="#5e35b1" stroke-width="1.6"/>
-<rect x="722" y="568" width="46" height="14" fill="#faf9f5"/>
-<text x="723" y="579" text-anchor="start" class="rl" fill="#5e35b1">1..300</text>
-<line x1="714.0" y1="899.0" x2="714.0" y2="887.0" stroke="#5e35b1" stroke-width="1.6"/><line x1="718.0" y1="899.0" x2="718.0" y2="887.0" stroke="#5e35b1" stroke-width="1.6"/>
-<rect x="28" y="26" width="315" height="200" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="760.0" y1="103.0" x2="769.0" y2="97.0" stroke="#0097a7" stroke-width="1.6"/><line x1="760.0" y1="103.0" x2="769.0" y2="103.0" stroke="#0097a7" stroke-width="1.6"/><line x1="760.0" y1="103.0" x2="769.0" y2="109.0" stroke="#0097a7" stroke-width="1.6"/><line x1="756.0" y1="97.0" x2="756.0" y2="109.0" stroke="#0097a7" stroke-width="1.6"/>
+<rect x="733" y="114" width="33" height="14" fill="#faf9f5"/>
+<text x="734" y="125" text-anchor="start" class="rl" fill="#0097a7">1..2</text>
+<line x1="714.0" y1="607.0" x2="714.0" y2="595.0" stroke="#0097a7" stroke-width="1.6"/><line x1="718.0" y1="607.0" x2="718.0" y2="595.0" stroke="#0097a7" stroke-width="1.6"/>
+<line x1="959.0" y1="357.0" x2="947.0" y2="357.0" stroke="#a0522d" stroke-width="1.6"/><circle cx="953.0" cy="349.0" r="3.5" fill="#faf9f5" stroke="#a0522d" stroke-width="1.6"/>
+<line x1="947.0" y1="307.0" x2="959.0" y2="307.0" stroke="#a0522d" stroke-width="1.6"/><line x1="947.0" y1="311.0" x2="959.0" y2="311.0" stroke="#a0522d" stroke-width="1.6"/>
+<line x1="760.0" y1="713.0" x2="769.0" y2="707.0" stroke="#5e35b1" stroke-width="1.6"/><line x1="760.0" y1="713.0" x2="769.0" y2="713.0" stroke="#5e35b1" stroke-width="1.6"/><line x1="760.0" y1="713.0" x2="769.0" y2="719.0" stroke="#5e35b1" stroke-width="1.6"/><line x1="756.0" y1="707.0" x2="756.0" y2="719.0" stroke="#5e35b1" stroke-width="1.6"/>
+<rect x="722" y="690" width="46" height="14" fill="#faf9f5"/>
+<text x="723" y="701" text-anchor="start" class="rl" fill="#5e35b1">1..300</text>
+<line x1="714.0" y1="1083.0" x2="714.0" y2="1071.0" stroke="#5e35b1" stroke-width="1.6"/><line x1="718.0" y1="1083.0" x2="718.0" y2="1071.0" stroke="#5e35b1" stroke-width="1.6"/>
+<rect x="28" y="26" width="315" height="242" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
 <text x="185.5" y="52" text-anchor="middle" class="nm">USUARIO</text>
 <line x1="28" y1="64" x2="343" y2="64" stroke="#1a1a1a"/>
 <text x="32" y="80" class="b" fill="#d9532c">PK</text>
 <text x="84" y="80" class="a">idInstitucional</text>
 <text x="333" y="80" text-anchor="end" class="ty">varchar(10)</text>
-<text x="84" y="102" class="a">nombre</text>
-<text x="333" y="102" text-anchor="end" class="ty">varchar(100)</text>
-<text x="84" y="124" class="a">apellidos</text>
-<text x="333" y="124" text-anchor="end" class="ty">varchar(100)</text>
-<text x="32" y="146" class="b" fill="#6b6b6b">UK</text>
-<text x="84" y="146" class="a">correo</text>
-<text x="333" y="146" text-anchor="end" class="ty">varchar(254)</text>
-<text x="84" y="168" class="a">contrasenaHash</text>
-<text x="333" y="168" text-anchor="end" class="ty">varchar(255)</text>
-<text x="84" y="190" class="a">activo</text>
-<text x="333" y="190" text-anchor="end" class="ty">boolean</text>
-<text x="84" y="212" class="a">cambioRequerido</text>
-<text x="333" y="212" text-anchor="end" class="ty">boolean</text>
-<rect x="28" y="270" width="315" height="68" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
-<text x="185.5" y="296" text-anchor="middle" class="nm">ADMINISTRADOR</text>
-<line x1="28" y1="308" x2="343" y2="308" stroke="#1a1a1a"/>
-<text x="32" y="324" class="b" fill="#d9532c">PK FK</text>
-<text x="84" y="324" class="a">idInstitucional</text>
-<text x="333" y="324" text-anchor="end" class="ty">varchar(10)</text>
-<rect x="28" y="382" width="315" height="200" rx="6" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1"/>
-<text x="185.5" y="408" text-anchor="middle" class="nm">NOTIFICACION</text>
-<line x1="28" y1="420" x2="343" y2="420" stroke="#1a1a1a"/>
-<text x="32" y="436" class="b" fill="#d9532c">PK</text>
-<text x="84" y="436" class="a">idNotificacion</text>
-<text x="333" y="436" text-anchor="end" class="ty">integer</text>
-<text x="32" y="458" class="b" fill="#1a1a1a">FK</text>
-<text x="84" y="458" class="a">idInstitucional</text>
-<text x="333" y="458" text-anchor="end" class="ty">varchar(10)</text>
-<text x="32" y="480" class="b" fill="#1a1a1a">FK</text>
-<text x="84" y="480" class="a">idExperimento</text>
-<text x="333" y="480" text-anchor="end" class="ty">integer · nulo</text>
-<text x="84" y="502" class="a">tipo</text>
-<text x="333" y="502" text-anchor="end" class="ty">tipo_notificacion</text>
-<text x="84" y="524" class="a">mensaje</text>
-<text x="333" y="524" text-anchor="end" class="ty">text</text>
-<text x="84" y="546" class="a">leido</text>
-<text x="333" y="546" text-anchor="end" class="ty">boolean</text>
-<text x="84" y="568" class="a">fechaCreacion</text>
-<text x="333" y="568" text-anchor="end" class="ty">timestamptz</text>
-<rect x="28" y="626" width="315" height="156" rx="6" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1"/>
-<text x="185.5" y="652" text-anchor="middle" class="nm">REPORTE</text>
-<line x1="28" y1="664" x2="343" y2="664" stroke="#1a1a1a"/>
-<text x="32" y="680" class="b" fill="#d9532c">PK</text>
-<text x="84" y="680" class="a">idReporte</text>
-<text x="333" y="680" text-anchor="end" class="ty">integer</text>
-<text x="32" y="702" class="b" fill="#1a1a1a">FK</text>
-<text x="84" y="702" class="a">idExperimento</text>
-<text x="333" y="702" text-anchor="end" class="ty">integer</text>
-<text x="84" y="724" class="a">formato</text>
-<text x="333" y="724" text-anchor="end" class="ty">formato_reporte</text>
-<text x="32" y="746" class="b" fill="#6b6b6b">UK</text>
-<text x="84" y="746" class="a">ruta</text>
-<text x="333" y="746" text-anchor="end" class="ty">text</text>
-<text x="84" y="768" class="a">fechaGeneracion</text>
-<text x="333" y="768" text-anchor="end" class="ty">timestamptz</text>
-<rect x="403" y="26" width="306" height="156" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="84" y="108" class="a">nombre</text>
+<text x="333" y="108" text-anchor="end" class="ty">varchar(100)</text>
+<text x="84" y="136" class="a">apellidos</text>
+<text x="333" y="136" text-anchor="end" class="ty">varchar(100)</text>
+<text x="32" y="164" class="b" fill="#6b6b6b">UK</text>
+<text x="84" y="164" class="a">correo</text>
+<text x="333" y="164" text-anchor="end" class="ty">varchar(254)</text>
+<text x="84" y="192" class="a">contrasenaHash</text>
+<text x="333" y="192" text-anchor="end" class="ty">varchar(255)</text>
+<text x="84" y="220" class="a">activo</text>
+<text x="333" y="220" text-anchor="end" class="ty">boolean</text>
+<text x="84" y="248" class="a">cambioRequerido</text>
+<text x="333" y="248" text-anchor="end" class="ty">boolean</text>
+<rect x="28" y="328" width="315" height="74" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="185.5" y="354" text-anchor="middle" class="nm">ADMINISTRADOR</text>
+<line x1="28" y1="366" x2="343" y2="366" stroke="#1a1a1a"/>
+<text x="32" y="382" class="b" fill="#d9532c">PK FK</text>
+<text x="84" y="382" class="a">idInstitucional</text>
+<text x="333" y="382" text-anchor="end" class="ty">varchar(10)</text>
+<rect x="28" y="462" width="315" height="242" rx="6" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1"/>
+<text x="185.5" y="488" text-anchor="middle" class="nm">NOTIFICACION</text>
+<line x1="28" y1="500" x2="343" y2="500" stroke="#1a1a1a"/>
+<text x="32" y="516" class="b" fill="#d9532c">PK</text>
+<text x="84" y="516" class="a">idNotificacion</text>
+<text x="333" y="516" text-anchor="end" class="ty">integer</text>
+<text x="32" y="544" class="b" fill="#1a1a1a">FK</text>
+<text x="84" y="544" class="a">idInstitucional</text>
+<text x="333" y="544" text-anchor="end" class="ty">varchar(10)</text>
+<text x="32" y="572" class="b" fill="#1a1a1a">FK</text>
+<text x="84" y="572" class="a">idExperimento</text>
+<text x="333" y="572" text-anchor="end" class="ty">integer · nulo</text>
+<text x="84" y="600" class="a">tipo</text>
+<text x="333" y="600" text-anchor="end" class="ty">tipo_notificacion</text>
+<text x="84" y="628" class="a">mensaje</text>
+<text x="333" y="628" text-anchor="end" class="ty">text</text>
+<text x="84" y="656" class="a">leido</text>
+<text x="333" y="656" text-anchor="end" class="ty">boolean</text>
+<text x="84" y="684" class="a">fechaCreacion</text>
+<text x="333" y="684" text-anchor="end" class="ty">timestamptz</text>
+<rect x="28" y="764" width="315" height="186" rx="6" fill="#ece7d8" stroke="#1a1a1a" stroke-width="1"/>
+<text x="185.5" y="790" text-anchor="middle" class="nm">REPORTE</text>
+<line x1="28" y1="802" x2="343" y2="802" stroke="#1a1a1a"/>
+<text x="32" y="818" class="b" fill="#d9532c">PK</text>
+<text x="84" y="818" class="a">idReporte</text>
+<text x="333" y="818" text-anchor="end" class="ty">integer</text>
+<text x="32" y="846" class="b" fill="#1a1a1a">FK</text>
+<text x="84" y="846" class="a">idExperimento</text>
+<text x="333" y="846" text-anchor="end" class="ty">integer</text>
+<text x="84" y="874" class="a">formato</text>
+<text x="333" y="874" text-anchor="end" class="ty">formato_reporte</text>
+<text x="32" y="902" class="b" fill="#6b6b6b">UK</text>
+<text x="84" y="902" class="a">ruta</text>
+<text x="333" y="902" text-anchor="end" class="ty">text</text>
+<text x="84" y="930" class="a">fechaGeneracion</text>
+<text x="333" y="930" text-anchor="end" class="ty">timestamptz</text>
+<rect x="403" y="26" width="306" height="186" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
 <text x="556.0" y="52" text-anchor="middle" class="nm">EXPERIMENTO</text>
 <line x1="403" y1="64" x2="709" y2="64" stroke="#1a1a1a"/>
 <text x="407" y="80" class="b" fill="#d9532c">PK</text>
 <text x="459" y="80" class="a">idExperimento</text>
 <text x="699" y="80" text-anchor="end" class="ty">integer</text>
-<text x="407" y="102" class="b" fill="#1a1a1a">FK</text>
-<text x="459" y="102" class="a">idInstitucional</text>
-<text x="699" y="102" text-anchor="end" class="ty">varchar(10)</text>
-<text x="407" y="124" class="b" fill="#6b6b6b">UK</text>
-<text x="459" y="124" class="a">nombre</text>
-<text x="699" y="124" text-anchor="end" class="ty">varchar(150)</text>
-<text x="459" y="146" class="a">fecha</text>
-<text x="699" y="146" text-anchor="end" class="ty">date</text>
-<text x="459" y="168" class="a">notas</text>
-<text x="699" y="168" text-anchor="end" class="ty">text · nulo</text>
-<rect x="403" y="226" width="306" height="184" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
-<text x="556.0" y="252" text-anchor="middle" class="nm">GRUPO</text>
-<line x1="403" y1="264" x2="709" y2="264" stroke="#1a1a1a"/>
-<text x="407" y="280" class="b" fill="#d9532c">PK</text>
-<text x="459" y="280" class="a">idGrupo</text>
-<text x="699" y="280" text-anchor="end" class="ty">integer</text>
-<text x="407" y="302" class="b" fill="#1a1a1a">FK</text>
-<text x="459" y="302" class="a">idExperimento</text>
-<text x="699" y="302" text-anchor="end" class="ty">integer</text>
-<text x="459" y="324" class="a">etiqueta</text>
-<text x="699" y="324" text-anchor="end" class="ty">varchar(100)</text>
-<text x="459" y="346" class="a">tipo</text>
-<text x="699" y="346" text-anchor="end" class="ty">tipo_grupo</text>
-<text x="459" y="368" class="a">tratamiento</text>
-<text x="699" y="368" text-anchor="end" class="ty">text</text>
-<line x1="411" y1="378" x2="701" y2="378" stroke="#6b6b6b" stroke-dasharray="3,3"/>
-<text x="413" y="394" class="ty">UK (idExperimento, etiqueta)</text>
-<rect x="403" y="454" width="306" height="162" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
-<text x="556.0" y="480" text-anchor="middle" class="nm">TANDA</text>
-<line x1="403" y1="492" x2="709" y2="492" stroke="#1a1a1a"/>
-<text x="407" y="508" class="b" fill="#d9532c">PK</text>
-<text x="459" y="508" class="a">idTanda</text>
-<text x="699" y="508" text-anchor="end" class="ty">integer</text>
-<text x="407" y="530" class="b" fill="#1a1a1a">FK</text>
-<text x="459" y="530" class="a">idGrupo</text>
-<text x="699" y="530" text-anchor="end" class="ty">integer</text>
-<text x="459" y="552" class="a">ordinal</text>
-<text x="699" y="552" text-anchor="end" class="ty">smallint</text>
-<text x="459" y="574" class="a">nCilindros</text>
-<text x="699" y="574" text-anchor="end" class="ty">smallint</text>
-<line x1="411" y1="584" x2="701" y2="584" stroke="#6b6b6b" stroke-dasharray="3,3"/>
-<text x="413" y="600" class="ty">UK (idGrupo, ordinal)</text>
-<rect x="403" y="660" width="306" height="140" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
-<text x="556.0" y="686" text-anchor="middle" class="nm">ESPECIMEN</text>
-<line x1="403" y1="698" x2="709" y2="698" stroke="#1a1a1a"/>
-<text x="407" y="714" class="b" fill="#d9532c">PK</text>
-<text x="459" y="714" class="a">idEspecimen</text>
-<text x="699" y="714" text-anchor="end" class="ty">integer</text>
-<text x="407" y="736" class="b" fill="#1a1a1a">FK</text>
-<text x="459" y="736" class="a">idTanda</text>
-<text x="699" y="736" text-anchor="end" class="ty">integer</text>
-<text x="459" y="758" class="a">numeroCilindro</text>
-<text x="699" y="758" text-anchor="end" class="ty">smallint</text>
-<line x1="411" y1="768" x2="701" y2="768" stroke="#6b6b6b" stroke-dasharray="3,3"/>
-<text x="413" y="784" class="ty">UK (idTanda, numeroCilindro)</text>
-<rect x="403" y="844" width="306" height="140" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
-<text x="556.0" y="870" text-anchor="middle" class="nm">OBSERVACION</text>
-<line x1="403" y1="882" x2="709" y2="882" stroke="#1a1a1a"/>
-<text x="407" y="898" class="b" fill="#d9532c">PK</text>
-<text x="459" y="898" class="a">idObservacion</text>
-<text x="699" y="898" text-anchor="end" class="ty">integer</text>
-<text x="407" y="920" class="b" fill="#1a1a1a">FK</text>
-<text x="459" y="920" class="a">idEspecimen</text>
-<text x="699" y="920" text-anchor="end" class="ty">integer</text>
-<text x="407" y="942" class="b" fill="#1a1a1a">FK</text>
-<text x="459" y="942" class="a">idVideo</text>
-<text x="699" y="942" text-anchor="end" class="ty">integer</text>
-<line x1="411" y1="952" x2="701" y2="952" stroke="#6b6b6b" stroke-dasharray="3,3"/>
-<text x="413" y="968" class="ty">UK (idEspecimen, idVideo)</text>
-<rect x="769" y="26" width="369" height="228" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="407" y="108" class="b" fill="#1a1a1a">FK</text>
+<text x="459" y="108" class="a">idInstitucional</text>
+<text x="699" y="108" text-anchor="end" class="ty">varchar(10)</text>
+<text x="407" y="136" class="b" fill="#6b6b6b">UK</text>
+<text x="459" y="136" class="a">nombre</text>
+<text x="699" y="136" text-anchor="end" class="ty">varchar(150)</text>
+<text x="459" y="164" class="a">fecha</text>
+<text x="699" y="164" text-anchor="end" class="ty">date</text>
+<text x="459" y="192" class="a">notas</text>
+<text x="699" y="192" text-anchor="end" class="ty">text · nulo</text>
+<rect x="403" y="272" width="306" height="220" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="556.0" y="298" text-anchor="middle" class="nm">GRUPO</text>
+<line x1="403" y1="310" x2="709" y2="310" stroke="#1a1a1a"/>
+<text x="407" y="326" class="b" fill="#d9532c">PK</text>
+<text x="459" y="326" class="a">idGrupo</text>
+<text x="699" y="326" text-anchor="end" class="ty">integer</text>
+<text x="407" y="354" class="b" fill="#1a1a1a">FK</text>
+<text x="459" y="354" class="a">idExperimento</text>
+<text x="699" y="354" text-anchor="end" class="ty">integer</text>
+<text x="459" y="382" class="a">etiqueta</text>
+<text x="699" y="382" text-anchor="end" class="ty">varchar(100)</text>
+<text x="459" y="410" class="a">tipo</text>
+<text x="699" y="410" text-anchor="end" class="ty">tipo_grupo</text>
+<text x="459" y="438" class="a">tratamiento</text>
+<text x="699" y="438" text-anchor="end" class="ty">text</text>
+<line x1="411" y1="454" x2="701" y2="454" stroke="#6b6b6b" stroke-dasharray="3,3"/>
+<text x="413" y="470" class="ty">UK (idExperimento, etiqueta)</text>
+<rect x="403" y="552" width="306" height="192" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="556.0" y="578" text-anchor="middle" class="nm">TANDA</text>
+<line x1="403" y1="590" x2="709" y2="590" stroke="#1a1a1a"/>
+<text x="407" y="606" class="b" fill="#d9532c">PK</text>
+<text x="459" y="606" class="a">idTanda</text>
+<text x="699" y="606" text-anchor="end" class="ty">integer</text>
+<text x="407" y="634" class="b" fill="#1a1a1a">FK</text>
+<text x="459" y="634" class="a">idGrupo</text>
+<text x="699" y="634" text-anchor="end" class="ty">integer</text>
+<text x="459" y="662" class="a">ordinal</text>
+<text x="699" y="662" text-anchor="end" class="ty">smallint</text>
+<text x="459" y="690" class="a">nCilindros</text>
+<text x="699" y="690" text-anchor="end" class="ty">smallint</text>
+<line x1="411" y1="706" x2="701" y2="706" stroke="#6b6b6b" stroke-dasharray="3,3"/>
+<text x="413" y="722" class="ty">UK (idGrupo, ordinal)</text>
+<rect x="403" y="804" width="306" height="164" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="556.0" y="830" text-anchor="middle" class="nm">ESPECIMEN</text>
+<line x1="403" y1="842" x2="709" y2="842" stroke="#1a1a1a"/>
+<text x="407" y="858" class="b" fill="#d9532c">PK</text>
+<text x="459" y="858" class="a">idEspecimen</text>
+<text x="699" y="858" text-anchor="end" class="ty">integer</text>
+<text x="407" y="886" class="b" fill="#1a1a1a">FK</text>
+<text x="459" y="886" class="a">idTanda</text>
+<text x="699" y="886" text-anchor="end" class="ty">integer</text>
+<text x="459" y="914" class="a">numeroCilindro</text>
+<text x="699" y="914" text-anchor="end" class="ty">smallint</text>
+<line x1="411" y1="930" x2="701" y2="930" stroke="#6b6b6b" stroke-dasharray="3,3"/>
+<text x="413" y="946" class="ty">UK (idTanda, numeroCilindro)</text>
+<rect x="403" y="1028" width="306" height="164" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="556.0" y="1054" text-anchor="middle" class="nm">OBSERVACION</text>
+<line x1="403" y1="1066" x2="709" y2="1066" stroke="#1a1a1a"/>
+<text x="407" y="1082" class="b" fill="#d9532c">PK</text>
+<text x="459" y="1082" class="a">idObservacion</text>
+<text x="699" y="1082" text-anchor="end" class="ty">integer</text>
+<text x="407" y="1110" class="b" fill="#1a1a1a">FK</text>
+<text x="459" y="1110" class="a">idEspecimen</text>
+<text x="699" y="1110" text-anchor="end" class="ty">integer</text>
+<text x="407" y="1138" class="b" fill="#1a1a1a">FK</text>
+<text x="459" y="1138" class="a">idVideo</text>
+<text x="699" y="1138" text-anchor="end" class="ty">integer</text>
+<line x1="411" y1="1154" x2="701" y2="1154" stroke="#6b6b6b" stroke-dasharray="3,3"/>
+<text x="413" y="1170" class="ty">UK (idEspecimen, idVideo)</text>
+<rect x="769" y="26" width="369" height="276" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
 <text x="953.5" y="52" text-anchor="middle" class="nm">VIDEO</text>
 <line x1="769" y1="64" x2="1138" y2="64" stroke="#1a1a1a"/>
 <text x="773" y="80" class="b" fill="#d9532c">PK</text>
 <text x="825" y="80" class="a">idVideo</text>
 <text x="1128" y="80" text-anchor="end" class="ty">integer</text>
-<text x="773" y="102" class="b" fill="#1a1a1a">FK</text>
-<text x="825" y="102" class="a">idTanda</text>
-<text x="1128" y="102" text-anchor="end" class="ty">integer</text>
-<text x="825" y="124" class="a">sesion</text>
-<text x="1128" y="124" text-anchor="end" class="ty">sesion_video</text>
-<text x="825" y="146" class="a">archivo</text>
-<text x="1128" y="146" text-anchor="end" class="ty">text · nulo</text>
-<text x="825" y="168" class="a">nombreOriginal</text>
-<text x="1128" y="168" text-anchor="end" class="ty">varchar(255) · nulo</text>
-<text x="825" y="190" class="a">duracion</text>
-<text x="1128" y="190" text-anchor="end" class="ty">numeric(8,2)</text>
-<text x="825" y="212" class="a">fechaCarga</text>
-<text x="1128" y="212" text-anchor="end" class="ty">timestamptz</text>
-<line x1="777" y1="222" x2="1130" y2="222" stroke="#6b6b6b" stroke-dasharray="3,3"/>
-<text x="779" y="238" class="ty">UK (idTanda, sesion)</text>
-<rect x="769" y="298" width="369" height="200" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
-<text x="953.5" y="324" text-anchor="middle" class="nm">ANALISIS</text>
-<line x1="769" y1="336" x2="1138" y2="336" stroke="#1a1a1a"/>
-<text x="773" y="352" class="b" fill="#d9532c">PK</text>
-<text x="825" y="352" class="a">idAnalisis</text>
-<text x="1128" y="352" text-anchor="end" class="ty">integer</text>
-<text x="773" y="374" class="b" fill="#1a1a1a">FK UK</text>
-<text x="825" y="374" class="a">idVideo</text>
-<text x="1128" y="374" text-anchor="end" class="ty">integer</text>
-<text x="825" y="396" class="a">estado</text>
-<text x="1128" y="396" text-anchor="end" class="ty">estado_analisis</text>
-<text x="825" y="418" class="a">etapa</text>
-<text x="1128" y="418" text-anchor="end" class="ty">etapa_analisis</text>
-<text x="825" y="440" class="a">nivelClasif</text>
-<text x="1128" y="440" text-anchor="end" class="ty">nivel_clasif_analisis</text>
-<text x="825" y="462" class="a">fechaAnalisis</text>
-<text x="1128" y="462" text-anchor="end" class="ty">timestamptz</text>
-<text x="825" y="484" class="a">rutaDiagnostico</text>
-<text x="1128" y="484" text-anchor="end" class="ty">text · nulo</text>
-<rect x="769" y="542" width="369" height="162" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
-<text x="953.5" y="568" text-anchor="middle" class="nm">SEGUNDO</text>
-<line x1="769" y1="580" x2="1138" y2="580" stroke="#1a1a1a"/>
-<text x="773" y="596" class="b" fill="#d9532c">PK FK</text>
-<text x="825" y="596" class="a">idObservacion</text>
-<text x="1128" y="596" text-anchor="end" class="ty">integer</text>
-<text x="773" y="618" class="b" fill="#d9532c">PK</text>
-<text x="825" y="618" class="a">segundo</text>
-<text x="1128" y="618" text-anchor="end" class="ty">smallint</text>
-<text x="825" y="640" class="a">conducta</text>
-<text x="1128" y="640" text-anchor="end" class="ty">tipo_conducta · nulo</text>
-<text x="825" y="662" class="a">origen</text>
-<text x="1128" y="662" text-anchor="end" class="ty">origen_segundo</text>
-<line x1="777" y1="672" x2="1130" y2="672" stroke="#6b6b6b" stroke-dasharray="3,3"/>
-<text x="779" y="688" class="ty">CK segundo entre 1 y 300</text>
-<rect x="28" y="826" width="315" height="264" rx="6" fill="#faf9f5" stroke="#6b6b6b" stroke-dasharray="4,3"/>
-<text x="40" y="854" class="nm">Leyenda</text>
-<text x="40" y="878" class="b" fill="#d9532c">PK</text>
-<text x="84" y="878" class="ty">llave primaria</text>
-<text x="40" y="900" class="b" fill="#1a1a1a">FK</text>
-<text x="84" y="900" class="ty">llave foránea</text>
-<text x="40" y="922" class="b" fill="#6b6b6b">UK</text>
-<text x="84" y="922" class="ty">valor único</text>
-<text x="40" y="944" class="b" fill="#6b6b6b">CK</text>
-<text x="84" y="944" class="ty">restricción de valores</text>
-<text x="40" y="966" class="ty">Cardinalidad:</text>
-<line x1="42" y1="983" x2="84" y2="983" stroke="#6b6b6b" stroke-width="1.4"/>
-<line x1="47.0" y1="989.0" x2="47.0" y2="977.0" stroke="#1a1a1a" stroke-width="1.6"/><line x1="51.0" y1="989.0" x2="51.0" y2="977.0" stroke="#1a1a1a" stroke-width="1.6"/>
-<text x="98" y="988" class="ty">exactamente uno</text>
-<line x1="42" y1="1005" x2="84" y2="1005" stroke="#6b6b6b" stroke-width="1.4"/>
-<line x1="47.0" y1="1011.0" x2="47.0" y2="999.0" stroke="#1a1a1a" stroke-width="1.6"/><circle cx="55.0" cy="1005.0" r="3.5" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.6"/>
-<text x="98" y="1010" class="ty">cero o uno</text>
-<line x1="42" y1="1027" x2="84" y2="1027" stroke="#6b6b6b" stroke-width="1.4"/>
-<line x1="51.0" y1="1027.0" x2="42.0" y2="1033.0" stroke="#1a1a1a" stroke-width="1.6"/><line x1="51.0" y1="1027.0" x2="42.0" y2="1027.0" stroke="#1a1a1a" stroke-width="1.6"/><line x1="51.0" y1="1027.0" x2="42.0" y2="1021.0" stroke="#1a1a1a" stroke-width="1.6"/><line x1="55.0" y1="1033.0" x2="55.0" y2="1021.0" stroke="#1a1a1a" stroke-width="1.6"/>
-<text x="98" y="1032" class="ty">uno o más</text>
-<line x1="42" y1="1049" x2="84" y2="1049" stroke="#6b6b6b" stroke-width="1.4"/>
-<line x1="51.0" y1="1049.0" x2="42.0" y2="1055.0" stroke="#1a1a1a" stroke-width="1.6"/><line x1="51.0" y1="1049.0" x2="42.0" y2="1049.0" stroke="#1a1a1a" stroke-width="1.6"/><line x1="51.0" y1="1049.0" x2="42.0" y2="1043.0" stroke="#1a1a1a" stroke-width="1.6"/><circle cx="57.0" cy="1049.0" r="3.5" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.6"/>
-<text x="98" y="1054" class="ty">cero o más</text>
-<rect x="40" y="1064" width="26" height="14" rx="3" fill="#ece7d8" stroke="#1a1a1a"/>
-<text x="84" y="1076" class="ty">soporte del sistema</text>
+<text x="773" y="108" class="b" fill="#1a1a1a">FK</text>
+<text x="825" y="108" class="a">idTanda</text>
+<text x="1128" y="108" text-anchor="end" class="ty">integer</text>
+<text x="825" y="136" class="a">sesion</text>
+<text x="1128" y="136" text-anchor="end" class="ty">sesion_video</text>
+<text x="825" y="164" class="a">archivo</text>
+<text x="1128" y="164" text-anchor="end" class="ty">text · nulo</text>
+<text x="825" y="192" class="a">nombreOriginal</text>
+<text x="1128" y="192" text-anchor="end" class="ty">varchar(255) · nulo</text>
+<text x="825" y="220" class="a">duracion</text>
+<text x="1128" y="220" text-anchor="end" class="ty">numeric(8,2)</text>
+<text x="825" y="248" class="a">fechaCarga</text>
+<text x="1128" y="248" text-anchor="end" class="ty">timestamptz</text>
+<line x1="777" y1="264" x2="1130" y2="264" stroke="#6b6b6b" stroke-dasharray="3,3"/>
+<text x="779" y="280" class="ty">UK (idTanda, sesion)</text>
+<rect x="769" y="362" width="369" height="242" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="953.5" y="388" text-anchor="middle" class="nm">ANALISIS</text>
+<line x1="769" y1="400" x2="1138" y2="400" stroke="#1a1a1a"/>
+<text x="773" y="416" class="b" fill="#d9532c">PK</text>
+<text x="825" y="416" class="a">idAnalisis</text>
+<text x="1128" y="416" text-anchor="end" class="ty">integer</text>
+<text x="773" y="444" class="b" fill="#1a1a1a">FK UK</text>
+<text x="825" y="444" class="a">idVideo</text>
+<text x="1128" y="444" text-anchor="end" class="ty">integer</text>
+<text x="825" y="472" class="a">estado</text>
+<text x="1128" y="472" text-anchor="end" class="ty">estado_analisis</text>
+<text x="825" y="500" class="a">etapa</text>
+<text x="1128" y="500" text-anchor="end" class="ty">etapa_analisis</text>
+<text x="825" y="528" class="a">nivelClasif</text>
+<text x="1128" y="528" text-anchor="end" class="ty">nivel_clasif_analisis</text>
+<text x="825" y="556" class="a">fechaAnalisis</text>
+<text x="1128" y="556" text-anchor="end" class="ty">timestamptz</text>
+<text x="825" y="584" class="a">rutaDiagnostico</text>
+<text x="1128" y="584" text-anchor="end" class="ty">text · nulo</text>
+<rect x="769" y="664" width="369" height="192" rx="6" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
+<text x="953.5" y="690" text-anchor="middle" class="nm">SEGUNDO</text>
+<line x1="769" y1="702" x2="1138" y2="702" stroke="#1a1a1a"/>
+<text x="773" y="718" class="b" fill="#d9532c">PK FK</text>
+<text x="825" y="718" class="a">idObservacion</text>
+<text x="1128" y="718" text-anchor="end" class="ty">integer</text>
+<text x="773" y="746" class="b" fill="#d9532c">PK</text>
+<text x="825" y="746" class="a">segundo</text>
+<text x="1128" y="746" text-anchor="end" class="ty">smallint</text>
+<text x="825" y="774" class="a">conducta</text>
+<text x="1128" y="774" text-anchor="end" class="ty">tipo_conducta · nulo</text>
+<text x="825" y="802" class="a">origen</text>
+<text x="1128" y="802" text-anchor="end" class="ty">origen_segundo</text>
+<line x1="777" y1="818" x2="1130" y2="818" stroke="#6b6b6b" stroke-dasharray="3,3"/>
+<text x="779" y="834" class="ty">CK segundo entre 1 y 300</text>
+<rect x="28" y="1010" width="315" height="318" rx="6" fill="#faf9f5" stroke="#6b6b6b" stroke-dasharray="4,3"/>
+<text x="40" y="1038" class="nm">Leyenda</text>
+<text x="40" y="1062" class="b" fill="#d9532c">PK</text>
+<text x="84" y="1062" class="ty">llave primaria</text>
+<text x="40" y="1090" class="b" fill="#1a1a1a">FK</text>
+<text x="84" y="1090" class="ty">llave foránea</text>
+<text x="40" y="1118" class="b" fill="#6b6b6b">UK</text>
+<text x="84" y="1118" class="ty">valor único</text>
+<text x="40" y="1146" class="b" fill="#6b6b6b">CK</text>
+<text x="84" y="1146" class="ty">restricción de valores</text>
+<text x="40" y="1174" class="ty">Cardinalidad:</text>
+<line x1="42" y1="1197" x2="84" y2="1197" stroke="#6b6b6b" stroke-width="1.4"/>
+<line x1="47.0" y1="1203.0" x2="47.0" y2="1191.0" stroke="#1a1a1a" stroke-width="1.6"/><line x1="51.0" y1="1203.0" x2="51.0" y2="1191.0" stroke="#1a1a1a" stroke-width="1.6"/>
+<text x="98" y="1202" class="ty">exactamente uno</text>
+<line x1="42" y1="1225" x2="84" y2="1225" stroke="#6b6b6b" stroke-width="1.4"/>
+<line x1="47.0" y1="1231.0" x2="47.0" y2="1219.0" stroke="#1a1a1a" stroke-width="1.6"/><circle cx="55.0" cy="1225.0" r="3.5" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.6"/>
+<text x="98" y="1230" class="ty">cero o uno</text>
+<line x1="42" y1="1253" x2="84" y2="1253" stroke="#6b6b6b" stroke-width="1.4"/>
+<line x1="51.0" y1="1253.0" x2="42.0" y2="1259.0" stroke="#1a1a1a" stroke-width="1.6"/><line x1="51.0" y1="1253.0" x2="42.0" y2="1253.0" stroke="#1a1a1a" stroke-width="1.6"/><line x1="51.0" y1="1253.0" x2="42.0" y2="1247.0" stroke="#1a1a1a" stroke-width="1.6"/><line x1="55.0" y1="1259.0" x2="55.0" y2="1247.0" stroke="#1a1a1a" stroke-width="1.6"/>
+<text x="98" y="1258" class="ty">uno o más</text>
+<line x1="42" y1="1281" x2="84" y2="1281" stroke="#6b6b6b" stroke-width="1.4"/>
+<line x1="51.0" y1="1281.0" x2="42.0" y2="1287.0" stroke="#1a1a1a" stroke-width="1.6"/><line x1="51.0" y1="1281.0" x2="42.0" y2="1281.0" stroke="#1a1a1a" stroke-width="1.6"/><line x1="51.0" y1="1281.0" x2="42.0" y2="1275.0" stroke="#1a1a1a" stroke-width="1.6"/><circle cx="57.0" cy="1281.0" r="3.5" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.6"/>
+<text x="98" y="1286" class="ty">cero o más</text>
+<rect x="40" y="1302" width="26" height="14" rx="3" fill="#ece7d8" stroke="#1a1a1a"/>
+<text x="84" y="1314" class="ty">soporte del sistema</text>
 </svg></body></html>
