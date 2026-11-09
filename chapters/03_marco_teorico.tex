@@ -233,7 +233,7 @@ reemplaza la capa de clasificación original por una nueva con 3 salidas ---una 
 conducta: escalamiento, inmovilidad y nado--- y se re-entrena con los \textit{clips} (fragmentos de video) etiquetados de los videos del laboratorio.
 En este proyecto la red parte de pesos preentrenados en Kinetics-400, pero se ajusta completa, con un
 paso de aprendizaje pequeño, y se le añade una rama de medidas del espécimen antes de la
-capa de salida (ver «Clasificación de las conductas»).
+capa de salida (ver «Red de fusión»).
 
 Este enfoque reduce los requerimientos de datos cuando el dominio de origen (ImageNet
 para imágenes, Kinetics-400 para video) y el de destino (recortes y clips de especímenes en el FST) comparten características visuales básicas
@@ -258,19 +258,35 @@ $\mathcal{F}(\mathbf{x}) = \mathcal{H}(\mathbf{x}) - \mathbf{x}$:
 
 Esto permite al gradiente fluir directamente hacia atrás sin atenuarse, lo que hace
 posible entrenar redes de 50, 101 o 152 capas. Para este proyecto interesa la versión
-de 18 capas, ResNet-18, porque es la base de la red del clasificador:
-la R(2+1)D-18 \cite{tran2018} conserva sus 18 capas y sus conexiones residuales, pero
-recibe clips de 16 fotogramas y separa cada convolución en una parte espacial, sobre
-cada fotograma, y una temporal, entre fotogramas. Así aprende patrones de movimiento
-que no se ven en un solo cuadro.
+de 18 capas, ResNet-18, porque es la base de la red del clasificador, la R(2+1)D-18
+que se describe a continuación.
+
+\subsection{Red R(2+1)D-18}
+
+La R(2+1)D-18 \cite{tran2018} es una ResNet-18 para video. Conserva sus 18 capas y sus
+conexiones residuales, pero recibe clips de 16 fotogramas y separa cada convolución 3D
+en una parte espacial, sobre cada fotograma, y una temporal, entre fotogramas. Así
+aprende patrones de movimiento que no se ven en un solo cuadro. La red del sistema parte
+de esta arquitectura con los pesos preentrenados en Kinetics-400 (la técnica de
+\textit{transfer learning} de la sección anterior) y sustituye su capa final por una de tres
+salidas, una por clase: escalamiento, inmovilidad y nado.
+
+\subsection{Red de fusión}
+
+El clasificador del sistema no usa solo el video. Es una red de fusión: tiene dos ramas
+que se unen antes de la capa de salida. La rama de video es la R(2+1)D-18, que procesa
+el clip de 16 fotogramas del cilindro de cada espécimen. La rama de medidas procesa los
+quince rasgos del etiquetador, que describen el movimiento, la postura y la trayectoria
+del espécimen, y siete reglas de observación del pataleo y de la nariz. La capa de
+salida decide, así, con lo que se ve en el video y con lo que se midió sobre el
+espécimen.
 
 \subsection{Clasificación de las conductas}
 
-Para clasificar cada segundo se toma una ventana de 4~s centrada en él, y de ella sale
-el clip de 16 fotogramas del cilindro de cada espécimen que recibe la red; en paralelo,
-una rama de medidas procesa los quince rasgos del etiquetador y siete reglas de
-observación del pataleo y de la nariz; las dos ramas se unen antes de la capa de
-salida. Esa capa produce tres valores de activación, uno por clase, que la función
+Para clasificar cada segundo se toma una ventana de 4~s centrada en él, y de ella salen
+el clip de 16 fotogramas del cilindro de cada espécimen y las medidas que recibe la red
+de fusión. La capa de salida produce tres valores de activación, uno por clase, que la
+función
 \textit{softmax} convierte en probabilidades:
 
 \begin{equation}
