@@ -25,7 +25,88 @@ usan base de datos. Cada arranque verifica además que las entidades de la aplic
 coincidan con las tablas; si no coinciden, la aplicación no arranca.
 
 Con la base de pruebas, las 77 pasan, sin fallos ni errores. Sin base de datos, 75 se
-omiten y 2 corren.
+omiten y 2 corren. Las Figuras~\ref{fig:pruebas_corrida_con_base} y
+\ref{fig:pruebas_corrida_sin_base} muestran la salida de ambas corridas.
+
+\begin{sidewaysfigure}[p]
+\centering
+\includegraphics[width=\textheight, height=0.9\textwidth, keepaspectratio]{figures/pruebas/01_corrida_77_con_base}
+\caption{Salida de la corrida de la selección con base PostgreSQL de pruebas, reproducida como texto a partir del registro de Maven y de los reportes de las pruebas.}
+\label{fig:pruebas_corrida_con_base}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}[p]
+\centering
+\includegraphics[width=\textheight, height=0.9\textwidth, keepaspectratio]{figures/pruebas/02_corrida_77_sin_base}
+\caption{Salida de la corrida de la selección sin base de datos, reproducida como texto a partir del registro de Maven y de los reportes de las pruebas.}
+\label{fig:pruebas_corrida_sin_base}
+\end{sidewaysfigure}
+
+\subsection{Plan de pruebas por tipo}
+
+Cada prueba de la selección se clasificó una sola vez según su propósito principal. La
+Tabla~\ref{tab:pruebas_tipos} describe los tipos, cuándo se aplican, qué validan y cuántas
+de las 77 pruebas corresponden a cada uno. Setenta y cinco de las 77 corren contra la
+aplicación completa y PostgreSQL reales; el tipo «integración» indica el propósito
+principal de la prueba (que varias partes juntas dejen el sistema en el estado correcto),
+no el entorno en que corre. La selección es solo del \textit{backend}, por lo que no
+incluye un tipo «interfaz».
+
+{\footnotesize\singlespacing
+\begin{longtable}{|>{\raggedright}p{1.8cm}|>{\raggedright}p{2.8cm}|>{\raggedright}p{2.6cm}|>{\raggedright}p{4.5cm}|>{\raggedright\arraybackslash}p{1.2cm}|}
+\caption{Tipos de prueba de la selección, con el número de pruebas de cada uno.
+\label{tab:pruebas_tipos}}\\
+\hline
+\textbf{Tipo} & \textbf{Objetivo} & \textbf{Cuándo se aplica} & \textbf{Qué valida} & \textbf{Pruebas} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tipo} & \textbf{Objetivo} & \textbf{Cuándo se aplica} & \textbf{Qué valida} & \textbf{Pruebas} \\
+\hline
+\endhead
+Funcional
+& Comprobar que una función entrega el resultado que describe el requerimiento.
+& Cada vez que se corre la selección, tras un cambio en la función.
+& Que subir un video horizontal del Día~2 cree la tanda y deje el análisis en cola, y que el CSV del grupo traiga las columnas, las filas y los estadísticos.
+& 20 \\
+\hline
+Validación de datos
+& Comprobar que los datos válidos entran y los que están fuera de formato o de rango se rechazan.
+& Tras un cambio en las reglas de formato o en el esquema de la base.
+& Que un archivo que no es MP4 ni MOV o un video vertical se rechacen, y que la base rechace un segundo igual a 0 o a 301 y una duración de 0.
+& 21 \\
+\hline
+Negativa (rechazo de lo no permitido)
+& Comprobar que lo no permitido se rechaza y no deja cambios.
+& Tras un cambio en las reglas de negocio.
+& Que un nombre de experimento repetido dé conflicto, que no se elimine un experimento con un análisis procesando y que no se borre un experimento que tiene grupos.
+& 20 \\
+\hline
+Seguridad
+& Comprobar que solo se accede a lo que corresponde a cada cuenta.
+& Tras un cambio en cuentas, sesión o permisos.
+& Que un investigador reciba acceso denegado en todo el panel de administración, que con contraseña temporal cambiarla exija aceptar el aviso de privacidad y los términos, y que el enlace de recuperación sirva una sola vez.
+& 12 \\
+\hline
+Integración
+& Comprobar que varias partes juntas dejan el sistema en el estado correcto.
+& Tras un cambio que toque más de una parte del sistema.
+& Que al eliminar un experimento desaparezcan sus grupos, tandas y notificaciones; que de dos reinicios a la vez solo pase uno; que el candado de cuenta deje pasar la notificación del \textit{worker}; y que reiniciar deje el análisis en cola sin resultados ni archivos viejos.
+& 4 \\
+\hline
+Rendimiento
+& Medir el tiempo de respuesta bajo carga.
+& Con el sistema armado.
+& Ninguna de las 77 pruebas es de este tipo: la prueba de carga es manual y se describe aparte (sección~\ref{sec:pruebas_carga}).
+& 0 \\
+\hline
+\textbf{Total}
+& & & & \textbf{77} \\
+\hline
+\end{longtable}
+}
+
+\subsection{Pruebas por tema}
 
 La Tabla~\ref{tab:pruebas_seleccion} agrupa las 77 pruebas por tema. Indica qué comprueba
 cada grupo y qué requerimientos funcionales (RF) y no funcionales (RNF) del
@@ -45,7 +126,7 @@ sección~\ref{sec:pruebas_bd}.
 \textbf{Tema} & \textbf{Pruebas} & \textbf{Qué comprueban} & \textbf{RF y RNF que verifican} \\
 \hline
 \endhead
-Cuentas, sesión y recuperación$^{*}$
+Cuentas, sesión y recuperación
 & 11
 & Que no se pueda quitar al único Administrador activo, ni desactivarlo, ni que se dé una contraseña temporal a sí mismo; que un investigador no entre a la administración; que con contraseña temporal solo se pueda cambiarla aceptando el aviso y los términos; que un correo o identificador repetido se rechace; que el enlace de recuperación sirva una sola vez y no sirva vencido.
 & RF-03, 04, 05, 06 y 07; RNF-05. \\
@@ -89,10 +170,66 @@ Restricciones de la base de datos
 & \textbf{77}
 & &  \\
 \hline
-\multicolumn{4}{|>{\raggedright\arraybackslash}p{13.1cm}|}{$^{*}$ Selección: de las 8 pruebas del grupo, el trabajo terminal documenta 4 (la regla del último Administrador y la autoprotección).} \\
-\hline
 \end{longtable}
 }
+
+Las Figuras~\ref{fig:pruebas_experimentos}, \ref{fig:pruebas_cuentas} y
+\ref{fig:pruebas_resultados} muestran el resultado de cada prueba, con su tiempo. Las
+capturas agrupan las pruebas por clase de prueba y no por tema, por lo que su reparto
+(18, 16 y 14 pruebas) no coincide con el de la Tabla~\ref{tab:pruebas_seleccion}; junto con
+las 29 de la Figura~\ref{fig:pruebas_restricciones} suman las mismas 77.
+
+\begin{sidewaysfigure}[p]
+\centering
+\includegraphics[width=\textheight, height=0.9\textwidth, keepaspectratio]{figures/pruebas/04_experimentos_crear_eliminar_subir}
+\caption{Salida de la corrida de las pruebas de experimentos (crear, eliminar, subir video, filtro por estado y aviso de vencimiento), reproducida como texto a partir del registro de Maven y de los reportes de las pruebas.}
+\label{fig:pruebas_experimentos}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}[p]
+\centering
+\includegraphics[width=\textheight, height=0.9\textwidth, keepaspectratio]{figures/pruebas/05_cuentas_sesion_y_recuperacion}
+\caption{Salida de la corrida de las pruebas de cuentas, sesión y recuperación de contraseña, reproducida como texto a partir del registro de Maven y de los reportes de las pruebas.}
+\label{fig:pruebas_cuentas}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}[p]
+\centering
+\includegraphics[width=\textheight, height=0.9\textwidth, keepaspectratio]{figures/pruebas/06_resultados_revision_y_demas}
+\caption{Salida de la corrida de las pruebas de resultados y reportes, revisión segundo a segundo, pausa, notificaciones y concurrencia, reproducida como texto a partir del registro de Maven y de los reportes de las pruebas.}
+\label{fig:pruebas_resultados}
+\end{sidewaysfigure}
+
+\subsection{Pantallas de la función de seguridad}
+
+Las Figuras~\ref{fig:pruebas_login}, \ref{fig:pruebas_privacidad} y
+\ref{fig:pruebas_terminos} muestran las pantallas de inicio de sesión, aviso de privacidad y
+términos y condiciones de uso. Son las pantallas de la función que verifican las pruebas de
+seguridad: con una contraseña temporal, cambiarla exige aceptar el aviso de privacidad y los
+términos.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/pruebas/07_pantalla_inicio_de_sesion}
+\caption{Captura del modo de ejemplo de la interfaz (sin servidor), con los textos de la versión actual.}
+\label{fig:pruebas_login}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/pruebas/08_pantalla_aviso_de_privacidad}
+\caption{Captura del modo de ejemplo de la interfaz (sin servidor), con los textos de la versión actual.}
+\label{fig:pruebas_privacidad}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/pruebas/09_pantalla_terminos_y_condiciones}
+\caption{Captura del modo de ejemplo de la interfaz (sin servidor), con los textos de la versión actual.}
+\label{fig:pruebas_terminos}
+\end{figure}
+
+\FloatBarrier
 
 % ============================================================
 \section{Restricciones de la base de datos}
@@ -101,7 +238,8 @@ Restricciones de la base de datos
 El esquema físico (Figura~\ref{fig:er} y apéndice~\ref{ap:diccionario}) declara reglas
 que la base de datos hace cumplir por sí misma, sin depender de la aplicación. Las 29 pruebas
 de este grupo intentan insertar, repetir o borrar datos directamente en la base y
-comprueban que responda como el esquema establece. Se agrupan en cinco tipos:
+comprueban que responda como el esquema establece. La Figura~\ref{fig:pruebas_restricciones}
+muestra el resultado de cada una. Se agrupan en cinco tipos:
 
 \begin{itemize}
   \item \textbf{Controles de que lo válido sí entra.} Una cadena completa y válida de
@@ -128,6 +266,15 @@ Estas pruebas no cubren todo lo que el esquema declara. \textbf{No existe prueba
 regla de actualización de las llaves foráneas (que tampoco actualiza en cascada), de los
 valores por defecto, de los índices ni de las migraciones. Esos elementos están declarados y
 la base los hace cumplir, pero ninguna prueba de la selección los verifica.
+
+\begin{sidewaysfigure}[p]
+\centering
+\includegraphics[width=\textheight, height=0.9\textwidth, keepaspectratio]{figures/pruebas/03_restricciones_de_la_base}
+\caption{Salida de la corrida de las pruebas de restricciones de la base de datos, reproducida como texto a partir del registro de Maven y de los reportes de las pruebas.}
+\label{fig:pruebas_restricciones}
+\end{sidewaysfigure}
+
+\FloatBarrier
 
 % ============================================================
 \section{Prueba de carga y despliegue}
