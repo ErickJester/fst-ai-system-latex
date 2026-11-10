@@ -4,8 +4,9 @@
 Este capítulo documenta una selección de pruebas automáticas del \textit{backend} del
 sistema y una prueba de carga con cuatro sesiones. Se organiza así: el alcance de la
 selección y los requerimientos que verifica, las restricciones de la base de datos que
-comprueba, la prueba de carga, los límites de lo que no cubre y, al final, la validación
-del clasificador.
+comprueba, la prueba de carga, la verificación del sistema completo con un video real, las
+pantallas de otras funciones, los límites de lo que no cubre y, al final, la validación del
+clasificador.
 
 % ============================================================
 \section{Alcance y estrategia}
@@ -200,35 +201,6 @@ las 29 de la Figura~\ref{fig:pruebas_restricciones} suman las mismas 77.
 \label{fig:pruebas_resultados}
 \end{sidewaysfigure}
 
-\subsection{Pantallas de la función de seguridad}
-
-Las Figuras~\ref{fig:pruebas_login}, \ref{fig:pruebas_privacidad} y
-\ref{fig:pruebas_terminos} muestran las pantallas de inicio de sesión, aviso de privacidad y
-términos y condiciones de uso. Son las pantallas de la función que verifican las pruebas de
-seguridad: con una contraseña temporal, cambiarla exige aceptar el aviso de privacidad y los
-términos.
-
-\begin{figure}[tbp]
-\centering
-\includegraphics[width=0.7\textwidth]{figures/pruebas/07_pantalla_inicio_de_sesion}
-\caption{Captura del modo de ejemplo de la interfaz (sin servidor), con los textos de la versión actual.}
-\label{fig:pruebas_login}
-\end{figure}
-
-\begin{figure}[tbp]
-\centering
-\includegraphics[width=0.7\textwidth]{figures/pruebas/08_pantalla_aviso_de_privacidad}
-\caption{Captura del modo de ejemplo de la interfaz (sin servidor), con los textos de la versión actual.}
-\label{fig:pruebas_privacidad}
-\end{figure}
-
-\begin{figure}[tbp]
-\centering
-\includegraphics[width=0.7\textwidth]{figures/pruebas/09_pantalla_terminos_y_condiciones}
-\caption{Captura del modo de ejemplo de la interfaz (sin servidor), con los textos de la versión actual.}
-\label{fig:pruebas_terminos}
-\end{figure}
-
 \FloatBarrier
 
 % ============================================================
@@ -348,6 +320,254 @@ es el número que fija RNF-13. La prueba cumple ambos requerimientos con mucho m
   \item No incluye la subida de videos ni la primera generación del reporte en PDF.
   \item Solo se registraron la mediana, el percentil 95 y el máximo, no el promedio.
 \end{itemize}
+
+% ============================================================
+\section{Verificación del sistema completo con un video real}
+\label{sec:pruebas_real}
+
+Las pruebas automáticas de las secciones anteriores verifican el \textit{backend}, pero ninguna
+ejecuta el sistema completo. Para comprobar que las partes funcionan juntas se hizo una
+verificación manual. Se armó el sistema completo en un montaje de prueba aparte, con la
+interfaz, el servidor web, la API, la base de datos PostgreSQL, el \textit{worker} y el modelo,
+construido con las imágenes de la versión actual del código. Por la API se subió el video de
+una sesión del Día~2 de la prueba de nado forzado, de 5 minutos (301~s, resolución
+$1920 \times 1080$). El \textit{worker} lo analizó en unos 9 minutos, con 4 especímenes y los
+300~s del análisis. Las figuras de esta sección son capturas de la interfaz con ese resultado
+real: no son del modo de ejemplo.
+
+Con ese análisis se comprobaron además las cuatro descargas del sistema. El reporte en PDF del
+experimento salió con 3 páginas y marcadores. El CSV de la tanda trajo 24 filas de datos, más
+la media, la desviación estándar, la varianza y la revisión. El XLSX de la tanda trajo la hoja
+«Resultados» con 25 filas y 9 columnas. El Excel del experimento trajo las hojas «Resultados» y
+«Segundo a segundo», esta última con 1201 filas y 11 columnas.
+
+Esta verificación muestra que el sistema procesa un video real de principio a fin. No mide el
+desempeño del clasificador. Además, el experimento tiene un solo grupo (Control) y una sola
+tanda, por lo que la comparación entre grupos solo muestra el Control.
+
+\subsection{Análisis en curso}
+
+La Figura~\ref{fig:pruebas_real_progreso} muestra la pantalla del análisis mientras corre: el
+preprocesamiento y la localización de los cilindros ya terminaron, la clasificación va en curso y la
+cola indica que hay un análisis procesando.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/pruebas/30_real_progreso_del_analisis}
+\caption{Captura de la interfaz con el sistema completo y un video real: análisis en curso, con el preprocesamiento y los cilindros hechos y la clasificación en curso.}
+\label{fig:pruebas_real_progreso}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Resultados}
+
+La Figura~\ref{fig:pruebas_real_resumen} muestra el resumen de resultados del experimento una vez
+terminado el análisis. Las Figuras~\ref{fig:pruebas_real_g1} a \ref{fig:pruebas_real_g6} muestran
+las seis gráficas de la galería de resultados con los datos de este análisis.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/pruebas/31_real_resumen_de_resultados}
+\caption{Captura de la interfaz con el sistema completo y un video real: resumen de resultados del experimento.}
+\label{fig:pruebas_real_resumen}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/pruebas/32_real_grafica_barras_por_grupo}
+\caption{Captura de la interfaz con el sistema completo y un video real: gráfica de barras por grupo.}
+\label{fig:pruebas_real_g1}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/pruebas/33_real_grafica_curva_por_minuto}
+\caption{Captura de la interfaz con el sistema completo y un video real: curva por minuto.}
+\label{fig:pruebas_real_g2}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/pruebas/34_real_grafica_barras_por_minuto}
+\caption{Captura de la interfaz con el sistema completo y un video real: barras por minuto.}
+\label{fig:pruebas_real_g3}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/pruebas/35_real_grafica_reparto_de_la_duracion}
+\caption{Captura de la interfaz con el sistema completo y un video real: reparto de la duración.}
+\label{fig:pruebas_real_g4}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/pruebas/36_real_grafica_variabilidad}
+\caption{Captura de la interfaz con el sistema completo y un video real: variabilidad entre especímenes.}
+\label{fig:pruebas_real_g5}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/pruebas/37_real_grafica_mapa_por_minuto}
+\caption{Captura de la interfaz con el sistema completo y un video real: mapa por minuto.}
+\label{fig:pruebas_real_g6}
+\end{figure}
+
+\FloatBarrier
+
+Las Figuras~\ref{fig:pruebas_real_esp}, \ref{fig:pruebas_real_seg} y \ref{fig:pruebas_real_min}
+muestran tres de las cinco vistas del detalle por tanda: por espécimen, segundo a segundo y
+minuto a minuto. La figura del segundo a segundo se recortó a las primeras filas de la tabla.
+
+\begin{sidewaysfigure}[p]
+\centering
+\includegraphics[width=\textheight, height=0.88\textwidth, keepaspectratio]{figures/pruebas/38_real_detalle_por_especimen}
+\caption{Captura de la interfaz con el sistema completo y un video real: detalle por tanda, vista por espécimen.}
+\label{fig:pruebas_real_esp}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}[p]
+\centering
+\includegraphics[width=\textheight, height=0.88\textwidth, keepaspectratio]{figures/pruebas/39_real_detalle_segundo_a_segundo_recorte}
+\caption{Captura de la interfaz con el sistema completo y un video real: detalle por tanda, vista segundo a segundo, recortada a las primeras filas.}
+\label{fig:pruebas_real_seg}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}[p]
+\centering
+\includegraphics[width=\textheight, height=0.88\textwidth, keepaspectratio]{figures/pruebas/40_real_detalle_minuto_a_minuto}
+\caption{Captura de la interfaz con el sistema completo y un video real: detalle por tanda, vista minuto a minuto.}
+\label{fig:pruebas_real_min}
+\end{sidewaysfigure}
+
+\FloatBarrier
+
+\subsection{Revisión segundo a segundo}
+
+La Figura~\ref{fig:pruebas_real_rev_a} y su continuación (Figura~\ref{fig:pruebas_real_rev_b})
+muestran la revisión segundo a segundo con el video real, los recuadros de los cuatro cilindros
+y las líneas de conducta de cada espécimen.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/pruebas/43_real_revision_segundo_a_segundo_a}
+\caption{Captura de la interfaz con el sistema completo y un video real: revisión segundo a segundo, con el video, los recuadros de los cilindros y las líneas de conducta.}
+\label{fig:pruebas_real_rev_a}
+\end{figure}
+
+\begin{figure}[tbp]
+\ContinuedFloat
+\centering
+\includegraphics[width=0.95\textwidth]{figures/pruebas/43_real_revision_segundo_a_segundo_b}
+\caption[]{Captura de la interfaz con el sistema completo y un video real: revisión segundo a segundo, con las conductas, la velocidad y el avance del espécimen (continuación).}
+\label{fig:pruebas_real_rev_b}
+\end{figure}
+
+\FloatBarrier
+
+% ============================================================
+\section{Pantallas de otras funciones}
+\label{sec:pruebas_pantallas}
+
+Esta sección reúne capturas de la interfaz de las funciones que las pruebas de las secciones
+anteriores verifican en el \textit{backend} y que no se capturaron con el sistema completo.
+Son capturas del modo de ejemplo, un modo de la interfaz que corre sin servidor y con datos de
+ejemplo. Ilustran cómo se ve cada función; no son resultado de las pruebas, que son del
+\textit{backend}.
+
+\subsection{Cuentas y sesión}
+
+Las Figuras~\ref{fig:pruebas_login}, \ref{fig:pruebas_privacidad} y \ref{fig:pruebas_terminos}
+muestran el inicio de sesión, el aviso de privacidad y los términos y condiciones de uso. La
+Figura~\ref{fig:pruebas_primer_acceso} muestra el primer acceso de una cuenta con contraseña
+temporal, que exige aceptar ambos textos, y la Figura~\ref{fig:pruebas_recuperar} la
+solicitud del enlace para recuperar la contraseña. Son las pantallas de las funciones que
+verifican las pruebas de seguridad.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/pruebas/07_pantalla_inicio_de_sesion}
+\caption{Captura de la interfaz en modo de ejemplo (sin servidor): pantalla de inicio de sesión, con los enlaces al aviso de privacidad y a los términos y condiciones de uso.}
+\label{fig:pruebas_login}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/pruebas/08_pantalla_aviso_de_privacidad}
+\caption{Captura de la interfaz en modo de ejemplo (sin servidor): aviso de privacidad.}
+\label{fig:pruebas_privacidad}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/pruebas/09_pantalla_terminos_y_condiciones}
+\caption{Captura de la interfaz en modo de ejemplo (sin servidor): términos y condiciones de uso.}
+\label{fig:pruebas_terminos}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/pruebas/12_primer_acceso_sin_aceptar_terminos}
+\caption{Captura de la interfaz en modo de ejemplo (sin servidor): primer acceso con contraseña temporal. La casilla de aceptación del aviso de privacidad y los términos está sin marcar y la pantalla pide aceptarlos para continuar.}
+\label{fig:pruebas_primer_acceso}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/pruebas/13_recuperar_contrasena}
+\caption{Captura de la interfaz en modo de ejemplo (sin servidor): recuperación de contraseña, donde se pide el correo para recibir el enlace de restablecimiento.}
+\label{fig:pruebas_recuperar}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Experimentos}
+
+La Figura~\ref{fig:pruebas_carga_a} y su continuación (Figura~\ref{fig:pruebas_carga_b}) muestran la
+carga de video por tanda, con el botón para agregar otra tanda. La
+Figura~\ref{fig:pruebas_eliminar} muestra la confirmación que se pide antes de eliminar un
+experimento.
+
+\begin{figure}[tbp]
+\centering
+\makebox[\textwidth][c]{\includegraphics[width=17cm]{figures/pruebas/15_cargar_video_por_tanda_a}}
+\caption{Captura de la interfaz en modo de ejemplo (sin servidor): carga de video por tanda, con el grupo, la tanda y la sesión.}
+\label{fig:pruebas_carga_a}
+\end{figure}
+
+\begin{figure}[tbp]
+\ContinuedFloat
+\centering
+\makebox[\textwidth][c]{\includegraphics[width=17cm]{figures/pruebas/15_cargar_video_por_tanda_b}}
+\caption[]{Captura de la interfaz en modo de ejemplo (sin servidor): carga de video por tanda, con el archivo de video y el botón para agregar otra tanda (continuación).}
+\label{fig:pruebas_carga_b}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/pruebas/17_confirmar_eliminar_experimento}
+\caption{Captura de la interfaz en modo de ejemplo (sin servidor): confirmación antes de eliminar un experimento.}
+\label{fig:pruebas_eliminar}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Pausa}
+
+La Figura~\ref{fig:pruebas_pausa} muestra la pantalla de un análisis en pausa, con el cilindro
+que se dejó de ver, el segundo, el tiempo para responder y los tres botones. El modo de ejemplo
+muestra un aviso en lugar de la imagen del instante; los recuadros sí se pueden ajustar.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/pruebas/18_pantalla_de_pausa}
+\caption{Captura de la interfaz en modo de ejemplo (sin servidor): análisis en pausa, con el cilindro, el segundo, el plazo para responder y los botones. Sin imagen real del instante.}
+\label{fig:pruebas_pausa}
+\end{figure}
+
+\FloatBarrier
 
 % ============================================================
 \section{Alcance y límites de las pruebas}
