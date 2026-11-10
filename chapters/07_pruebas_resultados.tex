@@ -1,19 +1,237 @@
 \chapter{Pruebas y resultados}
+\label{cap:pruebas}
 
-\section{Estrategia de validaci\'{o}n}
-% [PENDIENTE: describir el protocolo de evaluación del clasificador
-%   (conjunto de prueba independiente, métricas: F1, precisión y recall por clase)]
+Este capítulo documenta una selección de pruebas automáticas del \textit{backend} del
+sistema y una prueba de carga con cuatro sesiones. Se organiza así: el alcance de la
+selección y los requerimientos que verifica, las restricciones de la base de datos que
+comprueba, la prueba de carga, los límites de lo que no cubre y, al final, la validación
+del clasificador.
 
-\section{Conjunto de datos de prueba}
-% [PENDIENTE: describir los videos utilizados: n\'{u}mero de especímenes,
-%   condiciones de grabaci\'{o}n, duraci\'{o}n]
+% ============================================================
+\section{Alcance y estrategia}
+\label{sec:pruebas_estrategia}
 
-\section{Resultados del m\'{o}dulo de seguimiento}
-% [PENDIENTE: m\'{e}tricas: IoU promedio, tasa de p\'{e}rdida de seguimiento]
+Una prueba automática es un programa corto que ejecuta una parte del sistema y comprueba
+que el resultado sea el esperado; se puede repetir en cualquier momento y avisa cuándo un
+cambio rompe algo que antes funcionaba. El \textit{backend} usa JUnit~5, el marco de pruebas
+estándar de Java. Las pruebas de este capítulo corren contra PostgreSQL, el gestor de bases
+de datos relacionales del sistema, y no contra una base simulada.
 
-\section{Resultados del clasificador de conducta}
-% [PENDIENTE: tabla de m\'{e}tricas por clase: precisi\'{o}n, recall, F1]
-% [PENDIENTE: matriz de confusi\'{o}n --- fig. 7.1]
+Se documentan \textbf{77 pruebas seleccionadas del trabajo terminal}. Esas pruebas
+levantan la aplicación completa contra una base PostgreSQL de pruebas, vacía y creada con
+el mismo script de esquema que usa el sistema, y preparan y comprueban sus datos con
+consultas directas. La excepción son 2 pruebas de la regla del último Administrador, que no
+usan base de datos. Cada arranque verifica además que las entidades de la aplicación
+coincidan con las tablas; si no coinciden, la aplicación no arranca.
 
-\section{Comparativa de tiempos de an\'{a}lisis}
-% [PENDIENTE: tabla comparativa tiempo manual vs.\ autom\'{a}tico por sesi\'{o}n]
+Con la base de pruebas, las 77 pasan, sin fallos ni errores. Sin base de datos, 75 se
+omiten y 2 corren.
+
+La Tabla~\ref{tab:pruebas_seleccion} agrupa las 77 pruebas por tema. Indica qué comprueba
+cada grupo y qué requerimientos funcionales (RF) y no funcionales (RNF) del
+capítulo~4 verifica. Las restricciones de la base de datos no verifican un requerimiento
+directo: comprueban la integridad de los datos y se describen en la
+sección~\ref{sec:pruebas_bd}.
+
+{\footnotesize\singlespacing
+\begin{longtable}{|>{\raggedright}p{2.7cm}|>{\raggedright}p{1.4cm}|>{\raggedright}p{6.0cm}|>{\raggedright\arraybackslash}p{3.0cm}|}
+\caption{Pruebas seleccionadas del trabajo terminal, por tema.
+\label{tab:pruebas_seleccion}}\\
+\hline
+\textbf{Tema} & \textbf{Pruebas} & \textbf{Qué comprueban} & \textbf{RF y RNF que verifican} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Tema} & \textbf{Pruebas} & \textbf{Qué comprueban} & \textbf{RF y RNF que verifican} \\
+\hline
+\endhead
+Cuentas, sesión y recuperación$^{*}$
+& 11
+& Que no se pueda quitar al único Administrador activo, ni desactivarlo, ni que se dé una contraseña temporal a sí mismo; que un investigador no entre a la administración; que con contraseña temporal solo se pueda cambiarla aceptando el aviso y los términos; que un correo o identificador repetido se rechace; que el enlace de recuperación sirva una sola vez y no sirva vencido.
+& RF-03, 04, 05, 06 y 07; RNF-05. \\
+\hline
+Experimentos y carga de video
+& 18
+& Que se pueda crear y eliminar un experimento con las reglas de quién puede hacerlo y de cuándo no (si hay un análisis en curso o en pausa); que se filtre la lista por estado y aparezca el aviso de vencimiento a 7 días; que la subida de video rechace un archivo que no es MP4 ni MOV y un video vertical, y que acepte uno horizontal y cree su tanda, con el Día~1 sin análisis y un solo video por día en cada tanda.
+& RF-08, 09, 10, 11, 12, 23, 24, 27 y 30; RNF-04. \\
+\hline
+Pausa
+& 1
+& Que el estado de un análisis en pausa traiga el cilindro, el segundo y el plazo que queda.
+& RF-15. \\
+\hline
+Plazo del enlace de recuperación
+& 4
+& Que el enlace dure exactamente lo configurado (60 minutos), sirva dentro de su plazo y una sola vez, siga sirviendo a los 59 minutos y ya no sirva a los 62.
+& RF-03. \\
+\hline
+Resultados y reportes
+& 6
+& Que los bloques de cada espécimen, los totales (con las cinco claves, que suman 100\,\%), la comparación entre grupos, el CSV, el XLSX y el Excel del experimento traigan las columnas, los datos y los estadísticos esperados.
+& RF-18, 19, 20, 21, 22 y 31. \\
+\hline
+Revisión segundo a segundo
+& 5
+& Que el video se entregue con un permiso temporal y no con la sesión; que se guarden solo los segundos corregidos; que la corrección ajuste el nivel de clasificación; y que reiniciar un análisis lo deje en cola sin resultados, reportes ni archivos anteriores.
+& RF-32; RNF-04. \\
+\hline
+Notificaciones y concurrencia
+& 3
+& Que el contador de notificaciones no leídas cuente todas las de la cuenta; que de dos reinicios simultáneos de un análisis solo pase uno; y que una notificación del \textit{worker} no se bloquee mientras otro cambio de cuenta está en curso.
+& RF-32 y RF-33. \\
+\hline
+Restricciones de la base de datos
+& 29
+& Que la base acepte los datos válidos y rechace los que están fuera de rango, fuera de un dominio de valores cerrados, repetidos o que dejarían filas huérfanas (sección~\ref{sec:pruebas_bd}).
+& Ninguno directo: integridad de los datos. \\
+\hline
+\textbf{Total}
+& \textbf{77}
+& &  \\
+\hline
+\multicolumn{4}{|>{\raggedright\arraybackslash}p{13.1cm}|}{$^{*}$ Selección: de las 8 pruebas del grupo, el trabajo terminal documenta 4 (la regla del último Administrador y la autoprotección).} \\
+\hline
+\end{longtable}
+}
+
+% ============================================================
+\section{Restricciones de la base de datos}
+\label{sec:pruebas_bd}
+
+El esquema físico (Figura~\ref{fig:er} y apéndice~\ref{ap:diccionario}) declara reglas
+que la base de datos hace cumplir por sí misma, sin depender de la aplicación. Las 29 pruebas
+de este grupo intentan insertar, repetir o borrar datos directamente en la base y
+comprueban que responda como el esquema establece. Se agrupan en cinco tipos:
+
+\begin{itemize}
+  \item \textbf{Controles de que lo válido sí entra.} Una cadena completa y válida de
+        registros se inserta sin error; las tandas de dos y de cuatro cilindros son
+        válidas; los segundos 1 y 300 son válidos; un video con duración positiva es
+        válido; y un análisis con error y diagnóstico es válido. Evitan que una restricción
+        demasiado estricta rechace datos legítimos.
+  \item \textbf{Rechazo de valores fuera de rango.} La base rechaza una tanda de uno o de
+        cinco cilindros, un ordinal de tanda igual a cero, un número de cilindro de espécimen
+        igual a cero o a cinco, un segundo igual a cero o a 301, una duración de video igual a
+        cero o negativa, y un diagnóstico en un análisis cuyo estado no es de error.
+  \item \textbf{Dominios de valores cerrados.} La base rechaza un tipo de grupo, un estado
+        de análisis y una conducta que no estén en su lista de valores permitidos.
+  \item \textbf{Valores únicos.} La base rechaza un correo de usuario repetido, un
+        ordinal repetido dentro del mismo grupo, una sesión repetida en la misma tanda, un
+        número de cilindro repetido en la misma tanda, un nombre de experimento repetido y un
+        segundo análisis del mismo video.
+  \item \textbf{Llaves foráneas.} La base impide borrar un usuario que tiene experimentos,
+        un experimento que tiene grupos, un grupo que tiene tandas, una tanda que tiene videos
+        y un video que tiene análisis; es decir, no borra lo que otra tabla todavía usa.
+\end{itemize}
+
+Estas pruebas no cubren todo lo que el esquema declara. \textbf{No existe prueba} de la
+regla de actualización de las llaves foráneas (que tampoco actualiza en cascada), de los
+valores por defecto, de los índices ni de las migraciones. Esos elementos están declarados y
+la base los hace cumplir, pero ninguna prueba de la selección los verifica.
+
+% ============================================================
+\section{Prueba de carga y despliegue}
+\label{sec:pruebas_carga}
+
+La prueba de carga comprueba que el sistema responda en menos de 3~s (RNF-01) cuando
+trabajan cuatro usuarios a la vez (RNF-13). Se hizo con un programa propio que abre una
+sesión por cliente, repite las consultas habituales del sistema y mide el tiempo de cada
+respuesta. Se hicieron dos corridas, que resume la Tabla~\ref{tab:pruebas_carga}.
+
+La prueba de carga y el despliegue son verificaciones manuales del sistema completo, no
+pruebas automáticas, y no forman parte de las 77 pruebas seleccionadas. La corrida B se hizo
+sobre la configuración de despliegue del sistema, con el servidor web nginx.
+
+En esta sección se usa el \textbf{percentil 95}, que es el tiempo por debajo del cual
+respondió el 95\,\% de las peticiones: describe lo que vive casi cualquier usuario sin que el
+extremo más lento lo distorsione.
+
+{\footnotesize\singlespacing
+\begin{longtable}{|>{\raggedright}p{2.8cm}|>{\raggedright}p{5.4cm}|>{\raggedright\arraybackslash}p{5.2cm}|}
+\caption{Corridas de la prueba de carga con cuatro sesiones.
+\label{tab:pruebas_carga}}\\
+\hline
+\textbf{Concepto} & \textbf{Corrida A} & \textbf{Corrida B} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Concepto} & \textbf{Corrida A} & \textbf{Corrida B} \\
+\hline
+\endhead
+Clientes
+& 4, cada uno con su propia sesión.
+& 4 cuentas distintas. \\
+\hline
+Rutas
+& Inicio de sesión, lista, detalle, estado, resultados, minutos, bloques, grupos, CSV y XLSX.
+& Consultas y revisión, incluida la primera generación del XLSX. \\
+\hline
+Peticiones
+& 25 rondas sincronizadas; el total no se registró.
+& 1\,474, durante 120~s en bucle. \\
+\hline
+Errores
+& Ninguno: todas respondieron con éxito.
+& Ninguno. \\
+\hline
+Percentil 95
+& El mayor por ruta fue 0.086~s.
+& 0.041~s para todas las peticiones. \\
+\hline
+Máximo
+& 0.888~s, en la primera ronda, con la máquina virtual de Java sin calentar.
+& 0.962~s, en la primera generación del XLSX. \\
+\hline
+\end{longtable}
+}
+
+\subsection{Resultado}
+
+En ambas corridas todas las peticiones respondieron con éxito y el tiempo máximo quedó muy
+por debajo de los 3~s de RNF-01. El sistema atendió sin errores a cuatro cuentas trabajando a la vez, que
+es el número que fija RNF-13. La prueba cumple ambos requerimientos con mucho margen.
+
+\subsection{Límites}
+
+\begin{itemize}
+  \item Se hizo con el \textit{worker} sin procesar nada. No se probó con un video real en
+        análisis, por la memoria que se necesitaría: la máquina de pruebas tiene 15.7~GB y
+        el análisis puede ocupar hasta 3.5~GB. Por eso la prueba no incluye la condición de
+        RNF-13 que pide, además de las cuatro sesiones, al menos un análisis en cola.
+  \item No incluye la subida de videos ni la primera generación del reporte en PDF.
+  \item Solo se registraron la mediana, el percentil 95 y el máximo, no el promedio.
+\end{itemize}
+
+% ============================================================
+\section{Alcance y límites de las pruebas}
+\label{sec:pruebas_limites}
+
+La selección verifica reglas de negocio de cuentas, experimentos, resultados y revisión
+contra una base real, y la integridad del esquema. No verifica todo el sistema. En
+particular, no cubre:
+
+\begin{itemize}
+  \item el ajuste del recuadro y el botón «continuar» de la pausa; solo se comprueba el
+        estado del análisis cuando está en pausa;
+  \item un video que \textit{ffprobe} (la herramienta que lee las propiedades de un video)
+        no puede leer;
+  \item la subida de un video con un tipo de grupo o una sesión inválidos; solo se
+        comprueban el archivo que no es MP4 ni MOV y el video vertical;
+  \item la conservación de los resultados y el borrado automático a los 30 días;
+  \item la clasificación de conducta, que corre en el \textit{worker} y no tiene prueba en
+        el \textit{backend}.
+\end{itemize}
+
+Tampoco existe una prueba automática de punta a punta, que ejercite juntos el navegador,
+nginx, la API, la base de datos y el \textit{worker}. El sistema cuenta además con pruebas de
+la interfaz, que usan datos de ejemplo e incluyen una revisión de accesibilidad, y con pruebas
+del \textit{worker}, que usan piezas simuladas; ambas quedan fuera de esta selección. El
+contraste de color de las gráficas no está verificado automáticamente.
+
+% ============================================================
+\section{Validación del clasificador}
+\label{sec:pruebas_clasificador}
+
+% [Sección en blanco a petición del usuario. Se llenará cuando se mida el clasificador:
+%   estrategia de evaluación, conjunto de prueba, precisión, recall y F1 por conducta
+%   (RNF-02) y repetibilidad entre análisis del mismo video (RNF-14).]

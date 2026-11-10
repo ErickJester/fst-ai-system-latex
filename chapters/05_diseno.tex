@@ -701,7 +701,7 @@ GET    & \path{/experiments/{id}}    & Devuelve detalle y estado de un experimen
 \hline
 
 % --- Videos y análisis ---
-POST   & \path{/experiments/{id}/groups/{grupo}/videos}  & Sube un video (Día~1 o Día~2) a una tanda del grupo indicado (se crea la tanda si no existe) y, si es el del Día~2, encola el análisis. & Investiga\-dor \\
+POST   & \path{/experiments/{id}/groups/{grupo}/videos}  & Sube un video (Día~1 o Día~2) a una tanda del grupo indicado (se crea la tanda si no existe) y, si es el del Día~2, encola el análisis. & Creador \\
 \hline
 GET    & \path{/experiments/{id}/status}  & Devuelve el progreso del análisis en porcentaje. & Investiga\-dor \\
 \hline
@@ -733,6 +733,10 @@ GET    & \path{/experiments/{id}/results/groups} & Devuelve la comparación entr
 \hline
 GET    & \path{/experiments/{id}/results/blocks} & Devuelve, por espécimen, los bloques de 5~s con su conducta, su matiz y sus segundos (RF-18, RN-15); solo con el análisis completado. & Investiga\-dor \\
 \hline
+GET    & \path{/experiments/{id}/results/charts} & Devuelve los datos de las gráficas de resultados: por grupo, por conducta y por minuto. & Investiga\-dor \\
+\hline
+GET    & \path{/experiments/{id}/results/seconds} & Devuelve la conducta de cada segundo de una tanda, con su origen; recibe el grupo y la tanda como parámetros. & Investiga\-dor \\
+\hline
 
 % --- Reportes ---
 GET    & \path{/experiments/{id}/report/pdf}  & Descarga el reporte de resultados en PDF. & Investiga\-dor \\
@@ -740,6 +744,8 @@ GET    & \path{/experiments/{id}/report/pdf}  & Descarga el reporte de resultado
 GET    & \path{/experiments/{id}/report/csv}  & Descarga los datos en CSV, del grupo completo o de una tanda. & Investiga\-dor \\
 \hline
 GET    & \path{/experiments/{id}/report/xlsx} & Descarga los datos en XLSX, del grupo completo o de una tanda. & Investiga\-dor \\
+\hline
+GET    & \path{/experiments/{id}/report/excel} & Descarga el Excel del experimento completo, con las hojas «Resultados» y «Segundo a segundo». & Investiga\-dor \\
 \hline
 
 GET    & \path{/experiments/{id}/analyses/{idAnalisis}/diagnostic} & Descarga el reporte de diagnóstico de un análisis con error. & Autenti\-cado \\
@@ -776,6 +782,16 @@ PATCH  & \path{/admin/users/{id}}   & Edita nombre, apellidos o correo; da o qui
 POST   & \path{/admin/users/{id}/reset-temporal} & Genera una contraseña temporal nueva para la cuenta. & Admin \\
 \hline
 GET    & \path{/admin/system}       & Devuelve métricas del sistema: disco y cola. & Admin \\
+\hline
+
+% --- Sistema ---
+GET    & \path{/health} & Devuelve el estado del servicio, si el modo desarrollador está activo y la versión del sistema. & Público \\
+\hline
+
+% --- Modo desarrollador (responden 404 si el modo no está activo) ---
+GET    & \path{/dev/modelo-actual} & Devuelve el modelo con el que trabaja el \textit{worker}; solo con el modo desarrollador activo. & Autenti\-cado \\
+\hline
+GET    & \path{/experiments/{id}/dev/salida-modelo} & Descarga la salida del modelo de un grupo o de una tanda; solo con el modo desarrollador activo. & Autenti\-cado \\
 \hline
 
 \end{longtable}
