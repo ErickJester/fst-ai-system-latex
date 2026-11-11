@@ -12,6 +12,10 @@
 '  voluntario desde el perfil (CU-18, RF-06). En ambos casos el
 '  usuario ya tiene sesion y escribe su contraseña actual (en el
 '  primer acceso, la temporal) y la nueva.
+'  En el primer acceso (CU-16) tambien debe aceptar el aviso de
+'  privacidad y los terminos y condiciones de uso; sin esa
+'  aceptacion no se cambia nada. La aceptacion no se guarda: solo
+'  se exige en ese momento. El cambio voluntario no la pide.
 '
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_cambio_pass_inv.puml
@@ -31,8 +35,16 @@ note over u, ui
 end note
 
 u -> ui: escribe la contraseña\nactual\ny la nueva (dos veces)
-ui -> api: envía la contraseña actual\ny la nueva\ncon la sesión del usuario
+opt la cuenta tiene el cambio obligatorio (primer acceso)
+  ui -> u: pide aceptar el aviso\nde privacidad y los términos\ny condiciones de uso
+  u -> ui: marca que los acepta
+end
+ui -> api: envía la contraseña actual\ny la nueva\ncon la sesión del usuario\ny, en el primer acceso,\nla aceptación del aviso\ny los términos
 
+alt la cuenta tiene el cambio obligatorio\ny no se aceptaron el aviso\ny los términos
+  api --> ui: rechaza: hay que aceptar el\naviso de privacidad y los\ntérminos y condiciones de uso
+  ui --> u: muestra el error, no\ncambia nada
+else se aceptaron, o el cambio\nes voluntario
 api -> db: lee la contraseña cifrada\ndel usuario
 db --> api: contraseña cifrada actual
 
@@ -64,6 +76,7 @@ newpage
       ui --> u: confirma el cambio y se\nqueda en Mi perfil
     end
   end
+end
 end
 
 note over u, ui

@@ -6,8 +6,9 @@
 ' ----------------------------------------------------------------
 '  Cubre CU-02 "Cerrar sesion" (RF-02). La sesion dura 168 horas
 '  por omision (configurable); "cerrar sesion" solo hace que el
-'  navegador la olvide. El servidor no guarda sesiones canceladas,
-'  asi que no hay ninguna escritura en la base de datos.
+'  navegador la olvide. La interfaz no avisa al servidor: este no
+'  guarda sesiones, asi que no tiene nada que cancelar y no hay
+'  ninguna escritura en la base de datos.
 '
 '  Reemplaza a figures/mermaid/seq_logout.png (que mostraba el
 '  token registrado como invalido en el servidor).
@@ -20,14 +21,13 @@
 
 actor Usuario as u
 participant "Interfaz web" as ui
-participant Backend as api
 
 u -> ui: elige "Cerrar sesión" en\nel menú de usuario
-ui -> api: avisa que el usuario\ncierra sesión
-api --> ui: confirma\n(no guarda nada: el\nservidor no lleva\nuna lista de sesiones\ncanceladas)
-ui -> ui: el navegador olvida la\nsesión
+ui -> ui: el navegador olvida la\nsesión y los borradores\nde la revisión
 ui --> u: muestra la pantalla de\ninicio de sesión
 note over ui
+  El servidor no interviene: no lleva una lista de
+  sesiones, así que no hay nada que cancelar en él.
   La sesión dura una semana. Si vence,
   se pide iniciar sesión de nuevo.
 end note

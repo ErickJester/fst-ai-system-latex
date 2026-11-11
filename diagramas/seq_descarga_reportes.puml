@@ -1,6 +1,6 @@
 @startuml seq_descarga_reportes
 ' ================================================================
-'  Secuencia - Descarga de reportes (CSV, XLSX o PDF)
+'  Secuencia - Descarga de reportes (CSV, XLSX, PDF o Excel del experimento)
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
@@ -12,7 +12,12 @@
 '    activo, inmovilidad, escalamiento, conducta activa y "Sin ver",
 '    con la media, la desviación estándar y la varianza de esa vista).
 '  - PDF: el reporte de resultados del experimento, con la columna
-'    "Sin ver". Es distinto del reporte de diagnóstico de CU-08.
+'    "Sin ver" y las gráficas de resultados. Es distinto del reporte
+'    de diagnóstico de CU-08.
+'  - Excel del experimento: un libro con todo el experimento, con las
+'    hojas "Resultados" (una tabla por grupo con análisis completado)
+'    y "Segundo a segundo" (la conducta de cada segundo de cada
+'    espécimen). Se genera al momento y no se guarda.
 '  - Las estadísticas son las del grupo o la tanda que se pidió.
 '
 '  Caché:
@@ -24,9 +29,11 @@
 '    conservan (RF-26).
 '  - En modo desarrollador no hay caché: cada descarga se genera de
 '    nuevo.
+'  - El Excel del experimento nunca se guarda: no usa caché ni se
+'    registra como reporte.
 '
-'  Sin análisis completados: la descarga de CSV o XLSX se rechaza con
-'    un aviso; el PDF muestra "Sin resultados" y ese PDF no se guarda
+'  Sin análisis completados: la descarga de CSV, XLSX o del Excel del
+'    experimento se rechaza con un aviso; el PDF muestra "Sin resultados" y ese PDF no se guarda
 '    en caché.
 '
 '  Generar:
@@ -41,14 +48,14 @@ participant Backend as api
 database "Base de datos" as db
 participant "Archivos" as fs
 
-inv -> ui: elige el formato (CSV,\nXLSX o PDF) desde la\npantalla de resultados\ny, en CSV o XLSX, la\ntanda o el grupo\ncompleto
+inv -> ui: elige el formato (CSV,\nXLSX, PDF o Excel del\nexperimento) desde la\npantalla de resultados\ny, en CSV o XLSX, la\ntanda o el grupo\ncompleto
 ui -> api: pide el reporte en ese\nformato y para esa\nvista
 
 api -> db: ¿hay análisis\ncompletados en el\nexperimento?
 db --> api: sí / no
 
 alt no hay análisis completados
-  alt el formato es CSV o XLSX
+  alt el formato es CSV, XLSX o\nExcel del experimento
     api --> ui: rechaza la descarga,\ncon el motivo
     ui --> inv: muestra que no hay\nresultados todavía
   else el formato es PDF
@@ -56,6 +63,11 @@ alt no hay análisis completados
     ui --> inv: descarga el documento\n"Sin resultados"
   end
 else hay análisis completados
+alt el formato es el Excel\ndel experimento
+  api -> db: lee los resultados de\ntodos los grupos y la\nconducta de cada segundo
+  db --> api: resultados y segundos
+  api -> api: arma el libro con las\nhojas "Resultados" y\n"Segundo a segundo"\n(no se guarda)
+else el formato es CSV, XLSX o PDF
   api -> db: busca si ya hay un\nreporte guardado en\nese formato y para esa\nvista
   db --> api: reporte guardado, si\nexiste, con su fecha\nde generación
 
@@ -74,6 +86,7 @@ newpage
     api -> fs: recupera el archivo ya\nguardado
   end
 end
+end
 
 note right of api
   CSV / XLSX: datos por espécimen y por minuto, con "Sin ver",
@@ -81,7 +94,10 @@ note right of api
   (grupo o tanda), entre los especímenes de esa vista (RF-31).
 
   PDF: reporte de resultados del experimento, con la columna
-  "Sin ver"; distinto del reporte de diagnóstico de CU-08.
+  "Sin ver" y las gráficas; distinto del reporte de diagnóstico de CU-08.
+
+  Excel del experimento: dos hojas, "Resultados" y "Segundo a
+  segundo"; se genera al momento y no se guarda.
 end note
 
 api --> ui: archivo listo

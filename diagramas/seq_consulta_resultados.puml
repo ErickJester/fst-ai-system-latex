@@ -43,6 +43,13 @@
 '  - Los tres grupos se comparan por especimen, no por suma, para que
 '    el tamano del grupo no distorsione la comparacion.
 '
+'  La web no pide la comparacion a un endpoint aparte: usa los datos
+'  de la galeria de graficas (el backend calcula una sola vez, por
+'  grupo, por conducta y por minuto; la pantalla solo dibuja). La
+'  galeria muestra seis graficas con selector de conducta: barras
+'  por grupo, curva por minuto, barras por minuto, reparto de la
+'  duracion analizada, variabilidad y mapa de calor.
+'
 '  Generar:
 '      java -jar plantuml.jar -tpng diagramas/seq_consulta_resultados.puml
 ' ================================================================
@@ -67,7 +74,7 @@ note right of ui
 end note
 inv -> ui: elige ver el grupo\ncompleto o una sola tanda
 ui -> ui: calcula la media, la\ndesviación estándar y la\nvarianza\n(muestrales) de los\nespecímenes que se ven
-ui -> api: pide la comparación entre\ngrupos
+ui -> api: pide los datos de las\ngráficas de resultados\n(todos los grupos del\nDía 2)
 api -> db: busca los grupos del\nexperimento y sus tandas
 
 db --> api: grupos (control,\nreferencia, tratamiento)
@@ -88,15 +95,15 @@ newpage
   alt el grupo mezcla niveles "preciso" y "agrupado"
     api -> api: no promedia el grupo: lo\nsepara por tanda
   else el grupo tiene un solo nivel
-    api -> api: calcula la media, la\ndesviación estándar y la\nvarianza\n(muestrales) por conducta\nentre sus especímenes\nanalizados,\ncon todas sus tandas
+    api -> api: calcula, por conducta y\npor cada minuto del Día 2,\nla media, la desviación\nestándar, la varianza y el\ncoeficiente de variación\n(muestrales) entre sus\nespecímenes analizados,\ncon todas sus tandas
   end
 end
 
-api --> ui: comparación entre grupos\nen las cuatro conductas\n(sin "Sin ver"), con los\nfaltantes por tanda y su\nestado
+api --> ui: datos de las gráficas por\ngrupo, por conducta y por\nminuto, con los faltantes\npor tanda y su estado
 alt algún grupo mezcla niveles
   ui -> inv: aviso en la comparación:\nese grupo se muestra por\ntanda,\nsin promedio, porque sus\nniveles no significan lo\nmismo
 end
-ui -> inv: muestra la comparación de\nlos grupos (solo Día 2),\ncon los especímenes\nfaltantes señalados
+ui -> inv: muestra la galería de\ngráficas del Día 2 (barras por\ngrupo, curva y barras por\nminuto, reparto de la\nduración, variabilidad y\nmapa de calor), con selector\nde conducta y los especímenes\nfaltantes señalados
 inv -> ui: puede descargar en CSV o\nXLSX lo que ve\n(la tanda o el grupo\ncompleto); el PDF se\ndescarga desde el\nexperimento (ver CU-10)
 
 @enduml
