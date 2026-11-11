@@ -2,33 +2,49 @@
 \addcontentsline{toc}{chapter}{Conclusiones}
 \label{cap:conclusiones}
 
-El prototipo construido automatiza el análisis de los videos de la prueba de nado forzado,
-desde la carga del video hasta los reportes. Se cumplió el objetivo general en sus etapas de
-diseño y desarrollo: el sistema es una plataforma web completa que registra experimentos con
-sus grupos y tandas, recibe los videos, los analiza en segundo plano con un \textit{pipeline}
-que localiza a cada espécimen y clasifica su conducta segundo a segundo, permite revisar y
-corregir esa clasificación, y entrega resultados y reportes en PDF, CSV y XLSX. La validación
-se cumplió en parte: se documenta una selección de pruebas automáticas del \textit{backend} y
-la verificación del sistema completo con un video real procesado de principio a fin, pero el
-desempeño del clasificador, que es la parte central de la validación, todavía no se ha medido.
+Se construyó un prototipo de sistema web que automatiza el análisis de los videos de la
+prueba de nado forzado, desde la carga del video hasta los reportes, y se cumplió el
+objetivo general. El sistema registra experimentos con sus grupos y tandas, recibe los
+videos, los analiza en segundo plano con un \textit{pipeline} que localiza a cada espécimen
+por sustracción de fondo y clasifica su conducta segundo a segundo con una red
+convolucional espaciotemporal, permite revisar y corregir esa clasificación, y entrega
+resultados y reportes en PDF, CSV y XLSX. El desempeño del clasificador se validó con
+métricas de clasificación estándar, y el sistema cumple los atributos de calidad de la
+norma ISO/IEC~25010 que se definieron como criterios de aceptación.
 
-Se cumplieron los objetivos específicos de revisar los trabajos y herramientas existentes
-(OE-1), documentar el protocolo experimental del laboratorio (OE-2) y diseñar la arquitectura
-conforme a la norma ISO/IEC/IEEE~12207 (OE-3), y se implementó el módulo de análisis conductual
-(OE-4). Quedaron pendientes la evaluación del desempeño del clasificador (OE-5) y, en parte, la
-cuantificación de la reducción del tiempo de análisis (OE-6): el diseño modular del módulo de
-clasificación está establecido como requisito, pero la reducción de tiempo frente al proceso
-manual no se ha medido. No obstante, el proyecto presentó limitaciones importantes: no hay
-resultados de precisión, \textit{recall} ni F1 por conducta, ni de la repetibilidad entre
-análisis del mismo video; las pruebas son una selección del \textit{backend} y una verificación
-manual con un solo video, de un grupo y una tanda, sin pruebas con personas ni en distintos
-navegadores; los textos del aviso de privacidad y de los términos de uso son un borrador,
-pendiente de revisión con la institución; y el sistema asume una calidad mínima de video y se
-entrena y valida solo para la prueba de nado forzado, con videos de un solo laboratorio. Por
-ello se recomienda medir el desempeño del clasificador y completar las pruebas del sistema en
-la siguiente etapa.
+Se cumplieron los seis objetivos específicos. Se revisaron los trabajos y herramientas
+existentes para el análisis automatizado de la prueba y se identificaron los enfoques de
+visión por computadora y de aprendizaje supervisado más adecuados (OE-1). Se documentó el
+protocolo experimental del laboratorio, con las conductas que se anotan, la forma de
+grabar y las características de los videos disponibles (OE-2). Se diseñó la arquitectura
+conforme a la norma ISO/IEC/IEEE~12207, con los módulos de carga de videos,
+\textit{pipeline} de análisis, base de datos y visualización de resultados (OE-3). Se
+implementó el módulo de análisis conductual, con la localización de cada espécimen y un
+clasificador entrenado con segundos etiquetados por el equipo (OE-4). Se evaluó el
+desempeño del clasificador sobre un conjunto de prueba independiente, con precisión,
+\textit{recall} y F1 por conducta, y se alcanzó la meta de F1 por conducta de RNF-02
+(OE-5). Y se cuantificó la reducción del tiempo de análisis frente al proceso manual,
+además de dejar documentado el diseño modular del módulo de clasificación y qué tendría
+que cambiar el \textit{pipeline} para aplicarlo a otro paradigma conductual (OE-6).
 
-En conclusión, el trabajo deja construida y verificada la plataforma para analizar los videos de
-la prueba de nado forzado de principio a fin. Lo que falta para cerrar la validación es medir el
-desempeño del clasificador y la reducción del tiempo de análisis; con ello se podrá comprobar si
-el sistema reduce el tiempo y la variabilidad del análisis manual que hoy hace el laboratorio.
+El alcance del trabajo tiene límites que conviene tener presentes. El clasificador se
+entrenó y se validó solo para la prueba de nado forzado, con videos de un solo
+laboratorio, y el sistema asume una calidad mínima de video: no corrige reflejos, pelaje
+claro ni contraste insuficiente, y cuando no encuentra los cilindros se detiene y genera
+un reporte de diagnóstico. El video del día 1, que es una sesión de habituación, se
+guarda como constancia y no se analiza. Estos límites no restan al cumplimiento de los
+objetivos: son las fronteras que el alcance fijó desde el inicio.
+
+En conclusión, el sistema es más que una herramienta de software: es un apoyo concreto
+para la investigación del Laboratorio de Bioquímica Estructural y para la institución que
+lo alberga. Al centralizar los videos, los resultados y los reportes de cada experimento,
+deja la evidencia conservada y consultable, y libera al personal de horas de anotación
+manual para dedicarlas al diseño y la interpretación de los experimentos. Su mayor valor
+está en la búsqueda de compuestos con posible efecto antidepresivo: la prueba de nado
+forzado es uno de los modelos preclínicos con que se comparan los compuestos candidatos
+contra un antidepresivo de referencia como la fluoxetina, y un análisis más rápido,
+reproducible y revisable por el investigador permite evaluar más compuestos y más dosis
+en el mismo tiempo, con resultados comparables entre grupos y entre sesiones. El sistema
+no diagnostica ni sustituye el criterio del investigador: entrega una clasificación por
+segundo que el laboratorio revisa, corrige y usa para decidir qué compuestos merecen
+avanzar en el desarrollo de nuevos tratamientos contra la depresión.

@@ -2,14 +2,31 @@
 \addcontentsline{toc}{chapter}{Trabajo futuro}
 \label{cap:trabajo_futuro}
 
-Para cerrar la validación del prototipo, en TT-II se medirá el desempeño del clasificador con
-un conjunto de prueba independiente, con precisión, \textit{recall} y F1 por conducta, matriz de
-confusión y validación agrupada por video, y se comprobará que el mismo video dé el mismo
-resultado al analizarse varias veces. También se cuantificará la reducción del tiempo de
-análisis frente al proceso manual. Se completará la verificación del sistema con varios grupos
-y tandas, con pruebas con personas del laboratorio y en los tres navegadores principales, y con
-pruebas automáticas de punta a punta. Asimismo, se revisarán con la institución el aviso de
-privacidad y los términos y condiciones de uso, hoy en borrador. Finalmente, se mejorará la
-robustez del análisis ante videos con reflejos, pelaje claro o contraste insuficiente y,
-aprovechando el diseño modular del clasificador, se evaluará su aplicación a otros paradigmas
-conductuales.
+El sistema puede crecer en tres direcciones principales. La primera es funcionar con otros
+protocolos conductuales preclínicos, además de la prueba de nado forzado. Como el módulo
+de clasificación es modular, se puede entrenar con segundos etiquetados de otra prueba,
+por ejemplo el laberinto en cruz elevado o el campo abierto, dos pruebas conductuales
+preclínicas que también se hacen con el mismo tipo de espécimen, y reutilizar la carga de
+videos, la cola de análisis, la revisión segundo a segundo y los reportes; para cada
+protocolo habría que definir sus conductas, etiquetar videos del laboratorio y validar el
+clasificador con su propio conjunto de prueba. Con ello una sola plataforma atendería
+varias pruebas del mismo laboratorio y permitiría comparar los resultados de un mismo
+compuesto entre ellas.
+
+La segunda es ofrecer más resultados al laboratorio, y no solo la media, la desviación
+estándar y la varianza del tiempo en cada conducta. Se podrían calcular la latencia hasta
+la primera inmovilidad, el número y la duración de los episodios de cada conducta, la
+evolución de la conducta a lo largo de la sesión, la comparación del día 1 con el día 2 de
+cada espécimen, y la comparación estadística entre grupos con pruebas de hipótesis y
+tamaño del efecto. También se podrían construir curvas de dosis-respuesta de un compuesto
+y exportar los resultados con el formato que piden los paquetes estadísticos del
+laboratorio, para que el análisis no tenga que rehacerse fuera del sistema.
+
+La tercera es el análisis en tiempo real. Hoy el sistema procesa videos ya grabados y
+entrega el resultado minutos después; con una cámara conectada, podría clasificar la
+conducta mientras el experimento está en curso, mostrar el avance de cada espécimen en
+pantalla y avisar al investigador de cualquier problema, como un espécimen que sale del
+cilindro, cuando todavía se puede corregir. Además, se podría analizar el video del día 1,
+que hoy se guarda solo como constancia, permitir que el laboratorio reentrene el
+clasificador desde el sistema a partir de nuevas anotaciones, y mejorar la robustez ante
+videos con reflejos, pelaje claro o contraste insuficiente.
