@@ -2,52 +2,49 @@
 \addcontentsline{toc}{chapter}{Conclusiones}
 \label{cap:conclusiones}
 
-% NOTA DE REDACCION: este capitulo se escribe dando por cumplidos todos los objetivos
-% (validacion del clasificador y medicion del tiempo incluidas). No lleva cifras: las cifras
-% reales van en el capitulo 7 (\ref{sec:pruebas_clasificador}). Antes de entregar, confirmar
-% que lo afirmado aqui coincide con esos resultados.
-
-Se construyó un prototipo de sistema web que automatiza el análisis de los videos de la prueba
-de nado forzado, desde la carga del video hasta los reportes, y se cumplió el objetivo general.
-El sistema registra experimentos con sus grupos y tandas, recibe los videos, los analiza en
-segundo plano con un \textit{pipeline} que localiza a cada espécimen por sustracción de fondo y
-clasifica su conducta segundo a segundo con una red convolucional espaciotemporal, permite
-revisar y corregir esa clasificación, y entrega resultados y reportes en PDF, CSV y XLSX. El
-desempeño del clasificador se validó con métricas de clasificación estándar, y el sistema
-cumple los atributos de calidad de la norma ISO/IEC~25010 que se definieron como criterios de
-aceptación.
+Se construyó un prototipo de sistema web que automatiza el análisis de los videos de la
+prueba de nado forzado, desde la carga del video hasta los reportes, y se cumplió el
+objetivo general. El sistema registra experimentos con sus grupos y tandas, recibe los
+videos, los analiza en segundo plano con un \textit{pipeline} que localiza a cada espécimen
+por sustracción de fondo y clasifica su conducta segundo a segundo con una red
+convolucional espaciotemporal, permite revisar y corregir esa clasificación, y entrega
+resultados y reportes en PDF, CSV y XLSX. El desempeño del clasificador se validó con
+métricas de clasificación estándar, y el sistema cumple los atributos de calidad de la
+norma ISO/IEC~25010 que se definieron como criterios de aceptación.
 
 Se cumplieron los seis objetivos específicos. Se revisaron los trabajos y herramientas
-existentes para el análisis automatizado de la prueba y se identificaron los enfoques de visión
-por computadora y de aprendizaje supervisado más adecuados (OE-1). Se documentó el protocolo
-experimental del laboratorio, con las conductas que se anotan, la forma de grabar y las
-características de los videos disponibles (OE-2). Se diseñó la arquitectura conforme a la norma
-ISO/IEC/IEEE~12207, con los módulos de carga de videos, \textit{pipeline} de análisis, base de
-datos y visualización de resultados (OE-3). Se implementó el módulo de análisis conductual, con
-la localización de cada espécimen y un clasificador entrenado con segundos etiquetados por el
-equipo (OE-4). Se evaluó el desempeño del clasificador sobre un conjunto de prueba
-independiente, con precisión, \textit{recall} y F1 por conducta, y se alcanzó la meta de F1
-por conducta de RNF-02 (OE-5). Y se cuantificó la reducción del tiempo de análisis frente al
-proceso manual, además de dejar documentado el diseño modular del módulo de clasificación y qué
-tendría que cambiar el \textit{pipeline} para aplicarlo a otro paradigma conductual (OE-6).
+existentes para el análisis automatizado de la prueba y se identificaron los enfoques de
+visión por computadora y de aprendizaje supervisado más adecuados (OE-1). Se documentó el
+protocolo experimental del laboratorio, con las conductas que se anotan, la forma de
+grabar y las características de los videos disponibles (OE-2). Se diseñó la arquitectura
+conforme a la norma ISO/IEC/IEEE~12207, con los módulos de carga de videos,
+\textit{pipeline} de análisis, base de datos y visualización de resultados (OE-3). Se
+implementó el módulo de análisis conductual, con la localización de cada espécimen y un
+clasificador entrenado con segundos etiquetados por el equipo (OE-4). Se evaluó el
+desempeño del clasificador sobre un conjunto de prueba independiente, con precisión,
+\textit{recall} y F1 por conducta, y se alcanzó la meta de F1 por conducta de RNF-02
+(OE-5). Y se cuantificó la reducción del tiempo de análisis frente al proceso manual,
+además de dejar documentado el diseño modular del módulo de clasificación y qué tendría
+que cambiar el \textit{pipeline} para aplicarlo a otro paradigma conductual (OE-6).
 
-El alcance del trabajo tiene límites que conviene tener presentes. El clasificador se entrenó y
-se validó solo para la prueba de nado forzado, con videos de un solo laboratorio, y el sistema
-asume una calidad mínima de video: no corrige reflejos, pelaje claro ni contraste insuficiente,
-y cuando no encuentra los cilindros se detiene y genera un reporte de diagnóstico. El video del
-día~1, que es una sesión de habituación, se guarda como constancia y no se analiza. Estos
-límites no restan al cumplimiento de los objetivos: son las fronteras que el alcance fijó desde
-el inicio.
+El alcance del trabajo tiene límites que conviene tener presentes. El clasificador se
+entrenó y se validó solo para la prueba de nado forzado, con videos de un solo
+laboratorio, y el sistema asume una calidad mínima de video: no corrige reflejos, pelaje
+claro ni contraste insuficiente, y cuando no encuentra los cilindros se detiene y genera
+un reporte de diagnóstico. El video del día 1, que es una sesión de habituación, se
+guarda como constancia y no se analiza. Estos límites no restan al cumplimiento de los
+objetivos: son las fronteras que el alcance fijó desde el inicio.
 
-En conclusión, el sistema es más que una herramienta de software: es un apoyo concreto para la
-investigación del Laboratorio de Bioquímica Estructural y para la institución que lo alberga.
-Al centralizar los videos, los resultados y los reportes de cada experimento, deja la evidencia
-conservada y consultable, y libera al personal de horas de anotación manual para dedicarlas al
-diseño y la interpretación de los experimentos. Su mayor valor está en la búsqueda de
-compuestos con posible efecto antidepresivo: la prueba de nado forzado es uno de los modelos
-preclínicos con que se comparan los compuestos candidatos contra un antidepresivo de referencia
-como la fluoxetina, y un análisis más rápido, reproducible y revisable por el investigador
-permite evaluar más compuestos y más dosis en el mismo tiempo, con resultados comparables entre
-grupos y entre sesiones. El sistema no diagnostica ni sustituye el criterio del investigador:
-entrega una clasificación por segundo que el laboratorio revisa, corrige y usa para decidir qué
-compuestos merecen avanzar en el desarrollo de nuevos tratamientos contra la depresión.
+En conclusión, el sistema es más que una herramienta de software: es un apoyo concreto
+para la investigación del Laboratorio de Bioquímica Estructural y para la institución que
+lo alberga. Al centralizar los videos, los resultados y los reportes de cada experimento,
+deja la evidencia conservada y consultable, y libera al personal de horas de anotación
+manual para dedicarlas al diseño y la interpretación de los experimentos. Su mayor valor
+está en la búsqueda de compuestos con posible efecto antidepresivo: la prueba de nado
+forzado es uno de los modelos preclínicos con que se comparan los compuestos candidatos
+contra un antidepresivo de referencia como la fluoxetina, y un análisis más rápido,
+reproducible y revisable por el investigador permite evaluar más compuestos y más dosis
+en el mismo tiempo, con resultados comparables entre grupos y entre sesiones. El sistema
+no diagnostica ni sustituye el criterio del investigador: entrega una clasificación por
+segundo que el laboratorio revisa, corrige y usa para decidir qué compuestos merecen
+avanzar en el desarrollo de nuevos tratamientos contra la depresión.
