@@ -6,11 +6,12 @@ import math, html, sys
 
 esc = html.escape
 CH = 9.0     # ancho de carácter de Geist Mono a 15 px (0.6 em)
-LH = 28      # interlínea de filas
-HEAD = 38    # alto del encabezado de tabla
+import os
+LH = int(os.environ.get('LH', 28))
+HEAD = int(os.environ.get('HEAD', 38))
 NX = 56      # sangría del nombre de columna
-GAPV = int(sys.argv[2]) if len(sys.argv) > 2 else 60   # separación vertical entre tablas
-GAPC = 260
+GAPV = int(sys.argv[2]) if len(sys.argv) > 2 else 130   # separación vertical entre tablas
+GAPC = int(os.environ.get('GAPC', 260))
 Y0 = 26
 X0 = 52
 
@@ -187,12 +188,6 @@ for e in edges:
 for k, e in enumerate(edges):
     pts = e['pts']
     punta(pts[-1], pts[-2], e['color'])
-    rc = e['rng'] or CH_TXT[e['child']]
-    extremo(pts[0], pts[1], rc, e['color'])
-    extremo(pts[-1], pts[-2], PA_TXT[e['parent']], e['color'])
-    tramos = [(math.hypot(pts[i+1][0]-pts[i][0], pts[i+1][1]-pts[i][1]), i) for i in range(len(pts)-1)]
-    _, ix = max(tramos)
-    etiqueta_fk(pts[ix], pts[ix+1], LABELS[k], e['color'], 0.3 if k == 9 else 0.5)
 
 BADGE = {'PK': '#d9532c', 'PK FK': '#d9532c', 'FK': '#1a1a1a', 'FK UK': '#1a1a1a', 'UK': '#6b6b6b', 'AK': '#6b6b6b', 'FK AK': '#1a1a1a', 'PK FK': '#d9532c'}
 for n, t in T.items():
@@ -215,7 +210,7 @@ for n, t in T.items():
 
 def legend(x, y, w):
     texto = [('PK', '#d9532c', 'llave primaria'), ('FK', '#1a1a1a', 'llave foránea')]
-    h = 52 + (len(texto) + 3) * LH + 14
+    h = 52 + (len(texto) + 2) * LH + 14
     out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="6" fill="#faf9f5" stroke="#6b6b6b" stroke-dasharray="4,3"/>')
     out.append(f'<text x="{x+12}" y="{y+28}" class="nm">Leyenda</text>')
     by = y + 52
@@ -225,10 +220,8 @@ def legend(x, y, w):
         by += LH
     out.append(f'<text x="{x+12}" y="{by}" class="ty">Flecha: hijo → padre</text>')
     by += LH
-    out.append(f'<text x="{x+12}" y="{by}" class="ty">Rótulo: la FK</text>')
-    by += LH
     out.append(f'<rect x="{x+12}" y="{by-12}" width="26" height="14" rx="3" fill="#ece7d8" stroke="#1a1a1a"/>')
-    out.append(f'<text x="{x+56}" y="{by}" class="ty">soporte del sistema</text>')
+    out.append(f'<text x="{x+56}" y="{by}" class="ty">de soporte</text>')
     by += LH
     return y + h
 

@@ -329,7 +329,7 @@ reencola los que quedaron en \texttt{procesando} y los empieza de nuevo, y cance
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/estados_analisis}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/estados_analisis_diapositiva}
 \caption{Diagrama de estados de un análisis [autoría propia].}
 \label{fig:estados_analisis}
 \end{figure}
@@ -343,7 +343,7 @@ coexisten tandas en distintos estados.
 
 \begin{sidewaysfigure}[p]
 \centering
-\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/estados_experimento}
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/estados_experimento_diapositiva}
 \caption{Diagrama de estados agregado de un experimento [autoría propia].}
 \label{fig:estados_experimento}
 \end{sidewaysfigure}
@@ -2616,8 +2616,11 @@ análisis (Figura~\ref{fig:seq_pausa}) muestra cómo guarda una imagen fija, có
 usuario ajusta el recuadro del cilindro o cancela, y cómo el análisis ajustado vuelve a la
 cola por delante de los que llegaron después. Una vez completado el análisis, la consulta de
 resultados (Figura~\ref{fig:seq_resultados}) devuelve los tiempos por espécimen
-y conducta, y la descarga de reportes (Figura~\ref{fig:seq_reportes}) permite
-exportar los datos en PDF, CSV o XLSX. Además, el usuario puede revisar el análisis
+y conducta, los datos de las gráficas por grupo (media, desviación, varianza y
+coeficiente de variación por conducta y minuto) y una galería de seis gráficas con
+selector de conducta, y la descarga de reportes (Figura~\ref{fig:seq_reportes}) permite
+exportar los datos en PDF, CSV o XLSX, o bien un Excel del experimento que se arma
+al momento, con las hojas «Resultados» y «Segundo a segundo», sin guardarse. Además, el usuario puede revisar el análisis
 y corregir las etiquetas segundo a segundo (Figura~\ref{fig:seq_revision}; ver CU-17
 y CU-18), y los totales por minuto reflejan las correcciones porque se calculan desde las etiquetas.
 
