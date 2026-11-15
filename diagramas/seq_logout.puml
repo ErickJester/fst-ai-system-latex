@@ -4,7 +4,7 @@
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Cubre CU-02 "Cerrar sesion" (RF-02). La sesion dura 168 horas
+'  Cubre CU-03 "Cerrar sesion" (RF-02). La sesion dura 168 horas
 '  por omision (configurable); "cerrar sesion" solo hace que el
 '  navegador la olvide. El servidor no guarda sesiones canceladas,
 '  asi que no hay ninguna escritura en la base de datos.

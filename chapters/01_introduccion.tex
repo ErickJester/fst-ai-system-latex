@@ -139,14 +139,14 @@ resultados para compararlos con los de otros grupos de investigación.
 \section{Propuesta de solución}
 
 En términos concretos: el investigador sube el video al sistema desde el navegador, el
-sistema lo analiza y, cuando termina, genera un reporte con los tiempos de nado activo,
-inmovilidad, escalamiento y conducta activa por espécimen y sesión. Lo que hoy lleva horas de
+sistema lo analiza y, cuando termina, genera un reporte con los tiempos de nado,
+inmovilidad, escalamiento y conducta activa por espécimen. Lo que hoy lleva horas de
 anotación manual, el sistema lo produce de forma automática y con los mismos criterios
 cada vez.
 
 El sistema es una herramienta de apoyo a la investigación preclínica en farmacología.
 No diagnostica depresión ni produce información de uso clínico; su propósito es
-reemplazar la anotación manual de videos experimentales.
+automatizar la anotación manual de videos experimentales.
 
 La propuesta es un prototipo de sistema web que analiza automáticamente los videos del
 FST del laboratorio. Usa técnicas de visión por computadora para localizar a cada
@@ -163,9 +163,10 @@ metodología.
 El sistema tiene dos partes:
 
 \begin{itemize}
-  \item \textbf{Cadena de análisis de video (\textit{pipeline}):} recibe el video, identifica a cada
+  \item \textbf{Cadena de análisis de video (\textit{pipeline}):} recibe el video, localiza a cada
         espécimen dentro de su cilindro y clasifica la conducta que realiza en cada segundo
-        (nado, inmovilidad, escalamiento o, cuando no distingue entre nado y escalamiento, conducta activa) con un modelo de aprendizaje supervisado. La
+        (nado, inmovilidad, escalamiento o, cuando no distingue entre nado y escalamiento, conducta activa) con un modelo de aprendizaje supervisado (una red convolucional
+        espaciotemporal, R(2+1)D-18). La
         salida es el tiempo total por conducta y espécimen y el desglose por minuto.
   \item \textbf{Plataforma web:} interfaz desde el navegador donde el investigador sube
         los videos, consulta el estado del análisis, revisa resultados por espécimen y
@@ -186,7 +187,7 @@ El desempeño del clasificador se evalúa con métricas de clasificación están
 Diseñar, desarrollar y validar un prototipo de sistema web que, mediante visión por
 computadora (sustracción de fondo y segmentación para localizar a cada espécimen) y
 aprendizaje supervisado (una red neuronal convolucional espaciotemporal), automatice la
-detección y cuantificación de las conductas de la prueba de nado forzado en especímenes
+clasificación y cuantificación de las conductas de la prueba de nado forzado en especímenes
 ---nado, inmovilidad, escalamiento y conducta activa--- con
 desempeño validado mediante métricas de clasificación estándar y cumpliendo los
 atributos de calidad de la norma ISO/IEC~25010:2011 \cite{iso25010}, el modelo de
@@ -235,11 +236,11 @@ conductas--- el investigador debe decidir qué número reportar. Esa decisión n
 criterio formal: depende del evaluador, y distintos laboratorios pueden resolverla de
 forma diferente. El resultado es que el mismo experimento puede producir datos distintos
 en manos distintas, lo que complica comparar publicaciones entre grupos de investigación.
-Además, el error del sistema se puede medir con métricas de clasificación.
+Además, el error del sistema se puede medir con métricas de clasificación, algo que la anotación manual no permite.
 
 El laboratorio señaló que su criterio principal no es la velocidad del análisis sino la
 repetibilidad: que el mismo video analizado varias veces produzca siempre el mismo
-resultado, con una variabilidad máxima de entre 5 y 10\,\%. La anotación manual depende
+resultado, con una variabilidad máxima del 10\,\% y una meta del 5\,\%. La anotación manual depende
 de quién anota y de cómo interpreta cada transición entre conductas; un sistema
 automatizado aplica los mismos criterios en cada corrida.
 
@@ -260,7 +261,7 @@ En cuanto a calidad del software, el sistema se diseña para cumplir atributos c
 de la ISO/IEC~25010:2011 \cite{iso25010}: \textit{functional correctness} (corrección
 funcional), que mide el desempeño del clasificador con métricas de clasificación
 estándar sobre el conjunto de prueba; \textit{time behaviour} (desempeño temporal), que establece que el análisis
-debe terminar en un tiempo asumible en el flujo de trabajo; y \textit{usability}
+debe terminar en menos tiempo que el análisis manual del mismo video (hasta unas 2~horas con cuatro especímenes); y \textit{usability}
 (usabilidad), que garantiza que un investigador sin conocimientos de programación puede
 operar el sistema sin ayuda técnica. Esos tres atributos, junto con la repetibilidad que
 fijó el laboratorio, son los cuatro criterios de aceptación del sistema.
@@ -281,7 +282,7 @@ fijó el laboratorio, son los cuatro criterios de aceptación del sistema.
         lo analiza.
 
   \item \textbf{Localización de los especímenes:} el sistema localiza automáticamente
-        los cilindros del encuadre (de dos a cuatro) mediante visión por computadora, los
+        los cilindros del encuadre (de dos a cuatro) mediante visión por computadora (alineación de cuadros y sustracción de fondo), los
         numera de izquierda a derecha y asocia cada uno al espécimen que el usuario
         registró en esa posición de la tanda. No reconoce al espécimen como individuo:
         lo distingue por el cilindro en que está. Dentro de cada cilindro separa la
@@ -290,7 +291,7 @@ fijó el laboratorio, son los cuatro criterios de aceptación del sistema.
   \item \textbf{Clasificación de conductas:} clasificar significa asignar a cada
         segundo de cada espécimen una de las tres conductas del FST: nado, inmovilidad
         o escalamiento (el buceo cuenta como nado). Lo hace un modelo de aprendizaje
-        supervisado que observa una ventana de 4~s alrededor de ese segundo. Cuando
+        supervisado, una red convolucional espaciotemporal (R(2+1)D-18), que observa una ventana de 4~s alrededor de ese segundo. Cuando
         ninguna clase alcanza el umbral de confianza de 0.80, pero la suma de nado y
         escalamiento sí lo alcanza, el segundo queda como conducta activa (RN-13); si no
         se pudo ver al espécimen, el segundo queda sin conducta («sin ver»). Al no exigir
@@ -322,12 +323,12 @@ fijó el laboratorio, son los cuatro criterios de aceptación del sistema.
         por minuto se calculan siempre desde esas etiquetas, así que reflejan las
         correcciones. Reiniciar un análisis completado borra el resultado y toda la
         revisión hecha; la pantalla avisa antes, la acción no se puede deshacer y solo
-        la hacen solo el creador del experimento (quien sube sus videos) o un Administrador.
+        la hacen únicamente el creador del experimento (quien sube sus videos) o un Administrador.
 
   \item \textbf{Plataforma web:} interfaz accesible desde el navegador con creación
         de cuenta de usuario por parte del administrador, carga de videos, cola de
         procesamiento secuencial, con un análisis a la vez en orden de llegada, para hasta cuatro usuarios trabajando en un mismo período,
-        consulta de resultados por espécimen y sesión, avisos de análisis terminado o con error
+        consulta de resultados por espécimen, avisos de análisis terminado o con error
         en el panel y por correo, y descarga de reportes. Los
         datos se almacenan en base de datos para permitir comparar grupos y
         experimentos posteriores.
@@ -499,7 +500,7 @@ Revisiones mensuales con directores e investigador del laboratorio
 \textit{Baseline} (línea base): sustracción de fondo y curación de videos
   & & & & & & $\bullet$ & & & & & & \\
 \hline
-Anotación de conductas con el etiquetador del equipo y preparación de los rasgos o clips de entrada
+Anotación de conductas con el etiquetador del equipo y preparación de los rasgos o \textit{clips} (fragmentos de video) de entrada
   & & & & & & $\bullet$ & $\bullet$ & & & & & \\
 \hline
 Entrenamiento del clasificador de conducta (nado activo, inmovilidad y escalamiento) y regla de confianza para la conducta activa
@@ -508,7 +509,7 @@ Entrenamiento del clasificador de conducta (nado activo, inmovilidad y escalamie
 Ajuste de hiperparámetros y evaluación del clasificador
   & & & & & & & & $\bullet$ & & & & \\
 \hline
-Generación de métricas por espécimen y por sesión
+Generación de métricas por espécimen
   & & & & & & & & & $\bullet$ & & & \\
 \hline
 Pruebas con distintas condiciones $+$ oclusiones y reflejos
@@ -524,7 +525,7 @@ Redacción de caps.\ resultados, manuales y material de defensa
 \end{sidewaystable}
 
 El \textit{stack} (conjunto de tecnologías) técnico cubre los dos frentes del proyecto: Java con Spring Boot
-para el \textit{backend}; Python con OpenCV, scikit-learn, PyTorch y pandas para el \textit{worker} y el
+para el \textit{backend}; Python con OpenCV, scikit-learn, PyTorch y pandas para el \textit{worker} (proceso en segundo plano que ejecuta el análisis) y el
 \textit{pipeline}; PostgreSQL para la base de datos; React con Vite para el \textit{frontend}; un etiquetador propio del equipo, que propone la conducta de cada
 espécimen y permite revisarla y corregirla, para anotar el \textit{dataset} (conjunto de datos) de conductas; Git
 para control de versiones y Docker para empaquetar el sistema.

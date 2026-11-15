@@ -42,5 +42,5 @@ else un solo nivel
 end
 
 ui -> inv: muestra la comparación (solo Día 2) con faltantes por tanda y su estado
-inv -> ui: puede pedir el reporte de la vista (ver CU-10)
+inv -> ui: puede pedir el reporte de la vista (ver CU-15)
 @enduml

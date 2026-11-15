@@ -4,7 +4,7 @@
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Cubre CU-10 "Descargar reporte" y RF-22, RF-31.
+'  Cubre CU-15 "Descargar reporte" y RF-22, RF-31.
 '
 '  Que se descarga:
 '  - CSV y XLSX: la vista que el investigador tiene abierta, por grupo
@@ -12,7 +12,7 @@
 '    activo, inmovilidad, escalamiento, conducta activa y "Sin ver",
 '    con la media, la desviación estándar y la varianza de esa vista).
 '  - PDF: el reporte de resultados del experimento, con la columna
-'    "Sin ver". Es distinto del reporte de diagnóstico de CU-08.
+'    "Sin ver". Es distinto del reporte de diagnóstico de CU-13.
 '  - Las estadísticas son las del grupo o la tanda que se pidió.
 '
 '  Caché:
@@ -81,7 +81,7 @@ note right of api
   (grupo o tanda), entre los especímenes de esa vista (RF-31).
 
   PDF: reporte de resultados del experimento, con la columna
-  "Sin ver"; distinto del reporte de diagnóstico de CU-08.
+  "Sin ver"; distinto del reporte de diagnóstico de CU-13.
 end note
 
 api --> ui: archivo listo

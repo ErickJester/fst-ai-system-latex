@@ -1,11 +1,11 @@
 @startuml seq_gestion_usuarios
 ' ================================================================
 '  Secuencia - Gestion de usuarios: listar, cambiar rol, desactivar,
-'  reactivar y contraseña temporal (CU-11)
+'  reactivar y contraseña temporal (CU-20)
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Cubre CU-11 "Gestionar cuenta de investigador" (RF-05, RF-06,
+'  Cubre CU-20 "Gestionar cuenta de investigador" (RF-05, RF-06,
 '  RF-07). La parte de crear cuenta se referencia con "ref over"
 '  y tiene su propio diagrama, diagramas/seq_crear_cuenta.puml.
 '
@@ -56,7 +56,7 @@ else pertenece a un Administrador
 
   alt crear cuenta nueva
     ref over ui, api, db
-      ver CU-12 "Crear cuenta de usuario"
+      ver CU-21 "Crear cuenta de usuario"
     end ref
     ui --> admin: la tabla se actualiza con\nla cuenta nueva
 

@@ -1,0 +1,17 @@
+@startuml res_1
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+inv -> ui: abre los resultados del experimento
+ui -> api: pide los resultados
+api -> db: busca los especímenes analizados y los\nsegundos de cada conducta
+db --> api: segundos por conducta de cada espécimen
+api --> ui: resultados por espécimen
+ui -> inv: muestra la tabla por espécimen, con su\ntanda y "Sin ver"
+inv -> ui: elige ver el grupo completo o una tanda
+ui -> ui: calcula media, desviación estándar y\nvarianza
+@enduml

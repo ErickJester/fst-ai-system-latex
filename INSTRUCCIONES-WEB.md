@@ -2410,9 +2410,9 @@ else coincide
       los enlaces de recuperación pendientes (seq_recuperar_contrasena) dejan de servir
     end note
     api --> ui: 200 OK
-    alt primer acceso (CU-16)
+    alt primer acceso (CU-04)
       ui --> u: confirma el cambio y muestra la lista de experimentos
-    else cambio voluntario (CU-18)
+    else cambio voluntario (CU-05)
       ui --> u: confirma el cambio y se queda en Mi perfil
     end
   end
@@ -2723,7 +2723,7 @@ Archivo: `C:\Users\Samsung\Desktop\proyectos\fst-ai-system-latex\diagramas\guia_
 '  Conserva códigos HTTP, rutas y nombres de archivo.
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 ' ----------------------------------------------------------------
-'  Cubre CU-05 "Subir video" (RF-08, RF-09, RF-10, RF-12, RN-02,
+'  Cubre CU-07 "Subir video" (RF-08, RF-09, RF-10, RF-12, RN-02,
 '  RN-10) más la inferencia de tanda (D-19).
 '
 '  - Búsqueda: GET por subcadena en nombre y tratamiento, sin acentos
@@ -3323,7 +3323,7 @@ else un solo nivel
 end
 
 ui -> inv: muestra la comparación (solo Día 2) con faltantes por tanda y su estado
-inv -> ui: puede pedir el reporte de la vista (ver CU-10)
+inv -> ui: puede pedir el reporte de la vista (ver CU-15)
 @enduml
 ```
 
@@ -3379,7 +3379,7 @@ note right of api
   (al final). Una fila por espécimen y minuto. Al final, media,
   desviación estándar (n - 1) y varianza de cada columna de la vista.
   PDF: reporte de resultados del experimento, con la columna Sin ver;
-  distinto del reporte de diagnóstico (CU-08).
+  distinto del reporte de diagnóstico (CU-13).
 end note
 
 api --> ui: 200 OK, archivo listo

@@ -1,0 +1,18 @@
+@startuml an_1
+!include ../estilo_doc.iuml
+skinparam dpi 200
+participant Worker as w
+participant Archivos as fs
+database "Base de datos" as db
+
+w -> db: al arrancar, pasa a "en cola" los\nanálisis que quedaron "procesando"
+w -> fs: revisa el espacio libre del disco (aviso\nal 80 %, limpieza al 90 %)
+w -> db: toma el análisis más antiguo en cola
+w -> db: lo marca como "procesando"
+w -> fs: verifica los archivos del video, los\nespecímenes y el modelo
+w -> w: lee ancho, alto y duración del video
+alt no se puede abrir el video
+  w -> fs: guarda el reporte de diagnóstico (PDF)
+  w -> db: marca "error" y crea la notificación
+end
+@enduml

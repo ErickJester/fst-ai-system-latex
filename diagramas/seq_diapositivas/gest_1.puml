@@ -1,0 +1,20 @@
+@startuml gest_1
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Administrador as admin
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+admin -> ui: abre el panel de usuarios
+ui -> api: pide la lista de usuarios con la sesión\ndel Administrador
+api -> db: ¿es Administrador? Consulta todos los\nusuarios
+db --> api: lista de usuarios
+alt no es Administrador
+  api --> ui: rechaza: no tiene permiso
+  ui --> admin: muestra el error y no abre el panel
+else es Administrador
+  api --> ui: la lista de usuarios
+  ui --> admin: muestra la tabla de usuarios
+end
+@enduml

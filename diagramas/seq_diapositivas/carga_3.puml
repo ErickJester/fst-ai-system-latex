@@ -1,0 +1,23 @@
+@startuml carga_3
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant Archivos as fs
+
+api -> db: guarda grupo, tanda, especímenes y video\nen una sola operación
+alt la tanda ya tiene un video de esa sesión
+  api -> fs: descarta el archivo temporal
+  api --> ui: rechaza: la tanda ya tiene un video de\nesa sesión
+else se guarda
+  api -> fs: mueve el archivo a su lugar definitivo
+  alt el video es del Día 2
+    api -> db: crea el análisis en cola
+    ui --> inv: confirma y lleva a la pantalla de\nprogreso
+  else es del Día 1 (habituación)
+    ui --> inv: confirma que el video quedó guardado; no\nse analiza
+  end
+end
+@enduml

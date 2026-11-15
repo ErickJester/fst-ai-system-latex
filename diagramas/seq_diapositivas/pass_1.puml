@@ -1,0 +1,20 @@
+@startuml pass_1
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+u -> ui: escribe la contraseña actual y la nueva
+ui -> api: envía la actual y la nueva con la sesión\ndel usuario
+api -> db: lee la contraseña cifrada del usuario
+db --> api: contraseña cifrada actual
+alt la actual no coincide
+  api --> ui: rechaza: la contraseña actual no es\ncorrecta
+  ui --> u: muestra el error y no cambia nada
+else la nueva no cumple (mínimo 8 caracteres, distinta de la actual)
+  api --> ui: rechaza e indica el criterio incumplido
+  ui --> u: pide escribir otra contraseña
+end
+@enduml

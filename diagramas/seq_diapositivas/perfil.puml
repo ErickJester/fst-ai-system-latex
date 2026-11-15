@@ -1,0 +1,21 @@
+@startuml perfil
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+u -> ui: abre su perfil desde el menú de usuario
+ui --> u: muestra nombre, apellidos y correo de la\nsesión
+u -> ui: modifica sus datos y confirma
+ui -> api: envía los datos modificados
+alt el correo no tiene un formato válido
+  api --> ui: rechaza: el correo no es válido
+else otra cuenta ya usa ese correo
+  api --> ui: informa el conflicto y no aplica el\ncambio
+else los datos son válidos
+  api -> db: actualiza los datos del usuario
+  ui --> u: la barra superior muestra los datos\nnuevos
+end
+@enduml

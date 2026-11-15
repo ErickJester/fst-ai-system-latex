@@ -6,7 +6,7 @@
 '  Reemplaza a figures/mermaid/seq_carga.png (modelo viejo: el video
 '  colgaba directo de Experimento, sin Grupo ni Tanda).
 '
-'  Cubre CU-05 "Subir video" (RF-08, RF-09, RF-10, RF-12, RN-02,
+'  Cubre CU-07 "Subir video" (RF-08, RF-09, RF-10, RF-12, RN-02,
 '  de grupos trae, en la misma respuesta, la tanda sugerida (la
 '  siguiente, o la A si el grupo es nuevo). La interfaz la precarga
 '  en un campo editable, pero pide confirmacion explicita antes de

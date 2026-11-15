@@ -1,0 +1,24 @@
+@startuml login
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+u -> ui: escribe su correo y su contraseña
+ui -> api: envía correo y contraseña
+api -> db: busca la cuenta con ese correo
+db --> api: cuenta (contraseña cifrada, activa o no)
+alt cuenta activa y contraseña correcta
+  api --> ui: token de sesión, rol y si debe cambiar\nla contraseña
+  alt debe cambiarla (primer acceso)
+    ui --> u: pantalla de cambio de contraseña (CU-04)
+  else
+    ui --> u: lista de experimentos
+  end
+else correo no existe, cuenta inactiva o contraseña incorrecta
+  api --> ui: error de credenciales (no dice cuál dato\nfalló)
+  ui --> u: "Correo o contraseña incorrectos"
+end
+@enduml

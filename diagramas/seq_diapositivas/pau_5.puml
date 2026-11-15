@@ -1,0 +1,18 @@
+@startuml pau_5
+!include ../estilo_doc.iuml
+skinparam dpi 200
+participant Worker as w
+participant Archivos as fs
+database "Base de datos" as db
+
+w -> db: toma el análisis en cola y lo marca\n"procesando"
+w -> fs: lee los datos de la pausa
+w -> w: procesa el video desde el principio con\nel recuadro corregido
+loop en cada vuelta de la cola
+  w -> db: busca los análisis "en pausa"
+  opt pasaron más de 72 horas
+    w -> db: pasa a "cancelado"
+    w -> db: crea la notificación de análisis\ncancelado
+  end
+end
+@enduml

@@ -1,0 +1,18 @@
+@startuml prog_1
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant Archivos as fs
+
+inv -> ui: abre la pantalla de progreso del\nexperimento
+loop mientras la pantalla está abierta
+  ui -> api: pide el estado de los análisis
+  api -> db: busca los análisis del experimento
+  api -> fs: lee el avance de cada análisis activo
+  api --> ui: estado, etapa y porcentaje de cada\nanálisis
+  ui -> inv: actualiza la barra de progreso de cada\nvideo
+end
+@enduml

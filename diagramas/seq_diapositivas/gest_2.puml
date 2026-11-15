@@ -1,0 +1,15 @@
+@startuml gest_2
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Administrador as admin
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+admin -> ui: modifica nombre, apellidos o correo y\nconfirma
+ui -> api: pide guardar los cambios de la cuenta
+api -> db: actualiza la cuenta
+db --> api: confirma
+api --> ui: confirma los cambios
+ui --> admin: la tabla muestra los datos nuevos
+@enduml

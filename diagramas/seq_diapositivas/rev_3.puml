@@ -1,0 +1,17 @@
+@startuml rev_3
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant Archivos as fs
+
+u -> ui: elige "Reiniciar el análisis"
+ui --> u: avisa que se borran el resultado y toda\nla revisión
+u -> ui: confirma el reinicio
+ui -> api: pide reiniciar el análisis del video
+api -> fs: borra los resultados de la corrida\nanterior
+api -> db: borra el resultado y la revisión; deja\nel análisis "en cola"
+ui --> u: lleva a la pantalla de progreso
+@enduml

@@ -1,0 +1,21 @@
+@startuml notif_1
+!include ../estilo_doc.iuml
+skinparam dpi 200
+participant Worker as w
+database "Base de datos" as db
+participant Backend as api
+participant "Interfaz web" as ui
+actor Usuario as u
+
+w -> db: crea la notificación para el usuario
+w -> w: envía también el aviso por correo
+loop al entrar a cada pantalla y cada 30 s
+  ui -> api: pide las notificaciones del usuario
+  api -> db: busca las del usuario, las más recientes\nprimero
+  api --> ui: lista de notificaciones
+  ui -> u: muestra el contador de no leídas
+end
+u -> ui: abre una notificación
+ui -> api: la marca como leída
+ui --> u: lleva a la pantalla de destino
+@enduml

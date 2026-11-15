@@ -155,7 +155,7 @@ note bottom of USUARIO
   columna activo. La contraseña se guarda con bcrypt
   y sal (RNF-05). cambioRequerido obliga a cambiar la
   contraseña temporal en el primer ingreso (RF-05,
-  RF-07, CU-12).
+  RF-07, CU-21).
 end note
 
 entity EXPERIMENTO {

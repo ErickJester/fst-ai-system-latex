@@ -4,7 +4,7 @@
 '  Conserva códigos HTTP, rutas y nombres de archivo.
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 ' ----------------------------------------------------------------
-'  Cubre CU-05 "Subir video" (RF-08, RF-09, RF-10, RF-12, RN-02,
+'  Cubre CU-07 "Subir video" (RF-08, RF-09, RF-10, RF-12, RN-02,
 '  RN-10) más la inferencia de tanda (D-19).
 '
 '  - Búsqueda: GET por subcadena en nombre y tratamiento, sin acentos

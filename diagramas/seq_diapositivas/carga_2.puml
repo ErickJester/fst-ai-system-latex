@@ -1,0 +1,22 @@
+@startuml carga_2
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+participant Archivos as fs
+
+ui -> ui: comprueba el formato del video
+ui -> api: envía el video con su grupo, tanda y\nsesión
+api -> api: comprueba que quien sube sea el creador\ndel experimento
+alt no es el creador
+  api --> ui: "Solo quien creó el experimento sube sus\nvideos."
+else es el creador
+  api -> fs: guarda el archivo en un espacio temporal
+  api -> api: valida: se reproduce, es horizontal y\ntiene de 2 a 4 cilindros
+  alt el archivo no pasa la validación
+    api -> fs: descarta el archivo temporal
+    api --> ui: rechaza, con el motivo
+  end
+end
+@enduml

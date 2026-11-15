@@ -1,0 +1,18 @@
+@startuml an_2
+!include ../estilo_doc.iuml
+skinparam dpi 200
+participant Worker as w
+participant Archivos as fs
+database "Base de datos" as db
+
+w -> db: actualiza la etapa a "cilindros"
+w -> w: alinea la cámara y construye el fondo\ndel video
+w -> w: ubica la línea de agua y separa los\ncilindros
+w -> w: mide al espécimen en cada cilindro
+alt los cilindros no coinciden con los especímenes
+  w -> fs: guarda el reporte de diagnóstico (PDF)
+  w -> db: marca "error" y crea la notificación
+else pierde al espécimen 3 s seguidos
+  w -> db: marca "en pausa" (ver pausa y ajuste del\nrecuadro)
+end
+@enduml

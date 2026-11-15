@@ -34,9 +34,9 @@ else coincide
       los enlaces de recuperación pendientes (seq_recuperar_contrasena) dejan de servir
     end note
     api --> ui: 200 OK
-    alt primer acceso (CU-16)
+    alt primer acceso (CU-04)
       ui --> u: confirma el cambio y muestra la lista de experimentos
-    else cambio voluntario (CU-18)
+    else cambio voluntario (CU-05)
       ui --> u: confirma el cambio y se queda en Mi perfil
     end
   end

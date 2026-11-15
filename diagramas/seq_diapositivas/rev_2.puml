@@ -1,0 +1,19 @@
+@startuml rev_2
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant Archivos as fs
+
+u -> ui: elige una conducta o "No se ve" para un\nsegundo
+ui -> ui: guarda un borrador en el navegador
+u -> ui: elige "Guardar"
+ui -> api: envía las correcciones (espécimen,\nsegundo, conducta)
+api -> db: actualiza la conducta y el origen de\ncada segundo
+api -> db: recalcula el nivel de clasificación
+api -> db: borra los reportes guardados del\nexperimento
+api --> ui: guardado, con los totales recalculados
+ui --> u: confirma que se guardó
+@enduml

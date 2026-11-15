@@ -1,0 +1,20 @@
+@startuml rep_2
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant Archivos as fs
+
+api -> db: ¿ya hay un reporte guardado en ese\nformato y vista?
+alt no hay, o ya no sirve
+  api -> api: genera el archivo con los datos actuales
+  api -> fs: guarda el archivo
+  api -> db: registra el reporte nuevo
+else ya hay uno vigente
+  api -> fs: recupera el archivo guardado
+end
+api --> ui: archivo listo
+ui --> inv: descarga inmediata en el navegador
+@enduml

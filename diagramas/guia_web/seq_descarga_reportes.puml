@@ -47,7 +47,7 @@ note right of api
   (al final). Una fila por espécimen y minuto. Al final, media,
   desviación estándar (n - 1) y varianza de cada columna de la vista.
   PDF: reporte de resultados del experimento, con la columna Sin ver;
-  distinto del reporte de diagnóstico (CU-08).
+  distinto del reporte de diagnóstico (CU-13).
 end note
 
 api --> ui: 200 OK, archivo listo

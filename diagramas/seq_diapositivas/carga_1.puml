@@ -1,0 +1,20 @@
+@startuml carga_1
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+inv -> ui: elige el experimento y escribe el grupo
+ui -> api: busca grupos que coincidan con lo\nescrito
+api -> db: consulta los grupos del experimento
+api --> ui: sugerencias, cada una con su tanda\nsugerida
+alt hay un grupo con ese nombre
+  inv -> ui: elige la sugerencia
+  ui --> inv: precarga la tanda (editable) y pide\nconfirmarla
+else no hay grupo con ese nombre
+  ui --> inv: pide los datos del grupo nuevo
+end
+inv -> ui: elige la sesión (Día 1 o Día 2) y el\narchivo
+@enduml

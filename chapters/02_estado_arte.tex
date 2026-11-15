@@ -11,7 +11,7 @@ de conducta con modelos supervisados.
 \section{Limitaciones comunes y contexto del proyecto}
 % -----------------------------------------------------------
 
-Todos los trabajos revisados se validaron bajo condiciones controladas: iluminación
+Los trabajos revisados se validaron, en general, bajo condiciones controladas: iluminación
 uniforme, fondo contrastante, sin reflejos problemáticos. Las herramientas basadas en
 umbralización (DBscorer, ezTrack) son especialmente sensibles a eso. Los métodos de
 aprendizaje profundo son más robustos en principio, pero dependen de que el conjunto
@@ -264,7 +264,7 @@ sus objetivos. Para este proyecto, los atributos relevantes son:
         correctamente las tres conductas del FST; la conducta activa se asigna con la regla de confianza y se reporta, pero no se evalúa con F1 propio. Se evalúa con métricas de
         clasificación estándar: precisión, \textit{recall} y F1 por conducta.
   \item \textbf{\textit{Time behaviour}:} el análisis de un video de 5~minutos termina
-        en un tiempo aceptable para el laboratorio. El tiempo de análisis se mide por etapa, en segundos de
+        en menos tiempo que el análisis manual del mismo video (hasta unas 2~horas con cuatro especímenes). El tiempo de análisis se mide por etapa, en segundos de
         procesamiento por video.
   \item \textbf{\textit{Usability}:} un investigador sin conocimientos de programación debe
         poder operar el sistema sin ayuda técnica. Se evalúa con una prueba de
@@ -273,7 +273,7 @@ sus objetivos. Para este proyecto, los atributos relevantes son:
 
 Además de esos tres atributos, el laboratorio fijó un criterio propio: la repetibilidad.
 El mismo video analizado varias veces debe producir el mismo resultado, con una
-variabilidad máxima de entre 5 y 10\,\%. Es el criterio que el laboratorio considera
+variabilidad máxima del 10\,\% y una meta del 5\,\%. Es el criterio que el laboratorio considera
 principal, por encima del tiempo de análisis.
 
 % -----------------------------------------------------------

@@ -1,0 +1,23 @@
+@startuml rev_1
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant Archivos as fs
+
+u -> ui: elige "Revisar segundo a segundo"
+ui -> api: pide los datos de la revisión
+api -> db: ¿análisis completado? ¿el usuario subió\nel video o es Administrador?
+alt el análisis no está completado
+  api --> ui: rechaza la petición
+  ui --> u: muestra el motivo
+else está completado
+  api -> db: consulta las etiquetas de cada segundo
+  api -> fs: lee los recuadros de los cilindros
+  api --> ui: duración, especímenes, etiquetas y\nrecuadros
+  ui -> api: pide el video con un permiso temporal
+  api --> ui: video por partes (se puede adelantar y\nretroceder)
+end
+@enduml

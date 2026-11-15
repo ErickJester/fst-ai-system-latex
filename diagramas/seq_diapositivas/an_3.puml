@@ -1,0 +1,16 @@
+@startuml an_3
+!include ../estilo_doc.iuml
+skinparam dpi 200
+participant Worker as w
+participant Archivos as fs
+database "Base de datos" as db
+
+w -> db: actualiza la etapa a "clasificación"
+w -> w: la red clasifica cada segundo (conducta\nactiva con la regla de 0.80)
+w -> w: conserva los últimos 300 s de cada\nespécimen
+w -> fs: guarda la copia del video y los\nrecuadros de los cilindros
+w -> db: guarda observaciones y segundos en una\nsola operación
+w -> db: marca "completado" y deja el video para\nborrarse a los 30 días
+w -> db: crea la notificación de análisis\nterminado
+w -> w: envía el aviso por correo
+@enduml

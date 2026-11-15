@@ -1,0 +1,150 @@
+[
+ [
+  "crear_1",
+  "Secuencia: creación de cuenta por el administrador (validaciones)"
+ ],
+ [
+  "crear_2",
+  "Secuencia: creación de cuenta por el administrador (alta de la cuenta)"
+ ],
+ [
+  "login",
+  "Secuencia: inicio de sesión"
+ ],
+ [
+  "logout",
+  "Secuencia: cierre de sesión"
+ ],
+ [
+  "pass_1",
+  "Secuencia: cambio de contraseña (validar las contraseñas)"
+ ],
+ [
+  "pass_2",
+  "Secuencia: cambio de contraseña (guardar y volver)"
+ ],
+ [
+  "gest_1",
+  "Secuencia: gestión de usuarios (administrador)"
+ ],
+ [
+  "gest_2",
+  "Secuencia: gestión de usuarios (administrador)"
+ ],
+ [
+  "gest_2b",
+  "Secuencia: gestión de usuarios (administrador)"
+ ],
+ [
+  "gest_3",
+  "Secuencia: gestión de usuarios (administrador)"
+ ],
+ [
+  "gest_4",
+  "Secuencia: gestión de usuarios (administrador)"
+ ],
+ [
+  "perfil",
+  "Secuencia: configuración de perfil"
+ ],
+ [
+  "notif_1",
+  "Secuencia: notificaciones (crear y consultar)"
+ ],
+ [
+  "notif_2",
+  "Secuencia: notificaciones (marcar como leída o no leída)"
+ ],
+ [
+  "carga_1",
+  "Secuencia: carga de video (elegir grupo y tanda)"
+ ],
+ [
+  "carga_2",
+  "Secuencia: carga de video (validar el archivo)"
+ ],
+ [
+  "carga_3",
+  "Secuencia: carga de video (guardar y encolar)"
+ ],
+ [
+  "an_1",
+  "Secuencia: análisis automático (worker)"
+ ],
+ [
+  "an_2",
+  "Secuencia: análisis automático (worker)"
+ ],
+ [
+  "an_3",
+  "Secuencia: análisis automático (worker)"
+ ],
+ [
+  "an_4",
+  "Secuencia: análisis automático (worker)"
+ ],
+ [
+  "prog_1",
+  "Secuencia: consulta de progreso y manejo de error (seguir el avance)"
+ ],
+ [
+  "prog_2",
+  "Secuencia: consulta de progreso y manejo de error (según el estado)"
+ ],
+ [
+  "prog_3",
+  "Secuencia: consulta de progreso y manejo de error (descargar el diagnóstico)"
+ ],
+ [
+  "pau_1",
+  "Secuencia: pausa, ajuste del recuadro y cancelación (el Worker pausa)"
+ ],
+ [
+  "pau_2",
+  "Secuencia: pausa, ajuste del recuadro y cancelación (el usuario abre la pausa)"
+ ],
+ [
+  "pau_3",
+  "Secuencia: pausa, ajuste del recuadro y cancelación (ajustar el recuadro)"
+ ],
+ [
+  "pau_4",
+  "Secuencia: pausa, ajuste del recuadro y cancelación (continuar o cancelar)"
+ ],
+ [
+  "pau_5",
+  "Secuencia: pausa, ajuste del recuadro y cancelación (retomar o vencer)"
+ ],
+ [
+  "res_1",
+  "Secuencia: consulta de resultados (por espécimen)"
+ ],
+ [
+  "res_2",
+  "Secuencia: consulta de resultados (comparación entre grupos)"
+ ],
+ [
+  "res_3",
+  "Secuencia: consulta de resultados (estadísticas y descarga)"
+ ],
+ [
+  "rev_1",
+  "Secuencia: revisión segundo a segundo (abrir la revisión)"
+ ],
+ [
+  "rev_2",
+  "Secuencia: revisión segundo a segundo (corregir y guardar)"
+ ],
+ [
+  "rev_3",
+  "Secuencia: revisión segundo a segundo (reiniciar el análisis)"
+ ],
+ [
+  "rep_1",
+  "Secuencia: descarga de reportes (pedir el reporte)"
+ ],
+ [
+  "rep_2",
+  "Secuencia: descarga de reportes (generar o reutilizar)"
+ ]
+]

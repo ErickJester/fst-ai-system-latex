@@ -1,0 +1,15 @@
+@startuml crear_2
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Administrador as admin
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+api -> api: genera una contraseña temporal
+api -> db: crea el usuario como Investigador,\nactivo y con cambio obligatorio
+db --> api: confirma
+api -> api: envía la contraseña temporal por correo
+api --> ui: cuenta creada
+ui --> admin: muestra la contraseña temporal una sola\nvez
+@enduml

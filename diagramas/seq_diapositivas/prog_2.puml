@@ -1,0 +1,17 @@
+@startuml prog_2
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Investigador as inv
+participant "Interfaz web" as ui
+
+alt algún análisis llegó a "completado"
+  ui -> inv: habilita el acceso a los resultados
+else algún análisis quedó "en pausa"
+  ui -> inv: muestra el enlace "Ajustar o cancelar"
+else algún análisis quedó "cancelado"
+  ui -> inv: muestra "El análisis se canceló."
+else algún análisis llegó a "error"
+  ui -> inv: muestra el error, con la etapa donde se\ndetuvo
+  ui -> inv: habilita la descarga del reporte de\ndiagnóstico
+end
+@enduml

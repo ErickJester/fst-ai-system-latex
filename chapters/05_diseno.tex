@@ -336,7 +336,7 @@ reencola los que quedaron en \texttt{procesando} y los empieza de nuevo, y cance
 
 Un experimento agrupa varias tandas, cada una con su propio análisis, así que
 el estado que ve el investigador en la lista de experimentos (Figura~\ref{fig:estados_experimento})
-es un valor calculado, no una columna de \texttt{EXPERIMENTO} (ver CU-22, RF-23):
+es un valor calculado, no una columna de \texttt{EXPERIMENTO} (ver CU-10, RF-23):
 se deriva del conjunto de análisis de todas sus tandas, con precedencia
 error > cancelado > en pausa > procesando > en cola > completado cuando
 coexisten tandas en distintos estados.
@@ -361,10 +361,12 @@ reporte de diagnóstico (ver RN-11); no se entregan resultados parciales.
 \section{Diseño de la base de datos}
 % -----------------------------------------------------------
 
-El diseño de la base de datos parte de un modelo conceptual que identifica las
+El diseño de la base de datos sigue tres niveles. El modelo conceptual identifica las
 entidades del dominio y las relaciones entre ellas, sin entrar en detalles de
-implementación. A partir de ese modelo se deriva el esquema físico que especifica
-las tablas, columnas y tipos de datos concretos de PostgreSQL.
+implementación. De él se deriva el esquema lógico, que expresa esas entidades como
+relaciones (tablas) con sus atributos y sus llaves, todavía sin tipos de dato. A partir
+del esquema lógico se obtiene el esquema físico, que especifica las tablas, columnas y
+tipos de datos concretos de PostgreSQL.
 
 La Figura~\ref{fig:der} muestra el diagrama entidad-relación (DER) conceptual del
 sistema. Las entidades principales son \textbf{USUARIO}, \textbf{EXPERIMENTO},
@@ -372,7 +374,7 @@ sistema. Las entidades principales son \textbf{USUARIO}, \textbf{EXPERIMENTO},
 \textbf{ANALISIS}. Las relaciones entre ellas definen el flujo central del
 sistema: un usuario crea experimentos; cada experimento se organiza en grupos
 (control, referencia, tratamiento); cada grupo se graba en una o más tandas de
-hasta cuatro especímenes; cada tanda tiene uno o dos videos (Día~1 y/o Día~2); y
+dos a cuatro especímenes; cada tanda tiene uno o dos videos (Día~1 y/o Día~2); y
 cada video del Día~2 se procesa mediante un análisis que produce observaciones de
 conducta por espécimen, mientras que el video del Día~1 se guarda sin análisis (\textbf{OBSERVACION}, \textbf{SEGUNDO} y \textbf{CONDUCTA}). La figura muestra las entidades del dominio experimental, todas fuertes salvo \textbf{SEGUNDO}, que es débil porque solo se identifica junto con su observación (doble borde); el subtipo
 \textbf{ADMINISTRADOR} (un usuario con permisos adicionales) y las entidades
@@ -381,18 +383,37 @@ físico.
 
 \begin{sidewaysfigure}
 \centering
-\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/esquema_conceptual}
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/esquema_conceptual_diapositiva}
 \caption{Diagrama entidad-relación conceptual del sistema [autoría propia].}
 \label{fig:der}
 \end{sidewaysfigure}
 
-A partir del DER se derivó el esquema físico aplicando las reglas de conversión
-al modelo relacional: cada entidad se convierte en una tabla, cada relación se
-implementa mediante claves foráneas, y se agregan las columnas de control que
-necesita el \textit{pipeline} (\texttt{ANALISIS.estado}, \texttt{ANALISIS.etapa}) junto
-con la marca de tiempo propia de cada tabla (\texttt{fechaCarga},
-\texttt{fechaCreacion}, \texttt{fechaAnalisis}, \texttt{fechaGeneracion}). La
-Figura~\ref{fig:er} muestra el resultado.
+A partir del DER se derivó el esquema lógico aplicando las reglas de conversión al
+modelo relacional: cada entidad se convierte en una relación con su llave primaria,
+cada interrelación se implementa mediante una llave foránea en la relación del lado de
+``muchos'', y se agregan las columnas de control que necesita el \textit{pipeline}
+(\texttt{ANALISIS.estado}, \texttt{ANALISIS.etapa}) junto con la marca de tiempo propia de
+cada relación (\texttt{fechaCarga}, \texttt{fechaCreacion}, \texttt{fechaAnalisis},
+\texttt{fechaGeneracion}). Tres entidades e interrelaciones no pasan tal cual:
+\textbf{SEGUNDO}, que es débil, toma como llave la de su observación más el número de
+segundo; \textbf{CONDUCTA}, que no tiene atributos propios, se convierte en un dominio
+cerrado de cuatro valores; y la interrelación derivada que agrupa a los especímenes en
+un grupo no se guarda, porque el grupo de un espécimen se alcanza a través de su tanda.
+La Figura~\ref{fig:logico} muestra el esquema lógico resultante: 12 relaciones y 13 llaves
+foráneas, con la llave primaria, las foráneas y los atributos que pueden quedar
+vacíos.
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=\textwidth, height=0.88\textheight, keepaspectratio]{figures/diagramas/esquema_logico_diapositiva}
+\caption{Esquema lógico (grafo relacional) de la base de datos [autoría propia].}
+\label{fig:logico}
+\end{figure}
+
+Del esquema lógico se obtuvo el esquema físico, que agrega los tipos de dato de
+PostgreSQL, los dominios cerrados, los valores únicos y las restricciones de valores,
+como que el número de segundo esté entre 1 y 300. La Figura~\ref{fig:er} muestra el
+resultado.
 
 \begin{figure}[p]
 \centering
@@ -428,7 +449,7 @@ Las tablas están organizadas en cuatro grupos funcionales:
         tratamiento) dentro de un experimento, con su etiqueta y su
         tratamiento o condición.
 
-  \item \textbf{TANDA}: cada sesión de grabación de hasta cuatro especímenes
+  \item \textbf{TANDA}: cada sesión de grabación de dos a cuatro especímenes
         dentro de un grupo, numerada por orden (A, B, C...).
 
   \item \textbf{ESPECIMEN}: un registro por espécimen dentro de su tanda,
@@ -458,12 +479,11 @@ clasificación de conducta (módulo 3).
   \item \textbf{OBSERVACION}: vincula un espécimen con el video en el que
         fue analizado.
 
-  \item \textbf{CONDUCTA}: las cuatro conductas (nado activo, inmovilidad,
+  \item \textbf{CONDUCTA}: las cuatro conductas (nado, inmovilidad,
         escalamiento y conducta activa, esta última cuando el clasificador no
         decide entre nado y escalamiento; ver RN-13). Es una entidad del esquema
         conceptual; en el relacional no es tabla sino el dominio cerrado
-        \texttt{tipo\_conducta} de la columna \texttt{SEGUNDO.conducta}, porque son cuatro valores fijos y no tiene atributos propios. En el modelo físico, \textit{Conducta} se implementa como dominio cerrado de cuatro valores.
-
+        \texttt{tipo\_conducta} de la columna \texttt{SEGUNDO.conducta}, porque son cuatro valores fijos y no tiene atributos propios.
   \item \textbf{SEGUNDO}: una fila por espécimen y por segundo analizado, con
         la conducta asignada (o ninguna, si el espécimen no se ve) y el origen
         de esa conducta (de la máquina, confirmada, corregida o dudosa). Es lo que el usuario revisa y
@@ -489,7 +509,7 @@ de cada columna, está en el Apéndice~\ref{ap:diccionario}.
 
 La base de datos usa PostgreSQL como gestor relacional. Los datos del sistema
 tienen una estructura jerárquica natural: un experimento se organiza en grupos,
-cada grupo se graba en tandas de hasta cuatro especímenes, cada tanda tiene uno
+cada grupo se graba en tandas de dos a cuatro especímenes, cada tanda tiene uno
 o dos videos, y cada video del Día~2 se analiza produciendo resultados desglosados por
 espécimen, por conducta y por minuto. Esa jerarquía se representa con integridad
 referencial entre tablas relacionadas, sin repetir información en varios
@@ -568,8 +588,9 @@ Un segundo caso es \texttt{USUARIO}. El correo identifica al usuario en la
 práctica, pero la clave primaria es \texttt{idInstitucional} (boleta o número de
 empleado). Los campos \texttt{nombre}, \texttt{apellidos}, \texttt{activo} y
 \texttt{cambioRequerido} dependen directamente de \texttt{idInstitucional}, no
-del correo. El correo se declara como clave alterna (\texttt{UNIQUE}), no como
-primaria: si algún día cambiara, no haría falta actualizar las claves foráneas en
+del correo. Al correo se le impone una restricción de unicidad (\texttt{UNIQUE}) en el esquema
+físico, para que no haya dos usuarios con el mismo, pero no es la clave primaria:
+si algún día cambiara, no haría falta actualizar las claves foráneas en
 \texttt{EXPERIMENTO} y \texttt{NOTIFICACION}.
 
 La revisión de la 3FN se hizo en su forma estricta, la de Boyce--Codd (FNBC):
@@ -578,11 +599,12 @@ determinante (toda columna o conjunto de columnas del que dependan otras) sea un
 clave candidata de la tabla \cite{elmasri2015}. Con el tratamiento dentro de
 \texttt{ESPECIMEN}, \texttt{idTanda} sería un determinante que no es clave
 candidata; al llevar el tipo y el tratamiento a \texttt{GRUPO}, a
-\texttt{ESPECIMEN} solo le quedan su clave primaria \texttt{idEspecimen} y su
-clave alterna (\texttt{idTanda}, \texttt{numeroCilindro}). En el resto de las
-relaciones los únicos determinantes son la clave primaria y, cuando la hay, la
-clave alterna; por ejemplo, en \texttt{GRUPO} son \texttt{idGrupo} y
-(\texttt{idExperimento}, \texttt{etiqueta}). Las doce relaciones cumplen así la
+\texttt{ESPECIMEN} solo le quedan su clave primaria \texttt{idEspecimen} y la
+combinación (\texttt{idTanda}, \texttt{numeroCilindro}), que también identifica a
+cada fila y por eso lleva una restricción \texttt{UNIQUE}. En el resto de las
+relaciones los únicos determinantes son la clave primaria y, cuando existe, una
+combinación de columnas con restricción \texttt{UNIQUE}; por ejemplo, en
+\texttt{GRUPO} son \texttt{idGrupo} y (\texttt{idExperimento}, \texttt{etiqueta}). Las doce relaciones cumplen así la
 3FN en su forma estricta, y el esquema físico, que tiene las mismas columnas,
 también.
 
@@ -629,7 +651,7 @@ las tablas afectadas y la decisión de diseño concreta en cada caso.
 3FN &
   Los atributos dependen de la clave primaria, no del correo &
   \texttt{USUARIO} &
-  \texttt{idInstitucional} como primaria; correo declarado como clave alterna
+  \texttt{idInstitucional} como primaria; correo con restricción de unicidad
   (\texttt{UNIQUE}) \\
 \hline
 3FN &
@@ -785,14 +807,9 @@ GET    & \path{/admin/system}       & Devuelve métricas del sistema: disco y co
 \hline
 
 % --- Sistema ---
-GET    & \path{/health} & Devuelve el estado del servicio, si el modo desarrollador está activo y la versión del sistema. & Público \\
+GET    & \path{/health} & Devuelve el estado del servicio y la versión del sistema. & Público \\
 \hline
 
-% --- Modo desarrollador (responden 404 si el modo no está activo) ---
-GET    & \path{/dev/modelo-actual} & Devuelve el modelo con el que trabaja el \textit{worker}; solo con el modo desarrollador activo. & Autenti\-cado \\
-\hline
-GET    & \path{/experiments/{id}/dev/salida-modelo} & Descarga la salida del modelo de un grupo o de una tanda; solo con el modo desarrollador activo. & Autenti\-cado \\
-\hline
 
 \end{longtable}
 
@@ -803,233 +820,184 @@ GET    & \path{/experiments/{id}/dev/salida-modelo} & Descarga la salida del mod
 Los diagramas de casos de uso se construyen conforme a la especificación UML~2.5.1
 \cite{omg_uml}, usando actores, casos de uso y relaciones de
 \textit{include} y \textit{extend} para representar el comportamiento observable
-del sistema desde la perspectiva del usuario.
+del sistema desde la perspectiva del usuario. Una relación \textit{include} indica que el
+caso de uso base siempre ejecuta al incluido; una relación \textit{extend}, que el caso de
+uso que extiende se ejecuta solo cuando se cumple una condición, que describe su ficha.
+Cada actor representa un rol y no una persona, y cada caso de uso se acompaña de una ficha que
+describe su flujo principal y sus rutas alternativas \cite{kendall2011}.
 
-El sistema tiene dos actores principales: \textbf{Investigador} y
-\textbf{Administrador}. El Investigador gestiona experimentos y consulta
-resultados de cualquier investigador del laboratorio (ver RN-08); el Administrador
-gestiona usuarios y monitorea el estado del sistema. El Administrador hereda todas
-las capacidades del Investigador y además puede crear, modificar y desactivar cuentas. El \textit{Worker}, que ejecuta el análisis, aparece en los diagramas como actor del sistema.
+Kendall y Kendall retoman de Cockburn cinco niveles de detalle para un caso de uso, que
+nombran con metáforas de altitud: blanco (nivel empresarial), cometa (resumen de objetivos de
+un departamento), azul, índigo y negro (subfunciones cada vez más detalladas). El nivel
+\textbf{azul}, o «nivel del mar», es el de las \emph{metas del usuario}: describe una
+actividad de negocio completa que una persona puede realizar de principio a fin en un lapso de
+unos 2 a 20 minutos y que le produce un resultado de valor \cite{kendall2011}.
+Los 25 casos de uso de este capítulo se redactaron en ese nivel: cada uno corresponde a una
+meta que un actor logra por sí mismo (por ejemplo, subir un video o descargar un reporte) y
+cuenta con su propia ficha y con su propio diagrama. Las acciones más finas que lo componen o
+lo extienden, como filtrar la lista de experimentos o reactivar una cuenta, se dibujan como
+casos de uso de nivel índigo, subordinados al caso azul mediante \textit{include} o \textit{extend}.
 
-Los casos de uso están organizados en cinco paquetes funcionales. La
-Figura~\ref{fig:cu_vision_general} muestra la visión general con los dos actores y
-sus relaciones de alto nivel; las figuras siguientes detallan cada paquete.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{figures/diagramas/cu_vision_general}
-\caption{Diagrama de casos de uso — visión general del sistema [autoría propia].}
-\label{fig:cu_vision_general}
-\end{figure}
-
-\subsection{Paquete 1: Autenticación y gestión de usuarios}
-
-Agrupa los flujos de acceso al sistema: inicio de sesión con correo y contraseña,
-cierre de sesión y recuperación o cambio de contraseña. El flujo es idéntico para
-Investigador y Administrador; la diferencia de permisos se resuelve dentro del
-sistema una vez autenticados. Incluye además la gestión de cuentas a cargo del
-Administrador (crear, editar, cambiar el rol y desactivar), el cambio obligatorio de contraseña en el primer
-acceso y la actualización del perfil propio.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{figures/diagramas/cu_paquete1}
-\caption{Casos de uso — Paquete 1: Autenticación y gestión de usuarios [autoría propia].}
-\label{fig:cu_paquete1}
-\end{figure}
-
-\subsection{Paquete 2: Gestión de experimentos y carga de video}
-
-Cubre el ciclo de vida de un experimento: registrar sus datos (nombre, fecha y notas),
-subir uno o dos videos por tanda en formato MP4 o MOV (al subir el primer video de cada
-grupo se capturan su tipo, su tratamiento y el número de especímenes de la tanda) y
-consultar los experimentos del laboratorio desde la lista de experimentos del paquete~5 (ver RN-08).
+Los casos de uso se presentan por actor. El sistema tiene cuatro:
+el \textbf{Usuario sin sesión}, que solo puede recuperar su contraseña; el
+\textbf{Investigador}, que gestiona experimentos y consulta los resultados de cualquier
+investigador del laboratorio (ver RN-08); el \textbf{Administrador}, que hereda todos los casos
+de uso del Investigador y además gestiona cuentas, monitorea el estado del sistema y administra
+los experimentos de todo el laboratorio; y el \textit{Worker}, actor del sistema que ejecuta el
+análisis y las tareas programadas. La Figura~\ref{fig:cu_actor_general} muestra la visión
+general y las figuras siguientes detallan los casos de uso de cada actor.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{figures/diagramas/cu_paquete2}
-\caption{Casos de uso — Paquete 2: Gestión de experimentos y carga de video [autoría propia].}
-\label{fig:cu_paquete2}
+\includegraphics[width=\textwidth, height=0.8\textheight, keepaspectratio]{figures/diagramas/cu_actor_general}
+\caption{Diagrama de casos de uso: visión general por actor [autoría propia].}
+\label{fig:cu_actor_general}
 \end{figure}
 
-\subsection{Paquete 3: Análisis conductual}
+\subsection{Usuario sin sesión}
 
-Describe la interacción del investigador con el \textit{pipeline}: monitorear el avance
-del análisis por etapas y descargar el reporte de diagnóstico cuando el análisis termina
-en error (ver RN-11). El \textit{pipeline} lo ejecuta el \textit{Worker} de forma autónoma;
-el investigador solo observa.
+Es quien aún no ha iniciado sesión. Su único caso de uso es recuperar la contraseña
+mediante un enlace de restablecimiento que se envía al correo registrado (CU-01). Al iniciar
+sesión (CU-02) pasa a ser Investigador o Administrador.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{figures/diagramas/cu_paquete3}
-\caption{Casos de uso — Paquete 3: Análisis conductual [autoría propia].}
-\label{fig:cu_paquete3}
+\includegraphics[width=\textwidth, keepaspectratio]{figures/diagramas/cu_actor_visitante}
+\caption{Casos de uso del Usuario sin sesión [autoría propia].}
+\label{fig:cu_actor_visitante}
 \end{figure}
 
-\subsection{Paquete 4: Resultados y reportes}
+\subsection{Investigador}
 
-Cubre la consulta de resultados una vez finalizado el análisis: tiempos por
-espécimen y conducta, desglose por minuto, comparación entre los grupos del experimento con el Día~2,
-estadísticas por grupo o por tanda (media, desviación estándar y varianza), descarga de reportes en PDF, CSV y XLSX y, cuando el análisis termina, revisión y corrección de las etiquetas segundo a segundo (ver
-RF-32 y RN-14).
+El Investigador es el actor principal del sistema. Sus casos de uso se agrupan en cuatro
+figuras: su sesión y su cuenta, los experimentos y la carga de video, el seguimiento del
+análisis, y los resultados, la revisión y los reportes. El Administrador hereda todos ellos.
+
+La Figura~\ref{fig:cu_actor_investigador_1} muestra el acceso al sistema: inicio de sesión
+con correo y contraseña, cierre de sesión, el cambio obligatorio de contraseña en el primer
+acceso, que extiende al inicio de sesión cuando la cuenta tiene contraseña temporal, y la
+actualización del perfil propio. El flujo es idéntico para Investigador y Administrador; la
+diferencia de permisos se resuelve dentro del sistema una vez autenticados.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{figures/diagramas/cu_paquete4}
-\caption{Casos de uso — Paquete 4: Resultados y reportes [autoría propia].}
-\label{fig:cu_paquete4}
+\includegraphics[width=\textwidth, keepaspectratio]{figures/diagramas/cu_actor_investigador_1}
+\caption{Casos de uso del Investigador: sesión y cuenta propia [autoría propia].}
+\label{fig:cu_actor_investigador_1}
 \end{figure}
 
-\subsection{Paquete 5: Lista de experimentos, notificaciones y administración}
-
-Reúne lo que el investigador ve al entrar (la lista de experimentos, con sus filtros y los avisos de expiración de video), la eliminación de
-experimentos, el borrado automático de videos y, para el Administrador, el listado de
-usuarios, el monitoreo del estado del sistema (uso de disco, cola de análisis y alertas
-de capacidad) y la gestión de los experimentos de todo el laboratorio.
+La Figura~\ref{fig:cu_actor_investigador_2} cubre el ciclo de vida de un experimento: registrar
+sus datos (nombre, fecha y notas), subir uno o dos videos por tanda en formato MP4 o MOV (al subir
+el primer video de cada grupo se capturan su tipo, su tratamiento y el número de especímenes de la
+tanda) y, desde la lista de experimentos, consultarlos con sus filtros, ver los avisos de expiración
+de video y eliminar los propios (ver RN-08).
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{figures/diagramas/cu_paquete5}
-\caption{Casos de uso — Paquete 5: Lista de experimentos, notificaciones y administración [autoría propia].}
-\label{fig:cu_paquete5}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/cu_actor_investigador_2}
+\caption{Casos de uso del Investigador: experimentos y carga de video [autoría propia].}
+\label{fig:cu_actor_investigador_2}
 \end{figure}
 
-% -----------------------------------------------------------
+La Figura~\ref{fig:cu_actor_investigador_3} describe la interacción del Investigador con el
+\textit{pipeline}: monitorear el avance del análisis por etapas, descargar el reporte de
+diagnóstico cuando el análisis termina en error (ver RN-11) y atender la pausa, ya sea ajustando
+el recuadro del cilindro para continuar o cancelando el análisis (ver RN-17). El \textit{pipeline}
+lo ejecuta el \textit{Worker}; el Investigador no puede iniciarlo ni pausarlo.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio]{figures/diagramas/cu_actor_investigador_3}
+\caption{Casos de uso del Investigador: seguimiento del análisis [autoría propia].}
+\label{fig:cu_actor_investigador_3}
+\end{figure}
+
+La Figura~\ref{fig:cu_actor_investigador_4} cubre la consulta de resultados una vez finalizado
+el análisis: tiempos por espécimen y conducta, desglose por minuto, comparación entre los grupos del
+experimento con el Día~2, estadísticas por grupo o por tanda (media, desviación estándar y
+varianza), descarga de reportes en PDF, CSV y XLSX y, cuando el análisis termina, revisión y
+corrección de las etiquetas segundo a segundo (ver RF-32 y RN-14).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/cu_actor_investigador_4}
+\caption{Casos de uso del Investigador: resultados, revisión y reportes [autoría propia].}
+\label{fig:cu_actor_investigador_4}
+\end{figure}
+
+\subsection{Administrador}
+
+El Administrador es un Investigador con permisos adicionales (en el modelo de datos, un subtipo
+de usuario) y por eso hereda todos los casos de uso del Investigador. Los propios son la gestión
+de cuentas, el monitoreo del estado del sistema y la gestión de los experimentos de todo el
+laboratorio. Antes de cada una de estas acciones el sistema verifica que el usuario sea
+Administrador (CU-19), una regla de control de acceso que no se dibuja como caso de uso.
+
+La gestión de cuentas se descompone en la Figura~\ref{fig:cu_actor_administrador_1}.
+\textit{Gestionar cuenta de usuario} (CU-20) siempre incluye listar a los usuarios, porque el
+panel muestra la lista al entrar. Cada acción se modela como una extensión: crear una cuenta
+(CU-21), editar sus datos, dar o quitar el rol de Administrador, desactivarla (CU-22), reactivarla o
+generar una contraseña temporal nueva. Todas las acciones sobre una cuenta existente incluyen
+seleccionarla de la lista, que es también la forma de buscarla. El sistema no elimina cuentas; solo
+las desactiva.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/cu_actor_administrador_1}
+\caption{Casos de uso del Administrador: gestión de cuentas de usuario [autoría propia].}
+\label{fig:cu_actor_administrador_1}
+\end{figure}
+
+La Figura~\ref{fig:cu_actor_administrador_2} muestra el monitoreo del estado del sistema, con el
+uso de disco, la cola de análisis y las alertas de capacidad, y la gestión de los experimentos de
+todos los investigadores.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio]{figures/diagramas/cu_actor_administrador_2}
+\caption{Casos de uso del Administrador: estado del sistema y experimentos globales [autoría propia].}
+\label{fig:cu_actor_administrador_2}
+\end{figure}
+
+\subsection{\textit{Worker} (actor del sistema)}
+
+El \textit{Worker} es el proceso que ejecuta el análisis de forma autónoma: toma los videos de la
+cola, corre el \textit{pipeline}, reporta el error cuando no encuentra los cilindros y pausa el
+análisis cuando no ve al espécimen durante tres segundos seguidos. Participa en el monitoreo del
+progreso y en el reporte de diagnóstico, y ejecuta el borrado automático de los videos que
+cumplen su plazo de retención (Figura~\ref{fig:cu_actor_worker}).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio]{figures/diagramas/cu_actor_worker}
+\caption{Casos de uso del \textit{Worker} (actor del sistema) [autoría propia].}
+\label{fig:cu_actor_worker}
+\end{figure}
+
+
 \subsection{Especificación de casos de uso}
 \label{sec:especificacion_cu}
 % -----------------------------------------------------------
 
 Para cada caso de uso identificado en los diagramas anteriores se presenta una ficha
-completa que describe la interacción del actor con el sistema, los datos de entrada,
+completa, agrupada por actor, que describe la interacción del actor con el sistema, los datos de entrada,
 la información que el sistema devuelve y los eventos inesperados que pueden ocurrir.
 Los casos de uso con identificador CU-xx son los mismos de las fichas; los que no lo
 tienen en los diagramas son pasos o condiciones que cada ficha describe dentro de su
-curso normal o alterno. La ficha CU-15 describe una regla de control de acceso que el
+curso normal o alterno. La ficha CU-19 describe una regla de control de acceso que el
 sistema aplica antes de las acciones de administración, por lo que no se dibuja como
 caso de uso.
 
 \renewcommand{\arraystretch}{1.35}
 
-\subsubsection*{Paquete 1: Autenticación y gestión de usuarios}
-
-\noindent\textbf{Iniciar sesión}
-
-\noindent\small
-\begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
-\hline
-\textbf{Caso de Uso} & Iniciar sesión & \textbf{Identificador:} CU-01 \\
-\hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
-\hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
-\hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-01, RF-04. Extendido por: CU-16 (Cambiar contraseña al primer acceso).} \\
-\hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El usuario tiene una cuenta creada por el Administrador.} \\
-\hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión iniciada; JWT emitido y almacenado en el cliente; usuario redirigido a la lista de experimentos.} \\
-\hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Permite al usuario autenticarse en el sistema mediante correo electrónico y contraseña.} \\
-\hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El usuario introduce sus credenciales; el sistema las valida, emite un JWT y redirige a la lista de experimentos. Si las credenciales son incorrectas, se muestra el mensaje «Correo o contraseña incorrectos», sin revelar cuál campo falló.} \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
-\hline
-\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
-\hline
-\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
-\hline
-1 & Inv. / Admin. & Abre la aplicación en el navegador web. \\
-\hline
-2 & Sistema & Muestra la pantalla de inicio de sesión con campos de correo y contraseña. \\
-\hline
-3 & Inv. / Admin. & Introduce su correo electrónico y contraseña. \\
-\hline
-4 & Sistema & Valida las credenciales contra la base de datos. \\
-\hline
-5 & Sistema & Emite un token de sesión y responde con el rol y si la cuenta debe cambiar la contraseña; el rol no va dentro del token y se vuelve a leer en cada petición. \\
-\hline
-6 & Sistema & Muestra la lista de experimentos, o la pantalla de cambio de contraseña si la cuenta lo exige. \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{13.6cm}|}
-\hline
-\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
-\hline
-\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
-\hline
-4 & Credenciales incorrectas o cuenta inactiva: el sistema muestra el mensaje «Correo o contraseña incorrectos», sin indicar cuál campo falló (ver RN-01). \\
-\hline
-\end{tabular}
-
-\normalsize\bigskip
-
-\noindent\rule{\linewidth}{0.4pt}
-
-\noindent\textbf{Cerrar sesión}
-
-\noindent\small
-\begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
-\hline
-\textbf{Caso de Uso} & Cerrar sesión & \textbf{Identificador:} CU-02 \\
-\hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
-\hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
-\hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-02} \\
-\hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa con JWT válido.} \\
-\hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Token JWT descartado en el navegador; usuario redirigido a la pantalla de inicio de sesión.} \\
-\hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Permite al usuario terminar su sesión descartando el token de autenticación activo.} \\
-\hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El usuario selecciona la opción de cierre de sesión; el navegador descarta el JWT y redirige a la pantalla de inicio de sesión; el servidor no guarda tokens cancelados.} \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
-\hline
-\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
-\hline
-\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
-\hline
-1 & Inv. / Admin. & Selecciona «Cerrar sesión» en el menú de usuario, disponible desde cualquier pantalla. \\
-\hline
-2 & Sistema & Descarta el JWT activo en el navegador (el servidor no guarda tokens cancelados). \\
-\hline
-3 & Sistema & Redirige al usuario a la pantalla de inicio de sesión. \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{13.6cm}|}
-\hline
-\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
-\hline
-\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
-\hline
---- & No se identifican cursos alternos para este caso de uso. \\
-\hline
-\end{tabular}
-
-\normalsize\bigskip
-
-\noindent\rule{\linewidth}{0.4pt}
+\subsubsection*{Usuario sin sesión}
 
 \noindent\textbf{Recuperar contraseña}
 
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Recuperar contraseña & \textbf{Identificador:} CU-03 \\
+\textbf{Caso de Uso} & Recuperar contraseña & \textbf{Identificador:} CU-01 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Usuario sin sesión} \\
 \hline
@@ -1085,26 +1053,28 @@ caso de uso.
 
 \noindent\rule{\linewidth}{0.4pt}
 
-\noindent\textbf{Verificar pertenencia a Administrador}
+\subsubsection*{Investigador: sesión y cuenta propia}
+
+\noindent\textbf{Iniciar sesión}
 
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Verificar pertenencia a Administrador & \textbf{Identificador:} CU-15 \\
+\textbf{Caso de Uso} & Iniciar sesión & \textbf{Identificador:} CU-02 \\
 \hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Administrador (a través de CU-11, CU-12, CU-13, CU-17 y CU-24)} \\
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
 \hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Regla de control de acceso (se aplica antes de CU-11, CU-12, CU-13, CU-17 y CU-24)} \\
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-04} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-01, RF-04. Extendido por: CU-04 (Cambiar contraseña al primer acceso).} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa (JWT válido).} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El usuario tiene una cuenta creada por el Administrador.} \\
 \hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Se confirma o rechaza que el usuario pertenece a \texttt{ADMINISTRADOR}; la acción de administración solicitada continúa o se rechaza con error 403.} \\
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión iniciada; JWT emitido y almacenado en el cliente; usuario redirigido a la lista de experimentos.} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Antes de ejecutar cualquier acción de administración (crear cuenta, desactivar cuenta, listar usuarios, monitorear el sistema o consultar los experimentos de todos los investigadores), el sistema verifica si el usuario autenticado pertenece a la tabla \texttt{ADMINISTRADOR}, sin importar si la interfaz ya ocultó la opción.} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Permite al usuario autenticarse en el sistema mediante correo electrónico y contraseña.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Al invocar cualquiera de las acciones de administración, el sistema consulta si el \texttt{idInstitucional} del usuario autenticado tiene una fila en \texttt{ADMINISTRADOR}. Si no la tiene, rechaza la solicitud con error 403, incluso si la petición no pasó por la interfaz (por ejemplo, una llamada directa a la API).} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El usuario introduce sus credenciales; el sistema las valida, emite un JWT y redirige a la lista de experimentos. Si las credenciales son incorrectas, se muestra el mensaje «Correo o contraseña incorrectos», sin revelar cuál campo falló.} \\
 \hline
 \end{tabular}
 
@@ -1115,11 +1085,17 @@ caso de uso.
 \hline
 \textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
 \hline
-1 & Sistema & Recibe la solicitud de una acción de administración (crear o desactivar cuentas, listar usuarios, monitorear el sistema o gestionar los experimentos de todos). \\
+1 & Inv. / Admin. & Abre la aplicación en el navegador web. \\
 \hline
-2 & Sistema & Consulta si el \texttt{idInstitucional} del usuario autenticado tiene registro en \texttt{ADMINISTRADOR}. \\
+2 & Sistema & Muestra la pantalla de inicio de sesión con campos de correo y contraseña. \\
 \hline
-3 & Sistema & Si existe el registro, permite continuar con la acción solicitada. \\
+3 & Inv. / Admin. & Introduce su correo electrónico y contraseña. \\
+\hline
+4 & Sistema & Valida las credenciales contra la base de datos. \\
+\hline
+5 & Sistema & Emite un token de sesión y responde con el rol y si la cuenta debe cambiar la contraseña; el rol no va dentro del token y se vuelve a leer en cada petición. \\
+\hline
+6 & Sistema & Muestra la lista de experimentos, o la pantalla de cambio de contraseña si la cuenta lo exige. \\
 \hline
 \end{tabular}
 
@@ -1130,7 +1106,60 @@ caso de uso.
 \hline
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
-2 & El usuario no tiene registro en \texttt{ADMINISTRADOR}: el sistema rechaza la solicitud con error 403 (no autorizado), sin importar si la petición vino de la interfaz o de una llamada directa a la API. \\
+4 & Credenciales incorrectas o cuenta inactiva: el sistema muestra el mensaje «Correo o contraseña incorrectos», sin indicar cuál campo falló (ver RN-01). \\
+\hline
+\end{tabular}
+
+\normalsize\bigskip
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\noindent\textbf{Cerrar sesión}
+
+\noindent\small
+\begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
+\hline
+\textbf{Caso de Uso} & Cerrar sesión & \textbf{Identificador:} CU-03 \\
+\hline
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
+\hline
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
+\hline
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-02} \\
+\hline
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa con JWT válido.} \\
+\hline
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Token JWT descartado en el navegador; usuario redirigido a la pantalla de inicio de sesión.} \\
+\hline
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Permite al usuario terminar su sesión descartando el token de autenticación activo.} \\
+\hline
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El usuario selecciona la opción de cierre de sesión; el navegador descarta el JWT y redirige a la pantalla de inicio de sesión; el servidor no guarda tokens cancelados.} \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
+\hline
+\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
+\hline
+\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
+\hline
+1 & Inv. / Admin. & Selecciona «Cerrar sesión» en el menú de usuario, disponible desde cualquier pantalla. \\
+\hline
+2 & Sistema & Descarta el JWT activo en el navegador (el servidor no guarda tokens cancelados). \\
+\hline
+3 & Sistema & Redirige al usuario a la pantalla de inicio de sesión. \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{13.6cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
+\hline
+\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
+\hline
+--- & No se identifican cursos alternos para este caso de uso. \\
 \hline
 \end{tabular}
 
@@ -1143,13 +1172,13 @@ caso de uso.
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Cambiar contraseña al primer acceso & \textbf{Identificador:} CU-16 \\
+\textbf{Caso de Uso} & Cambiar contraseña al primer acceso & \textbf{Identificador:} CU-04 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
 \hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Secundario (\textit{<<extend>>} de CU-01 Iniciar sesión, condición: la cuenta tiene contraseña temporal)} \\
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Secundario (\textit{<<extend>>} de CU-02 Iniciar sesión, condición: la cuenta tiene contraseña temporal)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-05. Extiende: CU-01 (Iniciar sesión).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-05. Extiende: CU-02 (Iniciar sesión).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Usuario autenticado con contraseña temporal asignada por el Administrador; primer ingreso al sistema.} \\
 \hline
@@ -1195,69 +1224,12 @@ caso de uso.
 
 \noindent\rule{\linewidth}{0.4pt}
 
-\noindent\textbf{Desactivar cuenta de usuario}
-
-\noindent\small
-\begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
-\hline
-\textbf{Caso de Uso} & Desactivar cuenta de usuario & \textbf{Identificador:} CU-17 \\
-\hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Administrador} \\
-\hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Secundario (\textit{<<extend>>} de CU-11 Gestionar cuenta de usuario, condición: el Administrador desactiva la cuenta)} \\
-\hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-05. Extiende: CU-11 (Gestionar cuenta de usuario).} \\
-\hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-15); cuenta objetivo en estado activo.} \\
-\hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Cuenta marcada como inactiva; el usuario no puede iniciar sesión hasta que el Administrador reactive la cuenta.} \\
-\hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Permite al Administrador inhabilitar el acceso de un investigador sin eliminar su cuenta ni sus datos asociados.} \\
-\hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El Administrador selecciona la cuenta a desactivar y confirma la acción. El sistema marca la cuenta como inactiva; el usuario queda impedido de iniciar sesión.} \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
-\hline
-\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
-\hline
-\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
-\hline
-1 & Administrador & Selecciona la cuenta objetivo en la lista de usuarios y elige «Desactivar cuenta». \\
-\hline
-2 & Sistema & Solicita confirmación de la acción. \\
-\hline
-3 & Administrador & Confirma la desactivación. \\
-\hline
-4 & Sistema & Marca la cuenta como inactiva en la base de datos. \\
-\hline
-5 & Sistema & Muestra confirmación de la operación en el panel de administración. \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{13.6cm}|}
-\hline
-\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
-\hline
-\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
-\hline
-3 & Intento de desactivar la última cuenta de Administrador activa: el sistema rechaza la acción e informa que debe existir al menos un Administrador activo en todo momento (ver RN-16). \\
-\hline
-\end{tabular}
-
-\normalsize\bigskip
-
-\noindent\rule{\linewidth}{0.4pt}
-
 \noindent\textbf{Actualizar perfil propio}
 
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Actualizar perfil propio & \textbf{Identificador:} CU-18 \\
+\textbf{Caso de Uso} & Actualizar perfil propio & \textbf{Identificador:} CU-05 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
 \hline
@@ -1309,132 +1281,14 @@ caso de uso.
 
 \noindent\rule{\linewidth}{0.4pt}
 
-\noindent\textbf{Gestionar cuenta de usuario}
-
-\noindent\small
-\begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
-\hline
-\textbf{Caso de Uso} & Gestionar cuenta de usuario & \textbf{Identificador:} CU-11 \\
-\hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Administrador} \\
-\hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
-\hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-05, RF-06, RF-07. Relacionado: CU-12 (Crear cuenta de usuario). Extendido por: CU-17 (Desactivar cuenta de usuario).} \\
-\hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-15).} \\
-\hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Cuenta creada, editada o desactivada; cambio reflejado en la base de datos.} \\
-\hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Permite al Administrador crear, editar, desactivar o reactivar cuentas de usuario y generar contraseñas temporales nuevas desde el panel de administración.} \\
-\hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El Administrador accede a la lista de usuarios y ejecuta la acción deseada: alta con contraseña temporal, modificación de datos, cambio de rol, desactivación o reactivación, o contraseña temporal nueva. El sistema aplica el cambio en la base de datos y confirma la operación. Reactivar no genera contraseña temporal ni envía correo, y la contraseña anterior vuelve a servir; la contraseña temporal nueva solo es para cuentas activas y no para la propia, obliga a cambiarla en el siguiente acceso y se envía por correo.} \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
-\hline
-\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
-\hline
-\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
-\hline
-1 & Administrador & Accede al panel de administración. \\
-\hline
-2 & Sistema & Muestra la lista de usuarios con nombre, correo, si es administrador o investigador, y estado. \\
-\hline
-3 & Administrador & Selecciona la acción: (a) crear una cuenta nueva (ver CU-12); (b) editar nombre, apellidos o correo; (c) dar o quitar el rol de Administrador; (d) desactivar o reactivar la cuenta; (e) generar una contraseña temporal nueva. \\
-\hline
-4 & Sistema & Aplica el cambio en la base de datos y muestra confirmación de la operación. \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{13.6cm}|}
-\hline
-\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
-\hline
-\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
-\hline
-4a & Intento de desactivar la última cuenta de Administrador activa, o de quitarle el rol: el sistema rechaza la acción y muestra advertencia de que debe existir al menos un Administrador activo en todo momento (ver RN-16). Si el Administrador intenta desactivarse o quitarse a sí mismo el rol, el sistema lo rechaza con «Para cambiar tu propia cuenta usa Mi perfil.». Sí puede editar su propio nombre, apellidos o correo desde el panel. \\
-\hline
-4b & Al crear una cuenta nueva, el identificador institucional o el correo ya están registrados (ver CU-12): el sistema informa el conflicto y no crea el registro duplicado. \\
-\hline
-\end{tabular}
-
-\normalsize\bigskip
-
-\noindent\rule{\linewidth}{0.4pt}
-
-\noindent\textbf{Crear cuenta de usuario}
-
-\noindent\small
-\begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
-\hline
-\textbf{Caso de Uso} & Crear cuenta de usuario & \textbf{Identificador:} CU-12 \\
-\hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Administrador} \\
-\hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
-\hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-05, RF-07, RF-33. Relacionado: CU-11 (Gestionar cuenta de usuario).} \\
-\hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-15). No existe formulario público de registro (ver RF-07).} \\
-\hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Cuenta creada en la base de datos con contraseña temporal; investigador notificado por correo con su correo y la contraseña temporal en texto plano; la contraseña temporal se mostró una sola vez al Administrador como respaldo.} \\
-\hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Permite al Administrador dar de alta una nueva cuenta de investigador. La cuenta nace como Investigador; el alta no tiene campo de rol. El único mecanismo de ingreso al sistema es que el Administrador cree la cuenta; no existe autorregistro.} \\
-\hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El Administrador introduce los datos del nuevo usuario (identificador institucional, nombre, apellidos y correo electrónico) y el sistema genera una contraseña temporal. En el primer acceso, el sistema obliga al investigador a cambiar la contraseña.} \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
-\hline
-\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
-\hline
-\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
-\hline
-1 & Administrador & Accede al panel de administración y selecciona «Crear cuenta». \\
-\hline
-2 & Sistema & Muestra el formulario de alta con campos: identificador institucional, nombre, apellidos y correo electrónico. \\
-\hline
-3 & Administrador & Completa los datos y confirma la creación. \\
-\hline
-4 & Sistema & Valida por separado el identificador institucional y el correo; si alguno ya existe, muestra su propio mensaje. \\
-\hline
-5 & Sistema & Crea la cuenta con contraseña temporal generada automáticamente y la marca como «cambio obligatorio al primer ingreso». \\
-\hline
-6 & Sistema & Después de confirmar la creación, envía al investigador un correo con su correo y la contraseña temporal en texto plano. \\
-\hline
-7 & Sistema & Muestra la contraseña temporal una sola vez al Administrador, como respaldo por si el correo no llega. \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{13.6cm}|}
-\hline
-\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
-\hline
-\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
-\hline
-4 & El identificador institucional ya registrado y el correo ya registrado tienen cada uno un mensaje distinto («Ya existe una cuenta con ese identificador.» o «Ya existe una cuenta con ese correo.»): el sistema informa el conflicto y no crea el registro duplicado. El Administrador puede verificar el estado de la cuenta existente. \\
-\hline
-6 & El envío del correo falla: la cuenta queda creada, la interfaz no avisa del fallo y la contraseña temporal se muestra una sola vez en el paso 7. \\
-\hline
-\end{tabular}
-
-\normalsize\bigskip
-
-\subsubsection*{Paquete 2: Gestión de experimentos y carga de video}
+\subsubsection*{Investigador: experimentos y carga de video}
 
 \noindent\textbf{Registrar experimento}
 
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Registrar experimento & \textbf{Identificador:} CU-04 \\
+\textbf{Caso de Uso} & Registrar experimento & \textbf{Identificador:} CU-06 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
 \hline
@@ -1448,7 +1302,7 @@ caso de uso.
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Permite al investigador crear un nuevo experimento FST registrando los metadatos del protocolo.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El investigador completa el formulario con nombre, fecha y notas opcionales; el sistema valida y crea el registro, dejando el experimento listo para recibir los grupos y sus videos (Día 1 y/o Día 2). El tratamiento, el tipo de grupo y el número de especímenes se capturan después, por grupo, al subir el primer video de cada uno (ver CU-05).} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El investigador completa el formulario con nombre, fecha y notas opcionales; el sistema valida y crea el registro, dejando el experimento listo para recibir los grupos y sus videos (Día 1 y/o Día 2). El tratamiento, el tipo de grupo y el número de especímenes se capturan después, por grupo, al subir el primer video de cada uno (ver CU-07).} \\
 \hline
 \end{tabular}
 
@@ -1493,13 +1347,13 @@ caso de uso.
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Subir video & \textbf{Identificador:} CU-05 \\
+\textbf{Caso de Uso} & Subir video & \textbf{Identificador:} CU-07 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-08, RF-09, RF-10, RF-12. Extendido por: CU-19 (Encolar análisis automático, solo si el video es del Día~2), CU-20 (Notificar rechazo de video) y CU-07 (Monitorear progreso del análisis).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-08, RF-09, RF-10, RF-12. Extendido por: CU-08 (Encolar análisis automático, solo si el video es del Día~2), CU-09 (Notificar rechazo de video) y CU-12 (Monitorear progreso del análisis).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa del creador del experimento; archivo \texttt{.mp4} o \texttt{.mov}.} \\
 \hline
@@ -1568,13 +1422,13 @@ caso de uso.
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Encolar análisis automático & \textbf{Identificador:} CU-19 \\
+\textbf{Caso de Uso} & Encolar análisis automático & \textbf{Identificador:} CU-08 \\
 \hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador (al subir un video, ver CU-05)} \\
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador (al subir un video, ver CU-07)} \\
 \hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Secundario (\textit{<<extend>>} de CU-05 Subir video, solo si el video es del Día~2)} \\
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Secundario (\textit{<<extend>>} de CU-07 Subir video, solo si el video es del Día~2)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-12, RN-04. Extiende: CU-05 (Subir video).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-12, RN-04. Extiende: CU-07 (Subir video).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Video validado en formato \texttt{.mp4} o \texttt{.mov}, reproducible y en horizontal; almacenado en el volumen compartido.} \\
 \hline
@@ -1621,13 +1475,13 @@ caso de uso.
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Notificar rechazo de video & \textbf{Identificador:} CU-20 \\
+\textbf{Caso de Uso} & Notificar rechazo de video & \textbf{Identificador:} CU-09 \\
 \hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador (al subir un video, ver CU-05)} \\
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador (al subir un video, ver CU-07)} \\
 \hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Secundario (\textit{<<extend>>} de CU-05, condición: formato inválido, video vertical o video no reproducible)} \\
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Secundario (\textit{<<extend>>} de CU-07, condición: formato inválido, video vertical o video no reproducible)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-08, RF-10, RN-10. Extiende: CU-05 (Subir video).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-08, RF-10, RN-10. Extiende: CU-07 (Subir video).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Video rechazado por no cumplir la validación de formato (\texttt{.mp4} o \texttt{.mov}), de orientación (horizontal) o de reproducibilidad en el servidor.} \\
 \hline
@@ -1635,7 +1489,7 @@ caso de uso.
 \hline
 \textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El sistema informa al investigador del motivo exacto del rechazo, permitiéndole corregir el problema y subir un archivo válido.} \\
 \hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Cuando la validación de CU-05 falla, el sistema muestra un mensaje que indica el motivo (formato incorrecto, video vertical o video no reproducible) y la tanda permanece sin ese video para que el investigador pueda intentarlo nuevamente.} \\
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Cuando la validación de CU-07 falla, el sistema muestra un mensaje que indica el motivo (formato incorrecto, video vertical o video no reproducible) y la tanda permanece sin ese video para que el investigador pueda intentarlo nuevamente.} \\
 \hline
 \end{tabular}
 
@@ -1671,20 +1525,136 @@ caso de uso.
 
 \noindent\rule{\linewidth}{0.4pt}
 
-\subsubsection*{Paquete 3: Análisis conductual}
+\noindent\textbf{Consultar lista de experimentos}
+
+\noindent\small
+\begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
+\hline
+\textbf{Caso de Uso} & Consultar lista de experimentos & \textbf{Identificador:} CU-10 \\
+\hline
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
+\hline
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
+\hline
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-22, RF-23} \\
+\hline
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa.} \\
+\hline
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Lista de experimentos del laboratorio mostrada con estados, accesos directos y avisos de expiración activos.} \\
+\hline
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Pantalla principal del investigador. Muestra todos los experimentos del laboratorio con nombre, fecha, número de grupos, sesión, estado y accesos directos a resultados o progreso (ver RN-08). Incluye avisos cuando algún video expira en 7 días o menos.} \\
+\hline
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Al acceder a la lista de experimentos, el sistema recupera la lista de experimentos del laboratorio (ver RN-08) y muestra cualquier aviso de expiración próxima. El investigador puede filtrar la lista o acceder directamente a un experimento. El estado de cada experimento se calcula a partir de los análisis de sus tandas: primero «sin videos cargados» o «en espera del Día~2» (solo hay videos del Día~1, que no se analizan); si hay análisis, el de mayor precedencia entre ellos: error, cancelado, en pausa, procesando, en cola o completado.} \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
+\hline
+\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
+\hline
+\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
+\hline
+1 & Investigador & Accede a la lista de experimentos principal de la aplicación tras iniciar sesión. \\
+\hline
+2 & Sistema & Recupera la lista de experimentos del laboratorio con nombre, fecha, número de grupos, sesión y estado (ver RN-08). El estado de cada experimento se calcula a partir de los análisis de sus tandas: primero «sin videos cargados» o «en espera del Día~2» (solo hay videos del Día~1, que no se analizan); si hay análisis, el de mayor precedencia entre ellos: error, cancelado, en pausa, procesando, en cola o completado. \\
+\hline
+3 & Sistema & Verifica si algún video expira en 7 días o menos y muestra aviso con nombre del experimento y fecha exacta de eliminación (ver RF-24). \\
+\hline
+4 & Investigador & Selecciona un experimento para ver su detalle, progreso o resultados, o aplica filtros para acotar la lista. Si el estado es «procesando», puede abrir la pantalla de progreso detallado (ver CU-12). \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{13.6cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
+\hline
+\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
+\hline
+2 & No hay experimentos registrados: el sistema muestra una vista vacía con instrucción para crear el primero. \\
+\hline
+4 & Estado «error»: el sistema muestra la descripción del error según la etapa en que se detuvo y habilita el acceso al reporte de diagnóstico si está disponible (ver CU-13). \\
+\hline
+4 & El investigador aplica un filtro (por estado, año o tratamiento): el sistema actualiza la lista mostrando solo los experimentos que coinciden con el criterio seleccionado; el filtro por tratamiento considera los experimentos con al menos un grupo de ese tratamiento (ver RF-23). \\
+\hline
+\end{tabular}
+
+\normalsize\bigskip
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\noindent\textbf{Eliminar experimento}
+
+\noindent\small
+\begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
+\hline
+\textbf{Caso de Uso} & Eliminar experimento & \textbf{Identificador:} CU-11 \\
+\hline
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
+\hline
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
+\hline
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-27, RN-09} \\
+\hline
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa; experimento existente a nombre del investigador, o sesión de Administrador; ninguno de sus análisis está procesando ni en pausa.} \\
+\hline
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Experimento y todos sus datos eliminados de forma permanente e irreversible de la base de datos (ver RN-09).} \\
+\hline
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Permite al investigador eliminar un experimento desde la lista de experimentos o desde el detalle del experimento. La acción es permanente, irreversible y requiere confirmación explícita.} \\
+\hline
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El investigador selecciona «Eliminar» en un experimento. El sistema solicita confirmación explícita antes de proceder. Tras confirmar, elimina el experimento, sus videos, resultados y reportes asociados de forma permanente.} \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
+\hline
+\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
+\hline
+\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
+\hline
+1 & Investigador & Selecciona «Eliminar» en el experimento, desde la lista de experimentos o desde su detalle. \\
+\hline
+2 & Sistema & Muestra un diálogo de confirmación con advertencia de irreversibilidad (ver RN-09), con el foco inicial en «Cancelar». No pide nombre ni contraseña. \\
+\hline
+3 & Investigador & Confirma la eliminación. \\
+\hline
+4 & Sistema & Elimina el experimento, sus videos, resultados y reportes de la base de datos y del almacenamiento. \\
+\hline
+5 & Sistema & Actualiza la lista de experimentos y muestra confirmación de la operación. \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{13.6cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
+\hline
+\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
+\hline
+3 & El investigador cancela el diálogo de confirmación: el sistema descarta la acción y regresa a la lista de experimentos sin modificar ningún dato. \\
+\hline
+\end{tabular}
+
+\normalsize\bigskip
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\subsubsection*{Investigador: seguimiento del análisis}
 
 \noindent\textbf{Monitorear progreso del análisis}
 
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Monitorear progreso del análisis & \textbf{Identificador:} CU-07 \\
+\textbf{Caso de Uso} & Monitorear progreso del análisis & \textbf{Identificador:} CU-12 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador (solo observa) / \textit{Worker} \textsf{<<system>>} (ejecuta el \textit{pipeline})} \\
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-13, RF-14, RF-15, RF-16. Reglas: RN-04, RN-17. Extiende: CU-05 (Subir video). Extendido por: CU-08 (Descargar reporte de diagnóstico).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-13, RF-14, RF-15, RF-16. Reglas: RN-04, RN-17. Extiende: CU-07 (Subir video). Extendido por: CU-13 (Descargar reporte de diagnóstico).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Tarea de análisis encolada; \textit{Worker} disponible para procesar; sesión activa del investigador.} \\
 \hline
@@ -1715,7 +1685,7 @@ caso de uso.
 \hline
 6 & Sistema & Actualiza periódicamente la barra de porcentaje y la etapa activa en la pantalla del investigador. \\
 \hline
-7 & \textit{Worker} & Registra los resultados en la base de datos al completar el \textit{pipeline} y genera la copia del video recortada en H.264 para la revisión (ver CU-25). \\
+7 & \textit{Worker} & Registra los resultados en la base de datos al completar el \textit{pipeline} y genera la copia del video recortada en H.264 para la revisión (ver CU-17). \\
 \hline
 8 & Sistema & Notifica al investigador y habilita el acceso a la pantalla de resultados. \\
 \hline
@@ -1728,7 +1698,7 @@ caso de uso.
 \hline
 \textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
 \hline
-4 & El \textit{Worker} no puede abrir el video o no encuentra los cilindros (ver RN-11): detiene el \textit{pipeline}, genera el reporte de diagnóstico PDF (ver CU-08) y actualiza el estado de la tarea a «error». El sistema muestra alerta con la descripción del error. El investigador no puede reiniciar el análisis desde esta pantalla (ver RN-04). \\
+4 & El \textit{Worker} no puede abrir el video o no encuentra los cilindros (ver RN-11): detiene el \textit{pipeline}, genera el reporte de diagnóstico PDF (ver CU-13) y actualiza el estado de la tarea a «error». El sistema muestra alerta con la descripción del error. El investigador no puede reiniciar el análisis desde esta pantalla (ver RN-04). \\
 \hline
 5 & Hay tres segundos seguidos sin ver al espécimen: el \textit{Worker} guarda una imagen fija tomada a la mitad de esos tres segundos, deja el análisis «en pausa» (etapa de cilindros) y atiende el siguiente; el sistema notifica al usuario. El usuario mueve el recuadro y pulsa «Ajustar y continuar», o pulsa «El recuadro está bien, continuar»: el análisis vuelve al frente de la cola y el \textit{Worker} lo procesa desde el principio, y el recuadro corregido rige desde el inicio del primer segundo de esos tres. \\
 \hline
@@ -1745,13 +1715,13 @@ caso de uso.
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Descargar reporte de diagnóstico & \textbf{Identificador:} CU-08 \\
+\textbf{Caso de Uso} & Descargar reporte de diagnóstico & \textbf{Identificador:} CU-13 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / \textit{Worker} \textsf{<<system>>} (genera el PDF)} \\
 \hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Secundario (\textit{<<extend>>} de CU-07, condición: el análisis terminó en error)} \\
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Secundario (\textit{<<extend>>} de CU-12, condición: el análisis terminó en error)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-14, RF-16. Extiende: CU-07 (Monitorear progreso del análisis).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-14, RF-16. Extiende: CU-12 (Monitorear progreso del análisis).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{\textit{Pipeline} detenido por error (no se pudo abrir el video o no se encontraron los cilindros, ver RN-11); reporte PDF generado por el \textit{Worker}; sesión activa. Puede descargarlo cualquier usuario con sesión activa.} \\
 \hline
@@ -1793,20 +1763,22 @@ caso de uso.
 
 \normalsize\bigskip
 
-\subsubsection*{Paquete 4: Resultados y reportes}
+\noindent\rule{\linewidth}{0.4pt}
+
+\subsubsection*{Investigador: resultados, revisión y reportes}
 
 \noindent\textbf{Consultar resultados del análisis}
 
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Consultar resultados del análisis & \textbf{Identificador:} CU-09 \\
+\textbf{Caso de Uso} & Consultar resultados del análisis & \textbf{Identificador:} CU-14 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-19, RF-20, RF-21, RF-31. Extendido por: CU-10 (Descargar reporte) y CU-27 (Consultar estadísticas de grupo o tanda).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-19, RF-20, RF-21, RF-31. Extendido por: CU-15 (Descargar reporte) y CU-16 (Consultar estadísticas de grupo o tanda).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Análisis completado exitosamente; sesión activa.} \\
 \hline
@@ -1859,13 +1831,13 @@ caso de uso.
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Descargar reporte & \textbf{Identificador:} CU-10 \\
+\textbf{Caso de Uso} & Descargar reporte & \textbf{Identificador:} CU-15 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-22, RF-31. Extiende: CU-09 (Consultar resultados del análisis). Extendido por: CU-27 (Consultar estadísticas de grupo o tanda).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-22, RF-31. Extiende: CU-14 (Consultar resultados del análisis). Extendido por: CU-16 (Consultar estadísticas de grupo o tanda).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Resultados del análisis disponibles en la base de datos; sesión activa.} \\
 \hline
@@ -1905,18 +1877,20 @@ caso de uso.
 
 \normalsize\bigskip
 
+\noindent\rule{\linewidth}{0.4pt}
+
 \noindent\textbf{Consultar estadísticas de grupo o tanda}
 
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Consultar estadísticas de grupo o tanda &\textbf{Identificador:} CU-27 \\
+\textbf{Caso de Uso} & Consultar estadísticas de grupo o tanda &\textbf{Identificador:} CU-16 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
 \hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Secundario (\textit{<<extend>>} de CU-09 Consultar resultados del análisis y de CU-10 Descargar reporte)} \\
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Secundario (\textit{<<extend>>} de CU-14 Consultar resultados del análisis y de CU-15 Descargar reporte)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-31, RF-21, RN-12. Extiende: CU-09 (Consultar resultados del análisis) y CU-10 (Descargar reporte).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-31, RF-21, RN-12. Extiende: CU-14 (Consultar resultados del análisis) y CU-15 (Descargar reporte).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Análisis del Día~2 completado de especímenes del grupo; sesión activa.} \\
 \hline
@@ -1935,7 +1909,7 @@ caso de uso.
 \hline
 \textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
 \hline
-1 & Inv. / Admin. & Pide las estadísticas desde la pantalla de resultados de una tanda o del grupo completo (ver CU-09) o descarga un reporte en CSV o XLSX (ver CU-10). \\
+1 & Inv. / Admin. & Pide las estadísticas desde la pantalla de resultados de una tanda o del grupo completo (ver CU-14) o descarga un reporte en CSV o XLSX (ver CU-15). \\
 \hline
 2 & Sistema & Reúne los segundos por conducta de los especímenes analizados de la vista: los de una tanda o los del grupo completo, con todas sus tandas. \\
 \hline
@@ -1958,18 +1932,20 @@ caso de uso.
 
 \normalsize\bigskip
 
+\noindent\rule{\linewidth}{0.4pt}
+
 \noindent\textbf{Revisar segundo a segundo}
 
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Revisar segundo a segundo & \textbf{Identificador:} CU-25 \\
+\textbf{Caso de Uso} & Revisar segundo a segundo & \textbf{Identificador:} CU-17 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-32, RN-14. Extendido por: CU-26 (Corregir etiqueta de un segundo).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-32, RN-14. Extendido por: CU-18 (Corregir etiqueta de un segundo).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Análisis en estado «completado»; sesión activa (cualquier usuario abre la revisión; sin video ni guardado si no es el creador del experimento ni Administrador, ver RN-14).} \\
 \hline
@@ -1994,7 +1970,7 @@ caso de uso.
 \hline
 3 & Sistema & Muestra, si el usuario puede corregir, la copia del video en formato H.264 que generó el \textit{worker} al terminar el análisis, la línea de tiempo de cada espécimen y la conducta que puso el sistema en cada segundo. \\
 \hline
-4 & Inv. / Admin. & Revisa un espécimen a la vez con el video corriendo, y corrige las etiquetas que no coincidan con lo que observa (ver CU-26). \\
+4 & Inv. / Admin. & Revisa un espécimen a la vez con el video corriendo, y corrige las etiquetas que no coincidan con lo que observa (ver CU-18). \\
 \hline
 5 & Inv. / Admin. & Elige «Guardar». \\
 \hline
@@ -2019,20 +1995,22 @@ caso de uso.
 
 \normalsize\bigskip
 
+\noindent\rule{\linewidth}{0.4pt}
+
 \noindent\textbf{Corregir etiqueta de un segundo}
 
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Corregir etiqueta de un segundo & \textbf{Identificador:} CU-26 \\
+\textbf{Caso de Uso} & Corregir etiqueta de un segundo & \textbf{Identificador:} CU-18 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
 \hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Secundario (\textit{<<extend>>} de CU-25 Revisar segundo a segundo)} \\
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Secundario (\textit{<<extend>>} de CU-17 Revisar segundo a segundo)} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-32, RN-14. Extiende: CU-25 (Revisar segundo a segundo).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-32, RN-14. Extiende: CU-17 (Revisar segundo a segundo).} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Pantalla de revisión abierta (CU-25); la conducta del sistema no coincide con lo que el usuario observa.} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Pantalla de revisión abierta (CU-17); la conducta del sistema no coincide con lo que el usuario observa.} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{La conducta corregida queda guardada con su origen y reemplaza a la del sistema; los reportes guardados del experimento se eliminaron para regenerarse.} \\
 \hline
@@ -2074,14 +2052,248 @@ caso de uso.
 
 \normalsize\bigskip
 
-\subsubsection*{Paquete 5: Lista de experimentos, notificaciones y administración}
+\noindent\rule{\linewidth}{0.4pt}
+
+\subsubsection*{Administrador: gestión de cuentas de usuario}
+
+\noindent\textbf{Verificar pertenencia a Administrador}
+
+\noindent\small
+\begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
+\hline
+\textbf{Caso de Uso} & Verificar pertenencia a Administrador & \textbf{Identificador:} CU-19 \\
+\hline
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Administrador (a través de CU-20, CU-21, CU-23, CU-22 y CU-24)} \\
+\hline
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Regla de control de acceso (se aplica antes de CU-20, CU-21, CU-23, CU-22 y CU-24)} \\
+\hline
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-04} \\
+\hline
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa (JWT válido).} \\
+\hline
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Se confirma o rechaza que el usuario pertenece a \texttt{ADMINISTRADOR}; la acción de administración solicitada continúa o se rechaza con error 403.} \\
+\hline
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Antes de ejecutar cualquier acción de administración (crear cuenta, desactivar cuenta, listar usuarios, monitorear el sistema o consultar los experimentos de todos los investigadores), el sistema verifica si el usuario autenticado pertenece a la tabla \texttt{ADMINISTRADOR}, sin importar si la interfaz ya ocultó la opción.} \\
+\hline
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Al invocar cualquiera de las acciones de administración, el sistema consulta si el \texttt{idInstitucional} del usuario autenticado tiene una fila en \texttt{ADMINISTRADOR}. Si no la tiene, rechaza la solicitud con error 403, incluso si la petición no pasó por la interfaz (por ejemplo, una llamada directa a la API).} \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
+\hline
+\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
+\hline
+\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
+\hline
+1 & Sistema & Recibe la solicitud de una acción de administración (crear o desactivar cuentas, listar usuarios, monitorear el sistema o gestionar los experimentos de todos). \\
+\hline
+2 & Sistema & Consulta si el \texttt{idInstitucional} del usuario autenticado tiene registro en \texttt{ADMINISTRADOR}. \\
+\hline
+3 & Sistema & Si existe el registro, permite continuar con la acción solicitada. \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{13.6cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
+\hline
+\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
+\hline
+2 & El usuario no tiene registro en \texttt{ADMINISTRADOR}: el sistema rechaza la solicitud con error 403 (no autorizado), sin importar si la petición vino de la interfaz o de una llamada directa a la API. \\
+\hline
+\end{tabular}
+
+\normalsize\bigskip
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\noindent\textbf{Gestionar cuenta de usuario}
+
+\noindent\small
+\begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
+\hline
+\textbf{Caso de Uso} & Gestionar cuenta de usuario & \textbf{Identificador:} CU-20 \\
+\hline
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Administrador} \\
+\hline
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
+\hline
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-05, RF-06, RF-07, RF-28. Incluye: Listar usuarios. Extendido por: CU-21 (Crear cuenta de usuario), CU-22 (Desactivar cuenta de usuario), Editar datos de la cuenta, Dar o quitar el rol de Administrador, Reactivar cuenta y Generar contraseña temporal nueva.} \\
+\hline
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-19).} \\
+\hline
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Cuenta creada, editada o desactivada; cambio reflejado en la base de datos.} \\
+\hline
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Permite al Administrador crear, editar, desactivar o reactivar cuentas de usuario y generar contraseñas temporales nuevas desde el panel de administración.} \\
+\hline
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El Administrador accede a la lista de usuarios y ejecuta la acción deseada: alta con contraseña temporal, modificación de datos, cambio de rol, desactivación o reactivación, o contraseña temporal nueva. El sistema aplica el cambio en la base de datos y confirma la operación. Reactivar no genera contraseña temporal ni envía correo, y la contraseña anterior vuelve a servir; la contraseña temporal nueva solo es para cuentas activas y no para la propia, obliga a cambiarla en el siguiente acceso y se envía por correo.} \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
+\hline
+\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
+\hline
+\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
+\hline
+1 & Administrador & Accede al panel de administración. \\
+\hline
+2 & Sistema & Muestra la lista de usuarios con nombre, correo, si es administrador o investigador, y estado. \\
+\hline
+3 & Administrador & Selecciona la acción: (a) crear una cuenta nueva (ver CU-21); (b) editar nombre, apellidos o correo; (c) dar o quitar el rol de Administrador; (d) desactivar o reactivar la cuenta; (e) generar una contraseña temporal nueva. \\
+\hline
+4 & Sistema & Aplica el cambio en la base de datos y muestra confirmación de la operación. \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{13.6cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
+\hline
+\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
+\hline
+4a & Intento de desactivar la última cuenta de Administrador activa, o de quitarle el rol: el sistema rechaza la acción y muestra advertencia de que debe existir al menos un Administrador activo en todo momento (ver RN-16). Si el Administrador intenta desactivarse o quitarse a sí mismo el rol, el sistema lo rechaza con «Para cambiar tu propia cuenta usa Mi perfil.». Sí puede editar su propio nombre, apellidos o correo desde el panel. \\
+\hline
+4b & Al crear una cuenta nueva, el identificador institucional o el correo ya están registrados (ver CU-21): el sistema informa el conflicto y no crea el registro duplicado. \\
+\hline
+\end{tabular}
+
+\normalsize\bigskip
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\noindent\textbf{Crear cuenta de usuario}
+
+\noindent\small
+\begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
+\hline
+\textbf{Caso de Uso} & Crear cuenta de usuario & \textbf{Identificador:} CU-21 \\
+\hline
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Administrador} \\
+\hline
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
+\hline
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-05, RF-07, RF-33. Extiende: CU-20 (Gestionar cuenta de usuario).} \\
+\hline
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-19). No existe formulario público de registro (ver RF-07).} \\
+\hline
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Cuenta creada en la base de datos con contraseña temporal; investigador notificado por correo con su correo y la contraseña temporal en texto plano; la contraseña temporal se mostró una sola vez al Administrador como respaldo.} \\
+\hline
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Permite al Administrador dar de alta una nueva cuenta de investigador. La cuenta nace como Investigador; el alta no tiene campo de rol. El único mecanismo de ingreso al sistema es que el Administrador cree la cuenta; no existe autorregistro.} \\
+\hline
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El Administrador introduce los datos del nuevo usuario (identificador institucional, nombre, apellidos y correo electrónico) y el sistema genera una contraseña temporal. En el primer acceso, el sistema obliga al investigador a cambiar la contraseña.} \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
+\hline
+\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
+\hline
+\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
+\hline
+1 & Administrador & Accede al panel de administración y selecciona «Crear cuenta». \\
+\hline
+2 & Sistema & Muestra el formulario de alta con campos: identificador institucional, nombre, apellidos y correo electrónico. \\
+\hline
+3 & Administrador & Completa los datos y confirma la creación. \\
+\hline
+4 & Sistema & Valida por separado el identificador institucional y el correo; si alguno ya existe, muestra su propio mensaje. \\
+\hline
+5 & Sistema & Crea la cuenta con contraseña temporal generada automáticamente y la marca como «cambio obligatorio al primer ingreso». \\
+\hline
+6 & Sistema & Después de confirmar la creación, envía al investigador un correo con su correo y la contraseña temporal en texto plano. \\
+\hline
+7 & Sistema & Muestra la contraseña temporal una sola vez al Administrador, como respaldo por si el correo no llega. \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{13.6cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
+\hline
+\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
+\hline
+4 & El identificador institucional ya registrado y el correo ya registrado tienen cada uno un mensaje distinto («Ya existe una cuenta con ese identificador.» o «Ya existe una cuenta con ese correo.»): el sistema informa el conflicto y no crea el registro duplicado. El Administrador puede verificar el estado de la cuenta existente. \\
+\hline
+6 & El envío del correo falla: la cuenta queda creada, la interfaz no avisa del fallo y la contraseña temporal se muestra una sola vez en el paso 7. \\
+\hline
+\end{tabular}
+
+\normalsize\bigskip
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\noindent\textbf{Desactivar cuenta de usuario}
+
+\noindent\small
+\begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
+\hline
+\textbf{Caso de Uso} & Desactivar cuenta de usuario & \textbf{Identificador:} CU-22 \\
+\hline
+\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Administrador} \\
+\hline
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Secundario (\textit{<<extend>>} de CU-20 Gestionar cuenta de usuario, condición: el Administrador desactiva la cuenta)} \\
+\hline
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-05. Extiende: CU-20 (Gestionar cuenta de usuario).} \\
+\hline
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-19); cuenta objetivo en estado activo.} \\
+\hline
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Cuenta marcada como inactiva; el usuario no puede iniciar sesión hasta que el Administrador reactive la cuenta.} \\
+\hline
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Permite al Administrador inhabilitar el acceso de un investigador sin eliminar su cuenta ni sus datos asociados.} \\
+\hline
+\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El Administrador selecciona la cuenta a desactivar y confirma la acción. El sistema marca la cuenta como inactiva; el usuario queda impedido de iniciar sesión.} \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
+\hline
+\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
+\hline
+\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
+\hline
+1 & Administrador & Selecciona la cuenta objetivo en la lista de usuarios y elige «Desactivar cuenta». \\
+\hline
+2 & Sistema & Solicita confirmación de la acción. \\
+\hline
+3 & Administrador & Confirma la desactivación. \\
+\hline
+4 & Sistema & Marca la cuenta como inactiva en la base de datos. \\
+\hline
+5 & Sistema & Muestra confirmación de la operación en el panel de administración. \\
+\hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|p{1.0cm}|p{13.6cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
+\hline
+\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
+\hline
+3 & Intento de desactivar la última cuenta de Administrador activa: el sistema rechaza la acción e informa que debe existir al menos un Administrador activo en todo momento (ver RN-16). \\
+\hline
+\end{tabular}
+
+\normalsize\bigskip
+
+\noindent\rule{\linewidth}{0.4pt}
+
+\subsubsection*{Administrador: estado del sistema y experimentos globales}
 
 \noindent\textbf{Monitorear estado del sistema}
 
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Monitorear estado del sistema & \textbf{Identificador:} CU-13 \\
+\textbf{Caso de Uso} & Monitorear estado del sistema & \textbf{Identificador:} CU-23 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Administrador} \\
 \hline
@@ -2089,7 +2301,7 @@ caso de uso.
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-29} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-15).} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-19).} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Vista del estado operativo actual del sistema mostrada y actualizada en el panel de administración.} \\
 \hline
@@ -2127,122 +2339,6 @@ caso de uso.
 
 \noindent\rule{\linewidth}{0.4pt}
 
-\noindent\textbf{Consultar lista de experimentos}
-
-\noindent\small
-\begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
-\hline
-\textbf{Caso de Uso} & Consultar lista de experimentos & \textbf{Identificador:} CU-22 \\
-\hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
-\hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
-\hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-22, RF-23} \\
-\hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa.} \\
-\hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Lista de experimentos del laboratorio mostrada con estados, accesos directos y avisos de expiración activos.} \\
-\hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Pantalla principal del investigador. Muestra todos los experimentos del laboratorio con nombre, fecha, número de grupos, sesión, estado y accesos directos a resultados o progreso (ver RN-08). Incluye avisos cuando algún video expira en 7 días o menos.} \\
-\hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Al acceder a la lista de experimentos, el sistema recupera la lista de experimentos del laboratorio (ver RN-08) y muestra cualquier aviso de expiración próxima. El investigador puede filtrar la lista o acceder directamente a un experimento. El estado de cada experimento se calcula a partir de los análisis de sus tandas: primero «sin videos cargados» o «en espera del Día~2» (solo hay videos del Día~1, que no se analizan); si hay análisis, el de mayor precedencia entre ellos: error, cancelado, en pausa, procesando, en cola o completado.} \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
-\hline
-\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
-\hline
-\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
-\hline
-1 & Investigador & Accede a la lista de experimentos principal de la aplicación tras iniciar sesión. \\
-\hline
-2 & Sistema & Recupera la lista de experimentos del laboratorio con nombre, fecha, número de grupos, sesión y estado (ver RN-08). El estado de cada experimento se calcula a partir de los análisis de sus tandas: primero «sin videos cargados» o «en espera del Día~2» (solo hay videos del Día~1, que no se analizan); si hay análisis, el de mayor precedencia entre ellos: error, cancelado, en pausa, procesando, en cola o completado. \\
-\hline
-3 & Sistema & Verifica si algún video expira en 7 días o menos y muestra aviso con nombre del experimento y fecha exacta de eliminación (ver RF-24). \\
-\hline
-4 & Investigador & Selecciona un experimento para ver su detalle, progreso o resultados, o aplica filtros para acotar la lista. Si el estado es «procesando», puede abrir la pantalla de progreso detallado (ver CU-07). \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{13.6cm}|}
-\hline
-\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
-\hline
-\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
-\hline
-2 & No hay experimentos registrados: el sistema muestra una vista vacía con instrucción para crear el primero. \\
-\hline
-4 & Estado «error»: el sistema muestra la descripción del error según la etapa en que se detuvo y habilita el acceso al reporte de diagnóstico si está disponible (ver CU-08). \\
-\hline
-4 & El investigador aplica un filtro (por estado, año o tratamiento): el sistema actualiza la lista mostrando solo los experimentos que coinciden con el criterio seleccionado; el filtro por tratamiento considera los experimentos con al menos un grupo de ese tratamiento (ver RF-23). \\
-\hline
-\end{tabular}
-
-\normalsize\bigskip
-
-\noindent\rule{\linewidth}{0.4pt}
-
-\noindent\textbf{Eliminar experimento}
-
-\noindent\small
-\begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
-\hline
-\textbf{Caso de Uso} & Eliminar experimento & \textbf{Identificador:} CU-23 \\
-\hline
-\textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Investigador / Administrador} \\
-\hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
-\hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-27, RN-09} \\
-\hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa; experimento existente a nombre del investigador, o sesión de Administrador; ninguno de sus análisis está procesando ni en pausa.} \\
-\hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Experimento y todos sus datos eliminados de forma permanente e irreversible de la base de datos (ver RN-09).} \\
-\hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Permite al investigador eliminar un experimento desde la lista de experimentos o desde el detalle del experimento. La acción es permanente, irreversible y requiere confirmación explícita.} \\
-\hline
-\textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El investigador selecciona «Eliminar» en un experimento. El sistema solicita confirmación explícita antes de proceder. Tras confirmar, elimina el experimento, sus videos, resultados y reportes asociados de forma permanente.} \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
-\hline
-\multicolumn{3}{|l|}{\textbf{Curso Normal}} \\
-\hline
-\textbf{Nro.} & \textbf{Ejecutor} & \textbf{Paso o Actividad} \\
-\hline
-1 & Investigador & Selecciona «Eliminar» en el experimento, desde la lista de experimentos o desde su detalle. \\
-\hline
-2 & Sistema & Muestra un diálogo de confirmación con advertencia de irreversibilidad (ver RN-09), con el foco inicial en «Cancelar». No pide nombre ni contraseña. \\
-\hline
-3 & Investigador & Confirma la eliminación. \\
-\hline
-4 & Sistema & Elimina el experimento, sus videos, resultados y reportes de la base de datos y del almacenamiento. \\
-\hline
-5 & Sistema & Actualiza la lista de experimentos y muestra confirmación de la operación. \\
-\hline
-\end{tabular}
-
-\noindent
-\begin{tabular}{|p{1.0cm}|p{13.6cm}|}
-\hline
-\multicolumn{2}{|l|}{\textbf{Cursos Alternos}} \\
-\hline
-\textbf{Nro.} & \textbf{Descripción de acciones alternas} \\
-\hline
-3 & El investigador cancela el diálogo de confirmación: el sistema descarta la acción y regresa a la lista de experimentos sin modificar ningún dato. \\
-\hline
-\end{tabular}
-
-\normalsize\bigskip
-
-\noindent\rule{\linewidth}{0.4pt}
-
 \noindent\textbf{Gestionar experimentos globales}
 
 \noindent\small
@@ -2256,7 +2352,7 @@ caso de uso.
 \hline
 \textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-30, RN-08} \\
 \hline
-\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-15).} \\
+\textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-19).} \\
 \hline
 \textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Acción de consulta o gestión aplicada sobre el experimento de cualquier investigador del sistema.} \\
 \hline
@@ -2300,12 +2396,14 @@ caso de uso.
 
 \noindent\rule{\linewidth}{0.4pt}
 
+\subsubsection*{\textit{Worker} (actor del sistema)}
+
 \noindent\textbf{Borrar video automáticamente}
 
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Borrar video automáticamente & \textbf{Identificador:} CU-14 \\
+\textbf{Caso de Uso} & Borrar video automáticamente & \textbf{Identificador:} CU-25 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{\textit{Worker} \textsf{<<system>>}} \\
 \hline
@@ -2356,23 +2454,28 @@ caso de uso.
 \end{tabular}
 
 \normalsize\bigskip
+
+\noindent\rule{\linewidth}{0.4pt}
+
+
 % -----------------------------------------------------------
 \section{Diagramas de secuencia}
 % -----------------------------------------------------------
 
 Los diagramas de secuencia \cite{omg_uml} describen el flujo de mensajes entre el
 \textit{frontend}, el \textit{backend} y el \textit{worker} para los flujos principales del sistema, mostrando
-el orden temporal de las interacciones entre componentes. Están organizados en
-cuatro grupos funcionales que corresponden a los paquetes de casos de uso: autenticación
-y gestión de usuarios, administración y perfil, notificaciones, y análisis de experimentos.
+el orden temporal de las interacciones entre componentes. Cada diagrama traduce a una
+secuencia de mensajes el escenario de una ficha de caso de uso \cite{kendall2011}. Están organizados en
+cuatro grupos funcionales: autenticación y gestión de usuarios, administración y perfil,
+notificaciones, y análisis de experimentos.
 
-% ---- Paquete 1: Autenticación y gestión de usuarios ----
+% ---- Autenticación y gestión de usuarios ----
 
 \subsection{Autenticación y gestión de usuarios}
 
 Estos diagramas cubren el ciclo de acceso al sistema. La creación de cuenta
 (Figura~\ref{fig:seq_registro}) la inicia el Administrador, que verifica su
-pertenencia a \texttt{ADMINISTRADOR} (ver CU-15) y crea la cuenta con contraseña
+pertenencia a \texttt{ADMINISTRADOR} (ver CU-19) y crea la cuenta con contraseña
 temporal; no existe autorregistro. El inicio de sesión (Figura~\ref{fig:seq_login}) es idéntico
 para Investigador y Administrador: el \textit{backend} valida las credenciales contra la base
 de datos y devuelve un token JWT, el rol y si la cuenta debe cambiar la contraseña; las credenciales incorrectas producen el mensaje «Correo o contraseña incorrectos», sin revelar cuál campo falló (ver RN-01). El cierre de sesión
@@ -2382,82 +2485,91 @@ sesión activa y es obligatorio al primer ingreso cuando la cuenta fue creada co
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_crear_cuenta}
-\caption{Secuencia: creación de cuenta de usuario por administrador [autoría propia].}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_crear_1}
+\caption{Secuencia: creación de cuenta por el administrador (validaciones) [autoría propia]}
 \label{fig:seq_registro}
 \end{figure}
-\begin{figure}[H]
+\begin{sidewaysfigure}[p]
 \ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_crear_cuenta_001}
-\caption[]{Secuencia: creación de cuenta de usuario por administrador (continuación).}
-\end{figure}
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/sd_crear_2}
+\caption[]{Secuencia: creación de cuenta por el administrador (alta de la cuenta)}
+\end{sidewaysfigure}
+\clearpage
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_login}
-\caption{Secuencia: inicio de sesión (Investigador y Administrador) [autoría propia].}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_login}
+\caption{Secuencia: inicio de sesión [autoría propia]}
 \label{fig:seq_login}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_logout}
-\caption{Secuencia: cierre de sesión [autoría propia].}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_logout}
+\caption{Secuencia: cierre de sesión [autoría propia]}
 \label{fig:seq_logout}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_cambio_pass_inv}
-\caption{Secuencia: cambio de contraseña del usuario [autoría propia].}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_pass_1}
+\caption{Secuencia: cambio de contraseña (validar las contraseñas) [autoría propia]}
 \label{fig:seq_cambio_pass_inv}
 \end{figure}
 \begin{figure}[H]
 \ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_cambio_pass_inv_001}
-\caption[]{Secuencia: cambio de contraseña del usuario (continuación).}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_pass_2}
+\caption[]{Secuencia: cambio de contraseña (guardar y volver)}
 \end{figure}
 
-% ---- Paquete 5: Lista de experimentos, notificaciones y administración ----
+% ---- Lista de experimentos, notificaciones y administración ----
 
 \subsection{Administración y perfil}
 
 La gestión de usuarios (Figura~\ref{fig:seq_gestion_usuarios}) es exclusiva de
-quien pertenece a \texttt{ADMINISTRADOR} (ver CU-15): permite dar de alta cuentas nuevas con contraseña temporal, editar sus datos, dar o quitar el rol de Administrador, desactivar o reactivar cuentas sin eliminarlas y generar una contraseña temporal nueva (ver RF-05, RF-07). La configuración de perfil
+quien pertenece a \texttt{ADMINISTRADOR} (ver CU-19): permite dar de alta cuentas nuevas con contraseña temporal, editar sus datos, dar o quitar el rol de Administrador, desactivar o reactivar cuentas sin eliminarlas y generar una contraseña temporal nueva (ver RF-05, RF-07). La configuración de perfil
 (Figura~\ref{fig:seq_perfil}) está disponible para cualquier usuario con sesión
 activa y permite actualizar nombre, apellidos y correo electrónico; la contraseña se cambia en otro formulario de la misma pantalla.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_gestion_usuarios}
-\caption[{Secuencia: gestión de usuarios por administrador [autoría propia].}]{Secuencia: gestión de usuarios por administrador (crear, editar, cambiar el rol, desactivar, reactivar y generar una contraseña temporal nueva) [autoría propia].}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_gest_1}
+\caption{Secuencia: gestión de usuarios (administrador) (1/5) [autoría propia]}
 \label{fig:seq_gestion_usuarios}
 \end{figure}
+\begin{sidewaysfigure}[p]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/sd_gest_2}
+\caption[]{Secuencia: gestión de usuarios (administrador) (2/5)}
+\end{sidewaysfigure}
+\clearpage
+\begin{sidewaysfigure}[p]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/sd_gest_2b}
+\caption[]{Secuencia: gestión de usuarios (administrador) (3/5)}
+\end{sidewaysfigure}
+\clearpage
 \begin{figure}[H]
 \ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_gestion_usuarios_001}
-\caption[]{Secuencia: gestión de usuarios por administrador (crear, editar, cambiar el rol, desactivar, reactivar y generar una contraseña temporal nueva) (continuación).}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_gest_3}
+\caption[]{Secuencia: gestión de usuarios (administrador) (4/5)}
 \end{figure}
 \begin{figure}[H]
 \ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_gestion_usuarios_002}
-\caption[]{Secuencia: gestión de usuarios por administrador (crear, editar, cambiar el rol, desactivar, reactivar y generar una contraseña temporal nueva) (continuación).}
-\end{figure}
-\begin{figure}[H]
-\ContinuedFloat
-\centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_gestion_usuarios_003}
-\caption[]{Secuencia: gestión de usuarios por administrador (crear, editar, cambiar el rol, desactivar, reactivar y generar una contraseña temporal nueva) (continuación).}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_gest_4}
+\caption[]{Secuencia: gestión de usuarios (administrador) (5/5)}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_perfil}
-\caption{Secuencia: configuración de perfil del usuario [autoría propia].}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_perfil}
+\caption{Secuencia: configuración de perfil [autoría propia]}
 \label{fig:seq_perfil}
 \end{figure}
 
@@ -2470,20 +2582,21 @@ El sistema genera notificaciones de forma automática cuando un análisis finali
 RN-05, RN-11, RN-17, RNF-09). La Figura~\ref{fig:seq_notificaciones} muestra cómo el \textit{backend}
 persiste la notificación y cómo el \textit{frontend} la consulta al entrar a cada pantalla y cada 30 segundos (sin consultar con la pestaña oculta). Las notificaciones de «cancelado» solo llegan por plazo, el borrado a los 30 días no notifica, y el panel permite marcar todas como leídas o una como no leída.
 
-\begin{figure}[H]
+\begin{sidewaysfigure}[p]
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_notificaciones}
-\caption{Secuencia: generación y consulta de notificaciones [autoría propia].}
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/sd_notif_1}
+\caption{Secuencia: notificaciones (crear y consultar) [autoría propia]}
 \label{fig:seq_notificaciones}
-\end{figure}
+\end{sidewaysfigure}
+\clearpage
 \begin{figure}[H]
 \ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_notificaciones_001}
-\caption[]{Secuencia: generación y consulta de notificaciones (continuación).}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_notif_2}
+\caption[]{Secuencia: notificaciones (marcar como leída o no leída)}
 \end{figure}
 
-% ---- Paquetes 2, 3 y 4: Análisis, progreso, resultados y reportes ----
+% ---- Análisis, progreso, resultados y reportes ----
 
 \subsection{Análisis, resultados y reportes}
 
@@ -2505,173 +2618,160 @@ cola por delante de los que llegaron después. Una vez completado el análisis, 
 resultados (Figura~\ref{fig:seq_resultados}) devuelve los tiempos por espécimen
 y conducta, y la descarga de reportes (Figura~\ref{fig:seq_reportes}) permite
 exportar los datos en PDF, CSV o XLSX. Además, el usuario puede revisar el análisis
-y corregir las etiquetas segundo a segundo (Figura~\ref{fig:seq_revision}; ver CU-25
-y CU-26), y los totales por minuto reflejan las correcciones porque se calculan desde las etiquetas.
+y corregir las etiquetas segundo a segundo (Figura~\ref{fig:seq_revision}; ver CU-17
+y CU-18), y los totales por minuto reflejan las correcciones porque se calculan desde las etiquetas.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_carga_video}
-\caption{Secuencia: carga de video con inferencia de tanda [autoría propia].}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_carga_1}
+\caption{Secuencia: carga de video (elegir grupo y tanda) [autoría propia]}
 \label{fig:seq_carga}
 \end{figure}
 \begin{figure}[H]
 \ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_carga_video_001}
-\caption[]{Secuencia: carga de video con inferencia de tanda (continuación).}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_carga_2}
+\caption[]{Secuencia: carga de video (validar el archivo)}
 \end{figure}
 \begin{figure}[H]
 \ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_carga_video_002}
-\caption[]{Secuencia: carga de video con inferencia de tanda (continuación).}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_carga_3}
+\caption[]{Secuencia: carga de video (guardar y encolar)}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_analisis_automatico}
-\caption{Secuencia: análisis automático (ejecución del \textit{pipeline} por el Worker) [autoría propia].}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_an_1}
+\caption{Secuencia: análisis automático (worker) (1/4) [autoría propia]}
 \label{fig:seq_analisis}
 \end{figure}
 \begin{figure}[H]
 \ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_analisis_automatico_001}
-\caption[]{Secuencia: análisis automático (continuación).}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_an_2}
+\caption[]{Secuencia: análisis automático (worker) (2/4)}
 \end{figure}
 \begin{figure}[H]
 \ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_analisis_automatico_002}
-\caption[]{Secuencia: análisis automático (continuación).}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_an_3}
+\caption[]{Secuencia: análisis automático (worker) (3/4)}
+\end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_an_4}
+\caption[]{Secuencia: análisis automático (worker) (4/4)}
 \end{figure}
 
-\begin{figure}[H]
+\begin{sidewaysfigure}[p]
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_consulta_progreso}
-\caption{Secuencia: consulta de progreso del análisis, incluye manejo de error [autoría propia].}
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/sd_prog_1}
+\caption{Secuencia: consulta de progreso y manejo de error (seguir el avance) [autoría propia]}
 \label{fig:seq_progreso}
+\end{sidewaysfigure}
+\clearpage
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_prog_2}
+\caption[]{Secuencia: consulta de progreso y manejo de error (según el estado)}
 \end{figure}
 \begin{figure}[H]
 \ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_consulta_progreso_001}
-\caption[]{Secuencia: consulta de progreso del análisis, incluye manejo de error (continuación).}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_prog_3}
+\caption[]{Secuencia: consulta de progreso y manejo de error (descargar el diagnóstico)}
 \end{figure}
 
-\begin{sidewaysfigure}[p]
+\begin{figure}[H]
 \centering
-\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste}
-\caption{Secuencia: pausa del análisis, ajuste del recuadro del cilindro y cancelación [autoría propia].}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_pau_1}
+\caption{Secuencia: pausa, ajuste del recuadro y cancelación (el Worker pausa) [autoría propia]}
 \label{fig:seq_pausa}
-\end{sidewaysfigure}
+\end{figure}
 \begin{sidewaysfigure}[p]
 \ContinuedFloat
 \centering
-\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste_001}
-\caption[]{Secuencia: pausa del análisis (continuación).}
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/sd_pau_2}
+\caption[]{Secuencia: pausa, ajuste del recuadro y cancelación (el usuario abre la pausa)}
 \end{sidewaysfigure}
-\begin{sidewaysfigure}[p]
-\ContinuedFloat
-\centering
-\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste_002}
-\caption[]{Secuencia: pausa del análisis (continuación).}
-\end{sidewaysfigure}
-\begin{sidewaysfigure}[p]
-\ContinuedFloat
-\centering
-\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste_003}
-\caption[]{Secuencia: pausa del análisis (continuación).}
-\end{sidewaysfigure}
-\begin{sidewaysfigure}[p]
-\ContinuedFloat
-\centering
-\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste_004}
-\caption[]{Secuencia: pausa del análisis (continuación).}
-\end{sidewaysfigure}
-\begin{sidewaysfigure}[p]
-\ContinuedFloat
-\centering
-\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste_005}
-\caption[]{Secuencia: pausa del análisis (continuación).}
-\end{sidewaysfigure}
-\begin{sidewaysfigure}[p]
-\ContinuedFloat
-\centering
-\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste_006}
-\caption[]{Secuencia: pausa del análisis (continuación).}
-\end{sidewaysfigure}
-\begin{sidewaysfigure}[p]
-\ContinuedFloat
-\centering
-\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste_007}
-\caption[]{Secuencia: pausa del análisis (continuación).}
-\end{sidewaysfigure}
-\begin{sidewaysfigure}[p]
-\ContinuedFloat
-\centering
-\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/seq_pausa_y_ajuste_008}
-\caption[]{Secuencia: pausa del análisis (continuación).}
-\end{sidewaysfigure}
-
+\clearpage
 \begin{figure}[H]
+\ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_consulta_resultados}
-\caption{Secuencia: consulta de resultados del análisis [autoría propia].}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_pau_3}
+\caption[]{Secuencia: pausa, ajuste del recuadro y cancelación (ajustar el recuadro)}
+\end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_pau_4}
+\caption[]{Secuencia: pausa, ajuste del recuadro y cancelación (continuar o cancelar)}
+\end{figure}
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_pau_5}
+\caption[]{Secuencia: pausa, ajuste del recuadro y cancelación (retomar o vencer)}
+\end{figure}
+
+\begin{sidewaysfigure}[p]
+\centering
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/sd_res_1}
+\caption{Secuencia: consulta de resultados (por espécimen) [autoría propia]}
 \label{fig:seq_resultados}
-\end{figure}
+\end{sidewaysfigure}
+\clearpage
 \begin{figure}[H]
 \ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_consulta_resultados_001}
-\caption[]{Secuencia: consulta de resultados del análisis (continuación).}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_res_2}
+\caption[]{Secuencia: consulta de resultados (comparación entre grupos)}
 \end{figure}
-
-\begin{figure}[H]
+\begin{sidewaysfigure}[p]
 \ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_consulta_resultados_002}
-\caption[]{Secuencia: consulta de resultados del análisis (continuación).}
-\end{figure}
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/sd_res_3}
+\caption[]{Secuencia: consulta de resultados (estadísticas y descarga)}
+\end{sidewaysfigure}
+\clearpage
+
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_descarga_reportes}
-\caption{Secuencia: descarga de reportes (PDF, CSV, XLSX) [autoría propia].}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_rep_1}
+\caption{Secuencia: descarga de reportes (pedir el reporte) [autoría propia]}
 \label{fig:seq_reportes}
 \end{figure}
 \begin{figure}[H]
 \ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_descarga_reportes_001}
-\caption[]{Secuencia: descarga de reportes (PDF, CSV, XLSX) (continuación).}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_rep_2}
+\caption[]{Secuencia: descarga de reportes (generar o reutilizar)}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_revision_segundos}
-\caption{Secuencia: revisión y corrección segundo a segundo [autoría propia].}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_rev_1}
+\caption{Secuencia: revisión segundo a segundo (abrir la revisión) [autoría propia]}
 \label{fig:seq_revision}
 \end{figure}
 \begin{figure}[H]
 \ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_revision_segundos_001}
-\caption[]{Secuencia: revisión y corrección segundo a segundo (continuación).}
+\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/sd_rev_2}
+\caption[]{Secuencia: revisión segundo a segundo (corregir y guardar)}
 \end{figure}
-\begin{figure}[H]
+\begin{sidewaysfigure}[p]
 \ContinuedFloat
 \centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_revision_segundos_002}
-\caption[]{Secuencia: revisión y corrección segundo a segundo (continuación).}
-\end{figure}
+\includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/sd_rev_3}
+\caption[]{Secuencia: revisión segundo a segundo (reiniciar el análisis)}
+\end{sidewaysfigure}
+\clearpage
 
-\begin{figure}[H]
-\ContinuedFloat
-\centering
-\includegraphics[width=\textwidth, height=0.85\textheight, keepaspectratio]{figures/diagramas/seq_revision_segundos_003}
-\caption[]{Secuencia: revisión y corrección segundo a segundo (continuación).}
-\end{figure}
 
 % -----------------------------------------------------------
 \section{Diagrama de clases}
@@ -2831,8 +2931,8 @@ grupo completo, que reúne los análisis de todas sus tandas (RF-19).
 \subsection{Creación de experimento y carga de video}
 
 Formulario en dos pasos: datos generales del experimento (nombre, fecha y notas, ver
-CU-04); y carga del video de una tanda, donde se indica el grupo o tratamiento, la
-tanda sugerida por el sistema y sujeta a confirmación (ver CU-05), de dos a
+CU-06); y carga del video de una tanda, donde se indica el grupo o tratamiento, la
+tanda sugerida por el sistema y sujeta a confirmación (ver CU-07), de dos a
 cuatro cilindros en el cuadro, la sesión (Día~1 o Día~2) y el archivo. Solo acepta
 archivos \texttt{.mp4} o \texttt{.mov} en horizontal; el rechazo de formato ocurre en
 el cliente antes de iniciar la subida. Una vez completada la carga válida, el
@@ -2918,8 +3018,9 @@ y empieza de nuevo (RN-04).
 
 \subsection{Resultados del experimento}
 
-Cuatro pestañas: resultados por espécimen, comparación entre grupos, línea de tiempo
-por minuto (RF-20) y bloques de 5~s (RF-18), donde cada bloque muestra la conducta con
+Los resultados se ven en dos pantallas: la del experimento, que resume y compara los grupos, y la de
+cada tanda, con cuatro vistas: por espécimen (RF-19), segundo a segundo, bloques de 5~s (RF-18) y línea de
+tiempo por minuto (RF-20). En la vista de bloques, cada bloque muestra la conducta con
 más segundos y, dentro, los cinco segundos que lo componen, para notar las conductas
 breves y presentar los bloques en la unidad de la literatura. La regla con que se decide
 la conducta de cada bloque es RN-15: gana la conducta con más segundos, cualquier empate
@@ -2928,15 +3029,20 @@ segundo no se vio bien (si ninguno se vio, es \textit{conducta activa} con matiz
 pantalla de bloques tiene tantas columnas como bloques tiene el espécimen más largo, y
 los más cortos dejan celdas vacías al final; el último bloque puede quedar incompleto.
 Los fragmentos «no se ve» se marcan en pantalla y en el reporte de resultados.
+La línea de tiempo por minuto muestra, minuto a minuto, los segundos de cada conducta.
 Un selector en la parte superior permite ver el grupo completo, con todas sus tandas, o una
 sola tanda (RF-19); en el grupo completo, cada espécimen se rotula con su tanda. La vista por espécimen
-muestra el tiempo por conducta, con una columna «Sin ver» para los segundos sin conducta, y su media, desviación estándar y varianza de los especímenes que se ven (RF-19, RF-31; los reportes CSV y XLSX las incluyen para esa misma vista, con la columna «Sin ver» al final; el PDF también incluye la columna «Sin ver»; la comparación entre grupos se queda con las cuatro conductas), el
-nivel de clasificación del análisis y la leyenda de conductas; el panel lateral
-compara entre grupos la conducta que elija el usuario (por omisión, la inmovilidad), con las cuatro conductas disponibles, usando los videos del Día~2 (RF-21). Esa
+muestra el tiempo por conducta, con una columna «Sin ver» para los segundos sin conducta, y su media, desviación estándar y varianza de los especímenes que se ven (RF-19, RF-31; los reportes CSV y XLSX las incluyen para esa misma vista, con la columna «Sin ver» al final; el PDF también incluye la columna «Sin ver»; la comparación entre grupos se queda con las cuatro conductas), la
+leyenda de conductas y, si el análisis tiene segundos en conducta activa, una frase que lo avisa. La vista
+segundo a segundo muestra una cuadrícula con un renglón por minuto y un cuadro por segundo, y una tabla con el
+tiempo, la conducta y su origen. En el resumen del experimento, «¿Qué pasó?» compara la conducta que
+elija el usuario (por omisión, la inmovilidad), con las cuatro conductas disponibles, de cada grupo contra el
+grupo que se escoja en «Comparar contra» (por omisión, el control si existe), usando los videos del Día~2 y sin
+pruebas estadísticas (RF-21). La pantalla de una tanda trae un enlace para llegar a ese resumen. Esa
 comparación promedia los segundos por espécimen de cada grupo y señala los especímenes
 cuyo video aún no está analizado, que no entran al promedio (RN-12). Si un grupo mezcla
 análisis en nivel preciso y agrupado, no lo promedia: lo muestra por tanda y avisa. Incluye botones de
-descarga en PDF, CSV y XLSX.
+descarga en PDF, CSV, XLSX y el Excel del experimento.
 
 \begin{figure}[H]
 \centering
@@ -2981,7 +3087,7 @@ corriendo, el cambio se aplica desde 0.4~s antes del clic hasta el siguiente cam
 de color; en pausa, cambia solo el segundo actual. Se revisa un espécimen a la vez y
 el avance se guarda como borrador en el navegador hasta que el usuario elige
 «Guardar», momento en que el sistema registra las correcciones, reemplaza la
-conducta del sistema (CU-25 y CU-26); los totales por minuto se calculan desde las etiquetas y reflejan las correcciones.
+conducta del sistema (CU-17 y CU-18); los totales por minuto se calculan desde las etiquetas y reflejan las correcciones.
 
 El panel lateral muestra la conducta del segundo actual y si es la del
 sistema o una corrección, el avance de revisión del espécimen, los segundos por
@@ -2999,7 +3105,7 @@ segundo» de la pantalla de resultados.
 
 \subsection{Panel de administración}
 
-Vista exclusiva para quienes pertenecen a \texttt{ADMINISTRADOR} (ver CU-15).
+Vista exclusiva para quienes pertenecen a \texttt{ADMINISTRADOR} (ver CU-19).
 Muestra la lista de cuentas con correo, rol y estado, y permite desactivarlas sin
 borrarlas; la cola de trabajos; el uso de almacenamiento, con un aviso al llegar
 al 80\,\% de disco y el borrado de los videos más antiguos al llegar al 90\,\% (RF-29,

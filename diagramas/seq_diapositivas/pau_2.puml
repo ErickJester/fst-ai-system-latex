@@ -1,0 +1,16 @@
+@startuml pau_2
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant Archivos as fs
+
+inv -> ui: abre la notificación
+ui -> api: pide los datos de la pausa
+api -> db: lee el análisis
+api -> fs: lee los datos y la imagen
+api --> ui: imagen, recuadro y tiempo que queda
+ui --> inv: muestra la imagen y tres botones:\nAjustar, Continuar y Cancelar
+@enduml

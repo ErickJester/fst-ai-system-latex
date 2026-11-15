@@ -1,0 +1,22 @@
+@startuml pau_3
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+participant Archivos as fs
+
+inv -> ui: arrastra el recuadro y pulsa Ajustar
+ui -> api: envía el recuadro nuevo
+api -> api: revisa el recuadro
+alt el recuadro queda fuera de la imagen
+  api --> ui: rechaza: queda fuera de la imagen
+else casi no cambió (3 px o menos)
+  api --> ui: rechaza: casi no cambió
+else el recuadro es válido
+  api -> fs: agrega el recuadro nuevo a la pausa
+  api -> db: pasa a "en cola"
+  ui --> inv: avisa que continuará cuando el sistema\nesté libre
+end
+@enduml

@@ -1,0 +1,469 @@
+[
+ {
+  "g": "seq_crear_cuenta",
+  "s": 7937,
+  "archivos": [
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_crear_cuenta_01.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_crear_cuenta_02.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_crear_cuenta_03.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_crear_cuenta_04.png"
+  ],
+  "tam": [
+   [
+    966,
+    685
+   ],
+   [
+    966,
+    501
+   ],
+   [
+    966,
+    681
+   ],
+   [
+    966,
+    673
+   ]
+  ]
+ },
+ {
+  "g": "seq_login",
+  "s": 7937,
+  "archivos": [
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_login_01.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_login_02.png"
+  ],
+  "tam": [
+   [
+    772,
+    685
+   ],
+   [
+    772,
+    564
+   ]
+  ]
+ },
+ {
+  "g": "seq_logout",
+  "s": 7937,
+  "archivos": [
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_logout_01.png"
+  ],
+  "tam": [
+   [
+    462,
+    573
+   ]
+  ]
+ },
+ {
+  "g": "seq_cambio_pass_inv",
+  "s": 7937,
+  "archivos": [
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_cambio_pass_inv_01.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_cambio_pass_inv_02.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_cambio_pass_inv_03.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_cambio_pass_inv_04.png"
+  ],
+  "tam": [
+   [
+    832,
+    685
+   ],
+   [
+    832,
+    260
+   ],
+   [
+    832,
+    685
+   ],
+   [
+    832,
+    180
+   ]
+  ]
+ },
+ {
+  "g": "seq_gestion_usuarios",
+  "s": 7937,
+  "archivos": [
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_gestion_usuarios_01.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_gestion_usuarios_02.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_gestion_usuarios_03.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_gestion_usuarios_04.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_gestion_usuarios_05.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_gestion_usuarios_06.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_gestion_usuarios_07.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_gestion_usuarios_08.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_gestion_usuarios_09.png"
+  ],
+  "tam": [
+   [
+    852,
+    685
+   ],
+   [
+    852,
+    534
+   ],
+   [
+    852,
+    685
+   ],
+   [
+    852,
+    685
+   ],
+   [
+    852,
+    139
+   ],
+   [
+    852,
+    685
+   ],
+   [
+    852,
+    543
+   ],
+   [
+    852,
+    685
+   ],
+   [
+    852,
+    623
+   ]
+  ]
+ },
+ {
+  "g": "seq_perfil",
+  "s": 7937,
+  "archivos": [
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_perfil_01.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_perfil_02.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_perfil_03.png"
+  ],
+  "tam": [
+   [
+    793,
+    685
+   ],
+   [
+    793,
+    685
+   ],
+   [
+    793,
+    112
+   ]
+  ]
+ },
+ {
+  "g": "seq_notificaciones",
+  "s": 7937,
+  "archivos": [
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_notificaciones_01.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_notificaciones_02.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_notificaciones_03.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_notificaciones_04.png"
+  ],
+  "tam": [
+   [
+    942,
+    682
+   ],
+   [
+    942,
+    579
+   ],
+   [
+    942,
+    685
+   ],
+   [
+    942,
+    381
+   ]
+  ]
+ },
+ {
+  "g": "seq_carga_video",
+  "s": 7937,
+  "archivos": [
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_carga_video_01.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_carga_video_02.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_carga_video_03.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_carga_video_04.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_carga_video_05.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_carga_video_06.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_carga_video_07.png"
+  ],
+  "tam": [
+   [
+    1000,
+    678
+   ],
+   [
+    1000,
+    507
+   ],
+   [
+    1000,
+    685
+   ],
+   [
+    1000,
+    685
+   ],
+   [
+    1000,
+    99
+   ],
+   [
+    1000,
+    678
+   ],
+   [
+    1000,
+    469
+   ]
+  ]
+ },
+ {
+  "g": "seq_analisis_automatico",
+  "s": 7937,
+  "archivos": [
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_analisis_automatico_01.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_analisis_automatico_02.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_analisis_automatico_03.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_analisis_automatico_04.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_analisis_automatico_05.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_analisis_automatico_06.png"
+  ],
+  "tam": [
+   [
+    704,
+    682
+   ],
+   [
+    704,
+    482
+   ],
+   [
+    704,
+    685
+   ],
+   [
+    704,
+    86
+   ],
+   [
+    704,
+    685
+   ],
+   [
+    704,
+    357
+   ]
+  ]
+ },
+ {
+  "g": "seq_consulta_progreso",
+  "s": 7937,
+  "archivos": [
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_consulta_progreso_01.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_consulta_progreso_02.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_consulta_progreso_03.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_consulta_progreso_04.png"
+  ],
+  "tam": [
+   [
+    876,
+    685
+   ],
+   [
+    876,
+    460
+   ],
+   [
+    876,
+    678
+   ],
+   [
+    876,
+    538
+   ]
+  ]
+ },
+ {
+  "g": "seq_pausa_y_ajuste",
+  "s": 7937,
+  "archivos": [
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_pausa_y_ajuste_01.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_pausa_y_ajuste_02.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_pausa_y_ajuste_03.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_pausa_y_ajuste_04.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_pausa_y_ajuste_05.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_pausa_y_ajuste_06.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_pausa_y_ajuste_07.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_pausa_y_ajuste_08.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_pausa_y_ajuste_09.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_pausa_y_ajuste_10.png"
+  ],
+  "tam": [
+   [
+    1310,
+    548
+   ],
+   [
+    1310,
+    590
+   ],
+   [
+    1310,
+    612
+   ],
+   [
+    1310,
+    345
+   ],
+   [
+    1310,
+    652
+   ],
+   [
+    1310,
+    664
+   ],
+   [
+    1310,
+    681
+   ],
+   [
+    1310,
+    177
+   ],
+   [
+    1310,
+    528
+   ],
+   [
+    1310,
+    592
+   ]
+  ]
+ },
+ {
+  "g": "seq_consulta_resultados",
+  "s": 7937,
+  "archivos": [
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_consulta_resultados_01.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_consulta_resultados_02.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_consulta_resultados_03.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_consulta_resultados_04.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_consulta_resultados_05.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_consulta_resultados_06.png"
+  ],
+  "tam": [
+   [
+    1059,
+    681
+   ],
+   [
+    1059,
+    465
+   ],
+   [
+    1059,
+    685
+   ],
+   [
+    1059,
+    280
+   ],
+   [
+    1059,
+    685
+   ],
+   [
+    1059,
+    418
+   ]
+  ]
+ },
+ {
+  "g": "seq_revision_segundos",
+  "s": 7937,
+  "archivos": [
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_revision_segundos_01.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_revision_segundos_02.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_revision_segundos_03.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_revision_segundos_04.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_revision_segundos_05.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_revision_segundos_06.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_revision_segundos_07.png"
+  ],
+  "tam": [
+   [
+    906,
+    685
+   ],
+   [
+    906,
+    575
+   ],
+   [
+    906,
+    441
+   ],
+   [
+    906,
+    685
+   ],
+   [
+    906,
+    289
+   ],
+   [
+    906,
+    685
+   ],
+   [
+    906,
+    223
+   ]
+  ]
+ },
+ {
+  "g": "seq_descarga_reportes",
+  "s": 7937,
+  "archivos": [
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_descarga_reportes_01.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_descarga_reportes_02.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_descarga_reportes_03.png",
+   "E:/fst-ai-system-latex/Diagramas_TT1/secuencias_bloques/seq_descarga_reportes_04.png"
+  ],
+  "tam": [
+   [
+    1035,
+    685
+   ],
+   [
+    1035,
+    423
+   ],
+   [
+    1035,
+    685
+   ],
+   [
+    1035,
+    235
+   ]
+  ]
+ }
+]

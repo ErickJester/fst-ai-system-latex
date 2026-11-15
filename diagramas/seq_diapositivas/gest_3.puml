@@ -1,0 +1,23 @@
+@startuml gest_3
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Administrador as admin
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+admin -> ui: elige un usuario y confirma la\ndesactivación
+ui -> api: pide desactivar la cuenta
+alt es la propia cuenta del Administrador
+  api --> ui: rechaza: "Para cambiar tu propia cuenta\nusa Mi perfil."
+else es otra cuenta
+  api -> db: ¿quedaría al menos un Administrador\nactivo?
+  alt no quedaría ninguno
+    api --> ui: rechaza la desactivación
+  else sí quedaría
+    api -> db: marca la cuenta como inactiva
+    api -> api: corta las sesiones activas de esa cuenta
+    ui --> admin: usuario marcado como inactivo
+  end
+end
+@enduml

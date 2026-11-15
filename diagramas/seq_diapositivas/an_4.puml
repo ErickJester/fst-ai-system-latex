@@ -1,0 +1,18 @@
+@startuml an_4
+!include ../estilo_doc.iuml
+skinparam dpi 200
+participant Worker as w
+participant Archivos as fs
+database "Base de datos" as db
+
+w -> fs: una vez al día, de madrugada, revisa el\nespacio libre del disco
+alt hay poco espacio libre
+  w -> db: crea el aviso de alerta de disco para\nlos administradores
+end
+opt la limpieza borra videos antes de tiempo
+  w -> fs: borra videos para liberar espacio
+  w -> db: avisa al creador del experimento
+end
+w -> fs: borra los videos que cumplen 30 días
+w -> db: hace el respaldo diario de la base de\ndatos (se conservan 7 días)
+@enduml

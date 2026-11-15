@@ -4,7 +4,7 @@
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Cubre el curso normal de CU-07 "Monitorear progreso del análisis"
+'  Cubre el curso normal de CU-12 "Monitorear progreso del análisis"
 '  en la parte que ejecuta el Worker. Pantalla de progreso y reporte
 '  de diagnóstico: seq_consulta_progreso.puml. Pausa y ajuste:
 '  seq_pausa_y_ajuste.puml.

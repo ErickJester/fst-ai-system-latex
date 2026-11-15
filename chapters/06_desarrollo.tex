@@ -63,6 +63,16 @@ describe cada uno.
 \end{tabular}
 \end{table}
 
+La Figura~\ref{fig:contenedores} muestra cómo se relacionan los servicios, los dos volúmenes y los
+elementos externos al sistema.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio]{figures/diagramas/contenedores_diapositiva}
+\caption{Arquitectura en contenedores del sistema [autoría propia].}
+\label{fig:contenedores}
+\end{figure}
+
 El \textit{backend} y el \textit{worker} no se llaman entre sí. Se coordinan solo por la base de datos
 y por el volumen compartido. La cola de análisis es una tabla de la base: no hay Redis ni un sistema
 de mensajes separado.
@@ -340,6 +350,16 @@ marcan como dato faltante.
 Si un grupo tiene análisis con nivel preciso y con nivel agrupado, no se promedia: se muestra por tanda, cada una con su
 nivel, y la pantalla lo avisa. El nivel de un análisis es agrupado si algún segundo quedó como conducta activa, y preciso
 si ninguno.
+
+El resumen del experimento compara la conducta que elija el usuario de cada grupo contra el grupo de referencia que
+escoja, que por omisión es el control si existe. Muestra promedios y diferencias, con una frase en palabras, y no hace
+pruebas estadísticas.
+
+La pantalla de resultados del experimento trae además una galería de seis gráficas como apoyo visual. Muestran el
+promedio de cada grupo con una desviación estándar arriba y abajo y los especímenes como puntos, con opción de verlo como
+barras y de mostrar segundos, minutos y segundos, o porcentaje del tiempo; la curva por minuto; las barras por minuto; el
+reparto de la duración; la variabilidad entre especímenes y el mapa por minuto. Cada gráfica tiene su tabla de números y
+se puede descargar como imagen.
 
 \subsection{Revisión humana}
 

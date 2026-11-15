@@ -1,0 +1,19 @@
+@startuml res_2
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+ui -> api: pide la comparación entre grupos
+api -> db: busca los grupos del experimento y sus\ntandas
+loop por cada grupo
+  api -> db: busca los especímenes y su video del Día\n2
+  alt el espécimen tiene el Día 2 analizado
+    api -> db: cuenta los segundos de cada conducta
+  else sin resultado del Día 2
+    api -> api: lo marca como dato faltante
+  end
+end
+@enduml

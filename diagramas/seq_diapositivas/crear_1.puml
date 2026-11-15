@@ -1,0 +1,19 @@
+@startuml crear_1
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Administrador as admin
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+admin -> ui: elige "Crear cuenta" y llena el\nformulario
+ui -> api: envía identificador, nombre, apellidos y\ncorreo
+api -> db: ¿es Administrador? ¿identificador o\ncorreo ya existen?
+db --> api: sí / no
+alt no es Administrador
+  api --> ui: rechaza: no tiene permiso
+else identificador o correo ya registrados
+  api --> ui: informa el conflicto
+  ui --> admin: muestra el error y no crea la cuenta
+end
+@enduml

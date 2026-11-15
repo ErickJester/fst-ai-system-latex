@@ -4,7 +4,7 @@
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Cubre CU-01 "Iniciar sesion" (RF-01, RF-04, RN-01). Mismo
+'  Cubre CU-02 "Iniciar sesion" (RF-01, RF-04, RN-01). Mismo
 '  diagrama para Investigador y Administrador: el rol no se guarda
 '  en USUARIO, se deduce de si el usuario figura en ADMINISTRADOR.
 '
@@ -42,7 +42,7 @@ alt la cuenta existe, está activa y la contraseña coincide
   end note
   ui -> ui: guarda el token en el\nnavegador
   alt la cuenta tiene el cambio de contraseña obligatorio
-    ui --> u: muestra la pantalla de\ncambio de contraseña (ver\nCU-16)
+    ui --> u: muestra la pantalla de\ncambio de contraseña (ver\nCU-04)
   else
     ui --> u: muestra la lista de\nexperimentos
   end

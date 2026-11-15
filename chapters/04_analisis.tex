@@ -163,8 +163,9 @@ RF-14 & Análisis conductual
       & Alta & Sistema \\
 \hline
 RF-15 & Análisis conductual
-      & Mientras el análisis corre, el investigador debe ver el progreso en tiempo
-        real con una barra de porcentaje y la etapa activa. El análisis continúa
+      & Mientras el análisis corre, el investigador debe ver el progreso con una
+        barra de porcentaje y la etapa activa, que se actualizan solas sin recargar la página.
+        El análisis continúa
         en segundo plano aunque el investigador cierre la pestaña. Si el sistema deja de
         ver al espécimen, el análisis queda en pausa hasta que el usuario responda
         o pasen 72~horas (ver RN-17).
@@ -178,8 +179,8 @@ RF-16 & Análisis conductual
       & Alta & Investigador \\
 \hline
 RF-17 & Análisis conductual
-      & El sistema debe clasificar segundo a segundo la conducta de cada espécimen: nado
-        activo, inmovilidad o escalamiento \cite{armario2021}. Cuando ninguna clase alcanza el umbral de 0.80, pero la suma de nado y escalamiento sí lo alcanza, lo registra como
+      & El sistema debe clasificar segundo a segundo la conducta de cada espécimen: nado,
+        inmovilidad o escalamiento \cite{armario2021}. Cuando ninguna clase alcanza el umbral de 0.80, pero la suma de nado y escalamiento sí lo alcanza, lo registra como
         \textit{conducta activa}, una cuarta conducta (ver RN-13). En el etiquetado del entrenamiento, el buceo se
         cuenta como nado, por lo que el sistema lo clasifica como nado. Las conductas son mutuamente excluyentes (ver
         RN-07). Cada análisis tiene un nivel de clasificación: «agrupado» si queda algún
@@ -219,7 +220,8 @@ RF-20 & Resultados
 RF-21 & Resultados
       & El sistema debe mostrar una comparación entre los grupos de un experimento
         con el tiempo promedio por conducta de los especímenes de cada grupo,
-        calculado con los videos del Día~2. Un grupo que mezcle niveles «preciso» y «agrupado» se muestra por tanda, sin promedio.
+        calculado con los videos del Día~2, contra el grupo que el usuario elija como referencia (por omisión, el control),
+        sin pruebas estadísticas. Un grupo que mezcle niveles «preciso» y «agrupado» se muestra por tanda, sin promedio.
       & Alta & Investigador \\
 \hline
 RF-22 & Resultados
@@ -275,7 +277,7 @@ RF-26 & \textit{Lista de experimentos}
       & Alta & Sistema \\
 \hline
 RF-27 & \textit{Lista de experimentos}
-      & El investigador debe poder eliminar un experimento propio desde el
+      & El investigador debe poder eliminar un experimento propio desde la
         lista de experimentos o desde su detalle; el Administrador puede eliminar cualquiera. La acción es
         permanente e irreversible y requiere un aviso de confirmación (ver RN-09).
       & Media & Investigador / Admin \\
@@ -354,7 +356,8 @@ ISO/IEC~25010:2011 \cite{iso25010}, que establece que un sistema debe responder 
 de los tiempos que el usuario percibe como aceptables para cada tipo de operación. Para
 operaciones interactivas cortas (navegación, filtros, consultas) el umbral estándar es
 de 1 a 3 segundos; para operaciones de procesamiento intensivo (análisis de video) el
-tiempo aceptable lo fija el laboratorio \cite{iso25010}.
+criterio es que el análisis termine en menos tiempo que el análisis manual del mismo video
+(ver los criterios de aceptación operativa) \cite{iso25010}.
 
 \begin{longtable}{|>{\bfseries}p{1.2cm}|>{\raggedright}p{2.9cm}|>{\raggedright}p{5.2cm}|>{\raggedright\arraybackslash}p{3.8cm}|}
 \caption{Requerimientos No Funcionales (RNF).
@@ -371,21 +374,22 @@ tiempo aceptable lo fija el laboratorio \cite{iso25010}.
 \endfoot
 
 RNF-01 & Rendimiento
-       & Las operaciones de navegación e interacción con la interfaz (cargar el
+       & Las operaciones de navegación e interacción con la interfaz (cargar la
          lista de experimentos, filtrar experimentos, abrir resultados) deben responder en menos
          de 3~s. Derivado del atributo \textit{time behaviour} de la ISO/IEC~25010:2011
          \cite{iso25010}.
        & Tiempo de respuesta $\leq 3$~s en condiciones normales de red. \\
 \hline
 RNF-02 & Calidad del análisis
-       & El tiempo de procesamiento no es el criterio prioritario para el laboratorio.
+       & El tiempo de procesamiento no es el criterio prioritario para el laboratorio, pero debe ser menor que el del
+         análisis manual del mismo video.
          El criterio de calidad es el desempeño del clasificador por conducta: se considera
          aceptable un F1 $\geq 85$\,\% por conducta. Este umbral corresponde a la
          variabilidad aceptada entre analistas humanos, declarada por el investigador
          colaborador en la entrevista de levantamiento (véase la
          justificación de umbrales en la sección~\ref{sec:umbrales}).
        & F1 $\geq 85$\,\% por conducta (primera evaluación, por clase de la red
-         --nado activo, inmovilidad y escalamiento--, sobre los segundos etiquetados
+         --nado, inmovilidad y escalamiento--, sobre los segundos etiquetados
          con esas tres clases, con validación por video; y segunda evaluación,
          inmovilidad contra activa, con $P(\text{inmovilidad}) \geq 0.5$, ver RN-13) sobre el conjunto de
          prueba propio. \\
@@ -405,7 +409,7 @@ RNF-04 & Seguridad
          de otros investigadores restringido a usuarios con sesión activa. \\
 \hline
 RNF-05 & Seguridad
-       & Las contraseñas deben almacenarse cifradas con sal, nunca en texto plano.
+       & Las contraseñas deben almacenarse con \textit{hash} (resumen criptográfico irreversible) y sal, nunca en texto plano.
          Las contraseñas temporales asignadas por el Admin se marcan para cambio
          obligatorio al primer ingreso.
        & Hash con sal usando bcrypt. Política de contraseña temporal verificada
@@ -416,9 +420,9 @@ RNF-06 & Usabilidad
          experimento, subir un video, esperar el análisis y descargar el reporte
          sin necesitar ayuda técnica. Derivado del atributo \textit{usability} de
          la ISO/IEC~25010:2011 \cite{iso25010}.
-       & Prueba con al menos un usuario real del laboratorio, con los videos
-         del laboratorio. Tasa de completación de tarea $\geq$ 90\% sin
-         asistencia. \\
+       & Prueba con al menos un usuario real del laboratorio, con los videos del
+         laboratorio: completa las cuatro tareas (crear un experimento, subir un video,
+         esperar el análisis y descargar el reporte) sin asistencia. \\
 \hline
 RNF-07 & Compatibilidad
        & El sistema debe funcionar desde Chrome, Firefox y Edge en sus versiones
@@ -460,8 +464,8 @@ RNF-11 & Escalabilidad
 \hline
 RNF-12 & Mantenibilidad
        & El código debe estar documentado y separado en módulos independientes
-         (\textit{backend}, \textit{pipeline} de análisis de video, \textit{frontend}), siguiendo PEP~8 en Python y ESLint
-         en JavaScript.
+         (\textit{backend}, \textit{pipeline} de análisis de video, \textit{frontend}), siguiendo las convenciones de cada lenguaje: PEP~8 en Python, las
+         convenciones de Java en el \textit{backend} y ESLint en JavaScript.
        & Se revisa la calidad del código en cada cierre de bloque de
          implementación. \\
 \hline
@@ -477,12 +481,16 @@ RNF-13 & Concurrencia
          de interfaz. \\
 \hline
 RNF-14 & Repetibilidad
-       & El mismo video, analizado varias veces con el mismo sistema, debe dar siempre
-         el mismo resultado. El laboratorio lo declaró en la entrevista de levantamiento
-         como lo que más le importa: reducir la variabilidad que introduce el analista
-         (véase la justificación de umbrales en la sección~\ref{sec:umbrales}).
-       & Variación máxima de entre el 5 y el 10\,\% en los segundos de cada conducta
-         entre análisis repetidos del mismo video, verificada con los videos del laboratorio. \\
+       & El mismo video, analizado varias veces con el mismo modelo, debe dar el mismo
+         resultado: la red corre en modo de evaluación, sin los pasos aleatorios del
+         entrenamiento (apagado aleatorio de neuronas y variaciones aleatorias de las
+         imágenes). Un análisis completado se puede reiniciar sobre el mismo video (ver RN-04). El
+         laboratorio lo declaró en la entrevista de levantamiento como lo que más le importa:
+         reducir la variabilidad que introduce el analista (véase la justificación de umbrales
+         en la sección~\ref{sec:umbrales}).
+       & Dos análisis del mismo video con el mismo modelo dan los mismos segundos por
+         conducta; la variación aceptada por el laboratorio es de máximo 10\,\% (meta:
+         5\,\%). \\
 \hline
 
 \end{longtable}
@@ -510,8 +518,7 @@ ajustarse con la validación agrupada por video.
         sistemas automatizados comparables \cite{nandi2021_dbscorer,meng2024_dsaan}.
         El F1 se calcula contra las etiquetas del conjunto de prueba propio, hechas
         por el equipo con su etiquetador, y el 85\,\% se toma como la meta de calidad.
-        El F1 por conducta se evalúa sobre el conjunto de prueba propio, con
-        validación agrupada por video. El umbral se exige a las tres clases que da la red
+        El umbral se exige a las tres clases que da la red
         (escalamiento, inmovilidad y nado) en la primera evaluación (por clase de la
         red): se calcula con la clase más probable de la red en cada segundo, solo sobre
         los segundos que el equipo etiquetó con esas tres clases, con validación por
@@ -520,12 +527,12 @@ ajustarse con la validación agrupada por video.
         RN-13. Por eso se mide también en una segunda evaluación, inmovilidad contra
         activa, con $P(\text{inmovilidad}) \geq 0.5$ y no con la regla de confianza.
 
-  \item \textbf{Repetibilidad: variación máxima de entre el 5 y el 10\,\%.}
+  \item \textbf{Repetibilidad: variación máxima del 10\,\%, con meta del 5\,\%.}
         En la entrevista de levantamiento, el investigador colaborador indicó que lo
         que más importa no es la velocidad sino reducir la variabilidad del factor
         humano: lo ideal es que el mismo video analizado varias veces dé siempre el
-        mismo resultado, con una variabilidad máxima de entre el 5 y el 10\,\%
-        (ver RNF-14).
+        mismo resultado, con una variabilidad máxima de entre el 5 y el 10\,\%. Se toma el 10\,\% como
+        límite de aceptación y el 5\,\% como meta (ver RNF-14).
 
   \item \textbf{Sin duración mínima de episodio; bloques de 5~segundos como referencia.}
         En la entrevista de levantamiento, el investigador colaborador indicó que en
@@ -554,7 +561,7 @@ ajustarse con la validación agrupada por video.
         Umbrales estándar de gestión de capacidad en sistemas de almacenamiento
         \cite{pressman2014}. Dejan margen operativo suficiente antes de que el
         disco se llene y evitan pérdida de datos por falta de espacio. Se
-        se ajustan según el volumen real de videos generados (ver RNF-09).
+        ajustan según el volumen real de videos generados (ver RNF-09).
 \end{itemize}
 
 % -----------------------------------------------------------
@@ -621,7 +628,7 @@ RN-06 & Los resultados y reportes (PDF, CSV y XLSX) se conservan indefinidamente
       & Los datos de investigación tienen valor a largo plazo. Ver RF-26. \\
 \hline
 RN-07 & En cada segundo analizado, a cada espécimen se le asigna como máximo una
-        conducta: nado activo, inmovilidad, escalamiento o conducta activa; un segundo
+        conducta: nado, inmovilidad, escalamiento o conducta activa; un segundo
         en que no se ve al espécimen o que se marca como dudoso queda sin conducta. No
         pueden coexistir dos conductas al mismo tiempo para el mismo espécimen.
       & El FST define estas conductas como mutuamente excluyentes
@@ -738,6 +745,19 @@ RN-17 & Si en un segundo no se ve al espécimen, ese segundo se registra como «
       & Evita entregar como resultado un tramo en que el sistema no vio al espécimen sin
         que el usuario pueda intervenir, y evita dejar un análisis esperando para siempre
         en la cola. Ver RN-04, RN-07, RF-15. \\
+\hline
+RN-18 & La pantalla de inicio de sesión ofrece el aviso de privacidad y los términos y
+        condiciones de uso. El usuario los acepta en su primer ingreso, junto con el cambio de
+        su contraseña temporal, y no puede continuar sin aceptarlos. El aviso de privacidad
+        indica qué datos personales se tratan (identificador institucional, nombre, apellidos y
+        correo), con qué finalidad y cómo se protegen (contraseña con \textit{hash} y sal).
+        Los términos establecen que el sistema es una herramienta de apoyo a la investigación
+        y no emite diagnóstico clínico, que los resultados se pueden revisar y corregir segundo
+        a segundo, y que los videos se borran 30~días después de un análisis exitoso (RN-05).
+      & Cumple con la Ley Federal de Protección de Datos Personales en Posesión de los
+        Particulares (LFPDPPP; ver factibilidad legal) y asegura que el usuario conozca el
+        alcance del sistema antes de usarlo. La aceptación se exige en pantalla y no se guarda
+        en la base de datos. Ver RF-01, RF-05. \\
 \hline
 
 \end{longtable}
@@ -933,10 +953,10 @@ R-03 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf
        aprovechando las sesiones con el laboratorio. \\
 \hline
 R-04 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
-     & El tiempo de análisis de un video de 5~min supera lo que el laboratorio
-       puede asumir en su flujo de trabajo.
+     & El tiempo de análisis de un video de 5~min supera el del análisis manual
+       del mismo video (hasta unas 2~horas con cuatro especímenes).
      & Se miden los tiempos por etapa del \textit{pipeline} y se evalúa la reducción de resolución o
-       uso de GPU. El umbral aceptable de tiempo lo fija el laboratorio
+       uso de GPU. El umbral es el tiempo del análisis manual
        (ver los criterios de aceptación operativa). \\
 \hline
 R-05 & \cellcolor{orange!15}\textcolor{orange!80!black}{\Large$\bullet$}~\textbf{Medio}
@@ -1071,11 +1091,10 @@ Con base en las reuniones sostenidas con el laboratorio durante el arranque del
 proyecto, los criterios que determinan si el sistema es operativamente aceptable son:
 
 \begin{itemize}
-  \item El tiempo de procesamiento de un video de 5~min se mide en segundos de
-        cómputo y su umbral aceptable lo fija el laboratorio;
-        como referencia, el análisis manual lleva alrededor de 30~min por
-        espécimen (hasta unas 2~h por video). Cualquier resultado en ese rango o por
-        debajo ya representa una ganancia operativa.
+  \item El análisis de un video de 5~min debe terminar en menos tiempo que el
+        análisis manual del mismo video, que lleva alrededor de 30~min por
+        espécimen (hasta unas 2~h con cuatro especímenes). El tiempo se mide en
+        segundos de cómputo, por etapa.
   \item El reporte generado debe incluir, al menos, la duración acumulada por conducta
         (nado activo, inmovilidad, escalamiento y conducta activa) desglosada por
         minuto, de modo que sea directamente comparable con la tabla que el
@@ -1088,7 +1107,7 @@ proyecto, los criterios que determinan si el sistema es operativamente aceptable
         reporte de diagnóstico en lugar de entregar un resultado silencioso
         potencialmente erróneo.
   \item El mismo video, analizado varias veces, debe dar el mismo resultado, con una
-        variación máxima de entre el 5 y el 10\,\% en los segundos de cada conducta
+        variación máxima del 10\,\% (meta: 5\,\%) en los segundos de cada conducta
         (ver RNF-14).
 \end{itemize}
 
@@ -1099,8 +1118,8 @@ Estos cuatro criterios se comprueban con los videos del laboratorio y las métri
 La factibilidad económica determina si el proyecto puede concluirse dentro de los
 recursos con que cuenta el equipo de desarrollo. El principal costo del proyecto es
 el recurso humano: dos integrantes que destinan aproximadamente 500~horas cada uno
-durante TT-I y TT-II combinados. Los demás costos corresponden a servicios de cómputo
-en la nube, documentación e insumos de soporte. Dado que las herramientas del
+durante TT-I y TT-II combinados. Los demás costos corresponden a conectividad,
+documentación e insumos de soporte. Dado que las herramientas del
 \textit{stack} son de código abierto y el laboratorio ya dispone de equipo de
 grabación, no se requiere adquisición de hardware especializado.
 
@@ -1131,9 +1150,9 @@ Equipo de cómputo y cámara de grabación
     & \$0 --- el Laboratorio de Bioquímica Estructural (ENMyH-IPN) pone a disposición
       el equipo existente. \\
 \hline
-Cómputo acelerado por GPU --- Google Colab Pro (plan anual, entrenamiento
+Cómputo acelerado por GPU --- Google Colab (nivel gratuito, entrenamiento
       del clasificador)
-    & \$3{,}300 \\
+    & \$0 --- el nivel gratuito ofrece hasta 12~horas de GPU por sesión. \\
 \hline
 Conectividad e infraestructura (internet y electricidad durante el desarrollo,
       12~meses)
@@ -1150,7 +1169,7 @@ Impresión y encuadernación de dos ejemplares del documento recepcional
 Trámites y gestiones administrativas (titulación, registro)
     & \$800 \\
 \hline
-\textbf{Subtotal costos fijos} & \textbf{\$51{,}000} \\
+\textbf{Subtotal costos fijos} & \textbf{\$47{,}700} \\
 \hline
 
 \end{longtable}
@@ -1206,19 +1225,19 @@ Formación técnica complementaria (acceso a cursos especializados de visión po
 \hline
 \endfoot
 
-Costos fijos & \$51{,}000 \\
+Costos fijos & \$47{,}700 \\
 \hline
 Costos variables & \$4{,}000 a \$5{,}500 \\
 \hline
-\textbf{Costo total estimado} & \textbf{\$56{,}500} \\
+\textbf{Costo total estimado} & \textbf{\$53{,}200} \\
 \hline
 
 \end{longtable}
 
-Con un costo total estimado de \$56{,}500~MXN, el rubro principal es el recurso
+Con un costo total estimado de \$53{,}200~MXN, el rubro principal es el recurso
 humano (\$40{,}000), que refleja el esfuerzo real de desarrollo en un contexto
-académico. El resto de la inversión corresponde a servicios de cómputo en la nube para
-el entrenamiento del clasificador, conectividad, documentación e insumos menores. El
+académico. El resto de la inversión corresponde a conectividad, documentación e insumos menores;
+el entrenamiento del clasificador usa el nivel gratuito de Google Colab. El
 retorno es inmediato para el laboratorio: anotar manualmente un video de 5~min toma
 hasta unas 2~h; con alrededor de 24 a 32~videos en un semestre de actividad regular,
 el sistema evita decenas de horas-persona de trabajo manual por ciclo. Al no requerir compra de hardware
@@ -1241,7 +1260,7 @@ institucional, nombre, apellidos y correo), con la contraseña guardada con \tex
 con sal (bcrypt). Las credenciales de los investigadores
 registrados en la plataforma se manejan bajo las directrices de la Ley Federal de
 Protección de Datos Personales en Posesión de los Particulares (LFPDPPP), empleando
-almacenamiento cifrado y acceso autenticado con \textit{JSON Web Token} (JWT).
+acceso autenticado con \textit{JSON Web Token} (JWT) y contraseñas protegidas con \textit{hash} y sal.
 
 \subsubsection{Uso ético de especímenes}
 

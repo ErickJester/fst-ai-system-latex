@@ -1,0 +1,20 @@
+@startuml pau_4
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+alt el recuadro está bien
+  inv -> ui: pulsa "El recuadro está bien, continuar"
+  ui -> api: pide continuar
+  api -> db: pasa a "en cola"
+  ui --> inv: avisa que continuará
+else cancelar el análisis
+  inv -> ui: pulsa "Cancelar análisis" y confirma
+  ui -> api: pide cancelar
+  api -> db: pasa a "cancelado"
+  ui --> inv: muestra el análisis como cancelado
+end
+@enduml

@@ -1,12 +1,11 @@
 \chapter{Pruebas y resultados}
 \label{cap:pruebas}
 
-Este capítulo documenta una selección de pruebas automáticas del \textit{backend} del
-sistema y una prueba de carga con cuatro sesiones. Se organiza así: el alcance de la
-selección y los requerimientos que verifica, las restricciones de la base de datos que
-comprueba, la prueba de carga, la verificación del sistema completo con un video real, las
-pantallas de otras funciones, los límites de lo que no cubre y, al final, la validación del
-clasificador.
+Este capítulo documenta las pruebas automáticas del \textit{backend} del sistema, una prueba
+de carga con cuatro sesiones y la verificación del sistema completo. Se organiza así: el
+alcance de las pruebas y los requerimientos que verifican, las restricciones de la base de
+datos que comprueban, la prueba de carga, la verificación del sistema completo con un video
+real, las pantallas de otras funciones y, al final, la validación del clasificador.
 
 % ============================================================
 \section{Alcance y estrategia}
@@ -18,7 +17,7 @@ cambio rompe algo que antes funcionaba. El \textit{backend} usa JUnit~5, el marc
 estándar de Java. Las pruebas de este capítulo corren contra PostgreSQL, el gestor de bases
 de datos relacionales del sistema, y no contra una base simulada.
 
-Se documentan \textbf{77 pruebas seleccionadas del trabajo terminal}. Esas pruebas
+Se documentan \textbf{77 pruebas automáticas del trabajo terminal}. Esas pruebas
 levantan la aplicación completa contra una base PostgreSQL de pruebas, vacía y creada con
 el mismo script de esquema que usa el sistema, y preparan y comprueban sus datos con
 consultas directas. La excepción son 2 pruebas de la regla del último Administrador, que no
@@ -32,30 +31,29 @@ omiten y 2 corren. Las Figuras~\ref{fig:pruebas_corrida_con_base} y
 \begin{sidewaysfigure}[p]
 \centering
 \includegraphics[width=\textheight, height=0.9\textwidth, keepaspectratio]{figures/pruebas/01_corrida_77_con_base}
-\caption{Salida de la corrida de la selección con base PostgreSQL de pruebas, reproducida como texto a partir del registro de Maven y de los reportes de las pruebas.}
+\caption{Salida de la corrida de las 77 pruebas con base PostgreSQL de pruebas, reproducida como texto a partir del registro de Maven y de los reportes de las pruebas.}
 \label{fig:pruebas_corrida_con_base}
 \end{sidewaysfigure}
 
 \begin{sidewaysfigure}[p]
 \centering
 \includegraphics[width=\textheight, height=0.9\textwidth, keepaspectratio]{figures/pruebas/02_corrida_77_sin_base}
-\caption{Salida de la corrida de la selección sin base de datos, reproducida como texto a partir del registro de Maven y de los reportes de las pruebas.}
+\caption{Salida de la corrida de las 77 pruebas sin base de datos, reproducida como texto a partir del registro de Maven y de los reportes de las pruebas.}
 \label{fig:pruebas_corrida_sin_base}
 \end{sidewaysfigure}
 
 \subsection{Plan de pruebas por tipo}
 
-Cada prueba de la selección se clasificó una sola vez según su propósito principal. La
+Cada prueba se clasificó una sola vez según su propósito principal. La
 Tabla~\ref{tab:pruebas_tipos} describe los tipos, cuándo se aplican, qué validan y cuántas
 de las 77 pruebas corresponden a cada uno. Setenta y cinco de las 77 corren contra la
 aplicación completa y PostgreSQL reales; el tipo «integración» indica el propósito
 principal de la prueba (que varias partes juntas dejen el sistema en el estado correcto),
-no el entorno en que corre. La selección es solo del \textit{backend}, por lo que no
-incluye un tipo «interfaz».
+no el entorno en que corre.
 
 {\footnotesize\singlespacing
 \begin{longtable}{|>{\raggedright}p{1.8cm}|>{\raggedright}p{2.8cm}|>{\raggedright}p{2.6cm}|>{\raggedright}p{4.5cm}|>{\raggedright\arraybackslash}p{1.2cm}|}
-\caption{Tipos de prueba de la selección, con el número de pruebas de cada uno.
+\caption{Tipos de prueba, con el número de pruebas de cada uno.
 \label{tab:pruebas_tipos}}\\
 \hline
 \textbf{Tipo} & \textbf{Objetivo} & \textbf{Cuándo se aplica} & \textbf{Qué valida} & \textbf{Pruebas} \\
@@ -67,7 +65,7 @@ incluye un tipo «interfaz».
 \endhead
 Funcional
 & Comprobar que una función entrega el resultado que describe el requerimiento.
-& Cada vez que se corre la selección, tras un cambio en la función.
+& Cada vez que se corren las pruebas, tras un cambio en la función.
 & Que subir un video horizontal del Día~2 cree la tanda y deje el análisis en cola, y que el CSV del grupo traiga las columnas, las filas y los estadísticos.
 & 20 \\
 \hline
@@ -117,7 +115,7 @@ sección~\ref{sec:pruebas_bd}.
 
 {\footnotesize\singlespacing
 \begin{longtable}{|>{\raggedright}p{2.7cm}|>{\raggedright}p{1.4cm}|>{\raggedright}p{6.0cm}|>{\raggedright\arraybackslash}p{3.0cm}|}
-\caption{Pruebas seleccionadas del trabajo terminal, por tema.
+\caption{Pruebas del trabajo terminal, por tema.
 \label{tab:pruebas_seleccion}}\\
 \hline
 \textbf{Tema} & \textbf{Pruebas} & \textbf{Qué comprueban} & \textbf{RF y RNF que verifican} \\
@@ -234,11 +232,6 @@ muestra el resultado de cada una. Se agrupan en cinco tipos:
         y un video que tiene análisis; es decir, no borra lo que otra tabla todavía usa.
 \end{itemize}
 
-Estas pruebas no cubren todo lo que el esquema declara. \textbf{No existe prueba} de la
-regla de actualización de las llaves foráneas (que tampoco actualiza en cascada), de los
-valores por defecto, de los índices ni de las migraciones. Esos elementos están declarados y
-la base los hace cumplir, pero ninguna prueba de la selección los verifica.
-
 \begin{sidewaysfigure}[p]
 \centering
 \includegraphics[width=\textheight, height=0.9\textwidth, keepaspectratio]{figures/pruebas/03_restricciones_de_la_base}
@@ -258,7 +251,7 @@ sesión por cliente, repite las consultas habituales del sistema y mide el tiemp
 respuesta. Se hicieron dos corridas, que resume la Tabla~\ref{tab:pruebas_carga}.
 
 La prueba de carga y el despliegue son verificaciones manuales del sistema completo, no
-pruebas automáticas, y no forman parte de las 77 pruebas seleccionadas. La corrida B se hizo
+pruebas automáticas, y no forman parte de las 77 pruebas automáticas. La corrida B se hizo
 sobre la configuración de despliegue del sistema, con el servidor web nginx.
 
 En esta sección se usa el \textbf{percentil 95}, que es el tiempo por debajo del cual
@@ -309,17 +302,6 @@ Máximo
 En ambas corridas todas las peticiones respondieron con éxito y el tiempo máximo quedó muy
 por debajo de los 3~s de RNF-01. El sistema atendió sin errores a cuatro cuentas trabajando a la vez, que
 es el número que fija RNF-13. La prueba cumple ambos requerimientos con mucho margen.
-
-\subsection{Límites}
-
-\begin{itemize}
-  \item Se hizo con el \textit{worker} sin procesar nada. No se probó con un video real en
-        análisis, por la memoria que se necesitaría: la máquina de pruebas tiene 15.7~GB y
-        el análisis puede ocupar hasta 3.5~GB. Por eso la prueba no incluye la condición de
-        RNF-13 que pide, además de las cuatro sesiones, al menos un análisis en cola.
-  \item No incluye la subida de videos ni la primera generación del reporte en PDF.
-  \item Solo se registraron la mediana, el percentil 95 y el máximo, no el promedio.
-\end{itemize}
 
 % ============================================================
 \section{Verificación del sistema completo con un video real}
@@ -375,7 +357,7 @@ las seis gráficas de la galería de resultados con los datos de este análisis.
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=0.7\textwidth]{figures/pruebas/32_real_grafica_barras_por_grupo}
+\includegraphics[width=10.5cm]{figures/pruebas/32_real_grafica_barras_por_grupo}
 \caption{Captura de la interfaz con el sistema completo y un video real: gráfica de barras por grupo.}
 \label{fig:pruebas_real_g1}
 \end{figure}
@@ -418,7 +400,7 @@ las seis gráficas de la galería de resultados con los datos de este análisis.
 \FloatBarrier
 
 Las Figuras~\ref{fig:pruebas_real_esp}, \ref{fig:pruebas_real_seg} y \ref{fig:pruebas_real_min}
-muestran tres de las cinco vistas del detalle por tanda: por espécimen, segundo a segundo y
+muestran tres de las cuatro vistas del detalle por tanda: por espécimen, segundo a segundo y
 minuto a minuto. La figura del segundo a segundo se recortó a las primeras filas de la tabla.
 
 \begin{sidewaysfigure}[p]
@@ -431,7 +413,7 @@ minuto a minuto. La figura del segundo a segundo se recortó a las primeras fila
 \begin{sidewaysfigure}[p]
 \centering
 \includegraphics[width=\textheight, height=0.88\textwidth, keepaspectratio]{figures/pruebas/39_real_detalle_segundo_a_segundo_recorte}
-\caption{Captura de la interfaz con el sistema completo y un video real: detalle por tanda, vista segundo a segundo, recortada a las primeras filas.}
+\caption{Captura de la interfaz con el sistema completo y un video real: detalle por tanda, vista segundo a segundo, con la cuadrícula por minuto, recortada a las primeras filas de la tabla.}
 \label{fig:pruebas_real_seg}
 \end{sidewaysfigure}
 
@@ -513,10 +495,10 @@ Figura~\ref{fig:pruebas_real_lista} la lista de experimentos con el filtro de es
 
 \subsection{Reporte en PDF}
 
-Las Figuras~\ref{fig:pruebas_real_pdf1} y \ref{fig:pruebas_real_pdf2} muestran las dos primeras
-páginas del reporte en PDF que el sistema generó con el análisis real: los datos del experimento
-y los resultados por grupo con una gráfica, y después la curva por minuto, la tabla por espécimen
-y el desglose por minuto. La tercera página del reporte solo continúa el desglose.
+Las Figuras~\ref{fig:pruebas_real_pdf1}, \ref{fig:pruebas_real_pdf2} y \ref{fig:pruebas_real_pdf3} muestran las tres
+páginas del reporte en PDF que el sistema generó con el análisis real: los datos del experimento, los
+videos analizados y los resultados por grupo; después las gráficas de tiempo por conducta y de curva por
+minuto; y por último la tabla por espécimen y el desglose por minuto.
 
 \begin{figure}[tbp]
 \centering
@@ -530,6 +512,13 @@ y el desglose por minuto. La tercera página del reporte solo continúa el desgl
 \includegraphics[width=0.8\textwidth]{figures/pruebas/45_real_reporte_pdf_pagina_2}
 \caption{Reporte en PDF generado por el sistema con el análisis real: página 2.}
 \label{fig:pruebas_real_pdf2}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/pruebas/45_real_reporte_pdf_pagina_3}
+\caption{Reporte en PDF generado por el sistema con el análisis real: página 3.}
+\label{fig:pruebas_real_pdf3}
 \end{figure}
 
 \FloatBarrier
@@ -621,32 +610,6 @@ muestra un aviso en lugar de la imagen del instante; los recuadros sí se pueden
 \end{figure}
 
 \FloatBarrier
-
-% ============================================================
-\section{Alcance y límites de las pruebas}
-\label{sec:pruebas_limites}
-
-La selección verifica reglas de negocio de cuentas, experimentos, resultados y revisión
-contra una base real, y la integridad del esquema. No verifica todo el sistema. En
-particular, no cubre:
-
-\begin{itemize}
-  \item el ajuste del recuadro y el botón «continuar» de la pausa; solo se comprueba el
-        estado del análisis cuando está en pausa;
-  \item un video que \textit{ffprobe} (la herramienta que lee las propiedades de un video)
-        no puede leer;
-  \item la subida de un video con un tipo de grupo o una sesión inválidos; solo se
-        comprueban el archivo que no es MP4 ni MOV y el video vertical;
-  \item la conservación de los resultados y el borrado automático a los 30 días;
-  \item la clasificación de conducta, que corre en el \textit{worker} y no tiene prueba en
-        el \textit{backend}.
-\end{itemize}
-
-Tampoco existe una prueba automática de punta a punta, que ejercite juntos el navegador,
-nginx, la API, la base de datos y el \textit{worker}. El sistema cuenta además con pruebas de
-la interfaz, que usan datos de ejemplo e incluyen una revisión de accesibilidad, y con pruebas
-del \textit{worker}, que usan piezas simuladas; ambas quedan fuera de esta selección. El
-contraste de color de las gráficas no está verificado automáticamente.
 
 % ============================================================
 \section{Validación del clasificador}

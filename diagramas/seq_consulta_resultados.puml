@@ -4,11 +4,11 @@
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Reemplaza a CU-09 "Consultar resultados del analisis"
+'  Reemplaza a CU-14 "Consultar resultados del analisis"
 '  (chapters/05_diseno.tex) y a figures/mermaid/seq_resultados.
 '
 '  Por que cambia, con fuente:
-'  - CU-09 compara "Dia 1 vs Dia 2 por especimen" y lee de las tablas
+'  - CU-14 compara "Dia 1 vs Dia 2 por especimen" y lee de las tablas
 '    viejas ResultadoComportamiento / ComportamientoPorMinuto, que ya
 '    no existen. La comparacion real que pide el protocolo es OTRA:
 '    "Los 5 minutos del Dia 2, entre los tres grupos" (Reunion 3-sep).
@@ -97,6 +97,6 @@ alt algún grupo mezcla niveles
   ui -> inv: aviso en la comparación:\nese grupo se muestra por\ntanda,\nsin promedio, porque sus\nniveles no significan lo\nmismo
 end
 ui -> inv: muestra la comparación de\nlos grupos (solo Día 2),\ncon los especímenes\nfaltantes señalados
-inv -> ui: puede descargar en CSV o\nXLSX lo que ve\n(la tanda o el grupo\ncompleto); el PDF se\ndescarga desde el\nexperimento (ver CU-10)
+inv -> ui: puede descargar en CSV o\nXLSX lo que ve\n(la tanda o el grupo\ncompleto); el PDF se\ndescarga desde el\nexperimento (ver CU-15)
 
 @enduml

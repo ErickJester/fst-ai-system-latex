@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Pipeline del TT2</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>html,body{margin:0;background:#faf9f5}svg{display:block}</style></head><body><svg viewBox="0 0 640 600" width="640" height="600" role="img" aria-label="Pipeline del TT2" xmlns="http://www.w3.org/2000/svg"><style>.t{font:600 18px Geist,Arial,sans-serif;fill:#1a1a1a}.s{font:400 14px 'Geist Mono',monospace;fill:#1a1a1a}.k{font:400 12px 'Geist Mono',monospace;fill:#6b6b6b}.l{font:400 12.5px 'Geist Mono',monospace;fill:#444}.g{font:600 16px Geist,Arial,sans-serif;fill:#1a1a1a}</style><rect width="640" height="600" fill="#faf9f5"/>
+<rect x="20" y="27" width="600" height="120" rx="8" fill="#ffffff" stroke="#1a1a1a" stroke-width="1.6"/>
+<circle cx="46" cy="55" r="14" fill="#1a1a1a"/>
+<text x="46" y="61" text-anchor="middle" class="t" fill="#fff" style="fill:#fff;font-size:16px">1</text>
+<text x="72" y="61" class="t">Preprocesamiento</text>
+<text x="38" y="89" class="s">Comprueba que el video abra,</text>
+<text x="38" y="110" class="s">corrige su rotación y confirma</text>
+<text x="38" y="131" class="s">que el modelo esté disponible</text>
+<path d="M320,147 L320,169" fill="none" stroke="#1a1a1a" stroke-width="1.6"/>
+<path d="M315,160 L320,169 L325,160" fill="none" stroke="#1a1a1a" stroke-width="1.6"/>
+<rect x="20" y="169" width="600" height="120" rx="8" fill="#ffffff" stroke="#1a1a1a" stroke-width="1.6"/>
+<circle cx="46" cy="197" r="14" fill="#1a1a1a"/>
+<text x="46" y="203" text-anchor="middle" class="t" fill="#fff" style="fill:#fff;font-size:16px">2</text>
+<text x="72" y="203" class="t">Localización de cilindros</text>
+<text x="38" y="231" class="s">Modelo de fondo y línea de agua;</text>
+<text x="38" y="252" class="s">separa los cilindros y calcula la</text>
+<text x="38" y="273" class="s">región de cada uno (de 2 a 4)</text>
+<path d="M320,289 L320,311" fill="none" stroke="#1a1a1a" stroke-width="1.6"/>
+<path d="M315,302 L320,311 L325,302" fill="none" stroke="#1a1a1a" stroke-width="1.6"/>
+<rect x="20" y="311" width="600" height="120" rx="8" fill="#fde8e1" stroke="#d9532c" stroke-width="1.6"/>
+<circle cx="46" cy="339" r="14" fill="#1a1a1a"/>
+<text x="46" y="345" text-anchor="middle" class="t" fill="#fff" style="fill:#fff;font-size:16px">3</text>
+<text x="72" y="345" class="t">Clasificación de conducta</text>
+<text x="38" y="373" class="s">15 rasgos y 7 reglas; clip de 16 cuadros</text>
+<text x="38" y="394" class="s">Red R(2+1)D-18 con 22 medidas:</text>
+<text x="38" y="415" class="s">una conducta por segundo</text>
+<path d="M320,431 L320,453" fill="none" stroke="#1a1a1a" stroke-width="1.6"/>
+<path d="M315,444 L320,453 L325,444" fill="none" stroke="#1a1a1a" stroke-width="1.6"/>
+<rect x="20" y="453" width="600" height="120" rx="8" fill="#ffffff" stroke="#1a1a1a" stroke-width="1.6"/>
+<circle cx="46" cy="481" r="14" fill="#1a1a1a"/>
+<text x="46" y="487" text-anchor="middle" class="t" fill="#fff" style="fill:#fff;font-size:16px">4</text>
+<text x="72" y="487" class="t">Resultados</text>
+<text x="38" y="515" class="s">Conducta de cada segundo, tiempos</text>
+<text x="38" y="536" class="s">por minuto y copia del video</text>
+<text x="38" y="557" class="s">para revisión</text></svg></body></html>

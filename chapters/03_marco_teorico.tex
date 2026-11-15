@@ -283,7 +283,7 @@ espécimen.
 
 \subsection{Clasificación de las conductas}
 
-Para clasificar cada segundo se toma una ventana de 4~s centrada en él, y de ella salen
+Para clasificar cada segundo se toma una ventana de 4~s alrededor de él, y de ella salen
 el clip de 16 fotogramas del cilindro de cada espécimen y las medidas que recibe la red
 de fusión. La capa de salida produce tres valores de activación, uno por clase, que la
 función
@@ -368,7 +368,7 @@ relacionadas entre sí mediante llaves. El sistema usa Spring Data JPA para las 
 
 La evaluación del sistema se basa en métricas que cubren los atributos de calidad
 definidos en la norma ISO/IEC~25010:2011 \cite{iso25010}: \textit{functional
-correctness} (precisión de las predicciones), \textit{time behaviour} (tiempo de
+correctness} (corrección de las predicciones), \textit{time behaviour} (tiempo de
 procesamiento) y \textit{usability} (facilidad de uso para el investigador).
 
 \subsection{Precisión, \textit{recall} y F1 por conducta}
@@ -388,8 +388,9 @@ positivos y falsos negativos de la clase $c$ respectivamente, se calculan:
 \end{equation}
 
 donde, para la red, cada conducta (nado, inmovilidad y escalamiento) es una clase. El F1 es útil cuando las clases están
-desbalanceadas, que es esperable en el FST donde la inmovilidad suele dominar en los
-primeros experimentos.
+desbalanceadas, es decir, cuando una conducta ocupa muchos más segundos que otra: combina
+precisión y \textit{recall} de cada clase y no deja que la conducta más frecuente oculte un
+mal desempeño en las demás.
 
 El F1 se calcula en dos evaluaciones. La primera evaluación es el F1 por clase de la red (nado,
 inmovilidad y escalamiento), con la clase de mayor probabilidad de cada segundo, solo
@@ -407,8 +408,9 @@ meta de F1 $\geq 85$\,\% (RNF-02) se aplica a cada clase de la primera evaluaci�
 
 \subsection{Tiempo de análisis}
 
-El tiempo de procesamiento de un video de 5 minutos se mide en segundos de cómputo. El análisis de un video termina
-en un tiempo aceptable para el laboratorio, conforme al atributo de \textit{time behaviour} de la ISO/IEC~25010:2011
+El tiempo de procesamiento de un video de 5 minutos se mide en segundos de cómputo, por etapa. El análisis de un video
+debe terminar en menos tiempo que el análisis manual del mismo video, que lleva alrededor de 30~min por espécimen y
+hasta unas 2~horas con cuatro especímenes, conforme al atributo de \textit{time behaviour} de la ISO/IEC~25010:2011
 \cite{iso25010}.
 
 \subsection{Repetibilidad}
@@ -416,6 +418,6 @@ en un tiempo aceptable para el laboratorio, conforme al atributo de \textit{time
 El laboratorio fijó un criterio propio, además de los tres atributos anteriores: que
 el mismo video, analizado varias veces, produzca siempre el mismo resultado
 (ver RNF-14). Se mide analizando el mismo video repetidas veces y comparando, para cada
-conducta, los segundos que obtiene cada análisis; la diferencia máxima aceptada es de
-entre el 5 y el 10\,\%, según lo declarado por el investigador colaborador. El sistema se acepta si cumple este criterio
+conducta, los segundos que obtiene cada análisis; la diferencia máxima aceptada es del
+10\,\%, con una meta del 5\,\%, a partir del rango de entre el 5 y el 10\,\% que declaró el investigador colaborador. El sistema se acepta si cumple este criterio
 y los tres atributos de la ISO/IEC~25010:2011 indicados arriba.

@@ -1,10 +1,10 @@
 @startuml seq_crear_cuenta
 ' ================================================================
-'  Secuencia - Crear cuenta de usuario (CU-12)
+'  Secuencia - Crear cuenta de usuario (CU-21)
 '  Base de datos FST | TT 2026-B066 | ESCOM-IPN
 '  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
 ' ----------------------------------------------------------------
-'  Cubre CU-12 "Crear cuenta de usuario" (RF-05, RF-07).
+'  Cubre CU-21 "Crear cuenta de usuario" (RF-05, RF-07).
 '
 '  Solo el Administrador crea cuentas. La verificacion de rol se
 '  hace en el backend antes de ejecutar la accion, y la interfaz

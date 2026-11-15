@@ -1,0 +1,15 @@
+@startuml res_3
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+
+api -> api: calcula media, desviación estándar y\nvarianza por conducta
+alt el grupo mezcla niveles de clasificación
+  api -> api: no promedia el grupo: lo separa por\ntanda
+end
+api --> ui: comparación entre grupos en las cuatro\nconductas
+ui -> inv: muestra la comparación (solo Día 2) y\navisa de los faltantes
+inv -> ui: descarga en CSV o XLSX lo que ve
+@enduml

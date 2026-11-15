@@ -1,0 +1,20 @@
+@startuml notif_2
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+opt marcar todas como leídas
+  u -> ui: elige "Marcar todas como leídas"
+  ui -> api: marca cada notificación no leída como\nleída
+  api -> db: actualiza las notificaciones
+  ui --> u: actualiza el contador
+end
+opt marcar una como no leída
+  u -> ui: elige "Marcar como no leída"
+  ui -> api: la marca como no leída
+  api -> db: actualiza la notificación
+end
+@enduml

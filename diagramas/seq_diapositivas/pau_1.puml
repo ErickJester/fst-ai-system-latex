@@ -1,0 +1,14 @@
+@startuml pau_1
+!include ../estilo_doc.iuml
+skinparam dpi 200
+participant Worker as w
+participant Archivos as fs
+database "Base de datos" as db
+
+w -> w: ve 3 s seguidos sin ver al espécimen
+w -> fs: guarda la imagen fija y los recuadros
+w -> fs: guarda los datos de la pausa
+w -> db: marca "en pausa"
+w -> db: crea la notificación
+w -> w: suelta el video y atiende el siguiente
+@enduml

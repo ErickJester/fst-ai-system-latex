@@ -1,0 +1,19 @@
+@startuml prog_3
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Investigador as inv
+participant "Interfaz web" as ui
+participant Backend as api
+participant Archivos as fs
+
+inv -> ui: elige descargar el reporte de\ndiagnóstico
+ui -> api: pide el reporte de este análisis
+api -> fs: busca el reporte
+alt el reporte está listo
+  api --> ui: reporte de diagnóstico
+  ui --> inv: descarga inmediata en el navegador
+else el Worker todavía no lo generó
+  api --> ui: aún no está disponible
+  ui -> api: reintenta, con un tope de intentos
+end
+@enduml

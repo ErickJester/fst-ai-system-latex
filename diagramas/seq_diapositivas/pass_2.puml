@@ -1,0 +1,18 @@
+@startuml pass_2
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Usuario as u
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+api -> api: cifra la contraseña nueva
+api -> db: guarda la nueva y quita el cambio\nobligatorio
+db --> api: confirma
+api --> ui: cambio realizado
+alt viene del primer acceso (CU-04)
+  ui --> u: confirma y muestra la lista de\nexperimentos
+else cambio voluntario desde el perfil (CU-05)
+  ui --> u: confirma y se queda en Mi perfil
+end
+@enduml

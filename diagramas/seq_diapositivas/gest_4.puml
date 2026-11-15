@@ -1,0 +1,21 @@
+@startuml gest_4
+!include ../estilo_doc.iuml
+skinparam dpi 200
+actor Administrador as admin
+participant "Interfaz web" as ui
+participant Backend as api
+database "Base de datos" as db
+
+alt reactivar una cuenta inactiva
+  admin -> ui: elige el usuario inactivo y confirma
+  ui -> api: pide reactivar la cuenta
+  api -> db: marca la cuenta como activa
+  ui --> admin: la tabla muestra la cuenta activa
+else generar una contraseña temporal nueva
+  admin -> ui: elige otro usuario (activo) y confirma
+  ui -> api: pide la contraseña temporal
+  api -> api: genera la contraseña y la envía por\ncorreo
+  api -> db: la guarda y obliga a cambiarla en el\nsiguiente acceso
+  ui --> admin: confirma la acción
+end
+@enduml

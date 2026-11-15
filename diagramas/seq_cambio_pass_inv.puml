@@ -7,9 +7,9 @@
 '  Reemplaza a figures/mermaid/seq_cambio_pass_inv.png, que no tenia
 '  fuente en el repositorio (esta era una imagen sin .puml).
 '
-'  Cubre CU-16 "Cambiar contraseña al primer acceso" (cuenta con
+'  Cubre CU-04 "Cambiar contraseña al primer acceso" (cuenta con
 '  contraseña temporal, marca de cambio obligatorio) y el cambio
-'  voluntario desde el perfil (CU-18, RF-06). En ambos casos el
+'  voluntario desde el perfil (CU-05, RF-06). En ambos casos el
 '  usuario ya tiene sesion y escribe su contraseña actual (en el
 '  primer acceso, la temporal) y la nueva.
 '
@@ -56,10 +56,10 @@ newpage
       la sesión actual y las demás sesiones del usuario siguen activas;
       los enlaces de restablecer contraseña pendientes dejan de servir
     end note
-    alt viene del primer acceso (CU-16)
+    alt viene del primer acceso (CU-04)
       api --> ui: cambio realizado
       ui --> u: confirma el cambio y\nmuestra la lista de\nexperimentos
-    else cambio voluntario desde el perfil (CU-18)
+    else cambio voluntario desde el perfil (CU-05)
       api --> ui: cambio realizado
       ui --> u: confirma el cambio y se\nqueda en Mi perfil
     end

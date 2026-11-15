@@ -8,7 +8,7 @@
 '  el repositorio (era una imagen sin .puml) y mostraba un "rol" del
 '  usuario que el perfil no edita.
 '
-'  Cubre CU-18 "Actualizar perfil propio" (RF-06): nombre, apellidos
+'  Cubre CU-05 "Actualizar perfil propio" (RF-06): nombre, apellidos
 '  y correo. El cambio de contraseña es un diagrama aparte
 '  (seq_cambio_pass_inv.puml). El correo no puede estar en uso por
 '  otra cuenta (USUARIO.correo es clave alterna).
