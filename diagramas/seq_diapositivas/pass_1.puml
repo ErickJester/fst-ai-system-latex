@@ -7,10 +7,17 @@ participant Backend as api
 database "Base de datos" as db
 
 u -> ui: escribe la contraseña actual y la nueva
-ui -> api: envía la actual y la nueva con la sesión\ndel usuario
+opt el cambio es obligatorio (primer acceso)
+  ui --> u: pide aceptar el aviso de privacidad y\nlos términos
+  u -> ui: marca que los acepta
+end
+ui -> api: envía la actual y la nueva (y, en el\nprimer acceso, la aceptación)
 api -> db: lee la contraseña cifrada del usuario
 db --> api: contraseña cifrada actual
-alt la actual no coincide
+alt primer acceso sin aceptar el aviso y los términos
+  api --> ui: rechaza: hay que aceptarlos
+  ui --> u: muestra el error y no cambia nada
+else la actual no coincide
   api --> ui: rechaza: la contraseña actual no es\ncorrecta
   ui --> u: muestra el error y no cambia nada
 else la nueva no cumple (mínimo 8 caracteres, distinta de la actual)

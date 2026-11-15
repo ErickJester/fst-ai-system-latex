@@ -6,7 +6,7 @@ participant "Interfaz web" as ui
 participant Backend as api
 database "Base de datos" as db
 
-ui -> api: pide la comparación entre grupos
+ui -> api: pide los datos de las gráficas de\nresultados (todos los grupos del Día 2)
 api -> db: busca los grupos del experimento y sus\ntandas
 loop por cada grupo
   api -> db: busca los especímenes y su video del Día\n2

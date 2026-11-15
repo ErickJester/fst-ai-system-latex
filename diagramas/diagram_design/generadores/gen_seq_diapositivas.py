@@ -57,21 +57,26 @@ else correo no existe, cuenta inactiva o contraseña incorrecta
 end
 """)
 
-d('logout', 'Secuencia: cierre de sesión', 'u ui api', """
+d('logout', 'Secuencia: cierre de sesión', 'u ui', """
 u -> ui: elige "Cerrar sesión" en el menú de usuario
-ui -> api: avisa que el usuario cierra sesión
-api --> ui: confirma
-ui -> ui: el navegador olvida la sesión
+ui -> ui: el navegador olvida la sesión y los borradores de la revisión
 ui --> u: muestra la pantalla de inicio de sesión
 """)
 
 T_PASS = 'Secuencia: cambio de contraseña'
 d('pass_1', T_PASS, 'u ui api db', """
 u -> ui: escribe la contraseña actual y la nueva
-ui -> api: envía la actual y la nueva con la sesión del usuario
+opt el cambio es obligatorio (primer acceso)
+  ui --> u: pide aceptar el aviso de privacidad y los términos
+  u -> ui: marca que los acepta
+end
+ui -> api: envía la actual y la nueva (y, en el primer acceso, la aceptación)
 api -> db: lee la contraseña cifrada del usuario
 db --> api: contraseña cifrada actual
-alt la actual no coincide
+alt primer acceso sin aceptar el aviso y los términos
+  api --> ui: rechaza: hay que aceptarlos
+  ui --> u: muestra el error y no cambia nada
+else la actual no coincide
   api --> ui: rechaza: la contraseña actual no es correcta
   ui --> u: muestra el error y no cambia nada
 else la nueva no cumple (mínimo 8 caracteres, distinta de la actual)
@@ -396,7 +401,7 @@ inv -> ui: elige ver el grupo completo o una tanda
 ui -> ui: calcula media, desviación estándar y varianza
 """)
 d('res_2', T_RES, 'inv ui api db', """
-ui -> api: pide la comparación entre grupos
+ui -> api: pide los datos de las gráficas de resultados (todos los grupos del Día 2)
 api -> db: busca los grupos del experimento y sus tandas
 loop por cada grupo
   api -> db: busca los especímenes y su video del Día 2
@@ -408,12 +413,12 @@ loop por cada grupo
 end
 """)
 d('res_3', T_RES, 'inv ui api', """
-api -> api: calcula media, desviación estándar y varianza por conducta
+api -> api: calcula, por conducta y por minuto, la media, la desviación estándar, la varianza y el coeficiente de variación
 alt el grupo mezcla niveles de clasificación
   api -> api: no promedia el grupo: lo separa por tanda
 end
-api --> ui: comparación entre grupos en las cuatro conductas
-ui -> inv: muestra la comparación (solo Día 2) y avisa de los faltantes
+api --> ui: datos de las gráficas por grupo, por conducta y por minuto
+ui -> inv: muestra la galería de seis gráficas del Día 2, con selector de conducta, y avisa de los faltantes
 inv -> ui: descarga en CSV o XLSX lo que ve
 """)
 
@@ -456,11 +461,11 @@ ui --> u: lleva a la pantalla de progreso
 
 T_REP = 'Secuencia: descarga de reportes'
 d('rep_1', T_REP, 'inv ui api db', """
-inv -> ui: elige el formato (CSV, XLSX o PDF) en resultados
+inv -> ui: elige el formato (CSV, XLSX, PDF o Excel del experimento) en resultados
 ui -> api: pide el reporte en ese formato
 api -> db: ¿hay análisis completados en el experimento?
 alt no hay análisis completados
-  alt CSV o XLSX
+  alt CSV, XLSX o Excel del experimento
     api --> ui: rechaza la descarga, con el motivo
     ui --> inv: muestra que no hay resultados todavía
   else PDF
@@ -470,13 +475,18 @@ alt no hay análisis completados
 end
 """)
 d('rep_2', T_REP, 'inv ui api db fs', """
-api -> db: ¿ya hay un reporte guardado en ese formato y vista?
-alt no hay, o ya no sirve
-  api -> api: genera el archivo con los datos actuales
-  api -> fs: guarda el archivo
-  api -> db: registra el reporte nuevo
-else ya hay uno vigente
-  api -> fs: recupera el archivo guardado
+alt el formato es el Excel del experimento
+  api -> db: lee los resultados de todos los grupos y la conducta de cada segundo
+  api -> api: arma el libro con las hojas "Resultados" y "Segundo a segundo" (no se guarda)
+else el formato es CSV, XLSX o PDF
+  api -> db: ¿ya hay un reporte guardado en ese formato y vista?
+  alt no hay, o ya no sirve
+    api -> api: genera el archivo con los datos actuales
+    api -> fs: guarda el archivo
+    api -> db: registra el reporte nuevo
+  else ya hay uno vigente
+    api -> fs: recupera el archivo guardado
+  end
 end
 api --> ui: archivo listo
 ui --> inv: descarga inmediata en el navegador
@@ -494,9 +504,9 @@ DESC = {
     'an_1': 'toma del análisis y preprocesamiento', 'an_2': 'localización de cilindros',
     'an_3': 'clasificación y cierre', 'an_4': 'tareas diarias',
     'prog_1': 'seguir el avance', 'prog_2': 'según el estado', 'prog_3': 'descargar el diagnóstico',
-    'res_1': 'por espécimen', 'res_2': 'comparación entre grupos', 'res_3': 'estadísticas y descarga',
+    'res_1': 'por espécimen', 'res_2': 'datos de las gráficas por grupo', 'res_3': 'galería de gráficas y descarga',
     'rev_1': 'abrir la revisión', 'rev_2': 'corregir y guardar', 'rev_3': 'reiniciar el análisis',
-    'rep_1': 'pedir el reporte', 'rep_2': 'generar o reutilizar',
+    'rep_1': 'pedir el reporte', 'rep_2': 'Excel, generar o reutilizar',
 }
 
 

@@ -121,11 +121,11 @@
  ],
  [
   "res_2",
-  "Secuencia: consulta de resultados (comparación entre grupos)"
+  "Secuencia: consulta de resultados (datos de las gráficas por grupo)"
  ],
  [
   "res_3",
-  "Secuencia: consulta de resultados (estadísticas y descarga)"
+  "Secuencia: consulta de resultados (galería de gráficas y descarga)"
  ],
  [
   "rev_1",
@@ -145,6 +145,6 @@
  ],
  [
   "rep_2",
-  "Secuencia: descarga de reportes (generar o reutilizar)"
+  "Secuencia: descarga de reportes (Excel, generar o reutilizar)"
  ]
 ]

@@ -3,11 +3,8 @@
 skinparam dpi 200
 actor Usuario as u
 participant "Interfaz web" as ui
-participant Backend as api
 
 u -> ui: elige "Cerrar sesión" en el menú de\nusuario
-ui -> api: avisa que el usuario cierra sesión
-api --> ui: confirma
-ui -> ui: el navegador olvida la sesión
+ui -> ui: el navegador olvida la sesión y los\nborradores de la revisión
 ui --> u: muestra la pantalla de inicio de sesión
 @enduml

@@ -5,11 +5,11 @@ actor Investigador as inv
 participant "Interfaz web" as ui
 participant Backend as api
 
-api -> api: calcula media, desviación estándar y\nvarianza por conducta
+api -> api: calcula, por conducta y por minuto, la\nmedia, la desviación estándar, la\nvarianza y el coeficiente de variación
 alt el grupo mezcla niveles de clasificación
   api -> api: no promedia el grupo: lo separa por\ntanda
 end
-api --> ui: comparación entre grupos en las cuatro\nconductas
-ui -> inv: muestra la comparación (solo Día 2) y\navisa de los faltantes
+api --> ui: datos de las gráficas por grupo, por\nconducta y por minuto
+ui -> inv: muestra la galería de seis gráficas del\nDía 2, con selector de conducta, y avisa\nde los faltantes
 inv -> ui: descarga en CSV o XLSX lo que ve
 @enduml

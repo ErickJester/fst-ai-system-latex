@@ -6,11 +6,11 @@ participant "Interfaz web" as ui
 participant Backend as api
 database "Base de datos" as db
 
-inv -> ui: elige el formato (CSV, XLSX o PDF) en\nresultados
+inv -> ui: elige el formato (CSV, XLSX, PDF o Excel\ndel experimento) en resultados
 ui -> api: pide el reporte en ese formato
 api -> db: ¿hay análisis completados en el\nexperimento?
 alt no hay análisis completados
-  alt CSV o XLSX
+  alt CSV, XLSX o Excel del experimento
     api --> ui: rechaza la descarga, con el motivo
     ui --> inv: muestra que no hay resultados todavía
   else PDF

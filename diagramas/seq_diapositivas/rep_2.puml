@@ -7,13 +7,18 @@ participant Backend as api
 database "Base de datos" as db
 participant Archivos as fs
 
-api -> db: ¿ya hay un reporte guardado en ese\nformato y vista?
-alt no hay, o ya no sirve
-  api -> api: genera el archivo con los datos actuales
-  api -> fs: guarda el archivo
-  api -> db: registra el reporte nuevo
-else ya hay uno vigente
-  api -> fs: recupera el archivo guardado
+alt el formato es el Excel del experimento
+  api -> db: lee los resultados de todos los grupos y\nla conducta de cada segundo
+  api -> api: arma el libro con las hojas "Resultados"\ny "Segundo a segundo" (no se guarda)
+else el formato es CSV, XLSX o PDF
+  api -> db: ¿ya hay un reporte guardado en ese\nformato y vista?
+  alt no hay, o ya no sirve
+    api -> api: genera el archivo con los datos actuales
+    api -> fs: guarda el archivo
+    api -> db: registra el reporte nuevo
+  else ya hay uno vigente
+    api -> fs: recupera el archivo guardado
+  end
 end
 api --> ui: archivo listo
 ui --> inv: descarga inmediata en el navegador
