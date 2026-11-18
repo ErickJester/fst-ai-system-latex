@@ -615,6 +615,113 @@ muestra un aviso en lugar de la imagen del instante; los recuadros sí se pueden
 \section{Validación del clasificador}
 \label{sec:pruebas_clasificador}
 
-% [Sección en blanco a petición del usuario. Se llenará cuando se mida el clasificador:
-%   estrategia de evaluación, conjunto de prueba, precisión, recall y F1 por conducta
-%   (RNF-02) y repetibilidad entre análisis del mismo video (RNF-14).]
+\subsection{Estrategia de validación}
+
+El clasificador decide la conducta de cada segundo con una red convolucional
+espacio-temporal fusionada con una rama de 22 medidas (cap.~5). Para medir su
+desempeño se usa validación cruzada \textbf{por video} en cinco partes: cada video se
+predice con una red entrenada únicamente con los demás, de modo que la red nunca ve el
+video que se está evaluando. Se agrupa por video y no por segundo ni por bloque porque
+los segundos vecinos comparten casi el mismo clip; medirlos por separado inflaría el
+resultado.
+
+Las etiquetas de referencia las hizo el equipo a mano, segundo por segundo y sin partir
+de la propuesta del clasificador, en la pantalla de revisión. Hay dos evaluaciones. La
+primera es por clase de la red (nado, inmovilidad y escalamiento), con la clase más
+probable de cada segundo, solo sobre los segundos etiquetados con esas tres clases. La
+segunda es inmovilidad contra activa (RN-13), donde activa reúne nado y escalamiento y
+se cuentan como activa los segundos que el equipo marcó como conducta activa sin
+distinguir. Las métricas son precisión, \textit{recall} y F1 por clase, la exactitud, y
+la exactitud por bloque de 5~s con la conducta mayoritaria (RN-15). Los segundos en que
+no se ve al espécimen no entran a ninguna de las dos.
+
+\textbf{Alcance.} Esta es una validación cruzada por video, no una prueba sobre un
+conjunto independiente. La prueba con videos que la red no ve en ninguna etapa de
+entrenamiento queda pendiente: se reservaron dos videos de cuatro cilindros para ese fin y
+falta etiquetarlos.
+% [PENDIENTE: etiquetar a ciegas los dos videos reservados (8 especímenes) y medir con
+%   ellos; medir la concordancia entre dos analistas humanos sobre un mismo video; y
+%   repetibilidad entre análisis del mismo video (RNF-14).]
+
+\subsection{Conjunto de datos de la validación}
+
+La validación usa 11 videos del laboratorio con 25 especímenes en total: 7 videos traen
+de uno a cuatro cilindros y 4 videos traen un solo espécimen. Se etiquetaron 8\,248
+segundos: 3\,819 de nado, 2\,924 de inmovilidad, 1\,244 de escalamiento y 261 de
+conducta activa sin distinguir. Los 7\,987 segundos de las tres clases son los que se
+califican en la primera evaluación. La clase más frecuente, el nado, es el 47.8\,\% de
+ellos; un sistema que contestara siempre ``nado'' acertaría en esa proporción, y es la
+referencia contra la que se compara la exactitud del clasificador.
+
+\subsection{Resultados del clasificador}
+
+Con la validación por video, el clasificador acertó en el 71.6\,\% de los 7\,987
+segundos calificados. Por bloque de 5~s, con la conducta mayoritaria, la exactitud fue de
+69.9\,\% sobre 1\,400 bloques completos. El F1 promedio de las tres clases fue de 0.705.
+La Tabla~\ref{tab:resultados_clasificador} muestra los valores por clase y la
+Tabla~\ref{tab:confusion_clasificador}, la matriz de confusión.
+
+\begin{table}[H]
+\centering
+\caption{Precisión, \textit{recall} y F1 por clase en la validación por video.}
+\label{tab:resultados_clasificador}
+\begin{tabular}{|l|c|c|c|r|}
+\hline
+\textbf{Clase} & \textbf{Precisión} & \textbf{\textit{Recall}} & \textbf{F1} & \textbf{Segundos} \\
+\hline
+Escalamiento & 0.646 & 0.682 & 0.663 & 1\,244 \\
+\hline
+Inmovilidad  & 0.727 & 0.710 & 0.719 & 2\,924 \\
+\hline
+Nado         & 0.732 & 0.732 & 0.732 & 3\,819 \\
+\hline
+\textbf{Promedio} & & & \textbf{0.705} & 7\,987 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Matriz de confusión en segundos. Cada fila es la clase marcada por el equipo y
+cada columna, la que decidió el clasificador.}
+\label{tab:confusion_clasificador}
+\begin{tabular}{|l|r|r|r|}
+\hline
+ & \textbf{Escalamiento} & \textbf{Inmovilidad} & \textbf{Nado} \\
+\hline
+\textbf{Escalamiento} & 848 & 89 & 307 \\
+\hline
+\textbf{Inmovilidad}  & 132 & 2\,077 & 715 \\
+\hline
+\textbf{Nado}         & 333 & 690 & 2\,796 \\
+\hline
+\end{tabular}
+\end{table}
+
+Los errores más frecuentes son entre inmovilidad y nado (715 segundos de inmovilidad que
+el clasificador llamó nado y 690 en sentido contrario) y entre escalamiento y nado (307 y
+333 segundos). La inmovilidad casi no se confunde con el escalamiento.
+
+En la segunda evaluación, inmovilidad contra activa, el F1 de la conducta activa fue de
+0.839 y el de la inmovilidad, de 0.704. La exactitud fue de 0.792 sobre los 8\,248
+segundos, que incluyen los 261 de conducta activa sin distinguir.
+
+\textbf{Confianza.} Si solo se consideran los segundos en los que la red tiene una
+confianza de 0.8 o más, la exactitud sube a 0.774 con el 75\,\% de los segundos; con 0.9
+o más, sube a 0.813 con el 57\,\%. Una mayor exactitud implica dejar sin decidir una
+parte de los segundos.
+
+\textbf{Limitaciones.}
+\begin{itemize}
+  \item El desempeño queda por debajo del 85\,\% que el equipo fijó como meta inicial
+        (sección~\ref{sec:umbrales}). El requisito RNF-02 no se da por cumplido; falta
+        medir la concordancia entre dos analistas humanos sobre los mismos videos para
+        saber qué tan lejos está de ella el clasificador.
+  \item Los errores no son aleatorios: cambian de un video a otro. Por ejemplo, en un
+        espécimen el equipo marcó 47 segundos de escalamiento y el clasificador 117,
+        mientras que en otro marcó 34 y el clasificador 5.
+  \item El 70\,\% de los bloques de 5~s tiene más de una conducta, y el segundo en que una
+        conducta cambia a otra es dudoso aun para un analista humano.
+  \item Los 11 videos son de un solo laboratorio. No se probó con videos de otro
+        laboratorio ni con otras condiciones de grabación.
+\end{itemize}
