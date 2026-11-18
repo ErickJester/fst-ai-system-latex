@@ -659,7 +659,9 @@ Con la validación por video, el clasificador acertó en el 71.6\,\% de los 7\,9
 segundos calificados. Por bloque de 5~s, con la conducta mayoritaria, la exactitud fue de
 69.9\,\% sobre 1\,400 bloques completos. El F1 promedio de las tres conductas fue de 0.705.
 La Tabla~\ref{tab:resultados_clasificador} muestra los valores por conducta y la
-Tabla~\ref{tab:confusion_clasificador}, la matriz de confusión.
+Tabla~\ref{tab:confusion_clasificador}, la matriz de confusión. Las
+Figuras~\ref{fig:clasificador_metricas} y~\ref{fig:clasificador_confusion} presentan los mismos
+valores en forma gráfica.
 
 \begin{table}[H]
 \centering
@@ -680,6 +682,13 @@ Nado         & 0.732 & 0.732 & 0.732 & 3\,819 \\
 \end{tabular}
 \end{table}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/pruebas/clasificador_metricas}
+\caption{Precisión, \textit{recall} y F1 por conducta en la validación por video [autoría propia].}
+\label{fig:clasificador_metricas}
+\end{figure}
+
 \begin{table}[H]
 \centering
 \caption{Matriz de confusión en segundos. Cada fila es la conducta marcada por el equipo y
@@ -697,6 +706,13 @@ cada columna, la que decidió el clasificador.}
 \hline
 \end{tabular}
 \end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/pruebas/clasificador_matriz_confusion}
+\caption{Matriz de confusión del clasificador. Cada celda muestra los segundos y, entre paréntesis, el porcentaje de los segundos que marcó el equipo para esa conducta (fila); la diagonal es el \textit{recall} de cada conducta [autoría propia].}
+\label{fig:clasificador_confusion}
+\end{figure}
 
 Los errores más frecuentes son entre inmovilidad y nado (715 segundos de inmovilidad que
 el clasificador llamó nado y 690 en sentido contrario) y entre escalamiento y nado (307 y
