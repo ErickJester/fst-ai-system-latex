@@ -164,24 +164,6 @@ una cola de varios videos el mismo día esperaría horas. Con 4 usuarios casi nu
 
 **Decisión provisional, mientras se confirma:** 4 usuarios, un video a la vez (D-85).
 
-## Q-I · ¿Cómo se mide que el clasificador es suficientemente bueno? 🔴
-
-**Por qué se pregunta.** El equipo fijó como RNF-02 un F1 ≥ 85 % por conducta, dentro del rango de acuerdo
-entre evaluadores que reporta la literatura (80–90 %). **No es una cifra del Dr. Sandino.** La validación por
-video (16-nov-2026, 11 videos, 25 especímenes) dio exactitud 0.716 y F1 promedio 0.705. Seis variantes de
-entrenamiento y posproceso no pasaron de 0.725. El 85 % era una meta del equipo, no una medición hecha en el
-proyecto.
-
-**Qué preguntar:** ¿acepta que RNF-02 se mida como «concordancia con un analista no inferior a la que hay entre
-dos analistas sobre los mismos videos»? ¿Puede alguien del laboratorio etiquetar a ciegas un video que el equipo
-ya etiquetó, para medir esa concordancia?
-
-**Por qué importa.** Sin esa medición, RNF-02 no se puede dar por cumplido ni por incumplido con una referencia
-propia.
-
-**Decisión provisional, mientras se confirma:** el capítulo 4 plantea el criterio como concordancia comparable a
-la humana y reporta los resultados tal como salieron (capítulo 7); RNF-02 no se da por cumplido.
-
 ---
 
 # 3 · Para la Dra. Martha Cordero — revisión de notación

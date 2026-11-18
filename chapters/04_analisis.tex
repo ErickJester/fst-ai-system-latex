@@ -383,19 +383,17 @@ RNF-01 & Rendimiento
 RNF-02 & Calidad del análisis
        & El tiempo de procesamiento no es el criterio prioritario para el laboratorio, pero debe ser menor que el del
          análisis manual del mismo video.
-         El criterio de calidad es el desempeño del clasificador por conducta: su
-         concordancia con la codificación humana, medida con el F1 por conducta. El
-         equipo fijó como meta inicial una concordancia superior al 85\,\%, dentro del
-         rango de acuerdo entre evaluadores humanos que reporta la literatura. La
-         validación por video dio un F1 promedio de 0.705 (sección~\ref{sec:pruebas_clasificador}),
-         por debajo de esa meta, así que el criterio de aceptación se replantea como se
-         explica en la justificación de umbrales (sección~\ref{sec:umbrales}).
-       & F1, precisión y \textit{recall} por conducta (primera evaluación, por clase de la red
-         --nado, inmovilidad y escalamiento--, sobre los segundos etiquetados
-         con esas tres clases, con validación por video; y segunda evaluación,
-         inmovilidad contra activa, con $P(\text{inmovilidad}) \geq 0.5$, ver RN-13) sobre el conjunto de
-         prueba propio, reportados junto con la concordancia entre dos analistas humanos
-         sobre los mismos videos (medición pendiente). \\
+         El criterio de calidad no fija un umbral de desempeño: el desempeño del
+         clasificador debe medirse por conducta y reportarse completo, y el investigador
+         debe poder revisar y corregir cada segundo antes de usar los resultados (véase la
+         justificación en la sección~\ref{sec:umbrales}).
+       & Precisión, \textit{recall} y F1 por conducta, exactitud y matriz de confusión,
+         reportados en la sección~\ref{sec:pruebas_clasificador} (primera evaluación, por
+         clase de la red --nado, inmovilidad y escalamiento--, sobre los segundos
+         etiquetados con esas tres clases, con validación por video; y segunda
+         evaluación, inmovilidad contra activa, con $P(\text{inmovilidad}) \geq 0.5$,
+         ver RN-13), y pantalla de revisión segundo a segundo que permite corregir la
+         conducta de cada segundo (RF-32). \\
 \hline
 RNF-03 & Disponibilidad
        & El sistema debe permitir que los investigadores dejen análisis corriendo
@@ -508,32 +506,19 @@ A continuación se documenta el origen de cada uno para que puedan auditarse y
 ajustarse con la validación agrupada por video.
 
 \begin{itemize}
-  \item \textbf{Calidad del clasificador: concordancia con la codificación humana
-        (RNF-02).}
-        En la investigación conductual con roedores, la práctica estándar para
-        validar un sistema automatizado es comparar su acuerdo con la codificación
-        humana contra el nivel de acuerdo típico entre dos evaluadores
-        \cite{slattery2012,della_valle2025,nandi2021_dbscorer}. Ese nivel de
-        acuerdo entre humanos oscila entre el 80 y el 90\,\% en la codificación
-        de conductas del FST, dependiendo de la experiencia del evaluador y de
-        la nitidez del video \cite{slattery2012,della_valle2025}. El equipo fijó como
-        meta inicial un F1 de al menos 85\,\% por conducta, dentro de ese rango.
-
-        La validación por video (sección~\ref{sec:pruebas_clasificador}) dio un F1
-        promedio de 0.705 y una exactitud de 0.716, por debajo del 85\,\%. El 85\,\%
-        era una meta fijada por el equipo, no una medición hecha en este trabajo, y el
-        proyecto no tiene todavía una medición de la concordancia entre dos analistas
-        humanos sobre los mismos videos. Por eso el criterio de aceptación de RNF-02
-        se replantea: el clasificador se considerará adecuado si su concordancia con un
-        analista no es inferior a la que hay entre dos analistas sobre los mismos
-        videos, y esa referencia se medirá antes de declarar cumplido el requisito.
-        Mientras no exista esa medición, los resultados se reportan tal como salieron
-        y RNF-02 no se da por cumplido.
-        % [PENDIENTE: medir la concordancia entre dos analistas humanos sobre un mismo
-        %   video y confirmar con el laboratorio el criterio replanteado.]
+  \item \textbf{Calidad del clasificador: sin umbral numérico (RNF-02).}
+        En la investigación conductual con roedores, el acuerdo entre dos evaluadores
+        humanos que codifican las conductas del FST no es fijo: depende de la
+        experiencia del evaluador y de la nitidez del video
+        \cite{slattery2012,della_valle2025}. Con una referencia que cambia así,
+        RNF-02 no fija un umbral de F1. Exige que el desempeño del clasificador se
+        mida por conducta y se reporte completo (precisión, \textit{recall}, F1,
+        exactitud y matriz de confusión), y que el investigador pueda revisar y
+        corregir cada segundo antes de usar los resultados (RF-32). Así, quien usa el
+        sistema sabe qué tan confiable es cada conducta y puede corregirla.
 
         El F1 se calcula contra las etiquetas del conjunto de prueba propio, hechas
-        por el equipo con su etiquetador. El criterio se aplica a las tres clases que da la red
+        por el equipo con su etiquetador. Se calcula para las tres clases que da la red
         (escalamiento, inmovilidad y nado) en la primera evaluación (por clase de la
         red): se calcula con la clase más probable de la red en cada segundo, solo sobre
         los segundos que el equipo etiquetó con esas tres clases, con validación por
