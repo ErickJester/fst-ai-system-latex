@@ -62,7 +62,7 @@ A: Los requisitos pasaron de 31 funcionales, 13 no funcionales y 13 reglas de ne
 
 A: La matriz de riesgos sigue con ocho riesgos; reescribimos el R-01, el R-02 y el R-03 al cambiar el pipeline y el clasificador.
 
-A: Y el costo bajó de 56,500 a 53,200 pesos, porque el entrenamiento usa el nivel gratuito de Google Colab.
+A: Y el costo bajó de 56,500 a 53,655 pesos, porque el entrenamiento usa el nivel gratuito de Google Colab; a cambio se suma un mes de servidor para el desarrollo, de 455 pesos.
 
 A: Cada uno de estos cambios lo vemos ahora en los diagramas.
 
