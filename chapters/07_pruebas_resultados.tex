@@ -627,11 +627,11 @@ resultado.
 
 Las etiquetas de referencia las hizo el equipo a mano, segundo por segundo y sin partir
 de la propuesta del clasificador, en la pantalla de revisión. Hay dos evaluaciones. La
-primera es por clase de la red (nado, inmovilidad y escalamiento), con la clase más
-probable de cada segundo, solo sobre los segundos etiquetados con esas tres clases. La
+primera mide nado, inmovilidad y escalamiento por separado, con la conducta más probable
+de cada segundo, solo en los segundos que el equipo etiquetó con una de esas tres. La
 segunda es inmovilidad contra activa (RN-13), donde activa reúne nado y escalamiento y
 se cuentan como activa los segundos que el equipo marcó como conducta activa sin
-distinguir. Las métricas son precisión, \textit{recall} y F1 por clase, la exactitud, y
+distinguir. Las métricas son precisión, \textit{recall} y F1 por conducta, la exactitud, y
 la exactitud por bloque de 5~s con la conducta mayoritaria (RN-15). Los segundos en que
 no se ve al espécimen no entran a ninguna de las dos.
 
@@ -648,8 +648,8 @@ falta etiquetarlos.
 La validación usa 11 videos del laboratorio con 25 especímenes en total: 7 videos traen
 de uno a cuatro cilindros y 4 videos traen un solo espécimen. Se etiquetaron 8\,248
 segundos: 3\,819 de nado, 2\,924 de inmovilidad, 1\,244 de escalamiento y 261 de
-conducta activa sin distinguir. Los 7\,987 segundos de las tres clases son los que se
-califican en la primera evaluación. La clase más frecuente, el nado, es el 47.8\,\% de
+conducta activa sin distinguir. Los 7\,987 segundos de nado, inmovilidad y escalamiento
+son los que se califican en la primera evaluación. La conducta más frecuente, el nado, es el 47.8\,\% de
 ellos; un sistema que contestara siempre ``nado'' acertaría en esa proporción, y es la
 referencia contra la que se compara la exactitud del clasificador.
 
@@ -657,17 +657,17 @@ referencia contra la que se compara la exactitud del clasificador.
 
 Con la validación por video, el clasificador acertó en el 71.6\,\% de los 7\,987
 segundos calificados. Por bloque de 5~s, con la conducta mayoritaria, la exactitud fue de
-69.9\,\% sobre 1\,400 bloques completos. El F1 promedio de las tres clases fue de 0.705.
-La Tabla~\ref{tab:resultados_clasificador} muestra los valores por clase y la
+69.9\,\% sobre 1\,400 bloques completos. El F1 promedio de las tres conductas fue de 0.705.
+La Tabla~\ref{tab:resultados_clasificador} muestra los valores por conducta y la
 Tabla~\ref{tab:confusion_clasificador}, la matriz de confusión.
 
 \begin{table}[H]
 \centering
-\caption{Precisión, \textit{recall} y F1 por clase en la validación por video.}
+\caption{Precisión, \textit{recall} y F1 por conducta en la validación por video.}
 \label{tab:resultados_clasificador}
 \begin{tabular}{|l|c|c|c|r|}
 \hline
-\textbf{Clase} & \textbf{Precisión} & \textbf{\textit{Recall}} & \textbf{F1} & \textbf{Segundos} \\
+\textbf{Conducta} & \textbf{Precisión} & \textbf{\textit{Recall}} & \textbf{F1} & \textbf{Segundos} \\
 \hline
 Escalamiento & 0.646 & 0.682 & 0.663 & 1\,244 \\
 \hline
@@ -682,7 +682,7 @@ Nado         & 0.732 & 0.732 & 0.732 & 3\,819 \\
 
 \begin{table}[H]
 \centering
-\caption{Matriz de confusión en segundos. Cada fila es la clase marcada por el equipo y
+\caption{Matriz de confusión en segundos. Cada fila es la conducta marcada por el equipo y
 cada columna, la que decidió el clasificador.}
 \label{tab:confusion_clasificador}
 \begin{tabular}{|l|r|r|r|}

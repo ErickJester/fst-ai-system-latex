@@ -294,6 +294,162 @@ video dura menos, se conservan todos sus segundos. La revisión de la pausa (tre
 esos 300 segundos. Antes de guardarlos, el \textit{worker} los renumera de 1 a 300 para que coincidan con el video
 recortado que ve el usuario.
 
+% Cifras al 17-nov-2026: el modelo del sistema se entreno con 11 videos y 25 especimenes (7 987 segundos de las tres
+% conductas; 8 248 etiquetados en total), y la validacion por video usa GroupKFold de 5 particiones. No citar nombre de
+% archivo, fecha ni version en el texto. Si el equipo vuelve a entrenar, revisar la tabla de segundos etiquetados, el
+% numero de videos y que el modelo del sistema corresponde a lo descrito aqui. Revisar tambien quien etiqueta.
+\subsection{Entrenamiento del clasificador}
+\label{sec:entrenamiento}
+
+Esta subsección cuenta cómo se obtiene el modelo que usa el sistema. Los parámetros de la red están en la subsección
+anterior; aquí se describen los datos y el orden de los pasos.
+
+\paragraph{Datos.} Una muestra es un segundo de un cilindro: el clip de 16 cuadros, los 22 valores de la rama de
+rasgos y la conducta que corresponde a ese segundo. Los datos son 11 videos de la prueba de nado forzado del
+laboratorio, con 25 especímenes en total: 7 videos traen de uno a cuatro cilindros y 4 videos traen un solo
+espécimen. Las tres conductas no se presentan en la misma proporción, por lo que la pérdida lleva pesos por
+conducta. La tabla~\ref{tab:segundos_etiquetados} muestra cuántos segundos hay de cada conducta entre los que se usan
+para entrenar. Los 261 segundos que el equipo marcó como conducta activa sin distinguir, y los segundos en que no se ve
+al espécimen, se guardan pero no se usan para entrenar. En total, el nado es el 47.8 \%, la inmovilidad el 36.6 \% y el escalamiento el 15.6 \% de los segundos.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Segundos etiquetados por conducta en cada video de entrenamiento.}
+\label{tab:segundos_etiquetados}
+\begin{tabular}{|c|c|c|r|r|r|r|}
+\hline
+\textbf{Video} & \textbf{Cilindros} & \textbf{Especímenes} & \textbf{Nado} & \textbf{Inmovilidad} & \textbf{Escalamiento} & \textbf{Total} \\
+\hline
+V01 & 3 & 3 & 420 & 349 & 122 & 891 \\
+\hline
+V02 & 3 & 3 & 415 & 344 & 170 & 929 \\
+\hline
+V03 & 3 & 2 & 285 & 213 & 81 & 579 \\
+\hline
+V04 & 4 & 1 & 151 & 139 & 79 & 369 \\
+\hline
+V05 & 4 & 4 & 441 & 826 & 179 & 1\,446 \\
+\hline
+V06 & 4 & 4 & 759 & 467 & 178 & 1\,404 \\
+\hline
+V07 & 4 & 4 & 674 & 380 & 353 & 1\,407 \\
+\hline
+V08 & 1 & 1 & 215 & 33 & 32 & 280 \\
+\hline
+V09 & 1 & 1 & 207 & 15 & 14 & 236 \\
+\hline
+V10 & 1 & 1 & 214 & 48 & 4 & 266 \\
+\hline
+V11 & 1 & 1 & 38 & 110 & 32 & 180 \\
+\hline
+\textbf{Total} & & \textbf{25} & \textbf{3\,819} & \textbf{2\,924} & \textbf{1\,244} & \textbf{7\,987} \\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{Etiquetado.} Las etiquetas las asigna el equipo de desarrolladores con un programa propio. El etiquetador
+mide al espécimen en cada cilindro, calcula los rasgos y propone una conducta para cada segundo. La persona que
+etiqueta la revisa en un revisor que se abre en el navegador: ve el video y el recuadro del cilindro, acepta la
+conducta propuesta o la corrige. El revisor también permite etiquetar desde cero, sin ver la propuesta, para contar
+con una referencia que no dependa del etiquetador. Solo las conductas asignadas o confirmadas por una persona se
+usan como etiquetas.
+
+\paragraph{Software de etiquetado.} Son tres piezas, todas en Python o en el navegador. El etiquetador procesa el
+video: estabiliza la imagen, detecta hasta cuatro cilindros, mide al espécimen en cada uno, calcula 15 rasgos por
+ventana (movimiento dentro del cuerpo, postura, trayectoria y área, entre otros) y los normaliza por el largo del
+cuerpo para que videos con distinto encuadre sean comparables. Con esos rasgos, un modelo de \textit{gradient
+boosting} propone una conducta por cada bloque de 5 segundos y, con una ventana deslizante de 4 segundos, una por
+cada segundo. Este modelo es el del etiquetador y es distinto del clasificador final descrito en la subsección anterior. Las otras dos piezas son revisores que se abren en el navegador: uno trabaja por bloque y otro por
+segundo. En ambos se asigna la conducta con una tecla (nado, inmovilidad, escalamiento o conducta activa), y cada fila
+guarda su origen: confirmada por una persona, corregida por una persona o, en el revisor por bloque, marcada con duda;
+en el revisor por segundo también puede ser una conducta puesta a ciegas o un segundo sin revisar. En el revisor por
+segundo solo cuenta como revisado el tramo que el cabezal ya dejó atrás a una velocidad de 2x o menor; lo que se
+recorre hacia adelante sin verlo queda sin revisar y no se usa.
+
+La figura~\ref{fig:revisor_segundo} muestra el revisor por segundo y la figura~\ref{fig:revisor_bloque} el revisor por
+bloque. En el revisor por bloque el programa llama «tubo» al cilindro.
+
+\begin{sidewaysfigure}
+\centering
+\includegraphics[width=\textheight,height=0.88\textwidth,keepaspectratio]{figures/etiquetador/revisor_segundo.png}
+\caption{Revisor por segundo del etiquetador, con el segundo 121 de un video de cuatro especímenes ya etiquetados: recuadro del
+espécimen que se revisa, pestañas por espécimen con su avance, línea de tiempo con la lupa de 40 s y el cabezal, y las teclas de
+conducta [autoría propia].}
+\label{fig:revisor_segundo}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}
+\centering
+\includegraphics[width=\textheight,height=0.88\textwidth,keepaspectratio]{figures/etiquetador/revisor_bloque.png}
+\caption{Revisor por bloque del etiquetador, con el primer bloque de 5 s del cilindro 1: la conducta que propone el
+programa y su confianza, la línea de tiempo de los cuatro cilindros coloreada por conducta y las teclas para confirmar
+o corregir. Los bloques aún no se han revisado [autoría propia].}
+\label{fig:revisor_bloque}
+\end{sidewaysfigure}
+
+\FloatBarrier
+
+\paragraph{Formación del conjunto de datos.} Cada video se procesa con el etiquetador, que deja una propuesta con una fila
+por segundo para todos sus especímenes. El equipo recorre cada espécimen en el revisor por segundo, confirma o corrige
+la propuesta, o etiqueta desde cero a ciegas, y el revisor guarda una hoja por espécimen con una fila por segundo. Del conjunto resultante se conservan solo los segundos con una de las tres
+conductas asignada por una persona; los segundos sin etiquetar quedan fuera. Cada hoja se identifica por video y
+espécimen, y ese identificador es el que agrupa los segundos al validar.
+
+La tabla~\ref{tab:resumen_etiquetador} muestra la hoja de resumen que deja el etiquetador para un espécimen: los
+segundos por conducta en cada minuto y en total.
+
+% ACTUALIZAR si cambia el video de ejemplo: valores tomados de AcuBN2_resumen.csv, espécimen 1 (propuesta del programa).
+\begin{table}[H]
+\centering
+\caption{Hoja de resumen del etiquetador para un espécimen: segundos por conducta y por minuto (propuesta del
+programa, no etiqueta humana).}
+\label{tab:resumen_etiquetador}
+\begin{tabular}{|c|r|r|r|r|r|}
+\hline
+\textbf{Minuto} & \textbf{Nado} & \textbf{Inmovilidad} & \textbf{Escalamiento} & \textbf{Activa} & \textbf{Sin decidir} \\
+\hline
+1 & 47 & 5 & 7 & 1 & 0 \\
+\hline
+2 & 54 & 1 & 5 & 0 & 0 \\
+\hline
+3 & 50 & 4 & 5 & 1 & 0 \\
+\hline
+4 & 27 & 33 & 0 & 0 & 0 \\
+\hline
+5 & 14 & 46 & 0 & 0 & 0 \\
+\hline
+6 & 22 & 38 & 0 & 0 & 0 \\
+\hline
+7 & 0 & 3 & 0 & 0 & 0 \\
+\hline
+\textbf{Total} & \textbf{214} & \textbf{130} & \textbf{17} & \textbf{2} & \textbf{0} \\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{Procedimiento.} El entrenamiento sigue estos pasos:
+
+\begin{enumerate}
+  \item Etiquetar los segundos de los videos con el etiquetador y el revisor.
+  \item Extraer, para cada segundo etiquetado, el clip de 16 cuadros y los rasgos de la etapa de cilindros.
+  \item Validar con GroupKFold, con 5 particiones agrupadas por video, y registrar precisión, \textit{recall} y F1
+  por conducta en cada partición.
+  \item Entrenar el modelo final con todos los segundos etiquetados.
+  \item Guardar el modelo en la carpeta de solo lectura que consulta el \textit{worker}, de modo que el análisis lo
+  carga al iniciar y no puede modificarlo.
+\end{enumerate}
+
+La validación se agrupa por video porque los segundos contiguos de un mismo video se parecen mucho: si se repartieran
+al azar entre entrenamiento y validación, el modelo se evaluaría con segundos casi idénticos a los que ya vio y el
+resultado sería demasiado optimista. Los resultados de la validación se presentan en el capítulo de pruebas
+(sección~\ref{sec:pruebas_clasificador}).
+
+\paragraph{Reentrenar con datos nuevos.} El sistema no reentrena el modelo por sí mismo (sección de alcance del
+capítulo~1). Para ajustarlo con videos nuevos se repiten los pasos anteriores con los segundos etiquetados de esos
+videos, se valida de nuevo y se reemplaza el modelo de la carpeta de solo lectura. El resto del \textit{pipeline} no
+cambia.
+
 \section{Pausa de ajuste}
 \label{sec:pausa}
 

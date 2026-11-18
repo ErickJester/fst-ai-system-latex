@@ -392,19 +392,21 @@ desbalanceadas, es decir, cuando una conducta ocupa muchos más segundos que otr
 precisión y \textit{recall} de cada clase y no deja que la conducta más frecuente oculte un
 mal desempeño en las demás.
 
-El F1 se calcula en dos evaluaciones. La primera evaluación es el F1 por clase de la red (nado,
-inmovilidad y escalamiento), con la clase de mayor probabilidad de cada segundo, solo
-sobre los segundos que el equipo etiquetó con esas tres clases y con validación por
-video: una validación cruzada agrupada por video, de modo que los segundos de un mismo
-video nunca quedan a la vez en entrenamiento y en prueba. La segunda evaluación es
-inmovilidad contra activa, donde activa reúne nado y escalamiento juntos y se decide
-inmovilidad cuando $P(\text{inmovilidad}) \geq 0.5$: es la distinción de la prueba de
-Porsolt et al., que solo separaba lo inmóvil de lo que no lo es, y corresponde a la
-regla de negocio RN-13. Esta segunda evaluación importa porque la red puede confundir nado con
-escalamiento sin equivocarse en lo esencial, que es si el espécimen se mueve o no. Ninguna
-de las dos evaluaciones mide la salida final del sistema con la regla de confianza, y la
-conducta activa que esa regla asigna no es una clase de la red ni tiene un F1 propio. El
-criterio de calidad de RNF-02 pide reportar el F1 de cada clase de la primera evaluación y el de la segunda (inmovilidad contra conducta activa).
+El F1 se calcula en dos evaluaciones. En la primera se calcula por separado para cada una
+de las tres conductas que decide la red (nado, inmovilidad y escalamiento): para cada
+segundo se toma la conducta con mayor probabilidad y se compara con la que marcó el
+equipo, solo en los segundos que el equipo etiquetó con una de esas tres. Se usa validación
+cruzada agrupada por video, de modo que los segundos de un mismo video nunca quedan a la
+vez en entrenamiento y en prueba. En la segunda evaluación se juntan nado y escalamiento
+como activa y se mide inmovilidad contra activa: se decide inmovilidad cuando
+$P(\text{inmovilidad}) \geq 0.5$. Es la distinción de la prueba de Porsolt et al., que solo
+separaba lo inmóvil de lo que no lo es, y corresponde a la regla de negocio RN-13. Esta
+segunda evaluación importa porque la red puede confundir nado con escalamiento sin
+equivocarse en lo esencial, que es si el espécimen se mueve o no. Ninguna de las dos
+evaluaciones mide la salida final del sistema con la regla de confianza, y la conducta
+activa que esa regla asigna no es una de las tres conductas de la red ni tiene un F1 propio.
+El criterio de calidad de RNF-02 pide reportar el F1 de cada conducta de la primera
+evaluación y el de la segunda (inmovilidad contra conducta activa).
 
 \subsection{Tiempo de análisis}
 

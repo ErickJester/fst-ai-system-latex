@@ -381,19 +381,15 @@ RNF-01 & Rendimiento
        & Tiempo de respuesta $\leq 3$~s en condiciones normales de red. \\
 \hline
 RNF-02 & Calidad del análisis
-       & El tiempo de procesamiento no es el criterio prioritario para el laboratorio, pero debe ser menor que el del
-         análisis manual del mismo video.
-         El criterio de calidad no fija un umbral de desempeño: el desempeño del
+       & El criterio de calidad no fija un umbral de desempeño: el desempeño del
          clasificador debe medirse por conducta y reportarse completo, y el investigador
          debe poder revisar y corregir cada segundo antes de usar los resultados (véase la
          justificación en la sección~\ref{sec:umbrales}).
        & Precisión, \textit{recall} y F1 por conducta, exactitud y matriz de confusión,
-         reportados en la sección~\ref{sec:pruebas_clasificador} (primera evaluación, por
-         clase de la red --nado, inmovilidad y escalamiento--, sobre los segundos
-         etiquetados con esas tres clases, con validación por video; y segunda
-         evaluación, inmovilidad contra activa, con $P(\text{inmovilidad}) \geq 0.5$,
-         ver RN-13), y pantalla de revisión segundo a segundo que permite corregir la
-         conducta de cada segundo (RF-32). \\
+         reportados en la sección~\ref{sec:pruebas_clasificador} (primera evaluación: nado,
+         inmovilidad y escalamiento por separado, con validación por video; segunda
+         evaluación: inmovilidad contra activa, ver RN-13), y pantalla de revisión segundo
+         a segundo que permite corregir la conducta de cada segundo (RF-32). \\
 \hline
 RNF-03 & Disponibilidad
        & El sistema debe permitir que los investigadores dejen análisis corriendo
@@ -518,14 +514,13 @@ ajustarse con la validación agrupada por video.
         sistema sabe qué tan confiable es cada conducta y puede corregirla.
 
         El F1 se calcula contra las etiquetas del conjunto de prueba propio, hechas
-        por el equipo con su etiquetador. Se calcula para las tres clases que da la red
-        (escalamiento, inmovilidad y nado) en la primera evaluación (por clase de la
-        red): se calcula con la clase más probable de la red en cada segundo, solo sobre
-        los segundos que el equipo etiquetó con esas tres clases, con validación por
-        video; no mide la salida de producción con la regla de confianza. La conducta
-        activa no sale de la red: se asigna después, segundo a segundo, con la regla de
-        RN-13. Por eso se mide también en una segunda evaluación, inmovilidad contra
-        activa, con $P(\text{inmovilidad}) \geq 0.5$ y no con la regla de confianza.
+        por el equipo con su etiquetador, en dos evaluaciones. La primera mide nado,
+        inmovilidad y escalamiento por separado, con la conducta más probable de la red
+        en cada segundo, solo en los segundos que el equipo etiquetó con una de esas
+        tres. La segunda mide inmovilidad contra activa (nado y escalamiento juntos,
+        RN-13), porque la conducta activa no la decide la red sino una regla de
+        confianza posterior. Las dos se hacen con validación por video y miden a la red
+        sola, sin esa regla.
 
   \item \textbf{Repetibilidad: variación máxima del 10\,\%, con meta del 5\,\%.}
         En la entrevista de levantamiento, el investigador colaborador indicó que lo
@@ -830,7 +825,7 @@ R(2+1)D-18 \cite{tran2018}
     & Es el clasificador de conducta. Se fusiona con una rama de 22 medidas (los quince
       rasgos del etiquetador y siete reglas de pataleo y nariz) y da tres salidas por
       segundo (escalamiento, inmovilidad y nado); la conducta activa se asigna aparte
-      (ver RN-13). Se evalúa con F1 por clase. \\
+      (ver RN-13). Se evalúa con F1 por conducta. \\
 \hline
 PyTorch \cite{paszke2019}
     & Framework de aprendizaje profundo para entrenamiento e inferencia de redes
