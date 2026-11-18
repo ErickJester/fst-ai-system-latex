@@ -38,7 +38,7 @@ V: Eso trae cuatro problemas. Primero, el costo de tiempo: limita cuántos exper
 
 ### Diapositiva 6 — Objetivo general
 
-V: Nuestro objetivo general es diseñar, desarrollar y validar un prototipo de sistema web que automatice la detección y clasificación de las conductas de los especímenes en la prueba de nado forzado, con visión por computadora y aprendizaje supervisado.
+V: Nuestro objetivo general es diseñar, desarrollar y validar un prototipo de sistema web que automatice la clasificación de las conductas de los especímenes en la prueba de nado forzado, con visión por computadora y aprendizaje supervisado.
 
 V: Las conductas son nado activo, inmovilidad y escalamiento, y una cuarta, conducta activa, que se usa cuando el sistema no puede separar el nado del escalamiento.
 
