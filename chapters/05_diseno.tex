@@ -934,11 +934,11 @@ laboratorio. Antes de cada una de estas acciones el sistema verifica que el usua
 Administrador (CU-19), una regla de control de acceso que no se dibuja en los diagramas por actor.
 
 La gestión de cuentas se descompone en la Figura~\ref{fig:cu_actor_administrador_1}.
-\textit{Gestionar cuenta de usuario} (CU-20) siempre incluye listar a los usuarios, porque el
-panel muestra la lista al entrar. Cada acción se modela como una extensión: crear una cuenta
-(CU-21), editar sus datos, dar o quitar el rol de Administrador, desactivarla (CU-22), reactivarla o
-generar una contraseña temporal nueva. Todas las acciones sobre una cuenta existente incluyen
-seleccionarla de la lista, que es también la forma de buscarla. El sistema no elimina cuentas; solo
+Cada acción es un caso de uso del Administrador: listar los usuarios (CU-20), que es lo que el
+panel muestra al entrar, crear una cuenta (CU-21), editar sus datos, dar o quitar el rol de
+Administrador, desactivarla (CU-22), reactivarla o generar una contraseña temporal nueva. Todas
+las acciones sobre una cuenta existente incluyen seleccionarla de la lista, que es también la
+forma de buscarla. El sistema no elimina cuentas; solo
 las desactiva.
 
 \begin{figure}[H]
@@ -2242,24 +2242,24 @@ diagramas por actor; su diagrama aparece únicamente en su propia ficha.
 
 \noindent\rule{\linewidth}{0.4pt}
 
-\noindent\textbf{Gestionar cuenta de usuario}
+\noindent\textbf{Listar usuarios}
 
 \noindent\small
 \begin{tabular}{|p{2.8cm}|p{7.4cm}|p{4.0cm}|}
 \hline
-\textbf{Caso de Uso} & Gestionar cuenta de usuario & \textbf{Identificador:} CU-20 \\
+\textbf{Caso de Uso} & Listar usuarios & \textbf{Identificador:} CU-20 \\
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Administrador} \\
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-05, RF-06, RF-07, RF-28. Incluye: Listar usuarios. Extendido por: CU-21 (Crear cuenta de usuario), CU-22 (Desactivar cuenta de usuario), Editar datos de la cuenta, Dar o quitar el rol de Administrador, Reactivar cuenta y Generar contraseña temporal nueva.} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-05, RF-06, RF-07, RF-28. Desde la lista se accede a CU-21 (Crear cuenta de usuario) y CU-22 (Desactivar cuenta de usuario). Editar datos de la cuenta, dar o quitar el rol de Administrador, reactivar la cuenta y generar una contraseña temporal nueva no tienen ficha propia: se describen en el curso normal y alterno de esta ficha.} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-19).} \\
 \hline
-\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Cuenta creada, editada o desactivada; cambio reflejado en la base de datos.} \\
+\textbf{Postcondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Lista de usuarios mostrada; la acción que el Administrador elija desde la lista queda reflejada en la base de datos.} \\
 \hline
-\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Permite al Administrador crear, editar, desactivar o reactivar cuentas de usuario y generar contraseñas temporales nuevas desde el panel de administración.} \\
+\textbf{Descripción} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Permite al Administrador ver la lista de cuentas de usuario y, desde ella, elegir la acción que va a hacer: crear, editar, desactivar o reactivar cuentas, dar o quitar el rol de Administrador y generar contraseñas temporales nuevas.} \\
 \hline
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El Administrador accede a la lista de usuarios y ejecuta la acción deseada: alta con contraseña temporal, modificación de datos, cambio de rol, desactivación o reactivación, o contraseña temporal nueva. El sistema aplica el cambio en la base de datos y confirma la operación. Reactivar no genera contraseña temporal ni envía correo, y la contraseña anterior vuelve a servir; la contraseña temporal nueva solo es para cuentas activas y no para la propia, obliga a cambiarla en el siguiente acceso y se envía por correo.} \\
 \hline
@@ -2268,7 +2268,7 @@ diagramas por actor; su diagrama aparece únicamente en su propia ficha.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.92\textwidth, height=0.50\textheight, keepaspectratio]{figures/diagramas/cu_ind_20}
-\caption{Diagrama del caso de uso CU-20: Gestionar cuenta de usuario [autoría propia].}
+\caption{Diagrama del caso de uso CU-20: Listar usuarios [autoría propia].}
 \label{fig:cu_ind_20}
 \end{figure}
 
@@ -2317,7 +2317,7 @@ diagramas por actor; su diagrama aparece únicamente en su propia ficha.
 \hline
 \textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-05, RF-07, RF-33. Extiende: CU-20 (Gestionar cuenta de usuario).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-05, RF-07, RF-33. Se inicia desde la lista de usuarios (CU-20).} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-19). No existe formulario público de registro (ver RF-07).} \\
 \hline
@@ -2385,9 +2385,9 @@ diagramas por actor; su diagrama aparece únicamente en su propia ficha.
 \hline
 \textbf{Actores} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Administrador} \\
 \hline
-\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Secundario (\textit{<<extend>>} de CU-20 Gestionar cuenta de usuario, condición: el Administrador desactiva la cuenta)} \\
+\textbf{Tipo} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Primario} \\
 \hline
-\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-05. Extiende: CU-20 (Gestionar cuenta de usuario).} \\
+\textbf{Referencias} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{RF-05. Se inicia desde la lista de usuarios (CU-20). Incluye: Seleccionar cuenta de la lista.} \\
 \hline
 \textbf{Precondición} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Sesión activa; el usuario pertenece a \texttt{ADMINISTRADOR} (ver CU-19); cuenta objetivo en estado activo.} \\
 \hline
