@@ -931,7 +931,7 @@ El Administrador es un Investigador con permisos adicionales (en el modelo de da
 de usuario) y por eso hereda todos los casos de uso del Investigador. Los propios son la gestión
 de cuentas, el monitoreo del estado del sistema y la gestión de los experimentos de todo el
 laboratorio. Antes de cada una de estas acciones el sistema verifica que el usuario sea
-Administrador (CU-19), una regla de control de acceso que no se dibuja como caso de uso.
+Administrador (CU-19), una regla de control de acceso que no se dibuja en los diagramas por actor.
 
 La gestión de cuentas se descompone en la Figura~\ref{fig:cu_actor_administrador_1}.
 \textit{Gestionar cuenta de usuario} (CU-20) siempre incluye listar a los usuarios, porque el
@@ -985,8 +985,8 @@ la información que el sistema devuelve y los eventos inesperados que pueden ocu
 Los casos de uso con identificador CU-xx son los mismos de las fichas; los que no lo
 tienen en los diagramas son pasos o condiciones que cada ficha describe dentro de su
 curso normal o alterno. La ficha CU-19 describe una regla de control de acceso que el
-sistema aplica antes de las acciones de administración, por lo que no se dibuja como
-caso de uso.
+sistema aplica antes de las acciones de administración, por lo que no se dibuja en los
+diagramas por actor; su diagrama aparece únicamente en su propia ficha.
 
 \renewcommand{\arraystretch}{1.35}
 
@@ -1014,6 +1014,13 @@ caso de uso.
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El usuario solicita el restablecimiento; el sistema envía un enlace de validez limitada al correo del usuario; el usuario accede al enlace y establece una nueva contraseña.} \\
 \hline
 \end{tabular}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_01}
+\caption{Diagrama del caso de uso CU-01: Recuperar contraseña [autoría propia].}
+\label{fig:cu_ind_01}
+\end{figure}
 
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
@@ -1078,6 +1085,13 @@ caso de uso.
 \hline
 \end{tabular}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_02}
+\caption{Diagrama del caso de uso CU-02: Iniciar sesión [autoría propia].}
+\label{fig:cu_ind_02}
+\end{figure}
+
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
 \hline
@@ -1137,6 +1151,13 @@ caso de uso.
 \hline
 \end{tabular}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_03}
+\caption{Diagrama del caso de uso CU-03: Cerrar sesión [autoría propia].}
+\label{fig:cu_ind_03}
+\end{figure}
+
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
 \hline
@@ -1189,6 +1210,13 @@ caso de uso.
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Al detectar la marca de «cambio obligatorio», el sistema redirige al usuario a la pantalla de cambio de contraseña. El usuario introduce la nueva contraseña; el sistema la valida, la actualiza y habilita el acceso completo.} \\
 \hline
 \end{tabular}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_04}
+\caption{Diagrama del caso de uso CU-04: Cambiar contraseña al primer acceso [autoría propia].}
+\label{fig:cu_ind_04}
+\end{figure}
 
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
@@ -1246,6 +1274,13 @@ caso de uso.
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El investigador accede a su perfil, modifica los campos deseados y confirma los cambios. El sistema valida los datos y actualiza el registro en la base de datos.} \\
 \hline
 \end{tabular}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_05}
+\caption{Diagrama del caso de uso CU-05: Actualizar perfil propio [autoría propia].}
+\label{fig:cu_ind_05}
+\end{figure}
 
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
@@ -1306,6 +1341,13 @@ caso de uso.
 \hline
 \end{tabular}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_06}
+\caption{Diagrama del caso de uso CU-06: Registrar experimento [autoría propia].}
+\label{fig:cu_ind_06}
+\end{figure}
+
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
 \hline
@@ -1364,6 +1406,13 @@ caso de uso.
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El investigador escribe el nombre del grupo o tratamiento; si coincide con un grupo ya usado en el mismo experimento, el sistema sugiere la siguiente tanda y pide confirmación explícita (RF-09). Elige la sesión (Día 1 o Día 2) y el archivo MP4 o MOV; el sistema valida reproducibilidad y orientación (horizontal), pues la interfaz ya comprobó el formato, lo almacena y encola la tarea de análisis de forma automática.} \\
 \hline
 \end{tabular}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_07}
+\caption{Diagrama del caso de uso CU-07: Subir video [autoría propia].}
+\label{fig:cu_ind_07}
+\end{figure}
 
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
@@ -1440,6 +1489,13 @@ caso de uso.
 \hline
 \end{tabular}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_08}
+\caption{Diagrama del caso de uso CU-08: Encolar análisis automático [autoría propia].}
+\label{fig:cu_ind_08}
+\end{figure}
+
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
 \hline
@@ -1492,6 +1548,13 @@ caso de uso.
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Cuando la validación de CU-07 falla, el sistema muestra un mensaje que indica el motivo (formato incorrecto, video vertical o video no reproducible) y la tanda permanece sin ese video para que el investigador pueda intentarlo nuevamente.} \\
 \hline
 \end{tabular}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_09}
+\caption{Diagrama del caso de uso CU-09: Notificar rechazo de video [autoría propia].}
+\label{fig:cu_ind_09}
+\end{figure}
 
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
@@ -1547,6 +1610,13 @@ caso de uso.
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Al acceder a la lista de experimentos, el sistema recupera la lista de experimentos del laboratorio (ver RN-08) y muestra cualquier aviso de expiración próxima. El investigador puede filtrar la lista o acceder directamente a un experimento. El estado de cada experimento se calcula a partir de los análisis de sus tandas: primero «sin videos cargados» o «en espera del Día~2» (solo hay videos del Día~1, que no se analizan); si hay análisis, el de mayor precedencia entre ellos: error, cancelado, en pausa, procesando, en cola o completado.} \\
 \hline
 \end{tabular}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_10}
+\caption{Diagrama del caso de uso CU-10: Consultar lista de experimentos [autoría propia].}
+\label{fig:cu_ind_10}
+\end{figure}
 
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
@@ -1607,6 +1677,13 @@ caso de uso.
 \hline
 \end{tabular}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_11}
+\caption{Diagrama del caso de uso CU-11: Eliminar experimento [autoría propia].}
+\label{fig:cu_ind_11}
+\end{figure}
+
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
 \hline
@@ -1665,6 +1742,13 @@ caso de uso.
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El \textit{Worker} toma la tarea de la cola y ejecuta el \textit{pipeline} completo. El \textit{frontend} consulta periódicamente el estado y muestra la etapa activa y el porcentaje de avance, que pondera cada etapa con pesos fijos, obtenidos de una corrida de referencia. Al completarse, el \textit{Worker} registra los resultados y el sistema habilita el acceso a la pantalla de resultados. Si el \textit{pipeline} falla, el \textit{Worker} genera el reporte de diagnóstico PDF.} \\
 \hline
 \end{tabular}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_12}
+\caption{Diagrama del caso de uso CU-12: Monitorear progreso del análisis [autoría propia].}
+\label{fig:cu_ind_12}
+\end{figure}
 
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
@@ -1733,6 +1817,13 @@ caso de uso.
 \hline
 \end{tabular}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_13}
+\caption{Diagrama del caso de uso CU-13: Descargar reporte de diagnóstico [autoría propia].}
+\label{fig:cu_ind_13}
+\end{figure}
+
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
 \hline
@@ -1789,6 +1880,13 @@ caso de uso.
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El sistema recupera los resultados de la base de datos y los presenta en tablas por espécimen y desglose minuto a minuto. Además muestra la comparación entre los grupos del experimento con los videos del Día~2.} \\
 \hline
 \end{tabular}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_14}
+\caption{Diagrama del caso de uso CU-14: Consultar resultados del análisis [autoría propia].}
+\label{fig:cu_ind_14}
+\end{figure}
 
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
@@ -1849,6 +1947,13 @@ caso de uso.
 \hline
 \end{tabular}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_15}
+\caption{Diagrama del caso de uso CU-15: Descargar reporte [autoría propia].}
+\label{fig:cu_ind_15}
+\end{figure}
+
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
 \hline
@@ -1901,6 +2006,13 @@ caso de uso.
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El sistema calcula las estadísticas al pedirlas, a partir de los segundos por conducta de los especímenes analizados; no se guardan en la base de datos. Las muestra al pie de la tabla de resultados, calculadas sobre los especímenes que se están viendo (el grupo completo o una sola tanda), y las incluye en el reporte descargable de esa misma vista.} \\
 \hline
 \end{tabular}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_16}
+\caption{Diagrama del caso de uso CU-16: Consultar estadísticas de grupo o tanda [autoría propia].}
+\label{fig:cu_ind_16}
+\end{figure}
 
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
@@ -1956,6 +2068,13 @@ caso de uso.
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Cuando el análisis termina, el usuario abre una pantalla con el video y una línea de tiempo por espécimen, coloreada por conducta. Revisa un espécimen a la vez, con el video corriendo; cada segundo ya trae la conducta que puso el sistema. El borrador se restaura al volver a entrar y se borra al guardar, al reiniciar o al cerrar sesión; también se guarda al cerrar la pestaña.} \\
 \hline
 \end{tabular}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_17}
+\caption{Diagrama del caso de uso CU-17: Revisar segundo a segundo [autoría propia].}
+\label{fig:cu_ind_17}
+\end{figure}
 
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
@@ -2020,6 +2139,13 @@ caso de uso.
 \hline
 \end{tabular}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_18}
+\caption{Diagrama del caso de uso CU-18: Corregir etiqueta de un segundo [autoría propia].}
+\label{fig:cu_ind_18}
+\end{figure}
+
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
 \hline
@@ -2079,6 +2205,13 @@ caso de uso.
 \hline
 \end{tabular}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.50\textheight, keepaspectratio]{figures/diagramas/cu_ind_19}
+\caption{Diagrama del caso de uso CU-19: Verificar pertenencia a Administrador [autoría propia].}
+\label{fig:cu_ind_19}
+\end{figure}
+
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
 \hline
@@ -2131,6 +2264,13 @@ caso de uso.
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El Administrador accede a la lista de usuarios y ejecuta la acción deseada: alta con contraseña temporal, modificación de datos, cambio de rol, desactivación o reactivación, o contraseña temporal nueva. El sistema aplica el cambio en la base de datos y confirma la operación. Reactivar no genera contraseña temporal ni envía correo, y la contraseña anterior vuelve a servir; la contraseña temporal nueva solo es para cuentas activas y no para la propia, obliga a cambiarla en el siguiente acceso y se envía por correo.} \\
 \hline
 \end{tabular}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.50\textheight, keepaspectratio]{figures/diagramas/cu_ind_20}
+\caption{Diagrama del caso de uso CU-20: Gestionar cuenta de usuario [autoría propia].}
+\label{fig:cu_ind_20}
+\end{figure}
 
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
@@ -2188,6 +2328,13 @@ caso de uso.
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El Administrador introduce los datos del nuevo usuario (identificador institucional, nombre, apellidos y correo electrónico) y el sistema genera una contraseña temporal. En el primer acceso, el sistema obliga al investigador a cambiar la contraseña.} \\
 \hline
 \end{tabular}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_21}
+\caption{Diagrama del caso de uso CU-21: Crear cuenta de usuario [autoría propia].}
+\label{fig:cu_ind_21}
+\end{figure}
 
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
@@ -2252,6 +2399,13 @@ caso de uso.
 \hline
 \end{tabular}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_22}
+\caption{Diagrama del caso de uso CU-22: Desactivar cuenta de usuario [autoría propia].}
+\label{fig:cu_ind_22}
+\end{figure}
+
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
 \hline
@@ -2311,6 +2465,13 @@ caso de uso.
 \hline
 \end{tabular}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_23}
+\caption{Diagrama del caso de uso CU-23: Monitorear estado del sistema [autoría propia].}
+\label{fig:cu_ind_23}
+\end{figure}
+
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
 \hline
@@ -2361,6 +2522,13 @@ caso de uso.
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{Desde el panel de administración, el Administrador accede a la lista completa de experimentos de todos los investigadores. Puede consultar resultados, ver el estado del análisis y, como creador o Administrador, editar o eliminar cualquier experimento.} \\
 \hline
 \end{tabular}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_24}
+\caption{Diagrama del caso de uso CU-24: Gestionar experimentos globales [autoría propia].}
+\label{fig:cu_ind_24}
+\end{figure}
 
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
@@ -2420,6 +2588,13 @@ caso de uso.
 \textbf{Resumen} & \multicolumn{2}{>{\raggedright\arraybackslash}p{11.9cm}|}{El \textit{Worker} identifica los videos que expiran en 7 días o menos y emite avisos en la lista de experimentos. Al cumplirse los 30 días, elimina el archivo de video del almacenamiento y deja su campo \texttt{archivo} en nulo, conservando los resultados y reportes asociados.} \\
 \hline
 \end{tabular}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth, height=0.32\textheight, keepaspectratio]{figures/diagramas/cu_ind_25}
+\caption{Diagrama del caso de uso CU-25: Borrar video automáticamente [autoría propia].}
+\label{fig:cu_ind_25}
+\end{figure}
 
 \noindent
 \begin{tabular}{|p{1.0cm}|p{3.7cm}|p{9.5cm}|}
