@@ -262,7 +262,7 @@ por el brillo del clip.
 
 La red es de fusión. Una rama es un \textit{backbone} R(2+1)D-18 preentrenado con Kinetics-400, que analiza el
 movimiento y la apariencia del clip. En paralelo, una rama de perceptrón multicapa recibe los 15 rasgos medidos en la
-etapa de cilindros y 7 reglas del observador. Ambas ramas se unen en una capa lineal de tres salidas: nado,
+etapa de cilindros y 7 reglas del observador (sección~\ref{sec:medidas_red}). Ambas ramas se unen en una capa lineal de tres salidas: nado,
 escalamiento e inmovilidad. Cada salida es una probabilidad, y las tres suman 1.
 
 La red se entrena con aprendizaje supervisado sobre los segundos etiquetados por el equipo. El entrenamiento dura 15
@@ -293,6 +293,110 @@ El pipeline procesa el video completo; para cada espécimen se conservan y revis
 video dura menos, se conservan todos sus segundos. La revisión de la pausa (tres segundos seguidos sin ver) solo mira
 esos 300 segundos. Antes de guardarlos, el \textit{worker} los renumera de 1 a 300 para que coincidan con el video
 recortado que ve el usuario.
+
+\subsection{Medidas de entrada de la red}
+\label{sec:medidas_red}
+
+La rama de medidas de la red recibe 22 números por segundo y por espécimen: 15 rasgos y 7 reglas de observación. No
+tienen una unidad física: las distancias se expresan en largos de cuerpo y el resto son cantidades sin unidad o
+niveles de gris. Antes de entrar a la red, cada número se centra y se escala con la media y la desviación del
+entrenamiento, y los valores faltantes se rellenan con la mediana del entrenamiento.
+
+\paragraph{Los 15 rasgos.} Los calcula la etapa de cilindros en una ventana de 4 segundos centrada en el segundo que
+se clasifica. Si en la ventana hay menos de cinco mediciones del espécimen, los 15 salen vacíos. La longitud de
+referencia, el largo de cuerpo, es la mediana del largo del cuerpo medido en todo el video; el largo del cuerpo en
+cada cuadro es cuatro veces la desviación de la silueta sin cola a lo largo de su eje mayor. La
+tabla~\ref{tab:rasgos_red} define cada rasgo.
+
+\begin{longtable}{|p{1.7cm}|p{1.6cm}|p{6.6cm}|p{3.4cm}|}
+\caption{Los 15 rasgos de la rama de medidas.}
+\label{tab:rasgos_red}\\
+\hline
+\textbf{Grupo} & \textbf{Rasgo} & \textbf{Qué mide} & \textbf{Unidad} \\
+\hline
+\endfirsthead
+\caption[]{Los 15 rasgos de la rama de medidas (continuación).}\\
+\hline
+\textbf{Grupo} & \textbf{Rasgo} & \textbf{Qué mide} & \textbf{Unidad} \\
+\hline
+\endhead
+Trayectoria & \texttt{nq} & Cuántos de los cuatro cuadrantes del cilindro visitó el centro del espécimen, contando
+solo los que ocupó al menos 0.2 s. & Cuenta, de 0 a 4 \\
+\hline
+Trayectoria & \texttt{rng} & Extensión del recorrido: diagonal del rectángulo que encierra las posiciones del centro
+en la ventana. & Largos de cuerpo \\
+\hline
+Trayectoria & \texttt{path} & Distancia total recorrida por el centro, dividida entre la duración de la ventana. &
+Largos de cuerpo por segundo \\
+\hline
+Trayectoria & \texttt{spanx} & Anchura horizontal del recorrido del centro. & Largos de cuerpo \\
+\hline
+Trayectoria & \texttt{spany} & Altura del recorrido del centro. & Largos de cuerpo \\
+\hline
+Movimiento & \texttt{me} & Cuánto cambia la imagen dentro del espécimen respecto a unos 0.4 s antes (diferencia de
+gris promediada en la silueta); promedio de la ventana. & Niveles de gris (0 a 255) \\
+\hline
+Movimiento & \texttt{me\_max} & El máximo de \texttt{me} dentro de la ventana. & Niveles de gris (0 a 255) \\
+\hline
+Movimiento & \texttt{iou} & Solape entre la silueta actual y la de unos 0.4 s antes (intersección entre unión): 1 si
+es igual, 0 si no se tocan; promedio de la ventana. & Sin unidad, de 0 a 1 \\
+\hline
+Movimiento & \texttt{dice} & Lo mismo con el índice de Dice (dos veces la intersección entre la suma de las dos
+áreas). & Sin unidad, de 0 a 1 \\
+\hline
+Postura & \texttt{vert} & Qué tan vertical está el eje mayor del cuerpo: 0 es horizontal y 1 vertical. & Sin
+unidad, de 0 a 1 \\
+\hline
+Postura & \texttt{elong} & Qué tan alargado está el cuerpo (eje mayor entre eje menor de la silueta sin cola): 1 es
+redondo y crece al alargarse. & Sin unidad, 1 o más \\
+\hline
+Cabeza & \texttt{hrise} & Altura máxima de la cabeza sobre la línea de agua en la ventana; es negativa si la cabeza
+está bajo el agua. & Fracción de la altura de la columna de agua \\
+\hline
+Cabeza & \texttt{hmean} & Lo mismo, con el promedio de la ventana. & Fracción de la altura de la columna de agua \\
+\hline
+Forma & \texttt{above} & Cuánta silueta hay por encima de la línea de agua, promediada en la ventana. & Largos de
+cuerpo al cuadrado \\
+\hline
+Forma & \texttt{area} & Área de la silueta completa, promediada en la ventana. & Largos de cuerpo al cuadrado \\
+\hline
+\end{longtable}
+
+\paragraph{Las 7 reglas de observación.} Las calcula la propia red sobre los 16 cuadros en gris del recorte del
+segundo, que miden 128 por 96 píxeles. Cada cuadro se reescala a su rango de brillo antes de medir. El espécimen bajo
+el agua son los píxeles por debajo de la línea de agua que tienen brillo alto, y la silueta se parte en una mitad baja y
+una mitad alta por la fila donde se acumula la mitad de sus píxeles. La energía de una zona es la suma de los cambios de
+brillo entre cuadros consecutivos dentro de ella, dividida entre su número de píxeles. La
+tabla~\ref{tab:reglas_red} define cada regla.
+
+\begin{table}[H]
+\centering
+\caption{Las 7 reglas de observación de la rama de medidas.}
+\label{tab:reglas_red}
+\begin{tabular}{|p{2.0cm}|p{2.6cm}|p{8.5cm}|}
+\hline
+\textbf{Zona} & \textbf{Regla} & \textbf{Qué mide} \\
+\hline
+Mitad baja & \texttt{tras\_media} & Promedio de la energía de cambio en la mitad baja de la silueta. \\
+\hline
+Mitad baja & \texttt{tras\_max} & Máximo de esa energía entre cuadros consecutivos. \\
+\hline
+Mitad baja & \texttt{tras\_abrupto} & Qué tan brusco es el pico: máximo entre mediana. Un valor alto indica un golpe
+aislado de movimiento. \\
+\hline
+Mitad alta & \texttt{del\_media} & Promedio de la energía de cambio en la mitad alta de la silueta. \\
+\hline
+Cociente & \texttt{tras\_sobre\_del} & Cuánto se mueve la mitad baja respecto a la alta. \\
+\hline
+Nariz & \texttt{nariz\_max} & Máximo de la variación de brillo en la franja justo sobre la línea de agua. \\
+\hline
+Nariz & \texttt{nariz\_abrupto} & Qué tan brusca es esa variación: máximo entre mediana. \\
+\hline
+\end{tabular}
+\end{table}
+
+Las reglas no tienen unidad: miden cambios de brillo en una escala de 0 a 1 entre cuadros separados por 0.25 s, o
+cocientes entre ellos. La franja de la nariz es la que queda justo sobre la línea de agua.
 
 % Cifras al 17-nov-2026: el modelo del sistema se entreno con 11 videos y 25 especimenes (7 987 segundos de las tres
 % conductas; 8 248 etiquetados en total), y la validacion por video usa GroupKFold de 5 particiones. No citar nombre de
