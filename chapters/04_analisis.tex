@@ -245,9 +245,9 @@ RF-22 & Resultados
 % ── Lista de experimentos / gestión de experimentos ──────────────────
 RF-23 & \textit{Lista de experimentos}
       & La lista de experimentos debe mostrar todos los experimentos del laboratorio
-        con nombre, fecha, número de grupos, sesión, estado (en cola, procesando, en pausa,
+        con nombre, número de grupos, número de especímenes, videos del Día~2 analizados, estado (en cola, procesando, en pausa,
         completado, error, cancelado; «sin videos» si aún no tiene ninguno y «en espera
-        del Día~2» si solo tiene el video del Día~1) y accesos directos a resultados y descarga (ver RN-08).
+        del Día~2» si solo tiene el video del Día~1), responsable, retención del video y accesos directos a resultados y descarga (ver RN-08).
         La lista es filtrable por estado, año o tratamiento; el filtro por
         tratamiento muestra los experimentos que tengan al menos un grupo con
         ese tratamiento.
@@ -595,7 +595,8 @@ RN-02 & Un video pertenece a exactamente una tanda (y, a través de ella, a un
 RN-03 & Una tanda tiene como máximo dos videos: uno del Día~1 (20~min) y uno del
         Día~2 (5~min). Un experimento, al tener varios grupos y tandas, puede
         acumular muchos más de dos videos en total. Cada tanda admite un video por sesión. El video del Día~1 se guarda, pero
-        no se analiza (ver RN-12).
+        no se analiza (ver RN-12). Esas duraciones son las del protocolo: el sistema no exige
+        una duración mínima ni máxima al video, y analiza los últimos 300~s (todo el video si dura menos).
       & Así funciona el protocolo FST del laboratorio \cite{slattery2012}. Ver RF-09. \\
 \hline
 RN-04 & El análisis lo inicia el sistema automáticamente al terminar la carga. El
@@ -732,7 +733,7 @@ RN-17 & Si en un segundo no se ve al espécimen, ese segundo se registra como «
         cilindro. La imagen fija se toma a la mitad de esos tres segundos, y la pausa se registra
         en la etapa de cilindros. El usuario tiene tres acciones: «Ajustar y continuar», «El recuadro está bien,
         continuar» y «Cancelar análisis». Cancelar pide confirmar con «¿Cancelar el análisis? No se puede reanudar:
-        habrá que subir el video otra vez.»; el análisis cancelado no borra archivos, no crea notificación y no guarda motivo.
+        habrá que subir el video otra vez.»; el análisis cancelado no borra archivos y no guarda motivo, y el sistema avisa a quien creó el experimento en el panel de notificaciones y por correo.
         Si no hay respuesta en 72~horas, el análisis se cancela. Mientras el análisis espera, el sistema atiende el
         siguiente video de la cola. El análisis ajustado vuelve a la cola por delante de los que llegaron después; al
         retomarse, el sistema procesa el video de nuevo desde el principio y aplica el recuadro corregido desde el inicio

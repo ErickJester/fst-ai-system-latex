@@ -575,7 +575,7 @@ procedimiento:
   \item El \textit{worker}procesa el video de nuevo desde el principio; el recuadro corregido rige desde el inicio de esos tres segundos
   (instante $k-1$) y los segundos anteriores se miden con el recuadro original.
   Un mismo cilindro puede pausarse más de una vez en el mismo análisis.
-  \item Si el usuario cancela, el análisis pasa a cancelado sin notificación. Si pasan 72 horas sin respuesta
+  \item Si el usuario cancela, el análisis pasa a cancelado y el sistema crea una notificación, con copia por correo, para quien creó el experimento. Si el correo falla, la cancelación y la notificación quedan hechas. Si pasan 72 horas sin respuesta
   (\texttt{PAUSE\_TIMEOUT\_HOURS}), el \textit{worker} lo cancela y crea una notificación de cancelación. El
   \textit{worker} revisa las pausas vencidas en cada vuelta de la cola, así que la cancelación por vencimiento
   puede ocurrir un poco después de las 72 horas.

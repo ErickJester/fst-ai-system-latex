@@ -91,7 +91,7 @@ cuatro, y no hay tabla de conductas porque no tienen atributos propios.
 \hline
 \texttt{correo} & \texttt{varchar(254)} & No & UK & Correo con el que el usuario inicia sesión y al que llegan los avisos. Acepta cualquier dominio \\
 \hline
-\texttt{contrasenaHash} & \texttt{varchar(255)} & No & & Contraseña cifrada con bcrypt y sal. La contraseña en claro nunca se guarda \\
+\texttt{contrasenaHash} & \texttt{varchar(255)} & No & & \textit{Hash} de la contraseña con bcrypt y sal. La contraseña en claro nunca se guarda \\
 \hline
 \texttt{activo} & \texttt{boolean} & No & & Falso cuando el administrador da de baja la cuenta. La fila se conserva porque sus experimentos la referencian \\
 \hline

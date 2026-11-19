@@ -3004,7 +3004,8 @@ técnica (ver RNF-06). Las capturas de esta sección corresponden a los mockups,
 Formulario con campos de correo electrónico y contraseña. Las credenciales
 incorrectas muestran el mensaje «Correo o contraseña incorrectos», sin revelar cuál campo falló
 (ver RN-01). Incluye enlace de recuperación de contraseña (RF-03). Antes de enviar
-las credenciales, la pantalla comprueba que el correo tenga un formato válido.
+las credenciales, la pantalla comprueba que el correo tenga un formato válido. Al pie hay dos enlaces,
+«Aviso de privacidad» y «Términos y condiciones de uso» (RN-18).
 
 \begin{figure}[H]
 \centering
@@ -3030,7 +3031,10 @@ las credenciales, la pantalla comprueba que el correo tenga un formato válido.
 Una cuenta creada por el Administrador entra con una contraseña temporal y, mientras
 no la cambie, solo puede cambiarla o cerrar sesión (RF-05, RF-07). Después, el
 investigador puede consultar sus datos y cambiar su contraseña desde la pantalla de
-perfil; el identificador institucional es de solo lectura.
+perfil; el identificador institucional es de solo lectura. La pantalla de primer acceso pide la contraseña temporal,
+la nueva contraseña (de al menos 8 caracteres y distinta de la temporal) y su confirmación, y una casilla obligatoria:
+«He leído y acepto el Aviso de privacidad y los Términos y condiciones de uso», con los dos enlaces. Sin marcarla, la
+pantalla responde «Debes aceptar el aviso de privacidad y los términos para continuar.» y no guarda la contraseña (RN-18).
 
 \begin{figure}[H]
 \centering
@@ -3054,7 +3058,7 @@ perfil; el identificador institucional es de solo lectura.
 \subsection{Lista de experimentos}
 
 Lista de experimentos del laboratorio con grupos, especímenes, videos del Día~2,
-estado, responsable, retención y acceso al reporte (ver RN-08). Muestra un aviso
+estado, responsable, retención y las acciones «Ver resultados», «PDF» y «Eliminar…» (ver RN-08). Muestra un aviso
 cuando un video está a menos de 7~días de ser eliminado automáticamente (RF-24).
 Incluye filtros por estado y búsqueda por nombre o tratamiento. Cada experimento
 ofrece la opción de eliminarlo, con un diálogo que pide confirmación (ver RN-09).
@@ -3115,7 +3119,10 @@ cuatro cilindros en el cuadro, la sesión (Día~1 o Día~2) y el archivo. Solo a
 archivos \texttt{.mp4} o \texttt{.mov} en horizontal; el rechazo de formato ocurre en
 el cliente antes de iniciar la subida. Una vez completada la carga válida, el
 análisis inicia automáticamente (RF-12). El segundo paso se repite cada vez que
-se agrega una nueva tanda al experimento, no ocurre una sola vez.
+se agrega una nueva tanda al experimento, no ocurre una sola vez. El botón «+ Agregar otra tanda» permite preparar varias
+tandas en la misma pantalla; se suben una por una, en orden. Junto al botón de guardado, la pantalla indica lo primero
+que falta (por ejemplo, el nombre del grupo, la confirmación de la tanda o el archivo). Solo el Día~2 se analiza: el Día~1
+se guarda para dejar constancia de la sesión de habituación.
 
 La división en pasos se eligió sobre un formulario único porque la carga de video
 puede tardar varios minutos según el tamaño del archivo: separar los datos
@@ -3174,7 +3181,7 @@ cola de trabajos. El análisis continúa aunque el investigador cierre la pesta�
 No hay botón de pausar durante el análisis: es el sistema quien decide cuándo pausar.
 Si pasan tres segundos seguidos sin ver al espécimen, el análisis queda en pausa,
 aparece una notificación y el usuario ve una imagen fija de ese instante, con tres botones en la pantalla de pausa («Ajustar y continuar», «El recuadro está bien, continuar» y «Cancelar
-análisis»); si no responde en 72~horas, el análisis se cancela (RN-17). En la pantalla de progreso, un análisis en pausa solo muestra el enlace «Ajustar o cancelar →». Desde la pantalla de
+análisis»); si no responde en 72~horas, el análisis se cancela (RN-17). En la pantalla de progreso, un análisis en pausa muestra qué cilindro y en qué segundo dejó de verse, el tiempo que queda para responder y el enlace «Ajustar o cancelar →». Si el usuario cancela, el sistema avisa a quien creó el experimento en el panel de notificaciones y por correo. Desde la pantalla de
 revisión el investigador sí puede reiniciar el análisis, si es quien subió los videos del experimento o un
 Administrador (si no, el sistema responde «Solo quien subió el video o un Administrador puede reiniciar este análisis.»): la pantalla avisa antes que se borrarán el resultado anterior y toda la
 revisión hecha, y que no se puede deshacer; al confirmar, el análisis vuelve a «en cola»
@@ -3264,7 +3271,7 @@ no coincide con lo que el usuario observa, pulsa la conducta correcta. Con el vi
 corriendo, el cambio se aplica desde 0.4~s antes del clic hasta el siguiente cambio
 de color; en pausa, cambia solo el segundo actual. Se revisa un espécimen a la vez y
 el avance se guarda como borrador en el navegador hasta que el usuario elige
-«Guardar», momento en que el sistema registra las correcciones, reemplaza la
+«Guardar correcciones», momento en que el sistema registra las correcciones, reemplaza la
 conducta del sistema (CU-17 y CU-18); los totales por minuto se calculan desde las etiquetas y reflejan las correcciones.
 
 El panel lateral muestra la conducta del segundo actual y si es la del
