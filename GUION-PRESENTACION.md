@@ -58,7 +58,7 @@ V: Para eso hay dos partes. Una cadena de análisis de video, que identifica a c
 
 A: Para la visión por computadora usamos OpenCV, que lee, alinea y preprocesa el video, y una sustracción de fondo por percentil para localizar al espécimen en cada cilindro.
 
-V: Para el aprendizaje supervisado, una red R(2+1)D-18 en PyTorch, fusionada con una rama de 22 medidas; un modelo de scikit-learn sobre los rasgos, y un etiquetador propio del equipo.
+V: Para el aprendizaje supervisado, una red R(2+1)D-18 en PyTorch, fusionada con una rama de 22 medidas; y scikit-learn para el etiquetador de gradient boosting, que propone las etiquetas, y para las métricas de validación.
 
 A: La plataforma web usa Spring Boot con Java 21 para la API, React con Vite para la interfaz y un worker en Python para el análisis. Los datos y la cola de análisis van en PostgreSQL, y todo se empaqueta con Docker Compose, un contenedor por servicio.
 
