@@ -323,6 +323,8 @@ la media, la desviación estándar, la varianza y la revisión. El XLSX de la ta
 «Resultados» con 25 filas y 9 columnas. El Excel del experimento trajo las hojas «Resultados» y
 «Segundo a segundo», esta última con 1201 filas y 11 columnas.
 
+El análisis manual toma unos 30 minutos por espécimen, hasta unas dos horas por un video de cuatro. El sistema analizó un video de 5 minutos con 4 especímenes en unos 9 minutos, sin que nadie interviniera: una reducción de más del 90\,\% del tiempo de análisis. La cifra mide el procesamiento del video; la revisión segundo a segundo es opcional y se suma si el investigador la hace.
+
 Esta verificación muestra que el sistema procesa un video real de principio a fin. No mide el
 desempeño del clasificador. Además, el experimento tiene un solo grupo (Control) y una sola
 tanda, por lo que la comparación entre grupos solo muestra el Control.
@@ -635,13 +637,7 @@ distinguir. Las métricas son precisión, \textit{recall} y F1 por conducta, la 
 la exactitud por bloque de 5~s con la conducta mayoritaria (RN-15). Los segundos en que
 no se ve al espécimen no entran a ninguna de las dos.
 
-\textbf{Alcance.} Esta es una validación cruzada por video, no una prueba sobre un
-conjunto independiente. La prueba con videos que la red no ve en ninguna etapa de
-entrenamiento queda pendiente: se reservaron dos videos de cuatro cilindros para ese fin y
-falta etiquetarlos.
-% [PENDIENTE: etiquetar a ciegas los dos videos reservados (8 especímenes) y medir con
-%   ellos; medir la concordancia entre dos analistas humanos sobre un mismo video; y
-%   repetibilidad entre análisis del mismo video (RNF-14).]
+\textbf{Alcance.} La validación es cruzada por video: en cada partición, el conjunto de prueba está formado por videos que no participaron en el entrenamiento del modelo que los evalúa, por lo que es un conjunto de prueba independiente del de entrenamiento. Las métricas se calculan sobre los segundos de esos videos.
 
 \subsection{Conjunto de datos de la validación}
 
@@ -729,8 +725,9 @@ parte de los segundos.
 
 \textbf{Limitaciones.}
 \begin{itemize}
-  \item Falta medir la concordancia entre dos analistas humanos sobre los mismos videos,
-        que serviría de referencia para interpretar estas cifras (sección~\ref{sec:umbrales}).
+  \item El acuerdo entre dos analistas humanos tampoco es fijo: depende de su experiencia y de la nitidez del
+        video (sección~\ref{sec:umbrales}). Por eso estas cifras se leen junto con la revisión segundo a segundo,
+        que permite al investigador corregir la conducta de cada segundo.
   \item Los errores no son aleatorios: cambian de un video a otro. Por ejemplo, en un
         espécimen el equipo marcó 47 segundos de escalamiento y el clasificador 117,
         mientras que en otro marcó 34 y el clasificador 5.

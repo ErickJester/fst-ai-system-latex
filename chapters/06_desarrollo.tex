@@ -554,6 +554,57 @@ capítulo~1). Para ajustarlo con videos nuevos se repiten los pasos anteriores c
 videos, se valida de nuevo y se reemplaza el modelo de la carpeta de solo lectura. El resto del \textit{pipeline} no
 cambia.
 
+\subsection{Adaptación a otro paradigma conductual}
+\label{sec:adaptacion_paradigma}
+
+El módulo de clasificación está separado del resto del sistema. Aplicarlo a otro paradigma conductual, como el
+laberinto en cruz elevado o el campo abierto, exigiría cambiar solo las piezas que dependen de la prueba de nado
+forzado, que enumera la Tabla~\ref{tab:adaptacion_paradigma}. Este trabajo no valida el sistema con otros
+paradigmas.
+
+{\footnotesize\singlespacing
+\begin{longtable}{|>{\raggedright}p{3.2cm}|>{\raggedright}p{5.3cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\caption{Piezas que cambiarían al aplicar el sistema a otro paradigma conductual.
+\label{tab:adaptacion_paradigma}}\\
+\hline
+\textbf{Pieza} & \textbf{En la prueba de nado forzado} & \textbf{Qué cambiaría} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Pieza} & \textbf{En la prueba de nado forzado} & \textbf{Qué cambiaría} \\
+\hline
+\endhead
+Localización
+& Cilindros, línea de agua y suelo.
+& Detectar la arena del nuevo paradigma. \\
+\hline
+Rasgos y reglas
+& Quince rasgos y siete reglas de observación del pataleo y de la nariz.
+& Redefinirlos para las conductas nuevas. \\
+\hline
+Conductas y etiquetas
+& Nado, inmovilidad y escalamiento.
+& Definir las conductas nuevas y etiquetar segundos con el etiquetador del equipo. \\
+\hline
+Modelo
+& R(2+1)D-18 con una rama de medidas y una ventana de 4~s.
+& Reentrenar con las etiquetas nuevas y guardar el modelo en la carpeta de modelos, de solo lectura. \\
+\hline
+Conducta activa
+& Regla con un umbral de 0.80 entre nado y escalamiento.
+& Revisarla o quitarla. \\
+\hline
+Base de datos, reportes y revisión
+& Dominio \texttt{tipo\_conducta} de cuatro valores, columnas Nado, Escalamiento e Inmovilidad en los reportes y colores por conducta en la revisión.
+& Mostrar las conductas nuevas. \\
+\hline
+\end{longtable}
+}
+
+No cambian la carga y validación de videos, la cola de análisis, el \textit{worker}, la API, las cuentas y la
+sesión, los experimentos con sus grupos y tandas, los estados del análisis, la pausa, el borrado automático, la
+descarga de reportes ni la pantalla de revisión segundo a segundo.
+
 \section{Pausa de ajuste}
 \label{sec:pausa}
 
