@@ -39,6 +39,6 @@ error > cancelado > en pausa > procesando > en cola > completado.
 ## Cómo regenerarlos
 
 ```bash
-python diagramas/diagram_design/generadores/gen_estados.py analisis diagramas/diagram_design/estados_analisis.html
+python diagramas/diagram_design/generadores/gen_analisis_nuevo.py estados diagramas/diagram_design/estados_analisis.html
 python diagramas/diagram_design/generadores/gen_estados.py experimento diagramas/diagram_design/estados_experimento.html
 ```

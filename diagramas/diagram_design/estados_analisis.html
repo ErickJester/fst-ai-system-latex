@@ -2,86 +2,84 @@
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Estados del análisis</title>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+<style>html,body{margin:0;background:#faf9f5}svg{display:block;width:1700px;height:800px}</style></head><body><svg viewBox="0 0 1700 800" role="img" aria-labelledby="t1 d1" xmlns="http://www.w3.org/2000/svg">
+<title id="t1">Estados del análisis</title><desc id="d1">Estados de un análisis: en cola, procesando con sus tres etapas, en pausa, completado, error y cancelado.</desc>
+<defs><marker id="ea" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#444" stroke-width="1.3"/></marker></defs>
 <style>
-html,body{margin:0;background:#faf9f5}
-svg{display:block;width:1700px;height:700px}
-</style></head><body><svg viewBox="0 0 1700 700" role="img" aria-labelledby="es-title es-desc" xmlns="http://www.w3.org/2000/svg">
-<title id="es-title">Estados del análisis</title>
-<desc id="es-desc">Estados de un análisis: en cola, procesando con sus tres etapas, en pausa, completado, error y cancelado.</desc>
-<defs><marker id="es-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1 L9,5 L1,9" fill="none" stroke="#444" stroke-width="1.2"/></marker></defs>
-<style>
-.a{font:400 9px 'Geist Mono',monospace;fill:#1a1a1a}
-.nm{font:600 12px Geist,sans-serif;fill:#1a1a1a}
-.st{font:400 8px 'Geist Mono',monospace;fill:#6b6b6b;letter-spacing:.06em}
-.lg text{font:400 9px 'Geist Mono',monospace;fill:#6b6b6b}
+.t{font:600 15px Geist,'Segoe UI',sans-serif;fill:#1a1a1a}
+.b{font:400 12.5px Geist,'Segoe UI',sans-serif;fill:#3a3a3a}
+.l{font:400 12.5px Geist,'Segoe UI',sans-serif;fill:#1a1a1a}
+.tag{font:400 11px 'Geist Mono',monospace;fill:#6b6b6b;letter-spacing:.08em}
+.mod{font:600 17px Geist,'Segoe UI',sans-serif;fill:#1a1a1a}
+.lg text{font:400 12px 'Geist Mono',monospace;fill:#6b6b6b}
 </style>
-<circle cx="30" cy="215" r="7" fill="#1a1a1a"/>
-<rect x="190" y="193" width="160" height="44" rx="8" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
-<text x="270.0" y="219.0" text-anchor="middle" class="nm">en cola</text>
-<rect x="500" y="140" width="860" height="150" rx="10" fill="#f1eee5" stroke="#6b6b6b" stroke-dasharray="6,4"/>
-<text x="514" y="160" class="st">PROCESANDO</text>
-<rect x="530" y="193" width="160" height="44" rx="8" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
-<text x="610.0" y="219.0" text-anchor="middle" class="nm">preprocesamiento</text>
-<rect x="840" y="193" width="160" height="44" rx="8" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
-<text x="920.0" y="219.0" text-anchor="middle" class="nm">cilindros</text>
-<rect x="1150" y="193" width="160" height="44" rx="8" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
-<text x="1230.0" y="219.0" text-anchor="middle" class="nm">clasificación</text>
-<rect x="1470" y="193" width="160" height="44" rx="8" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
-<text x="1550.0" y="219.0" text-anchor="middle" class="nm">completado</text>
-<rect x="700" y="440" width="160" height="50" rx="8" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/>
-<text x="780.0" y="469.0" text-anchor="middle" class="nm">error</text>
-<rect x="1150" y="440" width="160" height="50" rx="8" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="5,4"/>
-<text x="1230.0" y="469.0" text-anchor="middle" class="nm">en pausa</text>
-<rect x="1470" y="440" width="160" height="50" rx="8" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1"/>
-<text x="1550.0" y="469.0" text-anchor="middle" class="nm">cancelado</text>
-<circle cx="1550" cy="305" r="9" fill="#faf9f5" stroke="#1a1a1a"/><circle cx="1550" cy="305" r="5" fill="#1a1a1a"/>
-<circle cx="780" cy="560" r="9" fill="#faf9f5" stroke="#1a1a1a"/><circle cx="780" cy="560" r="5" fill="#1a1a1a"/>
-<circle cx="1550" cy="565" r="9" fill="#faf9f5" stroke="#1a1a1a"/><circle cx="1550" cy="565" r="5" fill="#1a1a1a"/>
-<path d="M37,215 L190,215" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#es-arr)"/>
-<rect x="48" y="188" width="130" height="23" fill="#faf9f5"/>
-<text x="113" y="197" text-anchor="middle" class="a">se validó y almacenó</text>
-<text x="113" y="208" text-anchor="middle" class="a">el video (CU-07, RF-12)</text>
-<path d="M350,215 L530,215" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#es-arr)"/>
-<rect x="378" y="188" width="125" height="23" fill="#faf9f5"/>
-<text x="440" y="197" text-anchor="middle" class="a">el Worker tomó la</text>
-<text x="440" y="208" text-anchor="middle" class="a">tarea (polling, CU-12)</text>
-<path d="M690,215 L840,215" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#es-arr)"/>
-<path d="M1000,215 L1150,215" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#es-arr)"/>
-<rect x="1034" y="186" width="82" height="23" fill="#faf9f5"/>
-<text x="1075" y="195" text-anchor="middle" class="a">[se hallaron</text>
-<text x="1075" y="206" text-anchor="middle" class="a">los cilindros]</text>
-<path d="M1310,215 L1470,215" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#es-arr)"/>
-<rect x="1363" y="188" width="103" height="23" fill="#faf9f5"/>
-<text x="1415" y="197" text-anchor="middle" class="a">se completaron las</text>
-<text x="1415" y="208" text-anchor="middle" class="a">tres etapas</text>
-<path d="M610,237 L610,465 L700,465" fill="none" stroke="#6b6b6b" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#es-arr)"/>
-<rect x="506" y="361" width="98" height="23" fill="#faf9f5"/>
-<text x="600" y="370" text-anchor="end" class="a">[no se pudo abrir</text>
-<text x="600" y="381" text-anchor="end" class="a">el video] (RN-11)</text>
-<path d="M920,237 L920,465 L860,465" fill="none" stroke="#6b6b6b" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#es-arr)"/>
-<rect x="928" y="361" width="209" height="23" fill="#faf9f5"/>
-<text x="932" y="370" text-anchor="start" class="a">[no se hallaron los cilindros] (RN-11)</text>
-<text x="932" y="381" text-anchor="start" class="a">se generó el reporte de diagnóstico</text>
-<path d="M1230,237 L1230,440" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#es-arr)"/>
-<rect x="1238" y="341" width="194" height="23" fill="#faf9f5"/>
-<text x="1242" y="350" text-anchor="start" class="a">[3 s seguidos sin ver al espécimen]</text>
-<text x="1242" y="361" text-anchor="start" class="a">se avisó al usuario (RN-17)</text>
-<path d="M1310,465 L1470,465" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#es-arr)"/>
-<rect x="1317" y="431" width="146" height="23" fill="#faf9f5"/>
-<text x="1390" y="440" text-anchor="middle" class="a">el usuario canceló o no</text>
-<text x="1390" y="451" text-anchor="middle" class="a">respondió en 5 min (RN-17)</text>
-<path d="M1230,490 L1230,620 L270,620 L270,237" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#es-arr)"/>
-<rect x="606" y="631" width="289" height="23" fill="#faf9f5"/>
-<text x="750" y="640" text-anchor="middle" class="a">el usuario ajustó el recuadro</text>
-<text x="750" y="651" text-anchor="middle" class="a">vuelve al frente de la cola y continúa desde la pausa</text>
-<path d="M900,140 L900,92 L310,92 L310,193" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#es-arr)"/>
-<rect x="437" y="75" width="326" height="12" fill="#faf9f5"/>
-<text x="600" y="84" text-anchor="middle" class="a">el Worker se apagó a media análisis; al arrancar lo reencola</text>
-<path d="M1550,193 L1550,50 L230,50 L230,193" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#es-arr)"/>
-<rect x="779" y="33" width="241" height="12" fill="#faf9f5"/>
-<text x="900" y="42" text-anchor="middle" class="a">el investigador reinició el análisis (RN-04)</text>
-<path d="M1550,237 L1550,296" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#es-arr)"/>
-<path d="M780,490 L780,551" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#es-arr)"/>
-<path d="M1550,490 L1550,556" fill="none" stroke="#1a1a1a" stroke-width="1.1" marker-end="url(#es-arr)"/>
-<g transform="translate(40,680)" class="lg"><line x1="0" y1="0" x2="28" y2="0" stroke="#1a1a1a"/><path d="M22,-4 L28,0 L22,4" fill="none" stroke="#1a1a1a"/><text x="38" y="3">TRANSICIÓN</text><line x1="140" y1="0" x2="168" y2="0" stroke="#6b6b6b" stroke-dasharray="4,3"/><path d="M162,-4 L168,0 L162,4" fill="none" stroke="#6b6b6b"/><text x="178" y="3">FALLA</text><rect x="250" y="-8" width="22" height="14" rx="3" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.5"/><text x="280" y="3">ERROR</text><rect x="350" y="-8" width="22" height="14" rx="3" fill="#faf9f5" stroke="#1a1a1a" stroke-dasharray="4,3"/><text x="380" y="3">EN PAUSA</text><circle cx="480" cy="0" r="6" fill="#1a1a1a"/><text x="494" y="3">INICIO</text><circle cx="570" cy="0" r="8" fill="#faf9f5" stroke="#1a1a1a"/><circle cx="570" cy="0" r="4" fill="#1a1a1a"/><text x="584" y="3">FIN</text></g>
+<circle cx="32" cy="235" r="9" fill="#1a1a1a"/>
+<rect x="190" y="210" width="160" height="50" rx="9" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.2"/>
+<text x="270.0" y="240" text-anchor="middle" class="t">en cola</text>
+<rect x="480" y="150" width="900" height="170" rx="12" fill="#f1eee5" stroke="#6b6b6b" stroke-dasharray="7,5"/>
+<text x="496" y="174" class="tag">PROCESANDO</text>
+<rect x="510" y="210" width="190" height="50" rx="9" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.2"/>
+<text x="605.0" y="240" text-anchor="middle" class="t">preprocesamiento</text>
+<rect x="820" y="210" width="160" height="50" rx="9" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.2"/>
+<text x="900.0" y="240" text-anchor="middle" class="t">cilindros</text>
+<rect x="1120" y="210" width="170" height="50" rx="9" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.2"/>
+<text x="1205.0" y="240" text-anchor="middle" class="t">clasificación</text>
+<rect x="1470" y="210" width="170" height="50" rx="9" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.2"/>
+<text x="1555.0" y="240" text-anchor="middle" class="t">completado</text>
+<rect x="560" y="500" width="160" height="54" rx="9" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.8"/>
+<text x="640.0" y="532" text-anchor="middle" class="t">error</text>
+<rect x="1000" y="500" width="160" height="54" rx="9" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.2" stroke-dasharray="6,4"/>
+<text x="1080.0" y="532" text-anchor="middle" class="t">en pausa</text>
+<rect x="1330" y="500" width="160" height="54" rx="9" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.2"/>
+<text x="1410.0" y="532" text-anchor="middle" class="t">cancelado</text>
+<circle cx="640" cy="640" r="12" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.3"/><circle cx="640" cy="640" r="6.5" fill="#1a1a1a"/>
+<circle cx="1410" cy="640" r="12" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.3"/><circle cx="1410" cy="640" r="6.5" fill="#1a1a1a"/>
+<circle cx="1555" cy="340" r="12" fill="#faf9f5" stroke="#1a1a1a" stroke-width="1.3"/><circle cx="1555" cy="340" r="6.5" fill="#1a1a1a"/>
+<path d="M41,235 L190,235" fill="none" stroke="#1a1a1a" stroke-width="1.3" marker-end="url(#ea)"/>
+<rect x="78" y="192" width="68" height="35" fill="#faf9f5"/>
+<text x="112" y="205" text-anchor="middle" class="l">se validó</text>
+<text x="112" y="221" text-anchor="middle" class="l">el video</text>
+<path d="M350,235 L510,235" fill="none" stroke="#1a1a1a" stroke-width="1.3" marker-end="url(#ea)"/>
+<rect x="383" y="192" width="93" height="35" fill="#faf9f5"/>
+<text x="430" y="205" text-anchor="middle" class="l">el Worker</text>
+<text x="430" y="221" text-anchor="middle" class="l">tomó la tarea</text>
+<path d="M700,235 L820,235" fill="none" stroke="#1a1a1a" stroke-width="1.3" marker-end="url(#ea)"/>
+<path d="M980,235 L1120,235" fill="none" stroke="#1a1a1a" stroke-width="1.3" marker-end="url(#ea)"/>
+<rect x="1003" y="192" width="93" height="35" fill="#faf9f5"/>
+<text x="1050" y="205" text-anchor="middle" class="l">se hallaron</text>
+<text x="1050" y="221" text-anchor="middle" class="l">los cilindros</text>
+<path d="M1290,235 L1470,235" fill="none" stroke="#1a1a1a" stroke-width="1.3" marker-end="url(#ea)"/>
+<rect x="1327" y="192" width="106" height="35" fill="#faf9f5"/>
+<text x="1380" y="205" text-anchor="middle" class="l">terminaron</text>
+<text x="1380" y="221" text-anchor="middle" class="l">las tres etapas</text>
+<path d="M1555,260 L1555,328" fill="none" stroke="#1a1a1a" stroke-width="1.3" marker-end="url(#ea)"/>
+<path d="M605,260 L605,400 L640,400 L640,500" fill="none" stroke="#6b6b6b" stroke-width="1.3" stroke-dasharray="5,4" marker-end="url(#ea)"/>
+<rect x="495" y="382" width="100" height="35" fill="#faf9f5"/>
+<text x="590" y="395" text-anchor="end" class="l">no se pudo</text>
+<text x="590" y="411" text-anchor="end" class="l">abrir el video</text>
+<path d="M860,260 L860,420 L690,420 L690,500" fill="none" stroke="#6b6b6b" stroke-width="1.3" stroke-dasharray="5,4" marker-end="url(#ea)"/>
+<rect x="755" y="387" width="100" height="35" fill="#faf9f5"/>
+<text x="850" y="400" text-anchor="end" class="l">no se hallaron</text>
+<text x="850" y="416" text-anchor="end" class="l">los cilindros</text>
+<path d="M640,554 L640,628" fill="none" stroke="#1a1a1a" stroke-width="1.3" marker-end="url(#ea)"/>
+<path d="M940,260 L940,380 L1080,380 L1080,500" fill="none" stroke="#1a1a1a" stroke-width="1.3" marker-end="url(#ea)"/>
+<rect x="1087" y="427" width="112" height="35" fill="#faf9f5"/>
+<text x="1092" y="440" text-anchor="start" class="l">3 s seguidos sin</text>
+<text x="1092" y="456" text-anchor="start" class="l">ver al espécimen</text>
+<path d="M1160,527 L1330,527" fill="none" stroke="#1a1a1a" stroke-width="1.3" marker-end="url(#ea)"/>
+<rect x="1182" y="484" width="125" height="35" fill="#faf9f5"/>
+<text x="1245" y="497" text-anchor="middle" class="l">el usuario cancela</text>
+<text x="1245" y="513" text-anchor="middle" class="l">o pasan 72 h</text>
+<path d="M1410,554 L1410,628" fill="none" stroke="#1a1a1a" stroke-width="1.3" marker-end="url(#ea)"/>
+<path d="M1080,554 L1080,720 L270,720 L270,260" fill="none" stroke="#1a1a1a" stroke-width="1.3" marker-end="url(#ea)"/>
+<rect x="547" y="687" width="266" height="35" fill="#faf9f5"/>
+<text x="680" y="700" text-anchor="middle" class="l">el usuario ajusta o confirma el recuadro</text>
+<text x="680" y="716" text-anchor="middle" class="l">vuelve al frente de la cola</text>
+<path d="M700,150 L700,100 L310,100 L310,210" fill="none" stroke="#1a1a1a" stroke-width="1.3" marker-end="url(#ea)"/>
+<rect x="333" y="79" width="375" height="19" fill="#faf9f5"/>
+<text x="520" y="92" text-anchor="middle" class="l">el Worker se apagó a media tarea: al arrancar lo reencola</text>
+<path d="M1555,210 L1555,52 L230,52 L230,210" fill="none" stroke="#1a1a1a" stroke-width="1.3" marker-end="url(#ea)"/>
+<rect x="780" y="31" width="240" height="19" fill="#faf9f5"/>
+<text x="900" y="44" text-anchor="middle" class="l">el investigador reinició el análisis</text>
+<g transform="translate(40,780)" class="lg"><line x1="0" y1="0" x2="32" y2="0" stroke="#1a1a1a" stroke-width="1.3"/><path d="M25,-4 L32,0 L25,4" fill="none" stroke="#1a1a1a"/><text x="40" y="4">transición</text><line x1="150.0" y1="0" x2="182.0" y2="0" stroke="#6b6b6b" stroke-dasharray="5,4"/><path d="M175.0,-4 L182.0,0 L175.0,4" fill="none" stroke="#6b6b6b"/><text x="190.0" y="4">falla</text><rect x="262.0" y="-8" width="26" height="16" rx="4" fill="#fbe9e2" stroke="#d9532c" stroke-width="1.6"/><text x="296.0" y="4">error</text><rect x="368.0" y="-8" width="26" height="16" rx="4" fill="#faf9f5" stroke="#1a1a1a" stroke-dasharray="5,3"/><text x="402.0" y="4">en pausa</text><circle cx="504.8" cy="0" r="7" fill="#1a1a1a"/><text x="520.8" y="4">inicio</text><circle cx="610.4" cy="0" r="10" fill="#faf9f5" stroke="#1a1a1a"/><circle cx="610.4" cy="0" r="5.5" fill="#1a1a1a"/><text x="628.4" y="4">fin</text></g>
 </svg></body></html>
