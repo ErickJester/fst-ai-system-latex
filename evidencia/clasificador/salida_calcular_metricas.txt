@@ -1,0 +1,30 @@
+== corridas\base.npz: 7987 segundos, exactitud 0.710, F1 promedio 0.697
+   escalamiento  precisión 0.601  recall 0.699  F1 0.646  segundos 1244
+   inmovilidad   precisión 0.731  recall 0.693  F1 0.712  segundos 2924
+   nado          precisión 0.737  recall 0.728  F1 0.732  segundos 3819
+   matriz (filas: humano; columnas: red): [[869, 89, 286], [194, 2026, 704], [384, 656, 2779]]
+== corridas\ens3_tta_ep8.npz: 7987 segundos, exactitud 0.725, F1 promedio 0.713
+   escalamiento  precisión 0.640  recall 0.698  F1 0.668  segundos 1244
+   inmovilidad   precisión 0.728  recall 0.742  F1 0.735  segundos 2924
+   nado          precisión 0.755  recall 0.721  F1 0.738  segundos 3819
+   matriz (filas: humano; columnas: red): [[868, 85, 291], [150, 2170, 604], [338, 727, 2754]]
+== corridas\ep8.npz: 7987 segundos, exactitud 0.720, F1 promedio 0.705
+   escalamiento  precisión 0.614  recall 0.681  F1 0.646  segundos 1244
+   inmovilidad   precisión 0.726  recall 0.732  F1 0.729  segundos 2924
+   nado          precisión 0.756  recall 0.724  F1 0.740  segundos 3819
+   matriz (filas: humano; columnas: red): [[847, 114, 283], [174, 2139, 611], [358, 695, 2766]]
+== corridas\junto.npz: 7987 segundos, exactitud 0.683, F1 promedio 0.680
+   escalamiento  precisión 0.643  recall 0.711  F1 0.675  segundos 1244
+   inmovilidad   precisión 0.697  recall 0.650  F1 0.673  segundos 2924
+   nado          precisión 0.688  recall 0.699  F1 0.693  segundos 3819
+   matriz (filas: humano; columnas: red): [[884, 55, 305], [114, 1902, 908], [376, 773, 2670]]
+== corridas\reg_ep8.npz: 7987 segundos, exactitud 0.712, F1 promedio 0.707
+   escalamiento  precisión 0.653  recall 0.732  F1 0.690  segundos 1244
+   inmovilidad   precisión 0.715  recall 0.706  F1 0.710  segundos 2924
+   nado          precisión 0.732  recall 0.710  F1 0.721  segundos 3819
+   matriz (filas: humano; columnas: red): [[910, 75, 259], [125, 2063, 736], [358, 748, 2713]]
+== corridas\sin_frontera_ep8.npz: 7987 segundos, exactitud 0.685, F1 promedio 0.681
+   escalamiento  precisión 0.653  recall 0.695  F1 0.673  segundos 1244
+   inmovilidad   precisión 0.699  recall 0.644  F1 0.670  segundos 2924
+   nado          precisión 0.686  recall 0.713  F1 0.699  segundos 3819
+   matriz (filas: humano; columnas: red): [[864, 67, 313], [107, 1884, 933], [352, 745, 2722]]

@@ -1,0 +1,5 @@
+﻿,precisión,recall,F1,segundos
+escalamiento,0.601,0.699,0.646,1244.0
+inmovilidad,0.731,0.693,0.712,2924.0
+nado,0.737,0.728,0.732,3819.0
+exactitud global,,,0.71,7987.0

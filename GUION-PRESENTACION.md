@@ -4,7 +4,9 @@ A: Imaginemos que por parte del IPN se desarrolla un antidepresivo tan efectivo 
 
 V: Pero para dichos modelos preclínicos, se analiza por experimentos. Esto actualmente lo hace a mano el Laboratorio de Bioquímica Estructural de la ENMyH. Nuestro trabajo hace que esa etapa la haga un sistema y puedan avanzar más rápido y con un criterio consistente.
 
-A: Buenos días. Somos Ángel Frausto y Vanesa Rodríguez. Presentamos el Trabajo Terminal II, número 2026-B066: *Prototipo de un sistema web de análisis conductual asistido por IA en un modelo de conducta depresiva en rata mediante nado forzado*. Nuestros directores son la Dra. Martha Rosa Cordero López y el Dr. Israel Salas Ramírez.
+A: Buenas tardes a los sinodales, directores y presentes que nos acompañan. El día de hoy estaremos presentando el Trabajo Terminal II con número 2026-B066, que lleva por nombre *Prototipo de un sistema web de análisis conductual asistido por IA en un modelo de conducta depresiva en rata mediante nado forzado*. Mi nombre es Ángel Frausto Robles.
+
+V: Mi nombre es Vanesa Rodríguez Verdín Sandoval. Nuestros directores son la Dra. Martha Rosa Cordero López y el Dr. Israel Salas Ramírez.
 
 ### Diapositiva 2 — Índice
 
@@ -12,7 +14,9 @@ V: Vamos a ver el contexto y los objetivos, la propuesta de solución, las herra
 
 ### Diapositiva 3 — Contexto
 
-V: La prueba de nado forzado, propuesta por Porsolt en 1977, es la más citada para evaluar antidepresivos antes de pasar a ensayos en humanos. Hay más de 8,000 artículos que la reportan desde el año 2000.
+V: Vamos a empezar con el contexto, hablando sobre la prueba de nado forzado, por sus siglas en inglés FST (*Forced Swim Test*). Esta prueba, propuesta por Porsolt en 1977, es la más citada para evaluar antidepresivos antes de pasar a ensayos en humanos.
+
+A: Adicionando: desde 1977 la prueba ha tenido modificaciones, y los protocolos varían de un laboratorio a otro. Además, analizar los videos sigue siendo trabajo manual. Por eso un criterio consistente y automático es lo que aporta nuestro trabajo.
 
 V: Lo que se mide es qué hace cada espécimen. La inmovilidad refleja desesperanza conductual y se reduce con antidepresivos. El nado activo y el escalamiento indican qué sistema neurotransmisor actúa.
 
@@ -84,9 +88,9 @@ V: Arriba, fuera del flujo por video, está el entrenamiento: el equipo revisa l
 
 ### Diapositiva 13 — Diagrama de flujo del pipeline de análisis
 
-A: El pipeline tiene tres etapas. Primero, el preprocesamiento: comprueba que el video se abra y lee su ancho, alto y duración. Después, la localización de los cilindros: alinea la cámara, construye el fondo, ubica la línea de agua y el suelo, separa los cilindros y mide al espécimen en cada uno.
+A: El pipeline tiene cuatro módulos. Primero, el preprocesamiento: comprueba que el video se abra y lee su ancho, alto y duración. Después, la localización de los cilindros: alinea la cámara, construye el fondo, ubica la línea de agua y el suelo, separa los cilindros y mide al espécimen en cada uno.
 
-V: Al final, la clasificación: mide 15 rasgos y 7 reglas de observación, arma un clip de 4 segundos alrededor de cada segundo, la red da tres salidas y una regla con umbral de 0.80 asigna la conducta.
+V: Después, la clasificación: mide 15 rasgos y 7 reglas de observación, arma un clip de 4 segundos alrededor de cada segundo, la red da tres salidas y una regla con umbral de 0.80 asigna la conducta. Al final, los resultados: se calculan los totales y los bloques de 5 segundos cuando se muestran, y no se guardan.
 
 V: Si el video no abre o no se encuentran los cilindros, el análisis termina en error y genera un reporte de diagnóstico. Si un espécimen no se ve tres segundos seguidos, el análisis queda en pausa, y el usuario tiene 72 horas para ajustar el recuadro del cilindro y continuar.
 

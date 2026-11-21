@@ -2,17 +2,20 @@
 Fuente de verdad: diagramas/estados_analisis.puml y diagramas/pipeline.puml (y los cap. 5 y 6).
 Uso: gen_analisis_nuevo.py estados salida.html | pipeline salida.html
 """
-import html, sys
+import html, sys, os
+DIAPO = os.environ.get('DIAPO') == '1'
+KX, KY, F = (1.32, 1.17, 1.3) if DIAPO else (1, 1, 1)
+PITCH = 16 * F
 
 esc = html.escape
 FONT = '''<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">'''
-CSS = '''
-.t{font:600 15px Geist,'Segoe UI',sans-serif;fill:#1a1a1a}
-.b{font:400 12.5px Geist,'Segoe UI',sans-serif;fill:#3a3a3a}
-.l{font:400 12.5px Geist,'Segoe UI',sans-serif;fill:#1a1a1a}
-.tag{font:400 11px 'Geist Mono',monospace;fill:#6b6b6b;letter-spacing:.08em}
-.mod{font:600 17px Geist,'Segoe UI',sans-serif;fill:#1a1a1a}
-.lg text{font:400 12px 'Geist Mono',monospace;fill:#6b6b6b}
+CSS = f'''
+.t{{font:600 {15*F:.1f}px Geist,'Segoe UI',sans-serif;fill:#1a1a1a}}
+.b{{font:400 {12.5*F:.1f}px Geist,'Segoe UI',sans-serif;fill:#3a3a3a}}
+.l{{font:400 {12.5*F:.1f}px Geist,'Segoe UI',sans-serif;fill:#1a1a1a}}
+.tag{{font:400 {11*F:.1f}px 'Geist Mono',monospace;fill:#6b6b6b;letter-spacing:.08em}}
+.mod{{font:600 {17*F:.1f}px Geist,'Segoe UI',sans-serif;fill:#1a1a1a}}
+.lg text{{font:400 {12*F:.1f}px 'Geist Mono',monospace;fill:#6b6b6b}}
 '''
 INK, MUTE, PAPER = '#1a1a1a', '#6b6b6b', '#faf9f5'
 
@@ -36,6 +39,7 @@ class Lienzo:
         self.o, self.m = [], marker
 
     def caja(self, x, y, w, h, lineas, tipo='normal', pill=False):
+        x, y, w, h = x * KX, y * KY, w * KX, h * KY
         fill, stroke, sw, dash = PAPER, INK, 1.2, ''
         if tipo == 'error':
             fill, stroke, sw = '#fbe9e2', '#d9532c', 1.8
@@ -48,41 +52,46 @@ class Lienzo:
         rx = h // 2 if pill else 9
         self.o.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="{fill}" stroke="{stroke}" stroke-width="{sw}"{dash}/>')
         n = len(lineas)
-        y0 = y + h / 2 - (n - 1) * 9 + 5
+        y0 = y + h / 2 - (n - 1) * 9 * F + 5 * F
         for i, t in enumerate(lineas):
-            self.o.append(f'<text x="{x + w/2}" y="{y0 + i*18:.0f}" text-anchor="middle" class="{"t" if (i == 0 or (tipo == "normal" and not pill)) else "b"}">{esc(t)}</text>')
+            self.o.append(f'<text x="{x + w/2}" y="{y0 + i*18*F:.0f}" text-anchor="middle" class="{"t" if (i == 0 or (tipo == "normal" and not pill)) else "b"}">{esc(t)}</text>')
 
     def rombo(self, x, y, w, h, lineas):
+        x, y, w, h = x * KX, y * KY, w * KX, h * KY
         mx, my = x + w / 2, y + h / 2
         self.o.append(f'<polygon points="{mx},{y} {x+w},{my} {mx},{y+h} {x},{my}" fill="{PAPER}" stroke="{INK}" stroke-width="1.2"/>')
         n = len(lineas)
-        y0 = my - (n - 1) * 8 + 5
+        y0 = my - (n - 1) * 8 * F + 5 * F
         for i, t in enumerate(lineas):
-            self.o.append(f'<text x="{mx}" y="{y0 + i*16:.0f}" text-anchor="middle" class="b" style="font-weight:600;fill:#1a1a1a">{esc(t)}</text>')
+            self.o.append(f'<text x="{mx}" y="{y0 + i*PITCH:.0f}" text-anchor="middle" class="b" style="font-weight:600;fill:#1a1a1a">{esc(t)}</text>')
 
     def flecha(self, pts, falla=False, punto=False):
-        d = 'M' + ' L'.join(f'{x},{y}' for x, y in pts)
+        d = 'M' + ' L'.join(f'{x*KX:.1f},{y*KY:.1f}' for x, y in pts)
         col = MUTE if falla else INK
         self.o.append(f'<path d="{d}" fill="none" stroke="{col}" stroke-width="1.3"' + (' stroke-dasharray="5,4"' if falla else '') + f' marker-end="url(#{self.m})"/>')
 
     def etiqueta(self, lineas, x, y, ancla='middle'):
         if isinstance(lineas, str):
             lineas = [lineas]
-        w = max(len(l) for l in lineas) * 6.4 + 10
+        x, y = x * KX, y * KY
+        w = max(len(l) for l in lineas) * 6.4 * F + 10
         x0 = x - w / 2 if ancla == 'middle' else (x - 5 if ancla == 'start' else x - w + 5)
-        self.o.append(f'<rect x="{x0:.0f}" y="{y-13}" width="{w:.0f}" height="{len(lineas)*16+3}" fill="{PAPER}"/>')
+        self.o.append(f'<rect x="{x0:.0f}" y="{y-13*F}" width="{w:.0f}" height="{len(lineas)*PITCH+3}" fill="{PAPER}"/>')
         for i, l in enumerate(lineas):
-            self.o.append(f'<text x="{x}" y="{y + i*16}" text-anchor="{ancla}" class="l">{esc(l)}</text>')
+            self.o.append(f'<text x="{x}" y="{y + i*PITCH}" text-anchor="{ancla}" class="l">{esc(l)}</text>')
 
     def inicio(self, cx, cy):
+        cx, cy = cx * KX, cy * KY
         self.o.append(f'<circle cx="{cx}" cy="{cy}" r="9" fill="{INK}"/>')
 
     def fin(self, cx, cy):
+        cx, cy = cx * KX, cy * KY
         self.o.append(f'<circle cx="{cx}" cy="{cy}" r="12" fill="{PAPER}" stroke="{INK}" stroke-width="1.3"/><circle cx="{cx}" cy="{cy}" r="6.5" fill="{INK}"/>')
 
     def marco(self, x, y, w, h, titulo):
+        x, y, w, h = x * KX, y * KY, w * KX, h * KY
         self.o.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="12" fill="#f1eee5" stroke="{MUTE}" stroke-dasharray="7,5"/>')
-        self.o.append(f'<text x="{x+16}" y="{y+24}" class="tag">{esc(titulo)}</text>')
+        self.o.append(f'<text x="{x+16}" y="{y+24*F}" class="tag">{esc(titulo)}</text>')
 
 
 def leyenda(x, y, items):
@@ -111,14 +120,18 @@ def leyenda(x, y, items):
             s += f'<polygon points="{cx},0 {cx+13},-8 {cx+26},0 {cx+13},8" fill="{PAPER}" stroke="{INK}"/>'
             w = 34
         s += f'<text x="{cx+w}" y="4">{esc(txt)}</text>'
-        cx += w + len(txt) * 7.6 + 34
+        cx += w + len(txt) * 7.6 * F + 34
     return s + '</g>'
 
 
 # ---------------------------------------------------------------- estados del análisis
 def estados():
+    global KX, KY
+    if DIAPO:
+        KX, KY = 1.1, 1.3
     d = Lienzo('ea')
     W, H = 1700, 800
+    W, H = int(W * KX), int(H * KY)
     # estados
     d.inicio(32, 235)
     d.caja(190, 210, 160, 50, ['en cola'])
@@ -161,7 +174,7 @@ def estados():
     d.etiqueta('el Worker se apagó a media tarea: al arrancar lo reencola', 520, 92)
     d.flecha([(1555, 210), (1555, 52), (230, 52), (230, 210)])
     d.etiqueta('el investigador reinició el análisis', 900, 44)
-    cuerpo = d.o + [leyenda(40, 780, [('flecha', 'transición'), ('falla', 'falla'), ('error', 'error'), ('pausa', 'en pausa'), ('inicio', 'inicio'), ('fin', 'fin')])]
+    cuerpo = d.o + [leyenda(40 * KX, 780 * KY, [('flecha', 'transición'), ('falla', 'falla'), ('error', 'error'), ('pausa', 'en pausa'), ('inicio', 'inicio'), ('fin', 'fin')])]
     return pagina('Estados del análisis',
                   'Estados de un análisis: en cola, procesando con sus tres etapas, en pausa, completado, error y cancelado.',
                   W, H, cuerpo, 'ea')
@@ -171,16 +184,18 @@ def estados():
 def pipeline():
     d = Lienzo('pf')
     W, H = 1700, 1035
+    W0, W, H = W, int(W * KX), int(H * KY)
     NW = 230
     X = lambda c: 40 + c * 270
     cx = lambda c: X(c) + NW // 2
     bandas = [('MÓDULO 1', 'Preprocesamiento', 20, 300), ('MÓDULO 2', 'Localización de los cilindros', 315, 640),
               ('MÓDULO 3', 'Clasificación de conducta', 655, 832), ('MÓDULO 4', 'Resultados', 847, 970)]
     for i, (tag, nombre, y0, y1) in enumerate(bandas):
+        y0, y1 = y0 * KY, y1 * KY
         d.o.append(f'<rect x="20" y="{y0}" width="{W-40}" height="{y1-y0}" rx="12" fill="{"#f4f2ea" if i % 2 == 0 else "#efede4"}" stroke="#d8d5cc"/>')
         lado = i >= 2
         tx, an = (38, 'start') if lado else (W - 38, 'end')
-        d.o.append(f'<text x="{tx}" y="{y0+24}" text-anchor="{an}" class="tag">{tag}</text><text x="{tx}" y="{y0+46}" text-anchor="{an}" class="mod">{esc(nombre)}</text>')
+        d.o.append(f'<text x="{tx}" y="{y0+24*F}" text-anchor="{an}" class="tag">{tag}</text><text x="{tx}" y="{y0+46*F}" text-anchor="{an}" class="mod">{esc(nombre)}</text>')
     # módulo 1
     y1c = 130
     d.caja(X(0), y1c - 32, NW, 64, ['Video subido', 'por el usuario'], pill=True)
@@ -193,7 +208,7 @@ def pipeline():
     d.caja(X(1), 215, NW, 70, ['Falla', 'reporte de diagnóstico', 'y análisis en error'], 'falla')
     d.flecha([(cx(1), y1c + 55), (cx(1), 215)], falla=True); d.etiqueta('no', cx(1) + 16, 192, 'start')
     # módulo 2, fila a (izq → der)
-    ya = 405
+    ya = 420
     d.caja(X(0), ya - 36, NW, 72, ['Alinea la cámara con', 'un cuadro de referencia'])
     d.caja(X(1), ya - 34, NW, 68, ['Construye el fondo', 'del video'])
     d.caja(X(2), ya - 34, NW, 68, ['Ubica la línea de agua', 'y el suelo'])
@@ -206,7 +221,7 @@ def pipeline():
         d.flecha([(X(c) + NW, ya), (X(c + 1), ya)])
     d.flecha([(X(4) + NW, ya), (X(5), ya)], falla=True); d.etiqueta('no', X(4) + NW + 22, ya - 10)
     # fila b (der → izq)
-    yb = 560
+    yb = 572
     d.caja(X(4), yb - 36, NW, 72, ['Calcula la región', 'de cada cilindro'])
     d.caja(X(3), yb - 34, NW, 68, ['Mide al espécimen', 'en cada cilindro'])
     d.caja(X(2), yb - 40, NW, 80, ['Separa al espécimen', 'del fondo, segundo', 'a segundo'])
@@ -233,7 +248,7 @@ def pipeline():
     d.flecha([(cx(5), y3 + 42), (cx(5), 886)])
     d.fin(X(4) + 40, 924)
     d.flecha([(X(5), 924), (X(4) + 52, 924)])
-    cuerpo = d.o + [leyenda(40, 1008, [('flecha', 'flujo normal'), ('falla', 'falla'), ('rombo', 'decisión'), ('pausa', 'pausa'), ('error', 'la red decide la conducta de cada segundo'), ('fin', 'fin')])]
+    cuerpo = d.o + [leyenda(40 * KX, 1008 * KY, [('flecha', 'flujo normal'), ('falla', 'falla'), ('rombo', 'decisión'), ('pausa', 'pausa'), ('error', 'la red decide la conducta de cada segundo'), ('fin', 'fin')])]
     return pagina('Flujo del análisis',
                   'Los cuatro módulos del pipeline de análisis: preprocesamiento, localización de los cilindros, clasificación de conducta y resultados, con sus fallas y la pausa.',
                   W, H, cuerpo, 'pf')
