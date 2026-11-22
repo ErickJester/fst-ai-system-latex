@@ -10,6 +10,6 @@
 
 **Transferencias.** Durante este periodo de trabajo terminal, los avisos por correo (cuenta nueva y recuperación de contraseña) se envían con una cuenta de Gmail y una contraseña de aplicación; por ese servicio pasan el nombre, el correo y la contraseña temporal. Fuera de eso, los datos no se comparten con terceros.
 
-**Derechos.** Puedes acceder a tus datos, corregirlos, cancelarlos u oponerte a su uso, conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP), escribiendo a la Unidad de Transparencia del IPN (Edificio «Adolfo Ruiz Cortines», planta baja, Av. Wilfrido Massieu s/n esq. Luis Enrique Erro, Zacatenco; correo acceinfo@ipn.mx; teléfono 55 5729 6000, ext. 50128) o a través de la Plataforma Nacional de Transparencia.
+**Derechos.** Puedes acceder a tus datos, corregirlos, cancelarlos u oponerte a su uso, conforme a la Ley General de Protección de Datos Personales en Posesión de Sujetos Obligados (LGPDPPSO), escribiendo a la Unidad de Transparencia del IPN (Edificio «Adolfo Ruiz Cortines», planta baja, Av. Wilfrido Massieu s/n esq. Luis Enrique Erro, Zacatenco; correo acceinfo@ipn.mx; teléfono 55 5729 6000, ext. 50128) o a través de la Plataforma Nacional de Transparencia.
 
 **Cambios.** Este aviso puede cambiar; la versión vigente es la que se ve en el sistema.

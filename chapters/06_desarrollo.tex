@@ -36,8 +36,10 @@ Empaquetado & Docker Compose. El sistema se arranca con \texttt{portable\textbac
 \end{table}
 
 La interfaz y la API se comunican solo por una API REST que intercambia datos en formato JSON. La
-sesión del usuario va en un token JWT firmado con HS256 que el navegador guarda y envía en cada
-petición.
+sesión del usuario va en un token JWT firmado con HS256 que el navegador guarda en su almacenamiento local
+(\textit{localStorage}) y envía en cada petición en el encabezado \texttt{Authorization}. El token lleva solo el
+identificador de la cuenta, su tipo y sus fechas de emisión y vencimiento. El servidor fija HS256 al validar y no
+acepta el algoritmo que declare el token.
 
 \section{Arquitectura en contenedores}
 
@@ -737,8 +739,27 @@ El token de sesión dura 168 horas (una semana) por defecto, y ese plazo es conf
 lista de tokens cancelados ni una tabla de sesiones. «Cerrar sesión» borra el token en el navegador; por eso, al cerrar
 sesión no hay ninguna escritura en la base. Cuando el token vence, el sistema pide iniciar sesión de nuevo.
 
+Este diseño tiene cuatro consecuencias que conviene conocer:
+\begin{itemize}
+  \item Un token copiado sigue sirviendo hasta que vence, aunque su dueño haya cerrado sesión. Lo que corta el acceso
+        al instante es dar de baja la cuenta o quitarle el rol, porque el servidor lee ambos datos de la base en cada
+        petición.
+  \item Cambiar la contraseña no invalida los tokens que ya se emitieron. El cambio solo guarda el \textit{hash}
+        nuevo y no genera un token nuevo.
+  \item El inicio de sesión no cuenta los intentos fallidos ni bloquea la cuenta. Las respuestas de credenciales
+        incorrectas y de cuenta dada de baja son idénticas, para no revelar qué cuentas existen.
+  \item El contenido de un JWT va codificado, no cifrado, por eso el token no lleva datos sensibles.
+\end{itemize}
+
+El sistema emite tres tipos de token, que se distinguen por un campo \texttt{tipo} dentro del token: el de sesión, el
+del enlace de restablecer contraseña y el permiso temporal para ver el video de la revisión. Cada ruta acepta solo su
+tipo, así que un enlace de restablecer o un permiso de video no sirven como sesión.
+
 La recuperación de contraseña usa un enlace que vence a los 60 minutos y lleva su vencimiento firmado dentro, así que no
-se necesita una columna adicional en la tabla de usuarios.
+se necesita una columna adicional en la tabla de usuarios. El enlace lleva además una huella del \textit{hash} de la
+contraseña vigente cuando se emitió. Al cambiar la contraseña, ya sea con ese mismo enlace, con el cambio normal o con
+una contraseña temporal nueva, la huella deja de coincidir y el enlace deja de servir. Así el enlace sirve una sola vez
+sin necesidad de una tabla de enlaces usados.
 
 \section{Pruebas automatizadas}
 

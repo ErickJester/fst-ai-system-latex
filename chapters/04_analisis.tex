@@ -399,7 +399,7 @@ RNF-03 & Disponibilidad
 \hline
 RNF-04 & Seguridad
        & Solo los usuarios autenticados pueden acceder al sistema. La autenticación
-         usa \textit{tokens} JWT con tiempo de expiración configurable. Todos los
+         usa \textit{tokens} JWT con tiempo de expiración configurable (168 horas por omisión). Todos los
          investigadores con cuenta activa pueden consultar los experimentos y
          resultados de cualquier otro investigador del laboratorio (ver RN-08).
        & Autenticación con JWT verificada en pruebas de integración. Acceso a datos
@@ -750,8 +750,8 @@ RN-18 & La pantalla de inicio de sesión ofrece el aviso de privacidad y los té
         Los términos establecen que el sistema es una herramienta de apoyo a la investigación
         y no emite diagnóstico clínico, que los resultados se pueden revisar y corregir segundo
         a segundo, y que los videos se borran 30~días después de un análisis exitoso (RN-05).
-      & Cumple con la Ley Federal de Protección de Datos Personales en Posesión de los
-        Particulares (LFPDPPP; ver factibilidad legal) y asegura que el usuario conozca el
+      & Cumple con la Ley General de Protección de Datos Personales en Posesión de Sujetos
+        Obligados (LGPDPPSO; ver factibilidad legal) y asegura que el usuario conozca el
         alcance del sistema antes de usarlo. La aceptación se exige en pantalla y no se guarda
         en la base de datos. Ver RF-01, RF-05. \\
 \hline
@@ -1258,9 +1258,12 @@ son la conducta de cada segundo, duraciones de conducta y metadatos (grupo, fech
 tratamiento). Los únicos datos personales son los de las cuentas (identificador
 institucional, nombre, apellidos y correo), con la contraseña guardada con \textit{hash}
 con sal (bcrypt). Las credenciales de los investigadores
-registrados en la plataforma se manejan bajo las directrices de la Ley Federal de
-Protección de Datos Personales en Posesión de los Particulares (LFPDPPP), empleando
+registrados en la plataforma se manejan bajo las directrices de la Ley General de
+Protección de Datos Personales en Posesión de Sujetos Obligados (LGPDPPSO), empleando
 acceso autenticado con \textit{JSON Web Token} (JWT) y contraseñas protegidas con \textit{hash} y sal.
+Se aplica esta ley y no la de los particulares porque el sistema lo opera un laboratorio de la Escuela
+Nacional de Medicina y Homeopatía, que forma parte del Instituto Politécnico Nacional, una institución
+pública, y el aviso de privacidad integral de esa escuela se fundamenta en la LGPDPPSO.
 
 \subsubsection{Uso ético de especímenes}
 
