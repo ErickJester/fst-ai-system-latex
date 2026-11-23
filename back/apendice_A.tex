@@ -1,4 +1,229 @@
-\chapter{Configuraci\'{o}n del entorno de desarrollo}
+% ============================================================
+%  Apéndice A — Instalación y puesta en marcha
+%  TT 2026-B066 | ESCOM-IPN
+%  Fuente: inventario del sistema (docker-compose.yml, portable/)
+% ============================================================
 
-% [PENDIENTE: instrucciones de instalaci\'{o}n con Docker Compose,
-%   requisitos de hardware m\'{i}nimos, variables de entorno necesarias]
+\chapter{Instalación y puesta en marcha del sistema}
+\label{ap:instalacion}
+
+Este apéndice describe cómo se instala el sistema en la computadora del laboratorio
+y qué contiene cada parte. La instalación usa Docker Compose, que levanta los cuatro
+servicios del sistema con un solo archivo de configuración. No se descarga nada de
+internet: las imágenes de los servicios vienen en un archivo del paquete.
+
+\section{Requisitos}
+
+\begin{table}[H]
+\centering
+\caption{Requisitos de la computadora del laboratorio.}
+\label{tab:ap_requisitos}
+\begin{tabular}{|p{3.6cm}|p{10.2cm}|}
+\hline
+\textbf{Concepto} & \textbf{Requisito} \\
+\hline
+Sistema operativo & Windows 10 u 11. \\
+\hline
+Software & Docker Desktop, que incluye Docker Compose. Conviene activar que se
+inicie junto con la sesión. \\
+\hline
+Memoria & 16~GB en la computadora y al menos 8~GB asignados a Docker Desktop. El
+servicio de análisis admite hasta 5~GB y un análisis usa cerca de 3.5~GB. \\
+\hline
+Disco & 20~GB libres para empezar. Las imágenes ocupan cerca de 5~GB; cada video
+subido, cerca de 1~GB, y unos 200~MB más al analizarse. \\
+\hline
+Tarjeta gráfica & No se usa. El servicio de análisis trabaja con el procesador. \\
+\hline
+Internet & No hace falta para instalar ni para usar el sistema; solo para enviar
+correos. \\
+\hline
+Energía & La computadora no debe suspenderse mientras el sistema esté en uso. \\
+\hline
+\end{tabular}
+\end{table}
+
+Un video de unos 6 minutos tarda entre 40 minutos y más de una hora en analizarse,
+porque el análisis corre en el procesador.
+
+\section{Servicios}
+
+El archivo \texttt{docker-compose.yml} define cuatro servicios. Solo el último
+publica un puerto: los demás se comunican dentro de la red interna de Docker y no se
+alcanzan desde fuera.
+
+\begin{table}[H]
+\centering
+\caption{Servicios del sistema.}
+\label{tab:ap_servicios}
+\begin{tabular}{|p{1.8cm}|p{9.4cm}|p{2.6cm}|}
+\hline
+\textbf{Servicio} & \textbf{Función} & \textbf{Puerto publicado} \\
+\hline
+\texttt{db} & Base de datos PostgreSQL. El esquema se aplica solo la primera vez,
+con el volumen vacío. & Ninguno \\
+\hline
+\texttt{api} & Servidor del sistema (Spring Boot). Atiende las peticiones de la
+página y corre sin privilegios de administrador. & Ninguno \\
+\hline
+\texttt{worker} & Toma de la base un análisis a la vez, ejecuta la detección y el
+clasificador y guarda los resultados. También hace las tareas diarias: respaldo de
+la base y avisos de espacio en disco. & Ninguno \\
+\hline
+\texttt{web} & La página del sistema, servida por nginx, que reenvía las
+peticiones de la ruta \texttt{/api/} al servidor. & 8088 por omisión \\
+\hline
+\end{tabular}
+\end{table}
+
+Los servicios arrancan en orden: el servidor y el servicio de análisis esperan a que
+la base responda, y la página espera al servidor. Los registros de cada servicio se
+rotan para que no llenen el disco.
+
+\begin{table}[H]
+\centering
+\caption{Volúmenes y carpetas montadas.}
+\label{tab:ap_volumenes}
+\begin{tabular}{|p{2.2cm}|p{4.4cm}|p{7.2cm}|}
+\hline
+\textbf{Servicio} & \textbf{Montaje} & \textbf{Contenido} \\
+\hline
+\texttt{db} & Volumen \texttt{pgdata} & Los datos de la base. \\
+\hline
+\texttt{db} & Archivo del esquema, de solo lectura & El esquema de la base. \\
+\hline
+\texttt{api} y \texttt{worker} & Volumen \texttt{videos\_reportes} & Videos, copias
+para revisión, archivos de cada análisis y reportes guardados. Es el mismo volumen
+para los dos servicios, así se pasan los archivos. \\
+\hline
+\texttt{worker} & Carpeta \texttt{modelos}, de solo lectura & El modelo del
+clasificador. El servicio solo lo lee; no va dentro de la imagen. \\
+\hline
+\texttt{worker} & Carpeta \texttt{respaldos} & Respaldos diarios de la base, en una
+carpeta de la computadora fuera de Docker. \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Pasos de instalación}
+
+El paquete se entrega en dos archivos de la misma versión: un \texttt{.zip} pequeño
+con la configuración, los programas de arranque, el modelo y el esquema, y un
+\texttt{.tar} con las imágenes de Docker.
+
+\begin{enumerate}
+\item Descomprimir el \texttt{.zip} en una carpeta, por ejemplo \texttt{C:\textbackslash fst-portable}.
+\item Copiar el \texttt{.tar} de imágenes en esa carpeta, junto a \texttt{docker-compose.yml}.
+\item Abrir Docker Desktop y esperar a que indique que está corriendo.
+\item Dar doble clic a \texttt{iniciar.bat}, dentro de la carpeta \texttt{portable}.
+La primera vez crea el archivo \texttt{.env} a partir de una plantilla, lo abre y se
+detiene.
+\item Llenar en el \texttt{.env} los datos del primer administrador (variables
+\texttt{ADMIN\_*}) y, si se quiere enviar correos, los de \texttt{SMTP\_*}. La llave de
+sesiones y la clave de la base dicen \texttt{GENERAR} y no se tocan: \texttt{iniciar.bat}
+las genera solo. Guardar y cerrar.
+\item Dar doble clic otra vez a \texttt{iniciar.bat}. El programa comprueba Docker y los
+datos del administrador, genera la llave y la clave, comprueba que exista el modelo,
+carga las imágenes y levanta los servicios.
+\item Cuando la ventana indica que el sistema está listo, el navegador abre
+\texttt{http://localhost:8088}, que es la pantalla de inicio de sesión.
+\end{enumerate}
+
+Para entrar desde otras computadoras del laboratorio se ejecuta una vez
+\texttt{abrir\_red.bat} como administrador, que abre el puerto solo para redes de tipo
+privado, y se usa la dirección \texttt{http://NOMBRE-DE-LA-PC:8088}. La página va sin
+cifrado, porque está pensada para la red del laboratorio. Para apagar el sistema se usa
+\texttt{detener.bat}, que no borra datos, y para comprobar el correo,
+\texttt{probar\_correo.bat}.
+
+El compose no se ejecuta a mano: necesita datos que prepara \texttt{iniciar.bat}.
+
+\section{Variables de entorno}
+
+Se escriben en el archivo \texttt{.env}, sin comillas y sin espacios al final.
+
+\begin{longtable}{|p{4.0cm}|p{9.8cm}|}
+\caption{Variables del archivo \texttt{.env}.}
+\label{tab:ap_variables}\\
+\hline
+\textbf{Variable} & \textbf{Para qué sirve} \\
+\hline
+\endfirsthead
+\caption[]{Variables del archivo \texttt{.env} (continuación).}\\
+\hline
+\textbf{Variable} & \textbf{Para qué sirve} \\
+\hline
+\endhead
+\texttt{POSTGRES\_USER}, \texttt{POSTGRES\_DB} & Usuario y nombre de la base. \\
+\hline
+\texttt{POSTGRES\_PASSWORD} & Clave de la base. Se genera sola en una instalación
+nueva y no se cambia después de crear los datos. \\
+\hline
+\texttt{JWT\_SECRET} & Llave con la que se firman las sesiones. Se genera sola la
+primera vez. \\
+\hline
+\texttt{JWT\_EXPIRES\_HOURS} & Horas que dura una sesión abierta. \\
+\hline
+\texttt{ADMIN\_ID} & Boleta o número de empleado del primer administrador; máximo 10
+caracteres. \\
+\hline
+\texttt{ADMIN\_NOMBRE}, \texttt{ADMIN\_APELLIDOS} & Nombre y apellidos del primer
+administrador. \\
+\hline
+\texttt{ADMIN\_CORREO} & Correo del primer administrador; es con el que entra. \\
+\hline
+\texttt{ADMIN\_PASSWORD} & Contraseña temporal, de al menos 8 caracteres. El sistema
+pide cambiarla al entrar. \\
+\hline
+\texttt{MAX\_UPLOAD\_MB} & Tamaño máximo de un video en megabytes (2048). \\
+\hline
+\texttt{PUERTO\_WEB} & Puerto con el que se abre el sistema (8088 por omisión). \\
+\hline
+\texttt{DIRECCION\_WEB} & Dirección completa que va en los correos de recuperar
+contraseña y de primer acceso. Si está vacía, se usa el nombre de la computadora. \\
+\hline
+\texttt{WORKER\_TZ} & Zona horaria de las tareas diarias (Ciudad de México por
+omisión). \\
+\hline
+\texttt{MODO\_DESARROLLADOR} & Con \texttt{true} muestra herramientas de desarrollo,
+como el cronómetro de las etapas. Con \texttt{false}, uso normal. \\
+\hline
+\texttt{EQUIPO\_NOMBRE} & Nombre opcional de la computadora para los reportes de
+tiempos. \\
+\hline
+\texttt{SMTP\_HOST}, \texttt{SMTP\_PORT}, \texttt{SMTP\_USER}, \texttt{SMTP\_PASSWORD},
+\texttt{SMTP\_AUTH}, \texttt{SMTP\_STARTTLS}, \texttt{SMTP\_FROM} & Datos del servidor
+de correo. Si \texttt{SMTP\_HOST} está vacío no se envía ningún correo y los avisos
+salen solo en el panel de notificaciones. \\
+\hline
+\end{longtable}
+
+El compose fija por su cuenta otras variables, como la dirección de la base, el puerto
+interno del servidor y la ruta del modelo. Otras tienen valor por omisión y no hace
+falta escribirlas: los minutos que vale el enlace para ver un video (120) y el de
+recuperar contraseña (60), la hora de las tareas diarias (3), las horas máximas que un
+análisis puede quedar en pausa (72) y los porcentajes de disco para avisar (80) y para
+limpiar (90).
+
+\section{Primer administrador}
+
+El primer administrador no se crea con una pantalla ni con un comando. Lo crea el
+servidor al arrancar, con los datos de las variables \texttt{ADMIN\_*}.
+
+Si falta alguno de los cinco datos, o si el identificador pasa de 10 caracteres, el
+servidor no crea nada y avisa cuál falta. Si el administrador ya existe, no lo vuelve
+a crear. El usuario y su registro de administrador se crean en una sola operación, de
+modo que nunca queda un usuario sin su registro. En el primer ingreso el sistema pide
+cambiar la contraseña temporal. Las demás cuentas solo las crea un administrador, y
+si alguien olvida su contraseña, un administrador puede darle una temporal.
+
+\section{Instalación para desarrollo}
+
+Quien arma el paquete o modifica el sistema trabaja desde el repositorio. Coloca el
+modelo en la carpeta \texttt{modelos} y levanta el entorno de desarrollo con
+\texttt{docker compose --profile dev up --build} dentro de la carpeta del servidor. Ese
+entorno publica el puerto 5433 para la base y el 8084 para el servidor, activa la
+documentación de la interfaz del servidor y dirige los correos a un buzón de prueba que
+se consulta en el navegador. El paquete de instalación se arma con el programa
+\texttt{empaquetar.ps1}, que construye las imágenes y genera el \texttt{.tar} y el
+\texttt{.zip}.

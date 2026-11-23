@@ -68,13 +68,7 @@ V: El sistema se organiza en cuatro capas, que son la presentación, la lógica 
 
 A: El procesamiento analiza un video a la vez, y la capa de datos guarda todo en PostgreSQL y en dos volúmenes, uno con los videos y los reportes y otro, de solo lectura, con el modelo.
 
-### Diapositiva 11 — Arquitectura en contenedores Docker
-
-V: Esas capas se empaquetan en cuatro contenedores, que son la web, la API, el worker y la base de datos.
-
-A: La API y el worker no se llaman entre sí, y se comunican solo a través de la base de datos, que funciona como cola. Los videos y los reportes viven en un volumen compartido, el modelo en uno de solo lectura, y una cuenta de correo sirve para los avisos.
-
-### Diapositiva 12 — Diagrama de flujo del sistema
+### Diapositiva 11 — Diagrama de flujo del sistema
 
 A: Este es el flujo completo. El investigador sube el video y el backend lo valida y lo guarda. El del día 1 solo se guarda, y el del día 2 queda en cola. El worker toma el más antiguo, un video a la vez, y corre el pipeline, que consiste en preprocesamiento, cilindros y clasificación.
 
@@ -82,15 +76,15 @@ V: Al terminar se guardan la conducta de cada segundo, los tiempos por minuto y 
 
 A: Hay dos caminos alternos. Si el video no abre o no se encuentran los cilindros, el análisis termina en error y se genera un diagnóstico, y el worker sigue con el siguiente. Y si un espécimen no se ve tres segundos seguidos, queda en pausa, y el usuario tiene 72 horas para ajustar el recuadro y continuar, o cancelar. Si el worker se apaga, el análisis vuelve a la cola.
 
-### Diapositiva 13 — Desarrollo: clasificador de conducta
+### Diapositiva 12 — Desarrollo: clasificador de conducta
 
-V: Para cada segundo, la red recibe un clip de 16 fotogramas del cilindro y 22 medidas, que son 15 rasgos y 7 reglas de observación. Usamos una ventana de 4 segundos centrada en cada segundo, que se desliza de uno en uno, y por eso se pueden detectar conductas de unos 2 segundos.
+V: Para cada segundo, la red recibe un clip de 16 fotogramas del cilindro y 22 medidas, que son 15 rasgos y 7 reglas de observación. Usamos una ventana de 4 segundos que se desliza de uno en uno, y por eso cada segundo tiene su propia decisión.
 
 A: La red da tres salidas, que son nado, inmovilidad y escalamiento. La cuarta, conducta activa, no sale de la red, y una regla de 0.80 la asigna cuando nado más escalamiento suman al menos 0.80 y ninguna clase llega sola a ese umbral.
 
 A: Las etiquetas son propias, hechas con el etiquetador del equipo y revisadas a mano. Entrenamos 15 épocas, con lotes de 16 clips, y validamos en 5 particiones agrupadas por video, para no inflar el resultado con segundos vecinos.
 
-### Diapositiva 14 — Pruebas realizadas
+### Diapositiva 13 — Pruebas realizadas
 
 V: Validamos el clasificador por video, en cinco particiones, y los videos de prueba de cada partición no participan en el entrenamiento. Son 11 videos, 25 especímenes y 8,248 segundos etiquetados por el equipo.
 
@@ -100,7 +94,7 @@ V: Del sistema corrimos 77 pruebas automáticas contra PostgreSQL real, y las 77
 
 A: Y en tiempos, a mano un video toma unas 2 horas, y con el sistema uno de 5 minutos con cuatro especímenes se analizó en unos 9 minutos, sin intervención.
 
-### Diapositiva 15 — Demostración
+### Diapositiva 14 — Demostración
 
 V: Ahora les mostramos el sistema funcionando.
 
@@ -148,24 +142,24 @@ A: Desde ahí crea cuentas nuevas, y el sistema genera una contraseña temporal,
 
 V: El panel muestra además el estado del sistema, con el disco, la cola y los análisis activos, y avisa cuando el disco pasa del 80 %. El administrador también puede ver y gestionar los experimentos de todos.
 
-### Diapositiva 16 — Se cumplió el objetivo general y los seis específicos
+### Diapositiva 15 — Se cumplió el objetivo general y los seis específicos
 
 V: Con esto se cumplió el objetivo general y los seis específicos. Vamos a repasarlos uno por uno.
 
-A: El primero fue revisar los trabajos y herramientas existentes, y ese estado del arte está en los anexos. El segundo fue documentar el protocolo del laboratorio, que dio forma a los experimentos, los grupos y las tandas. Y el tercero fue diseñar la arquitectura, que vimos en las capas, los contenedores y el flujo.
+A: El primero fue revisar los trabajos y herramientas existentes, y ese estado del arte está en los anexos. El segundo fue documentar el protocolo del laboratorio, que dio forma a los experimentos, los grupos y las tandas. Y el tercero fue diseñar la arquitectura, que vimos en las capas y el flujo.
 
 V: El cuarto fue implementar el análisis conductual y el clasificador, que acabamos de ver funcionando. El quinto fue evaluar el clasificador sobre un conjunto de prueba independiente, con un F1 promedio de 0.705. Y el sexto fue cuantificar la reducción de tiempo, de unas 2 horas por video a unos 9 minutos, y dejar el clasificador modular.
 
-### Diapositiva 17 — Conclusiones
+### Diapositiva 16 — Conclusiones
 
 A: Tenemos cuatro conclusiones. La primera es un prototipo completo, del video a los reportes. La segunda es un pipeline que alinea, localiza los cilindros y clasifica, y que si falla entrega un diagnóstico. La tercera es un clasificador validado sobre un conjunto de prueba independiente. Y la cuarta son los límites, porque el sistema es solo para nado forzado, con videos de un laboratorio, y como la red no es 100 % exacta, el usuario revisa y corrige.
 
 A: El prototipo cumple el objetivo general, porque apoya al laboratorio, no diagnostica ni sustituye al investigador. Su valor está en el criterio consistente y el registro centralizado.
 
-### Diapositiva 18 — Trabajo futuro
+### Diapositiva 17 — Trabajo futuro
 
 V: Como trabajo futuro proponemos entrenar el clasificador con otros protocolos, como el laberinto en cruz elevado o el campo abierto. También ofrecer más resultados al laboratorio, como latencias, comparación estadística entre grupos y curvas de dosis-respuesta, y hacer análisis en tiempo real con una cámara conectada. Y por último mejorar el sistema, analizando también el día 1, permitiendo reentrenar desde la plataforma y ganando robustez ante reflejos y pelaje claro.
 
-### Diapositivas 19, 20 y 21 — Referencias, gracias y preguntas
+### Diapositivas 18, 19 y 20 — Referencias, gracias y preguntas
 
 V: Muchas gracias. Agradecemos a nuestros directores, a los sinodales y al Dr. Sandino, nuestro usuario final, que nos dio la oportunidad de desarrollar un sistema con requerimientos reales. Quedamos atentos a sus preguntas.

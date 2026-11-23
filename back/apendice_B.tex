@@ -1,4 +1,326 @@
-\chapter{Formato del archivo de salida JSON}
+% ============================================================
+%  Apéndice B — Archivos de salida
+%  TT 2026-B066 | ESCOM-IPN
+%  Fuente: inventario del sistema (pipeline/, worker/, backend-spring/)
+%  Los ejemplos son de forma: nombres y tipos reales, valores ilustrativos.
+% ============================================================
 
-% [PENDIENTE: documentar el esquema JSON de tracking (corto\_tracking.json)
-%   con descripci\'{o}n de cada campo: frame\_id, rat\_id, bbox, confidence, waterline\_y]
+\chapter{Archivos de salida del análisis}
+\label{ap:salidas}
+
+Este apéndice describe los archivos que produce el análisis de un video y los que el
+investigador obtiene del sistema. No hay un único archivo de seguimiento: la etapa de
+cilindros y el clasificador escriben tablas CSV de trabajo, el servicio de análisis
+escribe unos pocos archivos JSON de apoyo y los resultados definitivos se guardan en
+la base de datos. Los reportes que descarga el investigador se arman desde la base, no
+desde los CSV de trabajo.
+
+Los ejemplos de este apéndice muestran la forma de cada archivo: los nombres, el orden
+y el tipo de las columnas son los reales, pero los valores son ilustrativos.
+
+\section{Dónde se guardan}
+
+Todo lo de un análisis vive en el volumen \texttt{videos\_reportes}, en la carpeta
+\texttt{analisis/\{id del análisis\}/}. Los archivos de la etapa de cilindros y del
+clasificador van en su subcarpeta \texttt{trabajo/} y su nombre empieza con el
+identificador del video.
+
+\begin{longtable}{|p{4.3cm}|p{6.2cm}|p{3.3cm}|}
+\caption{Archivos que genera el análisis.}
+\label{tab:ap_archivos}\\
+\hline
+\textbf{Archivo} & \textbf{Contenido} & \textbf{¿Lo ve el investigador?} \\
+\hline
+\endfirsthead
+\caption[]{Archivos que genera el análisis (continuación).}\\
+\hline
+\textbf{Archivo} & \textbf{Contenido} & \textbf{¿Lo ve el investigador?} \\
+\hline
+\endhead
+\texttt{\_cuadros.csv} & Medidas de cada fotograma y de cada cilindro. & No \\
+\hline
+\texttt{\_rasgos.csv} & Los 15 rasgos por bloque de 5~s y por espécimen. & No \\
+\hline
+\texttt{\_cnnseg.csv} & La conducta de cada segundo, salida de la red. & Solo en modo
+desarrollador \\
+\hline
+\texttt{\_cnnseg\_resumen.csv} & Segundos de cada conducta por minuto. & Solo en modo
+desarrollador \\
+\hline
+\texttt{cajas.json} & Recuadro de cada cilindro, en píxeles del video. & Su efecto:
+los recuadros de la revisión \\
+\hline
+\texttt{web.mp4} & Copia del video, sin audio, de los últimos 300~s. & Sí: es el video
+que se reproduce en la revisión \\
+\hline
+\texttt{progreso.json} & Etapa y porcentaje de avance. & Sí, como barra de avance \\
+\hline
+\texttt{pausa.json}, \texttt{pausa.jpg} & Estado de la pausa del análisis. & Sí, como
+pantalla de pausa \\
+\hline
+\texttt{correcciones.json} & Ajustes de recuadros hechos en las pausas. & No \\
+\hline
+\texttt{tiempos.json} & Duración de cada etapa. & Solo en modo desarrollador \\
+\hline
+Reportes PDF, CSV y XLSX; Excel del experimento & Resultados armados desde la
+base. & Sí \\
+\hline
+\end{longtable}
+
+\section{Archivos de trabajo del clasificador}
+
+\paragraph{\texttt{\_cuadros.csv}.} Una fila por fotograma medido y por cilindro. Las
+medidas están en píxeles del video; la normalización se hace después.
+
+\begin{longtable}{|p{2.8cm}|p{2.2cm}|p{8.8cm}|}
+\caption{Columnas de \texttt{\_cuadros.csv}.}
+\label{tab:ap_cuadros}\\
+\hline
+\textbf{Campo} & \textbf{Unidad} & \textbf{Significado} \\
+\hline
+\endfirsthead
+\caption[]{Columnas de \texttt{\_cuadros.csv} (continuación).}\\
+\hline
+\textbf{Campo} & \textbf{Unidad} & \textbf{Significado} \\
+\hline
+\endhead
+\texttt{paso} & Fotogramas & Cada cuántos fotogramas se midió (12 por omisión). \\
+\hline
+\texttt{t} & Segundos & Instante del fotograma desde el inicio del video. \\
+\hline
+\texttt{s} & Sin unidad & Número del cilindro, que es el del espécimen. \\
+\hline
+\texttt{cx}, \texttt{cy} & Píxeles & Centro del espécimen; vacío si no se vio. \\
+\hline
+\texttt{area} & Píxeles$^2$ & Área de la silueta completa. \\
+\hline
+\texttt{above} & Píxeles$^2$ & Silueta por encima de la línea de agua. \\
+\hline
+\texttt{largo} & Píxeles & Largo del cuerpo en ese fotograma. \\
+\hline
+\texttt{vert} & 0 a 1 & Qué tan vertical está el eje mayor del cuerpo. \\
+\hline
+\texttt{elong} & 1 o más & Qué tan alargado está el cuerpo. \\
+\hline
+\texttt{cabeza} & Píxeles & Fila del punto más alto de la silueta sin cola. \\
+\hline
+\texttt{me} & Niveles de gris & Cambio de imagen dentro del espécimen respecto a
+unos 0.4~s antes. \\
+\hline
+\texttt{iou}, \texttt{dice} & 0 a 1 & Solape de la silueta con la de unos 0.4~s
+antes. \\
+\hline
+\texttt{gx0}, \texttt{gx1} & Píxeles & Límites izquierdo y derecho del cilindro. \\
+\hline
+\texttt{g\_agua}, \texttt{g\_fondo} & Píxeles & Fila de la línea de agua y del
+fondo. \\
+\hline
+\texttt{escala} & Píxeles & Mediana del largo del cuerpo en todo el video; es la
+unidad de longitud. \\
+\hline
+\end{longtable}
+
+Cuando no hay dato, por ejemplo en las medidas de movimiento de un fotograma sin
+espécimen, el campo queda vacío.
+
+\paragraph{\texttt{\_rasgos.csv}.} Una fila por bloque de 5~s y por espécimen. Además
+de los 15 rasgos de la sección~\ref{sec:medidas_red}, trae el video, el número de
+bloque, el espécimen, el inicio y el fin del bloque en segundos, los fotogramas
+medidos y los fotogramas en que se vio al espécimen (con menos de 5 el bloque queda
+sin rasgos), la escala en píxeles, la geometría detectada del cilindro y el recuadro
+del cilindro en el video original.
+
+\paragraph{\texttt{\_cnnseg.csv}.} Es la decisión del clasificador: una fila por
+espécimen y por segundo de todo el video. De aquí el servicio toma los últimos 300
+segundos de cada espécimen.
+
+\begin{table}[H]
+\centering
+\caption{Columnas de \texttt{\_cnnseg.csv}.}
+\label{tab:ap_cnnseg}
+\begin{tabular}{|p{3.4cm}|p{2.2cm}|p{8.2cm}|}
+\hline
+\textbf{Campo} & \textbf{Unidad} & \textbf{Significado} \\
+\hline
+\texttt{especimen} & Sin unidad & Número del cilindro. \\
+\hline
+\texttt{segundo} & Segundos & Segundo del video, desde 1. \\
+\hline
+\texttt{inicio\_s}, \texttt{tiempo} & Segundos, min:seg & Dónde empieza ese segundo,
+en dos formatos. \\
+\hline
+\texttt{conducta} & Texto & \texttt{escalamiento}, \texttt{inmovilidad},
+\texttt{nado} o \texttt{activa}, según la regla de tres pasos con umbral de 0.80. \\
+\hline
+\texttt{confianza} & 0 a 1 & Probabilidad de la conducta elegida. \\
+\hline
+\texttt{p\_escalamiento}, \texttt{p\_inmovilidad}, \texttt{p\_nado} & 0 a 1 &
+Probabilidad de cada conducta. \\
+\hline
+\texttt{ventana\_s} & Segundos & Ventana de los rasgos (4.0). \\
+\hline
+\end{tabular}
+\end{table}
+
+Ejemplo de forma:
+
+{ootnotesize
+\begin{verbatim}
+especimen,segundo,inicio_s,tiempo,conducta,confianza,p_escalamiento,p_inmovilidad,p_nado,ventana_s
+1,1,0,0:00,inmovilidad,0.912,0.021,0.912,0.067,4.0
+1,2,1,0:01,activa,0.874,0.402,0.126,0.472,4.0
+\end{verbatim}}
+
+Al guardar el resultado en la base, \texttt{nado} pasa a «nado activo» y \texttt{activa}
+a «conducta activa». Un segundo en el que no se vio al espécimen queda sin conducta,
+aunque la red haya dado una.
+
+\paragraph{\texttt{\_cnnseg\_resumen.csv}.} Una fila por espécimen y por minuto, y una
+fila \texttt{total} por espécimen, con los segundos de cada conducta
+(\texttt{nado}, \texttt{inmovilidad}, \texttt{escalamiento}, \texttt{activa}) y los
+segundos sin decidir (\texttt{sin\_decidir}).
+
+\section{Archivos JSON de apoyo}
+
+\paragraph{\texttt{cajas.json}.} Lo escribe el servicio de análisis al completar el
+análisis. El servidor lo lee para dibujar los recuadros sobre el video en la revisión;
+si falta, usa un tamaño por omisión y deja los recuadros vacíos, sin fallar.
+
+\begin{table}[H]
+\centering
+\caption{Campos de \texttt{cajas.json}.}
+\label{tab:ap_cajas}
+\begin{tabular}{|p{4.6cm}|p{2.2cm}|p{7.0cm}|}
+\hline
+\textbf{Campo} & \textbf{Unidad} & \textbf{Significado} \\
+\hline
+\texttt{version} & Sin unidad & Versión del formato. \\
+\hline
+\texttt{ancho}, \texttt{alto} & Píxeles & Tamaño del video. \\
+\hline
+\texttt{recuadros} & Lista & Un elemento por espécimen. \\
+\hline
+\texttt{recuadros[].cilindro} & Sin unidad & Número del cilindro. \\
+\hline
+\texttt{recuadros[].x0}, \texttt{y0}, \texttt{x1}, \texttt{y1} & Píxeles & Esquinas
+superior izquierda e inferior derecha. \\
+\hline
+\end{tabular}
+\end{table}
+
+Ejemplo de forma:
+
+\begin{verbatim}
+{
+  "version": 1, "ancho": 1920, "alto": 1080,
+  "recuadros": [
+    {"cilindro": 1, "x0": 150, "y0": 340, "x1": 276, "y1": 912},
+    {"cilindro": 2, "x0": 530, "y0": 340, "x1": 659, "y1": 912}
+  ]
+}
+\end{verbatim}
+
+\paragraph{Estado del análisis.} Tres archivos se ven en la página como pantallas y no
+se descargan:
+\begin{itemize}
+\item \texttt{progreso.json}: la etapa (\texttt{preprocesamiento}, \texttt{cilindros} o
+\texttt{clasificacion}), el porcentaje de la etapa, el porcentaje general y la hora de
+la última actualización.
+\item \texttt{pausa.json} y \texttt{pausa.jpg}: el cilindro que se perdió, desde qué
+segundo, la imagen de la pausa, la hora en que empezó, los recuadros vigentes y el
+ajuste que haga el investigador. Se borran al resolverse la pausa.
+\item \texttt{correcciones.json}: la lista de ajustes de recuadro hechos en las pausas,
+cada uno con el cilindro, el segundo desde el que vale y las cuatro esquinas.
+\end{itemize}
+
+\section{Lo que descarga el investigador}
+
+El investigador obtiene sus resultados desde el experimento, en cuatro formatos que el
+servidor arma desde la base de datos:
+
+\begin{enumerate}
+\item \textbf{PDF de resultados} del experimento, que se muestra en el navegador.
+\item \textbf{CSV} de un grupo o de una tanda.
+\item \textbf{XLSX} de un grupo o de una tanda, con el mismo contenido en una hoja
+llamada «Resultados».
+\item \textbf{Excel del experimento}, con una hoja «Resultados» y una hoja «Segundo a
+segundo».
+\end{enumerate}
+
+El CSV y el XLSX tienen una fila por espécimen y por minuto, con las columnas de la
+tabla~\ref{tab:ap_reporte_csv}. Debajo de las filas traen las filas de resumen
+\textit{Media}, \textit{Desviación estándar}, \textit{Varianza} y \textit{Revisión
+humana}. Si el grupo mezcla análisis de clasificación precisa y agrupada, agregan un
+aviso. El CSV lleva codificación UTF-8 con marca de orden de bytes, y neutraliza los
+textos que empiezan con \texttt{=}, \texttt{+}, \texttt{-} o \texttt{@} para que una
+hoja de cálculo no los interprete como fórmulas.
+
+\begin{table}[H]
+\centering
+\caption{Columnas del reporte CSV y XLSX.}
+\label{tab:ap_reporte_csv}
+\begin{tabular}{|p{3.6cm}|p{2.2cm}|p{8.0cm}|}
+\hline
+\textbf{Columna} & \textbf{Unidad} & \textbf{Significado} \\
+\hline
+Grupo & Texto & Etiqueta del grupo. \\
+\hline
+Tanda & Texto & Letra de la tanda. \\
+\hline
+Espécimen & Texto & «Espécimen» seguido del número del cilindro. \\
+\hline
+Tiempo (min:seg) & min:seg & Tramo de un minuto, por ejemplo 0:00-1:00. \\
+\hline
+Nado & Segundos & Segundos de nado activo en ese minuto. \\
+\hline
+Escalamiento & Segundos & Segundos de escalamiento. \\
+\hline
+Inmovilidad & Segundos & Segundos de inmovilidad. \\
+\hline
+Conducta activa & Segundos & Segundos de conducta activa, cuando no se distinguió
+entre nado y escalamiento. \\
+\hline
+Sin ver & Segundos & Segundos sin conducta: no se vio al espécimen o la revisión lo
+marcó como no visible. \\
+\hline
+\end{tabular}
+\end{table}
+
+La hoja «Segundo a segundo» del Excel tiene una fila por espécimen y por segundo, con
+las columnas Grupo, Tanda, Espécimen, Tiempo (s), Conducta, Nado activo, Inmovilidad,
+Escalamiento, Conducta activa, Sin ver y Origen. Las cinco columnas de conducta valen 1
+o 0. El origen dice de dónde salió el dato: \texttt{maquina}, \texttt{confirmada},
+\texttt{corregida} o \texttt{dudosa}.
+
+El CSV crudo de la red (\texttt{\_cnnseg.csv}, con probabilidades) solo se descarga con
+\texttt{MODO\_DESARROLLADOR=true}. Es la salida sin las correcciones de la revisión y no
+los resultados del sistema.
+
+\section{Cómo queda cada segundo en la base de datos}
+
+Los resultados no se quedan en los CSV: el servicio de análisis los inserta en la tabla
+\texttt{segundo}, una fila por espécimen y por segundo, y de ella se calculan todos los
+reportes. Los totales por minuto no se guardan, se calculan al pedirlos. Solo se
+guardan los últimos 300 segundos de cada espécimen, numerados de 1 a 300.
+
+\begin{table}[H]
+\centering
+\caption{Campos de la tabla \texttt{segundo}.}
+\label{tab:ap_segundo}
+\begin{tabular}{|p{3.4cm}|p{2.2cm}|p{8.2cm}|}
+\hline
+\textbf{Campo} & \textbf{Unidad} & \textbf{Significado} \\
+\hline
+\texttt{idobservacion} & Sin unidad & La observación: un espécimen en un video. \\
+\hline
+\texttt{segundo} & Segundos & De 1 a 300. \\
+\hline
+\texttt{conducta} & Texto o nulo & \texttt{nado activo}, \texttt{inmovilidad},
+\texttt{escalamiento} o \texttt{conducta activa}. Nulo si no se vio al espécimen o la
+revisión lo marcó como no visible. \\
+\hline
+\texttt{origen} & Texto & \texttt{maquina} (por omisión), \texttt{confirmada},
+\texttt{corregida} o \texttt{dudosa}. \\
+\hline
+\end{tabular}
+\end{table}

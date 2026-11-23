@@ -245,8 +245,8 @@ conducta. El sistema no marca segundos como dudosos por sí mismo: el usuario ma
 \paragraph{Decisión segundo a segundo.} Para decidir el segundo $k$, el sistema
 toma el clip y las medidas de una ventana de 4~s alrededor de él (desde 1.5~s antes
 hasta 2.5~s después) y aplica la red. La ventana avanza un segundo a la vez,
-así que cada segundo tiene su propia decisión y aparecen conductas breves, de unos
-2~s, que una decisión por bloques de 5~s esconde. Una ventana más corta vería
+así que cada segundo tiene su propia decisión y aparecen conductas breves que una
+decisión por bloques de 5~s esconde. Una ventana más corta vería
 conductas más breves, pero mediría con muy pocos datos; 4~s es el punto de
 equilibrio. El segundo es la unidad con la que el sistema registra las conductas;
 no se aplica una duración mínima de episodio (ver RF-18 y

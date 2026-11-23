@@ -53,7 +53,7 @@ Antes de seguir, recordemos qué significa cada conducta en la prueba de nado fo
 
 Con eso, la red da tres salidas: nado, inmovilidad y escalamiento. Pero el sistema reporta cuatro conductas. La cuarta es la conducta activa, y no sale de la red. Se asigna con una regla: cuando la suma de nado y escalamiento llega al menos a cero punto ochenta, y ninguna de las dos alcanza por sí sola ese umbral. Es el caso en que el espécimen claramente está activo, pero la red duda entre nado y escalamiento.
 
-Cada decisión se toma por segundo, con una ventana de cuatro segundos centrada en ese segundo. Esta ventana es lo que permite detectar conductas cortas, de unos dos segundos.
+Cada decisión se toma por segundo, con una ventana de cuatro segundos que se desliza de uno en uno. Por eso cada segundo tiene su propia decisión.
 
 Quiero explicar también de dónde salen los datos y cómo se midió que el modelo funciona. Los datos de entrenamiento son propios. Las etiquetas, es decir, la conducta correcta de cada segundo, las generamos con un etiquetador que construimos dentro del equipo, y después las revisamos a mano. Entrenamos durante quince épocas, con lotes de dieciséis clips.
 
