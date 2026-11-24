@@ -1,0 +1,294 @@
+[
+ {
+  "id": "s01_b00",
+  "texto": "Hola. Hoy vamos a enseñarle a una computadora a mirar un video y decir qué está haciendo un espécimen, un animalito de laboratorio."
+ },
+ {
+  "id": "s01_b01",
+  "texto": "Lo ponemos en un cilindro con agua y lo grabamos. En cada segundo del video, hace una de tres cosas."
+ },
+ {
+  "id": "s01_b02",
+  "texto": "Puede nadar."
+ },
+ {
+  "id": "s01_b03",
+  "texto": "Puede quedarse quieto, flotando. A eso le decimos inmovilidad."
+ },
+ {
+  "id": "s01_b04",
+  "texto": "O puede trepar por la pared. A eso le decimos escalamiento."
+ },
+ {
+  "id": "s01_b05",
+  "texto": "Revisar horas de video, segundo por segundo, cansa mucho a una persona. Por eso queremos que la computadora lo haga y nos avise."
+ },
+ {
+  "id": "s02_b00",
+  "texto": "¿Cómo aprendiste lo que es una manzana y lo que es un plátano? Alguien te mostró muchos ejemplos y te dijo el nombre de cada uno."
+ },
+ {
+  "id": "s02_b01",
+  "texto": "Con muchos ejemplos aprendiste a reconocerlos tú solo. Ahora, cuando ves una fruta nueva, ya sabes cuál es."
+ },
+ {
+  "id": "s02_b02",
+  "texto": "A esto se le llama aprendizaje supervisado: aprender con ejemplos que ya traen su respuesta. A la respuesta la llamamos etiqueta."
+ },
+ {
+  "id": "s02_b03",
+  "texto": "Aquí, cada ejemplo es un clip de video de un segundo. Y la etiqueta la puso el equipo, a mano: nadó, estuvo quieto o trepó."
+ },
+ {
+  "id": "s02_b04",
+  "texto": "Así la computadora aprende con unos ocho mil segundos de ejemplos, todos con su etiqueta."
+ },
+ {
+  "id": "s03_b00",
+  "texto": "Para decidir qué pasa en un segundo, la computadora no mira una sola foto. Mira un pedacito de video."
+ },
+ {
+  "id": "s03_b01",
+  "texto": "Toma 16 fotos de una ventana de 4 segundos, alrededor del segundo que quiere decidir."
+ },
+ {
+  "id": "s03_b02",
+  "texto": "¿Por qué tantas? Porque en una sola foto no se sabe si el espécimen flota o nada despacio. Para saberlo, hay que ver cómo cambia."
+ },
+ {
+  "id": "s03_b03",
+  "texto": "Y la ventana avanza de un segundo en un segundo. Así, cada segundo tiene su propia decisión."
+ },
+ {
+  "id": "s04_b00",
+  "texto": "Ahora, ¿quién mira ese clip? Una red neuronal. Imagínala como una fila de detectores pequeños, puestos capa tras capa."
+ },
+ {
+  "id": "s04_b01",
+  "texto": "Los primeros detectan cosas simples, como bordes y manchas. Los siguientes juntan eso para reconocer partes del cuerpo, y después movimientos."
+ },
+ {
+  "id": "s04_b02",
+  "texto": "La nuestra se llama: erre, dos más uno, de, dieciocho. Suena complicado, pero son tres ideas."
+ },
+ {
+  "id": "s04_b03",
+  "texto": "Primera idea: el dos más uno. Primero mira cada foto sola, para ver la forma: son dos dimensiones. Después mira cómo cambia de una foto a otra, el tiempo: es una dimensión."
+ },
+ {
+  "id": "s04_b04",
+  "texto": "Segunda idea: el dieciocho es el número de capas que aprenden."
+ },
+ {
+  "id": "s04_b05",
+  "texto": "Tercera idea: viene preentrenada. Antes de conocer a nuestro espécimen, ya vio muchísimos videos de personas haciendo cuatrocientas actividades distintas. Esa colección se llama Kinétics."
+ },
+ {
+  "id": "s04_b06",
+  "texto": "Así ya sabe algo de movimiento, como quien ya sabe leer y solo aprende un idioma nuevo."
+ },
+ {
+  "id": "s04_b07",
+  "texto": "Al final, la red entrega quinientos doce números. ¿Qué son? Eso es lo más importante, y lo vemos en la siguiente parte."
+ },
+ {
+  "id": "s05_b00",
+  "texto": "Piensa en la red como 512 inspectores. Cada inspector mira el clip, y cada uno está pendiente de un patrón distinto de forma y de movimiento."
+ },
+ {
+  "id": "s05_b01",
+  "texto": "Cada inspector contesta con un número: cuánto vio de lo suyo. Un número alto significa: lo vi mucho. Uno bajo: casi no lo vi."
+ },
+ {
+  "id": "s05_b02",
+  "texto": "Esos quinientos doce números juntos son las pistas. Es como una ficha con quinientas doce casillas, y cada casilla dice cuánto hay de un patrón en el clip."
+ },
+ {
+  "id": "s05_b03",
+  "texto": "Nadie les puso nombre a los inspectores. La red los descubrió sola, viendo primero los videos de Kinétics y después los nuestros. Por eso no sabemos decir qué mira cada uno."
+ },
+ {
+  "id": "s05_b04",
+  "texto": "Pero sirven: dos clips de nado dan fichas parecidas, y un clip de inmovilidad da una ficha distinta. Con eso la red puede decidir."
+ },
+ {
+  "id": "s06_b00",
+  "texto": "Pero la red de video no está sola. Hay una segunda fuente de pistas, que funciona muy distinto: las medidas."
+ },
+ {
+  "id": "s06_b01",
+  "texto": "Son veintidós números que se calculan con reglas, como si midiéramos con una regla y un cronómetro."
+ },
+ {
+  "id": "s06_b02",
+  "texto": "Quince son rasgos del espécimen: cuánto se mueve su cuerpo, qué tan vertical está, y qué camino recorre."
+ },
+ {
+  "id": "s06_b03",
+  "texto": "Siete son reglas de observación: cuánto patalea con las patas de atrás y con las de adelante, y si se mueve la nariz justo arriba de la línea del agua. Un movimiento brusco de nariz apunta a trepar."
+ },
+ {
+  "id": "s06_b04",
+  "texto": "Las distancias se miden en largos de cuerpo, no en píxeles. Así, un video grabado más cerca o más lejos da números comparables."
+ },
+ {
+  "id": "s06_b05",
+  "texto": "Fíjate en la diferencia. Las pistas de la red las descubrió la red sola y no tienen nombre. Las medidas las diseñamos nosotros: cada una tiene nombre y mide solo el cuerpo del espécimen."
+ },
+ {
+  "id": "s07_b00",
+  "texto": "Ya tenemos dos listas de pistas: las quinientas doce de la red de video y las veintidós medidas."
+ },
+ {
+  "id": "s07_b01",
+  "texto": "¿Por qué usar las dos? Porque ven cosas distintas. La red de video mira todo el clip y descubre patrones que a nosotros no se nos ocurrirían, pero puede fijarse en cosas que no son el espécimen, como el fondo o la luz."
+ },
+ {
+  "id": "s07_b02",
+  "texto": "Las medidas se calculan solo sobre el cuerpo del espécimen y miden justo lo que un experto observa, como el pataleo y la nariz. Pero son pocas, y no lo ven todo."
+ },
+ {
+  "id": "s07_b03",
+  "texto": "Por eso se fusionan: se juntan las dos listas para decidir con las dos a la vez."
+ },
+ {
+  "id": "s07_b04",
+  "texto": "Primero se limpian las medidas: si falta una, se rellena con un valor típico, y todas se ponen en la misma escala, para que ninguna pese más solo por tener números más grandes."
+ },
+ {
+  "id": "s07_b05",
+  "texto": "Luego una red pequeña mezcla las veintidós medidas y las convierte en sesenta y cuatro pistas nuevas. Cada una puede combinar varias medidas, por ejemplo: patalea fuerte y de golpe."
+ },
+ {
+  "id": "s07_b06",
+  "texto": "Ahora se pegan las dos listas: quinientas doce más sesenta y cuatro son quinientas setenta y seis pistas, una sola ficha."
+ },
+ {
+  "id": "s07_b07",
+  "texto": "Mientras entrena, se apagan algunas pistas al azar, a propósito. Se llama drop aut, y evita que la red dependa de una sola pista."
+ },
+ {
+  "id": "s07_b08",
+  "texto": "La capa final es como un jurado. Cada pista tiene un peso: cuánto empuja hacia nado, hacia quieto o hacia trepa. El jurado suma los empujes y da un puntaje a cada opción."
+ },
+ {
+  "id": "s07_b09",
+  "texto": "Esos pesos son las perillas que se ajustan al entrenar. Así la red aprende cuánto confiar en cada pista, tanto en las del video como en las de las medidas."
+ },
+ {
+  "id": "s07_b10",
+  "texto": "Un ejemplo inventado: el video duda entre nado y quieto. Pero las medidas dicen que el pataleo es suave y que la nariz no se movió. Al juntar todo, el jurado se inclina por quieto."
+ },
+ {
+  "id": "s07_b11",
+  "texto": "Eso es la fusión: dos fuentes distintas de pistas, y una sola decisión."
+ },
+ {
+  "id": "s08_b00",
+  "texto": "Al empezar, la red no sabe nada. Tiene millones de perillas, llamadas pesos, puestas en cualquier posición."
+ },
+ {
+  "id": "s08_b01",
+  "texto": "Entrenar es girar esas perillas poco a poco. Se hace con un ciclo de cuatro pasos."
+ },
+ {
+  "id": "s08_b02",
+  "texto": "Uno: la red recibe un lote de dieciséis clips, cada uno con sus medidas."
+ },
+ {
+  "id": "s08_b03",
+  "texto": "Dos: adivina. Para cada clip da sus tres probabilidades."
+ },
+ {
+  "id": "s08_b04",
+  "texto": "Tres: compara con la etiqueta, que es la respuesta del equipo. La diferencia es el error, que en el código se llama pérdida."
+ },
+ {
+  "id": "s08_b05",
+  "texto": "Cuatro: hacia atrás, calcula qué perillas tuvieron la culpa y mueve cada una un poquito para equivocarse menos."
+ },
+ {
+  "id": "s08_b06",
+  "texto": "Y se repite con el siguiente lote, una y otra vez."
+ },
+ {
+  "id": "s09_b00",
+  "texto": "Cuando la red ya vio todos los clips de entrenamiento una vez, se completó una época. Es como leer el libro entero una vez."
+ },
+ {
+  "id": "s09_b01",
+  "texto": "Una lectura no basta. Nuestra red hace quince épocas: repasa los mismos ejemplos quince veces, y cada vez se equivoca un poco menos."
+ },
+ {
+  "id": "s09_b02",
+  "texto": "En esta gráfica, que es una ilustración, abajo están las épocas y arriba el error. Empieza alto y baja con cada repaso."
+ },
+ {
+  "id": "s09_b03",
+  "texto": "Y mira la respuesta para un mismo clip que de verdad es de nado: en la primera época duda, y en la última está mucho más segura."
+ },
+ {
+  "id": "s09_b04",
+  "texto": "Entre una época y otra los clips cambian un poco: más brillo, más oscuros, volteados o movidos. Así la red no se aprende de memoria un video."
+ },
+ {
+  "id": "s09_b05",
+  "texto": "También cambia el tamaño del paso: empieza chico, crece, y al final vuelve a ser muy chico para afinar."
+ },
+ {
+  "id": "s09_b06",
+  "texto": "Y las piezas nuevas aprenden diez veces más rápido que la red preentrenada, porque ellas empiezan de cero."
+ },
+ {
+  "id": "s09_b07",
+  "texto": "Además, como hay más segundos de nado que de escalamiento, se da un poco más de peso a los ejemplos raros, para que no se olviden."
+ },
+ {
+  "id": "s10_b00",
+  "texto": "¿Cómo sabemos si aprendió bien? Con un examen. Pero debe ser un examen justo: no vale preguntar lo mismo que ya se vio en clase."
+ },
+ {
+  "id": "s10_b01",
+  "texto": "Tenemos once videos. Se hacen cinco grupos: la red se entrena con los demás y se examina con videos que nunca vio. Se repite cinco veces, cambiando los videos del examen."
+ },
+ {
+  "id": "s10_b02",
+  "texto": "¿Por qué por video y no por segundo? Porque los segundos vecinos se parecen casi igual: comparten el setenta y cinco por ciento del clip. Sería como repetir la misma pregunta con otra letra."
+ },
+ {
+  "id": "s10_b03",
+  "texto": "Resultado: la red acierta en siete de cada diez segundos, el setenta y uno coma seis por ciento. Contestar siempre nado acertaría cuarenta y ocho de cada cien."
+ },
+ {
+  "id": "s10_b04",
+  "texto": "No es perfecto: se confunde sobre todo entre nado e inmovilidad. Nuestra meta era sacar ochenta y cinco en efe uno, una calificación que mezcla aciertos y errores. Vamos en setenta, y todavía falta mejorar."
+ },
+ {
+  "id": "s11_b00",
+  "texto": "Falta un último paso: decidir la conducta de cada segundo. La red da tres probabilidades."
+ },
+ {
+  "id": "s11_b01",
+  "texto": "Regla uno: si una llega a ochenta por ciento, gana. Es como pedir que alguien esté bastante seguro antes de contestar."
+ },
+ {
+  "id": "s11_b02",
+  "texto": "Regla dos: si ninguna llega, pero nado y escalamiento juntos suman ochenta, el sistema dice: está activo, pero no sé si nadó o trepó. Eso es conducta activa."
+ },
+ {
+  "id": "s11_b03",
+  "texto": "Regla tres: si tampoco, gana la más probable."
+ },
+ {
+  "id": "s12_b00",
+  "texto": "Resumamos. Un clip de dieciséis fotos entra a la red erre, dos más uno, de, dieciocho, que entrega quinientas doce pistas. Las veintidós medidas entregan sesenta y cuatro. Se fusionan en quinientas setenta y seis, y la capa final da tres probabilidades."
+ },
+ {
+  "id": "s12_b01",
+  "texto": "Para aprender, la red adivina, mide su error y mueve las perillas, lote tras lote, durante quince épocas."
+ },
+ {
+  "id": "s12_b02",
+  "texto": "Se examina con videos que nunca vio, y acierta siete de cada diez segundos. Gracias por mirar."
+ }
+]
