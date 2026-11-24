@@ -17,28 +17,65 @@ cambio rompe algo que antes funcionaba. El \textit{backend} usa JUnit~5, el marc
 estándar de Java. Las pruebas de este capítulo corren contra PostgreSQL, el gestor de bases
 de datos relacionales del sistema, y no contra una base simulada.
 
-Se documentan \textbf{77 pruebas automáticas del trabajo terminal}. Esas pruebas
-levantan la aplicación completa contra una base PostgreSQL de pruebas, vacía y creada con
-el mismo script de esquema que usa el sistema, y preparan y comprueban sus datos con
-consultas directas. La excepción son 2 pruebas de la regla del último Administrador, que no
-usan base de datos. Cada arranque verifica además que las entidades de la aplicación
+El sistema tiene en total \textbf{739 pruebas automáticas}, repartidas en sus tres partes.
+La Tabla~\ref{tab:pruebas_totales} indica cuántas son en cada una y qué cubren.
+
+{\footnotesize\singlespacing
+\begin{longtable}{|>{\raggedright}p{2.0cm}|>{\raggedright}p{3.4cm}|>{\raggedright}p{1.4cm}|>{\raggedright\arraybackslash}p{5.8cm}|}
+\caption{Pruebas automáticas del sistema, por parte.
+\label{tab:pruebas_totales}}\\
+\hline
+\textbf{Parte} & \textbf{Herramienta} & \textbf{Pruebas} & \textbf{Qué cubren} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Parte} & \textbf{Herramienta} & \textbf{Pruebas} & \textbf{Qué cubren} \\
+\hline
+\endhead
+\textit{Backend}
+& JUnit~5
+& 278
+& Cuentas, experimentos, resultados por bloques de 5~s, reportes CSV, XLSX y PDF, revisión segundo a segundo, pausa y restricciones de la base de datos. \\
+\hline
+\textit{Worker}
+& Python
+& 93
+& Correos, diagnóstico, modelo, pausa, reportes, respaldo, tiempos y vigilancia del disco. \\
+\hline
+Interfaz web
+& Vitest, jsdom y Testing Library
+& 368
+& Pantallas, accesibilidad, gráficas de resultados, revisión segundo a segundo, avisos legales y servicios de la API. \\
+\hline
+\textbf{Total}
+& & \textbf{739} & \\
+\hline
+\end{longtable}
+}
+
+De las 278 pruebas del \textit{backend}, 172 son de integración: levantan la aplicación
+completa contra una base PostgreSQL de pruebas, vacía y creada con el mismo script de
+esquema que usa el sistema, y preparan y comprueban sus datos con consultas directas. Otras
+105 no necesitan base de datos, y una se omite siempre porque solo corre si se activa con una
+variable de entorno. Cada arranque verifica además que las entidades de la aplicación
 coincidan con las tablas; si no coinciden, la aplicación no arranca.
 
-Con la base de pruebas, las 77 pasan, sin fallos ni errores. Sin base de datos, 75 se
-omiten y 2 corren. Las Figuras~\ref{fig:pruebas_corrida_con_base} y
+Con la base de pruebas, las 278 pruebas se ejecutan sin fallos ni errores y una se omite por
+el motivo anterior. Sin base de datos corren 105 y se omiten 173. Las
+Figuras~\ref{fig:pruebas_corrida_con_base} y
 \ref{fig:pruebas_corrida_sin_base} muestran la salida de ambas corridas.
 
 \begin{sidewaysfigure}[p]
 \centering
-\includegraphics[width=\textheight, height=0.9\textwidth, keepaspectratio]{figures/pruebas/01_corrida_77_con_base}
-\caption{Salida de la corrida de las 77 pruebas con base PostgreSQL de pruebas, reproducida como texto a partir del registro de Maven y de los reportes de las pruebas.}
+\includegraphics[width=\textheight, height=0.9\textwidth, keepaspectratio]{figures/pruebas/01_corrida_con_base}
+\caption{Salida de la corrida de las pruebas con base PostgreSQL de pruebas, reproducida como texto a partir del registro de Maven y de los reportes de las pruebas.}
 \label{fig:pruebas_corrida_con_base}
 \end{sidewaysfigure}
 
 \begin{sidewaysfigure}[p]
 \centering
-\includegraphics[width=\textheight, height=0.9\textwidth, keepaspectratio]{figures/pruebas/02_corrida_77_sin_base}
-\caption{Salida de la corrida de las 77 pruebas sin base de datos, reproducida como texto a partir del registro de Maven y de los reportes de las pruebas.}
+\includegraphics[width=\textheight, height=0.9\textwidth, keepaspectratio]{figures/pruebas/02_corrida_sin_base}
+\caption{Salida de la corrida de las pruebas sin base de datos, reproducida como texto a partir del registro de Maven y de los reportes de las pruebas.}
 \label{fig:pruebas_corrida_sin_base}
 \end{sidewaysfigure}
 
@@ -46,7 +83,7 @@ omiten y 2 corren. Las Figuras~\ref{fig:pruebas_corrida_con_base} y
 
 Cada prueba se clasificó una sola vez según su propósito principal. La
 Tabla~\ref{tab:pruebas_tipos} describe los tipos, cuándo se aplican, qué validan y cuántas
-de las 77 pruebas corresponden a cada uno. Setenta y cinco de las 77 corren contra la
+de las pruebas documentadas corresponden a cada uno. Todas menos 2 corren contra la
 aplicación completa y PostgreSQL reales; el tipo «integración» indica el propósito
 principal de la prueba (que varias partes juntas dejen el sistema en el estado correcto),
 no el entorno en que corre.
@@ -96,18 +133,15 @@ Integración
 Rendimiento
 & Medir el tiempo de respuesta bajo carga.
 & Con el sistema armado.
-& Ninguna de las 77 pruebas es de este tipo: la prueba de carga es manual y se describe aparte (sección~\ref{sec:pruebas_carga}).
+& Ninguna de las pruebas documentadas es de este tipo: la prueba de carga es manual y se describe aparte (sección~\ref{sec:pruebas_carga}).
 & 0 \\
-\hline
-\textbf{Total}
-& & & & \textbf{77} \\
 \hline
 \end{longtable}
 }
 
 \subsection{Pruebas por tema}
 
-La Tabla~\ref{tab:pruebas_seleccion} agrupa las 77 pruebas por tema. Indica qué comprueba
+La Tabla~\ref{tab:pruebas_seleccion} agrupa por tema las pruebas documentadas. Indica qué comprueba
 cada grupo y qué requerimientos funcionales (RF) y no funcionales (RNF) del
 capítulo~4 verifica. Las restricciones de la base de datos no verifican un requerimiento
 directo: comprueban la integridad de los datos y se describen en la
@@ -165,18 +199,14 @@ Restricciones de la base de datos
 & Que la base acepte los datos válidos y rechace los que están fuera de rango, fuera de un dominio de valores cerrados, repetidos o que dejarían filas huérfanas (sección~\ref{sec:pruebas_bd}).
 & Ninguno directo: integridad de los datos. \\
 \hline
-\textbf{Total}
-& \textbf{77}
-& &  \\
-\hline
 \end{longtable}
 }
 
 Las Figuras~\ref{fig:pruebas_experimentos}, \ref{fig:pruebas_cuentas} y
 \ref{fig:pruebas_resultados} muestran el resultado de cada prueba, con su tiempo. Las
 capturas agrupan las pruebas por clase de prueba y no por tema, por lo que su reparto
-(18, 16 y 14 pruebas) no coincide con el de la Tabla~\ref{tab:pruebas_seleccion}; junto con
-las 29 de la Figura~\ref{fig:pruebas_restricciones} suman las mismas 77.
+no coincide con el de la Tabla~\ref{tab:pruebas_seleccion}. Las pruebas de restricciones de la
+base de datos se muestran en la Figura~\ref{fig:pruebas_restricciones}.
 
 \begin{sidewaysfigure}[p]
 \centering
@@ -251,7 +281,7 @@ sesión por cliente, repite las consultas habituales del sistema y mide el tiemp
 respuesta. Se hicieron dos corridas, que resume la Tabla~\ref{tab:pruebas_carga}.
 
 La prueba de carga y el despliegue son verificaciones manuales del sistema completo, no
-pruebas automáticas, y no forman parte de las 77 pruebas automáticas. La corrida B se hizo
+pruebas automáticas, y no forman parte de las pruebas automáticas del sistema. La corrida B se hizo
 sobre la configuración de despliegue del sistema, con el servidor web nginx.
 
 En esta sección se usa el \textbf{percentil 95}, que es el tiempo por debajo del cual

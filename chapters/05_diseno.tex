@@ -660,8 +660,8 @@ las tablas afectadas y la decisión de diseño concreta en cada caso.
 \section{Diseño de la API REST}
 % -----------------------------------------------------------
 
-La API REST sigue las convenciones HTTP estándar \cite{grinberg2018}. Es una API de
-nivel~2 del modelo de madurez de Richardson: cada recurso tiene su propia ruta y los
+La API REST sigue las convenciones HTTP estándar \cite{rfc9110,rfc5789}. Es una API de
+nivel~2 del modelo de madurez de Richardson \cite{richardson2008,fowler2010}: cada recurso tiene su propia ruta y los
 verbos HTTP se usan con su significado (\texttt{GET} consulta, \texttt{POST} crea,
 \texttt{PATCH} modifica solo los campos que se envían y \texttt{DELETE} elimina). No
 llega al nivel~3, en el que cada respuesta incluye enlaces a las acciones siguientes

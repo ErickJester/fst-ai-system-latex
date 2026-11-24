@@ -327,9 +327,9 @@ experimental.
 El sistema tiene tres capas: el \textit{frontend} (React.js) corre en el navegador del
 investigador, el \textit{backend} (Spring Boot) gestiona la lógica de negocio a través de una API
 REST, y la base de datos (PostgreSQL) persiste los datos. Esta separación permite que
-frontend y backend evolucionen de forma independiente \cite{grinberg2018}.
+frontend y backend evolucionen de forma independiente \cite{fielding2000}.
 
-La API REST usa semántica HTTP estándar: \texttt{GET} para consultar,
+La API REST usa semántica HTTP estándar \cite{rfc9110}: \texttt{GET} para consultar,
 \texttt{POST} para crear, \texttt{PUT}/\texttt{PATCH} para actualizar y
 \texttt{DELETE} para eliminar. Cada recurso tiene una URL fija y las respuestas
 se intercambian en formato JSON.

@@ -766,5 +766,6 @@ sin necesidad de una tabla de enlaces usados.
 El sistema tiene pruebas automáticas en sus tres partes. El \textit{backend} se prueba con JUnit; las pruebas de
 integración corren contra una base PostgreSQL de prueba. La interfaz se prueba con Vitest, jsdom y Testing
 Library. El \textit{worker} se prueba con \texttt{unittest}, que cubre los correos, el diagnóstico, la pausa, los
-reportes, el respaldo, los tiempos y la vigilancia del disco. Además, se hizo una prueba de carga con cuatro sesiones simultáneas (consultas y revisión, sin subida de videos ni
+reportes, el respaldo, los tiempos y la vigilancia del disco. En total son 739 pruebas automáticas: 278 del
+\textit{backend}, 93 del \textit{worker} y 368 de la interfaz (Tabla~\ref{tab:pruebas_totales}). Además, se hizo una prueba de carga con cuatro sesiones simultáneas (consultas y revisión, sin subida de videos ni
 reportes PDF). El capítulo~\ref{cap:pruebas} documenta una selección de estas pruebas y los resultados de la prueba de carga.
