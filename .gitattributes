@@ -9,3 +9,8 @@
 *.pptx  binary
 *.xlsx  binary
 *.svg   binary
+
+# Entrega del disco: los archivos pesados van por Git LFS (descargarlos con "git lfs pull")
+entregaDisco/**/*.gz  filter=lfs diff=lfs merge=lfs -text
+entregaDisco/**/*.zip filter=lfs diff=lfs merge=lfs -text
+entregaDisco/**/*.mp4 filter=lfs diff=lfs merge=lfs -text

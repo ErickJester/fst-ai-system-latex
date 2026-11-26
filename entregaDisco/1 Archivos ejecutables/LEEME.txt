@@ -1,0 +1,35 @@
+ARCHIVOS EJECUTABLES - TT 2026-B066
+
+CONTENIDO
+  fst-portable-1.20.4.zip
+      El sistema web: docker-compose.yml, la carpeta portable (iniciar.bat, detener.bat,
+      abrir_red.bat, probar_correo.bat y su guía LEEME.md), el modelo de análisis
+      (modelos\fst_cnn_seg.pt), el esquema de la base de datos y el código fuente
+      (backend, worker, pipeline y frontend).
+
+  fst-imagenes-1.20.4.tar.gz
+      Las imágenes de Docker ya construidas (servidor, worker, página web y PostgreSQL),
+      para instalar sin conexión a internet.
+
+  etiquetador_y_revisor_FST.zip
+      Herramienta de etiquetado y revisión de los videos: código fuente y el programa
+      dist\FST_Revisor.exe.
+
+  entrenamiento_del_modelo.zip
+      Cuaderno y scripts con los que se entrena el clasificador.
+
+REQUISITOS
+  Windows 10 u 11 con Docker Desktop.
+  16 GB de memoria RAM, con al menos 8 GB asignados a Docker Desktop.
+  20 GB libres en disco.
+
+INSTALACIÓN DEL SISTEMA
+  1. Copiar a la computadora los dos archivos fst-portable y fst-imagenes.
+  2. Descomprimir fst-portable-1.20.4.zip en una carpeta, por ejemplo C:\fst-portable.
+  3. Copiar fst-imagenes-1.20.4.tar.gz dentro de esa carpeta, junto a docker-compose.yml.
+  4. Abrir Docker Desktop y esperar a que indique que está corriendo.
+  5. Abrir portable\iniciar.bat. La primera vez pide los datos de la cuenta de
+     administrador; guardar el archivo y abrir iniciar.bat otra vez.
+  6. Entrar a http://localhost:8088
+
+La guía completa está en portable\LEEME.md, dentro del paquete.
