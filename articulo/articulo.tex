@@ -36,18 +36,18 @@ Tel. 57296000, ext. 52000. E-mail: \texttt{id634296@gmail.com}, \texttt{vanesaet
 
 \begin{abstract}
 Anotar a mano un video de la prueba de nado forzado toma alrededor de 30 minutos por
-espécimen y produce resultados que dependen de quién anota. Este trabajo presenta un
-prototipo de sistema web que automatiza esa anotación para el Laboratorio de Bioquímica
-Estructural, Sección de Posgrado, de la Escuela Nacional de Medicina y Homeopatía (ENMyH)
-del Instituto Politécnico Nacional (IPN). Con visión por computadora se localiza cada
-cilindro y se aísla al espécimen; una red convolucional espaciotemporal, combinada con 22
-medidas del espécimen, clasifica cada segundo como nado, inmovilidad o escalamiento, y una
-regla de confianza asigna la conducta activa. En validación cruzada por video, con 11
-videos y 25 especímenes, la exactitud fue de 71.6\% y el F1 promedio de 0.705; al separar
-inmovilidad de conducta activa, la exactitud fue de 79.2\%. En una verificación del sistema
-completo, un video de 5 minutos con cuatro especímenes se analizó en unos 9 minutos, contra
-unas dos horas de anotación manual. El sistema permite revisar y corregir cada segundo y
-genera reportes en PDF, CSV y XLSX.
+espécimen, y el resultado depende de quién anota. Este trabajo presenta un prototipo de
+sistema web que automatiza esa anotación para el Laboratorio de Bioquímica Estructural,
+Sección de Posgrado, de la Escuela Nacional de Medicina y Homeopatía (ENMyH) del Instituto
+Politécnico Nacional (IPN). El sistema localiza cada cilindro y aísla al espécimen con
+visión por computadora. Una red convolucional espaciotemporal, combinada con 22 medidas del
+espécimen, decide si en cada segundo hay nado, inmovilidad o escalamiento; cuando no logra
+separar el nado del escalamiento, una regla de confianza asigna la conducta activa. Con
+validación cruzada por video, en 11 videos y 25 especímenes, la exactitud fue de 71.6\% y
+el F1 promedio de 0.705. Al separar solo la inmovilidad de la conducta activa, la exactitud
+fue de 79.2\%. El sistema completo analizó un video de 5 minutos con cuatro especímenes en
+unos 9 minutos, cuando anotarlo a mano toma hasta unas dos horas. El investigador puede
+corregir cualquier segundo y descargar los reportes en PDF, CSV y XLSX.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -59,38 +59,39 @@ conductual preclínico, sistema web, farmacología experimental.
 \section{Introducción}
 
 La depresión es un trastorno mental común que afecta a cientos de millones de personas en el
-mundo \cite{who}. Para evaluar compuestos antes de los ensayos clínicos se usan modelos
-preclínicos con roedores; el más citado es la prueba de nado forzado (\textit{Forced Swim
-Test}, FST), propuesta por Porsolt et al. en 1977 \cite{porsolt}, con más de 8\,000
-artículos que la reportan desde el año 2000 \cite{dellavalle}. En ella el espécimen se
-coloca en un cilindro con agua del que no puede salir. Al principio intenta escapar y
-después flota con movimientos mínimos; esa conducta pasiva, llamada desesperanza
-conductual, disminuye con los antidepresivos \cite{armario,slattery}. Además de la
-inmovilidad interesa distinguir las dos conductas activas, nado y escalamiento, porque
-distintas clases de antidepresivos las modifican de manera diferente \cite{detke}.
+mundo \cite{who}. Antes de probar un compuesto en ensayos clínicos se evalúa en modelos
+preclínicos con roedores. El más citado es la prueba de nado forzado (\textit{Forced Swim
+Test}, FST), que Porsolt et al. propusieron en 1977 \cite{porsolt} y que desde el año 2000
+aparece en más de 8\,000 artículos \cite{dellavalle}. El espécimen se coloca en un cilindro
+con agua del que no puede salir. Primero intenta escapar y, pasado un rato, flota con
+movimientos mínimos. Los antidepresivos reducen esa conducta pasiva, conocida como
+desesperanza conductual \cite{armario,slattery}. También importa separar las dos conductas
+activas, nado y escalamiento, porque distintas clases de antidepresivos las modifican de
+forma diferente \cite{detke}.
 
-Un experimento compara varios grupos: control, de referencia, que recibe fluoxetina
-(antidepresivo de referencia), y de tratamientos experimentales. Cada grupo se graba en
-tandas de dos a cuatro especímenes, desde una vista lateral, en dos sesiones: 20 minutos el
-primer día y 5 minutos el segundo. Los experimentos los realiza el laboratorio bajo la
-NOM-062-ZOO-1999 \cite{nom}; este trabajo solo analiza los videos resultantes.
+Un experimento compara grupos de tres tipos: control, referencia, que recibe fluoxetina
+(antidepresivo de referencia), y tratamiento experimental. Cada grupo se graba de lado, en
+tandas de dos a cuatro especímenes, durante 20 minutos el primer día y 5 minutos el
+segundo. El laboratorio realiza los experimentos conforme a la NOM-062-ZOO-1999 \cite{nom},
+y este trabajo solo analiza los videos que resultan.
 
-En el laboratorio colaborador el análisis se hacía a mano: se repasa la grabación con
-cronómetro, una vez por cada conducta y por espécimen. Un video de cuatro especímenes puede
-requerir unas dos horas, y el triple si tres analistas lo anotan de forma independiente. En
-un semestre se juntan alrededor de 24 a 32 videos. A ese costo se suman la variabilidad
-entre evaluadores en las transiciones entre conductas \cite{armario}, la dispersión de los
-resultados en hojas de cálculo y la dificultad de obtener un desglose minuto a minuto.
+En el laboratorio colaborador ese análisis se hace a mano. El investigador repasa la
+grabación con un cronómetro, una vez por cada conducta y cada espécimen, de modo que un video
+con cuatro especímenes puede requerir unas dos horas, o el triple si tres analistas lo
+anotan por separado. En un semestre se acumulan alrededor de 24 a 32 videos. Dos personas
+pueden marcar en momentos distintos el paso de una conducta a otra \cite{armario}. Los
+resultados terminan repartidos en hojas de cálculo, y sacar a mano un desglose minuto
+a minuto no es práctico.
 
-Existen herramientas comerciales, como EthoVision XT \cite{ethovision} y ANY-maze
-\cite{anymaze}, y abiertas, como ezTrack \cite{eztrack} y DBscorer \cite{dbscorer}; ninguna
-de ellas distingue por separado las tres conductas de la FST ni ofrece una interfaz web.
-Entre los trabajos con aprendizaje profundo, DSAAN reporta 88.7\% de precisión con dos
-ramas para apariencia y movimiento \cite{dsaan}; Sturman et al. clasifican a partir de
-puntos del cuerpo \cite{sturman}, y Della Valle et al. distinguen las tres conductas con
-una red residual 3D \cite{dellavalle}, pero no la distribuyen como un sistema que un
-laboratorio sin infraestructura especializada pueda instalar. La
-Tabla~\ref{tab:comparacion} resume estas diferencias.
+Para automatizar parte del trabajo hay programas comerciales, como EthoVision XT
+\cite{ethovision} y ANY-maze \cite{anymaze}, y de código abierto, como ezTrack
+\cite{eztrack} y DBscorer \cite{dbscorer}. Ninguno separa las tres conductas de la FST ni
+tiene interfaz web. Entre los trabajos con aprendizaje profundo, DSAAN usa una rama para la
+apariencia y otra para el movimiento, y reporta 88.7\% de precisión \cite{dsaan}. Sturman
+et al. clasifican a partir de puntos del cuerpo \cite{sturman}. Della Valle et al. sí
+distinguen las tres conductas con una red residual 3D \cite{dellavalle}, aunque no la
+distribuyen como un sistema que pueda instalar un laboratorio sin infraestructura
+especializada (Tabla~\ref{tab:comparacion}).
 
 \begin{table}[t]
 \renewcommand{\arraystretch}{1.15}
@@ -123,37 +124,39 @@ DeepLabCut y clasif. & Parc. & Parc. & Sí & No & Sí \\
 \end{tabular}
 \end{table}
 
-El objetivo fue diseñar, desarrollar y validar un prototipo de sistema web que, mediante
-visión por computadora y aprendizaje supervisado, automatice la clasificación de las
-conductas de la FST, con desempeño medido con métricas de clasificación estándar y con los
-atributos de calidad de la norma 25010:2011 de la Organización Internacional de
+El objetivo fue diseñar, desarrollar y validar un prototipo de sistema web que clasifique de
+forma automática las conductas de la FST con visión por computadora y aprendizaje
+supervisado. El desempeño se mide con métricas de clasificación estándar, y la calidad del
+producto, con los atributos de la norma 25010:2011 de la Organización Internacional de
 Normalización (ISO) y la Comisión Electrotécnica Internacional (IEC) \cite{iso25010}. El
 desarrollo siguió una metodología ágil basada en Scrum y los procesos de la norma
 12207:2017 de la ISO, la IEC y el Instituto de Ingenieros Eléctricos y Electrónicos (IEEE)
-\cite{iso12207}. El sistema apoya la investigación preclínica: no
-diagnostica depresión ni produce información de uso clínico.
+\cite{iso12207}. El sistema es un apoyo para la investigación preclínica y no diagnostica
+depresión ni produce información de uso clínico.
 
 % =================================================================
 \section{Metodología}
 
-El investigador sube un video desde el navegador; el sistema lo analiza en segundo plano y
-entrega, por cada espécimen, la conducta de cada segundo, los totales por minuto y los
-reportes. El \textit{pipeline} (cadena de procesamiento) tiene tres etapas:
+El investigador sube un video desde el navegador y el sistema lo analiza en segundo plano.
+Al terminar entrega la conducta de cada espécimen segundo a segundo, los totales por minuto
+y los reportes. El \textit{pipeline} (cadena de procesamiento) tiene tres etapas, que son
 preprocesamiento, localización de los cilindros y clasificación.
 
 \subsection{Arquitectura del sistema}
 
-El sistema se compone de cuatro servicios en contenedores Docker (Fig.~\ref{fig:arq}). El \textit{frontend} (interfaz del navegador) está hecho con React y se sirve con
-nginx. El \textit{backend} (servidor), en Java con Spring Boot, expone una API REST que usa JSON,
-autentica con \textit{JSON Web Token} (JWT), protege las contraseñas con BCrypt y
-valida los videos: MP4 o MOV, en horizontal y de hasta 2048~MB. El \textit{worker} (proceso en segundo plano), en Python con OpenCV y PyTorch, ejecuta el análisis en CPU. La base de
-datos es PostgreSQL.
+El sistema se compone de cuatro servicios en contenedores Docker (Fig.~\ref{fig:arq}). El
+\textit{frontend} (interfaz del navegador) está hecho con React y lo sirve nginx. El
+\textit{backend} (servidor), escrito en Java con Spring Boot, expone una API REST con JSON,
+autentica con \textit{JSON Web Token} (JWT) y protege las contraseñas con BCrypt. También
+comprueba que cada video sea MP4 o MOV, esté en horizontal y no pase de 2048~MB. El
+análisis corre en CPU dentro del \textit{worker} (proceso en segundo plano), programado en
+Python con OpenCV y PyTorch. La base de datos es PostgreSQL.
 
-El \textit{backend} y el \textit{worker} no se llaman entre sí: se coordinan por la base de
-datos y por un volumen compartido. La cola de análisis es una tabla, y el \textit{worker}
-procesa un video a la vez, en orden de llegada. El sistema se empaqueta con sus imágenes
-construidas, de modo que se instala en un equipo del laboratorio sin descargar ni compilar
-nada.
+El \textit{backend} y el \textit{worker} se coordinan únicamente por la base de datos y un
+volumen compartido. La cola de análisis es una tabla de la base, y el \textit{worker} toma
+los videos de uno en uno, en orden de llegada. Las imágenes se construyen antes de
+empaquetar el sistema, por lo que el equipo del laboratorio no tiene que descargar ni
+compilar nada para instalarlo.
 
 \begin{figure}[t]
 \centering
@@ -184,44 +187,47 @@ nada.
 
 \subsection{Localización de los cilindros}
 
-El preprocesamiento comprueba que el archivo se pueda abrir, lee sus dimensiones y
-duración, y verifica que existan los especímenes registrados y el modelo. Después, la etapa
-de cilindros realiza cuatro operaciones.
+El preprocesamiento revisa que el archivo abra, lee sus dimensiones y su duración, y
+confirma que existan los especímenes registrados y el modelo. Sigue la etapa de cilindros,
+que tiene cuatro pasos.
 
-\textit{1) Alineación:} cada cuadro se alinea con uno de referencia mediante puntos ORB y
-una transformación de similitud estimada con RANSAC, para que un movimiento de la cámara no
-se confunda con movimiento del espécimen.
+Primero se alinea cada cuadro con uno de referencia, usando puntos ORB y una transformación
+de similitud estimada con RANSAC. Así, un movimiento de la cámara no se toma como
+movimiento del espécimen.
 
-\textit{2) Modelo de fondo:} con un cuadro por segundo se calcula, para cada píxel, el
-percentil 10. La mediana, opción habitual \cite{piccardi}, dejaría en el fondo a un
-espécimen que pasa mucho tiempo inmóvil. Con los mismos cuadros se obtiene un mapa de
-ocupación.
+Después se construye el modelo de fondo. Se toma un cuadro por segundo y para cada píxel se
+calcula el percentil 10. La opción habitual es la mediana \cite{piccardi}, pero aquí un
+espécimen que pasa mucho tiempo inmóvil quedaría incorporado al fondo. De esos mismos
+cuadros sale un mapa de ocupación.
 
-\textit{3) Geometría:} la línea de agua y el fondo del recipiente se obtienen de los bordes
-horizontales más marcados (filtro Sobel), y las columnas de los cilindros, del mapa de
-ocupación. Se numeran de izquierda a derecha y cada uno recibe una región de interés.
+El tercer paso ubica el aparato. La línea de agua y el fondo del recipiente se obtienen de
+los dos bordes horizontales más marcados (filtro Sobel), y las columnas de los cilindros,
+del mapa de ocupación. Los cilindros se numeran de izquierda a derecha y cada uno recibe una
+región de interés.
 
-\textit{4) Separación del espécimen:} un píxel pertenece al espécimen si difiere del fondo
-al menos 45 niveles de gris y tiene un brillo de al menos 80. Se conserva la región conexa
-más grande, se borra la cola con una erosión morfológica y el centroide se suaviza con una
-mediana móvil.
+Por último se separa al espécimen. Un píxel le pertenece si difiere del fondo al menos 45
+niveles de gris y tiene un brillo de 80 o más. De esos píxeles se conserva la región conexa
+más grande, se le borra la cola con una erosión morfológica y se suaviza el centroide con
+una mediana móvil.
 
-Si no se encuentran los cilindros, el análisis termina con un reporte de diagnóstico. Si un
-espécimen deja de verse tres segundos seguidos, el análisis se pausa y el usuario puede
-ajustar el recuadro, confirmarlo o cancelar; sin respuesta en 72 horas, se cancela.
+Cuando no se encuentran los cilindros, el análisis termina con un reporte de diagnóstico. Si
+un espécimen deja de verse durante tres segundos seguidos, el análisis se pausa para que el
+usuario ajuste el recuadro, lo confirme o cancele. Sin respuesta en 72 horas, se cancela.
 
 \subsection{Clasificación de conducta}
 
-La red es de fusión (Fig.~\ref{fig:red}). Una rama usa como \textit{backbone} (red base) una R(2+1)D-18 preentrenada con Kinetics-400 \cite{tran}, que separa cada convolución 3D en una
-espacial y una temporal. Recibe, por cada segundo y cilindro, un clip de 16 cuadros a 4
-cuadros por segundo: una ventana de 4~s que va desde 1.5~s antes hasta 2.5~s después del
-segundo que se clasifica. Cada cuadro se recorta al cilindro, se reduce a
-$128\times96$ píxeles y se normaliza por el brillo del clip.
+La red combina dos ramas (Fig.~\ref{fig:red}). La primera tiene como \textit{backbone} (red
+base) una R(2+1)D-18 preentrenada con Kinetics-400 \cite{tran}, en la que cada convolución
+3D se divide en una espacial y una temporal. Para clasificar un segundo recibe, de cada
+cilindro, 16 cuadros tomados a 4 por segundo. Esa ventana de 4~s empieza 1.5~s antes del
+segundo en cuestión y termina 2.5~s después. Los cuadros se recortan al cilindro, se reducen
+a $128\times96$ píxeles y se normalizan según el brillo del clip.
 
-La segunda rama, un perceptrón multicapa, recibe 22 medidas (Tabla~\ref{tab:medidas}): 15
-rasgos calculados sobre la silueta, con las distancias expresadas en largos de cuerpo, y 7
-reglas de observación calculadas sobre los cuadros del clip. Ambas ramas se unen en una capa
-lineal con tres salidas, nado, escalamiento e inmovilidad, cuyas probabilidades suman 1.
+La segunda rama es un perceptrón multicapa que recibe 22 medidas
+(Tabla~\ref{tab:medidas}). Quince son rasgos de la silueta, con las distancias expresadas en
+largos de cuerpo, y siete son reglas de observación calculadas sobre los cuadros del clip.
+Una capa lineal une las dos ramas y entrega tres probabilidades, de nado, escalamiento e
+inmovilidad, que suman 1.
 
 \begin{table}[t]
 \renewcommand{\arraystretch}{1.15}
@@ -272,8 +278,8 @@ Observación & 7 & Energía de movimiento en las mitades baja y alta del cuerpo 
 \label{fig:red}
 \end{figure}
 
-La conducta $\hat{c}$ de cada segundo se decide con las probabilidades $p_n$, $p_e$ y $p_i$
-de nado, escalamiento e inmovilidad, y el umbral $\tau=0.80$:
+Con esas probabilidades, $p_n$, $p_e$ y $p_i$, y un umbral $\tau=0.80$, la conducta
+$\hat{c}$ de cada segundo es
 \begin{equation}
 \hat{c}=
 \begin{cases}
@@ -282,21 +288,22 @@ de nado, escalamiento e inmovilidad, y el umbral $\tau=0.80$:
 \end{cases}
 \label{eq:regla}
 \end{equation}
-La conducta activa indica que el espécimen no está inmóvil, pero la red no distingue entre
-nado y escalamiento; no es una salida de la red. Un segundo en el que no se pudo medir al
-espécimen queda como «sin ver». De cada espécimen se conservan los últimos 300~s.
+La conducta activa la asigna esta regla, porque la red no tiene esa salida. Significa que el
+espécimen no está inmóvil, aunque no se pueda distinguir si nada o escala. Los segundos en
+que no se pudo medir al espécimen quedan como «sin ver». De cada espécimen se conservan los
+últimos 300~s.
 
 \subsection{Datos y entrenamiento}
 
-Se usaron 11 videos del laboratorio con 25 especímenes: siete videos con tres o cuatro
-cilindros y cuatro con un solo espécimen. El equipo asignó la conducta segundo a segundo con
-un etiquetador propio, que propone una conducta a partir de los rasgos mediante \textit{gradient boosting}
-(potenciación del gradiente); la persona la confirma o la corrige, o etiqueta
-sin ver la propuesta. Solo cuentan las conductas asignadas o confirmadas por una persona. Se
-obtuvieron 8\,248 segundos; los 7\,987 con una de las tres conductas (47.8\% de nado,
-36.6\% de inmovilidad y 15.6\% de escalamiento) se usaron para entrenar, y los 261
-restantes se marcaron como conducta activa sin distinguir. La Tabla~\ref{tab:datos} muestra
-el reparto por video.
+Los datos son 11 videos del laboratorio con 25 especímenes. Siete videos tienen tres o
+cuatro cilindros y los otros cuatro, un solo espécimen (Tabla~\ref{tab:datos}). El equipo
+etiquetó la conducta segundo a segundo con un programa propio. Ese etiquetador propone una
+conducta a partir de los rasgos mediante \textit{gradient boosting} (potenciación del
+gradiente), y la persona la confirma, la corrige o etiqueta sin ver la propuesta. Solo
+cuentan las conductas que una persona asignó o confirmó. En total son 8\,248 segundos. Para
+entrenar se usaron los 7\,987 que tienen una de las tres conductas (47.8\% de nado, 36.6\%
+de inmovilidad y 15.6\% de escalamiento). Los otros 261 quedaron marcados como conducta
+activa sin distinguir.
 
 \begin{table}[t]
 \renewcommand{\arraystretch}{1.1}
@@ -327,39 +334,41 @@ V11 & 1 & 1 & 38 & 110 & 32 & 180 \\
 \end{tabular}
 \end{table}
 
-La red se entrenó 15 épocas con lotes de 16 clips, optimizador AdamW con decaimiento de
-pesos de $10^{-4}$, tasa de aprendizaje con política \textit{OneCycle} ($10^{-4}$ en la red
-base y $10^{-3}$ en las capas nuevas) y entropía cruzada con pesos por clase y suavizado de
-etiquetas de 0.05. El modelo final se entrenó con todos los datos.
+El entrenamiento duró 15 épocas, con lotes de 16 clips y el optimizador AdamW (decaimiento
+de pesos de $10^{-4}$). La tasa de aprendizaje siguió la política \textit{OneCycle}, con
+$10^{-4}$ en la red base y $10^{-3}$ en las capas nuevas. La pérdida fue entropía cruzada
+con pesos por clase y suavizado de etiquetas de 0.05. El modelo final se entrenó con todos
+los datos.
 
 \subsection{Evaluación}
 
-Se usó validación cruzada de cinco particiones agrupadas por video: en cada una, el
-conjunto de prueba es independiente del de entrenamiento porque sus videos no participan en
-el modelo que los evalúa. Se agrupa por video porque los segundos vecinos comparten casi el
-mismo clip y separarlos al azar inflaría el resultado. Por conducta se calcularon la
-precisión $P$, el \textit{recall} (exhaustividad) $R$ y F1:
+Se hizo validación cruzada en cinco particiones agrupadas por video. Ningún video del
+conjunto de prueba participa en el entrenamiento del modelo que lo evalúa, de modo que ese
+conjunto es independiente. Agrupar por video es necesario porque los segundos vecinos
+comparten casi el mismo clip y repartirlos al azar inflaría el resultado. Para cada conducta
+se calcularon la precisión $P$, el \textit{recall} (exhaustividad) $R$ y F1:
 \begin{equation}
 P=\frac{VP}{VP+FP},\quad R=\frac{VP}{VP+FN},\quad F_1=\frac{2PR}{P+R},
 \label{eq:metricas}
 \end{equation}
 donde $VP$, $FP$ y $FN$ son los verdaderos positivos, falsos positivos y falsos negativos.
-Hubo dos evaluaciones: las tres conductas, con la clase más probable de cada segundo; e
-inmovilidad contra conducta activa, donde esta reúne nado, escalamiento y los segundos sin
-distinguir. También se midió la exactitud por bloques de 5~s con la conducta mayoritaria,
-la unidad del muestreo por intervalos usado en la literatura \cite{detke,craft}.
+La primera evaluación distingue las tres conductas y toma la clase más probable de cada
+segundo. La segunda enfrenta la inmovilidad con la conducta activa, que reúne nado,
+escalamiento y los segundos sin distinguir. También se midió la exactitud en bloques de 5~s
+según la conducta mayoritaria. Ese bloque es la unidad del muestreo por intervalos usado en
+la literatura \cite{detke,craft}.
 
 \subsection{Plataforma web}
 
-El usuario organiza experimentos con grupos y tandas y sube los videos; el del segundo día
-se analiza y el del primero, que es de habituación, solo se conserva. La interfaz muestra el
-avance, avisa el término o el error en un panel y por correo, y presenta resultados por
-espécimen, minuto y grupo, con media, desviación estándar y varianza, y seis gráficas. Los
-videos vencen y se eliminan de forma automática. En la
-pantalla de revisión (Fig.~\ref{fig:revision}) el investigador ve el video con una línea de
-tiempo por espécimen y corrige cualquier segundo; cada etiqueta conserva su origen y los
-totales se recalculan a partir de ellas. Los reportes se descargan en PDF, CSV y XLSX. Un
-administrador crea las cuentas y supervisa el estado del sistema.
+En la plataforma, el usuario crea experimentos con sus grupos y tandas y sube los videos. El
+del segundo día se analiza y el del primero, que es de habituación, solo se guarda. Todos se
+eliminan de forma automática cuando vencen. La interfaz muestra el avance y avisa en un
+panel y por correo cuando un análisis termina o falla. Los resultados se consultan por
+espécimen, por minuto y por grupo, con media, desviación estándar, varianza y seis gráficas.
+En la pantalla de revisión (Fig.~\ref{fig:revision}) el investigador ve el video junto a una
+línea de tiempo por espécimen y puede corregir cualquier segundo. Cada etiqueta guarda su
+origen y los totales se recalculan con las correcciones. Los reportes se descargan en PDF,
+CSV y XLSX. Un administrador crea las cuentas y revisa el estado del sistema.
 
 \begin{figure}[t]
 \centering
@@ -374,10 +383,10 @@ actual, acercamiento de 40~s y líneas de conducta de los cuatro especímenes.}
 
 \subsection{Desempeño del clasificador}
 
-Con la validación por video, el clasificador acertó en 71.6\% de los 7\,987 segundos
-calificados, frente a 47.8\% de un sistema que contestara siempre «nado». Por bloques de
-5~s la exactitud fue de 69.9\% sobre 1\,400 bloques completos. El F1 promedio fue de 0.705
-(Tabla~\ref{tab:metricas}).
+En la validación por video, el clasificador acertó en 71.6\% de los 7\,987 segundos
+calificados. Un sistema que contestara siempre «nado» habría acertado en 47.8\%. En bloques
+de 5~s la exactitud fue de 69.9\%, sobre 1\,400 bloques completos, y el F1 promedio fue de
+0.705 (Tabla~\ref{tab:metricas}).
 
 \begin{table}[t]
 \renewcommand{\arraystretch}{1.15}
@@ -400,9 +409,11 @@ Nado & 0.732 & 0.732 & 0.732 & 3\,819 \\
 \end{tabular}
 \end{table}
 
-La matriz de confusión (Tabla~\ref{tab:confusion}) muestra que los errores más frecuentes
-ocurren entre inmovilidad y nado (715 segundos en un sentido y 690 en el otro) y entre
-escalamiento y nado (307 y 333). La inmovilidad casi no se confunde con el escalamiento.
+Según la matriz de confusión (Tabla~\ref{tab:confusion}), la mayoría de los errores ocurren
+entre inmovilidad y nado (715 segundos en un sentido y 690 en el otro) y entre escalamiento
+y nado (307 y 333). Casi no hay confusiones entre inmovilidad y escalamiento. Si en esta evaluación de tres
+conductas solo se cuentan los segundos en que la red tiene una confianza de 0.8 o más
+(75\% del total), la exactitud sube a 77.4\%, y con 0.9 o más (57\%), a 81.3\%.
 
 \begin{table}[t]
 \renewcommand{\arraystretch}{1.15}
@@ -425,18 +436,18 @@ Nado & 333 & 690 & \textbf{2\,796} \\
 \end{tabular}
 \end{table}
 
-Al separar solo inmovilidad de conducta activa, sobre los 8\,248 segundos, la exactitud fue
-de 79.2\%, con F1 de 0.839 para la conducta activa y de 0.704 para la inmovilidad. La
-confianza de la red es informativa: en los segundos con confianza de 0.8 o más (75\% del
-total) la exactitud subió a 77.4\%, y con 0.9 o más (57\%), a 81.3\%.
+En la segunda evaluación, inmovilidad contra conducta activa sobre los 8\,248 segundos, la
+exactitud fue de 79.2\%, con F1 de 0.839 para la conducta activa y de 0.704 para la
+inmovilidad.
 
 \subsection{Pruebas del sistema}
 
-El sistema cuenta con 739 pruebas automáticas: 278 del \textit{backend}, 93 del
-\textit{worker} y 368 de la interfaz. Las 278 del \textit{backend}, ejecutadas con una base
-PostgreSQL de pruebas, terminan sin fallos ni errores (una se omite por configuración) e
-incluyen las restricciones de la base de datos. La Tabla~\ref{tab:sistema} resume la prueba de carga con
-cuatro cuentas simultáneas y la verificación del sistema completo.
+El sistema tiene 739 pruebas automáticas, 278 del \textit{backend}, 93 del \textit{worker} y
+368 de la interfaz. Las del \textit{backend} se corrieron con una base PostgreSQL de pruebas
+y terminaron sin fallos ni errores, con una omitida por configuración. Entre ellas están las
+que comprueban las restricciones de la base de datos. La Tabla~\ref{tab:sistema} reúne la
+prueba de carga, hecha con cuatro cuentas simultáneas, y la verificación del sistema
+completo.
 
 \begin{table}[t]
 \renewcommand{\arraystretch}{1.15}
@@ -463,51 +474,51 @@ Tiempo de anotación manual & Hasta unas 2 h \\
 \end{tabular}
 \end{table}
 
-La verificación se hizo con el sistema armado a partir de sus imágenes y un video real del
-segundo día. El análisis terminó sin intervención, lo que representa una reducción de más
-del 90\% del tiempo; la revisión humana es opcional y se suma si se realiza. Esta prueba
-confirma el funcionamiento de principio a fin, pero no mide el desempeño del clasificador.
+Para esa verificación se armó el sistema a partir de sus imágenes y se analizó un video real
+del segundo día. El análisis terminó sin intervención y tomó más de 90\% menos tiempo que la
+anotación manual. La cifra no incluye la revisión humana, que es opcional. La prueba
+confirma que las partes funcionan juntas, pero no mide el desempeño del clasificador.
 
 \subsection{Limitaciones}
 
-Los errores no son uniformes: cambian de un video a otro. En un espécimen el equipo marcó 47
-segundos de escalamiento y el clasificador 117; en otro, 34 y 5. Además, 70\% de los bloques
-de 5~s contiene más de una conducta, y el segundo de la transición es dudoso incluso para un
-analista. El clasificador se entrenó y validó solo con la FST y con videos de un
-laboratorio, y no se ha probado en otras condiciones de grabación. El sistema no corrige reflejos ni un contraste insuficiente, y no analiza el video del primer día. Por ello las cifras
-deben leerse junto con la revisión segundo a segundo.
+Los errores cambian de un video a otro. En un espécimen el equipo marcó 47 segundos de
+escalamiento y el clasificador 117, mientras que en otro marcó 34 y el clasificador 5.
+A esto se suma que
+70\% de los bloques de 5~s contiene más de una conducta, y que el segundo
+en que una cambia a otra es dudoso incluso para un analista. El clasificador se entrenó y
+validó solo con la FST y con videos de un laboratorio, sin pruebas en otras condiciones de
+grabación. El sistema tampoco corrige reflejos ni un contraste insuficiente, y no analiza el
+video del primer día. Conviene leer las cifras junto con la revisión segundo a segundo.
 
 \subsection{Discusión}
 
-Las cifras no se pueden comparar de forma directa con las de trabajos previos. DSAAN
-\cite{dsaan} y la red 3D \cite{dellavalle} se validaron en condiciones controladas,
-mientras que los videos de este laboratorio se graban con cámara web, tienen variaciones de
-iluminación y muestran especímenes de pelaje claro con poco contraste; además, aquí cada
-video se evalúa con una red que no lo vio durante el entrenamiento. La aportación está en
-reunir, en un sistema instalable, la clasificación por segundo de las tres conductas, la
-revisión humana y los reportes de cada experimento.
+Estas cifras no se pueden comparar de forma directa con las de trabajos previos. DSAAN
+\cite{dsaan} y la red 3D \cite{dellavalle} se validaron en condiciones controladas. Los
+videos de este laboratorio, en cambio, se graban con cámara web, tienen variaciones de
+iluminación y muestran especímenes de pelaje claro con poco contraste. Además, aquí cada
+video se evalúa con una red que no lo vio al entrenar. El sistema entrega la clasificación
+por segundo de las tres conductas junto con la revisión humana y los reportes de cada
+experimento, en un paquete que el laboratorio puede instalar.
 
 % =================================================================
 \section{Conclusiones}
 
-Se construyó un prototipo de sistema web que automatiza el análisis de videos de la prueba
-de nado forzado, desde la carga hasta los reportes. El clasificador distingue por segundo
-las tres conductas, con F1 entre 0.663 y 0.732, y separa la inmovilidad de la conducta
-activa con una exactitud de 79.2\%. Un video de cuatro especímenes que requería hasta unas
-dos horas de anotación se procesa en unos 9 minutos, con los mismos criterios en cada
-análisis.
+Se construyó un prototipo de sistema web que analiza videos de la prueba de nado forzado y
+genera sus reportes. El clasificador distingue las tres conductas en cada segundo, con F1 de
+0.663 a 0.732, y separa la inmovilidad de la conducta activa con 79.2\% de exactitud. Un
+video de cuatro especímenes, cuya anotación manual llega a unas dos horas, se procesa en
+unos 9 minutos y siempre con los mismos criterios.
 
-El sistema no sustituye el criterio del investigador: entrega una propuesta por segundo que
-el laboratorio revisa y corrige. Al reunir los resultados y reportes de cada experimento en
-un solo lugar, los deja consultables y libera horas
-de anotación para diseñar e
-interpretar experimentos, lo que puede favorecer la evaluación de más compuestos y dosis.
+La clasificación es una propuesta que el investigador revisa y corrige, y la decisión sigue
+siendo suya. Los resultados y reportes de cada experimento quedan reunidos para
+consultarlos. Las horas que hoy se dedican a anotar podrían usarse para diseñar e
+interpretar experimentos o para evaluar más compuestos y dosis.
 
-Como trabajo futuro se propone ampliar el sistema a otras pruebas conductuales, como el
-laberinto en cruz elevado y el campo abierto; agregar medidas como la latencia a la primera
-inmovilidad, los episodios por conducta y las comparaciones estadísticas entre grupos;
-mejorar la robustez ante reflejos y bajo contraste; permitir el reentrenamiento desde el
-sistema, y analizar la conducta en tiempo real.
+Como trabajo futuro se propone llevar el sistema a otras pruebas conductuales, como el
+laberinto en cruz elevado y el campo abierto. También quedan por explorar medidas como la
+latencia a la primera inmovilidad, los episodios por conducta y las comparaciones
+estadísticas entre grupos; una mayor robustez ante reflejos y bajo contraste; el
+reentrenamiento desde el sistema, y el análisis en tiempo real.
 
 % =================================================================
 \section*{Reconocimientos}
