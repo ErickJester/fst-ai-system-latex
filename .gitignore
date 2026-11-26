@@ -28,3 +28,8 @@ __pycache__/
 # PDF compilado y directorio de build
 build/
 main.pdf
+
+# Entrega del disco: los archivos pesados se quedan en la computadora, no se versionan
+entregaDisco/**/*.gz
+entregaDisco/**/*.zip
+entregaDisco/**/*.mp4
