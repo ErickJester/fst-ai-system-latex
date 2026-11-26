@@ -31,5 +31,5 @@ main.pdf
 
 # Entrega del disco: los archivos pesados se quedan en la computadora, no se versionan
 entregaDisco/**/*.gz
-entregaDisco/**/*.zip
-entregaDisco/**/*.mp4
+entregaDisco/**/fst-portable-*.zip
+entregaDisco/**/etiquetador_y_revisor_FST.zip

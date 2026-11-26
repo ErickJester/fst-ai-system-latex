@@ -9,3 +9,5 @@
 *.pptx  binary
 *.xlsx  binary
 *.svg   binary
+*.mp4   binary
+*.zip   binary
