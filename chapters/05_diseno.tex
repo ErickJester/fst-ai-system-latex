@@ -369,11 +369,17 @@ sistema. Las entidades principales son \textbf{USUARIO}, \textbf{EXPERIMENTO},
 sistema: un usuario crea experimentos; cada experimento se organiza en grupos
 (control, referencia, tratamiento); cada grupo se graba en una o más tandas de
 dos a cuatro especímenes; cada tanda tiene uno o dos videos (Día~1 y/o Día~2); y
-cada video del Día~2 se procesa mediante un análisis que produce observaciones de
-conducta por espécimen, mientras que el video del Día~1 se guarda sin análisis (\textbf{OBSERVACION}, \textbf{SEGUNDO} y \textbf{CONDUCTA}). La figura muestra las entidades del dominio experimental, todas fuertes salvo \textbf{SEGUNDO}, que es débil porque solo se identifica junto con su observación (doble borde); el subtipo
-\textbf{ADMINISTRADOR} (un usuario con permisos adicionales) y las entidades
-\textbf{REPORTE} y \textbf{NOTIFICACION}, derivadas del experimento, aparecen en el esquema
-físico.
+cada video del Día~2 se procesa mediante un análisis, mientras que el video del
+Día~1 se guarda como constancia de la sesión. El video analizado contiene una
+observación por espécimen (\textbf{OBSERVACION}), y cada observación se etiqueta
+segundo a segundo (\textbf{SEGUNDO}), con la conducta como atributo de cada segundo.
+El grupo de un espécimen se obtiene a través de su tanda: el recorrido de
+\textbf{GRUPO} a \textbf{TANDA} y de \textbf{TANDA} a \textbf{ESPECIMEN} expresa ese
+vínculo una sola vez. La figura incluye además el subtipo \textbf{ADMINISTRADOR}
+(un usuario con permisos adicionales), los reportes que genera cada experimento
+(\textbf{REPORTE}) y los avisos que recibe cada usuario (\textbf{NOTIFICACION}).
+Todas las entidades son fuertes salvo \textbf{SEGUNDO}, que es débil porque solo se
+identifica junto con su observación (doble borde).
 
 \begin{sidewaysfigure}
 \centering
@@ -388,14 +394,14 @@ cada interrelación se implementa mediante una llave foránea en la relación de
 ``muchos'', y se agregan las columnas de control que necesita el \textit{pipeline}
 (\texttt{ANALISIS.estado}, \texttt{ANALISIS.etapa}) junto con la marca de tiempo propia de
 cada relación (\texttt{fechaCarga}, \texttt{fechaCreacion}, \texttt{fechaAnalisis},
-\texttt{fechaGeneracion}). Tres entidades e interrelaciones no pasan tal cual:
+\texttt{fechaGeneracion}). Dos entidades tienen una conversión propia:
 \textbf{SEGUNDO}, que es débil, toma como llave la de su observación más el número de
-segundo; \textbf{CONDUCTA}, que no tiene atributos propios, se convierte en un dominio
-cerrado de cuatro valores; y la interrelación derivada que agrupa a los especímenes en
-un grupo no se guarda, porque el grupo de un espécimen se alcanza a través de su tanda.
+segundo; y \textbf{ADMINISTRADOR}, que es un subtipo, toma como llave primaria la de
+\textbf{USUARIO}, que es a la vez su llave foránea. El atributo \texttt{conducta} de
+\textbf{SEGUNDO} pasa a ser una columna con un dominio cerrado de cuatro valores.
 La Figura~\ref{fig:logico} muestra el esquema lógico resultante: 12 relaciones y 13 llaves
-foráneas, con la llave primaria, las foráneas y los atributos que pueden quedar
-vacíos.
+foráneas (una por cada una de las 12 interrelaciones y una por la generalización),
+con la llave primaria, las foráneas y los atributos que pueden quedar vacíos.
 
 \begin{figure}[p]
 \centering
@@ -473,16 +479,15 @@ clasificación de conducta (módulo 3).
   \item \textbf{OBSERVACION}: vincula un espécimen con el video en el que
         fue analizado.
 
-  \item \textbf{CONDUCTA}: las cuatro conductas (nado, inmovilidad,
-        escalamiento y conducta activa, esta última cuando el clasificador no
-        decide entre nado y escalamiento; ver RN-13). Es una entidad del esquema
-        conceptual; en el relacional no es tabla sino el dominio cerrado
-        \texttt{tipo\_conducta} de la columna \texttt{SEGUNDO.conducta}, porque son cuatro valores fijos y no tiene atributos propios.
   \item \textbf{SEGUNDO}: una fila por espécimen y por segundo analizado, con
         la conducta asignada (o ninguna, si el espécimen no se ve) y el origen
-        de esa conducta (de la máquina, confirmada, corregida o dudosa). Es lo que el usuario revisa y
-        corrige al terminar el análisis (ver RF-32). De esta tabla se calculan los
-        tiempos totales y el desglose por minuto, que no se guardan.
+        de esa conducta (de la máquina, confirmada, corregida o dudosa). La
+        columna \texttt{conducta} usa el dominio cerrado \texttt{tipo\_conducta},
+        de cuatro valores: nado, inmovilidad, escalamiento y conducta activa, esta
+        última cuando el clasificador no decide entre nado y escalamiento (ver
+        RN-13). Es lo que el usuario revisa y corrige al terminar el análisis (ver
+        RF-32). De esta tabla se calculan los tiempos totales y el desglose por
+        minuto, que no se guardan.
 
   \item \textbf{REPORTE}: referencia a los archivos PDF, CSV y XLSX
         generados, con su ruta y fecha de creación. Se conservan aunque el

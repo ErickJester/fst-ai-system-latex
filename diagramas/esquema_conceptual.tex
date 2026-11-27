@@ -1,202 +1,211 @@
-% ================================================================
-%  Esquema Conceptual - Base de datos FST
-%  TT 2026-B066 | ESCOM-IPN
-%  Frausto Robles Angel Ali . Rodriguez Verdin Sandoval Vanesa
-% ----------------------------------------------------------------
-%  Salida de la actividad 5 de la etapa de diseno conceptual.
-%  Modelo: Entidad-Relacion Extendido (EER), notacion de Chen con
-%  cardinalidades (minimo,maximo).
-%
-%  Sustituye a figures/mermaid/entidadRelacion.png, que pese a su
-%  titulo mostraba el esquema fisico (tipos SQL, PK/FK) y no un
-%  esquema conceptual.
-%
-%  Por que TikZ y no PlantUML: las cardinalidades (3,4) (5,5) (6,N)
-%  (2,3) (1,2) no son expresables en notacion de pata de gallo, que
-%  es la unica que PlantUML soporta para ER.
-%
-%  10 entidades - nueve fuertes y Segundo debil (M-27: se identifica por
-%  su observacion y su numero de segundo; va con doble borde) - y 11
-%  interrelaciones
-%  (D-35, 3-oct: se agrego Segundo y sus dos interrelaciones;
-%  D-52, 14-oct: se quitaron Intervalo y 'presenta' -- los segundos
-%  por conducta de cada minuto se calculan desde Segundo).
-%  Los atributos NO se dibujan: haran ilegible la figura. Van en el
-%  diccionario de datos (anexo).
-%
-%  Compilar:
-%      pdflatex -output-directory=build diagramas/esquema_conceptual.tex
-%  Incluir en el documento:
-%      \includegraphics[width=\textheight,keepaspectratio]{esquema_conceptual}
-% ================================================================
-
+% Generado por diagramas/diagram_design/generadores/gen_conceptual.py (no editar a mano).
+% Notacion de Elmasri y Navathe (D-108). Compilar desde la raiz:
+%     pdflatex -output-directory=build diagramas/esquema_conceptual.tex
 \documentclass[border=8pt]{standalone}
-
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[spanish]{babel}
+\usepackage{lmodern}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage[normalem]{ulem}
 \usepackage{tikz}
-\usetikzlibrary{shapes.geometric, calc}
-
+\usetikzlibrary{shapes.geometric}
 \begin{document}
 \begin{tikzpicture}[
-  % ---------- estilos ----------
-  ent/.style   = {draw, thick, rectangle, minimum width=2.7cm,
-                  minimum height=0.9cm, align=center, font=\small},
-  rel/.style   = {draw, thick, diamond, aspect=2.4, inner sep=1.5pt,
-                  align=center, font=\scriptsize},
-  % interrelacion derivada: no se guarda, se obtiene de otras dos (D-92)
-  reld/.style  = {draw, thick, dashed, diamond, aspect=2.4, inner sep=1.5pt,
-                  align=center, font=\scriptsize},
-  % entidad debil e interrelacion identificadora: doble linea (Chen)
-  entd/.style  = {ent, double, double distance=1.4pt},
-  reld2/.style = {rel, double, double distance=1.4pt},
-  att/.style   = {draw, thick, ellipse, minimum width=2.6cm,
-                  minimum height=0.75cm, font=\scriptsize},
-  lin/.style   = {draw, thick},
-  % sin 'fill': las etiquetas van junto a la linea, no encima, para
-  % que su caja no muerda el borde de las entidades vecinas.
-  card/.style  = {font=\scriptsize\ttfamily, inner sep=1.6pt}
+  lin/.style  = {draw, semithick},
+  ent/.style  = {draw, semithick, rectangle, fill=white, inner sep=0pt,
+                 minimum width=2.280cm, minimum height=0.552cm,
+                 font=\sffamily\bfseries\fontsize{7.4}{8}\selectfont},
+  rel/.style  = {draw, semithick, diamond, fill=white, inner sep=0pt,
+                 font=\sffamily\fontsize{5.6}{6.2}\selectfont},
+  att/.style  = {draw, semithick, ellipse, fill=white, inner sep=0pt, align=center,
+                 font=\sffamily\fontsize{6.4}{7.4}\selectfont},
+  doble/.style = {double, double distance=1.3pt},
+  card/.style = {inner sep=0pt, font=\ttfamily\fontsize{6.4}{7}\selectfont}
 ]
-
-% ================================================================
-%  ENTIDADES E INTERRELACIONES
-% ================================================================
-
-\node[ent] (usuario)   at ( 2.1,  -0.9) {Usuario};
-\node[rel] (registra)  at ( 4.7,  -0.9) {registra};
-\node[ent] (experim)   at ( 7.4,  -0.9) {Experimento};
-
-\node[rel] (compone)   at ( 7.4,  -2.3) {compone};
-\node[ent] (grupo)     at ( 7.4,  -3.7) {Grupo};
-
-\node[reld] (agrupa)   at ( 3.6,  -5.1) {agrupa};
-\node[rel] (grabaen)   at (11.1,  -5.1) {se graba en};
-
-\node[ent] (especimen) at ( 3.6,  -6.5) {Espécimen};
-\node[rel] (aloja)     at ( 7.4,  -6.5) {aloja};
-\node[ent] (tanda)     at (11.1,  -6.5) {Tanda};
-
-\node[rel] (produce)   at (11.1,  -7.9) {produce};
-\node[ent] (video)     at (11.1,  -9.3) {Video};
-\node[rel] (procesa)   at (14.5,  -9.3) {procesa};
-\node[ent] (analisis)  at (17.6,  -9.3) {Análisis};
-
-\node[rel] (aparece)   at ( 3.6, -10.6) {aparece en};
-\node[rel] (contiene)  at (11.1, -10.6) {contiene};
-\node[ent] (observ)    at ( 7.4, -12.0) {Observación};
-
-\node[ent] (conducta)  at (11.1, -14.8) {Conducta};
-
-% D-35 (3-oct): una etiqueta por especimen y por segundo
-\node[reld2] (etiqueta) at ( 3.6, -13.4) {se etiqueta\\en};
-\node[entd] (segundo)  at ( 3.6, -14.8) {Segundo};
-\node[rel] (clasifica) at ( 7.4, -14.8) {se clasifica\\como};
-
-% ================================================================
-%  ARISTAS CON CARDINALIDAD (minimo,maximo)
-% ================================================================
-
-% -- Usuario registra Experimento -------------------------------
-\draw[lin] (usuario) -- node[card, above, pos=0.35] {(0,N)} (registra);
-\draw[lin] (registra) -- node[card, above, pos=0.65] {(1,1)} (experim);
-
-% -- Experimento se compone de Grupos ---------------------------
-% Minimo tres grupos: control, referencia y tratamiento (Cap. 1, PA)
-\draw[lin] (experim) -- node[card, right, pos=0.55] {(3,N)} (compone);
-\draw[lin] (compone) -- node[card, right, pos=0.45] {(1,1)} (grupo);
-
-% -- Bus de salida del Grupo hacia sus dos ramas ----------------
-\coordinate (bus) at ($(grupo.south) + (0,-0.35)$);
-\draw[lin] (grupo.south) -- (bus);
-\draw[lin, dashed] (bus) -| (agrupa.north);
-\draw[lin] (bus) -| (grabaen.north);
-
-% -- Grupo agrupa Especimenes  (el hecho experimental) ----------
-% (2,N): un grupo puede tener una sola tanda con 2 especimenes;
-% sin tope superior (reunion 3-sep). Decision del equipo, 3-oct.
-% Antes era (6,N).
-% Interrelacion DERIVADA (D-92, 13-oct): el modelo relacional no la
-% guarda; el grupo de un espécimen se obtiene por su tanda (Grupo -
-% Tanda - Espécimen). Se conserva en el esquema porque la pantalla del
-% grupo y las estadisticas por grupo (RF-31) usan a todos sus
-% especimenes sin separarlos por tanda. Va punteada.
-\node[card, anchor=south east] at ($(agrupa.north) + (-0.10,0.05)$) {(2,N)};
-\draw[lin, dashed] (agrupa) -- node[card, right, pos=0.45] {(1,1)} (especimen);
-\node[font=\tiny\itshape, anchor=east] at ($(agrupa.west) + (-0.15,0)$) {derivada de Tanda};
-
-% -- Grupo se graba en Tandas  (la logistica de camara) ---------
-% (1,N): un grupo tiene al menos una tanda (la A); las demas
-% (B, C...) son opcionales. Sin tope, porque el grupo tampoco lo
-% tiene. Decision del equipo, 3-oct. Antes era (2,N).
-\node[card, anchor=south west] at ($(grabaen.north) + (0.10,0.05)$) {(1,N)};
-\draw[lin] (grabaen) -- node[card, right, pos=0.45] {(1,1)} (tanda);
-
-% -- Tanda aloja Especimenes ------------------------------------
-% (2,4): el encuadre admite de dos a cuatro cilindros a cuadro.
-% Decision del equipo, 3-oct. Antes era (3,4).
-\draw[lin] (especimen) -- node[card, above, pos=0.30] {(1,1)} (aloja);
-\draw[lin] (aloja) -- node[card, above, pos=0.70] {(2,4)} (tanda);
-
-% -- Tanda produce Videos ---------------------------------------
-% (1,2): Dia 1 y Dia 2. El Dia 1 es opcional (reunion 3-sep),
-% por eso el minimo es 1 y no 2.
-\draw[lin] (tanda) -- node[card, right, pos=0.55] {(1,2)} (produce);
-\draw[lin] (produce) -- node[card, right, pos=0.45] {(1,1)} (video);
-
-% -- Video se procesa en Analisis -------------------------------
-% (0,1): el video del Dia 1 no se analiza. El reanalisis reemplaza el
-% resultado anterior, no se conserva historial (D-03, reunion 3-sep).
-\draw[lin] (video) -- node[card, above, pos=0.35] {(0,1)} (procesa);
-\draw[lin] (procesa) -- node[card, above, pos=0.65] {(1,1)} (analisis);
-
-% -- Especimen aparece en Observaciones -------------------------
-% (0,1): solo el video del Dia 2 se analiza; el del Dia 1 no tiene observacion.
-\draw[lin] (especimen) -- node[card, right, pos=0.60] {(0,1)} (aparece);
-\draw[lin] (aparece.south) |- node[card, above, pos=0.72] {(1,1)} (observ.west);
-
-% -- Video contiene Observaciones -------------------------------
-% (0,4): el video del Dia 1 no tiene; el del Dia 2 analizado tiene de 2 a 4, una por cilindro.
-\draw[lin] (video) -- node[card, right, pos=0.60] {(0,4)} (contiene);
-\draw[lin] (contiene.south) |- node[card, above, pos=0.72] {(1,1)} (observ.east);
-
-% (D-52, 14-oct: ya no hay Intervalo ni 'presenta'. Los segundos por
-% conducta de cada minuto se calculan desde Segundo.)
-
-% -- Observacion se etiqueta en Segundos (D-35) ------------------
-% (1,300): hasta 300 segundos analizados por observacion.
-\draw[lin] (observ.south west) -- node[card, above left, pos=0.55] {(1,300)} (etiqueta.east);
-\draw[lin] (etiqueta.south) -- node[card, right, pos=0.5] {(1,1)} (segundo.north);
-
-% -- Segundo se clasifica como Conducta (D-35) -------------------
-% (0,1): el segundo puede quedar sin conducta ("no se ve").
-\draw[lin] (segundo.east) -- node[card, above, pos=0.5] {(0,1)} (clasifica.west);
-\draw[lin] (clasifica.east) -- node[card, above, pos=0.5] {(0,N)} (conducta.west);
-
-% ================================================================
-%  LEYENDA
-% ================================================================
-
-\begin{scope}[shift={(0.4,-17.0)}]
-  \node[draw, thick, rectangle, minimum width=0.85cm, minimum height=0.38cm]
-        (lg1) at (0,0) {};
-  \node[font=\tiny, anchor=west] at (0.5,0) {entidad};
-
-  \node[draw, thick, diamond, aspect=2.2, minimum width=0.85cm,
-        minimum height=0.38cm, inner sep=0pt] (lg2) at (0,-0.62) {};
-  \node[font=\tiny, anchor=west] at (0.5,-0.62) {interrelación};
-
-  \node[draw, thick, dashed, diamond, aspect=2.2, minimum width=0.85cm,
-        minimum height=0.38cm, inner sep=0pt] (lg4) at (0,-1.24) {};
-  \node[font=\tiny, anchor=west] at (0.5,-1.24) {interrelación derivada};
-
-  \node[font=\tiny\ttfamily, anchor=west] at (-0.42,-1.86) {(mín,máx)};
-  \node[font=\tiny, anchor=west] at (0.5,-1.86) {cardinalidad};
-
-  \node[draw, thick, rectangle, double, double distance=1.2pt, minimum width=0.85cm,
-        minimum height=0.38cm] (lg6) at (0,-2.48) {};
-  \node[font=\tiny, anchor=west] at (0.5,-2.48) {entidad débil (se identifica por otra)};
-\end{scope}
-
+\draw[lin] (3.180,-4.080) -- (2.580,-2.232);
+\draw[lin] (3.180,-4.080) -- (2.580,-2.736);
+\draw[lin] (3.180,-4.080) -- (2.580,-3.240);
+\draw[lin] (3.180,-4.080) -- (2.580,-3.744);
+\draw[lin] (3.180,-4.080) -- (2.580,-4.248);
+\draw[lin] (3.180,-4.080) -- (2.580,-4.752);
+\draw[lin] (3.180,-4.080) -- (2.580,-5.244);
+\draw[lin] (8.640,-1.452) -- (5.760,-0.780);
+\draw[lin] (8.640,-1.452) -- (6.672,-0.780);
+\draw[lin] (8.640,-1.452) -- (7.872,-0.780);
+\draw[lin] (8.640,-1.452) -- (9.144,-0.780);
+\draw[lin] (8.640,-1.452) -- (10.920,-0.780);
+\draw[lin] (12.816,-3.804) -- (13.860,-1.620);
+\draw[lin] (12.816,-3.804) -- (13.860,-2.124);
+\draw[lin] (12.816,-3.804) -- (13.860,-2.628);
+\draw[lin] (12.816,-3.804) -- (13.860,-3.132);
+\draw[lin] (20.040,-4.080) -- (20.640,-3.240);
+\draw[lin] (20.040,-4.080) -- (20.640,-3.804);
+\draw[lin] (20.040,-4.080) -- (20.640,-4.356);
+\draw[lin] (20.040,-4.080) -- (20.640,-4.920);
+\draw[lin] (10.860,-6.648) -- (10.260,-5.976);
+\draw[lin] (10.860,-6.648) -- (10.260,-6.480);
+\draw[lin] (10.860,-6.648) -- (10.260,-6.984);
+\draw[lin] (10.860,-6.648) -- (10.260,-7.476);
+\draw[lin] (6.540,-9.216) -- (5.940,-8.928);
+\draw[lin] (6.540,-9.216) -- (5.940,-9.492);
+\draw[lin] (17.940,-9.216) -- (18.540,-8.592);
+\draw[lin] (17.940,-9.216) -- (18.540,-9.156);
+\draw[lin] (17.940,-9.216) -- (18.540,-9.828);
+\draw[lin] (15.660,-11.784) -- (14.880,-10.272);
+\draw[lin] (15.660,-11.784) -- (14.880,-10.776);
+\draw[lin] (15.660,-11.784) -- (14.880,-11.280);
+\draw[lin] (15.660,-11.784) -- (14.880,-11.784);
+\draw[lin] (15.660,-11.784) -- (14.880,-12.276);
+\draw[lin] (15.660,-11.784) -- (14.880,-12.780);
+\draw[lin] (22.920,-11.508) -- (21.540,-11.040);
+\draw[lin] (22.920,-11.508) -- (22.620,-11.040);
+\draw[lin] (22.920,-11.508) -- (23.820,-11.040);
+\draw[lin] (22.920,-12.060) -- (21.180,-12.456);
+\draw[lin] (22.920,-12.060) -- (23.184,-13.236);
+\draw[lin] (22.920,-12.060) -- (21.420,-13.908);
+\draw[lin] (12.000,-14.064) -- (12.000,-13.608);
+\draw[lin] (17.340,-15.576) -- (18.000,-15.012);
+\draw[lin] (17.340,-15.576) -- (18.000,-15.576);
+\draw[lin] (17.340,-15.576) -- (18.000,-16.128);
+\draw[lin] (4.320,-3.804) -- (4.320,-2.100);
+\draw[lin] (7.500,-1.728) -- (5.520,-1.728);
+\draw[lin] (9.780,-1.728) -- (10.740,-1.728);
+\draw[lin] (12.000,-3.804) -- (12.000,-2.100);
+\draw[lin] (5.460,-4.080) -- (6.960,-4.080);
+\draw[lin] (10.860,-4.080) -- (9.360,-4.080);
+\draw[lin] (13.140,-4.080) -- (14.280,-4.080);
+\draw[lin] (17.760,-4.080) -- (16.680,-4.080);
+\draw[lin] (12.000,-4.356) -- (12.000,-4.992);
+\draw[lin] (12.000,-6.372) -- (12.000,-5.736);
+\draw[lin] (13.140,-6.648) -- (16.800,-6.648) -- (16.800,-7.440);
+\draw[lin] (16.800,-8.940) -- (16.800,-8.184);
+\draw[lin] (8.820,-9.216) -- (10.800,-9.216);
+\draw[lin] (15.660,-9.216) -- (13.200,-9.216);
+\draw[lin] (16.800,-9.492) -- (16.800,-10.128);
+\draw[lin] (16.800,-11.508) -- (16.800,-10.872);
+\draw[lin] (17.940,-11.784) -- (18.720,-11.784);
+\draw[lin] (21.780,-11.784) -- (21.240,-11.784);
+\draw[lin] (7.680,-9.492) -- (7.680,-11.520);
+\draw[lin] (10.860,-14.340) -- (7.680,-14.340) -- (7.680,-12.264);
+\draw[lin] (16.800,-12.060) -- (16.800,-12.804);
+\draw[lin] (13.140,-14.340) -- (16.800,-14.340) -- (16.800,-13.548);
+\draw[lin] (12.000,-14.616) -- (12.000,-15.204);
+\draw[lin] (15.060,-15.576) -- (13.344,-15.576);
+\draw[lin] (4.320,-4.356) -- (4.320,-6.252);
+\draw[lin] (4.164,-5.124) -- (4.164,-5.304) arc[start angle=180, end angle=360, radius=0.156cm] -- (4.476,-5.124);
+\node[att, minimum width=2.179cm, minimum height=0.432cm] at (1.490,-2.232) {\uline{Id institucional}};
+\node[att, minimum width=1.027cm, minimum height=0.432cm] at (2.066,-2.736) {\uline{Correo}};
+\node[att, minimum width=1.027cm, minimum height=0.432cm] at (2.066,-3.240) {Nombre};
+\node[att, minimum width=1.373cm, minimum height=0.432cm] at (1.894,-3.744) {Apellidos};
+\node[att, minimum width=2.410cm, minimum height=0.432cm] at (1.375,-4.248) {Contraseña cifrada};
+\node[att, minimum width=1.027cm, minimum height=0.432cm] at (2.066,-4.752) {Activo};
+\node[att, minimum width=2.179cm, minimum height=0.432cm] at (1.490,-5.244) {Cambio requerido};
+\node[att, minimum width=0.566cm, minimum height=0.432cm] at (5.760,-0.564) {\uline{Id}};
+\node[att, minimum width=0.797cm, minimum height=0.432cm] at (6.672,-0.564) {Tipo};
+\node[att, minimum width=1.142cm, minimum height=0.432cm] at (7.872,-0.564) {Mensaje};
+\node[att, minimum width=0.912cm, minimum height=0.432cm] at (9.144,-0.564) {Leído};
+\node[att, minimum width=2.294cm, minimum height=0.432cm] at (10.920,-0.564) {Fecha de creación};
+\node[att, minimum width=0.566cm, minimum height=0.432cm] at (14.143,-1.620) {\uline{Id}};
+\node[att, minimum width=1.027cm, minimum height=0.432cm] at (14.374,-2.124) {\uline{Nombre}};
+\node[att, minimum width=0.912cm, minimum height=0.432cm] at (14.316,-2.628) {Fecha};
+\node[att, minimum width=0.912cm, minimum height=0.432cm] at (14.316,-3.132) {Notas};
+\node[att, minimum width=0.566cm, minimum height=0.432cm] at (20.923,-3.240) {\uline{Id}};
+\node[att, minimum width=1.142cm, minimum height=0.432cm] at (21.211,-3.804) {Formato};
+\node[att, minimum width=0.797cm, minimum height=0.432cm] at (21.038,-4.356) {\uline{Ruta}};
+\node[att, minimum width=2.525cm, minimum height=0.432cm] at (21.902,-4.920) {Fecha de generación};
+\node[att, minimum width=0.566cm, minimum height=0.432cm] at (9.977,-5.976) {\uline{Id}};
+\node[att, minimum width=1.258cm, minimum height=0.432cm] at (9.631,-6.480) {Etiqueta};
+\node[att, minimum width=0.797cm, minimum height=0.432cm] at (9.862,-6.984) {Tipo};
+\node[att, minimum width=1.603cm, minimum height=0.432cm] at (9.458,-7.476) {Tratamiento};
+\node[att, minimum width=0.566cm, minimum height=0.432cm] at (5.657,-8.928) {\uline{Id}};
+\node[att, minimum width=2.410cm, minimum height=0.432cm] at (4.735,-9.492) {Número de cilindro};
+\node[att, minimum width=0.566cm, minimum height=0.432cm] at (18.823,-8.592) {\uline{Id}};
+\node[att, minimum width=0.912cm, minimum height=0.432cm] at (18.996,-9.156) {Orden};
+\node[att, minimum width=1.373cm, minimum height=0.648cm] at (19.226,-9.828) {Número de\\cilindros};
+\node[att, minimum width=0.566cm, minimum height=0.432cm] at (14.597,-10.272) {\uline{Id}};
+\node[att, minimum width=1.027cm, minimum height=0.432cm] at (14.366,-10.776) {Sesión};
+\node[att, minimum width=1.142cm, minimum height=0.432cm] at (14.309,-11.280) {Archivo};
+\node[att, minimum width=2.064cm, minimum height=0.432cm] at (13.848,-11.784) {Nombre original};
+\node[att, minimum width=1.258cm, minimum height=0.432cm] at (14.251,-12.276) {Duración};
+\node[att, minimum width=1.949cm, minimum height=0.432cm] at (13.906,-12.780) {Fecha de carga};
+\node[att, minimum width=0.566cm, minimum height=0.432cm] at (21.540,-10.824) {\uline{Id}};
+\node[att, minimum width=1.027cm, minimum height=0.432cm] at (22.620,-10.824) {Estado};
+\node[att, minimum width=0.912cm, minimum height=0.432cm] at (23.820,-10.824) {Etapa};
+\node[att, dashed, minimum width=1.834cm, minimum height=0.648cm] at (21.180,-12.780) {Nivel de\\clasificación};
+\node[att, minimum width=2.294cm, minimum height=0.432cm] at (23.184,-13.452) {Fecha de análisis};
+\node[att, minimum width=2.525cm, minimum height=0.432cm] at (21.420,-14.124) {Ruta de diagnóstico};
+\node[att, minimum width=0.566cm, minimum height=0.432cm] at (12.000,-13.392) {\uline{Id}};
+\node[att, minimum width=2.294cm, minimum height=0.432cm] at (19.147,-15.012) {\dashuline{Número de segundo}};
+\node[att, minimum width=1.258cm, minimum height=0.432cm] at (18.629,-15.576) {Conducta};
+\node[att, minimum width=1.027cm, minimum height=0.432cm] at (18.514,-16.128) {Origen};
+\node[ent] at (4.320,-4.080) {USUARIO};
+\node[ent] at (4.320,-6.528) {ADMINISTRADOR};
+\node[ent] at (8.640,-1.728) {NOTIFICACIÓN};
+\node[ent] at (12.000,-4.080) {EXPERIMENTO};
+\node[ent] at (18.900,-4.080) {REPORTE};
+\node[ent] at (12.000,-6.648) {GRUPO};
+\node[ent] at (7.680,-9.216) {ESPÉCIMEN};
+\node[ent] at (16.800,-9.216) {TANDA};
+\node[ent] at (16.800,-11.784) {VIDEO};
+\node[ent] at (22.920,-11.784) {ANÁLISIS};
+\node[ent] at (12.000,-14.340) {OBSERVACIÓN};
+\node[ent, doble] at (16.200,-15.576) {SEGUNDO};
+\node[rel, aspect=3.23, minimum width=2.400cm, minimum height=0.744cm] at (4.320,-1.728) {RECIBE};
+\node[rel, aspect=3.39, minimum width=2.520cm, minimum height=0.744cm] at (12.000,-1.728) {SE\_ORIGINA\_EN};
+\node[rel, aspect=3.23, minimum width=2.400cm, minimum height=0.744cm] at (8.160,-4.080) {REGISTRA};
+\node[rel, aspect=3.23, minimum width=2.400cm, minimum height=0.744cm] at (15.480,-4.080) {GENERA};
+\node[rel, aspect=3.39, minimum width=2.520cm, minimum height=0.744cm] at (12.000,-5.364) {SE\_COMPONE\_DE};
+\node[rel, aspect=3.23, minimum width=2.400cm, minimum height=0.744cm] at (16.800,-7.812) {SE\_GRABA\_EN};
+\node[rel, aspect=3.23, minimum width=2.400cm, minimum height=0.744cm] at (12.000,-9.216) {SE\_ALOJA\_EN};
+\node[rel, aspect=3.23, minimum width=2.400cm, minimum height=0.744cm] at (16.800,-10.500) {PRODUCE};
+\node[rel, aspect=3.39, minimum width=2.520cm, minimum height=0.744cm] at (19.980,-11.784) {SE\_PROCESA\_EN};
+\node[rel, aspect=3.23, minimum width=2.400cm, minimum height=0.744cm] at (7.680,-11.892) {APARECE\_EN};
+\node[rel, aspect=3.23, minimum width=2.400cm, minimum height=0.744cm] at (16.800,-13.176) {CONTIENE};
+\node[rel, doble, aspect=3.61, minimum width=2.688cm, minimum height=0.744cm] at (12.000,-15.576) {SE\_ETIQUETA\_EN};
+\node[card, anchor=base west] at (4.428,-3.684) {(0,N)};
+\node[card, anchor=base east] at (7.416,-1.620) {(1,1)};
+\node[card, anchor=base west] at (9.864,-1.620) {(0,1)};
+\node[card, anchor=base west] at (12.108,-3.684) {(0,N)};
+\node[card, anchor=base west] at (5.544,-3.972) {(0,N)};
+\node[card, anchor=base east] at (10.776,-3.972) {(1,1)};
+\node[card, anchor=base west] at (13.224,-3.972) {(0,N)};
+\node[card, anchor=base east] at (17.676,-3.972) {(1,1)};
+\node[card, anchor=base west] at (12.108,-4.596) {(0,N)};
+\node[card, anchor=base west] at (12.108,-6.252) {(1,1)};
+\node[card, anchor=base west] at (13.224,-6.540) {(1,N)};
+\node[card, anchor=base west] at (16.908,-8.820) {(1,1)};
+\node[card, anchor=base west] at (8.904,-9.108) {(1,1)};
+\node[card, anchor=base east] at (15.576,-9.108) {(2,4)};
+\node[card, anchor=base west] at (16.908,-9.732) {(1,2)};
+\node[card, anchor=base west] at (16.908,-11.388) {(1,1)};
+\node[card, anchor=base west] at (18.024,-11.676) {(0,1)};
+\node[card, anchor=base east] at (21.696,-11.676) {(1,1)};
+\node[card, anchor=base west] at (7.788,-9.732) {(0,1)};
+\node[card, anchor=base east] at (10.776,-14.232) {(1,1)};
+\node[card, anchor=base west] at (16.908,-12.300) {(0,4)};
+\node[card, anchor=base west] at (13.224,-14.232) {(1,1)};
+\node[card, anchor=base west] at (12.108,-14.856) {(1,300)};
+\node[card, anchor=base east] at (14.976,-15.468) {(1,1)};
+\node[ent, minimum width=0.792cm, minimum height=0.336cm] at (1.008,-10.608) {};
+\node[anchor=west, inner sep=0pt, font=\sffamily\fontsize{6.4}{7}\selectfont] at (1.656,-10.608) {Entidad};
+\node[ent, doble, minimum width=0.792cm, minimum height=0.336cm] at (1.008,-11.148) {};
+\node[anchor=west, inner sep=0pt, font=\sffamily\fontsize{6.4}{7}\selectfont] at (1.656,-11.148) {Entidad débil};
+\node[rel, aspect=2.06, minimum width=0.840cm, minimum height=0.408cm] at (1.008,-11.700) {};
+\node[anchor=west, inner sep=0pt, font=\sffamily\fontsize{6.4}{7}\selectfont] at (1.656,-11.700) {Relación};
+\node[rel, doble, aspect=2.06, minimum width=0.840cm, minimum height=0.408cm] at (1.008,-12.252) {};
+\node[anchor=west, inner sep=0pt, font=\sffamily\fontsize{6.4}{7}\selectfont] at (1.656,-12.252) {Relación identificativa};
+\node[att, minimum width=0.912cm, minimum height=0.360cm] at (1.008,-12.792) {abc};
+\node[anchor=west, inner sep=0pt, font=\sffamily\fontsize{6.4}{7}\selectfont] at (1.656,-12.792) {Atributo};
+\node[att, minimum width=0.912cm, minimum height=0.360cm] at (1.008,-13.344) {\uline{abc}};
+\node[anchor=west, inner sep=0pt, font=\sffamily\fontsize{6.4}{7}\selectfont] at (1.656,-13.344) {Atributo clave};
+\node[att, minimum width=0.912cm, minimum height=0.360cm] at (1.008,-13.884) {\dashuline{abc}};
+\node[anchor=west, inner sep=0pt, font=\sffamily\fontsize{6.4}{7}\selectfont] at (1.656,-13.884) {Clave parcial};
+\node[att, dashed, minimum width=0.912cm, minimum height=0.360cm] at (1.008,-14.436) {abc};
+\node[anchor=west, inner sep=0pt, font=\sffamily\fontsize{6.4}{7}\selectfont] at (1.656,-14.436) {Atributo derivado};
+\draw[lin] (1.008,-14.760) -- (1.008,-15.192);
+\draw[lin] (0.852,-14.820) -- (0.852,-15.000) arc[start angle=180, end angle=360, radius=0.156cm] -- (1.164,-14.820);
+\node[anchor=west, inner sep=0pt, font=\sffamily\fontsize{6.4}{7}\selectfont] at (1.656,-14.976) {Subclase};
+\node[card] at (1.008,-15.528) {(mín,máx)};
+\node[anchor=west, inner sep=0pt, font=\sffamily\fontsize{6.4}{7}\selectfont] at (1.656,-15.528) {Participación mínima y máxima};
 \end{tikzpicture}
 \end{document}
