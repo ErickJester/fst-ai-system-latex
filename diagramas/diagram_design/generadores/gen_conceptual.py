@@ -1,6 +1,6 @@
 import html, sys
 
-# Esquema conceptual del sistema con la notacion de Elmasri y Navathe, «Fundamentos de sistemas de
+# Diagrama entidad-relacion del sistema con la notacion de Elmasri y Navathe, «Fundamentos de sistemas de
 # bases de datos» (D-108): resumen de la figura 3.14, notacion (min,max) de la figura 3.15 y
 # especializacion con una sola subclase de la figura 4.1.
 #  - La pareja (min,max) va junto a la entidad que participa: cuantas veces participa cada ejemplar.
@@ -61,7 +61,7 @@ ATR = {
               ('Tratamiento', 855, 665, 'a', 'w')],
     'especimen': [('Id', 495, 795, 'k', 'w'), ('Número de cilindro', 495, 845, 'a', 'w')],
     'tanda': [('Id', 1545, 765, 'k', 'e'), ('Orden', 1545, 815, 'a', 'e'),
-              ('Número de\ncilindros', 1545, 875, 'a', 'e')],
+              ('Número de\ncilindros', 1545, 875, 'd', 'e')],
     'video': [('Id', 1240, 915, 'k', 'w'), ('Sesión', 1240, 960, 'a', 'w'), ('Archivo', 1240, 1005, 'a', 'w'),
               ('Nombre original', 1240, 1050, 'a', 'w'), ('Duración', 1240, 1095, 'a', 'w'),
               ('Fecha de carga', 1240, 1140, 'a', 'w')],
@@ -211,7 +211,7 @@ def svg():
             elipse(x, y, 38, 15, 'abc', tipo)
         texto(x + 54, y + 5, rotulo, 'le', 'start')
     cuerpo = f'''<svg viewBox="0 0 {W} {alto}" role="img" aria-labelledby="co-title co-desc" xmlns="http://www.w3.org/2000/svg">
-<title id="co-title">Esquema conceptual</title>
+<title id="co-title">Diagrama entidad-relación</title>
 <desc id="co-desc">Diagrama entidad-relación con la notación de Elmasri y Navathe: 12 entidades con sus 45 atributos, 12 relaciones con restricciones de participación mínima y máxima, la entidad débil Segundo y la subclase Administrador de Usuario.</desc>
 <style>
 .nm{{font:600 19px Geist,sans-serif;fill:#111}}
@@ -312,7 +312,7 @@ if __name__ == '__main__':
     alto, cuerpo = svg()
     pagina = f'''<!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Esquema conceptual</title>
+<title>Diagrama entidad-relación</title>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 html,body{{margin:0;background:#fff}}

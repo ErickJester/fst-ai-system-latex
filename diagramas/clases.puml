@@ -232,6 +232,7 @@ package P4_Resultados_y_reportes {
   end note
 
   class Observacion {
+    -id : Integer
     +calcularBloques()
   }
 

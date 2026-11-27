@@ -362,7 +362,7 @@ relaciones (tablas) con sus atributos y sus llaves, todavía sin tipos de dato. 
 del esquema lógico se obtiene el esquema físico, que especifica las tablas, columnas y
 tipos de datos concretos de PostgreSQL.
 
-La Figura~\ref{fig:der} muestra el diagrama entidad-relación (DER) conceptual del
+La Figura~\ref{fig:der} muestra el diagrama entidad-relación (DER) del
 sistema. Las entidades principales son \textbf{USUARIO}, \textbf{EXPERIMENTO},
 \textbf{GRUPO}, \textbf{TANDA}, \textbf{ESPECIMEN}, \textbf{VIDEO} y
 \textbf{ANALISIS}. Las relaciones entre ellas definen el flujo central del
@@ -375,16 +375,52 @@ observación por espécimen (\textbf{OBSERVACION}), y cada observación se etiqu
 segundo a segundo (\textbf{SEGUNDO}), con la conducta como atributo de cada segundo.
 El grupo de un espécimen se obtiene a través de su tanda: el recorrido de
 \textbf{GRUPO} a \textbf{TANDA} y de \textbf{TANDA} a \textbf{ESPECIMEN} expresa ese
-vínculo una sola vez. La figura incluye además el subtipo \textbf{ADMINISTRADOR}
+vínculo una sola vez y evita una redundancia en el diagrama
+\cite[p.~69]{elmasri2007}. La figura incluye además el subtipo \textbf{ADMINISTRADOR}
 (un usuario con permisos adicionales), los reportes que genera cada experimento
 (\textbf{REPORTE}) y los avisos que recibe cada usuario (\textbf{NOTIFICACION}).
 Todas las entidades son fuertes salvo \textbf{SEGUNDO}, que es débil porque solo se
 identifica junto con su observación (doble borde).
 
+La notación del diagrama es la de Elmasri y Navathe, cuyos símbolos resume la
+figura~3.14 de su obra \cite[p.~71]{elmasri2007}. De ella se tomaron las siguientes
+convenciones:
+
+\begin{itemize}
+  \item Las entidades se dibujan en rectángulos, las interrelaciones en rombos y los
+        atributos en óvalos, con los atributos clave subrayados
+        \cite[p.~69]{elmasri2007}.
+  \item La entidad débil, \textbf{SEGUNDO}, lleva rectángulo doble; su
+        interrelación identificativa, rombo doble, y su clave parcial, subrayado
+        punteado \cite[p.~69]{elmasri2007}.
+  \item Los atributos derivados se dibujan en óvalos de línea punteada
+        \cite[p.~69]{elmasri2007}. Son dos: el número de cilindros de una tanda, que
+        equivale a la cantidad de especímenes que aloja, y el nivel de clasificación
+        de un análisis, que depende de la conducta de sus segundos. En el esquema
+        lógico ambos se conservan como columnas.
+  \item Las llaves foráneas no aparecen como atributos, porque cada referencia entre
+        entidades se representa con una interrelación \cite[p.~69]{elmasri2007}.
+  \item Los nombres de entidades e interrelaciones van en mayúsculas y los de
+        atributos, con inicial mayúscula. Las interrelaciones se nombran para que el
+        diagrama se lea de izquierda a derecha y de arriba abajo
+        \cite[p.~70]{elmasri2007}.
+  \item La pareja (mín,máx) se escribe junto a la entidad que participa e indica en
+        cuántas instancias de la interrelación participa, como mínimo y como máximo,
+        cada instancia de esa entidad. Un mínimo mayor que cero significa
+        participación total \cite[pp.~72--73]{elmasri2007}, por lo que no se agrega
+        la línea doble.
+  \item \textbf{ADMINISTRADOR}, única subclase de \textbf{USUARIO}, se une a ella con
+        una línea sin círculo, marcada con el símbolo de subconjunto
+        \cite[pp.~92 y~94]{elmasri2007}.
+  \item \textbf{OBSERVACION} reúne a un espécimen con un video y además se relaciona
+        con \textbf{SEGUNDO}. Como el modelo no permite que una interrelación participe
+        en otra, se representa como un tipo de entidad \cite[p.~110]{elmasri2007}.
+\end{itemize}
+
 \begin{sidewaysfigure}
 \centering
 \includegraphics[width=\textheight, height=\textwidth, keepaspectratio]{figures/diagramas/esquema_conceptual_diapositiva}
-\caption{Diagrama entidad-relación conceptual del sistema [autoría propia].}
+\caption{Diagrama entidad-relación del sistema, con la notación de Elmasri y Navathe [autoría propia].}
 \label{fig:der}
 \end{sidewaysfigure}
 

@@ -90,9 +90,9 @@ segundo), ni `bloque` en `ROI` (solo haría falta si la web dibujara el recuadro
 video original), ni los valores de `origen` `humano_ciego` y `sin_revisar`: D-80 dejó
 `origen` con cuatro valores (del sistema, confirmada, corregida y dudosa).
 
-**`Observacion` no tiene atributos, y es correcto:** en el grafo esa tabla solo tiene su
-número y los enlaces al espécimen y al video. Representa «un espécimen en un video». Tiene
-una sola función, `calcularBloques()`, que agrupa sus segundos en bloques de 5 s: la
+**`Observacion` solo tiene su identificador (D-113):** en el grafo esa tabla guarda su
+número y los enlaces al espécimen y al video, y los enlaces ya son las asociaciones.
+Representa «un espécimen en un video». Tiene una sola función, `calcularBloques()`, que agrupa sus segundos en bloques de 5 s: la
 conducta del bloque es la que ocupa más de sus cinco segundos, como en el muestreo por
 intervalos de 5 s de Detke et al. (1995), descrito por Craft et al. (2010) (RN-15, RF-18). Los bloques se calculan al mostrarse y no se guardan en la
 base de datos.

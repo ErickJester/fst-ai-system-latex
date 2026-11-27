@@ -55,7 +55,7 @@ cls('Notificacion', ['- id: Integer', '- tipo: String', '- mensaje: String', '- 
                      '- fechaCreacion: DateTime'], ['+ marcarComoLeida(): void'])
 cls('Reporte', ['- id: Integer', '- formato: String', '- ruta: String', '- fechaGeneracion: DateTime'],
     ['+ generar(experimento, formato): void', '+ descargar(): File'])
-cls('Observacion', [], ['+ calcularBloques(): List<String>'])
+cls('Observacion', ['- id: Integer'], ['+ calcularBloques(): List<String>'])
 cls('Conducta', ['nado activo', 'inmovilidad', 'escalamiento', 'conducta activa'], stereo='enumeración')
 cls('Estadisticas', ['- conducta: Conducta', '- media: Decimal', '- desviacionEstandar: Decimal',
                      '- varianza: Decimal', '- n: Integer'], stereo='derivada')
